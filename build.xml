@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+
+<project name="Thaw" default="compile">
+
+  <property name="src.dir" value="src" />
+  <property name="bin.dir" value="build" />
+  <property name="lib.dir" value="lib" />
+  <property name="javadoc.dir" value="javadoc" />
+
+  <property name="hsqldb.location" value="${lib}/hsqldb.jar" />
+
+  <property name="javac.debug" value="false" />
+
+
+  <target name="compile">
+    <mkdir dir="${bin.dir}" />
+
+    <javac srcdir="${src.dir}" destdir="${bin.dir}" debug="false" optimize="true">
+      <classpath>
+        <pathelement location="${hsqldb.location}"/>
+      </classpath>
+    </javac>
+  </target>
+
+
+  <target name="jar" depends="compile"	description="Make the Jar" >
+    <jar jarfile="${lib.dir}/Thaw.jar" basedir="${bin.dir}">
+      <manifest>
+        <attribute name="Main-Class" value="thaw.core.Main"/>
+      </manifest>
+    </jar>
+  </target>
+
+
+  <target name="javadoc">
+    <javadoc sourcepath="${src.dir}" destdir="${javadoc}">
+      <fileset dir="${src.dir}" includes="**/*.java" />
+      <fileset dir="${lib.dir}" includes="hsqldb.jar" />
+    </javadoc>
+  </target>
+
+</project>
