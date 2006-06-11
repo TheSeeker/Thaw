@@ -25,9 +25,15 @@
 
   <target name="jar" depends="compile"	description="Make the Jar" >
     <jar jarfile="${lib.dir}/Thaw.jar" basedir="${bin.dir}">
+
       <manifest>
         <attribute name="Main-Class" value="thaw.core.Main"/>
       </manifest>
+
+      <fileset dir="${bin.dir}"/>
+      <fileset file="${hsqldb.location}"/>
+      <fileset file="gpl.txt" />
+
     </jar>
   </target>
 
