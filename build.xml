@@ -16,10 +16,26 @@
     <mkdir dir="${bin.dir}" />
 
     <javac srcdir="${src.dir}" destdir="${bin.dir}" debug="false" optimize="true">
+
+      <compilerarg value="-Xlint" />
+
       <classpath>
         <pathelement location="${hsqldb.location}"/>
       </classpath>
+
     </javac>
+
+    <copy todir="${bin.dir}">
+      <fileset dir="${src.dir}">
+        <include name="**/*.properties" />
+      </fileset>
+    </copy>
+
+  </target>
+
+
+  <target name="run" depends="compile">
+    <java classname="thaw.core.Main" classpath="lib/hsqldb.jar:build" dir="build" fork="true" />
   </target>
 
 
