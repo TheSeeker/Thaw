@@ -12,7 +12,7 @@ import javax.swing.JLabel;
 import java.util.Observer;
 import java.util.Observable;
 
-import thaw.core.i18n.I18n;
+import thaw.i18n.I18n;
 
 
 /**

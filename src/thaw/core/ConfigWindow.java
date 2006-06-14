@@ -11,7 +11,7 @@ import javax.swing.JButton;
 import java.util.Observable;
 import java.awt.GridLayout;
 
-import thaw.core.i18n.I18n;
+import thaw.i18n.I18n;
 
 
 /**

@@ -2,7 +2,7 @@
 package thaw.core;
 
 
-import thaw.core.i18n.I18n;
+import thaw.i18n.I18n;
 
 /**
  * A "core" contains references to all the main parts of Thaw.

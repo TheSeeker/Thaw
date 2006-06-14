@@ -10,7 +10,7 @@ import javax.swing.JMenuItem;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 
-import thaw.core.i18n.I18n;
+import thaw.i18n.I18n;
 
 
 /**

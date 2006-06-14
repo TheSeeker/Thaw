@@ -18,7 +18,7 @@ import java.util.Observer;
 import java.util.Observable;
 import java.util.Vector;
 
-import thaw.core.i18n.I18n;
+import thaw.i18n.I18n;
 
 
 /**
