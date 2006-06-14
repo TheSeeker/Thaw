@@ -7,7 +7,7 @@
   <property name="lib.dir" value="lib" />
   <property name="javadoc.dir" value="javadoc" />
 
-  <property name="hsqldb.location" value="${lib}/hsqldb.jar" />
+  <property name="hsqldb.location" value="${lib.dir}/hsqldb.jar" />
 
   <property name="javac.debug" value="false" />
 
