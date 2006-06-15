@@ -125,7 +125,6 @@ public class Config {
 		Document xmlDoc = null;
 		DocumentBuilderFactory xmlFactory = null;
 		DocumentBuilder xmlBuilder = null;
-		//DOMImplementation impl = null;
 		
 		Element rootEl = null;
 				
@@ -165,7 +164,7 @@ public class Config {
 
 		NodeList plugins = rootEl.getElementsByTagName("plugin");
 
-		for(int i = 0;i < params.getLength(); i++) {
+		for(int i = 0;i < plugins.getLength(); i++) {
 
 			Element pluginEl;
 			Node pluginNode = plugins.item(i);
