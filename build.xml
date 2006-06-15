@@ -15,7 +15,7 @@
   <target name="compile">
     <mkdir dir="${bin.dir}" />
 
-    <javac srcdir="${src.dir}" destdir="${bin.dir}" debug="false" optimize="true">
+    <javac srcdir="${src.dir}" destdir="${bin.dir}" debug="true" optimize="true">
 
       <compilerarg value="-Xlint" />
 
@@ -47,7 +47,10 @@
       </manifest>
 
       <fileset dir="${bin.dir}"/>
-      <fileset file="${hsqldb.location}"/>
+
+      <!-- hsqldb is not required for the moment -->
+      <!-- <fileset file="${hsqldb.location}"/> -->
+
       <fileset file="gpl.txt" />
 
     </jar>

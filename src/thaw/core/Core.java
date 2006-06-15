@@ -95,6 +95,12 @@ public class Core {
 	public boolean initConfig() {
 		config = new Config();
 		config.loadConfig();
+
+		if(config.getValue("nodeAddress") == null)
+			config.setValue("nodeAddress", "127.0.0.1");
+
+		if(config.getValue("nodePort") == null)
+			config.setValue("nodePort", "9481");
 		
 		return true;
 	}
@@ -135,6 +141,11 @@ public class Core {
 	public void exit() {
 		Logger.info(this, "Stopping plugins ...");
 		pluginManager.stopPlugins();
+
+		Logger.info(this, "Saving configuration ...");
+		if(!config.saveConfig()) {
+			Logger.error(this, "Config was not saved correctly !");
+		}
 
 		Logger.info(this, "Exiting");
 		System.exit(0);
