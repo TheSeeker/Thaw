@@ -17,6 +17,7 @@ import javax.swing.JOptionPane;
 import java.util.Observer;
 import java.util.Observable;
 import java.util.Vector;
+import java.util.Iterator;
 
 import thaw.i18n.I18n;
 
@@ -53,15 +54,18 @@ public class PluginConfigPanel implements Observer, ActionListener {
 		
 		pluginNames = core.getConfig().getPluginNames();
 		pluginList = new JList();
-		pluginList.setListData(core.getConfig().getPluginNames());
-		
+		// List is leave empty until windows is displayed (see update())
 		
 		pluginToAdd = new JTextField("", 30);
 		
 		buttonPanel = new JPanel();
-		buttonPanel.setLayout(new GridLayout(2, 1));
+		
+		GridLayout layout = new GridLayout(2, 1);
+		layout.setVgap(10);
+		buttonPanel.setLayout(layout);
 		
 		subButtonPanel = new JPanel();
+		
 		subButtonPanel.setLayout(new GridLayout(1, 2));
 
 		addButton = new JButton(I18n.getMessage("thaw.common.add"));
@@ -93,9 +97,34 @@ public class PluginConfigPanel implements Observer, ActionListener {
 	 * user change something.
 	 */
 	public void update(Observable o, Object arg) {
-
+		if(arg == null) // Warns us window is now visible
+			refreshList();
 	}
 
+	public void refreshList() {
+		//pluginList.setListData(core.getConfig().getPluginNames());
+		
+		Iterator pluginNames = core.getConfig().getPluginNames().iterator();
+
+		Vector toPutInTheList = new Vector();
+
+		while(pluginNames.hasNext()) {
+			String name = (String)pluginNames.next();
+			toPutInTheList.add(name +
+					   " ("+core.getPluginManager().getPlugin(name).getNameForUser()+")");
+		}
+
+		pluginList.setListData(toPutInTheList);
+	}
+	
+
+	/**
+	 * Return the class name contained in an option name from the list.
+	 */
+	public String getClassName(String optionName) {
+		String[] part = optionName.split(" ");
+		return part[0];
+	}
 
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == addButton) {
@@ -103,7 +132,7 @@ public class PluginConfigPanel implements Observer, ActionListener {
 			   && core.getPluginManager().runPlugin(pluginToAdd.getText())) {
 
 				core.getConfig().addPlugin(pluginToAdd.getText());
-				pluginList.setListData(core.getConfig().getPluginNames());
+				refreshList();
 
 			} else {
 				Logger.error(this, "Unable to load '"+pluginToAdd.getText()+"'");
@@ -116,15 +145,17 @@ public class PluginConfigPanel implements Observer, ActionListener {
 
 
 		if(e.getSource() == removeButton) {
-			if(core.getPluginManager().stopPlugin((String)pluginList.getSelectedValue())
-			   && core.getPluginManager().unloadPlugin((String)pluginList.getSelectedValue())) {
+			String pluginName = getClassName((String)pluginList.getSelectedValue());
+
+			if(core.getPluginManager().stopPlugin(pluginName)
+			   && core.getPluginManager().unloadPlugin(pluginName)) {
 				
-				core.getConfig().removePlugin((String)pluginList.getSelectedValue());
-				pluginList.setListData(core.getConfig().getPluginNames());
+				core.getConfig().removePlugin(pluginName);
+				refreshList();
 			} else {
-				Logger.error(this, "Unable to unload '"+pluginToAdd.getText()+"'");
+				Logger.error(this, "Unable to unload '"+pluginName+"'");
 				JOptionPane.showMessageDialog(core.getConfigWindow().getFrame(),
-							      "Unable to unload plugin '"+pluginToAdd.getText()+"'",
+							      "Unable to unload plugin '"+pluginName+"'",
 							      "Unable to unload plugin",
 							      JOptionPane.ERROR_MESSAGE);
 			}

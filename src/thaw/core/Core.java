@@ -96,11 +96,8 @@ public class Core {
 		config = new Config();
 		config.loadConfig();
 
-		if(config.getValue("nodeAddress") == null)
-			config.setValue("nodeAddress", "127.0.0.1");
-
-		if(config.getValue("nodePort") == null)
-			config.setValue("nodePort", "9481");
+		if(config.isEmpty())
+			config.setDefaultValues();
 		
 		return true;
 	}

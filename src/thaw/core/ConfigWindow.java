@@ -18,7 +18,8 @@ import thaw.i18n.I18n;
  * ConfigWindow. Create the window used by user to config everything.
  * Composed by a tabbed pane containing a NodeConfigPanel and a PluginConfigPanel, and below the tabbed pane,
  *   a JButton to validate.
- * Notify observer when a button (Ok / Cancel) is clicked (gives the button in arg).
+ * Notify observer when a button (Ok / Cancel) is clicked (gives the button in arg), or when
+ *  window is set visible (arg == null).
  */
 public class ConfigWindow extends Observable implements ActionListener, java.awt.event.WindowListener {
 	private JFrame configWin;
@@ -81,6 +82,11 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	 * Make [dis]appear the config window.
 	 */
 	public void setVisible(boolean v) {
+		if(v == true) {
+			setChanged();
+			notifyObservers(null);
+		}
+
 		configWin.setVisible(v);
 	}
 

@@ -283,4 +283,19 @@ public class Config {
 		return true;	
 	}
 
+
+	public boolean isEmpty() {
+		if(parameters.keySet().size() == 0)
+			return true;
+		return false;
+	}
+
+	
+	public void setDefaultValues() {
+		setValue("nodeAddress", "127.0.0.1");	
+		setValue("nodePort", "9481");
+		setValue("maxSimultaneousDownloads", "5");
+		setValue("maxSimultaneousInsertions", "2");
+	}
+
 }

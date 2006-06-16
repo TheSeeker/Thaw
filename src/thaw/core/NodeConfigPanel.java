@@ -26,14 +26,20 @@ public class NodeConfigPanel implements Observer {
 
 	private final static String[] paramNames = { 
 		I18n.getMessage("thaw.config.nodeAddress"),
-		I18n.getMessage("thaw.config.nodePort")
+		I18n.getMessage("thaw.config.nodePort"),
+		I18n.getMessage("thaw.config.maxSimultaneousDownloads"),
+		I18n.getMessage("thaw.config.maxSimultaneousInsertions")
 	};
+
 	private final static String[] configNames = {
 		"nodeAddress",
-		"nodePort"
+		"nodePort",
+		"maxSimultaneousDownloads",
+		"maxSimultaneousInsertions"
 	};
-	private JLabel[] paramLabels = { null, null };
-	private JTextField[] paramFields = { null, null };
+
+	private JLabel[] paramLabels = new JLabel[paramNames.length];
+	private JTextField[] paramFields = new JTextField[configNames.length];
 
 	
 

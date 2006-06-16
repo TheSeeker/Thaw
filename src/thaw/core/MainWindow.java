@@ -1,6 +1,7 @@
 package thaw.core;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JMenuBar;
 import javax.swing.JTabbedPane;
 import javax.swing.JLabel;
@@ -18,17 +19,18 @@ import thaw.i18n.I18n;
  *
  * Main window is divided in three parts:
  *
+ * <pre>
  * ------------------------------------
- * | MenuBar                          |
+ * | MenuBar                          |
  * ------------------------------------
  * | Tabbed Pane                      |
- * |                                  |
- * |                                  |
+ * |                                  |
+ * |                                  |
  * |                                  |
  * ------------------------------------
- * | JLabel (status)                  |
+ * | JLabel (status)                  |
  * ------------------------------------
- *
+ * </pre>
  *
  * @author <a href="mailto:jflesch@nerim.net">Jerome Flesch</a>
  */
@@ -75,11 +77,12 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		statusBar.setSize(500, 30);
 
 		mainWindow.setLayout(new BorderLayout());
+
 		mainWindow.add(menuBar, BorderLayout.NORTH);
 		mainWindow.add(tabbedPane, BorderLayout.CENTER);
 		mainWindow.add(statusBar, BorderLayout.SOUTH);
 
-		mainWindow.setSize(700, 500);
+		mainWindow.setSize(790, 550);
 		
 		mainWindow.addWindowListener(this);
 	}
@@ -94,15 +97,38 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 
 	/** 
-	 * Used by plugins to add their own tab.
+	 * Should not be used.
+	 * @see #addTab(String, JPanel)
+	 * @return In the future, it's possible that it will sometimes return null.
 	 */
 	public JTabbedPane getTabbedPane() {
 		return tabbedPane;
 	}
 
+	/**
+	 * Used to add a tab in the main window.
+	 */
+	public boolean addTab(String tabName, java.awt.Component panel) {
+		tabbedPane.addTab(tabName, panel);
+
+		return true;
+	}
+
 	
 	/**
-	 * Used by plugins to add their own menu.
+	 * Used to remove a tab from the main window.
+	 */
+	public boolean removeTab(java.awt.Component panel) {
+		tabbedPane.remove(panel);
+
+		return true;
+	}
+
+	
+	/**
+	 * Used by plugins to add their own menu. Not recommanded for the moment.
+	 * Need to find a more elegant way.
+	 * @return Check it does not return null.
 	 */
 	public JMenuBar getMenuBar() {
 		return menuBar;

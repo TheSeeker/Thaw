@@ -1,6 +1,6 @@
 package thaw.core;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.Iterator;
 
@@ -8,11 +8,14 @@ import java.util.Iterator;
  * Manages plugins :)
  */
 public class PluginManager {
-	private final static String[] defaultPlugins = {"thaw.plugins.QueueWatcher"};
+	private final static String[] defaultPlugins = {"thaw.plugins.QueueWatcher",
+							"thaw.plugins.InsertPlugin",
+							"thaw.plugins.FetchPlugin" };
 
 	private Core core = null;
 
-	private HashMap plugins = null; // String (pluginName) -> Plugin
+	// LinkedHashMap because I want to keep a predictible plugin order.
+	private LinkedHashMap plugins = null; // String (pluginName) -> Plugin
 
 
 	/**
@@ -20,7 +23,15 @@ public class PluginManager {
 	 */
 	public PluginManager(Core core) {
 		this.core = core;
-		this.plugins = new HashMap();
+		this.plugins = new LinkedHashMap();
+	}
+
+
+	/** 
+	 * Returns the whole plugin list.
+	 */
+	public LinkedHashMap getPlugins() {
+		return plugins;
 	}
 
 
@@ -39,8 +50,11 @@ public class PluginManager {
 
 		pluginNames = core.getConfig().getPluginNames();
 
-		for(int i=0 ; i < pluginNames.size(); i++) {
-			loadPlugin((String)pluginNames.get(i));
+		Iterator pluginIt = pluginNames.iterator();
+
+		while(pluginIt.hasNext()) {
+			String pluginName = (String)pluginIt.next();
+			loadPlugin(pluginName);
 		}
 
 		return true;
@@ -59,9 +73,11 @@ public class PluginManager {
 				Plugin plugin = (Plugin)pluginIt.next();
 
 				try {
+					Logger.info(this, "Running plugin '"+plugin.getClass().getName()+"'");
 					plugin.run(core);
 				} catch(Exception e) {
-					Logger.error(this, "Unable to run the plugin '"+plugin.getClass().getName()+"'");
+					Logger.error(this, "Unable to run the plugin '"+plugin.getClass().getName()+"' because: "+e+":");
+					e.printStackTrace();
 				}
 
 
@@ -110,6 +126,8 @@ public class PluginManager {
 	 * Load a given plugin (without adding it to the config or running it).
 	 */
 	public boolean loadPlugin(String className) {
+		Logger.info(this, "Loading plugin: '"+className+"'");
+
 		try {
 			if(plugins.get(className) != null) {
 				Logger.warning(this, "loadPlugin(): Plugin '"+className+"' already loaded");
@@ -131,6 +149,8 @@ public class PluginManager {
 	 * Run a given plugin.
 	 */
 	public boolean runPlugin(String className) {
+		Logger.info(this, "Starting plugin: '"+className+"'");
+
 		try {
 			((Plugin)plugins.get(className)).run(core);
 			
@@ -147,6 +167,8 @@ public class PluginManager {
 	 * Stop a given plugin.
 	 */
 	public boolean stopPlugin(String className) {
+		Logger.info(this, "Stopping plugin: '"+className+"'");
+
 		try {
 			((Plugin)plugins.get(className)).stop();
 			
