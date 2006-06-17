@@ -48,6 +48,14 @@ public class InsertPlugin implements thaw.core.Plugin {
 	private JLabel priorityLabel;
 	private JComboBox prioritySelecter;
 
+	private String[] globalStr;
+	private JLabel globalLabel;
+	private JComboBox globalSelecter;
+
+	private String[] persistences;
+	private JLabel persistenceLabel;
+	private JComboBox persistenceSelecter;
+
 	private JButton letsGoButton;
 
 	public InsertPlugin() {
@@ -68,7 +76,9 @@ public class InsertPlugin implements thaw.core.Plugin {
 		subPanel = new JPanel();
 
 		subPanel.setLayout(new GridLayout(3,2, 40, 40));
+
 		
+		// FILE SELECTION
 
 		JPanel subSubPanel = new JPanel();
 		subSubPanel.setLayout(new GridLayout(3, 1));
@@ -82,6 +92,8 @@ public class InsertPlugin implements thaw.core.Plugin {
 
 		subPanel.add(subSubPanel);
 
+
+		// KEY TYPE SELECTION
 
 		subSubPanel = new JPanel();
 		subSubPanel.setLayout(new GridLayout(4, 1));
@@ -101,6 +113,40 @@ public class InsertPlugin implements thaw.core.Plugin {
 		subPanel.add(subSubPanel);
 
 
+		// PERSISTENCE & GLOBAL
+
+		persistences = new String[] {
+			I18n.getMessage("thaw.common.persistenceConnection"),
+			I18n.getMessage("thaw.common.persistenceReboot"),
+			I18n.getMessage("thaw.common.persistenceForever"),
+		};
+
+		subSubPanel = new JPanel();
+		subSubPanel.setLayout(new GridLayout(4, 1));
+		persistenceLabel = new JLabel(I18n.getMessage("thaw.common.persistence"));
+		subSubPanel.add(persistenceLabel);
+		persistenceSelecter = new JComboBox(persistences);
+		persistenceSelecter.setSelectedItem(I18n.getMessage("thaw.common.persistenceReboot"));
+		subSubPanel.add(persistenceSelecter);
+		
+
+		globalStr = new String[] {
+			I18n.getMessage("thaw.common.true"),
+			I18n.getMessage("thaw.common.false"),
+		};
+
+		globalLabel = new JLabel(I18n.getMessage("thaw.common.globalQueue"));
+		subSubPanel.add(globalLabel);
+		globalSelecter = new JComboBox(globalStr);
+		globalSelecter.setSelectedItem(I18n.getMessage("thaw.common.true"));
+		subSubPanel.add(globalSelecter);
+
+		subPanel.add(subSubPanel);
+
+
+
+		// REVISION SELECTION
+
 		subSubPanel = new JPanel();
 		subSubPanel.setLayout(new GridLayout(4, 1));
 
@@ -119,22 +165,8 @@ public class InsertPlugin implements thaw.core.Plugin {
 		subPanel.add(subSubPanel);
 
 
-		subSubPanel = new JPanel();
-		subSubPanel.setLayout(new GridLayout(4, 1));
 
-		publicKeyLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.publicKey"));
-		subSubPanel.add(publicKeyLabel);
-		publicKeyField = new JTextField(20);
-		publicKeyField.setEditable(false);
-		subSubPanel.add(publicKeyField);
-
-		privateKeyLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.privateKey"));
-		subSubPanel.add(privateKeyLabel);
-		privateKeyField = new JTextField(20);
-		privateKeyField.setEditable(false);
-		subSubPanel.add(privateKeyField);
-
-		subPanel.add(subSubPanel);
+		// PRIORITY SELECTION
 
 		priorities = new String[] {
 			I18n.getMessage("thaw.plugin.insert.p0"),
@@ -155,6 +187,29 @@ public class InsertPlugin implements thaw.core.Plugin {
 		
 		subPanel.add(subSubPanel);
 		
+
+
+		// PUBLIC / PRIVATE KEY
+
+		subSubPanel = new JPanel();
+		subSubPanel.setLayout(new GridLayout(4, 1));
+
+		publicKeyLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.publicKey"));
+		subSubPanel.add(publicKeyLabel);
+		publicKeyField = new JTextField(20);
+		publicKeyField.setEditable(false);
+		subSubPanel.add(publicKeyField);
+
+		privateKeyLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.privateKey"));
+		subSubPanel.add(privateKeyLabel);
+		privateKeyField = new JTextField(20);
+		privateKeyField.setEditable(false);
+		subSubPanel.add(privateKeyField);
+
+		subPanel.add(subSubPanel);
+
+
+
 
 		mainPanel.add(subPanel, BorderLayout.CENTER);
 
