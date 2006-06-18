@@ -100,9 +100,9 @@ public class InsertPlugin implements thaw.core.Plugin {
 		selectKeyLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.selectKey"));
 		subSubPanel.add(selectKeyLabel);
 		keyRadioButtons = new JRadioButton[3];
-		keyRadioButtons[0] = new JRadioButton(I18n.getMessage("thaw.plugin.insert.KSK"));
-		keyRadioButtons[1] = new JRadioButton(I18n.getMessage("thaw.plugin.insert.CHK"));
-		keyRadioButtons[1].setSelected(true);
+		keyRadioButtons[0] = new JRadioButton(I18n.getMessage("thaw.plugin.insert.CHK"));
+		keyRadioButtons[0].setSelected(true);
+		keyRadioButtons[1] = new JRadioButton(I18n.getMessage("thaw.plugin.insert.KSK"));
 		keyRadioButtons[2] = new JRadioButton(I18n.getMessage("thaw.plugin.insert.SSK"));
 		keyRadioGroup = new ButtonGroup();
 		for(int i = 0 ; i < keyRadioButtons.length ; i++) {
@@ -174,7 +174,9 @@ public class InsertPlugin implements thaw.core.Plugin {
 			I18n.getMessage("thaw.plugin.insert.p2"),
 			I18n.getMessage("thaw.plugin.insert.p3"),
 			I18n.getMessage("thaw.plugin.insert.p4"),
-			I18n.getMessage("thaw.plugin.insert.p5") 
+			I18n.getMessage("thaw.plugin.insert.p5"),
+			I18n.getMessage("thaw.plugin.insert.p6") 
+			
 		};
 
 		subSubPanel = new JPanel();
