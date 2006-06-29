@@ -21,11 +21,6 @@ public class QueueWatcher implements thaw.core.Plugin {
 	private DetailPanel detailPanel;
 	private JPanel panel;
 
-
-	private JPanel buttonPanel;
-	private JButton buttonCopyInsertedKeys;
-	private JButton buttonCopyDownloadedKeys;
-
 	public QueueWatcher() {
 
 	}
@@ -62,17 +57,6 @@ public class QueueWatcher implements thaw.core.Plugin {
 		if(detailPanel.getPanel() != null) {
 			mainPanel.add(detailPanel.getPanel(), BorderLayout.EAST);
 		}
-
-		buttonPanel = new JPanel();
-		buttonPanel.setLayout(new GridLayout(1, 2));
-
-		buttonCopyInsertedKeys = new JButton(I18n.getMessage("thaw.plugin.copySelectedAndInsertedKeys"));
-		buttonCopyDownloadedKeys = new JButton(I18n.getMessage("thaw.plugin.copySelectedAndDownloadedKeys"));
-
-		buttonPanel.add(buttonCopyInsertedKeys);
-		buttonPanel.add(buttonCopyDownloadedKeys);
-
-		mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"), mainPanel);
 

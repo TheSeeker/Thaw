@@ -4,12 +4,13 @@ import javax.swing.JPanel;
 
 import thaw.core.*;
 import thaw.i18n.I18n;
+import thaw.plugins.fetchPlugin.*;
 
 
 public class FetchPlugin implements thaw.core.Plugin {
 	private Core core;
 
-	private JPanel mainPanel;
+	private FetchPanel fetchPanel = null;
 	
 
 	public FetchPlugin() {
@@ -22,9 +23,9 @@ public class FetchPlugin implements thaw.core.Plugin {
 		
 		Logger.info(this, "Starting plugin \"FetchPlugin\" ...");
 
-		mainPanel = new JPanel();
+		fetchPanel = new FetchPanel();
 
-		core.getMainWindow().addTab(I18n.getMessage("thaw.common.download"), mainPanel);
+		core.getMainWindow().addTab(I18n.getMessage("thaw.common.download"), fetchPanel.getPanel());
 
 		return true;
 	}
@@ -33,7 +34,7 @@ public class FetchPlugin implements thaw.core.Plugin {
 	public boolean stop() {
 		Logger.info(this, "Stopping plugin \"FetchPlugin\" ...");
 
-		core.getMainWindow().removeTab(mainPanel);
+		core.getMainWindow().removeTab(fetchPanel.getPanel());
 
 		return true;
 	}
