@@ -57,6 +57,8 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		this.core = core;
 
 		mainWindow = new JFrame("Thaw");
+
+		mainWindow.setVisible(false);
 		
 		menuBar = new JMenuBar();
 		fileMenu = new JMenu(I18n.getMessage("thaw.menu.file"));
@@ -78,9 +80,9 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 		mainWindow.setLayout(new BorderLayout());
 
-		mainWindow.add(menuBar, BorderLayout.NORTH);
-		mainWindow.add(tabbedPane, BorderLayout.CENTER);
-		mainWindow.add(statusBar, BorderLayout.SOUTH);
+		mainWindow.getContentPane().add(menuBar, BorderLayout.NORTH);
+		mainWindow.getContentPane().add(tabbedPane, BorderLayout.CENTER);
+		mainWindow.getContentPane().add(statusBar, BorderLayout.SOUTH);
 
 		mainWindow.setSize(790, 550);
 		

@@ -67,13 +67,12 @@ public class Core {
 		if(!initGraphics())
 			return false;
 
-		mainWindow.setStatus(I18n.getMessage("thaw.statusBar.initPlugins"));
-
 		if(!initPluginManager())
 			return false;
 
-
 		mainWindow.setStatus(I18n.getMessage("thaw.statusBar.ready"));
+
+		mainWindow.setVisible(true);
 
 		return true;
 	}
@@ -108,7 +107,6 @@ public class Core {
 	 */
 	public boolean initGraphics() {
 		mainWindow = new MainWindow(this);
-		mainWindow.setVisible(true);
 
 		configWindow = new ConfigWindow(this);
 		configWindow.setVisible(false);
