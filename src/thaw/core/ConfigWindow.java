@@ -62,7 +62,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		borderLayout.setVgap(20);
 		borderLayout.setVgap(20);
 
-		configWin.setLayout(borderLayout);
+		configWin.getContentPane().setLayout(borderLayout);
 
 		configWin.getContentPane().add(tabs, BorderLayout.CENTER);
 		configWin.getContentPane().add(buttons, BorderLayout.SOUTH);

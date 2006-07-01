@@ -78,7 +78,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		setStatus(null);
 		statusBar.setSize(500, 30);
 
-		mainWindow.setLayout(new BorderLayout());
+		mainWindow.getContentPane().setLayout(new BorderLayout());
 
 		mainWindow.getContentPane().add(menuBar, BorderLayout.NORTH);
 		mainWindow.getContentPane().add(tabbedPane, BorderLayout.CENTER);
