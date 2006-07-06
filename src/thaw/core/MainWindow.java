@@ -97,10 +97,15 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		mainWindow.setVisible(v);
 	}
 
+	
+	public JFrame getMainFrame() {
+		return mainWindow;
+	}
+
 
 	/** 
 	 * Should not be used.
-	 * @see #addTab(String, JPanel)
+	 * @see #addTab(String, java.awt.Component)
 	 * @return In the future, it's possible that it will sometimes return null.
 	 */
 	public JTabbedPane getTabbedPane() {
@@ -109,6 +114,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 	/**
 	 * Used to add a tab in the main window.
+	 * In the future, even if the interface, this function should remain available.
 	 */
 	public boolean addTab(String tabName, java.awt.Component panel) {
 		tabbedPane.addTab(tabName, panel);

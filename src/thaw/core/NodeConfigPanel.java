@@ -28,14 +28,16 @@ public class NodeConfigPanel implements Observer {
 		I18n.getMessage("thaw.config.nodeAddress"),
 		I18n.getMessage("thaw.config.nodePort"),
 		I18n.getMessage("thaw.config.maxSimultaneousDownloads"),
-		I18n.getMessage("thaw.config.maxSimultaneousInsertions")
+		I18n.getMessage("thaw.config.maxSimultaneousInsertions"),
+		I18n.getMessage("thaw.config.thawId")
 	};
 
 	private final static String[] configNames = {
 		"nodeAddress",
 		"nodePort",
 		"maxSimultaneousDownloads",
-		"maxSimultaneousInsertions"
+		"maxSimultaneousInsertions",
+		"thawId"
 	};
 
 	private JLabel[] paramLabels = new JLabel[paramNames.length];
@@ -75,6 +77,9 @@ public class NodeConfigPanel implements Observer {
 			for(int i=0;i < paramNames.length;i++) {
 				core.getConfig().setValue(configNames[i], paramFields[i].getText());
 			}
+
+			/* should reinit the whole connection correctly */
+			core.initNodeConnection();
 		}
 
 

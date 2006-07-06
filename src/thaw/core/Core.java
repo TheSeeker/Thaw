@@ -1,18 +1,27 @@
 
 package thaw.core;
 
+import java.util.Observer;
+import java.util.Observable;
 
 import thaw.i18n.I18n;
+import thaw.fcp.*;
 
 /**
  * A "core" contains references to all the main parts of Thaw.
  *
  */
-public class Core {
+public class Core implements Observer {
 	private MainWindow mainWindow = null;
 	private Config config = null;
 	private PluginManager pluginManager = null;
 	private ConfigWindow configWindow = null;
+
+	private FCPConnection connection = null;
+	private FCPQueryManager queryManager = null;
+	private FCPQueueManager queueManager = null;
+
+	private FCPClientHello clientHello = null;
 
 
 	/**
@@ -64,6 +73,9 @@ public class Core {
 		if(!initConfig())
 			return false;
 
+		if(!initNodeConnection())
+			return false;
+
 		if(!initGraphics())
 			return false;
 
@@ -101,6 +113,82 @@ public class Core {
 		return true;
 	}
 
+	
+	/**
+	 * Init the connection to the node.
+	 * If a connection is already established, it will disconnect, so this function could be call safely later.
+	 */
+	public boolean initNodeConnection() {
+		if(getMainWindow() != null)
+			getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.connecting"));
+
+		try {
+
+			if(connection != null && connection.isConnected())
+				connection.disconnect();
+			
+			connection = new FCPConnection(config.getValue("nodeAddress"),
+						       (new Integer(config.getValue("nodePort"))).intValue());
+			
+			if(!connection.connect()) {
+				new WarningWindow(this, "Unable to connect to "+config.getValue("nodeAddress")+":"+
+						  config.getValue("nodePort"));
+				
+				/* Not returning false,
+				   else it will break the loading */
+			}
+			
+			queryManager = new FCPQueryManager(connection);
+			queueManager = new FCPQueueManager(queryManager,
+							   (new Integer(config.getValue("maxSimultaneousDownloads"))).intValue(),
+							   (new Integer(config.getValue("maxSimultaneousInsertions"))).intValue());
+			if(connection.isConnected()) {
+				queryManager.startListening();
+				
+				clientHello = new FCPClientHello(config.getValue("thawId"));
+
+				if(!clientHello.start(queryManager)) {
+					new WarningWindow(this, I18n.getMessage("thaw.error.idAlreadyUsed"));
+				} else {
+					Logger.debug(this, "Hello successful");
+					Logger.debug(this, "Node name    : "+clientHello.getNodeName());
+					Logger.debug(this, "FCP  version : "+clientHello.getNodeFCPVersion());
+					Logger.debug(this, "Node version : "+clientHello.getNodeVersion());
+				}
+				
+			}
+
+		} catch(Exception e) { /* A little bit not ... "nice" ... */
+			Logger.warning(this, "Exception while connecting : "+e.toString()+" ; "+e.getMessage() + " ; "+e.getCause());
+			e.printStackTrace();
+			new WarningWindow(this, "Unable to connect to the node. Please check your configuration.");
+		}
+
+		if(connection.isConnected())
+			connection.addObserver(this);
+
+		if(getMainWindow() != null)
+			getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.ready"));
+
+		return true;
+	}
+
+	
+	public FCPConnection getConnectionManager() {
+		return connection;
+	}
+
+	public FCPQueueManager getQueueManger() {
+		return queueManager;
+	}
+
+	/**
+	 * FCPClientHello object contains all the information given by the node when the connection
+	 * was initiated.
+	 */
+	public FCPClientHello getClientHello() {
+		return clientHello;
+	}
 
 	/**
 	 * Init graphics.
@@ -147,5 +235,14 @@ public class Core {
 	}
 
 
+
+	public void update(Observable o, Object target) {
+		Logger.debug(this, "Move on the connection (?)");
+
+		if(o == connection && !connection.isConnected()) {
+			new WarningWindow(this, "We have been disconnected");
+			connection.deleteObserver(this);
+		}
+	}
 
 }

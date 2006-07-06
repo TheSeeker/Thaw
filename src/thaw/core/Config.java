@@ -5,6 +5,7 @@ import java.util.Vector;
 import java.io.File;
 import java.util.Set;
 import java.util.Iterator;
+import java.util.Random;
 
 /* XML */
 import org.w3c.dom.Document;
@@ -296,6 +297,7 @@ public class Config {
 		setValue("nodePort", "9481");
 		setValue("maxSimultaneousDownloads", "5");
 		setValue("maxSimultaneousInsertions", "2");
+		setValue("thawId", "thaw-"+(new Integer((new Random()).nextInt(1000))).toString());
 	}
 
 }

@@ -19,16 +19,14 @@ public class Logger {
 	 * 3 or more is recommanded.
 	 * 5 is never logged in a file, only on stdout.
 	 */
-	private final static int LOG_LEVEL = 3;
+	private final static int LOG_LEVEL = 5;
 
 
 	protected static void displayErr(String msg) {
-		// TODO : Log to a file
 		System.err.println(msg);
 	}
 
 	protected static void display(String msg) {
-		// TODO : Log to a file
 		System.out.println(msg);
 	}
 
@@ -82,6 +80,14 @@ public class Logger {
 	 */
 	public static void verbose(Object o, String msg) {
 		if(LOG_LEVEL >= 5)
-			System.out.println(o.getClass().getName()+": "+msg);
+			System.out.println("[VERBOSE] "+ o.getClass().getName()+": "+msg);
+	}
+
+	/**
+	 * As it. Similar to verbose()
+	 */
+	public static void asIt(Object o, String msg) {
+		if(LOG_LEVEL >= 5)
+			System.out.println(msg);
 	}
 }
