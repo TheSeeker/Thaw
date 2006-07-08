@@ -3,7 +3,8 @@ package thaw.fcp;
 import java.net.Socket;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.BufferedReader;
+/* import java.io.BufferedReader; */
+import java.io.BufferedInputStream;
 import java.io.InputStreamReader;
 import java.util.Observable;
 
@@ -26,7 +27,7 @@ public class FCPConnection extends Observable {
 	private InputStream in = null;
 	private OutputStream out = null;
 
-	private BufferedReader reader = null;
+	private BufferedInputStream reader = null;
 
 	/** If == 1, then will print on stdout
 	 * all fcp input / output.
@@ -120,7 +121,7 @@ public class FCPConnection extends Observable {
 			return false;
 		}
 
-		reader = new BufferedReader(new InputStreamReader(in));
+		reader = new BufferedInputStream(in);
 
 		setChanged();
 		notifyObservers();
@@ -138,7 +139,7 @@ public class FCPConnection extends Observable {
 
 	
 
-	public boolean write(String toWrite) {
+	public synchronized boolean write(String toWrite) {
 		Logger.asIt(this, "Thaw >>> Node :");
 		Logger.asIt(this, toWrite);
 
@@ -157,6 +158,18 @@ public class FCPConnection extends Observable {
 		return true;
 	}
 
+
+	public int read(int lng, byte[] buf) {
+		
+		try {
+			return reader.read(buf);
+		} catch(java.io.IOException e) {
+			Logger.warning(this, "IOException while reading on socket");
+			return -1;
+		}
+
+	}
+
 	/**
 	 * Read a line.
 	 * @return null if error
@@ -164,21 +177,35 @@ public class FCPConnection extends Observable {
 	public String readLine() {
 		String result;
 		
-		if(in != null && socket != null && socket.isConnected()) {
+		if(in != null && reader != null && socket != null && socket.isConnected()) {
 			try {
-				/*
-				reader = new BufferedReader(new InputStreamReader(in));
-				result = reader.readLine();
-				*/
+				result = "";
 				
-				result = reader.readLine();
+				/* result = reader.readLine(); */
+				
+				int c = 0;
+
+				while(c != '\n') {
+					c = reader.read();
+
+					if(c == -1) {
+						Logger.notice(this, "Unable to read ? => disconnect ?");
+						return null;
+					}
+					
+					if(c == '\n')
+						break;
+
+					result = result + new String(new byte[] { (byte)c });
+					
+				}
 
 				Logger.asIt(this, "Thaw <<< Node : "+result);
 				
 				return result;
 
 			} catch (java.io.IOException e) {
-				Logger.error(this, "Unable to read() on the socket ?! : "+e.toString());
+				Logger.notice(this, "Unable to read() on the socket ?! => disconnect ? : "+e.toString());
 				return null;
 			}
 		} else {

@@ -30,8 +30,9 @@ public class FCPClientHello implements FCPQuery, Observer {
 	/**
 	 * Need to know the id of the application (see FCP specs).
 	 */
-	public FCPClientHello(String id) {
+	public FCPClientHello(FCPQueryManager queryManager, String id) {
 		setID(id);
+		this.queryManager = queryManager;
 	}
 
 
@@ -67,8 +68,7 @@ public class FCPClientHello implements FCPQuery, Observer {
 	/**
 	 * Warning: This query is blocking (only this one) !
 	 */
-	public boolean start(FCPQueryManager queryManager) {
-		this.queryManager = queryManager;
+	public boolean start(FCPQueueManager queueManager) {
 
 		FCPMessage message = new FCPMessage();
 
@@ -141,8 +141,42 @@ public class FCPClientHello implements FCPQuery, Observer {
 	/**
 	 * Not used.
 	 */
-	public boolean stop(FCPQueryManager queryManager) {
+	public boolean stop(FCPQueueManager queueManager) {
 		return false;
 	}
 
+
+	public int getQueryType() {
+		return 0;
+	}
+
+	public String getStatus() {
+		return null;
+	}
+
+	public int getProgression() {
+		return 0;
+	}
+
+	public String getFileKey() {
+		return null;
+	}
+
+	public long getFileSize() {
+		return 0;
+	}
+
+	public boolean isFinished() {
+		return false;
+	}
+
+	public String getPath() {
+		return null;
+	}
+
+	public int getAttempt() {
+		return -1;
+	}
+
 }
+

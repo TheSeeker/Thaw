@@ -6,6 +6,7 @@ import thaw.core.*;
 import thaw.i18n.I18n;
 import thaw.plugins.fetchPlugin.*;
 
+import thaw.fcp.*;
 
 public class FetchPlugin implements thaw.core.Plugin {
 	private Core core;
@@ -23,7 +24,7 @@ public class FetchPlugin implements thaw.core.Plugin {
 		
 		Logger.info(this, "Starting plugin \"FetchPlugin\" ...");
 
-		fetchPanel = new FetchPanel();
+		fetchPanel = new FetchPanel(core, this);
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.common.download"), fetchPanel.getPanel());
 
@@ -41,6 +42,21 @@ public class FetchPlugin implements thaw.core.Plugin {
 
 	public String getNameForUser() {
 		return I18n.getMessage("thaw.common.download");
+	}
+
+
+	public void fetchFiles(String[] keys, int priority,
+			       int persistence, boolean globalQueue,
+			       String destination) {
+
+		for(int i = 0 ; i < keys.length ; i++) {
+			core.getQueueManager().addQueryToThePendingQueue(new FCPClientGet(keys[i],
+											  priority,
+											  persistence,
+											  globalQueue,
+											  destination));
+		}
+
 	}
 
 }

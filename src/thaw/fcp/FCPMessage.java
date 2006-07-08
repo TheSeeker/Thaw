@@ -39,8 +39,6 @@ public class FCPMessage {
 
 		String[] lines = rawMessage.split("\n");
 
-		/* TODO : Find why some messages from the node starts with an '\n' */
-
 		for(i = 0 ; lines[i].equals("");) {
 			i++;
 		}
@@ -85,11 +83,6 @@ public class FCPMessage {
 	}
 
 	public void setValue(String field, String value) {
-		if(field.equals("DataLength")) {
-			Logger.warning(this, "Trying to add field 'DataLength' to a message ! You don't have to !\n");
-			return;
-		}
-
 		fields.put(field, value);
 	}
 

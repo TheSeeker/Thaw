@@ -37,8 +37,11 @@ public class PluginManager {
 
 	/**
 	 * Load plugin from config or from default list.
+	 * Reload if already loaded.
 	 */
 	public boolean loadPlugins() {
+		plugins = new LinkedHashMap();
+
 		Vector pluginNames;
 
 		if(core.getConfig().getPluginNames().size() == 0) {

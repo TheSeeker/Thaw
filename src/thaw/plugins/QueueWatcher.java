@@ -6,13 +6,18 @@ import java.awt.GridLayout;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import javax.swing.JButton;
+import java.util.Observer;
+import java.util.Observable;
+import java.util.Vector;
+import java.util.Iterator;
 
 import thaw.core.*;
 import thaw.i18n.I18n;
 import thaw.plugins.queueWatcher.*;
 
+import thaw.fcp.*;
 
-public class QueueWatcher implements thaw.core.Plugin {
+public class QueueWatcher implements thaw.core.Plugin, Observer {
 	private Core core;
 
 	private JPanel mainPanel;
@@ -35,9 +40,10 @@ public class QueueWatcher implements thaw.core.Plugin {
 
 		mainPanel.setLayout(new BorderLayout());
 
-		queuePanels[0] = new QueuePanel(core, false); /* download */
-		queuePanels[1] = new QueuePanel(core, true); /* upload */
 		detailPanel = new DetailPanel(core);
+
+		queuePanels[0] = new QueuePanel(core, detailPanel, false); /* download */
+		queuePanels[1] = new QueuePanel(core, detailPanel, true); /* upload */
 
 		panel = new JPanel();
 
@@ -60,6 +66,8 @@ public class QueueWatcher implements thaw.core.Plugin {
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"), mainPanel);
 
+		core.getQueueManager().addObserver(this);
+
 		return true;
 	}
 
@@ -67,13 +75,46 @@ public class QueueWatcher implements thaw.core.Plugin {
 	public boolean stop() {
 		Logger.info(this, "Stopping plugin \"QueueWatcher\" ...");
 
-		core.getMainWindow().removeTab(panel);
-
+		core.getMainWindow().removeTab(mainPanel);
+		
 		return true;
 	}
 
 	public String getNameForUser() {
 		return I18n.getMessage("thaw.common.status");
+	}
+
+	protected void addToPanels(Vector queries) {
+
+		for(Iterator it = queries.iterator();
+		    it.hasNext();) {
+
+			FCPQuery query = (FCPQuery)it.next();
+
+			if(query.getQueryType() == 1)
+				queuePanels[0].addToTable(query);
+
+			if(query.getQueryType() == 2)
+				queuePanels[1].addToTable(query);
+
+		}
+
+	}
+
+	public void update(Observable o, Object arg) {
+
+		FCPQueueManager manager = (FCPQueueManager)o;
+
+		queuePanels[0].resetTable();
+		queuePanels[1].resetTable();
+
+		addToPanels(manager.getRunningQueue());
+
+		Vector[] pendings = manager.getPendingQueues();
+
+		for(int i = 0;i < pendings.length ; i++)
+			addToPanels(pendings[i]);
+		
 	}
 
 }

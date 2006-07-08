@@ -50,7 +50,7 @@ public class Logger {
 	 */
 	public static void notice(Object o, String msg) {
 		if(LOG_LEVEL >= 2)
-			displayErr("[NOTICE ] " +o.getClass().getName()+": "+msg);
+			display("[NOTICE ] " +o.getClass().getName()+": "+msg);
 	}
 	
 

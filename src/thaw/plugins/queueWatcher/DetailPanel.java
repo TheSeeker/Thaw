@@ -8,11 +8,14 @@ import javax.swing.JTextField;
 import javax.swing.JProgressBar;
 import javax.swing.JComponent;
 
+import java.util.Observer;
+import java.util.Observable;
+
 import thaw.core.*;
 import thaw.i18n.I18n;
+import thaw.fcp.*;
 
-
-public class DetailPanel {
+public class DetailPanel implements Observer {
 
 	private Core core;
 
@@ -27,7 +30,11 @@ public class DetailPanel {
 	private JTextField priority = new JTextField();
 	private JTextField attempt  = new JTextField();
 
+	private FCPQuery query = null;
+
+
 	private final static Dimension dim = new Dimension(300, 275);
+
 
 	public DetailPanel(Core core) {
 		this.core = core;
@@ -65,7 +72,7 @@ public class DetailPanel {
 				case(4): field = path; path.setEditable(false); break;
 				case(5): field = priority; priority.setEditable(false); break;
 				case(6): field = attempt; attempt.setEditable(false); break;
-				default: Logger.warning(this, "Gouli goula ? ... is going to crash :p"); break;
+				default: Logger.error(this, "Gouli goula ? ... is going to crash :p"); break;
 				}
 
 				subPanel.add(field);
@@ -83,4 +90,58 @@ public class DetailPanel {
 	public JPanel getPanel() {
 		return panel;
 	}
+
+	
+	public void setQuery(FCPQuery query) {
+		if(this.query != null)
+			((Observable)this.query).deleteObserver(this);
+
+		this.query = query;
+		
+		if(this.query != null)
+			((Observable)this.query).addObserver(this);
+
+		refreshAll();
+	}
+
+	public void update(Observable o, Object arg) {
+		refresh();
+	}
+
+
+	public void refresh() {
+		if(query != null) {
+			progress.setValue(query.getProgression());
+			progress.setString((new Integer(query.getProgression())).toString() + "%");
+		} else {
+			progress.setValue(0);
+			progress.setString("");
+		}
+	}
+
+	public void refreshAll() {
+		refresh();
+
+		if(query != null) {
+
+			String[] plop = query.getFileKey().split("/");
+			
+			file.setText(plop[plop.length-1]);
+			size.setText((new Long(query.getFileSize())).toString()+" B");
+			
+			key.setText(query.getFileKey());
+			path.setText(query.getPath());
+			priority.setText((new Integer(query.getThawPriority())).toString());
+			attempt.setText((new Integer(query.getAttempt())).toString());
+		} else {
+			file.setText("");
+			size.setText("");
+			key.setText("");
+			path.setText("");
+			priority.setText("");
+			attempt.setText("");
+		}
+
+	}
+
 }

@@ -37,7 +37,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 		return connection;
 	}
 
-	public boolean writeMessage(FCPMessage message) {
+	public synchronized boolean writeMessage(FCPMessage message) {
 		return connection.write(message.toString());
 	}
 
@@ -63,7 +63,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 				break;
 			}
 
-			whatsUp = whatsUp + "\n"+ read;
+			whatsUp = whatsUp + read + "\n";
 		}
 
 		Logger.verbose(this, "Parsing message ...");

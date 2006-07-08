@@ -79,7 +79,10 @@ public class NodeConfigPanel implements Observer {
 			}
 
 			/* should reinit the whole connection correctly */
+			core.getPluginManager().stopPlugins();
 			core.initNodeConnection();
+			core.getPluginManager().loadPlugins();
+			core.getPluginManager().runPlugins();
 		}
 
 

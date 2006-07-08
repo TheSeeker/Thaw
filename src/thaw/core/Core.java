@@ -124,8 +124,10 @@ public class Core implements Observer {
 
 		try {
 
-			if(connection != null && connection.isConnected())
+			if(connection != null && connection.isConnected()) {
+				connection.deleteObserver(this);
 				connection.disconnect();
+			}
 			
 			connection = new FCPConnection(config.getValue("nodeAddress"),
 						       (new Integer(config.getValue("nodePort"))).intValue());
@@ -139,23 +141,31 @@ public class Core implements Observer {
 			}
 			
 			queryManager = new FCPQueryManager(connection);
-			queueManager = new FCPQueueManager(queryManager,
-							   (new Integer(config.getValue("maxSimultaneousDownloads"))).intValue(),
-							   (new Integer(config.getValue("maxSimultaneousInsertions"))).intValue());
+
 			if(connection.isConnected()) {
 				queryManager.startListening();
 				
-				clientHello = new FCPClientHello(config.getValue("thawId"));
+				clientHello = new FCPClientHello(queryManager, config.getValue("thawId"));
 
-				if(!clientHello.start(queryManager)) {
+				if(!clientHello.start(null)) {
 					new WarningWindow(this, I18n.getMessage("thaw.error.idAlreadyUsed"));
 				} else {
 					Logger.debug(this, "Hello successful");
 					Logger.debug(this, "Node name    : "+clientHello.getNodeName());
 					Logger.debug(this, "FCP  version : "+clientHello.getNodeFCPVersion());
 					Logger.debug(this, "Node version : "+clientHello.getNodeVersion());
+					
+					queueManager = new FCPQueueManager(queryManager,
+									   config.getValue("thawId"),
+									   (new Integer(config.getValue("maxSimultaneousDownloads"))).intValue(),
+									   (new Integer(config.getValue("maxSimultaneousInsertions"))).intValue());
+					queueManager.startScheduler();
+
+					FCPWatchGlobal watchGlobal = new FCPWatchGlobal(true);
+					watchGlobal.start(queueManager);					
+
 				}
-				
+								   
 			}
 
 		} catch(Exception e) { /* A little bit not ... "nice" ... */
@@ -178,7 +188,7 @@ public class Core implements Observer {
 		return connection;
 	}
 
-	public FCPQueueManager getQueueManger() {
+	public FCPQueueManager getQueueManager() {
 		return queueManager;
 	}
 
@@ -222,8 +232,15 @@ public class Core implements Observer {
 	 * End of the world.
 	 */
 	public void exit() {
+		Logger.info(this, "Stopping scheduler ...");
+		queueManager.stopScheduler();
+		
 		Logger.info(this, "Stopping plugins ...");
 		pluginManager.stopPlugins();
+
+		Logger.info(this, "Disconnecting ...");
+		connection.deleteObserver(this);
+		connection.disconnect();
 
 		Logger.info(this, "Saving configuration ...");
 		if(!config.saveConfig()) {
