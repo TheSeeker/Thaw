@@ -72,5 +72,13 @@ public interface FCPQuery {
 	 */
 	public int getAttempt();
 
+	public boolean isRunning();
+
 	public boolean isFinished();
+
+	/**
+	 * If unknow, return false.
+	 * Query is considered as a failure is isFinished() && !isSuccesful()
+	 */
+	public boolean isSuccessful();
 }

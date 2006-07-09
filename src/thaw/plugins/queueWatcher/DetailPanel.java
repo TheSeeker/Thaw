@@ -112,7 +112,10 @@ public class DetailPanel implements Observer {
 	public void refresh() {
 		if(query != null) {
 			progress.setValue(query.getProgression());
-			progress.setString((new Integer(query.getProgression())).toString() + "%");
+			if(!query.isFinished() || query.isSuccessful())
+				progress.setString((new Integer(query.getProgression())).toString() + "%");
+			else
+				progress.setString("FAILED");
 		} else {
 			progress.setValue(0);
 			progress.setString("");

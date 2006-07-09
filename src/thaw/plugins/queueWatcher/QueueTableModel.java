@@ -7,6 +7,7 @@ import java.util.Observer;
 
 import javax.swing.event.TableModelListener;
 import javax.swing.event.TableModelEvent;
+import javax.swing.JProgressBar;
 
 import thaw.core.*;
 import thaw.i18n.I18n;
@@ -17,7 +18,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 	private Vector columnNames = new Vector();
 
-	private Vector queries = null;
+        private Vector queries = null;
 
 	public QueueTableModel(boolean isForInsertions) {
 		super();
@@ -30,6 +31,8 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		resetTable();
 	}
 	
+
+
 	
 	public int getRowCount() {
 		if(queries != null)
@@ -66,7 +69,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		}
 
 		if(column == 3) {
-			return (new Integer(query.getProgression())).toString() + "%";
+			return ((new Integer(query.getProgression())).toString() + " %");
 		}
 
 		return null;
@@ -91,7 +94,14 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 
 	public void addQuery(FCPQuery query) {
+		JProgressBar bar;
+
 		((Observable)query).addObserver(this);
+		
+		bar = new JProgressBar(0, 100);
+		bar.setStringPainted(true);
+		bar.setString((new Integer(query.getProgression())).toString()+"%");
+		bar.setValue(query.getProgression());
 
 		queries.add(query);
 

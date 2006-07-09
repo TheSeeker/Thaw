@@ -233,7 +233,8 @@ public class Core implements Observer {
 	 */
 	public void exit() {
 		Logger.info(this, "Stopping scheduler ...");
-		queueManager.stopScheduler();
+		if(queueManager != null)
+		    queueManager.stopScheduler();
 		
 		Logger.info(this, "Stopping plugins ...");
 		pluginManager.stopPlugins();

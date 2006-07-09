@@ -5,8 +5,14 @@ import javax.swing.JTable;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.event.TableModelEvent;
+import javax.swing.JProgressBar;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.util.Vector;
+
+import javax.swing.table.DefaultTableCellRenderer;
+import java.awt.Color;
+import java.awt.Component;
 
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
@@ -52,9 +58,58 @@ public class QueuePanel implements MouseListener {
 		panel.add(label, BorderLayout.NORTH);
 		panel.add(new JScrollPane(table), BorderLayout.CENTER);
 
+		table.setDefaultRenderer( table.getColumnClass(0), new ProgressRenderer(table, tableModel) );
+
 		tableModel.addTableModelListener(table);
 		table.addMouseListener(this);
 	}
+
+
+	private class ProgressRenderer extends DefaultTableCellRenderer {
+		private final static long serialVersionUID = 20060709;
+
+		private final Color SUCCESS = Color.GREEN;
+		private final Color FAILURE = Color.RED;
+		private final Color RUNNING = Color.ORANGE;
+		private final Color PENDING = Color.WHITE;
+
+		QueueTableModel model = null;
+		JTable tabl = null;
+
+		public ProgressRenderer(JTable table, QueueTableModel model) {
+			this.model = model;
+			this.tabl = table;
+		}
+
+		public Component getTableCellRendererComponent(JTable table, Object value,
+							       boolean isSelected, boolean hasFocus,
+							       int row, int column) {
+
+			Component cell = super.getTableCellRendererComponent(table, value,
+									     isSelected, hasFocus,
+									     row, column);
+
+			if(!isSelected) {
+	
+				FCPQuery query = model.getQuery(row);
+				
+				if(!query.isRunning() && !query.isFinished())
+					cell.setBackground(PENDING);
+				if(query.isFinished() && query.isSuccessful())
+					cell.setBackground(SUCCESS);
+				if(query.isFinished() && !query.isSuccessful())
+					cell.setBackground(FAILURE);
+				if(query.isRunning() && !query.isFinished())
+					cell.setBackground(RUNNING);
+			}
+			
+
+			return cell;
+		}
+
+	}
+
+
 
 	public void resetTable() {
 		tableModel.resetTable();

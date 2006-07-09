@@ -11,7 +11,7 @@ import thaw.core.Logger;
  * notify() only when progress has really changes.
  */
 public class FCPClientGet extends Observable implements Observer, FCPQuery {
-	private final static String MAX_RETRIES = "3";
+	private final static int MAX_RETRIES = 3;
 	private final static int PACKET_SIZE = 1024;
 	private final static int BLOCK_SIZE = 32768;
 
@@ -32,6 +32,9 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 	private int progress; /* in pourcent */
 	private long fileSize;
 
+	private boolean running = false;
+	private boolean successful = false;
+
 	/**
 	 * @param persistence 0 = Forever ; 1 = Until node reboot ; 2 = Until the app disconnect
 	 */
@@ -51,12 +54,11 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 		this.progress = 0;
 		this.fileSize = 0;
 		
-		String cutcut[] = key.split("/");
-		
-		filename = cutcut[cutcut.length-1];
-
-		if(filename.equals("") || filename.indexOf('.') < 0) {
+		if(key.indexOf('/') == key.length()-1) {
 			filename = "index.html";
+		} else {
+			String cutcut[] = key.split("/");			
+			filename = cutcut[cutcut.length-1];
 		}
 		
 		Logger.debug(this, "Getting "+key);
@@ -66,6 +68,8 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 	}
 
 	public boolean start(FCPQueueManager queueManager) {
+		running = true;
+
 		this.queueManager = queueManager;
 
 		status = "Requesting";
@@ -80,7 +84,7 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 		queryMessage.setValue("URI", getFileKey());
 		queryMessage.setValue("Identifier", id);
 		queryMessage.setValue("Verbosity", "1");
-		queryMessage.setValue("MaxRetries", MAX_RETRIES);
+		queryMessage.setValue("MaxRetries", "0");
 		queryMessage.setValue("PriorityClass", (new Integer(priority)).toString());
 
 		if(persistence == 0)
@@ -109,15 +113,9 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 		FCPMessage message = (FCPMessage)arg;
 
 		if(message.getValue("Identifier") == null
-		   || !message.getValue("Identifier").equals(id)) {
-			if(message.getValue("Identifier") != null)
-				Logger.verbose(this, "Not for us : "+message.getValue("Identifier"));
-			else
-				Logger.verbose(this, "Not for us");
+		   || !message.getValue("Identifier").equals(id))
 			return;
-		} else {
-			Logger.verbose(this, "For us for us !");
-		}
+
 
 		if(message.getMessageName().equals("DataFound")) {
 			Logger.debug(this, "DataFound!");
@@ -163,6 +161,7 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 
 			status = "Protocol Error";
 			progress = 100;
+			running = false;
 
 			queueManager.getQueryManager().deleteObserver(this);
 
@@ -175,10 +174,16 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 		if(message.getMessageName().equals("GetFailed")) {
 			Logger.debug(this, "GetFailed !");
 
-			status = "Failed";
-			progress = 100;
+			attempt++;
 
-			queueManager.getQueryManager().deleteObserver(this);
+			if(attempt >= MAX_RETRIES) {
+			    status = "Failed";
+			    progress = 100;
+			    running = false;
+			    queueManager.getQueryManager().deleteObserver(this);
+			} else {
+			    status = "Retrying";
+			}
 
 			setChanged();
 			notifyObservers();
@@ -215,10 +220,14 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 
 			fileSize = (new Long(message.getValue("DataLength"))).longValue();
 
-			status = "Available";
+			status = "Writing";
 
-			fetchDirectly(fileSize);
-
+			if(fetchDirectly(fileSize)) {
+				successful = true;
+				status = "Available";
+			}
+			
+			running = false;
 			progress = 100;
 
 			queueManager.getQueryManager().deleteObserver(this);
@@ -230,13 +239,13 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 			/* Should not bother us */
 			return;
 		}
-
+		
 		Logger.warning(this, "Unknow message : "+message.getMessageName() + " !");
-
+		
 	}
 
 
-	public void fetchDirectly(long size) {
+	public boolean fetchDirectly(long size) {
 		FCPConnection connection;
 		File newFile = new File(getPath());
 		FileOutputStream fileWriter;
@@ -250,7 +259,7 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 		} catch(java.io.IOException e) {
 			Logger.error(this, "Unable to write file on disk ... perms ? : "+e.toString());
 			status = "Write error";
-			return;
+			return false;
 		}
 
 		/* size == bytes remaining on socket */
@@ -277,13 +286,13 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 			} catch(java.io.IOException e) {
 				Logger.error(this, "Unable to write file on disk ... out of space ? : "+e.toString());
 				status = "Write error";
-				return;
+				return false;
 			}
 			
 			size = size - amount;
 			
 		}
-		
+
 		try {
 			fileWriter.close();
 		} catch(java.io.IOException e) {
@@ -292,6 +301,7 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 
 		Logger.info(this, "File written");
 
+		return true;
 	}
 
 
@@ -339,5 +349,13 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 
 	public int getAttempt() {
 		return attempt;
+	}
+
+	public boolean isSuccessful() {
+		return successful;
+	}
+
+	public boolean isRunning() {
+		return running;
 	}
 }

@@ -66,7 +66,10 @@ public class FCPConnection extends Observable {
 	
 	public void disconnect() {
 		try {
+		    if(isConnected())
 			socket.close();
+		    else
+			Logger.notice(this, "Disconnect(): Already disconnected !");
 		} catch(java.io.IOException e) {
 			Logger.warning(this, "Unable to close cleanly the connection : "+e.toString());
 		}

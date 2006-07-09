@@ -66,7 +66,13 @@ public class QueueWatcher implements thaw.core.Plugin, Observer {
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"), mainPanel);
 
-		core.getQueueManager().addObserver(this);
+		if(core.getQueueManager() != null)
+		    core.getQueueManager().addObserver(this);
+		else {
+		    Logger.warning(this, "Unable to connect to QueueManager. Is the connection established ?");
+		    return false;
+		}
+		    
 
 		return true;
 	}
@@ -105,15 +111,20 @@ public class QueueWatcher implements thaw.core.Plugin, Observer {
 
 		FCPQueueManager manager = (FCPQueueManager)o;
 
-		queuePanels[0].resetTable();
-		queuePanels[1].resetTable();
+		try {
+			queuePanels[0].resetTable();
+			queuePanels[1].resetTable();
+			
+			addToPanels(manager.getRunningQueue());
+			
+			Vector[] pendings = manager.getPendingQueues();
+			
+			for(int i = 0;i < pendings.length ; i++)
+				addToPanels(pendings[i]);
 
-		addToPanels(manager.getRunningQueue());
-
-		Vector[] pendings = manager.getPendingQueues();
-
-		for(int i = 0;i < pendings.length ; i++)
-			addToPanels(pendings[i]);
+		} catch(java.util.ConcurrentModificationException e) {
+			Logger.notice(this, "Collision while updating queue panels");
+		}
 		
 	}
 

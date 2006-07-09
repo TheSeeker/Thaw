@@ -23,6 +23,7 @@ public class FCPClientHello implements FCPQuery, Observer {
 	private int nmbCompressionCodecs = -1;
 
 	private boolean receiveAnswer = false;
+	private boolean successful = false;
 
 	private FCPQueryManager queryManager = null;
 
@@ -111,6 +112,7 @@ public class FCPClientHello implements FCPQuery, Observer {
 		if(o == queryManager) {
 			
 			if(answer.getMessageName().equals("NodeHello")) {
+				successful = true;
 				Logger.info(this, "Received a nodeHello");
 
 				nodeFCPVersion = answer.getValue("FCPVersion");
@@ -166,8 +168,12 @@ public class FCPClientHello implements FCPQuery, Observer {
 		return 0;
 	}
 
-	public boolean isFinished() {
+	public boolean isRunning() {
 		return false;
+	}
+
+	public boolean isFinished() {
+		return true;
 	}
 
 	public String getPath() {
@@ -176,6 +182,10 @@ public class FCPClientHello implements FCPQuery, Observer {
 
 	public int getAttempt() {
 		return -1;
+	}
+
+	public boolean isSuccessful() {
+		return successful;
 	}
 
 }
