@@ -67,9 +67,10 @@ public class FCPConnection extends Observable {
 	public void disconnect() {
 		try {
 		    if(isConnected())
-			socket.close();
-		    else
-			Logger.notice(this, "Disconnect(): Already disconnected !");
+			    socket.close();
+		    else {
+			    Logger.info(this, "Disconnect(): Already disconnected.");
+		    }
 		} catch(java.io.IOException e) {
 			Logger.warning(this, "Unable to close cleanly the connection : "+e.toString());
 		}
@@ -197,9 +198,6 @@ public class FCPConnection extends Observable {
 						else
 							Logger.notice(this, "Disconnected");
 
-						/* Warns every observers */
-						disconnect();
-
 						return null;
 					}
 					
@@ -219,9 +217,6 @@ public class FCPConnection extends Observable {
 					Logger.error(this, "IOException while reading but still connected, wtf? : "+e.toString());
 				else
 					Logger.notice(this, "IOException. Disconnected.");
-
-				/* Warns every observers */
-				disconnect();
 
 				return null;
 			}
