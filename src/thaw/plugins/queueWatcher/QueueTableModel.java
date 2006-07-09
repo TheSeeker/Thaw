@@ -61,7 +61,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		}
 
 		if(column == 1) {
-			return ((new Long(query.getFileSize())).toString() + " B");
+			return ((new Long(query.getFileSize())).toString() + " B"); /* TODO : Convert to KB / MB / GB */
 		}
 
 		if(column == 2) {
@@ -114,6 +114,8 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 	public void notifyObservers() {
 		TableModelListener[] listeners = getTableModelListeners();
+
+		/* TODO : Sort queries by progression */
 
 		for(int i = 0 ; i < listeners.length ; i++) {
 			listeners[i].tableChanged(new TableModelEvent(this));

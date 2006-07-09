@@ -83,6 +83,10 @@ public class FCPMessage {
 	}
 
 	public void setValue(String field, String value) {
+		if(field.equals("DataLength")) {
+			setAmountOfDataWaiting((new Long(value)).longValue());
+		}
+
 		fields.put(field, value);
 	}
 

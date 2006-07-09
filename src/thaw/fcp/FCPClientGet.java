@@ -60,6 +60,8 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 			String cutcut[] = key.split("/");			
 			filename = cutcut[cutcut.length-1];
 		}
+
+		/* TODO : Check if the file was not already downloaded */
 		
 		Logger.debug(this, "Getting "+key);
 
@@ -218,7 +220,7 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 
 			status = "Loading";
 
-			fileSize = (new Long(message.getValue("DataLength"))).longValue();
+			fileSize = message.getAmountOfDataWaiting();
 
 			status = "Writing";
 
@@ -306,7 +308,7 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 
 
 	public boolean stop(FCPQueueManager queryManager) {
-		Logger.info(this, "*TODO* stop()  *TODO*");
+		Logger.info(this, "stop()");
 		/* TODO */
 		return false;
 	}

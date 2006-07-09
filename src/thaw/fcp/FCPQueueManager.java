@@ -19,9 +19,11 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 	private Vector runningQueries;
 
 	private Thread scheduler;
+	private boolean stopThread = false;
 
 	private int lastId;
 	private String thawId;
+
 
 	/**
 	 * Calls setQueryManager() and then resetQueue().
@@ -132,25 +134,39 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 	 * Compare using the key.
 	 */
 	public boolean isAlreadyPresent(FCPQuery query) {
+		boolean interrupted=true;
+
 		Iterator it;
 
-		for(it = runningQueries.iterator();
-		    it.hasNext(); )
-			{
-				FCPQuery plop = (FCPQuery)it.next();
-				if(plop.getFileKey().equals(query.getFileKey()))
-					return true;
+		while(interrupted) {
+			interrupted = false;
+
+			try {
+				for(it = runningQueries.iterator();
+				    it.hasNext(); )
+					{
+						FCPQuery plop = (FCPQuery)it.next();
+						if(plop.getFileKey().equals(query.getFileKey()))
+							return true;
+					}
+				
+				for(int i = 0 ; i <= PRIORITY_MIN ; i++) {
+					for(it = pendingQueries[i].iterator();
+					    it.hasNext(); )
+						{
+							FCPQuery plop = (FCPQuery)it.next();
+							if(plop.getFileKey().equals(query.getFileKey()))
+								return true;
+						}
+					
+				}
+			} catch(java.util.ConcurrentModificationException e) {
+				Logger.notice(this, "isAlreadyPresent(): Collission. Reitering");
+				interrupted = true;
 			}
 
-		for(int i = 0 ; i <= PRIORITY_MIN ; i++) {
-			for(it = pendingQueries[i].iterator();
-			    it.hasNext(); )
-				{
-					FCPQuery plop = (FCPQuery)it.next();
-					if(plop.getFileKey().equals(query.getFileKey()))
-						return true;
-				}
 		}
+
 
 		return false;
 	}
@@ -183,34 +199,39 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 					|| runningDownloads < maxDownloads) ;
 			    priority++)	{
 
-				for(Iterator it = pendingQueries[priority].iterator();
-				    it.hasNext()
-					    && (runningInsertions < maxInsertions
-						|| runningDownloads < maxDownloads); ) {
-					
-					FCPQuery query = (FCPQuery)it.next();
-					
-					if( (query.getQueryType() == 1
-					     && runningDownloads < maxDownloads)
-					    || (query.getQueryType() == 2
-						&& runningInsertions < maxInsertions) ) {
+				try {
+					for(Iterator it = pendingQueries[priority].iterator();
+					    it.hasNext()
+						    && (runningInsertions < maxInsertions
+							|| runningDownloads < maxDownloads); ) {
 						
-						Logger.debug(this, "Scheduler : Moving a query from pendingQueue to the runningQueue");
-						pendingQueries[priority].remove(query);
+						FCPQuery query = (FCPQuery)it.next();
 						
-						it = pendingQueries[priority].iterator(); /* We reset iterator */
+						if( (query.getQueryType() == 1
+						     && runningDownloads < maxDownloads)
+						    || (query.getQueryType() == 2
+							&& runningInsertions < maxInsertions) ) {
+							
+							Logger.debug(this, "Scheduler : Moving a query from pendingQueue to the runningQueue");
+							pendingQueries[priority].remove(query);
+							
+							it = pendingQueries[priority].iterator(); /* We reset iterator */
+							
+							addQueryToTheRunningQueue(query);
+							
+							if(query.getQueryType() == 1)
+								runningDownloads++;
+							
+							if(query.getQueryType() == 2)
+								runningInsertions++;
+						}
 
-						addQueryToTheRunningQueue(query);
-
-						if(query.getQueryType() == 1)
-							runningDownloads++;
-
-						if(query.getQueryType() == 2)
-							runningInsertions++;
+						
+						
 					}
-
-					
-
+				} catch(java.util.ConcurrentModificationException e) {
+					Logger.notice(this, "Collision.");
+					priority--;
 				}
 
 			}
@@ -227,6 +248,9 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 				/* We don't care */
 			}
 
+			if(stopThread)
+				return;
+
 			ordonnance();
 		}
 
@@ -234,11 +258,12 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 
 	public void startScheduler() {
 		scheduler = new Thread(this);
+		stopThread = false;
 		scheduler.start();
 	}
 
 	public void stopScheduler() {
-		scheduler.stop(); /* I should find a safer way */
+		stopThread = true;
 	}
 
 

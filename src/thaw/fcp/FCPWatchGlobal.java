@@ -63,4 +63,12 @@ public class FCPWatchGlobal implements FCPQuery {
 	public boolean isFinished() {
 		return true;
 	}
+
+	public boolean isSuccessful() {
+		return true;
+	}
+
+	public boolean isRunning() {
+		return false;
+	}
 }

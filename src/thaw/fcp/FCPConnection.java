@@ -175,7 +175,7 @@ public class FCPConnection extends Observable {
 
 	/**
 	 * Read a line.
-	 * @return null if error
+	 * @return null if disconnected or error
 	 */
 	public String readLine() {
 		String result;
@@ -192,7 +192,14 @@ public class FCPConnection extends Observable {
 					c = reader.read();
 
 					if(c == -1) {
-						Logger.notice(this, "Unable to read ? => disconnect ?");
+						if(isConnected())
+							Logger.error(this, "Unable to read but still connected");
+						else
+							Logger.notice(this, "Disconnected");
+
+						/* Warns every observers */
+						disconnect();
+
 						return null;
 					}
 					
@@ -208,7 +215,14 @@ public class FCPConnection extends Observable {
 				return result;
 
 			} catch (java.io.IOException e) {
-				Logger.notice(this, "Unable to read() on the socket ?! => disconnect ? : "+e.toString());
+				if(isConnected())
+					Logger.error(this, "IOException while reading but still connected, wtf? : "+e.toString());
+				else
+					Logger.notice(this, "IOException. Disconnected.");
+
+				/* Warns every observers */
+				disconnect();
+
 				return null;
 			}
 		} else {
