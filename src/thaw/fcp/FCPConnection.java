@@ -33,10 +33,10 @@ public class FCPConnection extends Observable {
 
 	private boolean lockWriting = false;
 
-	/** If == 1, then will print on stdout
+	/** If == true, then will print on stdout
 	 * all fcp input / output.
 	 */
-	private final static int DEBUG_MODE = 1;
+	private final static boolean DEBUG_MODE = true;
 
 	/**
 	 * Don't connect. Call connect() for that.
@@ -44,7 +44,7 @@ public class FCPConnection extends Observable {
 	public FCPConnection(String nodeAddress,
 			     int port)
 	{
-		if(DEBUG_MODE == 1) {
+		if(DEBUG_MODE) {
 			Logger.notice(this, "DEBUG_MODE ACTIVATED");
 		}
 
@@ -268,11 +268,13 @@ public class FCPConnection extends Observable {
 					
 				}
 
+				if(DEBUG_MODE) {
+					if(result.matches("[- \\?.a-zA-Z0-9,~%@/_=\\[\\]\\(\\)]*"))
+						Logger.asIt(this, "Thaw <<< Node : "+result);
+					else
+						Logger.asIt(this, "Thaw <<< Node : Unknow chars in message. Not displayed");
+				}
 
-				if(result.matches("[- \\?.a-zA-Z0-9,~%@/_=]*"))				
-					Logger.asIt(this, "Thaw <<< Node : "+result);
-				else
-					Logger.error(this, "PROBABLE RAW MESSAGE. ABNORMAL.");
 				
 				return result;
 

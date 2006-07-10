@@ -383,8 +383,16 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	public boolean stop(FCPQueueManager queryManager) {
 		Logger.info(this, "Stop fetching of the key : "+getFileKey());
 
+		progress = 100;
+		successful = false;
+		status = "Stopped";
+
 		if(!isRunning() || isFinished()) {
-			Logger.notice(this, "Can't stop. Not running");
+			Logger.info(this, "Can't stop. Not running -> considered as failed");
+
+			setChanged();
+			notifyObservers();
+
 			return true;
 		}
 		
@@ -395,6 +403,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			return false;
 		}
 
+		setChanged();
+		notifyObservers();
+		
 		return true;
 	}
 

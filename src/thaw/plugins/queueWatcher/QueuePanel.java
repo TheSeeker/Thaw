@@ -231,8 +231,7 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 				}
 
 				if(e.getSource() == cancelItem) {
-					if(query.isRunning() && !query.isFinished())
-						query.stop(core.getQueueManager());
+					query.stop(core.getQueueManager());
 				}
 
 				if(e.getSource() == delayItem) {
