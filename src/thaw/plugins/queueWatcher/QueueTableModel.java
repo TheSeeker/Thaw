@@ -101,6 +101,15 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		notifyObservers();
 	}
 
+	public void removeQuery(FCPTransferQuery query) {
+		((Observable)query).deleteObserver(this);
+
+		queries.remove(query);
+
+		notifyObservers();
+	}
+
+
 	public FCPTransferQuery getQuery(int row) {
 		return (FCPTransferQuery)queries.get(row);
 	}

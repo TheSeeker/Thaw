@@ -338,9 +338,32 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 
 	public boolean stop(FCPQueueManager queryManager) {
-		Logger.info(this, "stop()");
-		/* TODO */
-		return false;
+		Logger.info(this, "Stop fetching of the key : "+getFileKey());
+
+		if(!isRunning() || isFinished()) {
+			Logger.notice(this, "Can't stop. Not running");
+			return true;
+		}
+		
+		if(isPersistent()) {
+			FCPMessage stopMessage = new FCPMessage();
+
+			stopMessage.setMessageName("RemovePersistentRequest");
+
+			if(globalQueue)
+				stopMessage.setValue("Global", "true");
+			else
+				stopMessage.setValue("Global", "false");
+
+			stopMessage.setValue("Identifier", identifier);
+			
+			queueManager.getQueryManager().writeMessage(stopMessage);
+		} else {
+			Logger.warning(this, "Can't stop a non-persistent query, will continue in background ...");
+			return false;
+		}
+
+		return true;
 	}
 
 	public int getThawPriority() {

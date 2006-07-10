@@ -18,12 +18,22 @@ import java.awt.Component;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.StringSelection;
+
 import thaw.core.*;
 import thaw.i18n.I18n;
 
 import thaw.fcp.*;
 
-public class QueuePanel implements MouseListener {
+public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner {
 	private Core core;
 
 	private JLabel label;
@@ -36,7 +46,14 @@ public class QueuePanel implements MouseListener {
 	private QueueTableModel tableModel;
 	private DetailPanel detailPanel;
 
-	private int lastRowSelected = -1;
+	private JPopupMenu rightClickMenu;
+	private JMenuItem removeItem;
+	private JMenuItem cancelItem;
+	private JMenuItem delayItem;
+	private JMenuItem copyKeysItem;
+
+	private int lastRowSelected = -1; /* Used for detail panel */
+	private int[] selectedRows;
 
 	private boolean insertionQueue = false;
 
@@ -69,6 +86,21 @@ public class QueuePanel implements MouseListener {
 		table.setDefaultRenderer( table.getColumnClass(0), new ProgressRenderer(table, tableModel) );
 
 		tableModel.addTableModelListener(table);
+		
+		rightClickMenu = new JPopupMenu();
+		removeItem = new JMenuItem(I18n.getMessage("thaw.common.remove"));
+		cancelItem = new JMenuItem(I18n.getMessage("thaw.common.cancel"));
+		delayItem = new JMenuItem(I18n.getMessage("thaw.common.delay"));
+		copyKeysItem = new JMenuItem(I18n.getMessage("thaw.common.copyKeysToClipboard"));
+		
+		rightClickMenu.add(removeItem);
+		rightClickMenu.add(cancelItem);
+		rightClickMenu.add(copyKeysItem);
+		
+		removeItem.addActionListener(this);
+		cancelItem.addActionListener(this);
+		copyKeysItem.addActionListener(this);
+
 		table.addMouseListener(this);
 
 		/* If a queue is already existing, we need to add it */
@@ -170,8 +202,57 @@ public class QueuePanel implements MouseListener {
 	}
 
 
+	public void actionPerformed(ActionEvent e) {
+		Toolkit tk = Toolkit.getDefaultToolkit();
+		String keys = "";
+
+		for(int i = 0 ; i < selectedRows.length;i++) {
+				FCPTransferQuery query = tableModel.getQuery(i);
+		
+				if(e.getSource() == removeItem) {
+					if(query.isRunning() && !query.isFinished())
+						query.stop(core.getQueueManager());
+					core.getQueueManager().remove(query);
+					
+					tableModel.removeQuery(query);
+				}
+
+				if(e.getSource() == cancelItem) {
+					if(query.isRunning() && !query.isFinished())
+						query.stop(core.getQueueManager());
+				}
+
+				if(e.getSource() == delayItem) {
+					if(query.isRunning() && !query.isFinished()) {
+						query.stop(core.getQueueManager());
+						core.getQueueManager().moveFromRunningToPendingQueue(query);
+					}
+				}
+
+				if(e.getSource() == copyKeysItem) {
+					keys = keys + query.getFileKey() + "\n";
+				}
+
+		} /* for i in selectedRows */
+
+		
+
+		if(e.getSource() == copyKeysItem) {
+			StringSelection st = new StringSelection(keys);
+			Clipboard cp = tk.getSystemClipboard();
+			cp.setContents(st, this);
+		}
+	}
+
 	public void mouseClicked(MouseEvent e) {
-		refresh();
+		if(e.getButton() == MouseEvent.BUTTON3) {
+			selectedRows = table.getSelectedRows();
+			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
+		}
+
+		if(e.getButton() == MouseEvent.BUTTON1) {
+			refresh();
+		}
 	}
 
 	public void mouseEntered(MouseEvent e) {
@@ -188,6 +269,10 @@ public class QueuePanel implements MouseListener {
 
 	public void mouseReleased(MouseEvent e) {
 
+	}
+
+	public void lostOwnership(Clipboard clipboard, java.awt.datatransfer.Transferable contents) {
+		/* we dont care */
 	}
 
 }
