@@ -12,7 +12,7 @@ import thaw.core.Logger;
 /**
  * notify() only when progress has really changes.
  */
-public class FCPClientGet extends Observable implements Observer, FCPQuery {
+public class FCPClientGet extends Observable implements Observer, FCPTransferQuery {
 	private final static int MAX_RETRIES = 3;
 	private final static int PACKET_SIZE = 1024;
 	private final static int BLOCK_SIZE = 32768;
@@ -184,11 +184,11 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 		if(message.getMessageName().equals("ProtocolError")) {
 			Logger.debug(this, "ProtocolError !");
 
-			status = "Protocol Error";
+			status = "Protocol Error ("+message.getValue("CodeDescription")+")";
 			progress = 100;
 			running = false;
 			successful = false;
-
+			
 			queueManager.getQueryManager().deleteObserver(this);
 
 			setChanged();
@@ -205,7 +205,7 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 			attempt++;
 
 			if(attempt >= MAX_RETRIES || code == 25) {
-			    status = "Failed";
+			    status = "Failed ("+message.getValue("CodeDescription")+")";
 			    progress = 100;
 			    running = false;
 			    successful = false;
@@ -383,6 +383,10 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 		return attempt;
 	}
 
+	public int getMaxAttempt() {
+		return MAX_RETRIES;
+	}
+
 	public boolean isSuccessful() {
 		return successful;
 	}
@@ -402,8 +406,13 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 		result.put("destinationDir", destinationDir);
 		result.put("attempt", ((new Integer(attempt)).toString()));
 
-		String[] cut = status.split(" ");
-		result.put("status", cut[0]);
+		if(status.indexOf("(?)") > 0) {
+			String[] cut = status.split(" ");
+			result.put("status", cut[0]);
+		} else {
+			result.put("status", status);
+		}
+
 		result.put("identifier", identifier);
 		result.put("progress", ((new Integer(progress)).toString()));
 		result.put("fileSize", ((new Long(fileSize)).toString()));

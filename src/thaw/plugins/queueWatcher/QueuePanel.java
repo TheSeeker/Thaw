@@ -107,7 +107,7 @@ public class QueuePanel implements MouseListener {
 
 			if(!isSelected) {
 	
-				FCPQuery query = model.getQuery(row);
+				FCPTransferQuery query = model.getQuery(row);
 				
 				if(!query.isRunning() && !query.isFinished())
 					cell.setBackground(PENDING);
@@ -133,20 +133,20 @@ public class QueuePanel implements MouseListener {
 
 
 
-	public void addToTable(FCPQuery query) {
+	public void addToTable(FCPTransferQuery query) {
 		if( (insertionQueue && query.getQueryType() == 2)
 		    || (!insertionQueue && query.getQueryType() == 1))
 			tableModel.addQuery(query);
 	}
 
 	/**
-	 * @param queries Vector of FCPQuery only
+	 * @param queries Vector of FCPTransferQuery only
 	 */
 	public void addToTable(Vector queries) {
 		for(Iterator queryIt = queries.iterator();
 		    queryIt.hasNext();) {
 			
-			FCPQuery query = (FCPQuery)queryIt.next();
+			FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
 
 			addToTable(query);
 		}

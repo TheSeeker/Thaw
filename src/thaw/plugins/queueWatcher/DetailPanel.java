@@ -15,6 +15,12 @@ import thaw.core.*;
 import thaw.i18n.I18n;
 import thaw.fcp.*;
 
+
+/**
+ * Right panel of queueWatcher plugin. Show details about a transfer.
+ * Possible evolution: Display what is return by FCPTransferQuery.getParameters() 
+ * (doing an exception for the progressbar).
+ */
 public class DetailPanel implements Observer {
 
 	private Core core;
@@ -22,15 +28,16 @@ public class DetailPanel implements Observer {
 	private JPanel subPanel;
 	private JPanel panel;
 
-	private JTextField file     = new JTextField();
-	private JTextField size     = new JTextField();
+	private JTextField file       = new JTextField();
+	private JTextField size       = new JTextField();
 	private JProgressBar progress = new JProgressBar(0, 100);
-	private JTextField key      = new JTextField();
-	private JTextField path     = new JTextField();
-	private JTextField priority = new JTextField();
-	private JTextField attempt  = new JTextField();
+	private JTextField status     = new JTextField(); 
+	private JTextField key        = new JTextField();
+	private JTextField path       = new JTextField();
+	private JTextField priority   = new JTextField();
+	private JTextField attempt    = new JTextField();
 
-	private FCPQuery query = null;
+	private FCPTransferQuery query = null;
 
 
 	private final static Dimension dim = new Dimension(300, 275);
@@ -45,6 +52,7 @@ public class DetailPanel implements Observer {
 		String[] fieldNames = { I18n.getMessage("thaw.common.file"),
 					I18n.getMessage("thaw.common.size"),
 					I18n.getMessage("thaw.common.progress"),
+					I18n.getMessage("thaw.common.status"),
 					I18n.getMessage("thaw.common.key"),
 					I18n.getMessage("thaw.common.localPath"),
 					I18n.getMessage("thaw.common.priority"),
@@ -68,10 +76,11 @@ public class DetailPanel implements Observer {
 					progress.setString("");
 					progress.setStringPainted(true);
 					break;
-				case(3): field = key; key.setEditable(false);break;
-				case(4): field = path; path.setEditable(false); break;
-				case(5): field = priority; priority.setEditable(false); break;
-				case(6): field = attempt; attempt.setEditable(false); break;
+				case(3): field = status; status.setEditable(false); break;
+				case(4): field = key; key.setEditable(false);break;
+				case(5): field = path; path.setEditable(false); break;
+				case(6): field = priority; priority.setEditable(false); break;
+				case(7): field = attempt; attempt.setEditable(false); break;
 				default: Logger.error(this, "Gouli goula ? ... is going to crash :p"); break;
 				}
 
@@ -92,7 +101,7 @@ public class DetailPanel implements Observer {
 	}
 
 	
-	public void setQuery(FCPQuery query) {
+	public void setQuery(FCPTransferQuery query) {
 		if(this.query != null)
 			((Observable)this.query).deleteObserver(this);
 
@@ -116,9 +125,11 @@ public class DetailPanel implements Observer {
 				progress.setString((new Integer(query.getProgression())).toString() + "%");
 			else
 				progress.setString("FAILED");
+			status.setText(query.getStatus());
 		} else {
 			progress.setValue(0);
 			progress.setString("");
+			status.setText("");
 		}
 	}
 

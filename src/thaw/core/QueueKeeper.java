@@ -42,7 +42,7 @@ public class QueueKeeper {
 
 
 	private static void loadQuery(FCPQueueManager queueManager, Element queryEl, boolean runningQueue) {
-		FCPQuery newQuery = null;
+		FCPTransferQuery newQuery = null;
 		HashMap params = new HashMap();
 
 		NodeList paramList = queryEl.getElementsByTagName("param");
@@ -152,7 +152,7 @@ public class QueueKeeper {
 	}
 	
 
-	private static Element saveQuery(FCPQuery query, Document xmlDoc) {
+	private static Element saveQuery(FCPTransferQuery query, Document xmlDoc) {
 		HashMap params = query.getParameters();
 
 		Element queryEl = xmlDoc.createElement("query");
@@ -226,7 +226,7 @@ public class QueueKeeper {
 
 		for(Iterator runIt = runningQueue.iterator() ;
 		    runIt.hasNext(); ) {
-			FCPQuery query = (FCPQuery)runIt.next();
+			FCPTransferQuery query = (FCPTransferQuery)runIt.next();
 
 			runningQueueEl.appendChild(saveQuery(query, xmlDoc));
 
@@ -241,7 +241,7 @@ public class QueueKeeper {
 			for(Iterator runIt = pendingQueue[i].iterator() ;
 			    runIt.hasNext(); ) {
 
-				FCPQuery query = (FCPQuery)runIt.next();
+				FCPTransferQuery query = (FCPTransferQuery)runIt.next();
 				
 				Element toSave = saveQuery(query, xmlDoc);
 

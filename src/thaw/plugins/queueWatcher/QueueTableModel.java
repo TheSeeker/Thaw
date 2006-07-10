@@ -53,7 +53,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		if(row >= queries.size())
 			return null;
 
-		FCPQuery query = (FCPQuery)queries.get(row);
+		FCPTransferQuery query = (FCPTransferQuery)queries.get(row);
 		
 		if(column == 0) {
 			String[] plop = query.getFileKey().split("/");
@@ -93,7 +93,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		notifyObservers();
 	}
 
-	public void addQuery(FCPQuery query) {
+	public void addQuery(FCPTransferQuery query) {
 		((Observable)query).addObserver(this);
 		
 		queries.add(query);
@@ -101,8 +101,8 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		notifyObservers();
 	}
 
-	public FCPQuery getQuery(int row) {
-		return (FCPQuery)queries.get(row);
+	public FCPTransferQuery getQuery(int row) {
+		return (FCPTransferQuery)queries.get(row);
 	}
 
 	public void notifyObservers() {

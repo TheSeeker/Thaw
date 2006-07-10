@@ -5,7 +5,10 @@ import java.util.Iterator;
 
 import thaw.core.Logger;
 
-
+/**
+ * Manage a running and a pending queue of FCPTransferQuery.
+ * Please notice that runningQueue contains too finished queries.
+ */
 public class FCPQueueManager extends java.util.Observable implements Runnable {
 
 	private final static int PRIORITY_MIN = 6; /* So 0 to 6 */
@@ -81,7 +84,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 		return runningQueries;
 	}
 
-	public void addQueryToThePendingQueue(FCPQuery query) {
+	public void addQueryToThePendingQueue(FCPTransferQuery query) {
 		if(query.getThawPriority() < 0) {
 			addQueryToTheRunningQueue(query);
 			return;
@@ -105,11 +108,11 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 	/**
 	 * will call start() function of the query.
 	 */
-	public void addQueryToTheRunningQueue(FCPQuery query) {
+	public void addQueryToTheRunningQueue(FCPTransferQuery query) {
 		addQueryToTheRunningQueue(query, true);
 	}
 
-	public void addQueryToTheRunningQueue(FCPQuery query, boolean callStart) {
+	public void addQueryToTheRunningQueue(FCPTransferQuery query, boolean callStart) {
 		Logger.debug(this, "Adding query to the running queue ...");
 
 		if(!callStart) {
@@ -142,7 +145,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 	/**
 	 * *Doesn't* call stop() from the query.
 	 */
-	public void moveFromRunningToPendingQueue(FCPQuery query) {
+	public void moveFromRunningToPendingQueue(FCPTransferQuery query) {
 		remove(query);
 		addQueryToThePendingQueue(query);
 	}
@@ -157,7 +160,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 
 		for(Iterator queryIt = getRunningQueue().iterator() ;
 		    queryIt.hasNext();) {
-			FCPQuery query = (FCPQuery)queryIt.next();
+			FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
 
 			if(!query.isPersistent() && !query.isFinished())
 				query.start(this);
@@ -167,7 +170,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 		    
 	}
 	
-	public void remove(FCPQuery query) {
+	public void remove(FCPTransferQuery query) {
 		runningQueries.remove(query);
 
 		for(int i = 0 ; i <= PRIORITY_MIN ; i++)
@@ -180,7 +183,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 	/**
 	 * Compare using the key.
 	 */
-	public boolean isAlreadyPresent(FCPQuery query) {
+	public boolean isAlreadyPresent(FCPTransferQuery query) {
 		boolean interrupted=true;
 
 		Iterator it;
@@ -192,7 +195,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 				for(it = runningQueries.iterator();
 				    it.hasNext(); )
 					{
-						FCPQuery plop = (FCPQuery)it.next();
+						FCPTransferQuery plop = (FCPTransferQuery)it.next();
 						if(plop.getFileKey().equals(query.getFileKey()))
 							return true;
 					}
@@ -201,7 +204,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 					for(it = pendingQueries[i].iterator();
 					    it.hasNext(); )
 						{
-							FCPQuery plop = (FCPQuery)it.next();
+							FCPTransferQuery plop = (FCPTransferQuery)it.next();
 							if(plop.getFileKey().equals(query.getFileKey()))
 								return true;
 						}
@@ -227,7 +230,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 			int runningDownloads = 0;
 
 			for(Iterator it = runningQueries.iterator(); it.hasNext(); ) {
-				FCPQuery query = (FCPQuery)it.next();
+				FCPTransferQuery query = (FCPTransferQuery)it.next();
 
 				if(query.getQueryType() == 1 /* Download */
 				   && !query.isFinished())
@@ -252,7 +255,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 						    && (runningInsertions < maxInsertions
 							|| runningDownloads < maxDownloads); ) {
 						
-						FCPQuery query = (FCPQuery)it.next();
+						FCPTransferQuery query = (FCPTransferQuery)it.next();
 						
 						if( (query.getQueryType() == 1
 						     && runningDownloads < maxDownloads)

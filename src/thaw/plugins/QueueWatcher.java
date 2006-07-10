@@ -95,7 +95,7 @@ public class QueueWatcher implements thaw.core.Plugin, Observer {
 		for(Iterator it = queries.iterator();
 		    it.hasNext();) {
 
-			FCPQuery query = (FCPQuery)it.next();
+			FCPTransferQuery query = (FCPTransferQuery)it.next();
 
 			if(query.getQueryType() == 1)
 				queuePanels[0].addToTable(query);

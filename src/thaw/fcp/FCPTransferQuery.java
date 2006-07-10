@@ -1,0 +1,85 @@
+package thaw.fcp;
+
+import java.util.HashMap;
+
+/**
+ * Transfer query == fetch / insert query. These queries must be able to
+ * give more informations than the other.
+ */
+public interface FCPTransferQuery extends FCPQuery {
+
+
+	
+	/**
+	 * Informal.
+	 * Human readable string describring the
+	 * status of the query.
+	 * @return can be null (== "Waiting")
+	 */
+	public String getStatus();
+
+	/**
+	 * Informal.
+	 * In pourcents.
+	 */
+	public int getProgression();
+
+	/**
+	 * Informal.
+	 * @return can be null
+	 */
+	public String getFileKey();
+
+	/**
+	 * Informal. In bytes.
+	 * @return can be -1
+	 */
+	public long getFileSize();
+
+	/**
+	 * Where is the file on the disk.
+	 */
+	public String getPath();
+
+	/**
+	 * @return can return -1
+	 */
+	public int getAttempt();
+
+	/**
+	 * @return can return -1
+	 */
+	public int getMaxAttempt();
+
+	public boolean isRunning();
+
+	public boolean isFinished();
+
+	/**
+	 * If unknow, return false.
+	 * Query is considered as a failure is isFinished() && !isSuccesful()
+	 */
+	public boolean isSuccessful();
+
+	/**
+	 * Use to save the query in an XML file / a database / whatever.
+	 * @return A HashMap : String (parameter name) -> String (parameter value) or null.
+	 */
+	public HashMap getParameters();
+
+	/**
+	 * Opposite of getParameters().
+	 * @return true if successful (or ignored) ; false if not.
+	 */
+	public boolean setParameters(HashMap parameters);
+
+
+	public boolean isPersistent();
+
+	/**
+	 * @return can be null (if non active, or meaningless).
+	 */
+	public String getIdentifier();
+
+
+}

@@ -151,14 +151,13 @@ public class Core implements Observer {
 			}
 			
 			queryManager = new FCPQueryManager(connection);
+			queueManager = new FCPQueueManager(queryManager,
+							   config.getValue("thawId"),
+							   (new Integer(config.getValue("maxSimultaneousDownloads"))).intValue(),
+							   (new Integer(config.getValue("maxSimultaneousInsertions"))).intValue());
 
 			if(connection.isConnected()) {
 				queryManager.startListening();
-
-				queueManager = new FCPQueueManager(queryManager,
-								   config.getValue("thawId"),
-								   (new Integer(config.getValue("maxSimultaneousDownloads"))).intValue(),
-								   (new Integer(config.getValue("maxSimultaneousInsertions"))).intValue());
 
 				QueueKeeper.loadQueue(queueManager, "thaw.queue.xml");
 
