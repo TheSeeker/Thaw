@@ -42,10 +42,6 @@ public class FCPClientHello implements FCPQuery, Observer {
 		this.id = id;
 	}
 
-	public int getThawPriority() {
-		return -1;
-	}
-
 	public String getNodeFCPVersion() {
 		return nodeFCPVersion;
 	}
@@ -153,57 +149,5 @@ public class FCPClientHello implements FCPQuery, Observer {
 		return 0;
 	}
 
-	public String getStatus() {
-		return null;
-	}
-
-	public int getProgression() {
-		return 0;
-	}
-
-	public String getFileKey() {
-		return null;
-	}
-
-	public long getFileSize() {
-		return 0;
-	}
-
-	public boolean isRunning() {
-		return false;
-	}
-
-	public boolean isFinished() {
-		return true;
-	}
-
-	public String getPath() {
-		return null;
-	}
-
-	public int getAttempt() {
-		return -1;
-	}
-
-	public boolean isSuccessful() {
-		return successful;
-	}
-
-
-	public HashMap getParameters() {
-		return null;
-	}
-
-	public boolean setParameters(HashMap parameters) {
-		return true;
-	}
-
-	public boolean isPersistent() {
-		return false;
-	}
-
-	public String getIdentifier() {
-		return null;
-	}
 }
 

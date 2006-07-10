@@ -201,6 +201,9 @@ public class Core implements Observer {
 
 			FCPWatchGlobal watchGlobal = new FCPWatchGlobal(true);
 			watchGlobal.start(queueManager);
+
+			FCPListPersistentRequests listPersistent = new FCPListPersistentRequests();
+			listPersistent.start(queueManager);
 		}
 
 		return true;

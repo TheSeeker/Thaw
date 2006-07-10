@@ -8,7 +8,15 @@ import java.util.HashMap;
  */
 public interface FCPTransferQuery extends FCPQuery {
 
-
+	/**
+	 * Used by the QueueManager only.
+	 * Currently these priority are the same
+	 * as FCP priority, but it can change in the
+	 * future.
+	 * -1 = No priority
+	 * Always between -1 and 6.
+	 */
+	public int getThawPriority();
 	
 	/**
 	 * Informal.

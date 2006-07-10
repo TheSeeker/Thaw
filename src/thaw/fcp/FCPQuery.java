@@ -18,16 +18,6 @@ public interface FCPQuery {
 	public boolean stop(FCPQueueManager queueManager);
 
 	/**
-	 * Used by the QueueManager only.
-	 * Currently these priority are the same
-	 * as FCP priority, but it can change in the
-	 * future.
-	 * -1 = No priority
-	 * Always between -1 and 6.
-	 */
-	public int getThawPriority();
-
-	/**
 	 * Tell if the query is a download query or an upload query.
 	 * If >= 1 then *must* be Observable and implements FCPTransfertQuery.
 	 * @return 0 : Meaningless ; 1 : Download ; 2 : Upload ; >= 2 : ?
