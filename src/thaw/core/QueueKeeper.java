@@ -180,6 +180,10 @@ public class QueueKeeper {
 		return queryEl;
 	}
 	
+
+	/**
+	 * TODO : Queries which are persistent should not be save. They should be taken from the queue node.
+	 */
 	public static boolean saveQueue(FCPQueueManager queueManager, String fileName) {
 		Vector runningQueue = queueManager.getRunningQueue();
 		Vector[] pendingQueue = queueManager.getPendingQueues();

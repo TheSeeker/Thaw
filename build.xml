@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<project name="Thaw" default="compile">
+<project name="Thaw" default="jar">
 
   <property name="src.dir" value="src" />
   <property name="bin.dir" value="build" />

@@ -4,6 +4,11 @@ package thaw.core;
 import java.util.Observer;
 import java.util.Observable;
 
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
+
 import thaw.i18n.I18n;
 import thaw.fcp.*;
 
@@ -22,6 +27,8 @@ public class Core implements Observer {
 	private FCPQueueManager queueManager = null;
 
 	private FCPClientHello clientHello = null;
+
+	private static String lookAndFeel = null;
 
 
 	/**
@@ -213,10 +220,45 @@ public class Core implements Observer {
 		return clientHello;
 	}
 
+	
+	/**
+	 * To call before initGraphics() !
+	 * @arg lAndF LookAndFeel name
+	 */
+	public static void setLookAndFeel(String lAndF) {
+		lookAndFeel = lAndF;
+	}
+
+
+	/**
+	 * This method sets the look and feel specified with setLookAndFeel().
+	 * If none was specified, the System Look and Feel is set.
+	 */
+	private void initializeLookAndFeel() { /* non static, else I can't call correctly Logger functions */
+
+		JFrame.setDefaultLookAndFeelDecorated(false); /* Don't touch my window decoration ! */
+		JDialog.setDefaultLookAndFeelDecorated(false);
+
+		try {
+			if (lookAndFeel == null) {
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			} else {
+				UIManager.setLookAndFeel(lookAndFeel);
+			}
+		} catch (Exception e) {
+			Logger.warning(this, "Exception while setting the L&F : " + e.getMessage());
+			Logger.warning(this, "Using the default lookAndFeel");
+		}
+
+	}
+
+
 	/**
 	 * Init graphics.
 	 */
 	public boolean initGraphics() {
+		initializeLookAndFeel();
+
 		mainWindow = new MainWindow(this);
 
 		configWindow = new ConfigWindow(this);
