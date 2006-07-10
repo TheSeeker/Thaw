@@ -148,7 +148,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			fileSize = (new Long(message.getValue("DataLength"))).longValue();
 
 			
-			if(globalQueue) {
+			if(isPersistent() && !isFinished()) {
 				FCPMessage getRequestStatus = new FCPMessage();
 				
 				getRequestStatus.setMessageName("GetRequestStatus");
@@ -160,6 +160,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				getRequestStatus.setValue("OnlyData", "true");
 				
 				queueManager.getQueryManager().writeMessage(getRequestStatus);
+
 			}
 			
 
@@ -254,20 +255,36 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			status = "Writing";
 
-			if(fetchDirectly(fileSize)) {
+			//queueManager.getQueryManager().getConnection().lockWriting();
+
+
+			if(fetchDirectly(fileSize, true)) {
 				successful = true;
 				status = "Available";
+			} else {
+				Logger.warning(this, "Unable to fetch correctly the file. This may create problems on socket");
 			}
+
+			//queueManager.getQueryManager().getConnection().unlockWriting();
 			
 			running = false;
 			progress = 100;
 
 			queueManager.getQueryManager().deleteObserver(this);
 
+			if(isPersistent())
+				removePersistent();
+
+			setChanged();
+			notifyObservers();
+			
+
 			return;
 		}
 
 		if(message.getMessageName().equals("PersistentGet")) {			
+			Logger.debug(this, "PersistentGet !");
+			
 			status = "Fetching";
 			return;
 		}
@@ -277,21 +294,27 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	}
 
 
-	public boolean fetchDirectly(long size) {
+	public boolean fetchDirectly(long size, boolean reallyWrite) {
 		FCPConnection connection;
+
 		File newFile = new File(getPath());
-		FileOutputStream fileWriter;
+		FileOutputStream fileWriter = null;
+
 
 		connection = queueManager.getQueryManager().getConnection();
 
-		Logger.info(this, "Writing file to disk ...");
-
-		try {
-			fileWriter = new FileOutputStream(newFile);
-		} catch(java.io.IOException e) {
-			Logger.error(this, "Unable to write file on disk ... perms ? : "+e.toString());
-			status = "Write error";
-			return false;
+		if(reallyWrite) {
+			Logger.info(this, "Writing file to disk ...");
+			
+			try {
+				fileWriter = new FileOutputStream(newFile);
+			} catch(java.io.IOException e) {
+				Logger.error(this, "Unable to write file on disk ... perms ? : "+e.toString());
+				status = "Write error";
+				return false;
+			}
+		} else {
+			Logger.info(this, "File is supposed already written. Not rewriting.");
 		}
 
 		/* size == bytes remaining on socket */
@@ -313,27 +336,47 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				break;
 			}
 
-			try {
-				fileWriter.write(read, 0, amount);
-			} catch(java.io.IOException e) {
-				Logger.error(this, "Unable to write file on disk ... out of space ? : "+e.toString());
-				status = "Write error";
-				return false;
+			if(reallyWrite) {
+				try {
+					fileWriter.write(read, 0, amount);
+				} catch(java.io.IOException e) {
+					Logger.error(this, "Unable to write file on disk ... out of space ? : "+e.toString());
+					status = "Write error";
+					return false;
+				}
 			}
 			
 			size = size - amount;
 			
 		}
 
-		try {
-			fileWriter.close();
-		} catch(java.io.IOException e) {
-			Logger.notice(this, "Unable to close correctly file on disk !? : "+e.toString());
+		if(reallyWrite) {
+			try {
+				fileWriter.close();
+			} catch(java.io.IOException e) {
+				Logger.notice(this, "Unable to close correctly file on disk !? : "+e.toString());
+			}
 		}
 
 		Logger.info(this, "File written");
 
 		return true;
+	}
+
+	
+	private void removePersistent() {
+		FCPMessage stopMessage = new FCPMessage();
+		
+		stopMessage.setMessageName("RemovePersistentRequest");
+		
+		if(globalQueue)
+			stopMessage.setValue("Global", "true");
+		else
+			stopMessage.setValue("Global", "false");
+		
+		stopMessage.setValue("Identifier", identifier);
+			
+		queueManager.getQueryManager().writeMessage(stopMessage);
 	}
 
 
@@ -346,18 +389,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		}
 		
 		if(isPersistent()) {
-			FCPMessage stopMessage = new FCPMessage();
-
-			stopMessage.setMessageName("RemovePersistentRequest");
-
-			if(globalQueue)
-				stopMessage.setValue("Global", "true");
-			else
-				stopMessage.setValue("Global", "false");
-
-			stopMessage.setValue("Identifier", identifier);
-			
-			queueManager.getQueryManager().writeMessage(stopMessage);
+			removePersistent();
 		} else {
 			Logger.warning(this, "Can't stop a non-persistent query, will continue in background ...");
 			return false;
@@ -404,6 +436,10 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	public int getAttempt() {
 		return attempt;
+	}
+
+	public void setAttempt(int x) {
+		attempt = x;
 	}
 
 	public int getMaxAttempt() {

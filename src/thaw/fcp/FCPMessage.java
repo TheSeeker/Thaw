@@ -55,6 +55,11 @@ public class FCPMessage {
 
 			String[] affectation = lines[i].split("=");
 			
+			if(affectation.length < 2) {
+				Logger.notice(this, "Malformed message");
+				continue;
+			}
+
 			setValue(affectation[0], affectation[1]);
 		}
 

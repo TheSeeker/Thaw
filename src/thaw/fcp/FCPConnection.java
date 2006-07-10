@@ -29,6 +29,10 @@ public class FCPConnection extends Observable {
 
 	private BufferedInputStream reader = null;
 
+	private long rawBytesWaiting = 0;
+
+	private boolean lockWriting = false;
+
 	/** If == 1, then will print on stdout
 	 * all fcp input / output.
 	 */
@@ -141,9 +145,27 @@ public class FCPConnection extends Observable {
 			return socket.isConnected();
 	}
 
+
+	public void lockWriting() {
+		lockWriting = true;
+	}
 	
+	public void unlockWriting() {
+		lockWriting = false;
+	}
+
 
 	public synchronized boolean write(String toWrite) {
+
+		while(lockWriting) {
+			Logger.verbose(this, "Writting lock, unable to write.");
+			try {
+				Thread.sleep(200);
+			} catch(java.lang.InterruptedException e) {
+				/* On s'en fout, mais alors d'une force ... */
+			}
+		}
+
 		Logger.asIt(this, "Thaw >>> Node :");
 		Logger.asIt(this, toWrite);
 
@@ -162,14 +184,32 @@ public class FCPConnection extends Observable {
 		return true;
 	}
 
+	/**
+	 * For security : FCPQueryManager uses this function to tells FCPConnection
+	 * how many raw bytes are waited (to avoid to *serious* problems).
+	 */
+	public void setRawDataWaiting(long waiting) {
+		rawBytesWaiting = waiting;
+	}
 
-	public int read(int lng, byte[] buf) {
-		
+	/**
+	 * @param lng Obsolete.
+	 */
+	public synchronized int read(int lng, byte[] buf) {
+		int rdBytes = 0;
 		try {
-			return reader.read(buf);
+			rdBytes = reader.read(buf);
+
+			rawBytesWaiting = rawBytesWaiting - rdBytes;
+
+			Logger.verbose(this, "Remaining: "+rawBytesWaiting);
+
+			return rdBytes;
 		} catch(java.io.IOException e) {
-			Logger.warning(this, "IOException while reading on socket");
-			return -1;
+			Logger.error(this, "IOException while reading raw bytes on socket, will probably cause troubles");
+			Logger.error(this, e.getMessage() + ":" +e.getCause());
+			System.exit(3);
+			return -2; /* -1 can mean eof */
 		}
 
 	}
@@ -179,6 +219,28 @@ public class FCPConnection extends Observable {
 	 * @return null if disconnected or error
 	 */
 	public String readLine() {
+
+		/* SECURITY */
+		if(rawBytesWaiting > 0) {
+			Logger.error(this, "RAW BYTES STILL WAITING ON SOCKET. THIS IS ABNORMAL.");
+			Logger.error(this, "Will drop them.");
+			
+			while(rawBytesWaiting > 0) {
+				int to_read = 1024;
+				
+				if(to_read > rawBytesWaiting)
+					to_read = (int)rawBytesWaiting;
+
+				byte[] read = new byte[to_read];
+				read(to_read, read);
+
+				rawBytesWaiting = rawBytesWaiting - to_read;
+			}
+
+		}
+
+
+
 		String result;
 		
 		if(in != null && reader != null && socket != null && socket.isConnected()) {
@@ -206,7 +268,11 @@ public class FCPConnection extends Observable {
 					
 				}
 
-				Logger.asIt(this, "Thaw <<< Node : "+result);
+
+				if(result.matches("[- \\?.a-zA-Z0-9,~%@/_=]*"))				
+					Logger.asIt(this, "Thaw <<< Node : "+result);
+				else
+					Logger.error(this, "PROBABLE RAW MESSAGE. ABNORMAL.");
 				
 				return result;
 

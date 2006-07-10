@@ -36,6 +36,7 @@ public class DetailPanel implements Observer {
 	private JTextField path       = new JTextField();
 	private JTextField priority   = new JTextField();
 	private JTextField attempt    = new JTextField();
+	private JTextField identifier = new JTextField();
 
 	private FCPTransferQuery query = null;
 
@@ -56,7 +57,9 @@ public class DetailPanel implements Observer {
 					I18n.getMessage("thaw.common.key"),
 					I18n.getMessage("thaw.common.localPath"),
 					I18n.getMessage("thaw.common.priority"),
-					I18n.getMessage("thaw.common.try")+" #" };
+					I18n.getMessage("thaw.common.try")+" #",
+					I18n.getMessage("thaw.common.identifier")
+		};
 
 		subPanel.setLayout(new GridLayout(fieldNames.length*2, 1));
 
@@ -81,6 +84,7 @@ public class DetailPanel implements Observer {
 				case(5): field = path; path.setEditable(false); break;
 				case(6): field = priority; priority.setEditable(false); break;
 				case(7): field = attempt; attempt.setEditable(false); break;
+				case(8): field = identifier; identifier.setEditable(false); break;
 				default: Logger.error(this, "Gouli goula ? ... is going to crash :p"); break;
 				}
 
@@ -126,10 +130,15 @@ public class DetailPanel implements Observer {
 			else
 				progress.setString("FAILED");
 			status.setText(query.getStatus());
+			if(query.getIdentifier() != null)
+				identifier.setText(query.getIdentifier());
+			else
+				identifier.setText("N/A");
 		} else {
 			progress.setValue(0);
 			progress.setString("");
 			status.setText("");
+			identifier.setText("");
 		}
 	}
 

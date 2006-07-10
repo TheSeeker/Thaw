@@ -79,7 +79,8 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		return false;
 	}
 
-	public void resetTable() {
+	public synchronized void resetTable() {
+
 		if(queries != null) {
 			for(Iterator it = queries.iterator();
 			    it.hasNext();) {
@@ -93,7 +94,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		notifyObservers();
 	}
 
-	public void addQuery(FCPTransferQuery query) {
+	public synchronized void addQuery(FCPTransferQuery query) {
 		((Observable)query).addObserver(this);
 		
 		queries.add(query);
@@ -101,7 +102,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		notifyObservers();
 	}
 
-	public void removeQuery(FCPTransferQuery query) {
+	public synchronized void removeQuery(FCPTransferQuery query) {
 		((Observable)query).deleteObserver(this);
 
 		queries.remove(query);
@@ -110,8 +111,27 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 
 
-	public FCPTransferQuery getQuery(int row) {
-		return (FCPTransferQuery)queries.get(row);
+	public synchronized FCPTransferQuery getQuery(int row) {
+		try {
+			return (FCPTransferQuery)queries.get(row);
+		} catch(java.lang.ArrayIndexOutOfBoundsException e) {
+			Logger.notice(this, "Query not found, row: "+row);
+			return null;
+		}
+	}
+
+	/**
+	 * returns a *copy*
+	 */
+	public synchronized Vector getQueries() {
+		Vector newVect = new Vector();
+
+		for(Iterator queryIt = queries.iterator() ;
+		    queryIt.hasNext();) {
+			newVect.add(queryIt.next());
+		}
+
+		return newVect;
 	}
 
 	public void notifyObservers() {

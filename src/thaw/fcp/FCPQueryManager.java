@@ -48,8 +48,12 @@ public class FCPQueryManager extends Observable implements Runnable {
 	public FCPMessage readMessage() {
 		String whatsUp = new String("");
 		FCPMessage result = new FCPMessage();
+		boolean withData;
+		
+		withData = false;
 
 		while(true) {
+
 			String read = new String("");
 
 			read = connection.readLine();
@@ -59,7 +63,12 @@ public class FCPQueryManager extends Observable implements Runnable {
 				return null;
 			}
 
-			if(read.equals("Data") || read.equals("EndMessage")) {
+			if(read.equals("Data")) {
+				withData = true;
+				break;
+			}
+
+			if(read.equals("EndMessage")) {
 				break;
 			}
 
@@ -69,6 +78,12 @@ public class FCPQueryManager extends Observable implements Runnable {
 		Logger.verbose(this, "Parsing message ...");
 
 		result.loadFromRawMessage(whatsUp);
+
+		if(withData) {
+			long dataWaiting = (new Long(result.getValue("DataLength"))).longValue();
+			connection.setRawDataWaiting(dataWaiting);
+			Logger.info(this, "Achtung data: "+(new Long(dataWaiting)).toString());			
+		}
 
 		return result;
 	}

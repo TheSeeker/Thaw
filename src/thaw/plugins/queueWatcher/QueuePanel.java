@@ -17,6 +17,8 @@ import java.awt.Component;
 
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
@@ -33,7 +35,7 @@ import thaw.i18n.I18n;
 
 import thaw.fcp.*;
 
-public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner {
+public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner, KeyListener {
 	private Core core;
 
 	private JLabel label;
@@ -50,10 +52,12 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 	private JMenuItem removeItem;
 	private JMenuItem cancelItem;
 	private JMenuItem delayItem;
+	private JMenuItem forceRestartItem;
 	private JMenuItem copyKeysItem;
 
 	private int lastRowSelected = -1; /* Used for detail panel */
 	private int[] selectedRows;
+	private Vector queries;
 
 	private boolean insertionQueue = false;
 
@@ -88,20 +92,26 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 		tableModel.addTableModelListener(table);
 		
 		rightClickMenu = new JPopupMenu();
-		removeItem = new JMenuItem(I18n.getMessage("thaw.common.remove"));
+		removeItem = new JMenuItem(I18n.getMessage("thaw.common.removeFromTheList"));
 		cancelItem = new JMenuItem(I18n.getMessage("thaw.common.cancel"));
 		delayItem = new JMenuItem(I18n.getMessage("thaw.common.delay"));
+		forceRestartItem = new JMenuItem(I18n.getMessage("thaw.common.forceRestart"));
 		copyKeysItem = new JMenuItem(I18n.getMessage("thaw.common.copyKeysToClipboard"));
 		
 		rightClickMenu.add(removeItem);
 		rightClickMenu.add(cancelItem);
+		rightClickMenu.add(delayItem);
+		rightClickMenu.add(forceRestartItem);
 		rightClickMenu.add(copyKeysItem);
 		
 		removeItem.addActionListener(this);
 		cancelItem.addActionListener(this);
 		copyKeysItem.addActionListener(this);
+		forceRestartItem.addActionListener(this);
+		delayItem.addActionListener(this);
 
 		table.addMouseListener(this);
+		table.addKeyListener(this);
 
 		/* If a queue is already existing, we need to add it */
 		addToTable(core.getQueueManager().getRunningQueue());
@@ -207,7 +217,10 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 		String keys = "";
 
 		for(int i = 0 ; i < selectedRows.length;i++) {
-				FCPTransferQuery query = tableModel.getQuery(i);
+				FCPTransferQuery query = (FCPTransferQuery)queries.get(selectedRows[i]);
+
+				if(query == null)
+					continue;
 		
 				if(e.getSource() == removeItem) {
 					if(query.isRunning() && !query.isFinished())
@@ -229,6 +242,14 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 					}
 				}
 
+				if(e.getSource() == forceRestartItem) {
+					if(query.isRunning() && !query.isFinished())
+						query.stop(core.getQueueManager());
+
+					query.setAttempt(0);
+					query.start(core.getQueueManager());					
+				}
+
 				if(e.getSource() == copyKeysItem) {
 					keys = keys + query.getFileKey() + "\n";
 				}
@@ -242,11 +263,13 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 			Clipboard cp = tk.getSystemClipboard();
 			cp.setContents(st, this);
 		}
+
 	}
 
 	public void mouseClicked(MouseEvent e) {
 		if(e.getButton() == MouseEvent.BUTTON3) {
 			selectedRows = table.getSelectedRows();
+			queries = tableModel.getQueries();
 			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
 		}
 
@@ -275,5 +298,10 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 		/* we dont care */
 	}
 
+
+	public void keyPressed(KeyEvent e) { }
+
+	public void keyReleased(KeyEvent e) { refresh(); }
+	public void keyTyped(KeyEvent e) { }
 }
 

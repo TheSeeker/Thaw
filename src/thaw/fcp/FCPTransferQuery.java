@@ -54,6 +54,8 @@ public interface FCPTransferQuery extends FCPQuery {
 	 */
 	public int getAttempt();
 
+	public void setAttempt(int x);
+
 	/**
 	 * @return can return -1
 	 */
