@@ -1,5 +1,7 @@
 package thaw.fcp;
 
+import java.util.HashMap;
+
 public class FCPWatchGlobal implements FCPQuery {
 	private boolean watch;
 
@@ -12,6 +14,7 @@ public class FCPWatchGlobal implements FCPQuery {
 		FCPMessage message = new FCPMessage();
 
 		message.setMessageName("WatchGlobal");
+
 		if(watch)
 			message.setValue("Enabled", "true");
 		else
@@ -41,7 +44,7 @@ public class FCPWatchGlobal implements FCPQuery {
 	}
 
 	public int getProgression() {
-		return 0;
+		return 100;
 	}
 
 	public String getFileKey() {
@@ -71,4 +74,19 @@ public class FCPWatchGlobal implements FCPQuery {
 	public boolean isRunning() {
 		return false;
 	}
+
+	public HashMap getParameters() {
+		return null;
+	}
+
+	public boolean setParameters(HashMap parameters) {
+		return true;
+	}
+
+
+	public boolean isPersistent() {
+		return false;
+	}
+
+	
 }

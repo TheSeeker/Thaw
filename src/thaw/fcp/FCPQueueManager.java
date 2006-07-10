@@ -105,8 +105,14 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 		Logger.debug(this, "Adding done");
 	}
 
-
+	/**
+	 * will call start() function of the query.
+	 */
 	public void addQueryToTheRunningQueue(FCPQuery query) {
+		addQueryToTheRunningQueue(query, true);
+	}
+
+	public void addQueryToTheRunningQueue(FCPQuery query, boolean callStart) {
 		Logger.debug(this, "Adding query to the running queue ...");
 
 		runningQueries.add(query);
@@ -114,9 +120,19 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 		setChanged();
 		notifyObservers(query);
 
-		query.start(this);
+		if(callStart)
+			query.start(this);
 		
 		Logger.debug(this, "Adding done");
+	}
+
+
+	
+	/**
+	 * *Doesn't* call stop() from the query.
+	 */
+	public void moveFromRunningToPendingQueue(FCPQuery query) {
+		/* TODO */
 	}
 
 	
@@ -274,7 +290,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 			lastId = 0;
 		}
 
-		return (thawId+"-"+(new Integer(lastId)).toString());
+		return (thawId+"_"+(new Integer(lastId)).toString());
 	}
 
 }

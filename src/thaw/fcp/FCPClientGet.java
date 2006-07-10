@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.util.Observer;
 import java.util.Observable;
 
+import java.util.HashMap;
+
 import thaw.core.Logger;
 
 /**
@@ -27,13 +29,27 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 	private int attempt = 0;
 	private String status;
 
-	private String id;
+	private String identifier;
 
 	private int progress; /* in pourcent */
 	private long fileSize;
 
 	private boolean running = false;
 	private boolean successful = false;
+
+	/**
+	 * See setParameters().
+	 */
+	public FCPClientGet(FCPQueueManager queueManager, HashMap parameters) {
+		this.queueManager = queueManager;
+		setParameters(parameters);
+
+		if(progress != 100 && identifier != null && !identifier.equals("")) {
+			this.queueManager.getQueryManager().deleteObserver(this);
+			this.queueManager.getQueryManager().addObserver(this);
+		}
+	}
+
 
 	/**
 	 * @param persistence 0 = Forever ; 1 = Until node reboot ; 2 = Until the app disconnect
@@ -76,7 +92,8 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 
 		status = "Requesting";
 
-		this.id = queueManager.getAnID();
+		if(this.identifier == null || this.identifier.equals(""))
+			this.identifier = queueManager.getAnID();
 
 		Logger.info(this, "Requesting key : "+getFileKey());
 
@@ -84,7 +101,7 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 
 		queryMessage.setMessageName("ClientGet");
 		queryMessage.setValue("URI", getFileKey());
-		queryMessage.setValue("Identifier", id);
+		queryMessage.setValue("Identifier", identifier);
 		queryMessage.setValue("Verbosity", "1");
 		queryMessage.setValue("MaxRetries", "0");
 		queryMessage.setValue("PriorityClass", (new Integer(priority)).toString());
@@ -103,6 +120,7 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 
 		queryMessage.setValue("ReturnType", "direct");
 
+		queueManager.getQueryManager().deleteObserver(this);
 		queueManager.getQueryManager().addObserver(this);
 
 		queueManager.getQueryManager().writeMessage(queryMessage);
@@ -115,7 +133,7 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 		FCPMessage message = (FCPMessage)arg;
 
 		if(message.getValue("Identifier") == null
-		   || !message.getValue("Identifier").equals(id))
+		   || !message.getValue("Identifier").equals(identifier))
 			return;
 
 
@@ -130,7 +148,7 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 				FCPMessage getRequestStatus = new FCPMessage();
 				
 				getRequestStatus.setMessageName("GetRequestStatus");
-				getRequestStatus.setValue("Identifier", id);
+				getRequestStatus.setValue("Identifier", identifier);
 				if(globalQueue)
 					getRequestStatus.setValue("Global", "true");
 				else
@@ -150,6 +168,7 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 		if(message.getMessageName().equals("IdentifierCollision")) {
 			Logger.notice(this, "IdentifierCollision ! Resending with another id");
 
+			identifier = null;
 			start(queueManager);
 			
 			setChanged();
@@ -176,15 +195,18 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 		if(message.getMessageName().equals("GetFailed")) {
 			Logger.debug(this, "GetFailed !");
 
+			int code = ((new Integer(message.getValue("Code"))).intValue());
+
 			attempt++;
 
-			if(attempt >= MAX_RETRIES) {
+			if(attempt >= MAX_RETRIES || code == 25) {
 			    status = "Failed";
 			    progress = 100;
 			    running = false;
 			    queueManager.getQueryManager().deleteObserver(this);
 			} else {
 			    status = "Retrying";
+			    start(queueManager);
 			}
 
 			setChanged();
@@ -217,6 +239,8 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 
 		if(message.getMessageName().equals("AllData")) {
 			Logger.debug(this, "AllData !");
+
+			progress = 98;
 
 			status = "Loading";
 
@@ -360,4 +384,60 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 	public boolean isRunning() {
 		return running;
 	}
+
+	public HashMap getParameters() {
+		HashMap result = new HashMap();
+
+		result.put("key", key);
+		result.put("filename", filename);
+		result.put("priority", ((new Integer(priority)).toString()));
+		result.put("persistence", ((new Integer(persistence)).toString()));
+		result.put("globalQueue", ((new Boolean(globalQueue)).toString()));
+		result.put("destinationDir", destinationDir);
+		result.put("attempt", ((new Integer(attempt)).toString()));
+		result.put("status", status);
+		result.put("identifier", identifier);
+		result.put("progress", ((new Integer(progress)).toString()));
+		result.put("fileSize", ((new Long(fileSize)).toString()));
+		result.put("running", ((new Boolean(running)).toString()));
+		result.put("successful", ((new Boolean(successful)).toString()));
+
+		return result;
+	}
+
+	public boolean setParameters(HashMap parameters) {
+		
+		key            = (String)parameters.get("key");
+
+		Logger.debug(this, "Resuming key : "+key);
+
+		filename       = (String)parameters.get("filename");
+		priority       = ((new Integer((String)parameters.get("priority"))).intValue());
+		persistence    = ((new Integer((String)parameters.get("persistence"))).intValue());
+		globalQueue    = ((new Boolean((String)parameters.get("globalQueue"))).booleanValue());
+		destinationDir = (String)parameters.get("destinationDir");
+		attempt        = ((new Integer((String)parameters.get("attempt"))).intValue());
+		status         = (String)parameters.get("status");
+		identifier     = (String)parameters.get("identifier");
+
+		Logger.info(this, "Resuming id : "+identifier);
+
+		progress       = ((new Integer((String)parameters.get("progress"))).intValue());
+		fileSize       = ((new Long((String)parameters.get("fileSize"))).longValue());
+		running        = ((new Boolean((String)parameters.get("running"))).booleanValue());
+		successful     = ((new Boolean((String)parameters.get("successful"))).booleanValue());
+
+		if(persistence == 2) {
+			progress = 0;
+			status = "Waiting";
+		}
+
+		return true;
+	}
+
+
+	public boolean isPersistent() {
+		return (persistence < 2);
+	}
+
 }

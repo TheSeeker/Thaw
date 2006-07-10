@@ -1,5 +1,7 @@
 package thaw.fcp;
 
+import java.util.HashMap;
+
 /**
  * This interface was designed for file query (insertions / downloads)
  * but it's used sometimes for other things.
@@ -81,4 +83,19 @@ public interface FCPQuery {
 	 * Query is considered as a failure is isFinished() && !isSuccesful()
 	 */
 	public boolean isSuccessful();
+
+	/**
+	 * Use to save the query in an XML file / a database / whatever.
+	 * @return A HashMap : String (parameter name) -> String (parameter value) or null.
+	 */
+	public HashMap getParameters();
+
+	/**
+	 * Opposite of getParameters().
+	 * @return true if successful (or ignored) ; false if not.
+	 */
+	public boolean setParameters(HashMap parameters);
+
+
+	public boolean isPersistent();
 }

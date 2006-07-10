@@ -2,6 +2,7 @@ package thaw.fcp;
 
 import java.util.Observer;
 import java.util.Observable;
+import java.util.HashMap;
 
 import thaw.core.Logger;
 
@@ -188,5 +189,17 @@ public class FCPClientHello implements FCPQuery, Observer {
 		return successful;
 	}
 
+
+	public HashMap getParameters() {
+		return null;
+	}
+
+	public boolean setParameters(HashMap parameters) {
+		return true;
+	}
+
+	public boolean isPersistent() {
+		return false;
+	}
 }
 

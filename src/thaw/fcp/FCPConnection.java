@@ -185,8 +185,6 @@ public class FCPConnection extends Observable {
 			try {
 				result = "";
 				
-				/* result = reader.readLine(); */
-				
 				int c = 0;
 
 				while(c != '\n') {

@@ -269,7 +269,7 @@ public class Config {
 			return false;
 		}
 
-		serializer.setOutputProperty(OutputKeys.ENCODING,"ISO-8859-15");
+		serializer.setOutputProperty(OutputKeys.ENCODING,"UTF-8");
 		serializer.setOutputProperty(OutputKeys.INDENT,"yes");
 		
 		/* final step */
@@ -295,9 +295,9 @@ public class Config {
 	public void setDefaultValues() {
 		setValue("nodeAddress", "127.0.0.1");	
 		setValue("nodePort", "9481");
-		setValue("maxSimultaneousDownloads", "5");
+		setValue("maxSimultaneousDownloads", "10");
 		setValue("maxSimultaneousInsertions", "2");
-		setValue("thawId", "thaw-"+(new Integer((new Random()).nextInt(1000))).toString());
+		setValue("thawId", "thaw_"+(new Integer((new Random()).nextInt(1000))).toString());
 	}
 
 }

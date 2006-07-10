@@ -82,6 +82,9 @@ public class Core implements Observer {
 		if(!initPluginManager())
 			return false;
 
+		if(!restorePreviousState())
+			return false;
+
 		mainWindow.setStatus(I18n.getMessage("thaw.statusBar.ready"));
 
 		mainWindow.setVisible(true);
@@ -147,22 +150,21 @@ public class Core implements Observer {
 				
 				clientHello = new FCPClientHello(queryManager, config.getValue("thawId"));
 
+				queueManager = new FCPQueueManager(queryManager,
+								   config.getValue("thawId"),
+								   (new Integer(config.getValue("maxSimultaneousDownloads"))).intValue(),
+								   (new Integer(config.getValue("maxSimultaneousInsertions"))).intValue());
+				
 				if(!clientHello.start(null)) {
 					new WarningWindow(this, I18n.getMessage("thaw.error.idAlreadyUsed"));
+					connection.disconnect();
 				} else {
 					Logger.debug(this, "Hello successful");
 					Logger.debug(this, "Node name    : "+clientHello.getNodeName());
 					Logger.debug(this, "FCP  version : "+clientHello.getNodeFCPVersion());
 					Logger.debug(this, "Node version : "+clientHello.getNodeVersion());
 					
-					queueManager = new FCPQueueManager(queryManager,
-									   config.getValue("thawId"),
-									   (new Integer(config.getValue("maxSimultaneousDownloads"))).intValue(),
-									   (new Integer(config.getValue("maxSimultaneousInsertions"))).intValue());
 					queueManager.startScheduler();
-
-					FCPWatchGlobal watchGlobal = new FCPWatchGlobal(true);
-					watchGlobal.start(queueManager);					
 
 				}
 								   
@@ -183,6 +185,17 @@ public class Core implements Observer {
 		return true;
 	}
 
+
+	public boolean restorePreviousState() {
+		if(connection.isConnected()) {
+			QueueKeeper.loadQueue(queueManager, "thaw.queue.xml");
+
+			FCPWatchGlobal watchGlobal = new FCPWatchGlobal(true);
+			watchGlobal.start(queueManager);
+		}
+
+		return true;
+	}
 	
 	public FCPConnection getConnectionManager() {
 		return connection;
@@ -242,6 +255,9 @@ public class Core implements Observer {
 		Logger.info(this, "Disconnecting ...");
 		connection.deleteObserver(this);
 		connection.disconnect();
+
+		Logger.info(this, "Saving queue state ...");
+		QueueKeeper.saveQueue(queueManager, "thaw.queue.xml");
 
 		Logger.info(this, "Saving configuration ...");
 		if(!config.saveConfig()) {
