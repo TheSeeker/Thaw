@@ -94,15 +94,8 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 
 	public void addQuery(FCPQuery query) {
-		JProgressBar bar;
-
 		((Observable)query).addObserver(this);
 		
-		bar = new JProgressBar(0, 100);
-		bar.setStringPainted(true);
-		bar.setString((new Integer(query.getProgression())).toString()+"%");
-		bar.setValue(query.getProgression());
-
 		queries.add(query);
 
 		notifyObservers();

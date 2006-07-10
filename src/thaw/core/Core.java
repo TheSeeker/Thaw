@@ -154,13 +154,16 @@ public class Core implements Observer {
 
 			if(connection.isConnected()) {
 				queryManager.startListening();
-				
-				clientHello = new FCPClientHello(queryManager, config.getValue("thawId"));
 
 				queueManager = new FCPQueueManager(queryManager,
 								   config.getValue("thawId"),
 								   (new Integer(config.getValue("maxSimultaneousDownloads"))).intValue(),
 								   (new Integer(config.getValue("maxSimultaneousInsertions"))).intValue());
+
+				QueueKeeper.loadQueue(queueManager, "thaw.queue.xml");
+
+
+				clientHello = new FCPClientHello(queryManager, config.getValue("thawId"));
 				
 				if(!clientHello.start(null)) {
 					new WarningWindow(this, I18n.getMessage("thaw.error.idAlreadyUsed"));
@@ -195,7 +198,7 @@ public class Core implements Observer {
 
 	public boolean restorePreviousState() {
 		if(connection.isConnected()) {
-			QueueKeeper.loadQueue(queueManager, "thaw.queue.xml");
+			queueManager.restartNonPersistent();
 
 			FCPWatchGlobal watchGlobal = new FCPWatchGlobal(true);
 			watchGlobal.start(queueManager);
@@ -236,7 +239,7 @@ public class Core implements Observer {
 	 */
 	private void initializeLookAndFeel() { /* non static, else I can't call correctly Logger functions */
 
-		JFrame.setDefaultLookAndFeelDecorated(false); /* Don't touch my window decoration ! */
+		JFrame.setDefaultLookAndFeelDecorated(false); /* Don't touch my window decorations ! */
 		JDialog.setDefaultLookAndFeelDecorated(false);
 
 		try {

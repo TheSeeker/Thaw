@@ -201,5 +201,9 @@ public class FCPClientHello implements FCPQuery, Observer {
 	public boolean isPersistent() {
 		return false;
 	}
+
+	public String getIdentifier() {
+		return null;
+	}
 }
 

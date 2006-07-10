@@ -37,6 +37,7 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 	private boolean running = false;
 	private boolean successful = false;
 
+
 	/**
 	 * See setParameters().
 	 */
@@ -44,14 +45,18 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 		this.queueManager = queueManager;
 		setParameters(parameters);
 
-		if(progress != 100 && identifier != null && !identifier.equals("")) {
+		/* If isPersistent(), then start() won't be called, so must relisten the
+		   queryManager by ourself */
+		if(isPersistent() && identifier != null && !identifier.equals("")) {
 			this.queueManager.getQueryManager().deleteObserver(this);
 			this.queueManager.getQueryManager().addObserver(this);
 		}
+		
 	}
 
 
 	/**
+	 * Only for initial queries : To resume queries, use FCPClientGet(FCPQueueManager, Hashmap).
 	 * @param persistence 0 = Forever ; 1 = Until node reboot ; 2 = Until the app disconnect
 	 */
 	public FCPClientGet(String key, int priority,
@@ -78,8 +83,6 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 			filename = cutcut[cutcut.length-1];
 		}
 
-		/* TODO : Check if the file was not already downloaded */
-		
 		Logger.debug(this, "Getting "+key);
 
 		status = "Waiting";
@@ -88,6 +91,7 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 
 	public boolean start(FCPQueueManager queueManager) {
 		running = true;
+		progress = 0;
 
 		this.queueManager = queueManager;
 
@@ -137,7 +141,6 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 		   || !message.getValue("Identifier").equals(identifier))
 			return;
 
-
 		if(message.getMessageName().equals("DataFound")) {
 			Logger.debug(this, "DataFound!");
 
@@ -184,6 +187,7 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 			status = "Protocol Error";
 			progress = 100;
 			running = false;
+			successful = false;
 
 			queueManager.getQueryManager().deleteObserver(this);
 
@@ -204,6 +208,7 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 			    status = "Failed";
 			    progress = 100;
 			    running = false;
+			    successful = false;
 			    queueManager.getQueryManager().deleteObserver(this);
 			} else {
 			    status = "Retrying";
@@ -229,7 +234,7 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 
 				status = "Fetching";
 
-				progress = (int)((succeeded * 100) / required);
+				progress = (int)((succeeded * 98) / required);
 
 				setChanged();
 				notifyObservers();
@@ -239,9 +244,9 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 		}
 
 		if(message.getMessageName().equals("AllData")) {
-			Logger.debug(this, "AllData !");
+			Logger.debug(this, "AllData ! : " + identifier);
 
-			progress = 98;
+			progress = 99;
 
 			status = "Loading";
 
@@ -262,8 +267,8 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 			return;
 		}
 
-		if(message.getMessageName().equals("PersistentGet")) {
-			/* Should not bother us */
+		if(message.getMessageName().equals("PersistentGet")) {			
+			status = "Fetching";
 			return;
 		}
 		
@@ -359,7 +364,7 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 	}
 
 	public boolean isFinished() {
-		if(progress >= 99)
+		if(progress >= 100)
 			return true;
 
 		return false;
@@ -396,7 +401,9 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 		result.put("globalQueue", ((new Boolean(globalQueue)).toString()));
 		result.put("destinationDir", destinationDir);
 		result.put("attempt", ((new Integer(attempt)).toString()));
-		result.put("status", status);
+
+		String[] cut = status.split(" ");
+		result.put("status", cut[0]);
 		result.put("identifier", identifier);
 		result.put("progress", ((new Integer(progress)).toString()));
 		result.put("fileSize", ((new Long(fileSize)).toString()));
@@ -428,10 +435,14 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 		running        = ((new Boolean((String)parameters.get("running"))).booleanValue());
 		successful     = ((new Boolean((String)parameters.get("successful"))).booleanValue());
 
-		if(persistence == 2) {
+		if(persistence == 2 && !isFinished()) {
 			progress = 0;
 			status = "Waiting";
 		}
+		
+		if(persistence < 2 && !isFinished() && identifier != null && !identifier.equals(""))
+			status = status + " (?)";
+		
 
 		return true;
 	}
@@ -441,4 +452,11 @@ public class FCPClientGet extends Observable implements Observer, FCPQuery {
 		return (persistence < 2);
 	}
 
+
+	public String getIdentifier() {
+		if(identifier == null || identifier.equals(""))
+			return null;
+
+		return identifier;
+	}
 }

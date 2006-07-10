@@ -88,5 +88,7 @@ public class FCPWatchGlobal implements FCPQuery {
 		return false;
 	}
 
-	
+	public String getIdentifier() {
+		return null;
+	}
 }

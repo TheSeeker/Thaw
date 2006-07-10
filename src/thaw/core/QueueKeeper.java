@@ -53,8 +53,6 @@ public class QueueKeeper {
 			if(param != null && param.getNodeType() == Node.ELEMENT_NODE) {
 				Element paramEl = (Element)param;
 
-				Logger.verbose(new QueueKeeper(), paramEl.getAttribute("name") + "=>" + paramEl.getAttribute("value"));
-
 				params.put(paramEl.getAttribute("name"),
 					   paramEl.getAttribute("value"));
 			}
@@ -72,9 +70,6 @@ public class QueueKeeper {
 			queueManager.addQueryToTheRunningQueue(newQuery, false);
 		else
 			queueManager.addQueryToThePendingQueue(newQuery);
-
-		if(runningQueue && !newQuery.isPersistent() && !newQuery.isFinished()) /* We restart */
-			newQuery.start(queueManager);
 
 	}
 
@@ -181,9 +176,6 @@ public class QueueKeeper {
 	}
 	
 
-	/**
-	 * TODO : Queries which are persistent should not be save. They should be taken from the queue node.
-	 */
 	public static boolean saveQueue(FCPQueueManager queueManager, String fileName) {
 		Vector runningQueue = queueManager.getRunningQueue();
 		Vector[] pendingQueue = queueManager.getPendingQueues();

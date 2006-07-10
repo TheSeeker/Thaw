@@ -5,6 +5,7 @@ import java.util.HashMap;
 /**
  * This interface was designed for file query (insertions / downloads)
  * but it's used sometimes for other things.
+ * TODO : Simplify this interface and create an interface FCPTransferQuery extending this one.
  */
 public interface FCPQuery {
 
@@ -98,4 +99,9 @@ public interface FCPQuery {
 
 
 	public boolean isPersistent();
+
+	/**
+	 * @return can be null (if non active, or meaningless).
+	 */
+	public String getIdentifier();
 }

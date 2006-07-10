@@ -9,6 +9,7 @@ import javax.swing.JProgressBar;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.util.Vector;
+import java.util.Iterator;
 
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.Color;
@@ -28,6 +29,7 @@ public class QueuePanel implements MouseListener {
 	private JLabel label;
 
 	private JTable table = null;
+	private JScrollPane scrollPane = null;
 
 	private JPanel panel;
 
@@ -36,7 +38,12 @@ public class QueuePanel implements MouseListener {
 
 	private int lastRowSelected = -1;
 
+	private boolean insertionQueue = false;
+
+
 	public QueuePanel(Core core, DetailPanel detailPanel, boolean isForInsertionQueue) {
+		insertionQueue = isForInsertionQueue;
+
 		this.core = core;
 		this.detailPanel = detailPanel;
 		
@@ -56,12 +63,21 @@ public class QueuePanel implements MouseListener {
 		panel.setLayout(new BorderLayout());
 
 		panel.add(label, BorderLayout.NORTH);
-		panel.add(new JScrollPane(table), BorderLayout.CENTER);
+		scrollPane = new JScrollPane(table);
+		panel.add(scrollPane, BorderLayout.CENTER);
 
 		table.setDefaultRenderer( table.getColumnClass(0), new ProgressRenderer(table, tableModel) );
 
 		tableModel.addTableModelListener(table);
 		table.addMouseListener(this);
+
+		/* If a queue is already existing, we need to add it */
+		addToTable(core.getQueueManager().getRunningQueue());
+
+		Vector[] pendingQueues = core.getQueueManager().getPendingQueues();
+		for(int i = 0 ; i < pendingQueues.length ; i++) {
+			addToTable(pendingQueues[i]);
+		}
 	}
 
 
@@ -115,9 +131,27 @@ public class QueuePanel implements MouseListener {
 		tableModel.resetTable();
 	}
 
+
+
 	public void addToTable(FCPQuery query) {
-		tableModel.addQuery(query);
+		if( (insertionQueue && query.getQueryType() == 2)
+		    || (!insertionQueue && query.getQueryType() == 1))
+			tableModel.addQuery(query);
 	}
+
+	/**
+	 * @param queries Vector of FCPQuery only
+	 */
+	public void addToTable(Vector queries) {
+		for(Iterator queryIt = queries.iterator();
+		    queryIt.hasNext();) {
+			
+			FCPQuery query = (FCPQuery)queryIt.next();
+
+			addToTable(query);
+		}
+	}
+
 
 	public void refresh() {
 		int selected = table.getSelectedRow();

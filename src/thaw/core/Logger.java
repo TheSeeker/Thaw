@@ -16,7 +16,7 @@ public class Logger {
 	 * 5 = [...] + horrible things that only God could understand easily.
 	 *             (or maybe someone having the FCPv2 doc :)
 	 *
-	 * 3 or more is recommanded.
+	 * 2 or more is recommanded.
 	 * 5 is never logged in a file, only on stdout.
 	 */
 	private final static int LOG_LEVEL = 5;

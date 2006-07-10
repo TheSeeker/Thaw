@@ -64,15 +64,12 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 
 
 	/**
-	 * Will purge the current known queue, and reload the queue according to the node.
-	 * Assume you have already called FCPConnection.connect().
+	 * Will purge the current known queue.
 	 */
 	public void resetQueue() {
 		runningQueries = new Vector();
 		for(int i = 0; i <= PRIORITY_MIN ; i++)
 			pendingQueries[i] = new Vector();
-		
-		/* TODO */
 	}
 
 
@@ -115,6 +112,20 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 	public void addQueryToTheRunningQueue(FCPQuery query, boolean callStart) {
 		Logger.debug(this, "Adding query to the running queue ...");
 
+		if(!callStart) {
+			/* It's a resumed query => We to adapt the next Id 
+			 * to avoid collisions.
+			 */
+
+			/* FIXME (not urgent) : Find a cleaner / safer way. */
+			String[] subId = query.getIdentifier().split("_");
+			int id = ((new Integer(subId[subId.length-1])).intValue());
+			
+			if(id > lastId) {
+				lastId = id;
+			}
+		}
+
 		runningQueries.add(query);
 
 		setChanged();
@@ -132,9 +143,29 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 	 * *Doesn't* call stop() from the query.
 	 */
 	public void moveFromRunningToPendingQueue(FCPQuery query) {
-		/* TODO */
+		remove(query);
+		addQueryToThePendingQueue(query);
 	}
 
+
+	/**
+	 * Restart non-persistent and non-finished queries being in the runninQueue.
+	 * Usefull to restart these query when thaw just start.
+	 */
+	public  void restartNonPersistent() {
+		Logger.info(this, "Restarting non persistent query");
+
+		for(Iterator queryIt = getRunningQueue().iterator() ;
+		    queryIt.hasNext();) {
+			FCPQuery query = (FCPQuery)queryIt.next();
+
+			if(!query.isPersistent() && !query.isFinished())
+				query.start(this);
+		}
+
+		Logger.info(this, "Restart done.");
+		    
+	}
 	
 	public void remove(FCPQuery query) {
 		runningQueries.remove(query);

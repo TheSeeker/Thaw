@@ -50,7 +50,9 @@ public class FetchPlugin implements thaw.core.Plugin {
 			       String destination) {
 
 		for(int i = 0 ; i < keys.length ; i++) {
-			core.getQueueManager().addQueryToThePendingQueue(new FCPClientGet(keys[i],
+			String[] subKey = keys[i].split("\\?"); /* Because of VolodyA :p */
+
+			core.getQueueManager().addQueryToThePendingQueue(new FCPClientGet(subKey[0],
 											  priority,
 											  persistence,
 											  globalQueue,
