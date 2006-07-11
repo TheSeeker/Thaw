@@ -201,6 +201,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		if(message.getMessageName().equals("GetFailed")) {
 			Logger.debug(this, "GetFailed !");
 
+			if(isPersistent())
+				removePersistent();
+
 			int code = ((new Integer(message.getValue("Code"))).intValue());
 
 			attempt++;
@@ -383,25 +386,24 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	public boolean stop(FCPQueueManager queryManager) {
 		Logger.info(this, "Stop fetching of the key : "+getFileKey());
 
-		progress = 100;
-		successful = false;
-		status = "Stopped";
-
 		if(!isRunning() || isFinished()) {
 			Logger.info(this, "Can't stop. Not running -> considered as failed");
 
 			setChanged();
 			notifyObservers();
 
-			return true;
-		}
-		
-		if(isPersistent()) {
-			removePersistent();
 		} else {
-			Logger.warning(this, "Can't stop a non-persistent query, will continue in background ...");
-			return false;
+			
+			if(isPersistent()) {
+				removePersistent();
+			} else {
+				Logger.warning(this, "Can't stop a non-persistent query, will continue in background ...");
+			}
 		}
+
+		progress = 100;
+		successful = false;
+		status = "Stopped";
 
 		setChanged();
 		notifyObservers();
@@ -451,6 +453,11 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	public void setAttempt(int x) {
 		attempt = x;
+
+		if(x == 0) {
+			/* We suppose it's a restart */
+			progress = 0;
+		}
 	}
 
 	public int getMaxAttempt() {
