@@ -7,8 +7,8 @@ import thaw.core.Logger;
 
 /**
  * This class is a generic class, able to handle all kind of FCPMessage.
- * Raw data are NOT stored inside. You have to handle them by yourself
- * (FCPConnection.getInputStream() / FCPConnection.getOutputStream())
+ * Raw data are NOT stored inside. You *have* to handle them by yourself
+ * (FCPConnection.read() / FCPConnection.write())
  * after reading / writing a message with this class.
  */
 public class FCPMessage {

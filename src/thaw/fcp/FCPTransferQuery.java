@@ -92,6 +92,7 @@ public interface FCPTransferQuery extends FCPQuery {
 
 
 	public boolean isPersistent();
+	public boolean isGlobal();
 
 	/**
 	 * @return can be null (if non active, or meaningless).

@@ -581,4 +581,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		return identifier;
 	}
+
+	public boolean isGlobal() {
+		return globalQueue;
+	}
 }

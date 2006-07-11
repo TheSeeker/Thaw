@@ -37,11 +37,13 @@ public class DetailPanel implements Observer {
 	private JTextField priority   = new JTextField();
 	private JTextField attempt    = new JTextField();
 	private JTextField identifier = new JTextField();
+	private JTextField globalQueue= new JTextField();
+	private JTextField persistence= new JTextField();
 
 	private FCPTransferQuery query = null;
 
 
-	private final static Dimension dim = new Dimension(300, 275);
+	private final static Dimension dim = new Dimension(300, 375);
 
 
 	public DetailPanel(Core core) {
@@ -58,7 +60,9 @@ public class DetailPanel implements Observer {
 					I18n.getMessage("thaw.common.localPath"),
 					I18n.getMessage("thaw.common.priority"),
 					I18n.getMessage("thaw.common.try")+" #",
-					I18n.getMessage("thaw.common.identifier")
+					I18n.getMessage("thaw.common.identifier"),
+					I18n.getMessage("thaw.common.globalQueue"),
+					I18n.getMessage("thaw.common.persistant")
 		};
 
 		subPanel.setLayout(new GridLayout(fieldNames.length*2, 1));
@@ -85,6 +89,8 @@ public class DetailPanel implements Observer {
 				case(6): field = priority; priority.setEditable(false); break;
 				case(7): field = attempt; attempt.setEditable(false); break;
 				case(8): field = identifier; identifier.setEditable(false); break;
+				case(9): field = globalQueue; globalQueue.setEditable(false); break;
+				case(10): field = persistence; persistence.setEditable(false); break;
 				default: Logger.error(this, "Gouli goula ? ... is going to crash :p"); break;
 				}
 
@@ -160,12 +166,23 @@ public class DetailPanel implements Observer {
 			key.setText(query.getFileKey());
 			path.setText(query.getPath());
 			priority.setText((new Integer(query.getThawPriority())).toString());
+			if(query.isPersistent())
+				persistence.setText(I18n.getMessage("thaw.common.yes"));
+			else
+				persistence.setText(I18n.getMessage("thaw.common.no"));
+
+			if(query.isGlobal())
+				globalQueue.setText(I18n.getMessage("thaw.common.yes"));
+			else
+				globalQueue.setText(I18n.getMessage("thaw.common.no"));
 		} else {
 			file.setText("");
 			size.setText("");
 			key.setText("");
 			path.setText("");
 			priority.setText("");
+			globalQueue.setText("");
+			persistence.setText("");
 		}
 
 	}

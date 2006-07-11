@@ -29,7 +29,7 @@ public class Main {
 		parseCommandLine(args);
 
 		core = new Core();
-		core.setLookAndFeel(lookAndFeel);
+		Core.setLookAndFeel(lookAndFeel);
 		core.initAll();
 	}
 

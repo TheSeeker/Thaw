@@ -11,12 +11,18 @@ import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import java.awt.Dimension;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.JFileChooser;
+import java.io.File;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
 
 import thaw.core.*;
 import thaw.i18n.I18n;
 
 
-public class InsertPanel {
+public class InsertPanel implements ActionListener, ItemListener {
 	private JPanel globalPanel = null;
 
 	private JPanel mainPanel;
@@ -25,7 +31,7 @@ public class InsertPanel {
 
 
 	private JLabel browseLabel;
-	private JTextField selectedFiles;
+	private JTextField selectedFiles; /* TODO: it was planned to support directory insertion */
 	private JButton browseButton;
 
 	private JLabel selectKeyLabel;
@@ -74,12 +80,13 @@ public class InsertPanel {
 
 		JPanel subSubPanel = new JPanel();
 		subSubPanel.setLayout(new GridLayout(3, 1));
-		browseLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.filesToInsert"));
+		browseLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.fileToInsert"));
 		subSubPanel.add(browseLabel);
 		selectedFiles = new JTextField(20);
-		selectedFiles.setEditable(false);
+		selectedFiles.setEditable(true);
 		subSubPanel.add(selectedFiles);
-		browseButton = new JButton(I18n.getMessage("thaw.common.selectFiles"));
+		browseButton = new JButton(I18n.getMessage("thaw.common.selectFile"));
+		browseButton.addActionListener(this);
 		subSubPanel.add(browseButton);
 
 		subPanel.add(subSubPanel);
@@ -98,6 +105,7 @@ public class InsertPanel {
 		keyRadioButtons[2] = new JRadioButton(I18n.getMessage("thaw.plugin.insert.SSK"));
 		keyRadioGroup = new ButtonGroup();
 		for(int i = 0 ; i < keyRadioButtons.length ; i++) {
+			keyRadioButtons[i].addItemListener(this);
 			keyRadioGroup.add(keyRadioButtons[i]);
 			subSubPanel.add(keyRadioButtons[i]);
 		}
@@ -224,5 +232,52 @@ public class InsertPanel {
 		return globalPanel;
 	}
 
+
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == browseButton) {
+			FileChooser fileChooser = new FileChooser();
+			File files;
+
+			fileChooser.setTitle(I18n.getMessage("thaw.common.selectFile"));
+			fileChooser.setDirectoryOnly(false);
+			fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
+			if( (files = fileChooser.askOneFile()) == null) { /* TODO: One file -> Many files */
+				Logger.info(this, "Nothing selected");
+				return;
+			}
+			
+			selectedFiles.setText(files.getPath());
+		}
+	}
+
+
+	public void itemStateChanged(ItemEvent e) {
+		if(e.getItem() == keyRadioButtons[0]
+		   && e.getStateChange() == ItemEvent.SELECTED) { /* CHK */
+			privateKeyField.setEditable(false);
+			publicKeyField.setEditable(false);
+			revField.setEditable(false);
+			nameField.setEditable(false);
+			return;
+		}
+
+		if(e.getItem() == keyRadioButtons[1]
+		   && e.getStateChange() == ItemEvent.SELECTED) { /* KSK */
+			privateKeyField.setEditable(false);
+			publicKeyField.setEditable(false);
+			revField.setEditable(true);
+			nameField.setEditable(true);
+			return;
+		}
+
+		if(e.getItem() == keyRadioButtons[2]
+		   && e.getStateChange() == ItemEvent.SELECTED) { /* SSK */
+			privateKeyField.setEditable(true);
+			publicKeyField.setEditable(true);
+			revField.setEditable(true);
+			nameField.setEditable(true);
+			return;
+		}
+	}
 }
 

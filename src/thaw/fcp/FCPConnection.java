@@ -193,6 +193,13 @@ public class FCPConnection extends Observable {
 	}
 
 	/**
+	 * @see read(int, byte[])
+	 */
+	public int read(byte[] buf) {
+		return read(buf.length, buf);
+	}
+
+	/**
 	 * @param lng Obsolete.
 	 */
 	public synchronized int read(int lng, byte[] buf) {
