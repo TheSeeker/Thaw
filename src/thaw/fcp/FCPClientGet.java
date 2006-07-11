@@ -13,7 +13,7 @@ import thaw.core.Logger;
  * notify() only when progress has really changes.
  */
 public class FCPClientGet extends Observable implements Observer, FCPTransferQuery {
-	private final static int MAX_RETRIES = 3;
+	private final static int MAX_RETRIES = 5;
 	private final static int PACKET_SIZE = 1024;
 	private final static int BLOCK_SIZE = 32768;
 
@@ -185,6 +185,11 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		if(message.getMessageName().equals("ProtocolError")) {
 			Logger.debug(this, "ProtocolError !");
 
+			if(message.getValue("Code").equals("15")) {
+				Logger.debug(this, "Unknow URI ? was probably a stop order so no problem ...");
+				return;
+			}
+
 			status = "Protocol Error ("+message.getValue("CodeDescription")+")";
 			progress = 100;
 			running = false;
@@ -200,6 +205,11 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		if(message.getMessageName().equals("GetFailed")) {
 			Logger.debug(this, "GetFailed !");
+
+			if(!isRunning()) { /* Must be a "GetFailed: cancelled by caller", so we simply ignore */
+				Logger.info(this, "Cancellation confirmed.");
+				return;
+			}
 
 			if(isPersistent())
 				removePersistent();
@@ -382,15 +392,40 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		queueManager.getQueryManager().writeMessage(stopMessage);
 	}
 
+	public boolean pause(FCPQueueManager queryManager) {
+		Logger.info(this, "Pausing fetching of the key : "+getFileKey());
+		
+		if(!isRunning() || isFinished()) {
+			Logger.info(this, "Can't stop (pause). Not running.");
+
+		} else {
+			
+			if(isPersistent()) {
+				removePersistent();
+			} else {
+				Logger.warning(this, "Can't stop a non-persistent query, will continue in background ...");
+			}
+		}
+
+		progress = 0;
+		successful = false;
+		running = false;
+		status = "Delayed";
+
+		
+
+		setChanged();
+		notifyObservers();
+		
+		return true;
+
+	}
 
 	public boolean stop(FCPQueueManager queryManager) {
 		Logger.info(this, "Stop fetching of the key : "+getFileKey());
 
 		if(!isRunning() || isFinished()) {
 			Logger.info(this, "Can't stop. Not running -> considered as failed");
-
-			setChanged();
-			notifyObservers();
 
 		} else {
 			
@@ -403,6 +438,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		progress = 100;
 		successful = false;
+		running = false;
 		status = "Stopped";
 
 		setChanged();

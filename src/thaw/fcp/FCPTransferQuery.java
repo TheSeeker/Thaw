@@ -9,6 +9,13 @@ import java.util.HashMap;
 public interface FCPTransferQuery extends FCPQuery {
 
 	/**
+	 * Similar to stop(), but the query knows that it will be started again later.
+	 * @param queueManager QueueManager gives access to QueryManager;
+	 */
+	public boolean pause(FCPQueueManager queueManager);
+
+
+	/**
 	 * Used by the QueueManager only.
 	 * Currently these priority are the same
 	 * as FCP priority, but it can change in the

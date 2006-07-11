@@ -134,11 +134,16 @@ public class DetailPanel implements Observer {
 				identifier.setText(query.getIdentifier());
 			else
 				identifier.setText("N/A");
+			attempt.setText((new Integer(query.getAttempt())).toString());
+
+			
 		} else {
 			progress.setValue(0);
 			progress.setString("");
 			status.setText("");
 			identifier.setText("");
+			attempt.setText("");
+			
 		}
 	}
 
@@ -155,14 +160,12 @@ public class DetailPanel implements Observer {
 			key.setText(query.getFileKey());
 			path.setText(query.getPath());
 			priority.setText((new Integer(query.getThawPriority())).toString());
-			attempt.setText((new Integer(query.getAttempt())).toString());
 		} else {
 			file.setText("");
 			size.setText("");
 			key.setText("");
 			path.setText("");
 			priority.setText("");
-			attempt.setText("");
 		}
 
 	}

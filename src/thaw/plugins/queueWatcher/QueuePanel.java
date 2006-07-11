@@ -232,11 +232,12 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 
 				if(e.getSource() == cancelItem) {
 					query.stop(core.getQueueManager());
+					core.getQueueManager().remove(query);
 				}
 
 				if(e.getSource() == delayItem) {
 					if(query.isRunning() && !query.isFinished()) {
-						query.stop(core.getQueueManager());
+						query.pause(core.getQueueManager());
 						core.getQueueManager().moveFromRunningToPendingQueue(query);
 					}
 				}

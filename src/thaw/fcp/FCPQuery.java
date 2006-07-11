@@ -13,6 +13,7 @@ public interface FCPQuery {
 	public boolean start(FCPQueueManager queueManager);
 
 	/**
+	 * Definitive stop.
 	 * @param queueManger QueueManager gives access to QueryManager.
 	 */
 	public boolean stop(FCPQueueManager queueManager);
