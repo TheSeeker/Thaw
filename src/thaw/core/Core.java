@@ -89,9 +89,6 @@ public class Core implements Observer {
 		if(!initPluginManager())
 			return false;
 
-		if(!restorePreviousState())
-			return false;
-
 		mainWindow.setStatus(I18n.getMessage("thaw.statusBar.ready"));
 
 		mainWindow.setVisible(true);
@@ -175,6 +172,14 @@ public class Core implements Observer {
 					
 					queueManager.startScheduler();
 
+					queueManager.restartNonPersistent();
+					
+					FCPWatchGlobal watchGlobal = new FCPWatchGlobal(true);
+					watchGlobal.start(queueManager);
+					
+					FCPQueueLoader queueLoader = new FCPQueueLoader();
+					queueLoader.start(queueManager, config.getValue("thawId"));
+					
 				}
 								   
 			}
@@ -195,20 +200,6 @@ public class Core implements Observer {
 	}
 
 
-	public boolean restorePreviousState() {
-		if(connection.isConnected()) {
-			queueManager.restartNonPersistent();
-
-			FCPWatchGlobal watchGlobal = new FCPWatchGlobal(true);
-			watchGlobal.start(queueManager);
-
-			FCPListPersistentRequests listPersistent = new FCPListPersistentRequests();
-			listPersistent.start(queueManager);
-		}
-
-		return true;
-	}
-	
 	public FCPConnection getConnectionManager() {
 		return connection;
 	}

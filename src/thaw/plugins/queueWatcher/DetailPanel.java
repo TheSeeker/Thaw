@@ -38,7 +38,6 @@ public class DetailPanel implements Observer {
 	private JTextField attempt    = new JTextField();
 	private JTextField identifier = new JTextField();
 	private JTextField globalQueue= new JTextField();
-	private JTextField persistence= new JTextField();
 
 	private FCPTransferQuery query = null;
 
@@ -61,8 +60,7 @@ public class DetailPanel implements Observer {
 					I18n.getMessage("thaw.common.priority"),
 					I18n.getMessage("thaw.common.try")+" #",
 					I18n.getMessage("thaw.common.identifier"),
-					I18n.getMessage("thaw.common.globalQueue"),
-					I18n.getMessage("thaw.common.persistant")
+					I18n.getMessage("thaw.common.globalQueue")
 		};
 
 		subPanel.setLayout(new GridLayout(fieldNames.length*2, 1));
@@ -90,7 +88,6 @@ public class DetailPanel implements Observer {
 				case(7): field = attempt; attempt.setEditable(false); break;
 				case(8): field = identifier; identifier.setEditable(false); break;
 				case(9): field = globalQueue; globalQueue.setEditable(false); break;
-				case(10): field = persistence; persistence.setEditable(false); break;
 				default: Logger.error(this, "Gouli goula ? ... is going to crash :p"); break;
 				}
 
@@ -135,6 +132,9 @@ public class DetailPanel implements Observer {
 				progress.setString((new Integer(query.getProgression())).toString() + "%");
 			else
 				progress.setString("FAILED");
+			
+			size.setText((new Long(query.getFileSize())).toString()+" B");
+
 			status.setText(query.getStatus());
 			if(query.getIdentifier() != null)
 				identifier.setText(query.getIdentifier());
@@ -142,6 +142,10 @@ public class DetailPanel implements Observer {
 				identifier.setText("N/A");
 			attempt.setText((new Integer(query.getAttempt())).toString());
 
+			if(query.getThawPriority() != -1)
+				priority.setText((new Integer(query.getThawPriority())).toString());
+			else
+				priority.setText("Unknown");
 			
 		} else {
 			progress.setValue(0);
@@ -149,6 +153,8 @@ public class DetailPanel implements Observer {
 			status.setText("");
 			identifier.setText("");
 			attempt.setText("");
+			size.setText("");
+			priority.setText("");
 			
 		}
 	}
@@ -161,15 +167,9 @@ public class DetailPanel implements Observer {
 			String[] plop = query.getFileKey().split("/");
 			
 			file.setText(plop[plop.length-1]);
-			size.setText((new Long(query.getFileSize())).toString()+" B");
 			
 			key.setText(query.getFileKey());
 			path.setText(query.getPath());
-			priority.setText((new Integer(query.getThawPriority())).toString());
-			if(query.isPersistent())
-				persistence.setText(I18n.getMessage("thaw.common.yes"));
-			else
-				persistence.setText(I18n.getMessage("thaw.common.no"));
 
 			if(query.isGlobal())
 				globalQueue.setText(I18n.getMessage("thaw.common.yes"));
@@ -177,12 +177,9 @@ public class DetailPanel implements Observer {
 				globalQueue.setText(I18n.getMessage("thaw.common.no"));
 		} else {
 			file.setText("");
-			size.setText("");
 			key.setText("");
 			path.setText("");
-			priority.setText("");
 			globalQueue.setText("");
-			persistence.setText("");
 		}
 
 	}

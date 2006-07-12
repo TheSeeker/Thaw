@@ -15,7 +15,7 @@ public class WarningWindow {
 	public WarningWindow(Core core,
 			     String warning)
 	{
-		if(core.getMainWindow() != null) {
+		if(core != null && core.getMainWindow() != null) {
 			JOptionPane.showMessageDialog(core.getMainWindow().getMainFrame(),
 						      warning,
 						      "Warning",

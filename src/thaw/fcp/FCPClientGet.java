@@ -13,7 +13,7 @@ import thaw.core.Logger;
  * notify() only when progress has really changes.
  */
 public class FCPClientGet extends Observable implements Observer, FCPTransferQuery {
-	private final static int MAX_RETRIES = 5;
+	private final static int MAX_RETRIES = -1;
 	private final static int PACKET_SIZE = 1024;
 	private final static int BLOCK_SIZE = 32768;
 
@@ -37,6 +37,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	private boolean running = false;
 	private boolean successful = false;
 
+	private static boolean fetchLock = false;
+
 
 	/**
 	 * See setParameters().
@@ -56,13 +58,37 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 
 	/**
+	 * Used to resume query from persistent queue of the node.
+	 * Think of adding this FCPClientGet as a queryManager observer.
+	 */
+	public FCPClientGet(String id, String key, int priority,
+			    int persistence, boolean globalQueue,
+			    String destinationDir, String status, int progress,
+			    FCPQueueManager queueManager) {
+
+		this(key, priority, persistence, globalQueue, destinationDir);
+
+		this.queueManager = queueManager;
+
+		this.progress = progress;
+		this.status = status;
+		this.identifier = id;
+
+		successful = true;
+		running = true;
+	}
+
+
+	/**
 	 * Only for initial queries : To resume queries, use FCPClientGet(FCPQueueManager, Hashmap).
+	 * @param destinationDir if null, won't be automatically saved
 	 * @param persistence 0 = Forever ; 1 = Until node reboot ; 2 = Until the app disconnect
 	 */
 	public FCPClientGet(String key, int priority,
 			    int persistence, boolean globalQueue,
-			    String destinationDir) {
+			    String destinationDir) {	
 
+	
 		if(globalQueue && persistence >= 2)
 			globalQueue = false; /* else protocol error */
 
@@ -83,7 +109,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			filename = cutcut[cutcut.length-1];
 		}
 
-		Logger.debug(this, "Getting "+key);
+		Logger.debug(this, "Query for getting "+key+" created");
 
 		status = "Waiting";
 
@@ -110,6 +136,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		queryMessage.setValue("Verbosity", "1");
 		queryMessage.setValue("MaxRetries", "0");
 		queryMessage.setValue("PriorityClass", (new Integer(priority)).toString());
+
+		if(destinationDir != null)
+			queryMessage.setValue("ClientToken", destinationDir);
 
 		if(persistence == 0)
 			queryMessage.setValue("Persistence", "forever");
@@ -144,28 +173,29 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		if(message.getMessageName().equals("DataFound")) {
 			Logger.debug(this, "DataFound!");
 
-			status = "Fetching";
-			fileSize = (new Long(message.getValue("DataLength"))).longValue();
-
-			
-			if(isPersistent() && !isFinished()) {
-				FCPMessage getRequestStatus = new FCPMessage();
+			if(!isFinished()) {
+				status = "Fetching";
+				fileSize = (new Long(message.getValue("DataLength"))).longValue();
 				
-				getRequestStatus.setMessageName("GetRequestStatus");
-				getRequestStatus.setValue("Identifier", identifier);
-				if(globalQueue)
-					getRequestStatus.setValue("Global", "true");
-				else
-					getRequestStatus.setValue("Global", "false");
-				getRequestStatus.setValue("OnlyData", "true");
+				progress = 100;
+				successful = true;
 				
-				queueManager.getQueryManager().writeMessage(getRequestStatus);
+				if(isPersistent()) {
+					if(destinationDir != null) {
 
+						if(!fileExists(destinationDir))
+							saveFileTo(destinationDir);
+						else
+							Logger.info(this, "File already existing. Not rewrited");
+						
+					} else {
+						Logger.info(this, "Don't know where to put file, so file not asked to the node");
+					}
+				}
+				
+				setChanged();
+				notifyObservers();
 			}
-			
-
-			setChanged();
-			notifyObservers();
 
 			return;
 		}
@@ -190,6 +220,12 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				return;
 			}
 
+			if(message.getValue("Fatal").equals("False")) {
+				Logger.debug(this, "Non-fatal protocol error");
+				status = "Protocol warning ("+message.getValue("CodeDescription")+")";
+				return;
+			}
+
 			status = "Protocol Error ("+message.getValue("CodeDescription")+")";
 			progress = 100;
 			running = false;
@@ -211,14 +247,13 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				return;
 			}
 
-			if(isPersistent())
-				removePersistent();
+			//removeRequest();
 
 			int code = ((new Integer(message.getValue("Code"))).intValue());
 
 			attempt++;
 
-			if(attempt >= MAX_RETRIES || code == 25) {
+			if(MAX_RETRIES == -1 || attempt >= MAX_RETRIES || code == 25) {
 			    status = "Failed ("+message.getValue("CodeDescription")+")";
 			    progress = 100;
 			    running = false;
@@ -248,7 +283,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 				status = "Fetching";
 
-				progress = (int)((succeeded * 98) / required);
+				progress = (int)((succeeded * 99) / required);
 
 				setChanged();
 				notifyObservers();
@@ -260,8 +295,6 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		if(message.getMessageName().equals("AllData")) {
 			Logger.debug(this, "AllData ! : " + identifier);
 
-			progress = 99;
-
 			status = "Loading";
 
 			fileSize = message.getAmountOfDataWaiting();
@@ -271,12 +304,14 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			//queueManager.getQueryManager().getConnection().lockWriting();
 
 
-			if(fetchDirectly(fileSize, true)) {
+			if(fetchDirectly(getPath(), fileSize, true)) {
 				successful = true;
 				status = "Available";
 			} else {
 				Logger.warning(this, "Unable to fetch correctly the file. This may create problems on socket");
 			}
+
+			fetchLock = false;
 
 			//queueManager.getQueryManager().getConnection().unlockWriting();
 			
@@ -284,9 +319,6 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			progress = 100;
 
 			queueManager.getQueryManager().deleteObserver(this);
-
-			if(isPersistent())
-				removePersistent();
 
 			setChanged();
 			notifyObservers();
@@ -307,10 +339,106 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	}
 
 
-	public boolean fetchDirectly(long size, boolean reallyWrite) {
+	private class UnlockWaiter implements Runnable {
+		FCPClientGet clientGet;
+		String dir;
+
+		public UnlockWaiter(FCPClientGet clientGet, String dir) {
+			this.clientGet = clientGet;
+			this.dir = dir;
+		}
+
+		public void run() {
+			if(dir == null) {
+				Logger.warning(this, "UnlockWaiter.run() : Wtf ?");
+			}
+
+			while(true) {
+				try {
+					Thread.sleep(200);
+				} catch(java.lang.InterruptedException e) {
+
+				}
+
+				if(!fetchLock)
+					break;
+			}
+			
+			if(dir == null) {
+				Logger.warning(this, "UnlockWaiter.run() : Wtf ?");
+			}
+
+			saveFileTo(this.dir);
+			return;
+		}
+	}
+
+	public synchronized boolean saveFileTo(String dir) {
+
+		if(dir == null) {
+			Logger.warning(this, "saveFileTo() : Can't save to null.");
+			return false;
+		}
+
+		destinationDir = dir;
+
+
+		if(!isFinished() || !isSuccessful()) {
+			Logger.warning(this, "Unable to fetch a file not finished");
+			return false;
+		}
+
+		if(!isPersistent()) {
+			Logger.warning(this, "Not persistent, so unable to ask");
+			return false;
+		}
+
+
+		if(fetchLock) {
+
+			Logger.info(this, "Another file is being downloaded ... waiting ...");
+
+			Thread fork = new Thread(new UnlockWaiter(this, dir));
+
+			fork.start();
+
+			return true;
+		}
+		
+		if(destinationDir == null) {
+				Logger.warning(this, "saveFileTo() : Wtf ?");
+		}
+
+		fetchLock = true;
+
+		FCPMessage getRequestStatus = new FCPMessage();
+		
+		getRequestStatus.setMessageName("GetRequestStatus");
+		getRequestStatus.setValue("Identifier", identifier);
+		if(globalQueue)
+			getRequestStatus.setValue("Global", "true");
+		else
+			getRequestStatus.setValue("Global", "false");
+		getRequestStatus.setValue("OnlyData", "true");
+		
+		queueManager.getQueryManager().writeMessage(getRequestStatus);
+
+		return true;
+	}
+
+
+	private boolean fileExists(String dir) {
+		destinationDir = dir;
+		File newFile = new File(getPath());
+		return newFile.exists();
+	}
+
+
+
+	private boolean fetchDirectly(String file, long size, boolean reallyWrite) {
 		FCPConnection connection;
 
-		File newFile = new File(getPath());
+		File newFile = new File(file);
 		FileOutputStream fileWriter = null;
 
 
@@ -377,9 +505,14 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	}
 
 	
-	private void removePersistent() {
+	public boolean removeRequest() {
 		FCPMessage stopMessage = new FCPMessage();
 		
+		if(!isPersistent()) {
+			Logger.info(this, "Can't remove non persistent request.");
+			return false;
+		}
+
 		stopMessage.setMessageName("RemovePersistentRequest");
 		
 		if(globalQueue)
@@ -388,31 +521,25 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			stopMessage.setValue("Global", "false");
 		
 		stopMessage.setValue("Identifier", identifier);
-			
+		
 		queueManager.getQueryManager().writeMessage(stopMessage);
+
+		running = false;
+
+		return true;
 	}
 
 	public boolean pause(FCPQueueManager queryManager) {
-		Logger.info(this, "Pausing fetching of the key : "+getFileKey());
-		
-		if(!isRunning() || isFinished()) {
-			Logger.info(this, "Can't stop (pause). Not running.");
+		/* TODO ? : Reduce the priority 
+		   instead of stopping */
 
-		} else {
-			
-			if(isPersistent()) {
-				removePersistent();
-			} else {
-				Logger.warning(this, "Can't stop a non-persistent query, will continue in background ...");
-			}
-		}
+		Logger.info(this, "Pausing fetching of the key : "+getFileKey());
+
+		removeRequest();
 
 		progress = 0;
 		successful = false;
-		running = false;
 		status = "Delayed";
-
-		
 
 		setChanged();
 		notifyObservers();
@@ -424,21 +551,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	public boolean stop(FCPQueueManager queryManager) {
 		Logger.info(this, "Stop fetching of the key : "+getFileKey());
 
-		if(!isRunning() || isFinished()) {
-			Logger.info(this, "Can't stop. Not running -> considered as failed");
-
-		} else {
-			
-			if(isPersistent()) {
-				removePersistent();
-			} else {
-				Logger.warning(this, "Can't stop a non-persistent query, will continue in background ...");
-			}
-		}
-
 		progress = 100;
 		successful = false;
-		running = false;
 		status = "Stopped";
 
 		setChanged();
@@ -479,7 +593,12 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	}
 
 	public String getPath() {
-		return destinationDir + File.separator + filename;
+		if(destinationDir != null)
+			return destinationDir + File.separator + filename;
+		
+		Logger.warning(this, "getPath() : destinationDir == null");
+
+		return null;
 	}
 
 
@@ -511,13 +630,13 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	public HashMap getParameters() {
 		HashMap result = new HashMap();
 
-		result.put("key", key);
-		result.put("filename", filename);
-		result.put("priority", ((new Integer(priority)).toString()));
-		result.put("persistence", ((new Integer(persistence)).toString()));
-		result.put("globalQueue", ((new Boolean(globalQueue)).toString()));
-		result.put("destinationDir", destinationDir);
-		result.put("attempt", ((new Integer(attempt)).toString()));
+		result.put("URI", key);
+		result.put("Filename", filename);
+		result.put("Priority", ((new Integer(priority)).toString()));
+		result.put("Persistence", ((new Integer(persistence)).toString()));
+		result.put("Global", ((new Boolean(globalQueue)).toString()));
+		result.put("ClientToken", destinationDir);
+		result.put("Attempt", ((new Integer(attempt)).toString()));
 
 		if(status.indexOf("(?)") > 0) {
 			String[] cut = status.split(" ");
@@ -526,36 +645,36 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			result.put("status", status);
 		}
 
-		result.put("identifier", identifier);
-		result.put("progress", ((new Integer(progress)).toString()));
-		result.put("fileSize", ((new Long(fileSize)).toString()));
-		result.put("running", ((new Boolean(running)).toString()));
-		result.put("successful", ((new Boolean(successful)).toString()));
+		result.put("Identifier", identifier);
+		result.put("Progress", ((new Integer(progress)).toString()));
+		result.put("FileSize", ((new Long(fileSize)).toString()));
+		result.put("Running", ((new Boolean(running)).toString()));
+		result.put("Successful", ((new Boolean(successful)).toString()));
 
 		return result;
 	}
 
 	public boolean setParameters(HashMap parameters) {
 		
-		key            = (String)parameters.get("key");
+		key            = (String)parameters.get("URI");
 
 		Logger.debug(this, "Resuming key : "+key);
 
-		filename       = (String)parameters.get("filename");
-		priority       = ((new Integer((String)parameters.get("priority"))).intValue());
-		persistence    = ((new Integer((String)parameters.get("persistence"))).intValue());
-		globalQueue    = ((new Boolean((String)parameters.get("globalQueue"))).booleanValue());
-		destinationDir = (String)parameters.get("destinationDir");
-		attempt        = ((new Integer((String)parameters.get("attempt"))).intValue());
-		status         = (String)parameters.get("status");
-		identifier     = (String)parameters.get("identifier");
+		filename       = (String)parameters.get("Filename");
+		priority       = ((new Integer((String)parameters.get("Priority"))).intValue());
+		persistence    = ((new Integer((String)parameters.get("Persistence"))).intValue());
+		globalQueue    = ((new Boolean((String)parameters.get("Global"))).booleanValue());
+		destinationDir = (String)parameters.get("ClientToken");
+		attempt        = ((new Integer((String)parameters.get("Attempt"))).intValue());
+		status         = (String)parameters.get("Status");
+		identifier     = (String)parameters.get("Identifier");
 
 		Logger.info(this, "Resuming id : "+identifier);
 
-		progress       = ((new Integer((String)parameters.get("progress"))).intValue());
-		fileSize       = ((new Long((String)parameters.get("fileSize"))).longValue());
-		running        = ((new Boolean((String)parameters.get("running"))).booleanValue());
-		successful     = ((new Boolean((String)parameters.get("successful"))).booleanValue());
+		progress       = ((new Integer((String)parameters.get("Progress"))).intValue());
+		fileSize       = ((new Long((String)parameters.get("FileSize"))).longValue());
+		running        = ((new Boolean((String)parameters.get("Running"))).booleanValue());
+		successful     = ((new Boolean((String)parameters.get("Successful"))).booleanValue());
 
 		if(persistence == 2 && !isFinished()) {
 			progress = 0;

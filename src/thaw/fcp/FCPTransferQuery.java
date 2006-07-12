@@ -9,11 +9,16 @@ import java.util.HashMap;
 public interface FCPTransferQuery extends FCPQuery {
 
 	/**
-	 * Similar to stop(), but the query knows that it will be started again later.
+	 * Stop the transfer, but don't consider it as failed.
 	 * @param queueManager QueueManager gives access to QueryManager;
 	 */
 	public boolean pause(FCPQueueManager queueManager);
 
+
+	/**
+	 * Only if persistent. Remove it from the queue.
+	 */
+	public boolean removeRequest();
 
 	/**
 	 * Used by the QueueManager only.
@@ -33,6 +38,13 @@ public interface FCPTransferQuery extends FCPQuery {
 	 */
 	public String getStatus();
 
+
+	/**
+	 * For persistent request only.
+	 * @param dir Directory
+	 */
+	public boolean saveFileTo(String dir);
+
 	/**
 	 * Informal.
 	 * In pourcents.
@@ -41,6 +53,7 @@ public interface FCPTransferQuery extends FCPQuery {
 
 	/**
 	 * Informal.
+	 * Gives *public* final key only.
 	 * @return can be null
 	 */
 	public String getFileKey();

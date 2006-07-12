@@ -42,10 +42,12 @@ public class FetchPanel implements java.awt.event.ActionListener {
 	private String[] priorities = null;
 	private JComboBox prioritySelecter = null;
 
+	/*
 	private JPanel persistencePanel = null;
 	private JLabel persistenceLabel = null;
 	private String[] persistences = null;
 	private JComboBox persistenceSelecter = null;
+	*/
 
 	private JLabel destinationLabel = null;
 	private JPanel dstChoosePanel = null; /* 3 x 1 */
@@ -117,7 +119,8 @@ public class FetchPanel implements java.awt.event.ActionListener {
 		priorityPanel.add(priorityLabel);
 		priorityPanel.add(prioritySelecter);
 		
-		/* PERSISTENCE */
+		/* PERSISTENCE */ /* set always to "forever" */
+		/*
 		persistencePanel = new JPanel();
 		persistencePanel.setLayout(new GridLayout(2, 1, 5, 5));
 
@@ -131,6 +134,7 @@ public class FetchPanel implements java.awt.event.ActionListener {
 
 		persistencePanel.add(persistenceLabel);
 		persistencePanel.add(persistenceSelecter);
+		*/
 
 		/* QUEUE */
 		queuePanel = new JPanel();
@@ -163,7 +167,7 @@ public class FetchPanel implements java.awt.event.ActionListener {
 		dstChoosePanel.add(destinationButton);
 
 		belowPanel.add(priorityPanel);
-		belowPanel.add(persistencePanel);
+		//belowPanel.add(persistencePanel);
 		belowPanel.add(queuePanel);
 		belowPanel.add(dstChoosePanel);
 		
@@ -184,20 +188,22 @@ public class FetchPanel implements java.awt.event.ActionListener {
 	public void actionPerformed(java.awt.event.ActionEvent e) {
 		if(e.getSource() == validationButton) {
 			int priority = 6;
-			int persistence = 0;
+			//int persistence = 0;
 			boolean globalQueue = true;
 
+			/*
 			if(((String)persistenceSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.persistenceForever")))
 				persistence = 0;
 			if(((String)persistenceSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.persistenceReboot")))
 				persistence = 1;
 			if(((String)persistenceSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.persistenceConnection")))
 				persistence = 2;
+			*/
 
 			if(((String)queueSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.false")))
 				globalQueue = false;
 
-
+			
 			for(int i = 0; i < priorities.length ; i++) {
 				if(((String)prioritySelecter.getSelectedItem()).equals(I18n.getMessage("thaw.plugin.priority.p"+i)))
 					priority = i;
@@ -208,8 +214,14 @@ public class FetchPanel implements java.awt.event.ActionListener {
 				return;
 			}
 
+			/*
 			fetchPlugin.fetchFiles(fileList.getText().split("\n"),
 					       priority, persistence, globalQueue,
+					       destinationField.getText());
+			*/
+
+			fetchPlugin.fetchFiles(fileList.getText().split("\n"),
+					       priority, 0, globalQueue,
 					       destinationField.getText());
 
 			fileList.setText("");

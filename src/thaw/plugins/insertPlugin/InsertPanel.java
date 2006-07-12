@@ -20,9 +20,12 @@ import java.awt.event.ItemEvent;
 
 import thaw.core.*;
 import thaw.i18n.I18n;
-
+import thaw.plugins.InsertPlugin;
+import thaw.fcp.*;
 
 public class InsertPanel implements ActionListener, ItemListener {
+	private final static int MIN_PRIORITY = 6;
+
 	private JPanel globalPanel = null;
 
 	private JPanel mainPanel;
@@ -57,14 +60,21 @@ public class InsertPanel implements ActionListener, ItemListener {
 	private JLabel globalLabel;
 	private JComboBox globalSelecter;
 
+	/*
 	private String[] persistences;
 	private JLabel persistenceLabel;
 	private JComboBox persistenceSelecter;
+	*/
 
 	private JButton letsGoButton;
 
 
-	public InsertPanel() {
+	private InsertPlugin insertPlugin;
+	private int keyType;
+	private FCPClientPut lastInsert = null;
+
+	public InsertPanel(InsertPlugin insertPlugin) {
+		this.insertPlugin = insertPlugin;
 
 		globalPanel = new JPanel();
 
@@ -101,6 +111,7 @@ public class InsertPanel implements ActionListener, ItemListener {
 		keyRadioButtons = new JRadioButton[3];
 		keyRadioButtons[0] = new JRadioButton(I18n.getMessage("thaw.plugin.insert.CHK"));
 		keyRadioButtons[0].setSelected(true);
+		keyType = 0;
 		keyRadioButtons[1] = new JRadioButton(I18n.getMessage("thaw.plugin.insert.KSK"));
 		keyRadioButtons[2] = new JRadioButton(I18n.getMessage("thaw.plugin.insert.SSK"));
 		keyRadioGroup = new ButtonGroup();
@@ -113,22 +124,24 @@ public class InsertPanel implements ActionListener, ItemListener {
 		subPanel.add(subSubPanel);
 
 
-		// PERSISTENCE & GLOBAL
+		subSubPanel = new JPanel();
+		subSubPanel.setLayout(new GridLayout(4, 1));
 
+
+		// PERSISTENCE & GLOBAL
+		/*
 		persistences = new String[] {
 			I18n.getMessage("thaw.common.persistenceConnection"),
 			I18n.getMessage("thaw.common.persistenceReboot"),
 			I18n.getMessage("thaw.common.persistenceForever"),
 		};
 
-		subSubPanel = new JPanel();
-		subSubPanel.setLayout(new GridLayout(4, 1));
 		persistenceLabel = new JLabel(I18n.getMessage("thaw.common.persistence"));
 		subSubPanel.add(persistenceLabel);
 		persistenceSelecter = new JComboBox(persistences);
 		persistenceSelecter.setSelectedItem(I18n.getMessage("thaw.common.persistenceReboot"));
 		subSubPanel.add(persistenceSelecter);
-		
+		*/
 
 		globalStr = new String[] {
 			I18n.getMessage("thaw.common.true"),
@@ -218,6 +231,8 @@ public class InsertPanel implements ActionListener, ItemListener {
 		letsGoButton = new JButton(I18n.getMessage("thaw.plugin.insert.insertAction"));
 		letsGoButton.setPreferredSize(new Dimension(200, 40));
 
+		letsGoButton.addActionListener(this);
+
 		mainPanel.add(letsGoButton, BorderLayout.SOUTH);
 
 		mainPanel.setSize(400, 400);
@@ -234,6 +249,70 @@ public class InsertPanel implements ActionListener, ItemListener {
 
 
 	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == letsGoButton) {
+			int rev = -1;
+			String name = null;
+			String privateKey = null;
+			int priority = 6;
+			boolean global = true;
+			//int persistence = 0;
+
+			if(selectedFiles.getText() == null
+			   || selectedFiles.getText().equals("")) {
+				new WarningWindow(null, I18n.getMessage("thaw.plugin.insert.specifyFile"));
+				return;
+			}
+
+			if(keyType == 1 || keyType == 2) {
+				if(nameField.getText() == null
+				   || nameField.getText().equals("")
+				   || revField.getText() == null
+				   || revField.getText().equals("")) {
+					new WarningWindow(null, I18n.getMessage("thaw.plugin.insert.specifyNameAndRev"));
+					return;
+				}
+
+				rev = ((new Integer(revField.getText())).intValue());
+				name = nameField.getText();
+			}
+
+			if(keyType == 2) {
+				if(privateKeyField.getText() != null
+				   && !privateKeyField.getText().equals(""))
+					privateKey = privateKeyField.getText();
+			}
+
+			for(int i = 0 ; i <= MIN_PRIORITY ; i++) {
+				if(I18n.getMessage("thaw.plugin.priority.p"+(new Integer(i)).toString()).equals((String)prioritySelecter.getSelectedItem())) {
+					priority = i;
+				}
+			}
+
+			if(((String)globalSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.true")))
+				global = true;
+			if(((String)globalSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.true")))
+				global = false;
+
+			/*
+			if(((String)persistenceSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.persistenceForever")))
+				persistence = 0;
+			if(((String)persistenceSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.persistenceReboot")))
+				persistence = 1;
+			if(((String)persistenceSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.persistenceConnection")))
+				persistence = 2;
+			
+			lastInsert = insertPlugin.insertFile(new File(selectedFiles.getText()),
+							     keyType, rev, name, privateKey, priority,
+							     global, persistence);
+			*/
+
+			lastInsert = insertPlugin.insertFile(new File(selectedFiles.getText()),
+							     keyType, rev, name, privateKey, priority,
+							     global, 0);
+
+			/* TODO : Listen lastInsert to fetch display the private / public key */
+		}
+
 		if(e.getSource() == browseButton) {
 			FileChooser fileChooser = new FileChooser();
 			File files;
@@ -241,15 +320,27 @@ public class InsertPanel implements ActionListener, ItemListener {
 			fileChooser.setTitle(I18n.getMessage("thaw.common.selectFile"));
 			fileChooser.setDirectoryOnly(false);
 			fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
-			if( (files = fileChooser.askOneFile()) == null) { /* TODO: One file -> Many files */
+			if( (files = fileChooser.askOneFile()) == null) { /* TODO ? : One file -> Many files */
 				Logger.info(this, "Nothing selected");
 				return;
 			}
 			
 			selectedFiles.setText(files.getPath());
+
+			if(keyType != 0)
+				nameField.setText(getFileNameFromPath());
 		}
 	}
 
+
+	public String getFileNameFromPath() {
+		if(selectedFiles.getText() == null)
+			return "";
+		
+		String[] cutcut = selectedFiles.getText().split(File.separator);
+
+		return cutcut[cutcut.length - 1];
+	}
 
 	public void itemStateChanged(ItemEvent e) {
 		if(e.getItem() == keyRadioButtons[0]
@@ -258,6 +349,11 @@ public class InsertPanel implements ActionListener, ItemListener {
 			publicKeyField.setEditable(false);
 			revField.setEditable(false);
 			nameField.setEditable(false);
+			revField.setText("");
+			nameField.setText("");
+			privateKeyField.setText("");
+			publicKeyField.setText("");
+			keyType = 0;
 			return;
 		}
 
@@ -267,6 +363,11 @@ public class InsertPanel implements ActionListener, ItemListener {
 			publicKeyField.setEditable(false);
 			revField.setEditable(true);
 			nameField.setEditable(true);
+			revField.setText("0");
+			nameField.setText(getFileNameFromPath());
+			privateKeyField.setText("");
+			publicKeyField.setText("");
+			keyType = 1;
 			return;
 		}
 
@@ -276,6 +377,11 @@ public class InsertPanel implements ActionListener, ItemListener {
 			publicKeyField.setEditable(true);
 			revField.setEditable(true);
 			nameField.setEditable(true);
+			revField.setText("0");
+			nameField.setText(getFileNameFromPath());
+			privateKeyField.setText("");
+			publicKeyField.setText("");
+			keyType = 2;
 			return;
 		}
 	}

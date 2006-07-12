@@ -13,7 +13,7 @@ public interface FCPQuery {
 	public boolean start(FCPQueueManager queueManager);
 
 	/**
-	 * Definitive stop.
+	 * Definitive stop. Transfer is considered as failed.
 	 * @param queueManger QueueManager gives access to QueryManager.
 	 */
 	public boolean stop(FCPQueueManager queueManager);

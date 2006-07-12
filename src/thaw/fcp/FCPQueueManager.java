@@ -84,15 +84,17 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 		return runningQueries;
 	}
 
-	public void addQueryToThePendingQueue(FCPTransferQuery query) {
+	/**
+	 * @return false if already added.
+	 */
+	public boolean addQueryToThePendingQueue(FCPTransferQuery query) {
 		if(query.getThawPriority() < 0) {
-			addQueryToTheRunningQueue(query);
-			return;
+			return addQueryToTheRunningQueue(query);
 		}
 
 		if(isAlreadyPresent(query)) {
 			Logger.notice(this, "Key was already in one of the queues");
-			return;
+			return false;
 		}
 
 		Logger.debug(this, "Adding query to the pending queue ...");
@@ -103,19 +105,26 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 		notifyObservers(query);
 
 		Logger.debug(this, "Adding done");
+		return true;
 	}
 
 	/**
 	 * will call start() function of the query.
+	 * @return false if already added
 	 */
-	public void addQueryToTheRunningQueue(FCPTransferQuery query) {
-		addQueryToTheRunningQueue(query, true);
+	public boolean addQueryToTheRunningQueue(FCPTransferQuery query) {
+		return addQueryToTheRunningQueue(query, true);
 	}
 
-	public void addQueryToTheRunningQueue(FCPTransferQuery query, boolean callStart) {
+	public boolean addQueryToTheRunningQueue(FCPTransferQuery query, boolean callStart) {
 		Logger.debug(this, "Adding query to the running queue ...");
 
-		if(!callStart) {
+		if(isAlreadyPresent(query)) {
+			Logger.notice(this, "Key was already in one of the queues");
+			return false;
+		}
+
+		if(!callStart && query.getIdentifier().startsWith(thawId)) {
 			/* It's a resumed query => We to adapt the next Id 
 			 * to avoid collisions.
 			 */
@@ -138,6 +147,8 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 			query.start(this);
 		
 		Logger.debug(this, "Adding done");
+
+		return true;
 	}
 
 
@@ -245,22 +256,22 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 			/* We move queries from the pendingQueue to the runningQueue until we got our quota */
 			for(int priority = 0;
 			    priority <= PRIORITY_MIN
-				    && (runningInsertions < maxInsertions
-					|| runningDownloads < maxDownloads) ;
+				    && ( (maxInsertions <= -1 || runningInsertions < maxInsertions)
+					|| (maxDownloads <= -1 || runningDownloads < maxDownloads) ) ;
 			    priority++)	{
 
 				try {
 					for(Iterator it = pendingQueries[priority].iterator();
 					    it.hasNext()
-						    && (runningInsertions < maxInsertions
-							|| runningDownloads < maxDownloads); ) {
+						    && ( (maxInsertions <= -1 || runningInsertions < maxInsertions)
+							|| (maxDownloads <= -1 || runningDownloads < maxDownloads) ); ) {
 						
 						FCPTransferQuery query = (FCPTransferQuery)it.next();
 						
 						if( (query.getQueryType() == 1
-						     && runningDownloads < maxDownloads)
+						     && (maxDownloads <= -1 || runningDownloads < maxDownloads) )
 						    || (query.getQueryType() == 2
-							&& runningInsertions < maxInsertions) ) {
+							&& (maxInsertions <= -1 || runningInsertions < maxInsertions)) ) {
 							
 							Logger.debug(this, "Scheduler : Moving a query from pendingQueue to the runningQueue");
 							pendingQueries[priority].remove(query);

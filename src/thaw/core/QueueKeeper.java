@@ -62,8 +62,7 @@ public class QueueKeeper {
 		   || queryEl.getAttribute("type").equals("1")) {
 			newQuery = new FCPClientGet(queueManager, params);
 		} else {
-			Logger.error(new QueueKeeper(), "Insert resuming TODO");
-			/* TODO */ /* FCPClientPut */
+			newQuery = new FCPClientPut(queueManager, params);
 		}
 
 		if(runningQueue)
@@ -153,6 +152,9 @@ public class QueueKeeper {
 	
 
 	private static Element saveQuery(FCPTransferQuery query, Document xmlDoc) {
+		if(query.isPersistent())
+			return null;
+
 		HashMap params = query.getParameters();
 
 		Element queryEl = xmlDoc.createElement("query");
@@ -222,18 +224,6 @@ public class QueueKeeper {
 
 
 		
-		Element runningQueueEl = xmlDoc.createElement("runningQueue");
-
-		for(Iterator runIt = runningQueue.iterator() ;
-		    runIt.hasNext(); ) {
-			FCPTransferQuery query = (FCPTransferQuery)runIt.next();
-
-			runningQueueEl.appendChild(saveQuery(query, xmlDoc));
-
-		}
-
-		rootEl.appendChild(runningQueueEl);
-
 		Element pendingQueueEl = xmlDoc.createElement("pendingQueue");
 		
 		for(int i = 0 ; i <= MIN_PRIORITY ; i++) {

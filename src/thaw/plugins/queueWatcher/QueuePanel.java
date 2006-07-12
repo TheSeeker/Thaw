@@ -6,6 +6,7 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.event.TableModelEvent;
 import javax.swing.JProgressBar;
+import javax.swing.JFileChooser;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.util.Vector;
@@ -30,6 +31,8 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
 
+import java.io.File;
+
 import thaw.core.*;
 import thaw.i18n.I18n;
 
@@ -52,6 +55,7 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 	private JMenuItem removeItem;
 	private JMenuItem cancelItem;
 	private JMenuItem delayItem;
+	private JMenuItem downloadItem;
 	private JMenuItem forceRestartItem;
 	private JMenuItem copyKeysItem;
 
@@ -95,12 +99,16 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 		removeItem = new JMenuItem(I18n.getMessage("thaw.common.removeFromTheList"));
 		cancelItem = new JMenuItem(I18n.getMessage("thaw.common.cancel"));
 		delayItem = new JMenuItem(I18n.getMessage("thaw.common.delay"));
+		downloadItem = new JMenuItem(I18n.getMessage("thaw.common.downloadLocally"));
 		forceRestartItem = new JMenuItem(I18n.getMessage("thaw.common.forceRestart"));
 		copyKeysItem = new JMenuItem(I18n.getMessage("thaw.common.copyKeysToClipboard"));
 		
 		rightClickMenu.add(removeItem);
 		rightClickMenu.add(cancelItem);
-		rightClickMenu.add(delayItem);
+		if((new Integer(core.getConfig().getValue("maxSimultaneousDownloads"))).intValue() >= 0
+		   || (new Integer(core.getConfig().getValue("maxSimultaneousInsertions"))).intValue() >= 0)
+			rightClickMenu.add(delayItem);
+		rightClickMenu.add(downloadItem);
 		rightClickMenu.add(forceRestartItem);
 		rightClickMenu.add(copyKeysItem);
 		
@@ -109,6 +117,7 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 		copyKeysItem.addActionListener(this);
 		forceRestartItem.addActionListener(this);
 		delayItem.addActionListener(this);
+		downloadItem.addActionListener(this);
 
 		table.addMouseListener(this);
 		table.addKeyListener(this);
@@ -177,8 +186,11 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 
 	public void addToTable(FCPTransferQuery query) {
 		if( (insertionQueue && query.getQueryType() == 2)
-		    || (!insertionQueue && query.getQueryType() == 1))
+		    || (!insertionQueue && query.getQueryType() == 1)) {
+			Logger.verbose(this, "Adding a query to the display");
+
 			tableModel.addQuery(query);
+		}
 	}
 
 	/**
@@ -215,6 +227,16 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 	public void actionPerformed(ActionEvent e) {
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		String keys = "";
+		File dir = null;
+
+		if(e.getSource() == downloadItem) {
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle(I18n.getMessage("thaw.common.downloadLocally"));
+			fileChooser.setDirectoryOnly(true);
+			fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
+			dir = fileChooser.askOneFile();
+		}
+
 
 		for(int i = 0 ; i < selectedRows.length;i++) {
 				FCPTransferQuery query = (FCPTransferQuery)queries.get(selectedRows[i]);
@@ -225,6 +247,9 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 				if(e.getSource() == removeItem) {
 					if(query.isRunning() && !query.isFinished())
 						query.stop(core.getQueueManager());
+					if(query.isFinished())
+						query.removeRequest();
+
 					core.getQueueManager().remove(query);
 					
 					tableModel.removeQuery(query);
@@ -232,7 +257,8 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 
 				if(e.getSource() == cancelItem) {
 					query.stop(core.getQueueManager());
-					core.getQueueManager().remove(query);
+					/*core.getQueueManager().remove(query);
+					 */
 				}
 
 				if(e.getSource() == delayItem) {
@@ -252,6 +278,11 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 
 				if(e.getSource() == copyKeysItem) {
 					keys = keys + query.getFileKey() + "\n";
+				}
+
+				if(e.getSource() == downloadItem
+				   && dir != null) {
+					query.saveFileTo(dir.getPath());
 				}
 
 		} /* for i in selectedRows */
