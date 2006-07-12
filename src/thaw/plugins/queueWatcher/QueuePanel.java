@@ -187,8 +187,6 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 	public void addToTable(FCPTransferQuery query) {
 		if( (insertionQueue && query.getQueryType() == 2)
 		    || (!insertionQueue && query.getQueryType() == 1)) {
-			Logger.verbose(this, "Adding a query to the display");
-
 			tableModel.addQuery(query);
 		}
 	}

@@ -174,7 +174,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			Logger.debug(this, "DataFound!");
 
 			if(!isFinished()) {
-				status = "Fetching";
+				status = "Available";
 				fileSize = (new Long(message.getValue("DataLength"))).longValue();
 				
 				progress = 100;
@@ -281,9 +281,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				long required = (new Long(message.getValue("Total"))).longValue();
 				long succeeded = (new Long(message.getValue("Succeeded"))).longValue();
 
-				status = "Fetching";
-
 				progress = (int)((succeeded * 99) / required);
+
+				status = "Fetching";
 
 				setChanged();
 				notifyObservers();
@@ -330,7 +330,6 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		if(message.getMessageName().equals("PersistentGet")) {			
 			Logger.debug(this, "PersistentGet !");
 			
-			status = "Fetching";
 			return;
 		}
 		
