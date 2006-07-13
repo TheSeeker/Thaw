@@ -104,10 +104,15 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 		copyKeysItem = new JMenuItem(I18n.getMessage("thaw.common.copyKeysToClipboard"));
 		
 		rightClickMenu.add(removeItem);
-		rightClickMenu.add(cancelItem);
+
+		if((new Integer(core.getConfig().getValue("maxSimultaneousDownloads"))).intValue() >= 0
+		   || (new Integer(core.getConfig().getValue("maxSimultaneousInsertions"))).intValue() >= 0)
+			rightClickMenu.add(cancelItem);
+
 		if((new Integer(core.getConfig().getValue("maxSimultaneousDownloads"))).intValue() >= 0
 		   || (new Integer(core.getConfig().getValue("maxSimultaneousInsertions"))).intValue() >= 0)
 			rightClickMenu.add(delayItem);
+
 		rightClickMenu.add(downloadItem);
 		rightClickMenu.add(forceRestartItem);
 		rightClickMenu.add(copyKeysItem);
@@ -207,14 +212,18 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 
 	public void refresh() {
 		int selected = table.getSelectedRow();
-
+		/*
 		if(lastRowSelected != selected) {
 			lastRowSelected = selected;
 			
 			if(selected != -1)
 				detailPanel.setQuery(tableModel.getQuery(selected));
 		}
-		
+		*/
+		lastRowSelected = selected;
+			
+		if(selected != -1)
+			detailPanel.setQuery(tableModel.getQuery(selected));
 	}
 
 	public JPanel getPanel() {
@@ -255,8 +264,6 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 
 				if(e.getSource() == cancelItem) {
 					query.stop(core.getQueueManager());
-					/*core.getQueueManager().remove(query);
-					 */
 				}
 
 				if(e.getSource() == delayItem) {
@@ -270,7 +277,11 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 					if(query.isRunning() && !query.isFinished())
 						query.stop(core.getQueueManager());
 
-					query.setAttempt(0);
+					query.removeRequest();
+
+					if(query.getMaxAttempt() >= 0)
+						query.setAttempt(0);
+
 					query.start(core.getQueueManager());					
 				}
 

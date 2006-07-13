@@ -247,6 +247,12 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				return;
 			}
 
+			if(message.getValue("Fatal").equals("False")) {
+				Logger.debug(this, "Non-fatal GetFailed");
+				status = "Non-fatal GetFailed ("+message.getValue("CodeDescription")+")";
+				return;
+			}
+
 			//removeRequest();
 
 			int code = ((new Integer(message.getValue("Code"))).intValue());
@@ -594,8 +600,6 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	public String getPath() {
 		if(destinationDir != null)
 			return destinationDir + File.separator + filename;
-		
-		Logger.warning(this, "getPath() : destinationDir == null");
 
 		return null;
 	}

@@ -62,11 +62,12 @@ public class FCPQueueLoader implements Observer {
 			if(msg.getValue("Identifier").startsWith(thawId))
 				destinationDir = msg.getValue("ClientToken");
 
+			int priority = ((new Integer(msg.getValue("PriorityClass"))).intValue());
 
 
 			FCPClientGet clientGet = new FCPClientGet(msg.getValue("Identifier"),
 								  msg.getValue("URI"), // key
-								  -1, persistence, global,
+								  priority, persistence, global,
 								  destinationDir, "Fetching", 0,
 								  queueManager);
 								  

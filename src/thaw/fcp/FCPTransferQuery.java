@@ -5,6 +5,8 @@ import java.util.HashMap;
 /**
  * Transfer query == fetch / insert query. These queries must be able to
  * give more informations than the other.
+ * Functions returning status of the request may be call frequently, so try to make them fast.
+ *
  */
 public interface FCPTransferQuery extends FCPQuery {
 

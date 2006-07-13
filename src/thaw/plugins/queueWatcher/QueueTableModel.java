@@ -20,11 +20,19 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
         private Vector queries = null;
 
+	private boolean isForInsertion = false;
+
 	public QueueTableModel(boolean isForInsertions) {
 		super();
 
+		this.isForInsertion = isForInsertion;
+
 		columnNames.add(I18n.getMessage("thaw.common.file"));
 		columnNames.add(I18n.getMessage("thaw.common.size"));
+		
+		if(!isForInsertion)
+			columnNames.add(I18n.getMessage("thaw.common.localPath"));
+
 		columnNames.add(I18n.getMessage("thaw.common.status"));
 		columnNames.add(I18n.getMessage("thaw.common.progress"));
 
@@ -64,11 +72,20 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 			return ((new Long(query.getFileSize())).toString() + " B"); /* TODO : Convert to KB / MB / GB */
 		}
 
-		if(column == 2) {
+		if(!isForInsertion && column == 2) {
+			if(query.getPath() != null)
+				return query.getPath();
+			else
+				return I18n.getMessage("thaw.common.unspecified");
+		}
+
+		if( (isForInsertion && column == 2)
+		    || (!isForInsertion && column == 3) ) {
 			return query.getStatus();
 		}
 
-		if(column == 3) {
+		if( (isForInsertion && column == 3
+		     || (!isForInsertion && column == 4) ) ) {
 			return ((new Integer(query.getProgression())).toString() + " %");
 		}
 
