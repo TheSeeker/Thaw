@@ -17,13 +17,16 @@ import javax.swing.JFileChooser;
 import java.io.File;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
+import java.util.Observer;
+import java.util.Observable;
+import java.util.Vector;
 
 import thaw.core.*;
 import thaw.i18n.I18n;
 import thaw.plugins.InsertPlugin;
 import thaw.fcp.*;
 
-public class InsertPanel implements ActionListener, ItemListener {
+public class InsertPanel implements ActionListener, ItemListener, Observer {
 	private final static int MIN_PRIORITY = 6;
 
 	private JPanel globalPanel = null;
@@ -60,12 +63,6 @@ public class InsertPanel implements ActionListener, ItemListener {
 	private JLabel globalLabel;
 	private JComboBox globalSelecter;
 
-	/*
-	private String[] persistences;
-	private JLabel persistenceLabel;
-	private JComboBox persistenceSelecter;
-	*/
-
 	private JButton letsGoButton;
 
 
@@ -90,12 +87,12 @@ public class InsertPanel implements ActionListener, ItemListener {
 
 		JPanel subSubPanel = new JPanel();
 		subSubPanel.setLayout(new GridLayout(3, 1));
-		browseLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.fileToInsert"));
+		browseLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.filesToInsert"));
 		subSubPanel.add(browseLabel);
 		selectedFiles = new JTextField(20);
 		selectedFiles.setEditable(true);
 		subSubPanel.add(selectedFiles);
-		browseButton = new JButton(I18n.getMessage("thaw.common.selectFile"));
+		browseButton = new JButton(I18n.getMessage("thaw.common.selectFiles"));
 		browseButton.addActionListener(this);
 		subSubPanel.add(browseButton);
 
@@ -124,24 +121,10 @@ public class InsertPanel implements ActionListener, ItemListener {
 		subPanel.add(subSubPanel);
 
 
+		/* GLOBAL */
+
 		subSubPanel = new JPanel();
 		subSubPanel.setLayout(new GridLayout(4, 1));
-
-
-		// PERSISTENCE & GLOBAL
-		/*
-		persistences = new String[] {
-			I18n.getMessage("thaw.common.persistenceConnection"),
-			I18n.getMessage("thaw.common.persistenceReboot"),
-			I18n.getMessage("thaw.common.persistenceForever"),
-		};
-
-		persistenceLabel = new JLabel(I18n.getMessage("thaw.common.persistence"));
-		subSubPanel.add(persistenceLabel);
-		persistenceSelecter = new JComboBox(persistences);
-		persistenceSelecter.setSelectedItem(I18n.getMessage("thaw.common.persistenceReboot"));
-		subSubPanel.add(persistenceSelecter);
-		*/
 
 		globalStr = new String[] {
 			I18n.getMessage("thaw.common.true"),
@@ -278,8 +261,19 @@ public class InsertPanel implements ActionListener, ItemListener {
 
 			if(keyType == 2) {
 				if(privateKeyField.getText() != null
-				   && !privateKeyField.getText().equals(""))
+				   && !privateKeyField.getText().equals("")) {
 					privateKey = privateKeyField.getText();
+
+					if(privateKey != null
+					   && !privateKey.equals("")) {
+						privateKey = privateKey.replace("SSK@", "");
+						privateKey = privateKey.replace("USK@", "");
+						String[] split = privateKey.split("/");
+						privateKey = split[0];
+					} else {
+						privateKey = null;
+					}
+				}
 			}
 
 			for(int i = 0 ; i <= MIN_PRIORITY ; i++) {
@@ -290,43 +284,38 @@ public class InsertPanel implements ActionListener, ItemListener {
 
 			if(((String)globalSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.true")))
 				global = true;
-			if(((String)globalSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.true")))
+			if(((String)globalSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.false")))
 				global = false;
-
-			/*
-			if(((String)persistenceSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.persistenceForever")))
-				persistence = 0;
-			if(((String)persistenceSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.persistenceReboot")))
-				persistence = 1;
-			if(((String)persistenceSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.persistenceConnection")))
-				persistence = 2;
 			
-			lastInsert = insertPlugin.insertFile(new File(selectedFiles.getText()),
-							     keyType, rev, name, privateKey, priority,
-							     global, persistence);
-			*/
+			
 
-			lastInsert = insertPlugin.insertFile(new File(selectedFiles.getText()),
-							     keyType, rev, name, privateKey, priority,
-							     global, 0);
-
-			/* TODO : Listen lastInsert to fetch display the private / public key */
+			insertPlugin.insertFile(selectedFiles.getText(),
+						keyType, rev, name, privateKey, priority,
+						global, 0);
 		}
 
 		if(e.getSource() == browseButton) {
 			FileChooser fileChooser = new FileChooser();
-			File files;
+			File[] files;
 
 			fileChooser.setTitle(I18n.getMessage("thaw.common.selectFile"));
 			fileChooser.setDirectoryOnly(false);
 			fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
-			if( (files = fileChooser.askOneFile()) == null) { /* TODO ? : One file -> Many files */
+			if( (files = fileChooser.askManyFiles()) == null) {
 				Logger.info(this, "Nothing selected");
 				return;
 			}
 			
-			selectedFiles.setText(files.getPath());
+			String fileList = "";
 
+			for(int i = 0 ; i < files.length ; i++) {
+				if(i >= 1)
+					fileList = fileList + ";";
+				fileList = fileList + files[i].getPath();
+			}
+
+			selectedFiles.setText(fileList);
+			
 			if(keyType != 0)
 				nameField.setText(getFileNameFromPath());
 		}
@@ -383,6 +372,50 @@ public class InsertPanel implements ActionListener, ItemListener {
 			publicKeyField.setText("");
 			keyType = 2;
 			return;
+		}
+	}
+
+
+	public void setLastInserted(FCPClientPut lastInserted) {
+		this.lastInsert = lastInserted;
+	}
+
+
+	public void update(Observable o, Object param) {
+		if(o == lastInsert) {
+			FCPClientPut clientPut = (FCPClientPut)o;
+			
+			if(clientPut.getKeyType() == 2) {
+				Logger.info(this, "Updating display");
+				
+				if(clientPut.getPublicKey() != null) {
+					String publicKey = clientPut.getPublicKey();
+					publicKey = publicKey.replace("SSK@", "");
+					publicKey = publicKey.replace("USK@", "");
+					String[] split = publicKey.split("/");
+					publicKeyField.setText(split[0]);
+				} else {
+					publicKeyField.setText("");
+				}
+
+				if(clientPut.getPrivateKey() != null) {
+					String privateKey = clientPut.getPrivateKey();
+					privateKey = privateKey.replace("SSK@", "");
+					privateKey = privateKey.replace("USK@", "");
+					String[] split = privateKey.split("/");
+					privateKeyField.setText(split[0]);
+					
+				} else {
+					privateKeyField.setText("");				
+				}
+
+			} else {
+				publicKeyField.setText("");
+				privateKeyField.setText("");
+			}			
+
+		} else {
+			o.deleteObserver(this);
 		}
 	}
 }

@@ -20,17 +20,17 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
         private Vector queries = null;
 
-	private boolean isForInsertion = false;
+	private boolean isForInsertions = false;
 
 	public QueueTableModel(boolean isForInsertions) {
 		super();
 
-		this.isForInsertion = isForInsertion;
+		this.isForInsertions = isForInsertions;
 
 		columnNames.add(I18n.getMessage("thaw.common.file"));
 		columnNames.add(I18n.getMessage("thaw.common.size"));
 		
-		if(!isForInsertion)
+		if(!isForInsertions)
 			columnNames.add(I18n.getMessage("thaw.common.localPath"));
 
 		columnNames.add(I18n.getMessage("thaw.common.status"));
@@ -64,28 +64,27 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		FCPTransferQuery query = (FCPTransferQuery)queries.get(row);
 		
 		if(column == 0) {
-			String[] plop = query.getFileKey().split("/");
-			return plop[plop.length-1];
+			return query.getFilename();
 		}
 
 		if(column == 1) {
 			return ((new Long(query.getFileSize())).toString() + " B"); /* TODO : Convert to KB / MB / GB */
 		}
 
-		if(!isForInsertion && column == 2) {
+		if(!isForInsertions && column == 2) {
 			if(query.getPath() != null)
 				return query.getPath();
 			else
 				return I18n.getMessage("thaw.common.unspecified");
 		}
 
-		if( (isForInsertion && column == 2)
-		    || (!isForInsertion && column == 3) ) {
+		if( (isForInsertions && column == 2)
+		    || (!isForInsertions && column == 3) ) {
 			return query.getStatus();
 		}
 
-		if( (isForInsertion && column == 3
-		     || (!isForInsertion && column == 4) ) ) {
+		if( (isForInsertions && column == 3
+		     || (!isForInsertions && column == 4) ) ) {
 			return ((new Integer(query.getProgression())).toString() + " %");
 		}
 

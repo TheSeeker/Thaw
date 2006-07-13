@@ -62,14 +62,40 @@ public class InsertPlugin implements thaw.core.Plugin {
 	 * @param privateKey : ignored if key == CHK/KSK ; can be null if it has to be generated
 	 * @param persistence 0 = Forever ; 1 = Until node reboot ; 2 = Until the app disconnect
 	 */
-	public FCPClientPut insertFile(File file, int keyType,
+	public boolean insertFile(String fileList, int keyType,
 				       int rev, String name,
 				       String privateKey,
 				       int priority, boolean global,
 				       int persistence) {
 
-		/* TODO */
-		return null;
+		FCPClientPut clientPut = null;
+		String[] files = fileList.split(";");
+
+		if(keyType > 0 && files.length > 1) {
+			new WarningWindow(core, "Can't insert multiple SSH@ / KSK@ files at the same time. Use jSite.");
+			return false;
+		}
+
+		for(int i = 0 ; i < files.length ; i++) {
+
+			if(privateKey != null && !privateKey.equals("")) {
+				clientPut = new FCPClientPut(new File(files[i]), keyType, rev, name,
+							     "USK@"+privateKey+"/", priority,
+							     global, persistence);
+			} else {
+				clientPut = new FCPClientPut(new File(files[i]), keyType, rev, name,
+							     null, priority,
+							     global, persistence);
+			}
+			
+			insertPanel.setLastInserted(clientPut);
+			clientPut.addObserver(insertPanel);
+			
+			core.getQueueManager().addQueryToThePendingQueue(clientPut);
+
+		}
+		
+		return true;
 	}
 				       
 				       

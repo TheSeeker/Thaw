@@ -191,6 +191,19 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 		notifyObservers(query);
 	}
 
+	
+	private boolean isTheSame(FCPTransferQuery queryA,
+				  FCPTransferQuery queryB) {
+		if(queryA.getIdentifier() != null && queryB.getIdentifier() != null)
+			return queryA.getIdentifier().equals(queryB.getIdentifier());
+
+		if(queryA.getFileKey() != null && queryB.getFileKey() != null)
+			return queryA.getFileKey().equals(queryB.getFileKey());
+					
+		return queryA.getFilename().equals(queryB.getFilename());
+	}
+
+
 	/**
 	 * Compare using the key.
 	 */
@@ -207,7 +220,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 				    it.hasNext(); )
 					{
 						FCPTransferQuery plop = (FCPTransferQuery)it.next();
-						if(plop.getFileKey().equals(query.getFileKey()))
+						if(isTheSame(plop, query))
 							return true;
 					}
 				
@@ -216,7 +229,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 					    it.hasNext(); )
 						{
 							FCPTransferQuery plop = (FCPTransferQuery)it.next();
-							if(plop.getFileKey().equals(query.getFileKey()))
+							if(isTheSame(plop, query))
 								return true;
 						}
 					
@@ -233,7 +246,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 	}
 
 
-	public synchronized void ordonnance() {
+	public void ordonnance() {
 		
 			/* We count the running query to see if there is an empty slot */
 
@@ -285,6 +298,10 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 							
 							if(query.getQueryType() == 2)
 								runningInsertions++;
+
+							try {
+								Thread.sleep(300);
+							} catch(java.lang.InterruptedException e) { }
 						}
 
 						

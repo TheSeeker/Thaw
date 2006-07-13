@@ -112,8 +112,10 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 		if((new Integer(core.getConfig().getValue("maxSimultaneousDownloads"))).intValue() >= 0
 		   || (new Integer(core.getConfig().getValue("maxSimultaneousInsertions"))).intValue() >= 0)
 			rightClickMenu.add(delayItem);
+		
+		if(!isForInsertionQueue)
+			rightClickMenu.add(downloadItem);
 
-		rightClickMenu.add(downloadItem);
 		rightClickMenu.add(forceRestartItem);
 		rightClickMenu.add(copyKeysItem);
 		
@@ -286,7 +288,9 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 				}
 
 				if(e.getSource() == copyKeysItem) {
-					keys = keys + query.getFileKey() + "\n";
+					if(query.getFileKey() != null
+					   && !query.getFileKey().equals(""))
+						keys = keys + query.getFileKey() + "\n";
 				}
 
 				if(e.getSource() == downloadItem

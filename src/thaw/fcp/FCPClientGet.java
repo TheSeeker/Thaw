@@ -26,7 +26,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	private boolean globalQueue = false;
 	private String destinationDir = null;
 
-	private int attempt = 0;
+	private int attempt = -1;
 	private String status;
 
 	private String identifier;
@@ -100,7 +100,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		this.progress = 0;
 		this.fileSize = 0;
-		this.attempt = 0;
+		this.attempt = -1;
 		
 		if(key.indexOf('/') == key.length()-1) {
 			filename = "index.html";
@@ -116,6 +116,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	}
 
 	public boolean start(FCPQueueManager queueManager) {
+		attempt++;
 		running = true;
 		progress = 0;
 
@@ -257,8 +258,6 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			int code = ((new Integer(message.getValue("Code"))).intValue());
 
-			attempt++;
-
 			if(MAX_RETRIES == -1 || attempt >= MAX_RETRIES || code == 25) {
 			    status = "Failed ("+message.getValue("CodeDescription")+")";
 			    progress = 100;
@@ -306,6 +305,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			fileSize = message.getAmountOfDataWaiting();
 
 			status = "Writing";
+
+			setChanged();
+			notifyObservers();
 
 			//queueManager.getQueryManager().getConnection().lockWriting();
 
@@ -373,7 +375,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				Logger.warning(this, "UnlockWaiter.run() : Wtf ?");
 			}
 
-			saveFileTo(this.dir);
+			clientGet.saveFileTo(this.dir);
 			return;
 		}
 	}
@@ -604,6 +606,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		return null;
 	}
 
+	public String getFilename() {
+		return filename;
+	}
 
 	public int getAttempt() {
 		return attempt;
@@ -641,14 +646,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		result.put("ClientToken", destinationDir);
 		result.put("Attempt", ((new Integer(attempt)).toString()));
 
-		if(status.indexOf("(?)") > 0) {
-			String[] cut = status.split(" ");
-			result.put("status", cut[0]);
-		} else {
-			result.put("status", status);
-		}
+		result.put("status", status);
 
-		result.put("Identifier", identifier);
+       		result.put("Identifier", identifier);
 		result.put("Progress", ((new Integer(progress)).toString()));
 		result.put("FileSize", ((new Long(fileSize)).toString()));
 		result.put("Running", ((new Boolean(running)).toString()));
@@ -684,10 +684,6 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			status = "Waiting";
 		}
 		
-		if(persistence < 2 && !isFinished() && identifier != null && !identifier.equals(""))
-			status = status + " (?)";
-		
-
 		return true;
 	}
 

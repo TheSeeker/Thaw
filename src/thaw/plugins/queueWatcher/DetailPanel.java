@@ -133,6 +133,11 @@ public class DetailPanel implements Observer {
 			else
 				progress.setString("FAILED");
 			
+			if(query.getFileKey() != null)
+				key.setText(query.getFileKey());
+			else
+				key.setText("Unknown");
+
 			size.setText((new Long(query.getFileSize())).toString()+" B");
 
 			status.setText(query.getStatus());
@@ -155,6 +160,8 @@ public class DetailPanel implements Observer {
 			attempt.setText("");
 			size.setText("");
 			priority.setText("");
+			key.setText("");
+
 			
 		}
 	}
@@ -164,17 +171,15 @@ public class DetailPanel implements Observer {
 
 		if(query != null) {
 
-			String[] plop = query.getFileKey().split("/");
-			
-			file.setText(plop[plop.length-1]);
-			
-			key.setText(query.getFileKey());
-			path.setText(query.getPath());
+			file.setText(query.getFilename());
 
+			path.setText(query.getPath());
+			
 			if(query.isGlobal())
 				globalQueue.setText(I18n.getMessage("thaw.common.yes"));
 			else
 				globalQueue.setText(I18n.getMessage("thaw.common.no"));
+
 		} else {
 			file.setText("");
 			key.setText("");

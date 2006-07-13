@@ -129,7 +129,7 @@ public class FCPMessage {
 		if(getAmountOfDataWaiting() == 0)
 			result = result + "EndMessage\n";
 		else {
-			result = result + "DataLength="+ (new Long(getAmountOfDataWaiting())).toString();
+			result = result + "DataLength="+ (new Long(getAmountOfDataWaiting())).toString() + "\n";
 			result = result + "Data\n";
 		}
 

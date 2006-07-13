@@ -37,8 +37,13 @@ public class FCPQueryManager extends Observable implements Runnable {
 		return connection;
 	}
 
-	public synchronized boolean writeMessage(FCPMessage message) {
+	public boolean writeMessage(FCPMessage message) {
 		return connection.write(message.toString());
+	}
+
+	public boolean writeMessage(FCPMessage message, boolean checkLock) {
+		return connection.write(message.toString(), checkLock);
+
 	}
 
 	/**
@@ -100,8 +105,15 @@ public class FCPQueryManager extends Observable implements Runnable {
 			Logger.debug(this, "Message received. Notifying observers");
 
 			if(latestMessage != null) {
-				setChanged();
-				notifyObservers(latestMessage);
+				try {
+					setChanged();
+					notifyObservers(latestMessage);
+				} catch(Exception e) {
+					/* it's really bad ... because if data are waiting on the socket ... */
+					Logger.error(this, "EXCEPTION FROM ONE OF LISTENER : "+e.toString());
+					Logger.error(this, "ERROR : "+e.getMessage());
+					e.printStackTrace();						     
+				}
 			} else {
 				Logger.info(this, "Stopping listening");
 				return;

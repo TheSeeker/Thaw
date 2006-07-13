@@ -17,6 +17,7 @@ import thaw.core.Logger;
  * After being instanciated, you should commit it to the FCPQueryManager, and then
  * commit the FCPQueryManager to the FCPQueueManager.
  * Call observer when connected / disconnected.
+ * TODO: Add functions socketToFile(long size, File file) / fileToSocket(File file)
  */
 public class FCPConnection extends Observable {
 
@@ -154,10 +155,36 @@ public class FCPConnection extends Observable {
 		lockWriting = false;
 	}
 
+	public boolean isWritingLocked() {
+		return lockWriting;
+	}
+
+	/**
+	 * Doesn't check the lock state !
+	 */
+	public boolean rawWrite(byte[] data) {
+		if(out != null && socket != null && socket.isConnected()) {
+			try {
+				out.write(data);
+			} catch(java.io.IOException e) {
+				Logger.warning(this, "Unable to write() on the socket ?! : "+ e.toString());
+				return false;
+			}
+		} else {
+			Logger.warning(this, "Cannot write if disconnected !\n");
+			return false;
+		}
+
+		return true;
+	}
 
 	public synchronized boolean write(String toWrite) {
+		return write(toWrite, true);
+	}
 
-		while(lockWriting) {
+	public synchronized boolean write(String toWrite, boolean checkLock) {
+
+		while(checkLock && lockWriting) {
 			Logger.verbose(this, "Writting lock, unable to write.");
 			try {
 				Thread.sleep(200);
@@ -175,6 +202,7 @@ public class FCPConnection extends Observable {
 				out.write(toWrite.getBytes());
 			} catch(java.io.IOException e) {
 				Logger.warning(this, "Unable to write() on the socket ?! : "+ e.toString());
+				disconnect();
 				return false;
 			}
 		} else {
@@ -209,7 +237,7 @@ public class FCPConnection extends Observable {
 
 			rawBytesWaiting = rawBytesWaiting - rdBytes;
 
-			Logger.verbose(this, "Remaining: "+rawBytesWaiting);
+			//Logger.verbose(this, "Remaining: "+rawBytesWaiting);
 
 			return rdBytes;
 		} catch(java.io.IOException e) {
@@ -276,7 +304,7 @@ public class FCPConnection extends Observable {
 				}
 
 				if(DEBUG_MODE) {
-					if(result.matches("[- \\?.a-zA-Z0-9,~%@/_=\\[\\]\\(\\)]*"))
+					if(result.matches("[\\-\\ \\?.a-zA-Z0-9\\,~%@/_=\\[\\]\\(\\)]*"))
 						Logger.asIt(this, "Thaw <<< Node : "+result);
 					else
 						Logger.asIt(this, "Thaw <<< Node : Unknow chars in message. Not displayed");
@@ -286,9 +314,10 @@ public class FCPConnection extends Observable {
 				return result;
 
 			} catch (java.io.IOException e) {
-				if(isConnected())
+				if(isConnected()) {
 					Logger.error(this, "IOException while reading but still connected, wtf? : "+e.toString());
-				else
+					disconnect();
+				} else
 					Logger.notice(this, "IOException. Disconnected.");
 
 				return null;

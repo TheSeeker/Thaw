@@ -49,8 +49,6 @@ public class FCPQueueLoader implements Observer {
 
 			if(msg.getValue("PersistenceType").equals("reboot"))
 				persistence = 1;
-			if(msg.getValue("PersistenceType").equals("connection"))
-				persistence = 2;
 
 			boolean global = true;
 
@@ -79,8 +77,44 @@ public class FCPQueueLoader implements Observer {
 
 		}
 
+
 		if(msg.getMessageName().equals("PersistentPut")) {
-			Logger.warning(this, "Non implemented yet !");
+			Logger.info(this, "Resuming from PersistentPut");
+			
+			int persistence = 2;
+
+			/* TOFIX : Node doesn't return PersistenceType */
+			/*
+			if(msg.getValue("PersistenceType").equals("reboot"))
+				persistence = 1;
+			*/
+
+			boolean global = true;
+
+			if(msg.getValue("Global").equals("false"))
+				global = false;
+
+			String srcFile = null;
+
+			if(msg.getValue("Identifier").startsWith(thawId))
+				srcFile = msg.getValue("ClientToken");
+
+			int priority = ((new Integer(msg.getValue("PriorityClass"))).intValue());
+
+
+			FCPClientPut clientPut = new FCPClientPut(msg.getValue("Identifier"),
+								  msg.getValue("URI"), // key
+								  priority, persistence, global,
+								  srcFile, "Inserting", 0,
+								  queueManager);
+								  
+								  
+			if(queueManager.addQueryToTheRunningQueue(clientPut, false))
+				queueManager.getQueryManager().addObserver(clientPut);
+			else
+				Logger.info(this, "Already in the running queue");
+			
+
 			return;
 		}
 
