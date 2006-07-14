@@ -75,11 +75,16 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 			pendingQueries[i] = new Vector();
 	}
 
-
+	/**
+	 * Take care: Can change while you're using it.
+	 */
 	public Vector[] getPendingQueues() {
 		return pendingQueries;
 	}
 
+	/**
+	 * Take care: Can change while you're using it.
+	 */
 	public Vector getRunningQueue() {
 		return runningQueries;
 	}
@@ -130,11 +135,16 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 			 */
 
 			/* FIXME (not urgent) : Find a cleaner / safer way. */
-			String[] subId = query.getIdentifier().split("_");
-			int id = ((new Integer(subId[subId.length-1])).intValue());
-			
-			if(id > lastId) {
-				lastId = id;
+			try {
+				String[] subId = query.getIdentifier().split("-");
+				subId = subId[0].split("_");
+				int id = ((new Integer(subId[subId.length-1])).intValue());
+				
+				if(id > lastId) {
+					lastId = id;
+				}
+			} catch(Exception e) {
+				Logger.notice(this, "Exception while parsing previous Id. Not really a problem");
 			}
 		}
 

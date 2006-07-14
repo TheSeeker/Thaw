@@ -259,10 +259,8 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 					continue;
 		
 				if(e.getSource() == removeItem) {
-					if(query.isRunning() && !query.isFinished())
-						query.stop(core.getQueueManager());
-					if(query.isFinished())
-						query.removeRequest();
+
+					query.stop(core.getQueueManager());
 
 					core.getQueueManager().remove(query);
 					
@@ -281,10 +279,7 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 				}
 
 				if(e.getSource() == forceRestartItem) {
-					if(query.isRunning() && !query.isFinished())
-						query.stop(core.getQueueManager());
-
-					query.removeRequest();
+					query.stop(core.getQueueManager());
 
 					if(query.getMaxAttempt() >= 0)
 						query.setAttempt(0);

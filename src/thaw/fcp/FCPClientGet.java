@@ -136,7 +136,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		status = "Requesting";
 
 		if(this.identifier == null || this.identifier.equals(""))
-			this.identifier = queueManager.getAnID();
+			this.identifier = queueManager.getAnID() + "-"+filename;;
 
 		Logger.info(this, "Requesting key : "+getFileKey());
 
@@ -586,6 +586,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	public boolean stop(FCPQueueManager queryManager) {
 		Logger.info(this, "Stop fetching of the key : "+getFileKey());
+
+		removeRequest();
 
 		progress = 100;
 		successful = false;

@@ -146,7 +146,10 @@ public class DetailPanel implements Observer {
 			else
 				key.setText(I18n.getMessage("thaw.common.unknown"));
 
-			size.setText((new Long(query.getFileSize())).toString()+" B");
+			if(query.getFileSize() > 0)
+				size.setText(I18n.getMessage("thaw.common.unknown"));
+			else
+				size.setText((new Long(query.getFileSize())).toString()+" B");
 
 			status.setText(query.getStatus());
 			if(query.getIdentifier() != null)

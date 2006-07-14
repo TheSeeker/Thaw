@@ -8,6 +8,7 @@ import thaw.core.Logger;
 /**
  * Reload the queue from the queue node.
  * Send himself the ListPersistentRequests.
+ * It remains active to receive and add the persistentGet/Put receive during the execution
  */
 public class FCPQueueLoader implements Observer {
 	FCPQueueManager queueManager;
@@ -119,8 +120,8 @@ public class FCPQueueLoader implements Observer {
 		}
 
 		if(msg.getMessageName().equals("EndListPersistentRequests")) {
-			Logger.info(this, "End Of ListPersistentRequests. Self removing");
-			queueManager.getQueryManager().deleteObserver(this);
+			Logger.info(this, "End Of ListPersistentRequests.");
+			return;
 		}
 	}
 }

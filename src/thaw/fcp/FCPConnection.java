@@ -164,7 +164,7 @@ public class FCPConnection extends Observable {
 	}
 
 	/**
-	 * Doesn't check the lock state !
+	 * Doesn't check the lock state ! You have to manage it yourself.
 	 */
 	public boolean rawWrite(byte[] data) {
 		if(out != null && socket != null && socket.isConnected()) {
@@ -188,8 +188,11 @@ public class FCPConnection extends Observable {
 
 	public synchronized boolean write(String toWrite, boolean checkLock) {
 
-		while(checkLock && lockWriting) {
+		if(checkLock && lockWriting) {
 			Logger.verbose(this, "Writting lock, unable to write.");
+		}
+
+		while(checkLock && lockWriting) {
 			try {
 				Thread.sleep(200);
 			} catch(java.lang.InterruptedException e) {

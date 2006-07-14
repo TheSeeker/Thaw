@@ -240,7 +240,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 		status = "Sending to the node";
 
-		identifier = queueManager.getAnID();
+		identifier = queueManager.getAnID() + "-"+ localFile.getName();
 
 		setChanged();
 		notifyObservers();
