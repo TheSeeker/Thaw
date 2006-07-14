@@ -11,6 +11,7 @@ import thaw.core.Logger;
 
 /**
  * notify() only when progress has really changes.
+ * TODO: Put the fetchLock on FCPConnection. Not here.
  */
 public class FCPClientGet extends Observable implements Observer, FCPTransferQuery {
 	private final static int MAX_RETRIES = -1;
@@ -32,12 +33,14 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	private String identifier;
 
 	private int progress; /* in pourcent */
+	private boolean progressReliable = false;
 	private long fileSize;
 
 	private boolean running = false;
 	private boolean successful = false;
 
 	private static boolean fetchLock = false;
+	private boolean fetchLockOwner = false;
 
 
 	/**
@@ -47,13 +50,15 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		this.queueManager = queueManager;
 		setParameters(parameters);
 
+		progressReliable = false;
+
 		/* If isPersistent(), then start() won't be called, so must relisten the
 		   queryManager by ourself */
 		if(isPersistent() && identifier != null && !identifier.equals("")) {
 			this.queueManager.getQueryManager().deleteObserver(this);
 			this.queueManager.getQueryManager().addObserver(this);
 		}
-		
+
 	}
 
 
@@ -68,6 +73,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		this(key, priority, persistence, globalQueue, destinationDir);
 
+		progressReliable = false;
+
 		this.queueManager = queueManager;
 
 		this.progress = progress;
@@ -76,6 +83,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		successful = true;
 		running = true;
+		
 	}
 
 
@@ -91,6 +99,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	
 		if(globalQueue && persistence >= 2)
 			globalQueue = false; /* else protocol error */
+
+		progressReliable = false;
+
 
 		this.key = key;
 		this.priority = priority;
@@ -220,18 +231,24 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				Logger.debug(this, "Unknow URI ? was probably a stop order so no problem ...");
 				return;
 			}
-
+			/*
 			if(message.getValue("Fatal").equals("False")) {
 				Logger.debug(this, "Non-fatal protocol error");
 				status = "Protocol warning ("+message.getValue("CodeDescription")+")";
 				return;
 			}
+			*/
 
 			status = "Protocol Error ("+message.getValue("CodeDescription")+")";
 			progress = 100;
 			running = false;
 			successful = false;
-			
+
+			if(message.getValue("Fatal") != null &&
+			   message.getValue("Fatal").equals("false")) {
+				status = status + " (non-fatal)";
+			}
+
 			queueManager.getQueryManager().deleteObserver(this);
 
 			setChanged();
@@ -248,12 +265,6 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				return;
 			}
 
-			if(message.getValue("Fatal").equals("False")) {
-				Logger.debug(this, "Non-fatal GetFailed");
-				status = "Non-fatal GetFailed ("+message.getValue("CodeDescription")+")";
-				return;
-			}
-
 			//removeRequest();
 
 			int code = ((new Integer(message.getValue("Code"))).intValue());
@@ -263,6 +274,12 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			    progress = 100;
 			    running = false;
 			    successful = false;
+			    
+			    if(message.getValue("Fatal") != null &&
+			       message.getValue("Fatal").equals("false")) {
+				    status = status + " (non-fatal)";
+			    }
+
 			    queueManager.getQueryManager().deleteObserver(this);
 			} else {
 			    status = "Retrying";
@@ -289,6 +306,11 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				progress = (int)((succeeded * 99) / required);
 
 				status = "Fetching";
+
+				if(message.getValue("FinalizedTotal") != null &&
+				   message.getValue("FinalizedTotal").equals("true")) {
+					progressReliable = true;
+				}
 
 				setChanged();
 				notifyObservers();
@@ -320,6 +342,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			}
 
 			fetchLock = false;
+			fetchLockOwner = false;
 
 			//queueManager.getQueryManager().getConnection().unlockWriting();
 			
@@ -367,7 +390,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 				}
 
-				if(!fetchLock)
+				if(!fetchLock || fetchLockOwner)
 					break;
 			}
 			
@@ -375,7 +398,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				Logger.warning(this, "UnlockWaiter.run() : Wtf ?");
 			}
 
-			clientGet.saveFileTo(this.dir);
+			clientGet.continueSaveFileTo(this.dir);
 			return;
 		}
 	}
@@ -401,22 +424,28 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		}
 
 
-		if(fetchLock) {
+		Logger.info(this, "Waiting socket avaibility ...");
+		status = "Waiting socket avaibility ...";
 
-			Logger.info(this, "Another file is being downloaded ... waiting ...");
+		setChanged();
+		notifyObservers();
 
-			Thread fork = new Thread(new UnlockWaiter(this, dir));
 
-			fork.start();
+		Thread fork = new Thread(new UnlockWaiter(this, dir));
+		fork.start();
 
-			return true;
-		}
-		
+		return true;
+	}
+
+	public synchronized boolean continueSaveFileTo(String dir) {
+		destinationDir = dir;
+
 		if(destinationDir == null) {
-				Logger.warning(this, "saveFileTo() : Wtf ?");
+			Logger.warning(this, "saveFileTo() : Wtf ?");
 		}
 
 		fetchLock = true;
+		fetchLockOwner = true;
 
 		FCPMessage getRequestStatus = new FCPMessage();
 		
@@ -582,6 +611,10 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	public int getProgression() {
 		return progress;
+	}
+
+	public boolean isProgressionReliable() {
+		return progressReliable;
 	}
 
 	public String getFileKey() {

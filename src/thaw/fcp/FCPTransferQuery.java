@@ -53,6 +53,9 @@ public interface FCPTransferQuery extends FCPQuery {
 	 */
 	public int getProgression();
 
+	public boolean isProgressionReliable();
+
+
 	/**
 	 * Informal.
 	 * Gives *public* final key only.
@@ -113,7 +116,6 @@ public interface FCPTransferQuery extends FCPQuery {
 	 * @return can be null (if non active, or meaningless).
 	 */
 	public String getIdentifier();
-
 
 	public String getFilename();
 }

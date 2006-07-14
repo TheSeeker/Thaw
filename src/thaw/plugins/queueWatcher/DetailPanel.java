@@ -128,15 +128,23 @@ public class DetailPanel implements Observer {
 	public void refresh() {
 		if(query != null) {
 			progress.setValue(query.getProgression());
-			if(!query.isFinished() || query.isSuccessful())
-				progress.setString((new Integer(query.getProgression())).toString() + "%");
-			else
-				progress.setString("FAILED");
+
+			
+
+			if(!query.isFinished() || query.isSuccessful()) {
+				String progression = (new Integer(query.getProgression())).toString() + "%";
+
+				if(!query.isProgressionReliable())
+					progression = progression + " ("+I18n.getMessage("thaw.common.estimation")+")";
+
+				progress.setString(progression);
+			} else
+				progress.setString(I18n.getMessage("thaw.common.failed"));
 			
 			if(query.getFileKey() != null)
 				key.setText(query.getFileKey());
 			else
-				key.setText("Unknown");
+				key.setText(I18n.getMessage("thaw.common.unknown"));
 
 			size.setText((new Long(query.getFileSize())).toString()+" B");
 
@@ -150,7 +158,7 @@ public class DetailPanel implements Observer {
 			if(query.getThawPriority() != -1)
 				priority.setText((new Integer(query.getThawPriority())).toString());
 			else
-				priority.setText("Unknown");
+				priority.setText(I18n.getMessage("thaw.common.unknown"));
 			
 		} else {
 			progress.setValue(0);
@@ -173,7 +181,10 @@ public class DetailPanel implements Observer {
 
 			file.setText(query.getFilename());
 
-			path.setText(query.getPath());
+			if(query.getPath() != null)
+				path.setText(query.getPath());
+			else
+				path.setText(I18n.getMessage("thaw.common.unspecified"));
 			
 			if(query.isGlobal())
 				globalQueue.setText(I18n.getMessage("thaw.common.yes"));

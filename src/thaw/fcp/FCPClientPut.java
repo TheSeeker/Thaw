@@ -453,17 +453,6 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			}
 
 			if(msg.getMessageName().equals("PutFailed")) {
-				/*
-				if(msg.getValue("Fatal") != null
-				   && msg.getValue("Fatal").equals("false")) {
-					status = "Warning ("+msg.getValue("CodeDescription+")+")";
-					
-					setChanged();
-					notifyObservers();
-
-					return;
-				}
-				*/
 
 				successful = false;
 				running = false;
@@ -471,29 +460,25 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 				status = "Failed ("+msg.getValue("CodeDescription")+")";
 
+				if(msg.getValue("Fatal") != null &&
+				   msg.getValue("Fatal").equals("false"))
+					status = status + " (non-fatal)";
+
 				setChanged();
 				notifyObservers();
 				return;
 			}
 
 			if(msg.getMessageName().equals("ProtocolError")) {
-				/*
-				if(msg.getValue("Fatal") != null
-				   && msg.getValue("Fatal").equals("false")) {
-					status = "Protocol warning ("+msg.getValue("CodeDescription+")+")";
-
-					setChanged();
-					notifyObservers();
-
-					return;
-				}
-				*/
 
 				successful = false;
 				running = false;
 				finished = true;
 
 				status = "Protocol error ("+msg.getValue("CodeDescription")+")";
+				if(msg.getValue("Fatal") != null && 
+				   msg.getValue("Fatal").equals("false"))
+					status = status + " (non-fatal)";
 
 				setChanged();
 				notifyObservers();
@@ -526,7 +511,14 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			if(msg.getMessageName().equals("FinishedCompression")) {
 				status = "Inserting";
 
-				int rate = (int)( ((new Long(msg.getValue("OrigSize"))).longValue() * 100) / (new Long(msg.getValue("OrigSize"))).longValue() );
+				if(msg.getValue("OrigSize") == null
+				   || msg.getValue("CompressedSize") == null) {
+					setChanged();
+					notifyObservers();
+					return;
+				}
+
+				int rate = (int)( ((new Long(msg.getValue("OrigSize"))).longValue() * 100) / (new Long(msg.getValue("CompressedSize"))).longValue() );
 
 				Logger.info(this, "Compression: "+ (new Integer(rate)).intValue());
 
@@ -616,6 +608,10 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 	public int getProgression() {
 		return progress;
+	}
+
+	public boolean isProgressionReliable() {
+		return true;
 	}
 
 	/**

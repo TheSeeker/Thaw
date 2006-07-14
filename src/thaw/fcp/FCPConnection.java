@@ -99,6 +99,8 @@ public class FCPConnection extends Observable {
 			return false;
 		}
 		
+		Logger.info(this, "Connection to "+nodeAddress+":"+(new Integer(port)).toString()+"...");
+
 		if(socket != null && !socket.isClosed())
 			disconnect();
 
@@ -131,6 +133,8 @@ public class FCPConnection extends Observable {
 		}
 
 		reader = new BufferedInputStream(in);
+
+		Logger.info(this, "Connected");
 
 		setChanged();
 		notifyObservers();

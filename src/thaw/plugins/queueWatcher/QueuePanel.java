@@ -201,13 +201,18 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 	/**
 	 * @param queries Vector of FCPTransferQuery only
 	 */
-	public void addToTable(Vector queries) {
-		for(Iterator queryIt = queries.iterator();
-		    queryIt.hasNext();) {
-			
-			FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
+	public synchronized void addToTable(Vector queries) {
+		try {
+			for(Iterator queryIt = queries.iterator();
+			    queryIt.hasNext();) {
+				
+				FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
+				
+				addToTable(query);
+			}
 
-			addToTable(query);
+		} catch(java.util.ConcurrentModificationException e) {
+			Logger.notice(this, "Collision.");
 		}
 	}
 

@@ -50,7 +50,7 @@ public class FCPMessage {
 		for(i++; i < lines.length ; i++) {
 			/* Empty lines are ignored. */
 			/* Line not containing '=' (like "Data" or "EndMessage") are ignored */
-			if(lines[i].equals("") || !lines[i].contains("="))
+			if(lines[i].equals("") || !(lines[i].indexOf("=") >= 0))
 				continue;
 
 			String[] affectation = lines[i].split("=");
@@ -76,7 +76,7 @@ public class FCPMessage {
 			Logger.notice(this, "Setting name to empty ? weird");
 		}
 		
-		if(name.contains("\n")) {
+		if(name.indexOf("\n")>=0) {
 			Logger.notice(this, "Name shouldn't contain '\n'");
 		}
 
