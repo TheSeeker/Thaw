@@ -48,8 +48,8 @@ public class FCPGenerateSSK extends Observable implements FCPQuery, Observer {
 			privateKey = msg.getValue("InsertURI");
 			publicKey = msg.getValue("RequestURI");
 
-			privateKey = privateKey.replace("freenet:", "");
-			publicKey = publicKey.replace("freenet:", "");
+			privateKey = privateKey.replaceFirst("freenet:", "");
+			publicKey = publicKey.replaceFirst("freenet:", "");
 
 			setChanged();
 			notifyObservers();

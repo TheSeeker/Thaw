@@ -52,7 +52,7 @@ public class FetchPlugin implements thaw.core.Plugin {
 		for(int i = 0 ; i < keys.length ; i++) {
 			String[] subKey = keys[i].split("\\?"); /* Because of VolodyA :p */
 
-			String key = subKey[0].replace("http://127.0.0.1:8888/", "");
+			String key = subKey[0].replaceFirst("http://127.0.0.1:8888/", "");
 
 			core.getQueueManager().addQueryToThePendingQueue(new FCPClientGet(key,
 											  priority,

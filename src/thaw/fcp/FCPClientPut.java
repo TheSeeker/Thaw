@@ -411,7 +411,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				status = "Inserting";
 
 				publicKey = msg.getValue("URI");
-				publicKey = publicKey.replace("freenet:", "");
+				publicKey = publicKey.replaceAll("freenet:", "");
 
 				/*
 				if(keyType == 0)
@@ -433,7 +433,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				running = false;
 
 				publicKey = msg.getValue("URI");
-				publicKey = publicKey.replace("freenet:", "");
+				publicKey = publicKey.replaceAll("freenet:", "");
 
 				if(keyType == 0)
 					publicKey = publicKey + name;
@@ -703,7 +703,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		
 		result.put("status", status);
 
-		result.put("attempt", (new Integer(attempt)).intValue());
+		result.put("attempt", (new Integer(attempt)).toString());
 		result.put("identifier", identifier);
 		result.put("running", ((new Boolean(running)).toString()));
 		result.put("successful", ((new Boolean(successful)).toString()));

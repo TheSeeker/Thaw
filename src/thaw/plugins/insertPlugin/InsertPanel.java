@@ -266,8 +266,8 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 					if(privateKey != null
 					   && !privateKey.equals("")) {
-						privateKey = privateKey.replace("SSK@", "");
-						privateKey = privateKey.replace("USK@", "");
+						privateKey = privateKey.replaceFirst("SSK@", "");
+						privateKey = privateKey.replaceFirst("USK@", "");
 						String[] split = privateKey.split("/");
 						privateKey = split[0];
 					} else {
@@ -390,8 +390,8 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 				
 				if(clientPut.getPublicKey() != null) {
 					String publicKey = clientPut.getPublicKey();
-					publicKey = publicKey.replace("SSK@", "");
-					publicKey = publicKey.replace("USK@", "");
+					publicKey = publicKey.replaceFirst("SSK@", "");
+					publicKey = publicKey.replaceFirst("USK@", "");
 					String[] split = publicKey.split("/");
 					publicKeyField.setText(split[0]);
 				} else {
@@ -400,8 +400,8 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 				if(clientPut.getPrivateKey() != null) {
 					String privateKey = clientPut.getPrivateKey();
-					privateKey = privateKey.replace("SSK@", "");
-					privateKey = privateKey.replace("USK@", "");
+					privateKey = privateKey.replaceFirst("SSK@", "");
+					privateKey = privateKey.replaceFirst("USK@", "");
 					String[] split = privateKey.split("/");
 					privateKeyField.setText(split[0]);
 					
