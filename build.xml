@@ -16,7 +16,6 @@
 
     <javac srcdir="${src.dir}" destdir="${bin.dir}" debug="true" optimize="true">
 
-      <compilerarg value="-Xlint" />
 
       <classpath>
         <pathelement location="${hsqldb.location}"/>
