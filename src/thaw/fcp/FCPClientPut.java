@@ -26,6 +26,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	private int persistence = 2;
 
 	private int progress = 0;
+	private int toTheNodeProgress = 0;
 	private String status = null;
 
 	private int attempt = 0;
@@ -101,6 +102,8 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			    int priority, int persistence, boolean global,
 			    String srcFile, String status, int progress,
 			    FCPQueueManager queueManager) {
+		toTheNodeProgress = 100;
+		
 		this.queueManager = queueManager;
 		this.identifier = identifier;
 		
@@ -222,6 +225,8 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	public boolean startInsert() {
 		FCPConnection connection = queueManager.getQueryManager().getConnection();
 
+		toTheNodeProgress= 0;
+
 		status = "Waiting socket availability";
 		
 		Logger.info(this, "Another file is being uploaded ... waiting ...");
@@ -323,7 +328,9 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			Logger.error(this, "FileNotFoundException ?! ohoh, problems ...");
 			return false;
 		}
-		
+
+		long startTime = System.currentTimeMillis();
+		long origSize = remaining;
 
 		while(remaining > 0) {
 			int to_read = PACKET_SIZE;			
@@ -350,8 +357,18 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 			remaining = remaining - to_read;
 
+			if( System.currentTimeMillis() >= (startTime+1000) ) {
+				toTheNodeProgress = (int) (((origSize - remaining) * 100) / origSize);
+				setChanged();
+				notifyObservers();
+				startTime = System.currentTimeMillis();
+			}
+
 			//Logger.verbose(this, "Remaining: "+(new Long(remaining)).toString());
 		}
+
+
+		toTheNodeProgress = 100;
 
 		try {
 			if(in.available() > 0) {
@@ -768,5 +785,9 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	 */
 	public boolean saveFileTo(String dir) {
 		return false;
+	}
+
+	public int getTransferWithTheNodeProgression() {
+		return toTheNodeProgress;
 	}
 }

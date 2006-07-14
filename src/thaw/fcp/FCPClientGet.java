@@ -33,6 +33,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	private String identifier;
 
 	private int progress; /* in pourcent */
+	private int fromTheNodeProgress = 0; /* I'm not sure that it's correct english ... */
 	private boolean progressReliable = false;
 	private long fileSize;
 
@@ -51,6 +52,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		setParameters(parameters);
 
 		progressReliable = false;
+		fromTheNodeProgress = 0;
 
 		/* If isPersistent(), then start() won't be called, so must relisten the
 		   queryManager by ourself */
@@ -58,7 +60,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			this.queueManager.getQueryManager().deleteObserver(this);
 			this.queueManager.getQueryManager().addObserver(this);
 		}
-
+		
 	}
 
 
@@ -83,6 +85,11 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		successful = true;
 		running = true;
+
+		if(progress < 100)
+			fromTheNodeProgress = 0;
+		else
+			fromTheNodeProgress = 100;
 		
 	}
 
@@ -101,7 +108,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			globalQueue = false; /* else protocol error */
 
 		progressReliable = false;
-
+		fromTheNodeProgress = 0;
 
 		this.key = key;
 		this.priority = priority;
@@ -404,7 +411,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	}
 
 	public synchronized boolean saveFileTo(String dir) {
-
+		fromTheNodeProgress = 0;
 		if(dir == null) {
 			Logger.warning(this, "saveFileTo() : Can't save to null.");
 			return false;
@@ -495,7 +502,11 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		}
 
 		/* size == bytes remaining on socket */
+		long origSize = size;
+		long startTime = System.currentTimeMillis();
+
 		while(size > 0) {
+
 			int packet = PACKET_SIZE;
 			byte[] read;
 			int amount;
@@ -525,7 +536,16 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			
 			size = size - amount;
 			
+			if( System.currentTimeMillis() >= (startTime+1000)) {
+				fromTheNodeProgress = (int) (((origSize-size) * 100) / origSize);
+				setChanged();
+				notifyObservers();
+				startTime = System.currentTimeMillis();
+			}
+
 		}
+
+		fromTheNodeProgress = 100;
 
 		if(reallyWrite) {
 			try {
@@ -737,5 +757,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	public boolean isGlobal() {
 		return globalQueue;
+	}
+
+	public int getTransferWithTheNodeProgression() {
+		return fromTheNodeProgress;
 	}
 }

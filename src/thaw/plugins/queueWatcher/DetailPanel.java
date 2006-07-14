@@ -31,6 +31,7 @@ public class DetailPanel implements Observer {
 	private JTextField file       = new JTextField();
 	private JTextField size       = new JTextField();
 	private JProgressBar progress = new JProgressBar(0, 100);
+	private JProgressBar withTheNodeProgress = new JProgressBar(0, 100);
 	private JTextField status     = new JTextField(); 
 	private JTextField key        = new JTextField();
 	private JTextField path       = new JTextField();
@@ -42,7 +43,7 @@ public class DetailPanel implements Observer {
 	private FCPTransferQuery query = null;
 
 
-	private final static Dimension dim = new Dimension(300, 375);
+	private final static Dimension dim = new Dimension(300, 400);
 
 
 	public DetailPanel(Core core) {
@@ -54,6 +55,7 @@ public class DetailPanel implements Observer {
 		String[] fieldNames = { I18n.getMessage("thaw.common.file"),
 					I18n.getMessage("thaw.common.size"),
 					I18n.getMessage("thaw.common.progress"),
+					I18n.getMessage("thaw.common.withTheNodeProgress"),
 					I18n.getMessage("thaw.common.status"),
 					I18n.getMessage("thaw.common.key"),
 					I18n.getMessage("thaw.common.localPath"),
@@ -81,13 +83,18 @@ public class DetailPanel implements Observer {
 					progress.setString("");
 					progress.setStringPainted(true);
 					break;
-				case(3): field = status; status.setEditable(false); break;
-				case(4): field = key; key.setEditable(false);break;
-				case(5): field = path; path.setEditable(false); break;
-				case(6): field = priority; priority.setEditable(false); break;
-				case(7): field = attempt; attempt.setEditable(false); break;
-				case(8): field = identifier; identifier.setEditable(false); break;
-				case(9): field = globalQueue; globalQueue.setEditable(false); break;
+				case(3):
+					field = withTheNodeProgress;
+					withTheNodeProgress.setString("");
+					withTheNodeProgress.setStringPainted(true);
+					break;
+				case(4): field = status; status.setEditable(false); break;
+				case(5): field = key; key.setEditable(false);break;
+				case(6): field = path; path.setEditable(false); break;
+				case(7): field = priority; priority.setEditable(false); break;
+				case(8): field = attempt; attempt.setEditable(false); break;
+				case(9): field = identifier; identifier.setEditable(false); break;
+				case(10): field = globalQueue; globalQueue.setEditable(false); break;
 				default: Logger.error(this, "Gouli goula ? ... is going to crash :p"); break;
 				}
 
@@ -127,10 +134,10 @@ public class DetailPanel implements Observer {
 
 	public void refresh() {
 		if(query != null) {
+			withTheNodeProgress.setValue((new Integer(query.getTransferWithTheNodeProgression())).intValue());
+			withTheNodeProgress.setString((new Integer(query.getTransferWithTheNodeProgression())).toString() + "%");
+
 			progress.setValue(query.getProgression());
-
-			
-
 			if(!query.isFinished() || query.isSuccessful()) {
 				String progression = (new Integer(query.getProgression())).toString() + "%";
 
@@ -164,6 +171,8 @@ public class DetailPanel implements Observer {
 				priority.setText(I18n.getMessage("thaw.common.unknown"));
 			
 		} else {
+			withTheNodeProgress.setValue(0);
+			withTheNodeProgress.setString("");
 			progress.setValue(0);
 			progress.setString("");
 			status.setText("");

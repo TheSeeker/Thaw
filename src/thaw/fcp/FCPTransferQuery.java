@@ -6,7 +6,7 @@ import java.util.HashMap;
  * Transfer query == fetch / insert query. These queries must be able to
  * give more informations than the other.
  * Functions returning status of the request may be call frequently, so try to make them fast.
- *
+ * Some methods are only useful for downloads, and some for insertions, so check getQueryType() before calling them.
  */
 public interface FCPTransferQuery extends FCPQuery {
 
@@ -49,11 +49,17 @@ public interface FCPTransferQuery extends FCPQuery {
 
 	/**
 	 * Informal.
+	 * Is about the transfer on the network.
 	 * In pourcents.
 	 */
 	public int getProgression();
 
 	public boolean isProgressionReliable();
+
+	/**
+	 * Is about the transfer between the node and thaw.
+	 */
+	public int getTransferWithTheNodeProgression();
 
 
 	/**
