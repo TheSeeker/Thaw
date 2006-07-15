@@ -108,7 +108,11 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 		if( (isForInsertions && column == 3
 		     || (!isForInsertions && column == 4) ) ) {
-			return (new Integer(query.getProgression()));
+			if(!query.isFinished() || query.isSuccessful())
+				return (new Integer(query.getProgression()));
+			else
+				return (new Integer(-1));
+
 		}
 
 		return null;

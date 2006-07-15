@@ -168,9 +168,16 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 				JProgressBar bar = new JProgressBar(0, 100);
 
 				bar.setStringPainted(true);
-				bar.setValue(progress.intValue());
-				bar.setString(progress.toString() + "%");
 				bar.setBorderPainted(false);
+
+				if(progress.intValue() >= 0) {
+					bar.setValue(progress.intValue());
+					bar.setString(progress.toString() + "%");
+				} else {
+					bar.setValue(100);
+					bar.setString(I18n.getMessage("thaw.common.failed"));
+				}
+
 
 				return bar;
 			}

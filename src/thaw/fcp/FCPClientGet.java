@@ -120,7 +120,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		this.progress = 0;
 		this.fileSize = 0;
-		this.attempt = -1;
+		this.attempt = 0;
 		
 		if(key.indexOf('/') == key.length()-1) {
 			filename = "index.html";
