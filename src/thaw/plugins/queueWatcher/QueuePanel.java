@@ -91,7 +91,7 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 		scrollPane = new JScrollPane(table);
 		panel.add(scrollPane, BorderLayout.CENTER);
 
-		table.setDefaultRenderer( table.getColumnClass(0), new ProgressRenderer(table, tableModel) );
+		table.setDefaultRenderer( table.getColumnClass(0), new ProgressRenderer(table, tableModel, isForInsertionQueue) );
 
 		tableModel.addTableModelListener(table);
 		
@@ -147,17 +147,34 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 		private final Color RUNNING = Color.ORANGE;
 		private final Color PENDING = Color.WHITE;
 
-		QueueTableModel model = null;
-		JTable tabl = null;
+		private QueueTableModel model = null;
+		private JTable tabl = null;
+		private boolean insertionQueue;
 
-		public ProgressRenderer(JTable table, QueueTableModel model) {
+		public ProgressRenderer(JTable table, QueueTableModel model, boolean isForInsertion) {
 			this.model = model;
 			this.tabl = table;
+			this.insertionQueue = isForInsertion;
 		}
 
 		public Component getTableCellRendererComponent(JTable table, Object value,
 							       boolean isSelected, boolean hasFocus,
 							       int row, int column) {
+
+			
+			if( (insertionQueue && column == 3)
+			    || (!insertionQueue && column == 4) ) {
+				Integer progress = (Integer)value;
+				JProgressBar bar = new JProgressBar(0, 100);
+
+				bar.setStringPainted(true);
+				bar.setValue(progress.intValue());
+				bar.setString(progress.toString() + "%");
+				bar.setBorderPainted(false);
+
+				return bar;
+			}
+
 
 			Component cell = super.getTableCellRendererComponent(table, value,
 									     isSelected, hasFocus,
