@@ -59,6 +59,9 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	
 
 	private String getPrintableSize(long size) {
+		if(size == 0)
+			return I18n.getMessage("thaw.common.unknown");
+
 		if(size < 1024) /* < 1KB */
 			return ((new Long(size)).toString() + " B");
 

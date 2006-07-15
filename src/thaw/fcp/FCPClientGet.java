@@ -83,13 +83,15 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		this.status = status;
 		this.identifier = id;
 
-		successful = true;
+		successful = false;
 		running = true;
 
-		if(progress < 100)
+		if(progress < 100) {
 			fromTheNodeProgress = 0;
-		else
+		} else {
 			fromTheNodeProgress = 100;
+			progressReliable = true;
+		}
 		
 	}
 
@@ -211,6 +213,10 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 						Logger.info(this, "Don't know where to put file, so file not asked to the node");
 					}
 				}
+
+
+				fromTheNodeProgress = 100;
+				progressReliable = true;
 				
 				setChanged();
 				notifyObservers();

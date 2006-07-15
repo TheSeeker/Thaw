@@ -13,6 +13,7 @@ import thaw.core.Logger;
  */
 public class FCPClientPut extends Observable implements FCPTransferQuery, Observer {
 	private FCPQueueManager queueManager = null;
+	private final static int BLOCK_SIZE = 32768;
 
 	private File localFile = null;
 	private long fileSize = 0;
@@ -550,14 +551,18 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				if(msg.getValue("Total") != null
 				   && msg.getValue("Succeeded") != null) {
 
-					long required = (new Long(msg.getValue("Total"))).longValue();
+					long total = (new Long(msg.getValue("Total"))).longValue();
+					//long required = (new Long(msg.getValue("Required"))).longValue();
 					long succeeded = (new Long(msg.getValue("Succeeded"))).longValue();
 					
-					progress = (int)((succeeded * 99) / required);
+					progress = (int)((succeeded * 99) / total);
 				
 					running = true;
 					finished = false;
 					successful = false;
+
+					//if(fileSize == 0)
+					//	fileSize = BLOCK_SIZE * required; // NOT RELIABLE
 
 					status = "Inserting";
 					
