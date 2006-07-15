@@ -57,6 +57,26 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		return (String)columnNames.get(col);
 	}
 	
+
+	private String getPrintableSize(long size) {
+		if(size < 1024) /* < 1KB */
+			return ((new Long(size)).toString() + " B");
+
+		if(size < 1048576) { /* < 1MB */
+			long kb = size / 1024;
+			return ((new Long(kb)).toString() + " KB");
+		}
+
+		if(size < 1073741824) { /* < 1GB */
+			long mb = size / 1048576;
+			return ((new Long(mb)).toString() + " MB");
+		}
+
+		long gb = size / 1073741824;
+
+		return ((new Long(gb)).toString() +" GB");
+	}
+
 	public Object getValueAt(int row, int column) {
 		if(row >= queries.size())
 			return null;
@@ -68,7 +88,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		}
 
 		if(column == 1) {
-			return ((new Long(query.getFileSize())).toString() + " B"); /* TODO : Convert to KB / MB / GB */
+			return getPrintableSize(query.getFileSize());
 		}
 
 		if(!isForInsertions && column == 2) {
