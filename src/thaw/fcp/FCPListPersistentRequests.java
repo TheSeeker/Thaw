@@ -17,8 +17,7 @@ public class FCPListPersistentRequests implements FCPQuery {
 	}
 
 	public boolean stop(FCPQueueManager queueManager) {
-
-		return false;
+		return true;
 	}
 
 	public int getQueryType() {

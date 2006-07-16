@@ -38,7 +38,7 @@ import thaw.i18n.I18n;
 
 import thaw.fcp.*;
 
-public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner, KeyListener {
+public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	private Core core;
 
 	private JLabel label;
@@ -262,33 +262,42 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 	}
 
 
-	public void actionPerformed(ActionEvent e) {
-		Toolkit tk = Toolkit.getDefaultToolkit();
-		String keys = "";
-		File dir = null;
+	private class ActionReplier implements Runnable, ClipboardOwner {
+		ActionEvent e;
+		Vector queries;
 
-		if(e.getSource() == downloadItem) {
-			FileChooser fileChooser = new FileChooser();
-			fileChooser.setTitle(I18n.getMessage("thaw.common.downloadLocally"));
-			fileChooser.setDirectoryOnly(true);
-			fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
-			dir = fileChooser.askOneFile();
+		public ActionReplier(ActionEvent e, Vector queries) {
+			this.e = e;
+			this.queries = queries;
 		}
 
+		public void run() {
+			Toolkit tk = Toolkit.getDefaultToolkit();
+			String keys = "";
+			File dir = null;
 
-		for(int i = 0 ; i < selectedRows.length;i++) {
-				FCPTransferQuery query = (FCPTransferQuery)queries.get(selectedRows[i]);
+			if(e.getSource() == downloadItem) {
+				FileChooser fileChooser = new FileChooser();
+				fileChooser.setTitle(I18n.getMessage("thaw.common.downloadLocally"));
+				fileChooser.setDirectoryOnly(true);
+				fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
+				dir = fileChooser.askOneFile();
+			}
+			
+			
+			for(Iterator queryIt = queries.iterator() ; queryIt.hasNext() ;) {
+				FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
 
 				if(query == null)
 					continue;
 		
 				if(e.getSource() == removeItem) {
 
-					query.stop(core.getQueueManager());
+					if(query.stop(core.getQueueManager())) {
 
-					core.getQueueManager().remove(query);
-					
-					tableModel.removeQuery(query);
+						core.getQueueManager().remove(query);
+						tableModel.removeQuery(query);
+					}
 				}
 
 				if(e.getSource() == cancelItem) {
@@ -316,22 +325,44 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 					   && !query.getFileKey().equals(""))
 						keys = keys + query.getFileKey() + "\n";
 				}
-
+				
 				if(e.getSource() == downloadItem
 				   && dir != null) {
 					query.saveFileTo(dir.getPath());
 				}
-
-		} /* for i in selectedRows */
-
-		
-
-		if(e.getSource() == copyKeysItem) {
-			StringSelection st = new StringSelection(keys);
-			Clipboard cp = tk.getSystemClipboard();
-			cp.setContents(st, this);
+				
+			} /* for i in selectedRows */
+			
+			
+			
+			if(e.getSource() == copyKeysItem) {
+				StringSelection st = new StringSelection(keys);
+				Clipboard cp = tk.getSystemClipboard();
+				cp.setContents(st, this);
+			}
+			
 		}
 
+		public void lostOwnership(Clipboard clipboard, java.awt.datatransfer.Transferable contents) {
+			/* we dont care */
+		}
+		
+	}
+
+	/**
+	 * Manage it on a different thread to avoid UI freeze.
+	 */
+	public void actionPerformed(ActionEvent e) {
+		Vector queries = new Vector();
+		Vector initialQueries = tableModel.getQueries();
+
+		/* Create a separate vector to avoid collisions */
+		for(int i = 0 ; i < selectedRows.length; i++) {
+			queries.add(initialQueries.get(selectedRows[i]));
+		}
+
+		Thread action = new Thread(new ActionReplier(e, queries));
+		action.start();
 	}
 
 	public void mouseClicked(MouseEvent e) {
@@ -361,11 +392,6 @@ public class QueuePanel implements MouseListener, ActionListener, ClipboardOwner
 	public void mouseReleased(MouseEvent e) {
 
 	}
-
-	public void lostOwnership(Clipboard clipboard, java.awt.datatransfer.Transferable contents) {
-		/* we dont care */
-	}
-
 
 	public void keyPressed(KeyEvent e) { }
 

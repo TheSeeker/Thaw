@@ -37,7 +37,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	private boolean running = false;
 	private boolean finished = false;
 	private boolean successful = false;
-
+	private boolean sending = false;
 	
 	private FCPGenerateSSK sskGenerator = null;
 
@@ -241,6 +241,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 	public boolean continueInsert() {
 		running = true; /* Here we are really running */
+		sending = true;
 
 		FCPConnection connection = queueManager.getQueryManager().getConnection();
 
@@ -288,6 +289,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		Logger.info(this, "File sent (or not)");
 
 		connection.unlockWriting();
+		sending = false;
 
 		if(ret == true) {
 			successful = false;
@@ -360,7 +362,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 			remaining = remaining - to_read;
 
-			if( System.currentTimeMillis() >= (startTime+1000) ) {
+			if( System.currentTimeMillis() >= (startTime+3000) ) {
 				toTheNodeProgress = (int) (((origSize - remaining) * 100) / origSize);
 				setChanged();
 				notifyObservers();
@@ -387,9 +389,8 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	}
 
 	public boolean stop(FCPQueueManager queueManager) {
-		status = "Stopped";
-		
 		if(removeRequest()) {
+			status = "Stopped";
 			finished = true;
 			successful = false;
 			running = false;
@@ -605,6 +606,14 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	public boolean removeRequest() {
 		setChanged();
 		notifyObservers();
+
+		if(sending) {
+			Logger.notice(this, "Can't interrupt while sending to the node ...");
+			status = status + " (can't interrupt while sending to the node)";
+			setChanged();
+			notifyObservers();
+			return false;
+		}
 
 		if(isRunning() || isFinished()) {
 			FCPMessage msg = new FCPMessage();

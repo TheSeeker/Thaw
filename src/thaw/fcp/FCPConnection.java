@@ -176,7 +176,12 @@ public class FCPConnection extends Observable {
 	 * Doesn't check the lock state ! You have to manage it yourself.
 	 */
 	public boolean rawWrite(byte[] data) {
-		return bufferedOut.write(data);
+		if(bufferedOut != null)
+			return bufferedOut.write(data);
+		else {
+			Logger.notice(this, "rawWrite(), bufferedOut == null ? Socket closed ?");
+			return false;
+		}
 	}
 
 	/**

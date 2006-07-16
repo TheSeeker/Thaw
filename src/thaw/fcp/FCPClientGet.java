@@ -542,7 +542,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			
 			size = size - amount;
 			
-			if( System.currentTimeMillis() >= (startTime+1000)) {
+			if( System.currentTimeMillis() >= (startTime+3000)) {
 				fromTheNodeProgress = (int) (((origSize-size) * 100) / origSize);
 				setChanged();
 				notifyObservers();
@@ -613,12 +613,13 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	public boolean stop(FCPQueueManager queryManager) {
 		Logger.info(this, "Stop fetching of the key : "+getFileKey());
 
-		removeRequest();
+		if(!removeRequest()) {
+			return false;
+		}
 
 		progress = 100;
 		successful = false;
 		status = "Stopped";
-
 		setChanged();
 		notifyObservers();
 		

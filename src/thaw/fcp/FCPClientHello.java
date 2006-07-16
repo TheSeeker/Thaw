@@ -141,7 +141,7 @@ public class FCPClientHello implements FCPQuery, Observer {
 	 * Not used.
 	 */
 	public boolean stop(FCPQueueManager queueManager) {
-		return false;
+		return true;
 	}
 
 

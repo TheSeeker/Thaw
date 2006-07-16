@@ -32,7 +32,7 @@ public class FCPQueueLoader implements Observer {
 
 	public boolean stop(FCPQueueManager queueManager) {
 		/* Ignored */
-		return false;
+		return true;
 	}
 
 	public int getQueryType() {
