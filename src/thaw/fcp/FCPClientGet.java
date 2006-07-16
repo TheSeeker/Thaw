@@ -335,8 +335,6 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		if(message.getMessageName().equals("AllData")) {
 			Logger.debug(this, "AllData ! : " + identifier);
 
-			status = "Loading";
-
 			fileSize = message.getAmountOfDataWaiting();
 
 			status = "Writing";
@@ -453,6 +451,11 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	public synchronized boolean continueSaveFileTo(String dir) {
 		destinationDir = dir;
 
+		status = "Requesting file";
+
+		setChanged();
+		notifyObservers();
+
 		if(destinationDir == null) {
 			Logger.warning(this, "saveFileTo() : Wtf ?");
 		}
@@ -469,6 +472,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		else
 			getRequestStatus.setValue("Global", "false");
 		getRequestStatus.setValue("OnlyData", "true");
+
+		
 		
 		queueManager.getQueryManager().writeMessage(getRequestStatus);
 
