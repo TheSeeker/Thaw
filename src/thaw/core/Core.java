@@ -89,7 +89,7 @@ public class Core implements Observer {
 		if(!initPluginManager())
 			return false;
 
-		mainWindow.setStatus(I18n.getMessage("thaw.statusBar.ready"));
+		mainWindow.setStatus("Thaw "+Main.VERSION+" : "+I18n.getMessage("thaw.statusBar.ready"));
 
 		mainWindow.setVisible(true);
 
