@@ -15,6 +15,10 @@ public class FileChooser {
 		fileChooser = new JFileChooser();
 	}
 
+	public FileChooser(String path) {
+		fileChooser = new JFileChooser(path);
+	}
+
 	public void setTitle(String title) {
 		fileChooser.setDialogTitle(title);
 	}

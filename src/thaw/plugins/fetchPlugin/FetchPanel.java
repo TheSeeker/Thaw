@@ -157,6 +157,8 @@ public class FetchPanel implements java.awt.event.ActionListener {
 		dstChoosePanel.setLayout(new GridLayout(3,1, 5, 5));
 		
 		destinationField = new JTextField("");
+		if(core.getConfig().getValue("lastDestinationDirectory") != null)
+			destinationField.setText(core.getConfig().getValue("lastDestinationDirectory"));
 		destinationField.setEditable(false);
 		
 		destinationButton = new JButton(I18n.getMessage("thaw.plugin.fetch.chooseDestination"));
@@ -213,6 +215,8 @@ public class FetchPanel implements java.awt.event.ActionListener {
 				new thaw.core.WarningWindow(core, "You must choose a destination");
 				return;
 			}
+			
+
 
 			/*
 			fetchPlugin.fetchFiles(fileList.getText().split("\n"),
@@ -229,9 +233,16 @@ public class FetchPanel implements java.awt.event.ActionListener {
 
 
 		if(e.getSource() == destinationButton) {
-			FileChooser fileChooser = new FileChooser();
-			File dir = null;
+			FileChooser fileChooser;
 
+			if(destinationField.getText() != null && !destinationField.getText().equals("")) {
+				fileChooser = new FileChooser(destinationField.getText());
+			} else {
+				fileChooser = new FileChooser();
+			}
+
+			File dir = null;
+			
 			fileChooser.setTitle(I18n.getMessage("thaw.plugin.fetch.destinationDirectory"));
 			fileChooser.setDirectoryOnly(true);
 			fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
@@ -244,6 +255,8 @@ public class FetchPanel implements java.awt.event.ActionListener {
 			}
 
 			destinationField.setText(dir.getPath());
+			core.getConfig().setValue("lastDestinationDirectory", destinationField.getText());
+
 		}
 
 		if(e.getSource() == loadListButton) {
