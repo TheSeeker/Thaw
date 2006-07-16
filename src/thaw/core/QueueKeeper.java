@@ -179,8 +179,25 @@ public class QueueKeeper {
 	
 
 	public static boolean saveQueue(FCPQueueManager queueManager, String fileName) {
-		Vector runningQueue = queueManager.getRunningQueue();
-		Vector[] pendingQueue = queueManager.getPendingQueues();
+		Vector[] pendingQueues = queueManager.getPendingQueues();
+		
+		boolean needed = false;
+
+		for(int i = 0 ; i < pendingQueues.length ; i++) {
+			if(pendingQueues[i].size() > 0) {
+				needed = true;
+				break;
+			}
+		}
+		
+		if(!needed) {
+			Logger.info(new QueueKeeper(), "Nothing in the pending queue to save.");
+			File file = new File(fileName);
+			file.delete(); // Else we may reload something that we shouldn't when restarting
+			return true;
+		}
+
+		
 
 		File file = new File(fileName);
 		StreamResult fileOut;
@@ -228,7 +245,7 @@ public class QueueKeeper {
 		
 		for(int i = 0 ; i <= MIN_PRIORITY ; i++) {
 			
-			for(Iterator runIt = pendingQueue[i].iterator() ;
+			for(Iterator runIt = pendingQueues[i].iterator() ;
 			    runIt.hasNext(); ) {
 
 				FCPTransferQuery query = (FCPTransferQuery)runIt.next();
