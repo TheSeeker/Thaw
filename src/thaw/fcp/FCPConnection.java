@@ -17,9 +17,13 @@ import thaw.core.Logger;
  * After being instanciated, you should commit it to the FCPQueryManager, and then
  * commit the FCPQueryManager to the FCPQueueManager.
  * Call observer when connected / disconnected.
+ * WARNING: This FCP implement don't guarantee that messages are sent in the same order than initally put
+ *          if the lock on writting is not set !
  * TODO: Add functions socketToFile(long size, File file) / fileToSocket(File file)
  */
 public class FCPConnection extends Observable {
+	private FCPBufferedStream bufferedOut = null;
+	private int maxUploadSpeed = 0;
 
 	private String nodeAddress = null;
 	private int port = 0;
@@ -41,9 +45,11 @@ public class FCPConnection extends Observable {
 
 	/**
 	 * Don't connect. Call connect() for that.
+	 * @param maxUploadSpeed in KB: -1 means no limit
 	 */
 	public FCPConnection(String nodeAddress,
-			     int port)
+			     int port,
+			     int maxUploadSpeed)
 	{
 		if(DEBUG_MODE) {
 			Logger.notice(this, "DEBUG_MODE ACTIVATED");
@@ -51,21 +57,20 @@ public class FCPConnection extends Observable {
 
 		setNodeAddress(nodeAddress);
 		setNodePort(port);
+		setMaxUploadSpeed(maxUploadSpeed);
 	}
 
 
-	/**
-	 * You will probably have to use resetQueue() from the FCPQueueManager after using this function.
-	 */
 	public void setNodeAddress(String nodeAddress) {
 		this.nodeAddress = nodeAddress;
 	}
 
-	/**
-	 * You will probably have to use resetQueue() from the FCPQueueManager after using this function.
-	 */
 	public void setNodePort(int port) {
 		this.port = port;
+	}
+
+	public void setMaxUploadSpeed(int max) {
+		this.maxUploadSpeed = max;
 	}
 	
 	
@@ -83,6 +88,8 @@ public class FCPConnection extends Observable {
 		socket = null;
 		in = null;
 		out = null;
+		bufferedOut.stopSender();
+		bufferedOut = null;
 
 		setChanged();
 		notifyObservers();
@@ -133,6 +140,8 @@ public class FCPConnection extends Observable {
 		}
 
 		reader = new BufferedInputStream(in);
+		bufferedOut = new FCPBufferedStream(this, maxUploadSpeed);
+		bufferedOut.startSender();
 
 		Logger.info(this, "Connected");
 
@@ -167,6 +176,13 @@ public class FCPConnection extends Observable {
 	 * Doesn't check the lock state ! You have to manage it yourself.
 	 */
 	public boolean rawWrite(byte[] data) {
+		return bufferedOut.write(data);
+	}
+
+	/**
+	 * Should be call by FCPBufferedStream. Not you.
+	 */
+	public boolean realRawWrite(byte[] data) {
 		if(out != null && socket != null && socket.isConnected()) {
 			try {
 				out.write(data);
@@ -182,11 +198,11 @@ public class FCPConnection extends Observable {
 		return true;
 	}
 
-	public synchronized boolean write(String toWrite) {
+	public boolean write(String toWrite) {
 		return write(toWrite, true);
 	}
 
-	public synchronized boolean write(String toWrite, boolean checkLock) {
+	public boolean write(String toWrite, boolean checkLock) {
 
 		if(checkLock && lockWriting) {
 			Logger.verbose(this, "Writting lock, unable to write.");
@@ -205,13 +221,7 @@ public class FCPConnection extends Observable {
 
 
 		if(out != null && socket != null && socket.isConnected()) {
-			try {
-				out.write(toWrite.getBytes());
-			} catch(java.io.IOException e) {
-				Logger.warning(this, "Unable to write() on the socket ?! : "+ e.toString());
-				disconnect();
-				return false;
-			}
+			bufferedOut.write(toWrite.getBytes());
 		} else {
 			Logger.warning(this, "Cannot write if disconnected !\n");
 			return false;
@@ -334,22 +344,6 @@ public class FCPConnection extends Observable {
 		}
 
 		return null;
-	}
-
-
-	/**
-	 * Use this when you want to fetch the data still waiting on the socket.
-	 */
-	public InputStream getInputStream() {
-		return in;
-	}
-
-
-	/**
-	 * Use this when you want to send raw data.
-	 */
-	public OutputStream getOutputStream() {
-		return out;
 	}
 
 }

@@ -162,9 +162,9 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		queueManager.getQueryManager().addObserver(this);
 		
 		progress = 0;
-		running = true;
 		finished = false;
 		successful = false;
+		running = false;
 		
 		if(keyType == 2 && privateKey == null) {
 			generateSSK();
@@ -240,6 +240,8 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	}
 
 	public boolean continueInsert() {
+		running = true; /* Here we are really running */
+
 		FCPConnection connection = queueManager.getQueryManager().getConnection();
 
 		connection.lockWriting();
@@ -431,10 +433,11 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				publicKey = msg.getValue("URI");
 				publicKey = publicKey.replaceAll("freenet:", "");
 
-				/*
+				
 				if(keyType == 0)
 					publicKey = publicKey + "/" +name;
 
+				/*
 				if(keyType > 0)
 					publicKey = publicKey + "/" + name + "-" + (new Integer(rev)).toString();
 				*/
@@ -454,7 +457,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				publicKey = publicKey.replaceAll("freenet:", "");
 
 				if(keyType == 0)
-					publicKey = publicKey + name;
+					publicKey = publicKey + "/" + name;
 				if(keyType == 1)
 					publicKey = "KSK@"+name+"-" + (new Integer(rev)).toString();
 				if(keyType == 2)
@@ -603,20 +606,26 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		setChanged();
 		notifyObservers();
 
-		FCPMessage msg = new FCPMessage();
-		msg.setMessageName("RemovePersistentRequest");
-		msg.setValue("Identifier", identifier);
-		
-		if(global)
-			msg.setValue("Global", "true");
-		else
-			msg.setValue("Global", "false");
+		if(isRunning() || isFinished()) {
+			FCPMessage msg = new FCPMessage();
+			msg.setMessageName("RemovePersistentRequest");
+			msg.setValue("Identifier", identifier);
+			
+			if(global)
+				msg.setValue("Global", "true");
+			else
+				msg.setValue("Global", "false");
+			
+			queueManager.getQueryManager().writeMessage(msg);
+			
+			running = false;
+			
+			queueManager.getQueryManager().deleteObserver(this);
+		} else {
+			Logger.notice(this, "Nothing to remove");
+		}
 
-		queueManager.getQueryManager().writeMessage(msg);
 
-		running = false;
-
-		queueManager.getQueryManager().deleteObserver(this);
 		return true;
 	}
 

@@ -297,6 +297,7 @@ public class Config {
 		setValue("nodePort", "9481");
 		setValue("maxSimultaneousDownloads", "-1");
 		setValue("maxSimultaneousInsertions", "-1");
+		setValue("maxUploadSpeed", "-1");
 		setValue("thawId", "thaw_"+(new Integer((new Random()).nextInt(1000))).toString());
 	}
 

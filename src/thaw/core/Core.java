@@ -137,7 +137,8 @@ public class Core implements Observer {
 			}
 			
 			connection = new FCPConnection(config.getValue("nodeAddress"),
-						       (new Integer(config.getValue("nodePort"))).intValue());
+						       (new Integer(config.getValue("nodePort"))).intValue(),
+						       (new Integer(config.getValue("maxUploadSpeed"))).intValue());
 			
 			if(!connection.connect()) {
 				new WarningWindow(this, "Unable to connect to "+config.getValue("nodeAddress")+":"+

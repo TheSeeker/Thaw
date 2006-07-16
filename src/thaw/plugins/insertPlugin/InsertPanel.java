@@ -220,7 +220,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 		mainPanel.setSize(400, 400);
 
-		globalPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 50, 50));
+		globalPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
 		globalPanel.add(mainPanel);
 	}

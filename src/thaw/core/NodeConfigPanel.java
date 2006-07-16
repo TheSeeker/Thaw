@@ -29,6 +29,7 @@ public class NodeConfigPanel implements Observer {
 		I18n.getMessage("thaw.config.nodePort"),
 		I18n.getMessage("thaw.config.maxSimultaneousDownloads"),
 		I18n.getMessage("thaw.config.maxSimultaneousInsertions"),
+		I18n.getMessage("thaw.config.maxUploadSpeed"),
 		I18n.getMessage("thaw.config.thawId")
 	};
 
@@ -37,6 +38,7 @@ public class NodeConfigPanel implements Observer {
 		"nodePort",
 		"maxSimultaneousDownloads",
 		"maxSimultaneousInsertions",
+		"maxUploadSpeed",
 		"thawId"
 	};
 
