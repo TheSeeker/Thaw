@@ -151,7 +151,8 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		revField = new JTextField(4);
 		revField.setEditable(false);
 		subSubPanel.add(revField);
-		
+
+		// NAME
 		selectNameLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.selectName"));
 		subSubPanel.add(selectNameLabel);
 		nameField = new JTextField(10);
@@ -160,6 +161,8 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 		subPanel.add(subSubPanel);
 
+
+		setRevAndNameVisible(false);
 
 
 		// PRIORITY SELECTION
@@ -206,7 +209,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 		subPanel.add(subSubPanel);
 
-
+		setKeysVisible(false);
 
 
 		mainPanel.add(subPanel, BorderLayout.CENTER);
@@ -334,42 +337,34 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 	public void itemStateChanged(ItemEvent e) {
 		if(e.getItem() == keyRadioButtons[0]
 		   && e.getStateChange() == ItemEvent.SELECTED) { /* CHK */
-			privateKeyField.setEditable(false);
-			publicKeyField.setEditable(false);
-			revField.setEditable(false);
-			nameField.setEditable(false);
-			revField.setText("");
-			nameField.setText("");
-			privateKeyField.setText("");
-			publicKeyField.setText("");
+			setKeysVisible(false);
+			setRevAndNameVisible(false);
+			
+			resetOptionalFields();
+
 			keyType = 0;
+
 			return;
 		}
 
 		if(e.getItem() == keyRadioButtons[1]
 		   && e.getStateChange() == ItemEvent.SELECTED) { /* KSK */
-			privateKeyField.setEditable(false);
-			publicKeyField.setEditable(false);
-			revField.setEditable(true);
-			nameField.setEditable(true);
-			revField.setText("0");
-			nameField.setText(getFileNameFromPath());
-			privateKeyField.setText("");
-			publicKeyField.setText("");
+			setKeysVisible(false);
+			setRevAndNameVisible(true);
+
+			resetOptionalFields();
+
 			keyType = 1;
 			return;
 		}
 
 		if(e.getItem() == keyRadioButtons[2]
 		   && e.getStateChange() == ItemEvent.SELECTED) { /* SSK */
-			privateKeyField.setEditable(true);
-			publicKeyField.setEditable(true);
-			revField.setEditable(true);
-			nameField.setEditable(true);
-			revField.setText("0");
-			nameField.setText(getFileNameFromPath());
-			privateKeyField.setText("");
-			publicKeyField.setText("");
+			setRevAndNameVisible(true);
+			setKeysVisible(true);
+
+			resetOptionalFields();
+
 			keyType = 2;
 			return;
 		}
@@ -380,6 +375,27 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		this.lastInsert = lastInserted;
 	}
 
+	private void setRevAndNameVisible(boolean v) {
+		selectRevLabel.setVisible(v);
+		revField.setVisible(v);
+		
+		selectNameLabel.setVisible(v);
+		nameField.setVisible(v);
+	}
+
+	private void setKeysVisible(boolean v) {
+		publicKeyLabel.setVisible(v);
+		publicKeyField.setVisible(v);
+		privateKeyLabel.setVisible(v);
+		privateKeyField.setVisible(v);
+	}
+	
+	private void resetOptionalFields() {
+		revField.setText("0");
+		nameField.setText(getFileNameFromPath());
+		privateKeyField.setText("");
+		publicKeyField.setText("");
+	}
 
 	public void update(Observable o, Object param) {
 		if(o == lastInsert) {
