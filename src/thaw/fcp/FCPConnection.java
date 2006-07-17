@@ -216,7 +216,7 @@ public class FCPConnection extends Observable {
 
 	
 	public boolean isWriting() {
-		return ( isConnected() && ((System.currentTimeMillis() - lastWrite) < 300) );
+		return ( isConnected() && ( isWritingLocked() || ((System.currentTimeMillis() - lastWrite) < 300) ) );
 	}
 
 	public boolean write(String toWrite) {

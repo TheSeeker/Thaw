@@ -297,11 +297,14 @@ public class Core implements Observer {
 	public void exit(boolean force) {
 		if(!force) {
 			if(connection.isWriting()) {
-				int ret = JOptionPane.showOptionDialog(null, I18n.getMessage("thaw.warning.isWriting"),
+				int ret = JOptionPane.showOptionDialog((java.awt.Component)null,
+								       I18n.getMessage("thaw.warning.isWriting"),
 								       I18n.getMessage("thaw.warning.title"),
 								       JOptionPane.YES_NO_OPTION, 
 								       JOptionPane.WARNING_MESSAGE,
-								       null, null, 0);
+								       (javax.swing.Icon)null,
+								       (java.lang.Object[])null,
+								       (java.lang.Object)null);
 				if(ret == JOptionPane.CLOSED_OPTION || ret > 0)
 					return;
 			}
