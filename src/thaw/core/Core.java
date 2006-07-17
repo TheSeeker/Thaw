@@ -8,6 +8,8 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.JOptionPane;
+
 
 import thaw.i18n.I18n;
 import thaw.fcp.*;
@@ -279,11 +281,32 @@ public class Core implements Observer {
 		return true;
 	}
 
-
 	/**
 	 * End of the world.
 	 */
 	public void exit() {
+		exit(false);
+	}
+
+
+	/**
+	 * End of the world.
+	 * @param force if true, doesn't check if FCPConnection.isWritting().
+	 * @see exit()
+	 */
+	public void exit(boolean force) {
+		if(!force) {
+			if(connection.isWriting()) {
+				int ret = JOptionPane.showOptionDialog(null, I18n.getMessage("thaw.warning.isWriting"),
+								       I18n.getMessage("thaw.warning.title"),
+								       JOptionPane.YES_NO_OPTION, 
+								       JOptionPane.WARNING_MESSAGE,
+								       null, null, 0);
+				if(ret == JOptionPane.CLOSED_OPTION || ret > 0)
+					return;
+			}
+		}
+
 		Logger.info(this, "Stopping scheduler ...");
 		if(queueManager != null)
 		    queueManager.stopScheduler();

@@ -2,6 +2,7 @@ package thaw.core;
 
 import javax.swing.JOptionPane;
 
+import thaw.i18n.I18n;
 
 /**
  * Use to create a warning popup.
@@ -18,12 +19,12 @@ public class WarningWindow {
 		if(core != null && core.getMainWindow() != null) {
 			JOptionPane.showMessageDialog(core.getMainWindow().getMainFrame(),
 						      warning,
-						      "Warning",
+						      I18n.getMessage("thaw.warning.title"),
 						      JOptionPane.WARNING_MESSAGE);
 		} else {
 			JOptionPane.showMessageDialog(null,
 						      warning,
-						      "Warning",
+						      I18n.getMessage("thaw.warning.title"),
 						      JOptionPane.WARNING_MESSAGE);
 		}
 	}

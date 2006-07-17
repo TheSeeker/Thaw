@@ -147,10 +147,19 @@ public class FCPBufferedStream implements Runnable {
 		}
 	}
 
+
 	public boolean stopSender() {
 		running = false;
 		tractopelle = null;
 		return true;
+	}
+
+	public boolean isOutputBufferEmpty() {
+		return (waiting == 0);
+	}
+
+	public boolean isOutputBufferFull() {
+		return (maxUploadSpeed < 0 || waiting >= (OUTPUT_BUFFER_SIZE-1));
 	}
 
 	/**

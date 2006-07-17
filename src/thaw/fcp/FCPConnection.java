@@ -22,6 +22,11 @@ import thaw.core.Logger;
  * TODO: Add functions socketToFile(long size, File file) / fileToSocket(File file)
  */
 public class FCPConnection extends Observable {
+	/** If == true, then will print on stdout
+	 * all fcp input / output.
+	 */
+	private final static boolean DEBUG_MODE = true;
+
 	private FCPBufferedStream bufferedOut = null;
 	private int maxUploadSpeed = 0;
 
@@ -38,10 +43,9 @@ public class FCPConnection extends Observable {
 
 	private boolean lockWriting = false;
 
-	/** If == true, then will print on stdout
-	 * all fcp input / output.
-	 */
-	private final static boolean DEBUG_MODE = true;
+	private long lastWrite = 0; /* real writes ; System.currentTimeMillis() */
+
+
 
 	/**
 	 * Don't connect. Call connect() for that.
@@ -153,6 +157,9 @@ public class FCPConnection extends Observable {
 		return true;
 	}
 
+	public boolean isOutputBufferEmpty() {
+		return bufferedOut.isOutputBufferEmpty();
+	}
 	
 	public boolean isConnected() {
 		if(socket == null)
@@ -192,6 +199,7 @@ public class FCPConnection extends Observable {
 	public boolean realRawWrite(byte[] data) {
 		if(out != null && socket != null && socket.isConnected()) {
 			try {
+				lastWrite = System.currentTimeMillis();
 				out.write(data);
 			} catch(java.io.IOException e) {
 				Logger.warning(this, "Unable to write() on the socket ?! : "+ e.toString());
@@ -204,6 +212,11 @@ public class FCPConnection extends Observable {
 		}
 
 		return true;
+	}
+
+	
+	public boolean isWriting() {
+		return ( isConnected() && ((System.currentTimeMillis() - lastWrite) < 300) );
 	}
 
 	public boolean write(String toWrite) {
