@@ -2,68 +2,61 @@
 
 <project name="Thaw" default="jar">
 
-  <property name="src.dir" value="src" />
-  <property name="bin.dir" value="build" />
-  <property name="lib.dir" value="lib" />
-  <property name="javadoc.dir" value="javadoc" />
-
-  <property name="hsqldb.location" value="${lib.dir}/hsqldb.jar" />
-
-  <property name="javac.debug" value="false" />
-
-  <target name="compile">
-    <mkdir dir="${bin.dir}" />
-
-    <javac srcdir="${src.dir}" destdir="${bin.dir}" debug="true" optimize="true">
-
-    	<!-- <compilerarg value="-Xlint" /> -->
-      <classpath>
-        <pathelement location="${hsqldb.location}"/>
-      </classpath>
-
-    </javac>
-
-    <copy todir="${bin.dir}">
-      <fileset dir="${src.dir}">
-        <include name="**/*.properties" />
-      </fileset>
-    </copy>
-
-  </target>
+	<property name="src.dir" value="src" />
+	<property name="bin.dir" value="build" />
+	<property name="lib.dir" value="lib" />
+	<property name="javadoc.dir" value="javadoc" />
+	<property name="hsqldb.location" value="${lib.dir}/hsqldb.jar" />
+	<property name="javac.debug" value="false" />
 
 
-  <target name="run" depends="compile">
-    <java classname="thaw.core.Main" classpath="lib/hsqldb.jar:build" dir="build" fork="true" />
-  </target>
+	<target name="compile">
+		<mkdir dir="${bin.dir}" />
+
+		<javac srcdir="${src.dir}" destdir="${bin.dir}" debug="true" optimize="true">
+
+			<!-- <compilerarg value="-Xlint" /> -->
+			<classpath>
+				<pathelement location="${hsqldb.location}"/>
+			</classpath>
+		</javac>
+
+		<copy todir="${bin.dir}">
+			<fileset dir="${src.dir}">
+				<include name="**/*.properties" />
+			</fileset>
+		</copy>
+	</target>
 
 
-  <target name="jar" depends="compile"	description="Make the Jar" >
-    <jar jarfile="${lib.dir}/Thaw.jar" basedir="${bin.dir}">
-
-      <manifest>
-        <attribute name="Main-Class" value="thaw.core.Main"/>
-      </manifest>
-
-      <fileset dir="${bin.dir}"/>
-
-      <!-- hsqldb is not required for the moment -->
-      <!-- <fileset file="${hsqldb.location}"/> -->
-
-      <fileset file="gpl.txt" />
-
-    </jar>
-  </target>
+	<target name="run" depends="compile">
+		<java classname="thaw.core.Main" classpath="lib/hsqldb.jar:build" dir="build" fork="true" />
+	</target>
 
 
-  <target name="javadoc">
-    <javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}">
-      <fileset dir="${src.dir}" includes="**/*.java" />
-    </javadoc>
-  </target>
-	
-  <target name="clean">
-	   <delete dir="${bin.dir}"/>
-	   <delete file="${lib.dir}/Thaw.jar"/>
- </target>
+	<target name="jar" depends="compile"	description="Make the Jar" >
+		<jar jarfile="${lib.dir}/Thaw.jar" basedir="${bin.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="thaw.core.Main"/>
+			</manifest>
+			<fileset dir="${bin.dir}"/>
+			<!-- hsqldb is not required for the moment -->
+			<!-- <fileset file="${hsqldb.location}"/> -->
+			<fileset file="gpl.txt" />
+			<fileset file="readme.txt" />
+		</jar>
+	</target>
+
+
+	<target name="javadoc">
+		<javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}">
+			<fileset dir="${src.dir}" includes="**/*.java" />
+		</javadoc>
+	</target>
+
+	<target name="clean">
+		<delete dir="${bin.dir}"/>
+		<delete file="${lib.dir}/Thaw.jar"/>
+	</target>
 
 </project>
