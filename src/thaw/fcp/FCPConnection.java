@@ -88,8 +88,10 @@ public class FCPConnection extends Observable {
 		socket = null;
 		in = null;
 		out = null;
-		bufferedOut.stopSender();
-		bufferedOut = null;
+		if(bufferedOut != null) {
+			bufferedOut.stopSender();
+			bufferedOut = null;
+		}
 
 		setChanged();
 		notifyObservers();
@@ -193,6 +195,7 @@ public class FCPConnection extends Observable {
 				out.write(data);
 			} catch(java.io.IOException e) {
 				Logger.warning(this, "Unable to write() on the socket ?! : "+ e.toString());
+				disconnect();
 				return false;
 			}
 		} else {
