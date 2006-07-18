@@ -336,8 +336,11 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 
 
 	public void run() {
-
-		Thread.sleep(5000);
+		try {
+			Thread.sleep(5000);
+		} catch(java.lang.InterruptedException e) {
+			// I'm stupid. I'm stupid. I'm stupid. (r9654)
+		}
 
 		while(true) {
 			try {
