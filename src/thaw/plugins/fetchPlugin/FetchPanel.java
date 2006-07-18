@@ -15,6 +15,13 @@ import javax.swing.JScrollPane;
 import java.awt.Dimension;
 import javax.swing.JFileChooser;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+
 import java.io.File;
 import java.util.Vector;
 import java.util.Iterator;
@@ -32,6 +39,7 @@ public class FetchPanel implements java.awt.event.ActionListener {
 	private JPanel filePanel = null;
 	private JLabel fileLabel = null;
 	private JTextArea fileList = null;
+	private JButton pasteButton = null;
 	private JButton loadListButton = null;
 	
 
@@ -41,13 +49,6 @@ public class FetchPanel implements java.awt.event.ActionListener {
 	private JLabel priorityLabel = null;
 	private String[] priorities = null;
 	private JComboBox prioritySelecter = null;
-
-	/*
-	private JPanel persistencePanel = null;
-	private JLabel persistenceLabel = null;
-	private String[] persistences = null;
-	private JComboBox persistenceSelecter = null;
-	*/
 
 	private JLabel destinationLabel = null;
 	private JPanel dstChoosePanel = null; /* 3 x 1 */
@@ -88,10 +89,18 @@ public class FetchPanel implements java.awt.event.ActionListener {
 
 		loadListButton = new JButton(I18n.getMessage("thaw.plugin.fetch.loadKeyListFromFile"));
 		loadListButton.addActionListener(this);
+
+		pasteButton = new JButton(I18n.getMessage("thaw.plugin.fetch.pasteFromClipboard"));
+		pasteButton.addActionListener(this);
 		
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new GridLayout(1,2));
+		buttonPanel.add(pasteButton);
+		buttonPanel.add(loadListButton);
+
 		filePanel.add(fileLabel, BorderLayout.NORTH);
 		filePanel.add(new JScrollPane(fileList), BorderLayout.CENTER);
-		filePanel.add(loadListButton, BorderLayout.SOUTH);
+		filePanel.add(buttonPanel, BorderLayout.SOUTH);
 
 		
 		belowPanel = new JPanel();
@@ -119,22 +128,6 @@ public class FetchPanel implements java.awt.event.ActionListener {
 		priorityPanel.add(priorityLabel);
 		priorityPanel.add(prioritySelecter);
 		
-		/* PERSISTENCE */ /* set always to "forever" */
-		/*
-		persistencePanel = new JPanel();
-		persistencePanel.setLayout(new GridLayout(2, 1, 5, 5));
-
-		persistenceLabel = new JLabel(I18n.getMessage("thaw.common.persistence"));
-		persistences = new String[] {
-			I18n.getMessage("thaw.common.persistenceReboot"),
-			I18n.getMessage("thaw.common.persistenceForever"),
-			I18n.getMessage("thaw.common.persistenceConnection")
-		};
-		persistenceSelecter = new JComboBox(persistences);
-
-		persistencePanel.add(persistenceLabel);
-		persistencePanel.add(persistenceSelecter);
-		*/
 
 		/* QUEUE */
 		queuePanel = new JPanel();
@@ -190,17 +183,8 @@ public class FetchPanel implements java.awt.event.ActionListener {
 	public void actionPerformed(java.awt.event.ActionEvent e) {
 		if(e.getSource() == validationButton) {
 			int priority = 6;
-			//int persistence = 0;
 			boolean globalQueue = true;
 
-			/*
-			if(((String)persistenceSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.persistenceForever")))
-				persistence = 0;
-			if(((String)persistenceSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.persistenceReboot")))
-				persistence = 1;
-			if(((String)persistenceSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.persistenceConnection")))
-				persistence = 2;
-			*/
 
 			if(((String)queueSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.false")))
 				globalQueue = false;
@@ -217,12 +201,6 @@ public class FetchPanel implements java.awt.event.ActionListener {
 			}
 			
 
-
-			/*
-			fetchPlugin.fetchFiles(fileList.getText().split("\n"),
-					       priority, persistence, globalQueue,
-					       destinationField.getText());
-			*/
 
 			fetchPlugin.fetchFiles(fileList.getText().split("\n"),
 					       priority, 0, globalQueue,
@@ -257,6 +235,28 @@ public class FetchPanel implements java.awt.event.ActionListener {
 			destinationField.setText(dir.getPath());
 			core.getConfig().setValue("lastDestinationDirectory", destinationField.getText());
 
+		}
+
+		if(e.getSource() == pasteButton) {
+			Toolkit tk = Toolkit.getDefaultToolkit();
+			Clipboard cp = tk.getSystemClipboard();
+
+			try {
+				String result;
+				Transferable contents = cp.getContents(null);
+
+				boolean hasTransferableText = ((contents != null) &&
+							       contents.isDataFlavorSupported(DataFlavor.stringFlavor));
+
+				if ( hasTransferableText ) {
+					result = (String)contents.getTransferData(DataFlavor.stringFlavor);
+					fileList.setText(fileList.getText() + "\n" + result);
+				} else {
+					Logger.info(this, "Nothing to get from clipboard");
+				}
+			} catch(Exception exception) {
+				Logger.notice(this, "Exception while pasting: "+exception.toString());
+			}
 		}
 
 		if(e.getSource() == loadListButton) {
