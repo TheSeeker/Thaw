@@ -733,8 +733,10 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		result.put("keyType", ((new Integer(keyType)).toString()));
 		result.put("Revision", ((new Integer(rev)).toString()));
 		result.put("Name", name);
-		result.put("privateKey", privateKey);
-		result.put("publicKey", publicKey);
+		if(privateKey != null)
+			result.put("privateKey", privateKey);
+		if(publicKey != null)
+			result.put("publicKey", publicKey);
 		result.put("priority", ((new Integer(priority)).toString()));
 		result.put("global", ((new Boolean(global)).toString()));
 		result.put("persistence", (new Integer(persistence)).toString());
@@ -744,7 +746,8 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		result.put("status", status);
 
 		result.put("attempt", (new Integer(attempt)).toString());
-		result.put("identifier", identifier);
+		if(identifier != null)
+			result.put("identifier", identifier);
 		result.put("running", ((new Boolean(running)).toString()));
 		result.put("successful", ((new Boolean(successful)).toString()));
 		result.put("finished", ((new Boolean(finished)).toString()));
@@ -761,15 +764,26 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		keyType = (new Integer((String)parameters.get("keyType"))).intValue();
 		rev = (new Integer((String)parameters.get("Revision"))).intValue();
 		name = (String)parameters.get("name");
+
 		privateKey = (String)parameters.get("privateKey");
+		if(privateKey == null || privateKey.equals(""))
+			privateKey = null;
+
 		publicKey = (String)parameters.get("publicKey");
+		if(privateKey == null || publicKey.equals(""))
+			publicKey = null;
+
 		priority = ((new Integer((String)parameters.get("priority"))).intValue());
 		global = ((new Boolean((String)parameters.get("global"))).booleanValue());
 		persistence = ((new Integer((String)parameters.get("persistence"))).intValue());
 		progress = ((new Integer((String)parameters.get("progress"))).intValue());
 		status = (String)parameters.get("status");
 		attempt = ((new Integer((String)parameters.get("attempt"))).intValue());
+
 		identifier = (String)parameters.get("identifier");
+		if(identifier == null || identifier.equals(""))
+			identifier = null;
+
 		running = ((new Boolean((String)parameters.get("running"))).booleanValue());
 		successful = ((new Boolean((String)parameters.get("successful"))).booleanValue());
 		finished = ((new Boolean((String)parameters.get("finished"))).booleanValue());

@@ -98,7 +98,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 		}
 
 		if(isAlreadyPresent(query)) {
-			Logger.notice(this, "Key was already in one of the queues");
+			Logger.notice(this, "Key was already in one of the queues : "+query.getFilename());
 			return false;
 		}
 
@@ -204,13 +204,21 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 	
 	private boolean isTheSame(FCPTransferQuery queryA,
 				  FCPTransferQuery queryB) {
-		if(queryA.getIdentifier() != null && queryB.getIdentifier() != null)
+		if(queryA.getIdentifier() != null && queryB.getIdentifier() != null) {
+			Logger.debug(this, "isTheSame(): Identifier");
 			return queryA.getIdentifier().equals(queryB.getIdentifier());
+		}
 
-		if(queryA.getFileKey() != null && queryB.getFileKey() != null)
+		if(queryA.getFileKey() != null && queryB.getFileKey() != null) {
+			Logger.debug(this, "isTheSame(): FileKey");
 			return queryA.getFileKey().equals(queryB.getFileKey());
-					
-		return queryA.getFilename().equals(queryB.getFilename());
+		}
+		
+		if(queryA.getFilename().equals(queryB.getFilename())) {
+			Logger.debug(this, "isTheSame(): Filename");
+			return true;
+		}
+		return false;
 	}
 
 
@@ -328,6 +336,8 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 
 
 	public void run() {
+
+		Thread.sleep(5000);
 
 		while(true) {
 			try {

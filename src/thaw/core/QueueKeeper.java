@@ -152,7 +152,7 @@ public class QueueKeeper {
 	
 
 	private static Element saveQuery(FCPTransferQuery query, Document xmlDoc) {
-		if(query.isPersistent())
+		if(query.isPersistent() && (query.isRunning() || query.isFinished()))
 			return null;
 
 		HashMap params = query.getParameters();

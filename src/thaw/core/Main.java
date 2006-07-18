@@ -10,7 +10,7 @@ import javax.swing.UIManager.LookAndFeelInfo;
  */
 public class Main {
 
-	public final static String VERSION="0.1 Beta";
+	public final static String VERSION="0.2 WIP";
 
 	/**
 	 * Look & feel use by GUI front end
