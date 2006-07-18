@@ -10,6 +10,9 @@ import java.util.Observer;
 import java.util.Observable;
 import java.util.Vector;
 import java.util.Iterator;
+import javax.swing.JSplitPane;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 
 import thaw.core.*;
 import thaw.i18n.I18n;
@@ -17,14 +20,19 @@ import thaw.plugins.queueWatcher.*;
 
 import thaw.fcp.*;
 
-public class QueueWatcher implements thaw.core.Plugin, Observer {
+public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeListener {
 	private Core core;
 
-	private JPanel mainPanel;
+	//private JPanel mainPanel;
+	private JSplitPane mainPanel;
 
 	private QueuePanel[] queuePanels = new QueuePanel[2];
 	private DetailPanel detailPanel;
 	private JPanel panel;
+
+	private final static int DIVIDER_LOCATION = -1;
+	private long lastChange = 0;
+	private boolean folded = false;
 
 	public QueueWatcher() {
 
@@ -35,10 +43,6 @@ public class QueueWatcher implements thaw.core.Plugin, Observer {
 		this.core = core;
 		
 		Logger.info(this, "Starting plugin \"QueueWatcher\" ...");
-
-		mainPanel = new JPanel();
-
-		mainPanel.setLayout(new BorderLayout());
 
 		detailPanel = new DetailPanel(core);
 
@@ -51,8 +55,6 @@ public class QueueWatcher implements thaw.core.Plugin, Observer {
 		layout.setVgap(10);
 		panel.setLayout(layout);
 
-		mainPanel.add(panel, BorderLayout.CENTER);
-
 		if(queuePanels[0].getPanel() != null)
 			panel.add(queuePanels[0].getPanel());
 
@@ -60,9 +62,21 @@ public class QueueWatcher implements thaw.core.Plugin, Observer {
 			panel.add(queuePanels[1].getPanel());
 		
 
-		if(detailPanel.getPanel() != null) {
-			mainPanel.add(detailPanel.getPanel(), BorderLayout.EAST);
+		mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, detailPanel.getPanel(), panel);
+		
+		if(core.getConfig().getValue("detailPanelFolded") == null
+		   || ((new Boolean(core.getConfig().getValue("detailPanelFolded"))).booleanValue()) == true) {
+			folded = true;
+			mainPanel.setDividerLocation(1);
+			detailPanel.getPanel().setVisible(false);
+		} else {
+			folded = false;
+			mainPanel.setDividerLocation(-1);
+			detailPanel.getPanel().setVisible(true);
 		}
+
+		mainPanel.addPropertyChangeListener(this);
+		mainPanel.setOneTouchExpandable(true);
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"), mainPanel);
 
@@ -77,9 +91,13 @@ public class QueueWatcher implements thaw.core.Plugin, Observer {
 		return true;
 	}
 
+	
+
 
 	public boolean stop() {
 		Logger.info(this, "Stopping plugin \"QueueWatcher\" ...");
+
+		core.getConfig().setValue("detailPanelFolded", ((new Boolean(folded)).toString()));
 
 		core.getMainWindow().removeTab(mainPanel);
 		
@@ -126,6 +144,31 @@ public class QueueWatcher implements thaw.core.Plugin, Observer {
 			Logger.notice(this, "Collision while updating queue panels");
 		}
 		
+	}
+
+	public void propertyChange(PropertyChangeEvent evt) {
+
+		if(evt.getPropertyName().equals("dividerLocation")) {
+
+			if(System.currentTimeMillis() - lastChange < 500) {
+				lastChange = System.currentTimeMillis();
+				return;
+			}
+
+			lastChange = System.currentTimeMillis();
+
+			folded = !folded;
+
+			if(folded)
+				mainPanel.setDividerLocation(1);
+			else
+				mainPanel.setDividerLocation(-1);
+
+			detailPanel.getPanel().setVisible(!folded);
+
+
+		}
+
 	}
 
 }

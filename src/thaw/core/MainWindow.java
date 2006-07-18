@@ -81,7 +81,6 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		mainWindow.getContentPane().setLayout(new BorderLayout());
 
 		mainWindow.setJMenuBar(menuBar);
-		//mainWindow.getContentPane().add(menuBar, BorderLayout.NORTH);
 		mainWindow.getContentPane().add(tabbedPane, BorderLayout.CENTER);
 		mainWindow.getContentPane().add(statusBar, BorderLayout.SOUTH);
 

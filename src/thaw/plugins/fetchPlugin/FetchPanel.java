@@ -159,7 +159,7 @@ public class FetchPanel implements java.awt.event.ActionListener {
 		destinationField = new JTextField("");
 		if(core.getConfig().getValue("lastDestinationDirectory") != null)
 			destinationField.setText(core.getConfig().getValue("lastDestinationDirectory"));
-		destinationField.setEditable(false);
+		destinationField.setEditable(true);
 		
 		destinationButton = new JButton(I18n.getMessage("thaw.plugin.fetch.chooseDestination"));
 		destinationButton.addActionListener(this);
