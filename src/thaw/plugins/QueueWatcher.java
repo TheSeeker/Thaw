@@ -30,7 +30,7 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 	private DetailPanel detailPanel;
 	private JPanel panel;
 
-	private final static int DIVIDER_LOCATION = -1;
+	private final static int DIVIDER_LOCATION = 310;
 	private long lastChange = 0;
 	private boolean folded = false;
 
@@ -63,16 +63,16 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 		
 
 		mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, detailPanel.getPanel(), panel);
-		
+
 		if(core.getConfig().getValue("detailPanelFolded") == null
 		   || ((new Boolean(core.getConfig().getValue("detailPanelFolded"))).booleanValue()) == true) {
 			folded = true;
 			detailPanel.getPanel().setVisible(false);
 			mainPanel.setDividerLocation(1);
 		} else {
-			folded = true; /* Don't ask me why */
+			folded = false;
 			detailPanel.getPanel().setVisible(true);
-			mainPanel.setDividerLocation(-1);
+			mainPanel.setDividerLocation(DIVIDER_LOCATION);
 		}
 
 		mainPanel.addPropertyChangeListener(this);
@@ -164,7 +164,7 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 				mainPanel.setDividerLocation(1);
 			} else {
 				detailPanel.getPanel().setVisible(true);
-				mainPanel.setDividerLocation(-1);
+				mainPanel.setDividerLocation(DIVIDER_LOCATION);
 			}
 
 		}
