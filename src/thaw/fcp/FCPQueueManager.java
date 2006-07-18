@@ -205,13 +205,19 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 	private boolean isTheSame(FCPTransferQuery queryA,
 				  FCPTransferQuery queryB) {
 		if(queryA.getIdentifier() != null && queryB.getIdentifier() != null) {
-			Logger.debug(this, "isTheSame(): Identifier");
-			return queryA.getIdentifier().equals(queryB.getIdentifier());
+			if(queryA.getIdentifier().equals(queryB.getIdentifier())) {
+				Logger.debug(this, "isTheSame(): Identifier");
+				return true;
+			}
+			return false;
 		}
 
 		if(queryA.getFileKey() != null && queryB.getFileKey() != null) {
-			Logger.debug(this, "isTheSame(): FileKey");
-			return queryA.getFileKey().equals(queryB.getFileKey());
+			if(queryA.getFileKey().equals(queryB.getFileKey())) {
+				Logger.debug(this, "isTheSame(): FileKey");
+				return true;
+			}
+			return false;
 		}
 		
 		if(queryA.getFilename().equals(queryB.getFilename())) {

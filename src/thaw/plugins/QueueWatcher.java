@@ -67,12 +67,12 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 		if(core.getConfig().getValue("detailPanelFolded") == null
 		   || ((new Boolean(core.getConfig().getValue("detailPanelFolded"))).booleanValue()) == true) {
 			folded = true;
-			mainPanel.setDividerLocation(1);
 			detailPanel.getPanel().setVisible(false);
+			mainPanel.setDividerLocation(1);
 		} else {
-			folded = false;
-			mainPanel.setDividerLocation(-1);
+			folded = true; /* Don't ask me why */
 			detailPanel.getPanel().setVisible(true);
+			mainPanel.setDividerLocation(-1);
 		}
 
 		mainPanel.addPropertyChangeListener(this);
@@ -159,13 +159,13 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 
 			folded = !folded;
 
-			if(folded)
+			if(folded) {
+				detailPanel.getPanel().setVisible(false);
 				mainPanel.setDividerLocation(1);
-			else
+			} else {
+				detailPanel.getPanel().setVisible(true);
 				mainPanel.setDividerLocation(-1);
-
-			detailPanel.getPanel().setVisible(!folded);
-
+			}
 
 		}
 

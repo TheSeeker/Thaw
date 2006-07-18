@@ -391,7 +391,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	public boolean stop(FCPQueueManager queueManager) {
 		if(removeRequest()) {
 			status = "Stopped";
-			finished = true;
+			finished = false;
 			successful = false;
 			running = false;
 			

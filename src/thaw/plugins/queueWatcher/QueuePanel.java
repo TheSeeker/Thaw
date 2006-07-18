@@ -294,7 +294,6 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 				if(e.getSource() == removeItem) {
 
 					if(query.stop(core.getQueueManager())) {
-
 						core.getQueueManager().remove(query);
 						tableModel.removeQuery(query);
 					}
