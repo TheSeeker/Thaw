@@ -34,7 +34,7 @@ public class Console implements Plugin, LogListener, ActionListener {
 	private JLabel sizeLabel;
 	private JTextField sizeField;
 
-	private long maxLogSize = 25600;
+	private long maxLogSize = 5120;
 
 	public boolean run(Core core) {
 		this.core = core;

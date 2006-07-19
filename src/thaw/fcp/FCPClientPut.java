@@ -216,6 +216,11 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 			}
 
+			if(!connection.lockWriting()) {
+				/* Ah ben oué mais non ... */
+				run();
+			}
+
 			clientPut.continueInsert();
 			return;
 		}
@@ -244,8 +249,6 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		sending = true;
 
 		FCPConnection connection = queueManager.getQueryManager().getConnection();
-
-		connection.lockWriting();
 
 		status = "Sending to the node";
 

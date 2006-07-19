@@ -40,9 +40,6 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	private boolean running = false;
 	private boolean successful = false;
 
-	private static boolean fetchLock = false;
-	private boolean fetchLockOwner = false;
-
 
 	/**
 	 * See setParameters().
@@ -337,12 +334,10 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			fileSize = message.getAmountOfDataWaiting();
 
-			status = "Writing";
+			status = "Writing to disk";
 
 			setChanged();
 			notifyObservers();
-
-			//queueManager.getQueryManager().getConnection().lockWriting();
 
 
 			if(fetchDirectly(getPath(), fileSize, true)) {
@@ -351,11 +346,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			} else {
 				Logger.warning(this, "Unable to fetch correctly the file. This may create problems on socket");
 			}
-
-			fetchLock = false;
-			fetchLockOwner = false;
-
-			//queueManager.getQueryManager().getConnection().unlockWriting();
+			
+			queueManager.getQueryManager().getConnection().unlockReading();
+			queueManager.getQueryManager().getConnection().unlockWriting();
 			
 			running = false;
 			progress = 100;
@@ -382,11 +375,13 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	private class UnlockWaiter implements Runnable {
 		FCPClientGet clientGet;
+		FCPConnection connection;
 		String dir;
 
-		public UnlockWaiter(FCPClientGet clientGet, String dir) {
+		public UnlockWaiter(FCPClientGet clientGet, FCPConnection connection, String dir) {
 			this.clientGet = clientGet;
 			this.dir = dir;
+			this.connection = connection;
 		}
 
 		public void run() {
@@ -395,16 +390,30 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			}
 
 			while(true) {
+				if(!connection.isReadingLocked()
+				   && (!connection.isWritingLocked()))
+					break;
+
 				try {
 					Thread.sleep(200);
 				} catch(java.lang.InterruptedException e) {
 
 				}
-
-				if(!fetchLock || fetchLockOwner)
-					break;
 			}
 			
+			if(!connection.lockReading()) {
+				/* Ah ben oué mais non */
+				run();
+			}
+
+			if(!connection.lockWriting()) {
+				/* Ah ben oué mais non */
+				connection.unlockReading();
+				run();
+			}
+
+			Logger.debug(this, "I take the reading lock !");
+
 			if(dir == null) {
 				Logger.warning(this, "UnlockWaiter.run() : Wtf ?");
 			}
@@ -442,7 +451,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		notifyObservers();
 
 
-		Thread fork = new Thread(new UnlockWaiter(this, dir));
+		Thread fork = new Thread(new UnlockWaiter(this, queueManager.getQueryManager().getConnection(), dir));
 		fork.start();
 
 		return true;
@@ -460,9 +469,6 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			Logger.warning(this, "saveFileTo() : Wtf ?");
 		}
 
-		fetchLock = true;
-		fetchLockOwner = true;
-
 		FCPMessage getRequestStatus = new FCPMessage();
 		
 		getRequestStatus.setMessageName("GetRequestStatus");
@@ -475,7 +481,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		
 		
-		queueManager.getQueryManager().writeMessage(getRequestStatus);
+		queueManager.getQueryManager().writeMessage(getRequestStatus, false);
 
 		return true;
 	}

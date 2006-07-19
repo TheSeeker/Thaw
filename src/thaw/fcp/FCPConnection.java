@@ -42,6 +42,7 @@ public class FCPConnection extends Observable {
 	private long rawBytesWaiting = 0;
 
 	private boolean lockWriting = false;
+	private boolean lockReading = false;
 
 	private long lastWrite = 0; /* real writes ; System.currentTimeMillis() */
 
@@ -169,16 +170,56 @@ public class FCPConnection extends Observable {
 	}
 
 
-	public void lockWriting() {
+	public synchronized boolean lockWriting() {
+		if(lockWriting) {
+			Logger.notice(this, "Writing already locked! You can't lock it !");
+			return false;
+		}
+
+		Logger.debug(this, "Lock writing ...");
 		lockWriting = true;
+
+		return true;
 	}
 	
-	public void unlockWriting() {
+	public synchronized boolean lockReading() {
+		if(lockReading) {
+			Logger.notice(this, "Reading already locked! You can't lock it !");
+			return false;
+		}
+
+		Logger.debug(this, "Lock reading");
+		lockReading = true;
+
+		return true;
+	}
+
+	public synchronized void unlockWriting() {
+		if(!lockWriting) {
+			Logger.notice(this, "Writing already unlocked !");
+			return;
+		}
+
+		Logger.debug(this, "Unlock writting");
 		lockWriting = false;
+	}
+
+	public synchronized void unlockReading() {
+		if(!lockReading) {
+			Logger.notice(this, "Reading already unlocked !");
+			return;
+		}
+
+		Logger.debug(this, "Unlock reading");
+		lockReading = false;
 	}
 
 	public boolean isWritingLocked() {
 		return lockWriting;
+	}
+
+	public boolean isReadingLocked() {
+		return lockReading;
 	}
 
 	/**
@@ -225,11 +266,11 @@ public class FCPConnection extends Observable {
 
 	public boolean write(String toWrite, boolean checkLock) {
 
-		if(checkLock && lockWriting) {
+		if(checkLock && isWritingLocked()) {
 			Logger.verbose(this, "Writting lock, unable to write.");
 		}
 
-		while(checkLock && lockWriting) {
+		while(checkLock && isWritingLocked()) {
 			try {
 				Thread.sleep(200);
 			} catch(java.lang.InterruptedException e) {
