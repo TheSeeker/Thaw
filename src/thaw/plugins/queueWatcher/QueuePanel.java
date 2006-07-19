@@ -191,6 +191,9 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	
 				FCPTransferQuery query = model.getQuery(row);
 				
+				if(query == null)
+					return null;
+
 				if(!query.isRunning() && !query.isFinished())
 					cell.setBackground(PENDING);
 				if(query.isFinished() && query.isSuccessful())

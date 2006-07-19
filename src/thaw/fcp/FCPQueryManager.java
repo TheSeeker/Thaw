@@ -102,7 +102,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 		while(true) {
 			latestMessage = readMessage();
 			
-			Logger.debug(this, "Message received. Notifying observers");
+			Logger.verbose(this, "Message received. Notifying observers");
 
 			if(latestMessage != null) {
 				try {

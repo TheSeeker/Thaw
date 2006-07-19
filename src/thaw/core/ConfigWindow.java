@@ -92,6 +92,15 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		configWin.setVisible(v);
 	}
 
+	public boolean addTab(String name, java.awt.Component panel) {
+		tabs.add(name, panel);
+		return true;
+	}
+
+	public boolean removeTab(java.awt.Component panel) {
+		tabs.remove(panel);
+		return true;
+	}
 
 	/**
 	 * Get a ref to the JFrame.

@@ -1,5 +1,7 @@
 package thaw.core;
 
+import java.util.Vector;
+import java.util.Iterator;
 
 /**
  * Manage all log message.
@@ -21,13 +23,17 @@ public class Logger {
 	 */
 	private final static int LOG_LEVEL = 5;
 
+	private static Vector logListeners = null;
+	
 
 	protected static void displayErr(String msg) {
 		System.err.println(msg);
+		notifyLogListeners(msg);
 	}
 
 	protected static void display(String msg) {
 		System.out.println(msg);
+		notifyLogListeners(msg);
 	}
 
 	/**
@@ -79,15 +85,52 @@ public class Logger {
 	 * Verbose. Too Verbose.
 	 */
 	public static void verbose(Object o, String msg) {
-		if(LOG_LEVEL >= 5)
+		if(LOG_LEVEL >= 5) {
 			System.out.println("[VERBOSE] "+ o.getClass().getName()+": "+msg);
+			notifyLogListeners(msg);
+		}
 	}
 
 	/**
 	 * As it. Similar to verbose()
 	 */
 	public static void asIt(Object o, String msg) {
-		if(LOG_LEVEL >= 5)
+		if(LOG_LEVEL >= 5) {
 			System.out.println(msg);
+			notifyLogListeners(msg);
+		}
 	}
+
+
+
+
+
+	public static void addLogListener(LogListener logListener) {
+		if(logListeners == null)
+			logListeners = new Vector();
+
+		logListeners.add(logListener);
+		
+	}
+	
+	public static void removeLogListener(LogListener logListener) {
+		if(logListeners == null)
+			return;
+
+		logListeners.remove(logListener);
+	}
+	
+
+	private static void notifyLogListeners(String line) {
+		if(logListeners == null)
+			return;
+
+		for(Iterator it = logListeners.iterator();
+		    it.hasNext(); ) {
+			LogListener logListener = (LogListener)it.next();
+
+			logListener.newLogLine(line);			
+		}
+	}
+
 }
