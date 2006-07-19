@@ -85,8 +85,11 @@ public class Console implements Plugin, LogListener, ActionListener {
 	public boolean stop() {
 		core.getConfig().setValue("consoleMaxLogSize", sizeField.getText() );
 
+		Logger.removeLogListener(this);
+
 		core.getConfigWindow().removeTab(configPanel);
 		core.getMainWindow().removeTab(consolePanel);
+
 		return true;
 	}
 
