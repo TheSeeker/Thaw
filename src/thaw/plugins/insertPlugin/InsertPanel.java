@@ -329,7 +329,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		if(selectedFiles.getText() == null)
 			return "";
 		
-		String[] cutcut = selectedFiles.getText().split(File.separator);
+		String[] cutcut = selectedFiles.getText().split(File.separator.replaceAll("\\", "\\\\"));
 
 		return cutcut[cutcut.length - 1];
 	}

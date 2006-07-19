@@ -90,7 +90,7 @@ public class QueueKeeper {
 		File file = new File(fileName);
 
 		if(!file.exists() || !file.canRead()) {
-			Logger.notice(new QueueKeeper(), "Unable to find previous queue state file '"+file.getPath()+"'");
+			Logger.info(new QueueKeeper(), "Unable to find previous queue state file '"+file.getPath()+"' => Not reloaded from file.");
 			return false;
 		}
 

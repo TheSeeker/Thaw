@@ -65,7 +65,6 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 	private boolean insertionQueue = false;
 
-
 	public QueuePanel(Core core, DetailPanel detailPanel, boolean isForInsertionQueue) {
 		insertionQueue = isForInsertionQueue;
 
@@ -161,9 +160,13 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 							       boolean isSelected, boolean hasFocus,
 							       int row, int column) {
 
+			if(value == null)
+				return null;
+
 			
 			if( (insertionQueue && column == 3)
 			    || (!insertionQueue && column == 4) ) {
+
 				Integer progress = (Integer)value;
 				JProgressBar bar = new JProgressBar(0, 100);
 
@@ -215,7 +218,6 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	public void resetTable() {
 		tableModel.resetTable();
 	}
-
 
 
 	public void addToTable(FCPTransferQuery query) {

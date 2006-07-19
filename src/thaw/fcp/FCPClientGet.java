@@ -335,6 +335,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			fileSize = message.getAmountOfDataWaiting();
 
 			status = "Writing to disk";
+			Logger.notice(this, "Receiving file ...");
 
 			setChanged();
 			notifyObservers();
@@ -347,6 +348,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				Logger.warning(this, "Unable to fetch correctly the file. This may create problems on socket");
 			}
 			
+			Logger.notice(this, "Done");
+
 			queueManager.getQueryManager().getConnection().unlockReading();
 			queueManager.getQueryManager().getConnection().unlockWriting();
 			
@@ -458,6 +461,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	}
 
 	public synchronized boolean continueSaveFileTo(String dir) {
+		Logger.notice(this, "Asking file to the node...");
+
 		destinationDir = dir;
 
 		status = "Requesting file";

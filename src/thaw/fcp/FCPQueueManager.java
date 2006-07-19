@@ -358,7 +358,15 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 			if(stopThread)
 				return;
 
-			ordonnance();
+			try {
+				ordonnance();
+			} catch(java.util.ConcurrentModificationException e) {
+				Logger.notice(this, "Ordonnancor: Collision !");
+			} catch(Exception e) {
+				Logger.error(this, "EXCEPTION FROM ORDONNANCOR : "+e.toString());
+				Logger.error(this, "ERROR : "+e.getMessage());
+				e.printStackTrace();
+			}
 		}
 
 	}

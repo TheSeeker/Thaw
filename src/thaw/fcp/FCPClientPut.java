@@ -121,10 +121,12 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		this.publicKey = publicKey;
 
 		if(srcFile != null) {
-			String[] plop = srcFile.split(File.separator);
+			String[] plop = srcFile.split(File.separator.replaceAll("\\\\", "\\\\\\\\"));
 			this.name = plop[plop.length-1];
 		} else {
-			String[] plop = publicKey.split(File.separator);
+			/* <Jflesch> Bill Gates: God kills a kitten each time you use a '\' !! */
+
+			String[] plop = publicKey.split(File.separator.replaceAll("\\\\", "\\\\\\\\"));
 			this.name = plop[plop.length-1];
 
 			if(keyType != 0) {
