@@ -4,7 +4,7 @@
  * 2006(c) Freenet project
  * ==================================================
  *
- * This file was originally created by David Roden and next adapted to Thaw by Jerome Flesch.
+ * This file was originally created by David Roden and next was adapted to Thaw by Jerome Flesch.
  *
  * Copyright (C) 2006 David Roden
  *
