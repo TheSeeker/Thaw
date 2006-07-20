@@ -8,10 +8,15 @@
 	<property name="javadoc.dir" value="javadoc" />
 	<property name="hsqldb.location" value="${lib.dir}/hsqldb.jar" />
 	<property name="javac.debug" value="false" />
-
+	<property name="svn.revision" value="@custom@"/>
 
 	<target name="compile">
 		<mkdir dir="${bin.dir}" />
+
+		<replace file="${src.dir}/thaw/core/Main.java">
+			<replacefilter token="@custom@" value="${svn.revision}"/>
+		</replace>
+
 
 		<javac srcdir="${src.dir}" destdir="${bin.dir}" debug="true" optimize="true">
 

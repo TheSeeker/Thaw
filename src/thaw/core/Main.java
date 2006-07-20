@@ -13,7 +13,7 @@ import thaw.i18n.I18n;
  */
 public class Main {
 
-	public final static String VERSION="0.2 Beta $Rev$".replaceAll("\\$", "");
+	public final static String VERSION="0.2 Beta r@custom@";
 
 	/**
 	 * Look & feel use by GUI front end
