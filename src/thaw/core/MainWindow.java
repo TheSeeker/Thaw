@@ -182,6 +182,11 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 			statusBar.setText(" ");/* not empty else the status bar disappear */
 	}
 
+
+	public String getStatus() {
+		return statusBar.getText();
+	}
+
 	
 	public void windowActivated(WindowEvent e) {
 

@@ -10,7 +10,8 @@ import java.util.Iterator;
 public class PluginManager {
 	private final static String[] defaultPlugins = {"thaw.plugins.QueueWatcher",
 							"thaw.plugins.InsertPlugin",
-							"thaw.plugins.FetchPlugin" };
+							"thaw.plugins.FetchPlugin",
+							"thaw.plugins.StatusBar"};
 
 	private Core core = null;
 

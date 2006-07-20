@@ -2,6 +2,9 @@ package thaw.core;
 
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+import java.util.Locale;
+
+import thaw.i18n.I18n;
 
 /**
  * Main class. Only used to display some informations and init the core.
@@ -16,6 +19,12 @@ public class Main {
 	 * Look & feel use by GUI front end
 	 */
 	private static String lookAndFeel = null;
+	
+
+	/**
+	 * Locale (null = default)
+	 */
+	private static String locale = null;
 
 
 	/**
@@ -27,6 +36,9 @@ public class Main {
 		Core core;
 
 		parseCommandLine(args);
+
+		if(locale != null)
+			I18n.setLocale(new Locale(locale));
 
 		core = new Core();
 		Core.setLookAndFeel(lookAndFeel);
@@ -56,6 +68,9 @@ public class Main {
 				} else if (args[count].equals("-lf")) {
 					lookAndFeel = args[count + 1];
 					count = count + 2;
+				} else if (args[count].equals("-lc")) {
+					locale = args[count + 1];
+					count = count + 2;
 				} else {
 					showHelp();
 				}
@@ -82,6 +97,11 @@ public class Main {
 		}
 		System.out.println("\n         And this one is used by default:");
 		System.out.println("           " + UIManager.getSystemLookAndFeelClassName() + "\n");
+
+		System.out.println("\n-lc     Sets the locale to use: 'en' for english,");
+		System.out.println("        'fr' for french, etc.");
+		System.out.println("        see http://ftp.ics.uci.edu/pub/ietf/http/related/iso639.txt");
+		System.out.println("        for the complete list");
 
 		System.exit(0);
 
