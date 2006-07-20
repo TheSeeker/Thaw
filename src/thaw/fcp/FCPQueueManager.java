@@ -270,7 +270,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 	}
 
 
-	public void ordonnance() {
+	public void schedule() {
 		
 			/* We count the running query to see if there is an empty slot */
 
@@ -359,7 +359,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 				return;
 
 			try {
-				ordonnance();
+				schedule();
 			} catch(java.util.ConcurrentModificationException e) {
 				Logger.notice(this, "Ordonnancor: Collision !");
 			} catch(Exception e) {

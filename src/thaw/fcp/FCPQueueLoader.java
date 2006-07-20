@@ -26,7 +26,12 @@ public class FCPQueueLoader implements Observer {
 		
 
 		FCPListPersistentRequests listPersistent = new FCPListPersistentRequests();
-		return listPersistent.start(queueManager);
+		boolean ret = listPersistent.start(queueManager);
+		
+		if(ret)
+			queueManager.getQueryManager().getConnection().lockWriting();
+
+		return ret;
 	}
 
 
@@ -121,6 +126,8 @@ public class FCPQueueLoader implements Observer {
 
 		if(msg.getMessageName().equals("EndListPersistentRequests")) {
 			Logger.info(this, "End Of ListPersistentRequests.");
+			queueManager.getQueryManager().getConnection().unlockWriting();
+
 			return;
 		}
 	}

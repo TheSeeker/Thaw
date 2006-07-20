@@ -40,6 +40,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	private boolean sending = false;
 	
 	private FCPGenerateSSK sskGenerator = null;
+	private boolean lockOwner = false;
 
 
 	private final static int PACKET_SIZE = 1024;
@@ -221,7 +222,10 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			if(!connection.lockWriting()) {
 				/* Ah ben oué mais non ... */
 				run();
+				return;
 			}
+
+			lockOwner = true;
 
 			clientPut.continueInsert();
 			return;
@@ -291,9 +295,10 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		
 		Logger.info(this, "Sending file to the node");
 		boolean ret = sendFile();
-		Logger.info(this, "File sent (or not)");
+		Logger.info(this, "File sent (or not :p)");
 
 		connection.unlockWriting();
+		lockOwner = false;
 		sending = false;
 
 		if(ret == true) {
@@ -501,6 +506,11 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				successful = false;
 				running = false;
 				finished = true;
+
+				if(lockOwner) {
+					lockOwner = false;
+					queueManager.getQueryManager().getConnection().unlockWriting();
+				}
 
 				status = "Protocol error ("+msg.getValue("CodeDescription")+")";
 				if(msg.getValue("Fatal") != null && 

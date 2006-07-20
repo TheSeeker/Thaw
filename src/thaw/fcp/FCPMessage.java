@@ -63,6 +63,10 @@ public class FCPMessage {
 			setValue(affectation[0], affectation[1]);
 		}
 
+		if(getMessageName().equals("ProtocolError")) {
+			Logger.notice(this, "PROTOCOL ERROR:"+toString());
+		}
+
 		return true;
 	}
 
@@ -71,7 +75,7 @@ public class FCPMessage {
 		return messageName;
 	}
 
-	public void setMessageName(String name) {
+	public void setMessageName(String name) {	
 		if(name == null || name.equals("")) {
 			Logger.notice(this, "Setting name to empty ? weird");
 		}
@@ -79,6 +83,8 @@ public class FCPMessage {
 		if(name.indexOf("\n")>=0) {
 			Logger.notice(this, "Name shouldn't contain '\n'");
 		}
+
+		Logger.notice(this, "Message: "+name);
 
 		messageName = name;
 	}

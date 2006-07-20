@@ -21,7 +21,7 @@ public class Logger {
 	 * 2 or more is recommanded.
 	 * 5 is never logged in a file, only on stdout.
 	 */
-	private final static int LOG_LEVEL = 2;
+	public final static int LOG_LEVEL = 2;
 
 	private static Vector logListeners = null;
 	

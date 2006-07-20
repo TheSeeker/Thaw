@@ -164,8 +164,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 				return null;
 
 			
-			if( (insertionQueue && column == 3)
-			    || (!insertionQueue && column == 4) ) {
+			if(value instanceof Integer) {
 
 				Integer progress = (Integer)value;
 				JProgressBar bar = new JProgressBar(0, 100);

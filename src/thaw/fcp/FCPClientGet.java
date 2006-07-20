@@ -39,7 +39,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	private boolean running = false;
 	private boolean successful = false;
-
+	private boolean isLockOwner = false;
+	
 
 	/**
 	 * See setParameters().
@@ -249,14 +250,22 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			}
 			*/
 
+			Logger.error(this, "=== PROTOCOL ERROR === \n"+message.toString());
+
 			status = "Protocol Error ("+message.getValue("CodeDescription")+")";
 			progress = 100;
 			running = false;
-			successful = false;
+			successful = false;			
 
 			if(message.getValue("Fatal") != null &&
 			   message.getValue("Fatal").equals("false")) {
 				status = status + " (non-fatal)";
+			}
+
+			if(isLockOwner) {
+				queueManager.getQueryManager().getConnection().unlockReading();
+				queueManager.getQueryManager().getConnection().unlockWriting();
+				isLockOwner= false;
 			}
 
 			queueManager.getQueryManager().deleteObserver(this);
@@ -335,7 +344,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			fileSize = message.getAmountOfDataWaiting();
 
 			status = "Writing to disk";
-			Logger.notice(this, "Receiving file ...");
+			Logger.info(this, "Receiving file ...");
 
 			setChanged();
 			notifyObservers();
@@ -348,10 +357,11 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				Logger.warning(this, "Unable to fetch correctly the file. This may create problems on socket");
 			}
 			
-			Logger.notice(this, "Done");
+			Logger.info(this, "File received");
 
 			queueManager.getQueryManager().getConnection().unlockReading();
 			queueManager.getQueryManager().getConnection().unlockWriting();
+			isLockOwner= false;
 			
 			running = false;
 			progress = 100;
@@ -407,13 +417,17 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			if(!connection.lockReading()) {
 				/* Ah ben oué mais non */
 				run();
+				return;
 			}
 
 			if(!connection.lockWriting()) {
 				/* Ah ben oué mais non */
 				connection.unlockReading();
 				run();
+				return;
 			}
+
+			isLockOwner = true;
 
 			Logger.debug(this, "I take the reading lock !");
 
@@ -461,7 +475,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	}
 
 	public synchronized boolean continueSaveFileTo(String dir) {
-		Logger.notice(this, "Asking file to the node...");
+		Logger.debug(this, "Asking file to the node...");
 
 		destinationDir = dir;
 
