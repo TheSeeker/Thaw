@@ -41,11 +41,11 @@ public class FCPConnection extends Observable {
 
 	private long rawBytesWaiting = 0;
 
+
 	private boolean lockWriting = false;
 	private boolean lockReading = false;
 
 	private long lastWrite = 0; /* real writes ; System.currentTimeMillis() */
-
 
 
 	/**
