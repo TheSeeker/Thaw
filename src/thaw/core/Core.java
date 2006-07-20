@@ -132,6 +132,8 @@ public class Core implements Observer {
 			getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.connecting"));
 
 		try {
+			if(queueManager != null)
+				queueManager.stopScheduler();
 
 			if(connection != null && connection.isConnected()) {
 				connection.deleteObserver(this);
