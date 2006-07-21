@@ -19,7 +19,6 @@ public class Logger {
 	 *             (or maybe someone having the FCPv2 doc :)
 	 *
 	 * 2 or more is recommanded.
-	 * 5 is never logged in a file, only on stdout.
 	 */
 	public final static int LOG_LEVEL = 2;
 
