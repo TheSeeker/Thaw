@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 /* import java.io.BufferedReader; */
 import java.io.BufferedInputStream;
-import java.io.InputStreamReader;
 import java.util.Observable;
 
 /* Should be the only real dep of the FCP package */
@@ -26,6 +25,7 @@ public class FCPConnection extends Observable {
 	 * all fcp input / output.
 	 */
 	private final static boolean DEBUG_MODE = true;
+	private final static int MAX_RECV = 1024;
 
 	private FCPBufferedStream bufferedOut = null;
 	private int maxUploadSpeed = 0;
@@ -283,7 +283,12 @@ public class FCPConnection extends Observable {
 
 
 		if(out != null && socket != null && socket.isConnected()) {
-			bufferedOut.write(toWrite.getBytes());
+			try {
+				bufferedOut.write(toWrite.getBytes("UTF-8"));
+			} catch(java.io.UnsupportedEncodingException e) {
+				Logger.error(this, "UNSUPPORTED ENCODING EXCEPTION : UTF-8");
+				bufferedOut.write(toWrite.getBytes());
+			}
 		} else {
 			Logger.warning(this, "Cannot write if disconnected !\n");
 			return false;
@@ -333,6 +338,8 @@ public class FCPConnection extends Observable {
 	 * @return null if disconnected or error
 	 */
 	public String readLine() {
+		
+
 
 		/* SECURITY */
 		if(rawBytesWaiting > 0) {
@@ -359,11 +366,17 @@ public class FCPConnection extends Observable {
 		
 		if(in != null && reader != null && socket != null && socket.isConnected()) {
 			try {
+				byte[] recvBytes = new byte[MAX_RECV];
+
+				for(int i = 0; i < recvBytes.length ; i++)
+					recvBytes[i] = 0;
+
 				result = "";
 				
 				int c = 0;
+				int i = 0; /* position in recvBytes */
 
-				while(c != '\n') {
+				while(c != '\n' && i < recvBytes.length) {
 					c = reader.read();
 
 					if(c == -1) {
@@ -378,9 +391,13 @@ public class FCPConnection extends Observable {
 					if(c == '\n')
 						break;
 
-					result = result + new String(new byte[] { (byte)c });
-					
+					//result = result + new String(new byte[] { (byte)c });
+
+					recvBytes[i] = (byte)c;
+					i++;
 				}
+
+				result = new String(recvBytes, 0, i, "UTF-8");
 
 				if(DEBUG_MODE) {
 					if(result.matches("[\\-\\ \\?.a-zA-Z0-9\\,~%@/_=\\[\\]\\(\\)]*"))

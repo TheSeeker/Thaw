@@ -127,7 +127,7 @@ public class Console implements Plugin, LogListener, ActionListener {
 		}
 
 		try {
-			output.write(logArea.getText().getBytes());
+			output.write(logArea.getText().getBytes("UTF-8"));
 		} catch(java.io.IOException e) {
 			Logger.error(this, "IOException while writing logs ... out of space ?");
 			return;

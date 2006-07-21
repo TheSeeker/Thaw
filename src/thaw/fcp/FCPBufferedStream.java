@@ -74,7 +74,12 @@ public class FCPBufferedStream implements Runnable {
 	 * @see write(byte[])
 	 */
 	public boolean write(String data) {
-		return write(data.getBytes());
+		try {
+			return write(data.getBytes("UTF-8"));
+		} catch(java.io.UnsupportedEncodingException e) {
+			Logger.error(this, "UNSUPPORTED ENCODING EXCEPTION : UTF-8");
+			return write(data.getBytes());
+		}
 	}
 
 	/**
