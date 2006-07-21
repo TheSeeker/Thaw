@@ -156,15 +156,17 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			if(this.name.equals("null")) {
 				Logger.warning(this, "The node returns \"null\" as filename. Using id !");
 				Logger.warning(this, "( URI="+publicKey +" )");
+				Logger.warning(this, "( Identifier="+identifier+" )");
 
 				plop = this.identifier.split("\\-");
 
 				if(plop.length >= 2) {
 					this.name = "";
 					for(int i = 1 ; i < plop.length; i++) {
-						this.name = this.name + plop[i];
-						if(i < plop.length-2)
+						if(i != 1)
 							this.name = this.name +"-";
+						this.name = this.name + plop[i];
+
 					}
 				}
 				
