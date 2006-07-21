@@ -104,7 +104,7 @@ public class FCPMessage {
 	
 	/**
 	 * Returns the amount of data waiting on socket (in octets).
-	 * @return if > 0 : Data are still waiting, if == 0 : No data waiting, if < 0 : These data are now unavailable.
+	 * @return if > 0 : Data are still waiting (except if the message name is "PersistentPut" !), if == 0 : No data waiting, if < 0 : These data are now unavailable.
 	 */
 	public long getAmountOfDataWaiting() {
 		return dataWaiting;
@@ -112,6 +112,10 @@ public class FCPMessage {
 
 	
 	public void setAmountOfDataWaiting(long amount) {
+		if(amount == 0) {
+			Logger.warning(this, "Setting amount of data waiting to 0 ?! Abnormal !");
+		}
+
 		this.dataWaiting = amount;
 	}
 

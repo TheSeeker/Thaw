@@ -66,7 +66,7 @@ public class FCPQueueLoader implements Observer {
 			if(msg.getValue("Identifier").startsWith(thawId))
 				destinationDir = msg.getValue("ClientToken");
 
-			int priority = ((new Integer(msg.getValue("PriorityClass"))).intValue());
+			int priority = Integer.parseInt(msg.getValue("PriorityClass"));
 
 
 			FCPClientGet clientGet = new FCPClientGet(msg.getValue("Identifier"),
@@ -105,13 +105,17 @@ public class FCPQueueLoader implements Observer {
 			if(msg.getValue("Identifier").startsWith(thawId))
 				srcFile = msg.getValue("ClientToken");
 
-			int priority = ((new Integer(msg.getValue("PriorityClass"))).intValue());
+			int priority = Integer.parseInt(msg.getValue("PriorityClass"));
 
+			long fileSize = 0;
+
+			if(msg.getValue("DataLength") != null)
+				fileSize = Long.getLong(msg.getValue("DataLength"));
 
 			FCPClientPut clientPut = new FCPClientPut(msg.getValue("Identifier"),
 								  msg.getValue("URI"), // key
 								  priority, persistence, global,
-								  srcFile, "Inserting", 0,
+								  srcFile, "Inserting", 0, fileSize,
 								  queueManager);
 								  
 								  

@@ -159,7 +159,7 @@ public class QueueKeeper {
 
 		Element queryEl = xmlDoc.createElement("query");
 
-		queryEl.setAttribute("type", ((new Integer(query.getQueryType())).toString()));
+		queryEl.setAttribute("type", Integer.toString(query.getQueryType()));
 		
 		for(Iterator keys = params.keySet().iterator();
 		    keys.hasNext();) {

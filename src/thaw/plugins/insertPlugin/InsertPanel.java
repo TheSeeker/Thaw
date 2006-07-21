@@ -258,7 +258,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 					return;
 				}
 
-				rev = ((new Integer(revField.getText())).intValue());
+				rev = Integer.parseInt(revField.getText());
 				name = nameField.getText();
 			}
 
@@ -280,7 +280,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 			}
 
 			for(int i = 0 ; i <= MIN_PRIORITY ; i++) {
-				if(I18n.getMessage("thaw.plugin.priority.p"+(new Integer(i)).toString()).equals((String)prioritySelecter.getSelectedItem())) {
+				if(I18n.getMessage("thaw.plugin.priority.p"+ Integer.toString(i)).equals((String)prioritySelecter.getSelectedItem())) {
 					priority = i;
 				}
 			}

@@ -141,8 +141,8 @@ public class Core implements Observer {
 			}
 			
 			connection = new FCPConnection(config.getValue("nodeAddress"),
-						       (new Integer(config.getValue("nodePort"))).intValue(),
-						       (new Integer(config.getValue("maxUploadSpeed"))).intValue());
+						       Integer.parseInt(config.getValue("nodePort")),
+						       Integer.parseInt(config.getValue("maxUploadSpeed")));
 			
 			if(!connection.connect()) {
 				new WarningWindow(this, "Unable to connect to "+config.getValue("nodeAddress")+":"+
@@ -155,8 +155,8 @@ public class Core implements Observer {
 			queryManager = new FCPQueryManager(connection);
 			queueManager = new FCPQueueManager(queryManager,
 							   config.getValue("thawId"),
-							   (new Integer(config.getValue("maxSimultaneousDownloads"))).intValue(),
-							   (new Integer(config.getValue("maxSimultaneousInsertions"))).intValue());
+							   Integer.parseInt(config.getValue("maxSimultaneousDownloads")),
+							   Integer.parseInt(config.getValue("maxSimultaneousInsertions")));
 
 			if(connection.isConnected()) {
 				queryManager.startListening();

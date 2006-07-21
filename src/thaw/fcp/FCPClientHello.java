@@ -115,8 +115,8 @@ public class FCPClientHello implements FCPQuery, Observer {
 				nodeFCPVersion = answer.getValue("FCPVersion");
 				nodeVersion = answer.getValue("Version");
 				nodeName = answer.getValue("Node");
-				testnet = (new Boolean(answer.getValue("Testnet"))).booleanValue();
-				nmbCompressionCodecs = (new Integer(answer.getValue("CompressionCodecs"))).intValue();
+				testnet = Boolean.parseBoolean(answer.getValue("Testnet"));
+				nmbCompressionCodecs = Integer.parseInt(answer.getValue("CompressionCodecs"));
 
 				queryManager.deleteObserver(this);
 

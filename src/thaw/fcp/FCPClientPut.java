@@ -103,7 +103,10 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	public FCPClientPut(String identifier, String publicKey,
 			    int priority, int persistence, boolean global,
 			    String srcFile, String status, int progress,
-			    FCPQueueManager queueManager) {
+			    long fileSize, FCPQueueManager queueManager) {
+		if(fileSize > 0)
+			this.fileSize = fileSize;
+
 		toTheNodeProgress = 100;
 		
 		this.queueManager = queueManager;
@@ -124,7 +127,14 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		if(srcFile != null) {
 			String[] plop = srcFile.split(File.separator.replaceAll("\\\\", "\\\\\\\\"));
 			this.name = plop[plop.length-1];
+
+			this.localFile = new File(srcFile);
+			if(this.localFile.length() > 0)
+				this.fileSize = this.localFile.length();
+			
 		} else {
+			
+
 			/* <Jflesch> Bill Gates: God kills a kitten each time you use a '\' !! */
 
 			String[] plop = publicKey.split(File.separator.replaceAll("\\\\", "\\\\\\\\"));
@@ -141,6 +151,28 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 					}
 				}
 			}
+
+
+			if(this.name.equals("null")) {
+				Logger.warning(this, "The node returns \"null\" as filename. Using id !");
+				Logger.warning(this, "( URI="+publicKey +" )");
+
+				plop = this.identifier.split("\\-");
+
+				if(plop.length >= 2) {
+					this.name = "";
+					for(int i = 1 ; i < plop.length; i++) {
+						this.name = this.name + plop[i];
+						if(i < plop.length-2)
+							this.name = this.name +"-";
+					}
+				}
+				
+
+			}
+			
+			
+
 		}
 		
 		this.publicKey = null;
@@ -161,7 +193,23 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 	public boolean start(FCPQueueManager queueManager) {
 		this.queueManager = queueManager;
-		
+
+		if(localFile != null && localFile.length() <= 0) {
+			Logger.warning(this, "Empty or unreachable file:"+localFile.getPath());
+
+			status = "EMPTY OR UNREACHABLE FILE";
+
+			successful = false;
+			finished = true;
+			running = false;
+
+			setChanged();
+			notifyObservers();
+
+			return false;
+		}
+
+
 		queueManager.getQueryManager().addObserver(this);
 		
 		progress = 0;
@@ -270,7 +318,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		msg.setValue("Identifier", identifier);
 		msg.setValue("Verbosity", "512");
 		msg.setValue("MaxRetries", "-1");
-		msg.setValue("PriorityClass", (new Integer(priority)).toString());
+		msg.setValue("PriorityClass", Integer.toString(priority));
 		msg.setValue("GetCHKOnly", "false");
 		if(global)
 			msg.setValue("Global", "true");
@@ -450,7 +498,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 				/*
 				if(keyType > 0)
-					publicKey = publicKey + "/" + name + "-" + (new Integer(rev)).toString();
+					publicKey = publicKey + "/" + name + "-" + Integer.toString(rev);
 				*/
 				
 
@@ -470,9 +518,9 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				if(keyType == 0)
 					publicKey = publicKey + "/" + name;
 				if(keyType == 1)
-					publicKey = "KSK@"+name+"-" + (new Integer(rev)).toString();
+					publicKey = "KSK@"+name+"-" + Integer.toString(rev);
 				if(keyType == 2)
-					publicKey = publicKey + "/" + name + "-" + (new Integer(rev)).toString();
+					publicKey = publicKey + "/" + name + "-" + Integer.toString(rev);
 				
 
 				status = "Finished";
@@ -557,7 +605,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 				int rate = (int)( ((new Long(msg.getValue("OrigSize"))).longValue() * 100) / (new Long(msg.getValue("CompressedSize"))).longValue() );
 
-				Logger.info(this, "Compression: "+ (new Integer(rate)).intValue());
+				Logger.info(this, "Compression: "+ Integer.toString(rate));
 
 				setChanged();
 				notifyObservers();
@@ -689,7 +737,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		if(keyType == 0 && publicKey == null)
 			key = "CHK@coinCoin/"+name;
 		if(keyType == 1)
-			key = "KSK@" + name + "-"+((new Integer(rev)).intValue());
+			key = "KSK@" + name + "-"+ Integer.toString(rev);
 		if(keyType == 2)
 			key = privateKey + name+"-"+rev;
 
@@ -745,27 +793,27 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		HashMap result = new HashMap();
 
 		result.put("localFile", localFile.getPath());
-		result.put("keyType", ((new Integer(keyType)).toString()));
-		result.put("Revision", ((new Integer(rev)).toString()));
+		result.put("keyType", Integer.toString(keyType));
+		result.put("Revision", Integer.toString(rev));
 		result.put("Name", name);
 		if(privateKey != null)
 			result.put("privateKey", privateKey);
 		if(publicKey != null)
 			result.put("publicKey", publicKey);
-		result.put("priority", ((new Integer(priority)).toString()));
-		result.put("global", ((new Boolean(global)).toString()));
-		result.put("persistence", (new Integer(persistence)).toString());
+		result.put("priority", Integer.toString(priority));
+		result.put("global", Boolean.toString(global));
+		result.put("persistence", Integer.toString(persistence));
 		
-		result.put("progress", (new Integer(progress)).toString());
+		result.put("progress", Integer.toString(progress));
 		
 		result.put("status", status);
 
-		result.put("attempt", (new Integer(attempt)).toString());
+		result.put("attempt", Integer.toString(attempt));
 		if(identifier != null)
 			result.put("identifier", identifier);
-		result.put("running", ((new Boolean(running)).toString()));
-		result.put("successful", ((new Boolean(successful)).toString()));
-		result.put("finished", ((new Boolean(finished)).toString()));
+		result.put("running", Boolean.toString(running));
+		result.put("successful", Boolean.toString(successful));
+		result.put("finished", Boolean.toString(finished));
 
 		return result;
 	}
@@ -774,10 +822,13 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	 * not tested ; TODO : to test it
 	 */
 	public boolean setParameters(HashMap parameters) {
-				
+		
 		localFile = new File((String)parameters.get("localFile"));
-		keyType = (new Integer((String)parameters.get("keyType"))).intValue();
-		rev = (new Integer((String)parameters.get("Revision"))).intValue();
+
+		fileSize = localFile.length();
+
+		keyType = Integer.parseInt((String)parameters.get("keyType"));
+		rev = Integer.parseInt((String)parameters.get("Revision"));
 		name = (String)parameters.get("name");
 
 		privateKey = (String)parameters.get("privateKey");
@@ -788,20 +839,20 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		if(privateKey == null || publicKey.equals(""))
 			publicKey = null;
 
-		priority = ((new Integer((String)parameters.get("priority"))).intValue());
-		global = ((new Boolean((String)parameters.get("global"))).booleanValue());
-		persistence = ((new Integer((String)parameters.get("persistence"))).intValue());
-		progress = ((new Integer((String)parameters.get("progress"))).intValue());
+		priority = Integer.parseInt((String)parameters.get("priority"));
+		global = Boolean.parseBoolean((String)parameters.get("global"));
+		persistence = Integer.parseInt((String)parameters.get("persistence"));
+		progress = Integer.parseInt(((String)parameters.get("progress")));
 		status = (String)parameters.get("status");
-		attempt = ((new Integer((String)parameters.get("attempt"))).intValue());
+		attempt = Integer.parseInt((String)parameters.get("attempt"));
 
 		identifier = (String)parameters.get("identifier");
 		if(identifier == null || identifier.equals(""))
 			identifier = null;
 
-		running = ((new Boolean((String)parameters.get("running"))).booleanValue());
-		successful = ((new Boolean((String)parameters.get("successful"))).booleanValue());
-		finished = ((new Boolean((String)parameters.get("finished"))).booleanValue());
+		running = Boolean.parseBoolean((String)parameters.get("running"));
+		successful = Boolean.parseBoolean((String)parameters.get("successful"));
+		finished = Boolean.parseBoolean((String)parameters.get("finished"));
 
 		if(persistence == 2 && !isFinished()) {
 			progress = 0;

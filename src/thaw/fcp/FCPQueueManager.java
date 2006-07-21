@@ -138,7 +138,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 			try {
 				String[] subId = query.getIdentifier().split("-");
 				subId = subId[0].split("_");
-				int id = ((new Integer(subId[subId.length-1])).intValue());
+				int id = Integer.parseInt(subId[subId.length-1]);
 				
 				if(id > lastId) {
 					lastId = id;
@@ -389,7 +389,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 			lastId = 0;
 		}
 
-		return (thawId+"_"+(new Integer(lastId)).toString());
+		return (thawId+"_"+ Integer.toString(lastId));
 	}
 
 }

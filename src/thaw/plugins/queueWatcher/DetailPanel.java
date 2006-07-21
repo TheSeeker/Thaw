@@ -134,12 +134,12 @@ public class DetailPanel implements Observer {
 
 	public void refresh() {
 		if(query != null) {
-			withTheNodeProgress.setValue((new Integer(query.getTransferWithTheNodeProgression())).intValue());
-			withTheNodeProgress.setString((new Integer(query.getTransferWithTheNodeProgression())).toString() + "%");
+			withTheNodeProgress.setValue(query.getTransferWithTheNodeProgression());
+			withTheNodeProgress.setString(Integer.toString(query.getTransferWithTheNodeProgression()) + "%");
 
 			progress.setValue(query.getProgression());
 			if(!query.isFinished() || query.isSuccessful()) {
-				String progression = (new Integer(query.getProgression())).toString() + "%";
+				String progression = Integer.toString(query.getProgression()) + "%";
 
 				if(!query.isProgressionReliable())
 					progression = progression + " ("+I18n.getMessage("thaw.common.estimation")+")";
@@ -163,10 +163,10 @@ public class DetailPanel implements Observer {
 				identifier.setText(query.getIdentifier());
 			else
 				identifier.setText("N/A");
-			attempt.setText((new Integer(query.getAttempt())).toString());
+			attempt.setText(Integer.toString(query.getAttempt()));
 
 			if(query.getThawPriority() != -1)
-				priority.setText((new Integer(query.getThawPriority())).toString());
+				priority.setText(Integer.toString(query.getThawPriority()));
 			else
 				priority.setText(I18n.getMessage("thaw.common.unknown"));
 			

@@ -298,7 +298,7 @@ public class Config {
 		setValue("maxSimultaneousDownloads", "-1");
 		setValue("maxSimultaneousInsertions", "-1");
 		setValue("maxUploadSpeed", "-1");
-		setValue("thawId", "thaw_"+(new Integer((new Random()).nextInt(1000))).toString());
+		setValue("thawId", "thaw_"+Integer.toString((new Random()).nextInt(1000)));
 	}
 
 }

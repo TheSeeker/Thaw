@@ -154,7 +154,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		queryMessage.setValue("Identifier", identifier);
 		queryMessage.setValue("Verbosity", "1");
 		queryMessage.setValue("MaxRetries", "0");
-		queryMessage.setValue("PriorityClass", (new Integer(priority)).toString());
+		queryMessage.setValue("PriorityClass", Integer.toString(priority));
 
 		if(destinationDir != null)
 			queryMessage.setValue("ClientToken", destinationDir);
@@ -286,7 +286,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			//removeRequest();
 
-			int code = ((new Integer(message.getValue("Code"))).intValue());
+			int code = Integer.parseInt(message.getValue("Code"));
 
 			if(MAX_RETRIES == -1 || attempt >= MAX_RETRIES || code == 25) {
 			    status = "Failed ("+message.getValue("CodeDescription")+")";
@@ -732,19 +732,19 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		result.put("URI", key);
 		result.put("Filename", filename);
-		result.put("Priority", ((new Integer(priority)).toString()));
-		result.put("Persistence", ((new Integer(persistence)).toString()));
-		result.put("Global", ((new Boolean(globalQueue)).toString()));
+		result.put("Priority", Integer.toString(priority));
+		result.put("Persistence", Integer.toString(persistence));
+		result.put("Global", Boolean.toString(globalQueue));
 		result.put("ClientToken", destinationDir);
-		result.put("Attempt", ((new Integer(attempt)).toString()));
+		result.put("Attempt", Integer.toString(attempt));
 
 		result.put("status", status);
 
        		result.put("Identifier", identifier);
-		result.put("Progress", ((new Integer(progress)).toString()));
-		result.put("FileSize", ((new Long(fileSize)).toString()));
-		result.put("Running", ((new Boolean(running)).toString()));
-		result.put("Successful", ((new Boolean(successful)).toString()));
+		result.put("Progress", Integer.toString(progress));
+		result.put("FileSize", Long.toString(fileSize));
+		result.put("Running", Boolean.toString(running));
+		result.put("Successful", Boolean.toString(successful));
 
 		return result;
 	}
@@ -756,20 +756,20 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		Logger.debug(this, "Resuming key : "+key);
 
 		filename       = (String)parameters.get("Filename");
-		priority       = ((new Integer((String)parameters.get("Priority"))).intValue());
-		persistence    = ((new Integer((String)parameters.get("Persistence"))).intValue());
-		globalQueue    = ((new Boolean((String)parameters.get("Global"))).booleanValue());
+		priority       = Integer.parseInt((String)parameters.get("Priority"));
+		persistence    = Integer.parseInt((String)parameters.get("Persistence"));
+		globalQueue    = Boolean.parseBoolean((String)parameters.get("Global"));
 		destinationDir = (String)parameters.get("ClientToken");
-		attempt        = ((new Integer((String)parameters.get("Attempt"))).intValue());
+		attempt        = Integer.parseInt((String)parameters.get("Attempt"));
 		status         = (String)parameters.get("Status");
 		identifier     = (String)parameters.get("Identifier");
 
 		Logger.info(this, "Resuming id : "+identifier);
 
-		progress       = ((new Integer((String)parameters.get("Progress"))).intValue());
-		fileSize       = ((new Long((String)parameters.get("FileSize"))).longValue());
-		running        = ((new Boolean((String)parameters.get("Running"))).booleanValue());
-		successful     = ((new Boolean((String)parameters.get("Successful"))).booleanValue());
+		progress       = Integer.parseInt((String)parameters.get("Progress"));
+		fileSize       = Long.parseLong((String)parameters.get("FileSize"));
+		running        = Boolean.parseBoolean((String)parameters.get("Running"));
+		successful     = Boolean.parseBoolean((String)parameters.get("Successful"));
 
 		if(persistence == 2 && !isFinished()) {
 			progress = 0;

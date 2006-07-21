@@ -104,12 +104,12 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		
 		rightClickMenu.add(removeItem);
 
-		if((new Integer(core.getConfig().getValue("maxSimultaneousDownloads"))).intValue() >= 0
-		   || (new Integer(core.getConfig().getValue("maxSimultaneousInsertions"))).intValue() >= 0)
+		if( Integer.parseInt(core.getConfig().getValue("maxSimultaneousDownloads")) >= 0
+		   || Integer.parseInt(core.getConfig().getValue("maxSimultaneousInsertions")) >= 0)
 			rightClickMenu.add(cancelItem);
 
-		if((new Integer(core.getConfig().getValue("maxSimultaneousDownloads"))).intValue() >= 0
-		   || (new Integer(core.getConfig().getValue("maxSimultaneousInsertions"))).intValue() >= 0)
+		if( Integer.parseInt(core.getConfig().getValue("maxSimultaneousDownloads")) >= 0
+		   || Integer.parseInt(core.getConfig().getValue("maxSimultaneousInsertions")) >= 0)
 			rightClickMenu.add(delayItem);
 		
 		if(!isForInsertionQueue)

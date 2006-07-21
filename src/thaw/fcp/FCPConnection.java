@@ -113,7 +113,7 @@ public class FCPConnection extends Observable {
 			return false;
 		}
 		
-		Logger.info(this, "Connection to "+nodeAddress+":"+(new Integer(port)).toString()+"...");
+		Logger.info(this, "Connection to "+nodeAddress+":"+ Integer.toString(port) +"...");
 
 		if(socket != null && !socket.isClosed())
 			disconnect();
