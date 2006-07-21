@@ -758,7 +758,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		filename       = (String)parameters.get("Filename");
 		priority       = Integer.parseInt((String)parameters.get("Priority"));
 		persistence    = Integer.parseInt((String)parameters.get("Persistence"));
-		globalQueue    = Boolean.valueOf((String)parameters.get("Global"));
+		globalQueue    = Boolean.valueOf((String)parameters.get("Global")).booleanValue();
 		destinationDir = (String)parameters.get("ClientToken");
 		attempt        = Integer.parseInt((String)parameters.get("Attempt"));
 		status         = (String)parameters.get("Status");
@@ -768,8 +768,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		progress       = Integer.parseInt((String)parameters.get("Progress"));
 		fileSize       = Long.parseLong((String)parameters.get("FileSize"));
-		running        = Boolean.valueOf((String)parameters.get("Running"));
-		successful     = Boolean.valueOf((String)parameters.get("Successful"));
+		running        = Boolean.valueOf((String)parameters.get("Running")).booleanValue();
+		successful     = Boolean.valueOf((String)parameters.get("Successful")).booleanValue();
 
 		if(persistence == 2 && !isFinished()) {
 			progress = 0;

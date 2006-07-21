@@ -843,7 +843,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 		priority = Integer.parseInt((String)parameters.get("priority"));
 
-		global = Boolean.valueOf((String)parameters.get("global"));
+		global = Boolean.valueOf((String)parameters.get("global")).booleanValue();
 
 		persistence = Integer.parseInt((String)parameters.get("persistence"));
 		progress = Integer.parseInt(((String)parameters.get("progress")));
@@ -854,9 +854,9 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		if(identifier == null || identifier.equals(""))
 			identifier = null;
 
-		running = Boolean.valueOf((String)parameters.get("running"));
-		successful = Boolean.valueOf((String)parameters.get("successful"));
-		finished = Boolean.valueOf((String)parameters.get("finished"));
+		running = Boolean.valueOf((String)parameters.get("running")).booleanValue();
+		successful = Boolean.valueOf((String)parameters.get("successful")).booleanValue();
+		finished = Boolean.valueOf((String)parameters.get("finished")).booleanValue();
 
 		if(persistence == 2 && !isFinished()) {
 			progress = 0;
