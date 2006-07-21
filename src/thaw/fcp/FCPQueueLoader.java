@@ -110,7 +110,7 @@ public class FCPQueueLoader implements Observer {
 			long fileSize = 0;
 
 			if(msg.getValue("DataLength") != null)
-				fileSize = Long.getLong(msg.getValue("DataLength"));
+				fileSize = Long.parseLong(msg.getValue("DataLength"));
 
 			FCPClientPut clientPut = new FCPClientPut(msg.getValue("Identifier"),
 								  msg.getValue("URI"), // key
