@@ -11,8 +11,7 @@ public class PluginManager {
 	private final static String[] defaultPlugins = {"thaw.plugins.QueueWatcher",
 							"thaw.plugins.InsertPlugin",
 							"thaw.plugins.FetchPlugin",
-							"thaw.plugins.StatusBar",
-							"thaw.plugins.Restarter"};
+							"thaw.plugins.StatusBar"};
 
 	private Core core = null;
 

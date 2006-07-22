@@ -154,7 +154,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		queryMessage.setValue("URI", getFileKey());
 		queryMessage.setValue("Identifier", identifier);
 		queryMessage.setValue("Verbosity", "1");
-		queryMessage.setValue("MaxRetries", "0");
+		queryMessage.setValue("MaxRetries", Integer.toString(MAX_RETRIES));
 		queryMessage.setValue("PriorityClass", Integer.toString(priority));
 
 		if(destinationDir != null)
