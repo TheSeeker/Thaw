@@ -299,6 +299,7 @@ public class Config {
 		setValue("maxSimultaneousInsertions", "-1");
 		setValue("maxUploadSpeed", "-1");
 		setValue("thawId", "thaw_"+Integer.toString((new Random()).nextInt(1000)));
+		setValue("advancedMode", "false");
 	}
 
 }

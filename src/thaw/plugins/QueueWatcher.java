@@ -34,6 +34,8 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 	private long lastChange = 0;
 	private boolean folded = false;
 
+	private boolean advancedMode = false;
+
 	public QueueWatcher() {
 
 	}
@@ -61,25 +63,31 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 		if(queuePanels[1].getPanel() != null)
 			panel.add(queuePanels[1].getPanel());
 		
+		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
+		
+		if(advancedMode) {
+			mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, detailPanel.getPanel(), panel);
+			
+			if(core.getConfig().getValue("detailPanelFolded") == null
+			   || ((new Boolean(core.getConfig().getValue("detailPanelFolded"))).booleanValue()) == true) {
+				folded = true;
+				detailPanel.getPanel().setVisible(false);
+				mainPanel.setDividerLocation(1);
+			} else {
+				folded = false;
+				detailPanel.getPanel().setVisible(true);
+				mainPanel.setDividerLocation(DIVIDER_LOCATION);
+			}
+			
+			mainPanel.addPropertyChangeListener(this);
+			mainPanel.setOneTouchExpandable(true);
 
-		mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, detailPanel.getPanel(), panel);
-
-		if(core.getConfig().getValue("detailPanelFolded") == null
-		   || ((new Boolean(core.getConfig().getValue("detailPanelFolded"))).booleanValue()) == true) {
-			folded = true;
-			detailPanel.getPanel().setVisible(false);
-			mainPanel.setDividerLocation(1);
+			core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"), mainPanel);
 		} else {
-			folded = false;
-			detailPanel.getPanel().setVisible(true);
-			mainPanel.setDividerLocation(DIVIDER_LOCATION);
+
+			core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"), panel);
 		}
-
-		mainPanel.addPropertyChangeListener(this);
-		mainPanel.setOneTouchExpandable(true);
-
-		core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"), mainPanel);
-
+			
 		if(core.getQueueManager() != null)
 		    core.getQueueManager().addObserver(this);
 		else {
@@ -99,7 +107,10 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 
 		core.getConfig().setValue("detailPanelFolded", ((new Boolean(folded)).toString()));
 
-		core.getMainWindow().removeTab(mainPanel);
+		if(advancedMode)
+			core.getMainWindow().removeTab(mainPanel);
+		else
+			core.getMainWindow().removeTab(panel);
 		
 		return true;
 	}

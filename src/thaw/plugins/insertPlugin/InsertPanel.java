@@ -26,6 +26,8 @@ import thaw.i18n.I18n;
 import thaw.plugins.InsertPlugin;
 import thaw.fcp.*;
 
+
+
 public class InsertPanel implements ActionListener, ItemListener, Observer {
 	private final static int MIN_PRIORITY = 6;
 
@@ -34,7 +36,6 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 	private JPanel mainPanel;
 
 	private JPanel subPanel; /* because we won't use the whole space */
-
 
 	private JLabel browseLabel;
 	private JTextField selectedFiles; /* TODO: it was planned to support directory insertion */
@@ -70,17 +71,22 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 	private int keyType;
 	private FCPClientPut lastInsert = null;
 
-	public InsertPanel(InsertPlugin insertPlugin) {
+	private boolean advancedMode = false;
+
+	public InsertPanel(InsertPlugin insertPlugin, boolean advancedMode) {
 		this.insertPlugin = insertPlugin;
+
+		this.advancedMode = advancedMode;
 
 		globalPanel = new JPanel();
 
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout(10, 10));
 
-		subPanel = new JPanel();
-
-		subPanel.setLayout(new GridLayout(3,2, 20, 20));
+		if(advancedMode) {
+			subPanel = new JPanel();
+			subPanel.setLayout(new GridLayout(3,2, 20, 20));
+		}
 
 		
 		// FILE SELECTION
@@ -96,7 +102,10 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		browseButton.addActionListener(this);
 		subSubPanel.add(browseButton);
 
-		subPanel.add(subSubPanel);
+		if(advancedMode)
+			subPanel.add(subSubPanel);
+		else
+			mainPanel.add(subSubPanel, BorderLayout.CENTER);
 
 
 		// KEY TYPE SELECTION
@@ -118,7 +127,8 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 			subSubPanel.add(keyRadioButtons[i]);
 		}
 
-		subPanel.add(subSubPanel);
+		if(advancedMode)
+			subPanel.add(subSubPanel);
 
 
 		/* GLOBAL */
@@ -137,7 +147,8 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		globalSelecter.setSelectedItem(I18n.getMessage("thaw.common.true"));
 		subSubPanel.add(globalSelecter);
 
-		subPanel.add(subSubPanel);
+		if(advancedMode)
+			subPanel.add(subSubPanel);
 
 
 
@@ -159,7 +170,8 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		nameField.setEditable(true);
 		subSubPanel.add(nameField);
 
-		subPanel.add(subSubPanel);
+		if(advancedMode)
+			subPanel.add(subSubPanel);
 
 
 		setRevAndNameVisible(false);
@@ -186,7 +198,8 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		prioritySelecter.setSelectedItem(I18n.getMessage("thaw.plugin.priority.p3"));
 		subSubPanel.add(prioritySelecter);
 		
-		subPanel.add(subSubPanel);
+		if(advancedMode)
+			subPanel.add(subSubPanel);
 		
 
 
@@ -207,12 +220,13 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		privateKeyField.setEditable(true);
 		subSubPanel.add(privateKeyField);
 
-		subPanel.add(subSubPanel);
+		if(advancedMode)
+			subPanel.add(subSubPanel);
 
 		setKeysVisible(false);
 
-
-		mainPanel.add(subPanel, BorderLayout.CENTER);
+		if(advancedMode)
+			mainPanel.add(subPanel, BorderLayout.CENTER);
 
 		letsGoButton = new JButton(I18n.getMessage("thaw.plugin.insert.insertAction"));
 		letsGoButton.setPreferredSize(new Dimension(200, 40));
@@ -221,7 +235,10 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 		mainPanel.add(letsGoButton, BorderLayout.SOUTH);
 
-		mainPanel.setSize(400, 400);
+		if(advancedMode)
+			mainPanel.setSize(400, 400);
+		else
+			mainPanel.setSize(150, 250);
 
 		globalPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
 

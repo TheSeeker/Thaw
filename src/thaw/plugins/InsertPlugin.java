@@ -32,7 +32,8 @@ public class InsertPlugin implements thaw.core.Plugin {
 		
 		Logger.info(this, "Starting plugin \"InsertPlugin\" ...");
 
-		insertPanel = new InsertPanel(this);
+		insertPanel = new InsertPanel(this,
+					      Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.common.insertion"), insertPanel.getPanel());
 

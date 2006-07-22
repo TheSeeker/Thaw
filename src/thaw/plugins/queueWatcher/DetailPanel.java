@@ -36,7 +36,6 @@ public class DetailPanel implements Observer {
 	private JTextField key        = new JTextField();
 	private JTextField path       = new JTextField();
 	private JTextField priority   = new JTextField();
-	private JTextField attempt    = new JTextField();
 	private JTextField identifier = new JTextField();
 	private JTextField globalQueue= new JTextField();
 
@@ -60,7 +59,6 @@ public class DetailPanel implements Observer {
 					I18n.getMessage("thaw.common.key"),
 					I18n.getMessage("thaw.common.localPath"),
 					I18n.getMessage("thaw.common.priority"),
-					I18n.getMessage("thaw.common.try")+" #",
 					I18n.getMessage("thaw.common.identifier"),
 					I18n.getMessage("thaw.common.globalQueue")
 		};
@@ -92,9 +90,8 @@ public class DetailPanel implements Observer {
 				case(5): field = key; key.setEditable(false);break;
 				case(6): field = path; path.setEditable(false); break;
 				case(7): field = priority; priority.setEditable(false); break;
-				case(8): field = attempt; attempt.setEditable(false); break;
-				case(9): field = identifier; identifier.setEditable(false); break;
-				case(10): field = globalQueue; globalQueue.setEditable(false); break;
+				case(8): field = identifier; identifier.setEditable(false); break;
+				case(9): field = globalQueue; globalQueue.setEditable(false); break;
 				default: Logger.error(this, "Gouli goula ? ... is going to crash :p"); break;
 				}
 
@@ -163,7 +160,6 @@ public class DetailPanel implements Observer {
 				identifier.setText(query.getIdentifier());
 			else
 				identifier.setText("N/A");
-			attempt.setText(Integer.toString(query.getAttempt()));
 
 			if(query.getThawPriority() != -1)
 				priority.setText(Integer.toString(query.getThawPriority()));
@@ -177,7 +173,6 @@ public class DetailPanel implements Observer {
 			progress.setString("");
 			status.setText("");
 			identifier.setText("");
-			attempt.setText("");
 			size.setText("");
 			priority.setText("");
 			key.setText("");

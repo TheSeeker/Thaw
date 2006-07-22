@@ -63,9 +63,13 @@ public class FetchPanel implements java.awt.event.ActionListener {
 	private Core core;
 	private FetchPlugin fetchPlugin;
 
+	private boolean advancedMode;
+
 	public FetchPanel(Core core, FetchPlugin fetchPlugin) {
 		this.core = core;
 		this.fetchPlugin = fetchPlugin;
+
+		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout(20, 20));
@@ -103,8 +107,15 @@ public class FetchPanel implements java.awt.event.ActionListener {
 		filePanel.add(buttonPanel, BorderLayout.SOUTH);
 
 		
+		/* below panel */
+
+		
 		belowPanel = new JPanel();
-		belowPanel.setLayout(new GridLayout(2, 2, 10, 10));
+		if(advancedMode)
+			belowPanel.setLayout(new GridLayout(2, 2, 10, 10));
+		else
+			belowPanel.setLayout(new GridLayout(1, 2, 10, 10));
+
 
 
 		/* PRIORITY */
@@ -161,11 +172,17 @@ public class FetchPanel implements java.awt.event.ActionListener {
 		dstChoosePanel.add(destinationField);
 		dstChoosePanel.add(destinationButton);
 
-		belowPanel.add(priorityPanel);
-		//belowPanel.add(persistencePanel);
-		belowPanel.add(queuePanel);
+		if(advancedMode) {
+			belowPanel.add(priorityPanel);
+			//belowPanel.add(persistencePanel);
+			belowPanel.add(queuePanel);
+		}
+
 		belowPanel.add(dstChoosePanel);
 		
+		if(!advancedMode) {
+			belowPanel.add(new JPanel());
+		}
 
 		centeredPart.add(filePanel, BorderLayout.CENTER);
 		centeredPart.add(belowPanel, BorderLayout.SOUTH);

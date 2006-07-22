@@ -66,11 +66,21 @@ public class NodeConfigPanel implements Observer {
 			nodeConfigPanel.add(paramFields[i]);
 		}
 
+		setVisibility(Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
+
 		configWindow.addObserver(this);
 	}
 
 	public JPanel getPanel() {
 		return nodeConfigPanel;
+	}
+
+	private void setVisibility(boolean advancedMode) {
+		for(int i= 2; i < paramNames.length;i++) {
+			paramLabels[i].setVisible(advancedMode);
+			paramFields[i].setVisible(advancedMode);
+		}
+
 	}
 
 	
@@ -79,6 +89,8 @@ public class NodeConfigPanel implements Observer {
 			for(int i=0;i < paramNames.length;i++) {
 				core.getConfig().setValue(configNames[i], paramFields[i].getText());
 			}
+
+			setVisibility(Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
 		}
 
 

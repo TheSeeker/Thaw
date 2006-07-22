@@ -30,14 +30,18 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	private JButton okButton;
 	private JButton cancelButton;
 
+	private ThawConfigPanel thawConfigPanel;
 	private NodeConfigPanel nodeConfigPanel;
 	private PluginConfigPanel pluginConfigPanel;
 
 	private Core core;
 
+	private boolean advancedMode = false;
 
 	public ConfigWindow(Core core) {
 		this.core = core;
+
+		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 
 		configWin = new JFrame(I18n.getMessage("thaw.config.windowName"));
 
@@ -54,10 +58,9 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 		nodeConfigPanel = new NodeConfigPanel(this, core);
 		pluginConfigPanel = new PluginConfigPanel(this, core);
+		thawConfigPanel = new ThawConfigPanel(this, core);
 
-		tabs.add(I18n.getMessage("thaw.common.node"), nodeConfigPanel.getPanel());
-		tabs.add(I18n.getMessage("thaw.common.plugins"), pluginConfigPanel.getPanel());
-
+		addTabs();
 
 		BorderLayout borderLayout = new BorderLayout();
 		borderLayout.setVgap(20);
@@ -78,6 +81,21 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		cancelButton.addActionListener(this);
 
 		configWin.addWindowListener(this);
+	}
+
+
+	/**
+	 * Remove them and re-add them.
+	 */
+	private void addTabs() {
+		tabs.remove( thawConfigPanel.getPanel() );
+		tabs.remove( nodeConfigPanel.getPanel() );
+		tabs.remove( pluginConfigPanel.getPanel() );
+
+		tabs.add("Thaw", thawConfigPanel.getPanel());
+		tabs.add(I18n.getMessage("thaw.common.node"), nodeConfigPanel.getPanel());
+		if(advancedMode)
+			tabs.add(I18n.getMessage("thaw.common.plugins"), pluginConfigPanel.getPanel());
 	}
 
 
@@ -129,7 +147,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	 * Called when apply button is pressed.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		if(e.getSource() == okButton) {
+		if(e.getSource() == okButton && !core.canDisconnect()) {
 			int ret = JOptionPane.showOptionDialog((java.awt.Component)null,
 								       I18n.getMessage("thaw.warning.isWritingSoApplyLater"),
 								       I18n.getMessage("thaw.warning.title"),
@@ -152,11 +170,16 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		}
 
 		if(e.getSource() == okButton) {
+			advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
+
 			/* should reinit the whole connection correctly */
 			core.getPluginManager().stopPlugins();
 			core.initNodeConnection();
 			core.getPluginManager().loadPlugins();
 			core.getPluginManager().runPlugins();
+
+			/* reinit config win */
+			addTabs();
 		}
 	}
 

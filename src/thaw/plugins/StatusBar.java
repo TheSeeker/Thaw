@@ -15,9 +15,12 @@ public class StatusBar implements Runnable, Plugin {
 	private boolean running = true;
 	private Thread refresher;
 
+	private boolean advancedMode = false;
 
 	public boolean run(Core core) {
 		this.core = core;
+
+		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 		
 		running = true;
 		refresher = new Thread(this);
@@ -93,18 +96,25 @@ public class StatusBar implements Runnable, Plugin {
 		
 		total = finished + failed + running + pending;
 
-		core.getMainWindow().setStatus("Thaw "+Main.VERSION
-					       + SEPARATOR + I18n.getMessage("thaw.plugin.statistics.globalProgression") + " "
-					       + Integer.toString(progressDone) + "/" + Integer.toString(progressTotal)
-					       + SEPARATOR + I18n.getMessage("thaw.plugin.statistics.finished")+ " "
-					       + Integer.toString(finished) + "/" + Integer.toString(total)
-					       + SEPARATOR + I18n.getMessage("thaw.plugin.statistics.failed") + " "
-					       + Integer.toString(failed) + "/" + Integer.toString(total)
-					       + SEPARATOR + I18n.getMessage("thaw.plugin.statistics.running") + " "
-					       + Integer.toString(running) + "/" + Integer.toString(total)
-					       + SEPARATOR + I18n.getMessage("thaw.plugin.statistics.pending") + " "
-					       + Integer.toString(pending) + "/" + Integer.toString(total)
-					       );
+		String status = "Thaw "+Main.VERSION;
+
+		if(advancedMode) {
+			status = status
+				+ SEPARATOR + I18n.getMessage("thaw.plugin.statistics.globalProgression") + " "
+				+ Integer.toString(progressDone) + "/" + Integer.toString(progressTotal);
+		}
+
+		status = status
+			+ SEPARATOR + I18n.getMessage("thaw.plugin.statistics.finished")+ " "
+			+ Integer.toString(finished) + "/" + Integer.toString(total)
+			+ SEPARATOR + I18n.getMessage("thaw.plugin.statistics.failed") + " "
+			+ Integer.toString(failed) + "/" + Integer.toString(total)
+			+ SEPARATOR + I18n.getMessage("thaw.plugin.statistics.running") + " "
+			+ Integer.toString(running) + "/" + Integer.toString(total)
+			+ SEPARATOR + I18n.getMessage("thaw.plugin.statistics.pending") + " "
+			+ Integer.toString(pending) + "/" + Integer.toString(total);
+			
+		core.getMainWindow().setStatus(status);
 
 	}
 
