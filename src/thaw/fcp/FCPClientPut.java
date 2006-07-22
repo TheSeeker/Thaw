@@ -67,6 +67,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			    String privateKey, int priority,
 			    boolean global, int persistence) {
 		this.localFile = file;
+		this.name = file.getName();
 		fileSize = file.length();
 
 		this.keyType = keyType;

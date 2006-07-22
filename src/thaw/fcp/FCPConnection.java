@@ -259,7 +259,10 @@ public class FCPConnection extends Observable {
 
 	
 	public boolean isWriting() {
-		return ( isConnected() && ( isWritingLocked() || ((System.currentTimeMillis() - lastWrite) < 300) ) );
+		if( !isConnected() )
+			return false;
+
+		return ( isWritingLocked() || ((System.currentTimeMillis() - lastWrite) < 300) );
 	}
 
 	public boolean write(String toWrite) {
@@ -414,9 +417,10 @@ public class FCPConnection extends Observable {
 			} catch (java.io.IOException e) {
 				if(isConnected()) {
 					Logger.error(this, "IOException while reading but still connected, wtf? : "+e.toString());
-					disconnect();
 				} else
 					Logger.notice(this, "IOException. Disconnected.");
+
+				disconnect();
 
 				return null;
 			}
