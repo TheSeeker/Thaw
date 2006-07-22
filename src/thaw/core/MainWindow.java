@@ -10,6 +10,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
+//import javax.swing.Icon;
+import javax.swing.ImageIcon;
 
 import thaw.i18n.I18n;
 
@@ -59,9 +61,16 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		mainWindow = new JFrame("Thaw");
 
 		mainWindow.setVisible(false);
-		
+
+		try {
+			mainWindow.setIconImage((new ImageIcon(getClass().getClassLoader().getResource("blueBunny.png"))).getImage());
+		} catch(java.lang.NullPointerException e) {
+			Logger.notice(this, "No icon");
+		}
+			
 		menuBar = new JMenuBar();
 		fileMenu = new JMenu(I18n.getMessage("thaw.menu.file"));
+
 		optionsFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.options"));
 		quitFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.quit"));
 		
