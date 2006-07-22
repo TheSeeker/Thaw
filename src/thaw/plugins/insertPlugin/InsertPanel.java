@@ -149,14 +149,14 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		selectRevLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.selectRev"));
 		subSubPanel.add(selectRevLabel);
 		revField = new JTextField(4);
-		revField.setEditable(false);
+		revField.setEditable(true);
 		subSubPanel.add(revField);
 
 		// NAME
 		selectNameLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.selectName"));
 		subSubPanel.add(selectNameLabel);
 		nameField = new JTextField(10);
-		nameField.setEditable(false);
+		nameField.setEditable(true);
 		subSubPanel.add(nameField);
 
 		subPanel.add(subSubPanel);
@@ -198,13 +198,13 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		publicKeyLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.publicKey"));
 		subSubPanel.add(publicKeyLabel);
 		publicKeyField = new JTextField(20);
-		publicKeyField.setEditable(false);
+		publicKeyField.setEditable(true);
 		subSubPanel.add(publicKeyField);
 
 		privateKeyLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.privateKey"));
 		subSubPanel.add(privateKeyLabel);
 		privateKeyField = new JTextField(20);
-		privateKeyField.setEditable(false);
+		privateKeyField.setEditable(true);
 		subSubPanel.add(privateKeyField);
 
 		subPanel.add(subSubPanel);
@@ -326,10 +326,10 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 
 	public String getFileNameFromPath() {
-		if(selectedFiles.getText() == null)
+		if(selectedFiles.getText() == null || selectedFiles.getText().equals(""))
 			return "";
 		
-		String[] cutcut = selectedFiles.getText().split(File.separator.replaceAll("\\", "\\\\"));
+		String[] cutcut = selectedFiles.getText().split(File.separator.replaceAll("\\\\", "\\\\\\\\"));
 
 		return cutcut[cutcut.length - 1];
 	}
