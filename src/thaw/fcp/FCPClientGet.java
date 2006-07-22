@@ -39,6 +39,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	private boolean running = false;
 	private boolean successful = false;
+	private boolean fatal = true;
 	private boolean isLockOwner = false;
 	
 
@@ -242,23 +243,18 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				Logger.debug(this, "Unknow URI ? was probably a stop order so no problem ...");
 				return;
 			}
-			/*
-			if(message.getValue("Fatal").equals("False")) {
-				Logger.debug(this, "Non-fatal protocol error");
-				status = "Protocol warning ("+message.getValue("CodeDescription")+")";
-				return;
-			}
-			*/
 
 			Logger.error(this, "=== PROTOCOL ERROR === \n"+message.toString());
 
 			status = "Protocol Error ("+message.getValue("CodeDescription")+")";
 			progress = 100;
 			running = false;
-			successful = false;			
+			successful = false;
+			fatal = true;
 
 			if(message.getValue("Fatal") != null &&
 			   message.getValue("Fatal").equals("false")) {
+				fatal = false;
 				status = status + " (non-fatal)";
 			}
 
@@ -294,8 +290,11 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			    running = false;
 			    successful = false;
 			    
+			    fatal = true;
+
 			    if(message.getValue("Fatal") != null &&
 			       message.getValue("Fatal").equals("false")) {
+				    fatal = false;
 				    status = status + " (non-fatal)";
 			    }
 
@@ -649,6 +648,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		progress = 100;
 		successful = false;
+		fatal = true;
 		status = "Stopped";
 		setChanged();
 		notifyObservers();
@@ -721,6 +721,10 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	public boolean isSuccessful() {
 		return successful;
+	}
+
+	public boolean isFatallyFailed() {
+		return ((!successful) && fatal);
 	}
 
 	public boolean isRunning() {

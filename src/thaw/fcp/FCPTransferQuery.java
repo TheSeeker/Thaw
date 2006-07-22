@@ -101,6 +101,7 @@ public interface FCPTransferQuery extends FCPQuery {
 	 * Query is considered as a failure is isFinished() && !isSuccesful()
 	 */
 	public boolean isSuccessful();
+	public boolean isFatallyFailed();
 
 	/**
 	 * Use to save the query in an XML file / a database / whatever.

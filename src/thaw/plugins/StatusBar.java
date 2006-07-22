@@ -12,7 +12,7 @@ public class StatusBar implements Runnable, Plugin {
 	public final static String SEPARATOR = "     ";
 
 	private Core core;
-	private boolean running;
+	private boolean running = true;
 	private Thread refresher;
 
 

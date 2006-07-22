@@ -37,6 +37,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	private boolean running = false;
 	private boolean finished = false;
 	private boolean successful = false;
+	private boolean fatal = true;
 	private boolean sending = false;
 	
 	private FCPGenerateSSK sskGenerator = null;
@@ -93,6 +94,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		this.running = false;
 		this.finished = false;
 		this.successful = false;
+		this.fatal = true;
 
 	}
 
@@ -190,6 +192,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		running = true;
 		finished = false;
 		successful = false;
+		fatal = true;
 	}
 
 
@@ -202,6 +205,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			status = "EMPTY OR UNREACHABLE FILE";
 
 			successful = false;
+			fatal = true;
 			finished = true;
 			running = false;
 
@@ -353,6 +357,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 		if(ret == true) {
 			successful = false;
+			fatal = true;
 			finished = false;
 			progress = 0;
 			running = true;
@@ -453,6 +458,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			status = "Stopped";
 			finished = false;
 			successful = false;
+			fatal= true;
 			running = false;
 			
 			setChanged();
@@ -539,12 +545,15 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				successful = false;
 				running = false;
 				finished = true;
+				fatal = true;
 
 				status = "Failed ("+msg.getValue("CodeDescription")+")";
 
 				if(msg.getValue("Fatal") != null &&
-				   msg.getValue("Fatal").equals("false"))
+				   msg.getValue("Fatal").equals("false")) {
 					status = status + " (non-fatal)";
+					fatal = false;
+				}
 
 				setChanged();
 				notifyObservers();
@@ -555,6 +564,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 				successful = false;
 				running = false;
+				fatal = true;
 				finished = true;
 
 				if(lockOwner) {
@@ -563,9 +573,12 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				}
 
 				status = "Protocol error ("+msg.getValue("CodeDescription")+")";
+
 				if(msg.getValue("Fatal") != null && 
-				   msg.getValue("Fatal").equals("false"))
+				   msg.getValue("Fatal").equals("false")) {
 					status = status + " (non-fatal)";
+					fatal = false;
+				}
 
 				setChanged();
 				notifyObservers();
@@ -662,6 +675,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		running = false;
 		successful = false;
 		finished = false;
+		fatal = true;
 
 		removeRequest();
 		return false;
@@ -786,6 +800,10 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 	public boolean isSuccessful() {
 		return successful;
+	}
+
+	public boolean isFatallyFailed() {
+		return ((!successful) && fatal);
 	}
 
 	/**

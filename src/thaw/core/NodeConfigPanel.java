@@ -79,12 +79,6 @@ public class NodeConfigPanel implements Observer {
 			for(int i=0;i < paramNames.length;i++) {
 				core.getConfig().setValue(configNames[i], paramFields[i].getText());
 			}
-
-			/* should reinit the whole connection correctly */
-			core.getPluginManager().stopPlugins();
-			core.initNodeConnection();
-			core.getPluginManager().loadPlugins();
-			core.getPluginManager().runPlugins();
 		}
 
 

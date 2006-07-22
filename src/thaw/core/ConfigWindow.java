@@ -136,6 +136,14 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 			setVisible(false);
 		}
+
+		if(e.getSource() == okButton) {
+			/* should reinit the whole connection correctly */
+			core.getPluginManager().stopPlugins();
+			core.initNodeConnection();
+			core.getPluginManager().loadPlugins();
+			core.getPluginManager().runPlugins();
+		}
 	}
 
 

@@ -50,6 +50,9 @@ public class FetchPlugin implements thaw.core.Plugin {
 			       String destination) {
 
 		for(int i = 0 ; i < keys.length ; i++) {
+			if(keys[i].length() < 10)
+				continue;
+
 			String[] subKey = keys[i].split("\\?"); /* Because of VolodyA :p */
 
 			String key = subKey[0].replaceFirst("http://127.0.0.1:8888/", "");

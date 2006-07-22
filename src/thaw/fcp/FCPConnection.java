@@ -27,6 +27,8 @@ public class FCPConnection extends Observable {
 	private final static boolean DEBUG_MODE = true;
 	private final static int MAX_RECV = 1024;
 
+	private byte[] recvBytes = new byte[MAX_RECV]; /* global to avoid each time free() / malloc() */
+
 	private FCPBufferedStream bufferedOut = null;
 	private int maxUploadSpeed = 0;
 
@@ -366,8 +368,6 @@ public class FCPConnection extends Observable {
 		
 		if(in != null && reader != null && socket != null && socket.isConnected()) {
 			try {
-				byte[] recvBytes = new byte[MAX_RECV];
-
 				for(int i = 0; i < recvBytes.length ; i++)
 					recvBytes[i] = 0;
 
@@ -384,6 +384,8 @@ public class FCPConnection extends Observable {
 							Logger.error(this, "Unable to read but still connected");
 						else
 							Logger.notice(this, "Disconnected");
+
+						disconnect(); /* will warn everybody */
 
 						return null;
 					}

@@ -84,9 +84,24 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 
 	/**
 	 * Take care: Can change while you're using it.
+	 * The running queue contains running request, but also finished/failed ones.
 	 */
 	public Vector getRunningQueue() {
 		return runningQueries;
+	}
+
+	/**
+	 * @return < 0 if no limit
+	 */
+	public int getMaxDownloads() {
+		return maxDownloads;
+	}
+
+	/**
+	 * @return < 0 if no limite
+	 */
+	public int getMaxInsertions() {
+		return maxInsertions;
 	}
 
 	/**
