@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import java.util.Observable;
 import java.awt.GridLayout;
+import javax.swing.JOptionPane;
 
 import thaw.i18n.I18n;
 
@@ -128,6 +129,19 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	 * Called when apply button is pressed.
 	 */
 	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == okButton) {
+			int ret = JOptionPane.showOptionDialog((java.awt.Component)null,
+								       I18n.getMessage("thaw.warning.isWritingSoApplyLater"),
+								       I18n.getMessage("thaw.warning.title"),
+								       JOptionPane.YES_NO_OPTION, 
+								       JOptionPane.WARNING_MESSAGE,
+								       (javax.swing.Icon)null,
+								       (java.lang.Object[])null,
+								       (java.lang.Object)null);
+			if(ret == JOptionPane.CLOSED_OPTION || ret > 0)
+				return;
+		}
+
 		if(e.getSource() == okButton
 		   || e.getSource() == cancelButton) {
 

@@ -125,7 +125,8 @@ public class Core implements Observer {
 	
 	/**
 	 * Init the connection to the node.
-	 * If a connection is already established, it will disconnect, so this function could be call safely later.
+	 * If a connection is already established, it will disconnect, so 
+	 * if you called canDisconnect() before, then this function can be called safely.
 	 */
 	public boolean initNodeConnection() {
 		if(getMainWindow() != null)
@@ -136,8 +137,7 @@ public class Core implements Observer {
 				queueManager.stopScheduler();
 
 			if(connection != null && connection.isConnected()) {
-				connection.deleteObserver(this);
-				connection.disconnect();
+				disconnect();
 			}
 			
 			connection = new FCPConnection(config.getValue("nodeAddress"),
@@ -292,13 +292,32 @@ public class Core implements Observer {
 
 
 	/**
+	 * Makes things nicely ... :)
+	 */
+	public void disconnect() {
+		Logger.info(this, "Disconnecting");
+		connection.deleteObserver(this);
+		connection.disconnect();
+
+		Logger.info(this, "Saving queue state");
+		QueueKeeper.saveQueue(queueManager, "thaw.queue.xml");
+	}
+
+	/**
+	 * Check if the connection can be interrupted safely.
+	 */
+	public boolean canDisconnect() {
+		return !connection.isWriting();
+	}
+
+	/**
 	 * End of the world.
 	 * @param force if true, doesn't check if FCPConnection.isWritting().
 	 * @see exit()
 	 */
 	public void exit(boolean force) {
 		if(!force) {
-			if(connection.isWriting()) {
+			if(!canDisconnect()) {
 				int ret = JOptionPane.showOptionDialog((java.awt.Component)null,
 								       I18n.getMessage("thaw.warning.isWriting"),
 								       I18n.getMessage("thaw.warning.title"),
@@ -319,12 +338,7 @@ public class Core implements Observer {
 		Logger.info(this, "Stopping plugins ...");
 		pluginManager.stopPlugins();
 
-		Logger.info(this, "Disconnecting ...");
-		connection.deleteObserver(this);
-		connection.disconnect();
-
-		Logger.info(this, "Saving queue state ...");
-		QueueKeeper.saveQueue(queueManager, "thaw.queue.xml");
+		disconnect();
 
 		Logger.info(this, "Saving configuration ...");
 		if(!config.saveConfig()) {
@@ -342,7 +356,7 @@ public class Core implements Observer {
 
 		if(o == connection && !connection.isConnected()) {
 			new WarningWindow(this, "We have been disconnected");
-			connection.deleteObserver(this);
+			disconnect();
 		}
 	}
 
