@@ -4,6 +4,7 @@
 
 	<property name="src.dir" value="src" />
 	<property name="bin.dir" value="build" />
+	<property name="images.dir" value="images" />
 	<property name="lib.dir" value="lib" />
 	<property name="javadoc.dir" value="javadoc" />
 	<property name="hsqldb.location" value="${lib.dir}/hsqldb.jar" />
@@ -49,6 +50,7 @@
 			<!-- <fileset file="${hsqldb.location}"/> -->
 			<fileset file="gpl.txt" />
 			<fileset file="readme.txt" />
+			<fileset dir="${images.dir}" />
 		</jar>
 	</target>
 
