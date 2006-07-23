@@ -28,6 +28,8 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 
 	private QueuePanel[] queuePanels = new QueuePanel[2];
 	private DetailPanel detailPanel;
+	private DragAndDropManager dnd;
+
 	private JPanel panel;
 
 	private final static int DIVIDER_LOCATION = 310;
@@ -95,6 +97,7 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 		    return false;
 		}
 		    
+		dnd = new DragAndDropManager(core, queuePanels);
 
 		return true;
 	}

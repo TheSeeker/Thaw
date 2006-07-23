@@ -17,6 +17,7 @@ public class FileChooser {
 
 	public FileChooser(String path) {
 		fileChooser = new JFileChooser(path);
+		fileChooser.setDragEnabled(true);
 	}
 
 	public void setTitle(String title) {

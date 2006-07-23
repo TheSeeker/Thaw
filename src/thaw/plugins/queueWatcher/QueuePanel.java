@@ -213,6 +213,29 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	}
 
 
+	public void reloadSelections() {
+		selectedRows = table.getSelectedRows();
+	}
+
+	/**
+	 * return a vector made of FCPTransferQueries.
+	 * Doesn't refresh the selection !
+	 */
+	public Vector getSelectedQueries() {
+		Vector queries = new Vector();
+		Vector initialQueries = tableModel.getQueries();
+
+		if(selectedRows == null)
+			return queries;
+
+		/* Create a separate vector to avoid collisions */
+		for(int i = 0 ; i < selectedRows.length; i++) {
+			queries.add(initialQueries.get(selectedRows[i]));
+		}
+		
+		return queries;
+	}
+
 
 	public void resetTable() {
 		tableModel.resetTable();
@@ -263,6 +286,11 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 	public JPanel getPanel() {
 		return panel;
+	}
+
+
+	public JTable getTable() {
+		return table;
 	}
 
 
@@ -356,21 +384,14 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	 * Manage it on a different thread to avoid UI freeze.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		Vector queries = new Vector();
-		Vector initialQueries = tableModel.getQueries();
+		Thread action = new Thread(new ActionReplier(e, getSelectedQueries()));
 
-		/* Create a separate vector to avoid collisions */
-		for(int i = 0 ; i < selectedRows.length; i++) {
-			queries.add(initialQueries.get(selectedRows[i]));
-		}
-
-		Thread action = new Thread(new ActionReplier(e, queries));
 		action.start();
 	}
 
 	public void mouseClicked(MouseEvent e) {
 		if(e.getButton() == MouseEvent.BUTTON3) {
-			selectedRows = table.getSelectedRows();
+			reloadSelections();
 			queries = tableModel.getQueries();
 			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
 		}

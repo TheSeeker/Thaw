@@ -600,8 +600,13 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		FCPMessage stopMessage = new FCPMessage();
 		
 		if(!isPersistent()) {
-			Logger.info(this, "Can't remove non persistent request.");
+			Logger.notice(this, "Can't remove non persistent request.");
 			return false;
+		}
+
+		if(identifier == null) {
+			Logger.notice(this, "Can't remove non-started queries");
+			return true;
 		}
 
 		stopMessage.setMessageName("RemovePersistentRequest");

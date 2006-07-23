@@ -98,6 +98,11 @@ public class FCPMessage {
 			setAmountOfDataWaiting((new Long(value)).longValue());
 		}
 
+		if(value == null) {
+			fields.remove(field);
+			return;
+		}
+
 		fields.put(field, value);
 	}
 
