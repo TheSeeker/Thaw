@@ -43,10 +43,10 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 		dragSource = DragSource.getDefaultDragSource();
 
 		for(int i = 0 ; i < queuePanels.length ; i++) {
-			/* this.dragSource.createDefaultDragGestureRecognizer(queuePanels[i].getTable(),
+			this.dragSource.createDefaultDragGestureRecognizer(queuePanels[i].getTable(),
 			                                                      DnDConstants.ACTION_COPY_OR_MOVE,
 									      this);
-			*/
+			
 			//queuePanels[i].getTable().setTransferHandler(new FileTransferHandler());
 			//queuePanels[i].getTable().setDragEnabled(true);
 
