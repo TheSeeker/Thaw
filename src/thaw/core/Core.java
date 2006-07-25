@@ -32,6 +32,9 @@ public class Core implements Observer {
 
 	private static String lookAndFeel = null;
 
+	public final static int MAX_CONNECT_TRIES = 3;
+	public final static int TIME_BETWEEN_EACH_TRY = 2500;
+
 
 	/**
 	 * Creates a core, but do nothing else (no initialization).
@@ -76,14 +79,12 @@ public class Core implements Observer {
 	 * @return true is success, false if not
 	 */
 	public boolean initAll() {
-		if(!initI18n())
-			return false;
-
 		if(!initConfig())
 			return false;
 
 		if(!initNodeConnection())
-			return false;
+			new WarningWindow(this, "Unable to connect to "+config.getValue("nodeAddress")+":"+
+					  config.getValue("nodePort"));
 
 		if(!initGraphics())
 			return false;
@@ -98,15 +99,6 @@ public class Core implements Observer {
 		return true;
 	}
 
-
-	/** 
-	 * Init I18n with default values.
-	 */
-	public boolean initI18n() {
-		// Hum, nothing to do ?
-
-		return true;
-	}
 
 
 	/**
@@ -145,11 +137,7 @@ public class Core implements Observer {
 						       Integer.parseInt(config.getValue("maxUploadSpeed")));
 			
 			if(!connection.connect()) {
-				new WarningWindow(this, "Unable to connect to "+config.getValue("nodeAddress")+":"+
-						  config.getValue("nodePort"));
-				
-				/* Not returning false,
-				   else it will break the loading */
+				return false;
 			}
 			
 			queryManager = new FCPQueryManager(connection);
@@ -167,8 +155,10 @@ public class Core implements Observer {
 				clientHello = new FCPClientHello(queryManager, config.getValue("thawId"));
 				
 				if(!clientHello.start(null)) {
-					new WarningWindow(this, I18n.getMessage("thaw.error.idAlreadyUsed"));
+					Logger.warning(this, "Id already used !");
 					connection.disconnect();
+					new WarningWindow(this, "Unable to connect to "+config.getValue("nodeAddress")+":"+config.getValue("nodePort"));
+					return false;
 				} else {
 					Logger.debug(this, "Hello successful");
 					Logger.debug(this, "Node name    : "+clientHello.getNodeName());
@@ -182,8 +172,8 @@ public class Core implements Observer {
 					FCPWatchGlobal watchGlobal = new FCPWatchGlobal(true);
 					watchGlobal.start(queueManager);
 					
-					FCPQueueLoader queueLoader = new FCPQueueLoader();
-					queueLoader.start(queueManager, config.getValue("thawId"));
+					FCPQueueLoader queueLoader = new FCPQueueLoader(config.getValue("thawId"));
+					queueLoader.start(queueManager);
 					
 				}
 								   
@@ -192,7 +182,7 @@ public class Core implements Observer {
 		} catch(Exception e) { /* A little bit not ... "nice" ... */
 			Logger.warning(this, "Exception while connecting : "+e.toString()+" ; "+e.getMessage() + " ; "+e.getCause());
 			e.printStackTrace();
-			new WarningWindow(this, "Unable to connect to the node. Please check your configuration.");
+			return false;
 		}
 
 		if(connection.isConnected())
@@ -355,8 +345,28 @@ public class Core implements Observer {
 		Logger.debug(this, "Move on the connection (?)");
 
 		if(o == connection && !connection.isConnected()) {
-			new WarningWindow(this, "We have been disconnected");
-			disconnect();
+			int nmbReconnect = 0;
+
+			for(nmbReconnect = 0;
+			    nmbReconnect < MAX_CONNECT_TRIES ;
+			    nmbReconnect++) {
+				
+				try {
+					Thread.sleep(TIME_BETWEEN_EACH_TRY);
+				} catch(java.lang.InterruptedException e) {
+					// brouzouf
+				}
+				
+				Logger.info(this, "Trying to reconnect ... : "+ Integer.toString(nmbReconnect));
+
+				if(initNodeConnection())
+					break;
+			}
+			
+			if(nmbReconnect == MAX_CONNECT_TRIES) {
+				new WarningWindow(this, "We have been disconnected");
+			}
+			
 		}
 	}
 

@@ -10,17 +10,16 @@ import thaw.core.Logger;
  * Send himself the ListPersistentRequests.
  * It remains active to receive and add the persistentGet/Put receive during the execution
  */
-public class FCPQueueLoader implements Observer {
-	FCPQueueManager queueManager;
-	String thawId;
+public class FCPQueueLoader implements FCPQuery, Observer {
+	private FCPQueueManager queueManager;
+	private String thawId;
 
-	public FCPQueueLoader() {
-		
+	public FCPQueueLoader(String thawId) {
+		this.thawId = thawId;
 	}
 
-	public boolean start(FCPQueueManager queueManager, String thawId) {
+	public boolean start(FCPQueueManager queueManager) {
 		this.queueManager = queueManager;
-		this.thawId = thawId;
 		
 		queueManager.getQueryManager().addObserver(this);
 		
@@ -36,7 +35,7 @@ public class FCPQueueLoader implements Observer {
 
 
 	public boolean stop(FCPQueueManager queueManager) {
-		/* Ignored */
+		queueManager.getQueryManager().deleteObserver(this);
 		return true;
 	}
 
@@ -100,11 +99,6 @@ public class FCPQueueLoader implements Observer {
 			if(msg.getValue("Global").equals("false"))
 				global = false;
 
-			String srcFile = null;
-
-			if(msg.getValue("Identifier").startsWith(thawId))
-				srcFile = msg.getValue("ClientToken");
-
 			int priority = Integer.parseInt(msg.getValue("PriorityClass"));
 
 			long fileSize = 0;
@@ -112,10 +106,16 @@ public class FCPQueueLoader implements Observer {
 			if(msg.getValue("DataLength") != null)
 				fileSize = Long.parseLong(msg.getValue("DataLength"));
 
+			String filePath=null;
+
+			if(msg.getValue("Identifier").startsWith(thawId))
+				filePath = msg.getValue("ClientToken");
+
 			FCPClientPut clientPut = new FCPClientPut(msg.getValue("Identifier"),
 								  msg.getValue("URI"), // key
 								  priority, persistence, global,
-								  srcFile, "Inserting", 0, fileSize,
+								  filePath,
+								  "Inserting", 0, fileSize,
 								  queueManager);
 								  
 								  

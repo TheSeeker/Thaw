@@ -100,13 +100,15 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	}
 
 	/**
-	 * Used for resuming.
+	 * Used for resuming from a PersistentPut.
 	 * @param publicKey : Complete key (with filename, etc)
 	 */
 	public FCPClientPut(String identifier, String publicKey,
 			    int priority, int persistence, boolean global,
-			    String srcFile, String status, int progress,
+			    String filePath, String status, int progress,
 			    long fileSize, FCPQueueManager queueManager) {
+		
+
 		if(fileSize > 0)
 			this.fileSize = fileSize;
 
@@ -127,11 +129,12 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 		this.publicKey = publicKey;
 
-		if(srcFile != null) {
-			String[] plop = srcFile.split(File.separator.replaceAll("\\\\", "\\\\\\\\"));
+		if(filePath != null && filePath.startsWith("thaw")) {
+
+			String[] plop = filePath.split(File.separator.replaceAll("\\\\", "\\\\\\\\"));
 			this.name = plop[plop.length-1];
 
-			this.localFile = new File(srcFile);
+			this.localFile = new File(filePath);
 			if(this.localFile.length() > 0)
 				this.fileSize = this.localFile.length();
 			
