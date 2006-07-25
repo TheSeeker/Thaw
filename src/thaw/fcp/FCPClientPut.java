@@ -138,9 +138,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		} else {
 			
 
-			/* <Jflesch> Bill Gates: God kills a kitten each time you use a '\' !! */
-
-			String[] plop = publicKey.split(File.separator.replaceAll("\\\\", "\\\\\\\\"));
+			String[] plop = publicKey.split("/");
 			this.name = plop[plop.length-1];
 
 			if(keyType != 0) {

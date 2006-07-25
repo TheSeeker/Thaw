@@ -14,6 +14,7 @@ import java.awt.dnd.DragSourceContext;
 import javax.swing.TransferHandler;
 
 import java.awt.Component;
+import javax.swing.JComponent;
 
 import java.util.Vector;
 import java.util.Iterator;
@@ -42,14 +43,34 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 		dragSource = DragSource.getDefaultDragSource();
 
 		for(int i = 0 ; i < queuePanels.length ; i++) {
-			this.dragSource.createDefaultDragGestureRecognizer(queuePanels[i].getTable(),
-									   DnDConstants.ACTION_COPY_OR_MOVE,
-									   this);
-			queuePanels[i].getTable().setDragEnabled(true);
+			/* this.dragSource.createDefaultDragGestureRecognizer(queuePanels[i].getTable(),
+			                                                      DnDConstants.ACTION_COPY_OR_MOVE,
+									      this);
+			*/
+			//queuePanels[i].getTable().setTransferHandler(new FileTransferHandler());
+			//queuePanels[i].getTable().setDragEnabled(true);
+
+		}
+	}
+
+
+	private class FileTransferHandler extends TransferHandler {
+
+		protected  Transferable createTransferable(JComponent c) {
+			if(c == queuePanels[0].getTable()) {
+				queuePanels[0].reloadSelections();
+				return new DragableFinishedTransfers(queuePanels[0].getSelectedQueries(), false);
+			}
+
+			if(c == queuePanels[1].getTable()) {
+				queuePanels[1].reloadSelections();
+				return new DragableFinishedTransfers(queuePanels[1].getSelectedQueries(), true);
+			}
+
+			return null;
 		}
 
 	}
-
 
 	public void dragGestureRecognized(DragGestureEvent dge) {
 		try {
@@ -67,21 +88,22 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 
 
 	
-	private class DragableFinishedDownloads implements Transferable{
+	private class DragableFinishedTransfers implements Transferable{
 		public final DataFlavor[] FLAVORS = {
 			DataFlavor.javaFileListFlavor,
 			DataFlavor.stringFlavor,
 		};
 
 		private Vector queries; /* FCPTransferQuery */
+		private boolean insert;
 
-
-		public DragableFinishedDownloads(Vector queries) {
+		public DragableFinishedTransfers(Vector queries, boolean insert) {
 			if(queries == null || queries.size() <= 0) {
 				Logger.warning(this, "Selection null ?!");
 			}
 
 			this.queries = queries;
+			this.insert = insert;
 		}
 		
 
@@ -92,6 +114,7 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 		public Object getTransferData(DataFlavor flavor) {
 			if(flavor == DataFlavor.javaFileListFlavor
 			   || flavor.equals(DataFlavor.javaFileListFlavor) ) {
+
 				Vector fileList = new Vector();
 
 				for(Iterator queryIt = queries.iterator();
@@ -125,7 +148,10 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 					if(query.getPath() == null) // We need a path !
 						continue;
 
-					result = result +query.getPath()+"\n";
+					if(!insert)
+						result = result +query.getPath()+"\n";
+					else
+						result = result + query.getFileKey() + "\n";
 				}
 
 				return result;
@@ -151,9 +177,15 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 
 
 	private Transferable getTransferableFor(Component c) {
+
 		if(c == queuePanels[0].getTable()) {
 			queuePanels[0].reloadSelections();
-			return new DragableFinishedDownloads(queuePanels[0].getSelectedQueries());
+			return new DragableFinishedTransfers(queuePanels[0].getSelectedQueries(), false);
+		}
+
+		if(c == queuePanels[1].getTable()) {
+			queuePanels[1].reloadSelections();
+			return new DragableFinishedTransfers(queuePanels[1].getSelectedQueries(), true);
 		}
 
 		return null;
