@@ -195,7 +195,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		priorityLabel = new JLabel(I18n.getMessage("thaw.common.priority"));
 		subSubPanel.add(priorityLabel);
 		prioritySelecter = new JComboBox(priorities);
-		prioritySelecter.setSelectedItem(I18n.getMessage("thaw.plugin.priority.p3"));
+		prioritySelecter.setSelectedItem(I18n.getMessage("thaw.plugin.priority.p4"));
 		subSubPanel.add(prioritySelecter);
 		
 		if(advancedMode)

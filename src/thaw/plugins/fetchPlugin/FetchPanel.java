@@ -134,7 +134,7 @@ public class FetchPanel implements java.awt.event.ActionListener {
 			
 		};
 		prioritySelecter = new JComboBox(priorities);
-		prioritySelecter.setSelectedItem(I18n.getMessage("thaw.plugin.priority.p3"));
+		prioritySelecter.setSelectedItem(I18n.getMessage("thaw.plugin.priority.p4"));
 
 		priorityPanel.add(priorityLabel);
 		priorityPanel.add(prioritySelecter);
