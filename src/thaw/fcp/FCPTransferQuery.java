@@ -33,6 +33,23 @@ public interface FCPTransferQuery extends FCPQuery {
 	public int getThawPriority();
 	
 	/**
+	 * Currently the same than Thaw priority.
+	 */
+	public int getFCPPriority();
+
+	/**
+	 * call updatePersistentRequest() after to apply the change (Please note that the change
+	 * will be visible even if you don't call it).
+	 */
+	public void setFCPPriority(int prio);
+
+	/**
+	 * you can call it after saveFileTo() to update the clientToken.
+	 * @param clientToken tell if the clientToken must be updated or just the priority
+	 */
+	public void updatePersistentRequest(boolean clientToken);
+
+	/**
 	 * Informal.
 	 * Human readable string describring the
 	 * status of the query.

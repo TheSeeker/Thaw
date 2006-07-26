@@ -23,8 +23,11 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JRadioButtonMenuItem;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.ButtonGroup;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -59,7 +62,11 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	private JMenuItem forceRestartItem;
 	private JMenuItem copyKeysItem;
 
-	private int lastRowSelected = -1; /* Used for detail panel */
+	private JRadioButtonMenuItem[] priorityRadioButton;
+	private JRadioButtonMenuItem unknowPriority;
+	private ButtonGroup priorityGroup;
+	private final int MIN_PRIORITY = 6;
+
 	private int[] selectedRows;
 	private Vector queries;
 
@@ -101,7 +108,20 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		downloadItem = new JMenuItem(I18n.getMessage("thaw.common.downloadLocally"));
 		forceRestartItem = new JMenuItem(I18n.getMessage("thaw.common.forceRestart"));
 		copyKeysItem = new JMenuItem(I18n.getMessage("thaw.common.copyKeysToClipboard"));
-		
+		JMenu priorityMenu = new JMenu(I18n.getMessage("thaw.common.priority"));
+
+		priorityGroup = new ButtonGroup();
+		priorityRadioButton = new JRadioButtonMenuItem[MIN_PRIORITY+1];
+		for(int i =0 ; i <= MIN_PRIORITY ; i++) {
+			priorityRadioButton[i] = new JRadioButtonMenuItem(I18n.getMessage("thaw.plugin.priority.p"+Integer.toString(i)));
+			priorityRadioButton[i].addActionListener(this);
+			priorityMenu.add(priorityRadioButton[i]);
+			priorityGroup.add(priorityRadioButton[i]);
+		}
+		unknowPriority = new JRadioButtonMenuItem("Coin");
+		priorityGroup.add(unknowPriority);
+
+
 		rightClickMenu.add(removeItem);
 
 		if( Integer.parseInt(core.getConfig().getValue("maxSimultaneousDownloads")) >= 0
@@ -118,6 +138,10 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		rightClickMenu.add(forceRestartItem);
 		rightClickMenu.add(copyKeysItem);
 		
+		if( Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue() == true) {
+			rightClickMenu.add(priorityMenu);
+		}
+
 		removeItem.addActionListener(this);
 		cancelItem.addActionListener(this);
 		copyKeysItem.addActionListener(this);
@@ -217,6 +241,13 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 	public void reloadSelections() {
 		selectedRows = table.getSelectedRows();
+
+		if(selectedRows.length > 1 || selectedRows.length < 1) {
+			resetPriorityRadioButtons();
+		} else {
+			FCPTransferQuery query = tableModel.getQuery(selectedRows[0]);
+			priorityRadioButton[query.getFCPPriority()].setSelected(true);
+		}
 	}
 
 	/**
@@ -270,20 +301,18 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	}
 
 
-	public void refresh() {
+	public void refreshDetailPanel() {
 		int selected = table.getSelectedRow();
-		/*
-		if(lastRowSelected != selected) {
-			lastRowSelected = selected;
-			
-			if(selected != -1)
-				detailPanel.setQuery(tableModel.getQuery(selected));
+		
+
+		if(selected != -1) {
+			FCPTransferQuery query = tableModel.getQuery(selected);
+			detailPanel.setQuery(query);
 		}
-		*/
-		lastRowSelected = selected;
-			
-		if(selected != -1)
-			detailPanel.setQuery(tableModel.getQuery(selected));
+	}
+
+	private void resetPriorityRadioButtons() {
+		unknowPriority.setSelected(true);
 	}
 
 	public JPanel getPanel() {
@@ -316,8 +345,23 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 				fileChooser.setDirectoryOnly(true);
 				fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
 				dir = fileChooser.askOneFile();
+
+				if(dir == null)
+					return;
 			}
 			
+			int prioritySelected = 0;
+
+			for(prioritySelected = 0;
+			    prioritySelected <= MIN_PRIORITY;
+			    prioritySelected++) {
+				if(priorityRadioButton[prioritySelected] == e.getSource()) {
+					break;
+				}
+			}
+
+			if(prioritySelected > MIN_PRIORITY)
+				prioritySelected = -1;
 			
 			for(Iterator queryIt = queries.iterator() ; queryIt.hasNext() ;) {
 				FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
@@ -325,6 +369,13 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 				if(query == null)
 					continue;
 		
+				if(prioritySelected >= 0) {
+					if(query.isPersistent()) {
+						query.setFCPPriority(prioritySelected);
+						query.updatePersistentRequest(false);
+					}
+				}
+
 				if(e.getSource() == removeItem) {
 
 					if(query.stop(core.getQueueManager())) {
@@ -361,7 +412,12 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 				
 				if(e.getSource() == downloadItem
 				   && dir != null) {
-					query.saveFileTo(dir.getPath());
+					if(query.isPersistent()) {
+
+						query.saveFileTo(dir.getPath());
+						if(query.getIdentifier().startsWith(core.getConfig().getValue("thawId")))
+							query.updatePersistentRequest(true);
+					}
 				}
 				
 			} /* for i in selectedRows */
@@ -399,7 +455,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		}
 
 		if(e.getButton() == MouseEvent.BUTTON1) {
-			refresh();
+			refreshDetailPanel();
 		}
 	}
 
@@ -421,7 +477,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 	public void keyPressed(KeyEvent e) { }
 
-	public void keyReleased(KeyEvent e) { refresh(); }
+	public void keyReleased(KeyEvent e) { refreshDetailPanel(); }
 	public void keyTyped(KeyEvent e) { }
 }
 

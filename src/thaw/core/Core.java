@@ -19,6 +19,7 @@ import thaw.fcp.*;
  *
  */
 public class Core implements Observer {
+
 	private MainWindow mainWindow = null;
 	private Config config = null;
 	private PluginManager pluginManager = null;

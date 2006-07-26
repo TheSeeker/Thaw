@@ -732,10 +732,42 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		return true;
 	}
 
+	public void updatePersistentRequest(boolean clientToken) {
+		//if(!isPersistent())
+		//	return;
+
+		FCPMessage msg = new FCPMessage();
+
+		msg.setMessageName("ModifyPersistentRequest");
+		msg.setValue("Global", Boolean.toString(global));
+		msg.setValue("Identifier", identifier);
+		msg.setValue("PriorityClass", Integer.toString(priority));
+		
+		if(clientToken && getPath() != null)
+			msg.setValue("ClientToken", getPath());
+
+		queueManager.getQueryManager().writeMessage(msg);
+	}
+
 	public int getThawPriority() {
 		return priority;
 	}
+
+	public int getFCPPriority() {
+		return priority;
+	}
 	
+	public void setFCPPriority(int prio) {
+		Logger.info(this, "Setting priority to "+Integer.toString(prio));
+
+		priority = prio;
+
+		setChanged();
+		notifyObservers();
+	}
+
+	
+
 	public String getStatus() {
 		return status;
 	}

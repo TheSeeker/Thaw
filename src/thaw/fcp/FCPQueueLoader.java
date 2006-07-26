@@ -86,7 +86,7 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 		if(msg.getMessageName().equals("PersistentPut")) {
 			Logger.info(this, "Resuming from PersistentPut");
 			
-			int persistence = 2;
+			int persistence = 0;
 
 			/* TOFIX : Node doesn't return PersistenceType */
 			/*

@@ -33,7 +33,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	private String identifier;
 
 	private int progress; /* in pourcent */
-	private int fromTheNodeProgress = 0; /* I'm not sure that it's correct english ... */
+	private int fromTheNodeProgress = 0;
 	private boolean progressReliable = false;
 	private long fileSize;
 
@@ -441,6 +441,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	public synchronized boolean saveFileTo(String dir) {
 		fromTheNodeProgress = 0;
+
 		if(dir == null) {
 			Logger.warning(this, "saveFileTo() : Can't save to null.");
 			return false;
@@ -592,6 +593,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		Logger.info(this, "File written");
 
+
 		return true;
 	}
 
@@ -661,8 +663,41 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		return true;
 	}
 
+
+	public void updatePersistentRequest(boolean clientToken) {
+		if(!isPersistent())
+			return;
+		
+		FCPMessage msg = new FCPMessage();
+
+		msg.setMessageName("ModifyPersistentRequest");
+		msg.setValue("Global", Boolean.toString(globalQueue));
+		msg.setValue("Identifier", identifier);
+		msg.setValue("PriorityClass", Integer.toString(priority));
+		
+		if(clientToken && destinationDir != null)
+			msg.setValue("ClientToken", destinationDir);
+
+		queueManager.getQueryManager().writeMessage(msg);
+
+	}
+
+
 	public int getThawPriority() {
 		return priority;
+	}
+
+	public int getFCPPriority() {
+		return priority;
+	}
+
+	public void setFCPPriority(int prio) {
+		Logger.info(this, "Setting priority to "+Integer.toString(prio));
+	
+		priority = prio;
+
+		setChanged();
+		notifyObservers();
 	}
 
 	public int getQueryType() {

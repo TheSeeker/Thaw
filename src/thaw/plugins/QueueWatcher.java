@@ -90,6 +90,10 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 			core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"), panel);
 		}
 			
+		if(core.getConnectionManager() != null && core.getConnectionManager().isConnected()) {
+			core.getConnectionManager().addObserver(this);
+		}
+
 		if(core.getQueueManager() != null)
 		    core.getQueueManager().addObserver(this);
 		else {
@@ -118,9 +122,11 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 		return true;
 	}
 
+
 	public String getNameForUser() {
 		return I18n.getMessage("thaw.common.status");
 	}
+
 
 	protected void addToPanels(Vector queries) {
 
@@ -140,22 +146,31 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 	}
 
 	public void update(Observable o, Object arg) {
-
-		FCPQueueManager manager = (FCPQueueManager)o;
-
-		try {
+		if(o == core.getConnectionManager()) {
 			queuePanels[0].resetTable();
 			queuePanels[1].resetTable();
-			
-			addToPanels(manager.getRunningQueue());
-			
-			Vector[] pendings = manager.getPendingQueues();
-			
-			for(int i = 0;i < pendings.length ; i++)
-				addToPanels(pendings[i]);
+		}
 
-		} catch(java.util.ConcurrentModificationException e) {
-			Logger.notice(this, "Collision while updating queue panels");
+
+		if(o == core.getQueueManager()) {
+
+			FCPQueueManager manager = (FCPQueueManager)o;
+			
+			try {
+				queuePanels[0].resetTable();
+				queuePanels[1].resetTable();
+				
+				addToPanels(manager.getRunningQueue());
+				
+				Vector[] pendings = manager.getPendingQueues();
+				
+				for(int i = 0;i < pendings.length ; i++)
+					addToPanels(pendings[i]);
+				
+			} catch(java.util.ConcurrentModificationException e) {
+				Logger.notice(this, "Collision while updating queue panels");
+			}
+
 		}
 		
 	}
