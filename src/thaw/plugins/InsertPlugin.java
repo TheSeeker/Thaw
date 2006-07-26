@@ -62,12 +62,13 @@ public class InsertPlugin implements thaw.core.Plugin {
 	 * @param name : ignored if key == CHK
 	 * @param privateKey : ignored if key == CHK/KSK ; can be null if it has to be generated
 	 * @param persistence 0 = Forever ; 1 = Until node reboot ; 2 = Until the app disconnect
+	 * @param mimeType null = autodetect
 	 */
 	public boolean insertFile(String fileList, int keyType,
 				       int rev, String name,
 				       String privateKey,
 				       int priority, boolean global,
-				       int persistence) {
+				       int persistence, String mimeType) {
 
 		FCPClientPut clientPut = null;
 		String[] files = fileList.split(";");
@@ -89,6 +90,11 @@ public class InsertPlugin implements thaw.core.Plugin {
 							     global, persistence);
 			}
 			
+			if(mimeType != null) {
+				Logger.notice(this, "Mime type forced to "+mimeType);
+				clientPut.setMetadata("ContentType", mimeType);
+			}
+
 			insertPanel.setLastInserted(clientPut);
 			clientPut.addObserver(insertPanel);
 			

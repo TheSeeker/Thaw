@@ -64,6 +64,9 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 	private JLabel globalLabel;
 	private JComboBox globalSelecter;
 
+	private JLabel mimeLabel;
+	private JComboBox mimeField;
+
 	private JButton letsGoButton;
 
 
@@ -151,6 +154,30 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 			subPanel.add(subSubPanel);
 
 
+		// PRIORITY SELECTION
+
+		priorities = new String[] {
+			I18n.getMessage("thaw.plugin.priority.p0"),
+			I18n.getMessage("thaw.plugin.priority.p1"),
+			I18n.getMessage("thaw.plugin.priority.p2"),
+			I18n.getMessage("thaw.plugin.priority.p3"),
+			I18n.getMessage("thaw.plugin.priority.p4"),
+			I18n.getMessage("thaw.plugin.priority.p5"),
+			I18n.getMessage("thaw.plugin.priority.p6") 
+			
+		};
+
+		subSubPanel.setLayout(new GridLayout(4, 1));
+		priorityLabel = new JLabel(I18n.getMessage("thaw.common.priority"));
+		subSubPanel.add(priorityLabel);
+		prioritySelecter = new JComboBox(priorities);
+		prioritySelecter.setSelectedItem(I18n.getMessage("thaw.plugin.priority.p4"));
+		subSubPanel.add(prioritySelecter);
+
+		if(advancedMode) {
+			subPanel.add(subSubPanel);
+			subPanel.add(subSubPanel);
+		}
 
 		// REVISION SELECTION
 
@@ -177,30 +204,25 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		setRevAndNameVisible(false);
 
 
-		// PRIORITY SELECTION
-
-		priorities = new String[] {
-			I18n.getMessage("thaw.plugin.priority.p0"),
-			I18n.getMessage("thaw.plugin.priority.p1"),
-			I18n.getMessage("thaw.plugin.priority.p2"),
-			I18n.getMessage("thaw.plugin.priority.p3"),
-			I18n.getMessage("thaw.plugin.priority.p4"),
-			I18n.getMessage("thaw.plugin.priority.p5"),
-			I18n.getMessage("thaw.plugin.priority.p6") 
-			
-		};
+		// MIME TYPE
 
 		subSubPanel = new JPanel();
 		subSubPanel.setLayout(new GridLayout(4, 1));
-		priorityLabel = new JLabel(I18n.getMessage("thaw.common.priority"));
-		subSubPanel.add(priorityLabel);
-		prioritySelecter = new JComboBox(priorities);
-		prioritySelecter.setSelectedItem(I18n.getMessage("thaw.plugin.priority.p4"));
-		subSubPanel.add(prioritySelecter);
 		
+		mimeLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.mime"));
+		
+		Vector mimes = (Vector)DefaultMIMETypes.getAllMIMETypes().clone();
+		mimes.add(0, "");
+
+		mimeField = new JComboBox(mimes);
+		mimeField.setEditable(true);
+		mimeField.setPreferredSize(new Dimension(75, 20));
+
+		subSubPanel.add(mimeLabel);
+		subSubPanel.add(mimeField);
+				       
 		if(advancedMode)
 			subPanel.add(subSubPanel);
-		
 
 
 		// PUBLIC / PRIVATE KEY
@@ -307,11 +329,15 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 			if(((String)globalSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.false")))
 				global = false;
 			
+
+			String mimeType = null;
 			
+			if(mimeField.getSelectedItem() != null && !((String)mimeField.getSelectedItem()).equals(""))
+				mimeType = (String)mimeField.getSelectedItem();
 
 			insertPlugin.insertFile(selectedFiles.getText(),
 						keyType, rev, name, privateKey, priority,
-						global, 0);
+						global, 0, mimeType);
 		}
 
 		if(e.getSource() == browseButton) {

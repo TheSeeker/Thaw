@@ -129,11 +129,13 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		table.addKeyListener(this);
 
 		/* If a queue is already existing, we need to add it */
-		addToTable(core.getQueueManager().getRunningQueue());
-
-		Vector[] pendingQueues = core.getQueueManager().getPendingQueues();
-		for(int i = 0 ; i < pendingQueues.length ; i++) {
-			addToTable(pendingQueues[i]);
+		if(core.getQueueManager() != null) {
+			addToTable(core.getQueueManager().getRunningQueue());
+			
+			Vector[] pendingQueues = core.getQueueManager().getPendingQueues();
+			for(int i = 0 ; i < pendingQueues.length ; i++) {
+				addToTable(pendingQueues[i]);
+			}
 		}
 	}
 

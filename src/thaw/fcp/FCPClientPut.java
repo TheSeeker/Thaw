@@ -6,6 +6,8 @@ import java.util.Observer;
 import java.util.Observable;
 import java.io.FileInputStream;
 
+import java.util.Iterator;
+
 import thaw.core.Logger;
 
 /**
@@ -43,6 +45,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	private FCPGenerateSSK sskGenerator = null;
 	private boolean lockOwner = false;
 
+	private HashMap metadatas = null;
 
 	private final static int PACKET_SIZE = 1024;
 
@@ -323,6 +326,16 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 		msg.setMessageName("ClientPut");
 		msg.setValue("URI", getInsertionKey());
+
+		if(metadatas != null) {
+			for(Iterator keyIt = metadatas.keySet().iterator();
+			    keyIt.hasNext();) {
+				String key = (String)keyIt.next();
+				String value = (String)metadatas.get(key);
+				msg.setValue("Metadata."+key, value);
+			}
+		}
+
 		msg.setValue("Identifier", identifier);
 		msg.setValue("Verbosity", "512");
 		msg.setValue("MaxRetries", "-1");
@@ -917,4 +930,23 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	public int getTransferWithTheNodeProgression() {
 		return toTheNodeProgress;
 	}
+
+	public HashMap getMetadatas() {
+		return metadatas;
+	}
+
+	public void setMetadata(String name, String val) {
+		if(metadatas == null)
+			metadatas = new HashMap();
+
+		if(val == null)
+			metadatas.remove(name);
+		else
+			metadatas.put(name, val);
+	}
+
+	public String getMetadata(String name) {
+		return (String)metadatas.get(name);
+	}
+
 }

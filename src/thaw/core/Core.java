@@ -137,7 +137,7 @@ public class Core implements Observer {
 						       Integer.parseInt(config.getValue("maxUploadSpeed")));
 			
 			if(!connection.connect()) {
-				return false;
+				Logger.warning(this, "Unable to connect !");
 			}
 			
 			queryManager = new FCPQueryManager(connection);
@@ -145,6 +145,8 @@ public class Core implements Observer {
 							   config.getValue("thawId"),
 							   Integer.parseInt(config.getValue("maxSimultaneousDownloads")),
 							   Integer.parseInt(config.getValue("maxSimultaneousInsertions")));
+
+
 
 			if(connection.isConnected()) {
 				queryManager.startListening();
@@ -177,6 +179,8 @@ public class Core implements Observer {
 					
 				}
 								   
+			} else {
+				return false;
 			}
 
 		} catch(Exception e) { /* A little bit not ... "nice" ... */
