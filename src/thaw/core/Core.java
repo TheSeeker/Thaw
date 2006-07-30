@@ -133,9 +133,15 @@ public class Core implements Observer {
 				disconnect();
 			}
 			
-			connection = new FCPConnection(config.getValue("nodeAddress"),
-						       Integer.parseInt(config.getValue("nodePort")),
-						       Integer.parseInt(config.getValue("maxUploadSpeed")));
+			if(connection == null) {
+				connection = new FCPConnection(config.getValue("nodeAddress"),
+							       Integer.parseInt(config.getValue("nodePort")),
+							       Integer.parseInt(config.getValue("maxUploadSpeed")));
+			} else {
+				connection.setNodeAddress(config.getValue("nodeAddress"));
+				connection.setNodePort(Integer.parseInt(config.getValue("nodePort")));
+				connection.setMaxUploadSpeed(Integer.parseInt(config.getValue("maxUploadSpeed")));
+			}
 			
 			if(!connection.connect()) {
 				Logger.warning(this, "Unable to connect !");
@@ -315,17 +321,7 @@ public class Core implements Observer {
 	public void exit(boolean force) {
 		if(!force) {
 			if(!canDisconnect()) {
-				int ret = JOptionPane.showOptionDialog((java.awt.Component)null,
-								       I18n.getMessage("thaw.warning.isWriting"),
-								       "Thaw - "+I18n.getMessage("thaw.warning.title"),
-								       JOptionPane.YES_NO_OPTION, 
-								       JOptionPane.WARNING_MESSAGE,
-								       (javax.swing.Icon)null,
-								       (java.lang.Object[])null,
-								       (java.lang.Object)null);
-				if(ret == JOptionPane.CLOSED_OPTION
-				   || ret == JOptionPane.CANCEL_OPTION
-				   || ret == JOptionPane.NO_OPTION)
+				if(!askDeconnectionConfirmation())
 					return;
 			}
 		}
@@ -348,6 +344,23 @@ public class Core implements Observer {
 		System.exit(0);
 	}
 
+
+	public boolean askDeconnectionConfirmation() {
+		int ret = JOptionPane.showOptionDialog((java.awt.Component)null,
+						       I18n.getMessage("thaw.warning.isWriting"),
+						       "Thaw - "+I18n.getMessage("thaw.warning.title"),
+						       JOptionPane.YES_NO_OPTION, 
+						       JOptionPane.WARNING_MESSAGE,
+						       (javax.swing.Icon)null,
+						       (java.lang.Object[])null,
+						       (java.lang.Object)null);
+		if(ret == JOptionPane.CLOSED_OPTION
+		   || ret == JOptionPane.CANCEL_OPTION
+		   || ret == JOptionPane.NO_OPTION)
+			return false;
+
+		return true;
+	}
 
 	public void update(Observable o, Object target) {
 		Logger.debug(this, "Move on the connection (?)");

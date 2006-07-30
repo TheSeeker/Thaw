@@ -213,7 +213,7 @@ public class FetchPanel implements java.awt.event.ActionListener {
 			}
 
 			if(destinationField.getText() == null || destinationField.getText().equals("")) {
-				new thaw.core.WarningWindow(core, "You must choose a destination");
+				new thaw.core.WarningWindow(core, I18n.getMessage("thaw.plugin.fetch.chooseADestination"));
 				return;
 			}
 			

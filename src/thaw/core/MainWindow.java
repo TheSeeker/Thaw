@@ -12,8 +12,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
+import javax.swing.JToolBar;
+import javax.swing.JButton;
 import javax.swing.Icon;
 import java.awt.Font;
+import javax.swing.Box;
 
 import thaw.i18n.I18n;
 
@@ -27,8 +30,13 @@ import thaw.i18n.I18n;
  * ------------------------------------
  * | MenuBar                          |
  * ------------------------------------
- * | Tabbed Pane                      |
+ * | ToolBar                          |
+ * ------------------------------------
+ * | Tab 1 | Tab 2 | Tab 3 |          |
+ * |----------------------------------|
+ * | Tab content                      |
  * |                                  |
+ * |                                  |
  * |                                  |
  * |                                  |
  * ------------------------------------
@@ -38,7 +46,9 @@ import thaw.i18n.I18n;
  *
  * @author <a href="mailto:jflesch@nerim.net">Jerome Flesch</a>
  */
-public class MainWindow implements java.awt.event.ActionListener, java.awt.event.WindowListener {
+public class MainWindow implements java.awt.event.ActionListener, java.awt.event.WindowListener,
+				   java.util.Observer {
+
 	private JFrame mainWindow = null;
 
 	private JMenuBar menuBar = null;
@@ -50,6 +60,13 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 	private JMenu helpMenu = null;
 	private JMenuItem aboutHelpMenuItem = null;
+
+	private JToolBar toolBar = null;
+	private JButton connectButton = null;
+	private JButton disconnectButton = null;
+	private JButton settingsButton = null;
+	private JButton quitButton = null;
+	
 
 	private JTabbedPane tabbedPane = null;
 	private JLabel statusBar = null;
@@ -75,7 +92,9 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		} catch(Throwable e) {
 			Logger.notice(this, "No icon");
 		}
-			
+		
+		// MENUS
+	
 		menuBar = new JMenuBar();
 		fileMenu = new JMenu(I18n.getMessage("thaw.menu.file"));
 
@@ -93,6 +112,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		fileMenu.add(reconnectionFileMenuItem);
 		fileMenu.add(optionsFileMenuItem);
 		fileMenu.add(quitFileMenuItem);
+
 		menuBar.add(fileMenu);
 
 		helpMenu = new JMenu(I18n.getMessage("thaw.menu.help"));
@@ -101,25 +121,62 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		aboutHelpMenuItem.addActionListener(this);
 
 		helpMenu.add(aboutHelpMenuItem);
+
+		menuBar.add(Box.createHorizontalGlue());
 		menuBar.add(helpMenu);
 
+		// TOOLBAR
+		toolBar = new JToolBar(I18n.getMessage("thaw.toolbar.title"));
+
+		connectButton = new JButton(IconBox.connectAction);
+		connectButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.connect"));
+		disconnectButton = new JButton(IconBox.disconnectAction);
+		disconnectButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.disconnect"));
+
+		settingsButton = new JButton(IconBox.settings);
+		settingsButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.settings"));
+
+		quitButton = new JButton(IconBox.quitAction);
+		quitButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.quit"));
+		
+
+		connectButton.addActionListener(this);
+		disconnectButton.addActionListener(this);
+		settingsButton.addActionListener(this);
+		quitButton.addActionListener(this);
+
+		toolBar.add(connectButton);
+		toolBar.add(disconnectButton);
+		toolBar.addSeparator();
+		toolBar.add(settingsButton);
+		toolBar.addSeparator();
+		toolBar.add(quitButton);
+
+		updateToolBar();
+
+		// TABBED PANE
+		
 		tabbedPane = new JTabbedPane();
 
-		//tabbedPane.setTabPlacement(JTabbedPane.RIGHT);
-
+		// STATUS BAR
+		
 		statusBar = new JLabel();
 		setStatus(null);
 		statusBar.setSize(500, 30);
 
+
 		mainWindow.getContentPane().setLayout(new BorderLayout());
 
 		mainWindow.setJMenuBar(menuBar);
+		mainWindow.getContentPane().add(toolBar, BorderLayout.NORTH);
 		mainWindow.getContentPane().add(tabbedPane, BorderLayout.CENTER);
 		mainWindow.getContentPane().add(statusBar, BorderLayout.SOUTH);
 
 		mainWindow.setSize(790, 550);
 		
 		mainWindow.addWindowListener(this);
+
+		core.getConnectionManager().addObserver(this);
 	}
 
 
@@ -189,12 +246,48 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 * Called when an element from the menu is called.
 	 */
 	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == connectButton) {
+			core.getPluginManager().stopPlugins();			
+
+			if(!core.initNodeConnection())
+				unableToConnect();
+
+			core.getPluginManager().runPlugins();
+		}
+
+		if(e.getSource() == disconnectButton) {
+			if(!core.canDisconnect()) {
+				if(!core.askDeconnectionConfirmation())
+					return;
+			}
+
+			core.getPluginManager().stopPlugins();
+
+			core.disconnect();
+
+			core.getPluginManager().runPlugins();
+		}
+
+		if(e.getSource() == settingsButton) {
+			core.getConfigWindow().setVisible(true);
+		}
+
+		if(e.getSource() == quitButton) {
+			core.exit();
+		}
+
 		if(e.getSource() == reconnectionFileMenuItem) {
+
+			if(!core.canDisconnect()) {
+				if(!core.askDeconnectionConfirmation())
+					return;
+			}
 
 			core.getPluginManager().stopPlugins();
 			
-			core.initNodeConnection();
-
+			if(!core.initNodeConnection())
+				unableToConnect();
+			
 			core.getPluginManager().loadPlugins();
 			core.getPluginManager().runPlugins();
 
@@ -211,6 +304,30 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 		if(e.getSource() == aboutHelpMenuItem) {
 			showDialogAbout();
+		}
+	}
+
+	/**
+	 * Warns the user by a popup.
+	 */
+	protected void unableToConnect() {
+		new WarningWindow(core, 
+				  I18n.getMessage("thaw.warning.unableToConnectTo")+
+				  " "+core.getConfig().getValue("nodeAddress")+":"+ core.getConfig().getValue("nodePort"));
+	}
+
+	public void update(java.util.Observable o, Object arg) {
+		updateToolBar();
+	}
+
+
+	public void updateToolBar() {
+		if(core.getConnectionManager().isConnected()) {
+			connectButton.setEnabled(false);
+			disconnectButton.setEnabled(true);
+		} else {
+			connectButton.setEnabled(true);
+			disconnectButton.setEnabled(false);
 		}
 	}
 
