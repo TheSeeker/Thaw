@@ -85,8 +85,7 @@ public class Core implements Observer {
 			return false;
 
 		if(!initNodeConnection())
-			new WarningWindow(this, I18n.getMessage("thaw.warning.unableToConnectTo")+ " "+config.getValue("nodeAddress")+":"+
-					  config.getValue("nodePort"));
+			new WarningWindow(this, I18n.getMessage("thaw.warning.unableToConnectTo")+ " "+config.getValue("nodeAddress")+":"+ config.getValue("nodePort"));
 
 		if(!initGraphics())
 			return false;
@@ -255,6 +254,8 @@ public class Core implements Observer {
 	 */
 	public boolean initGraphics() {
 		initializeLookAndFeel();
+
+		IconBox.loadIcons();
 
 		mainWindow = new MainWindow(this);
 

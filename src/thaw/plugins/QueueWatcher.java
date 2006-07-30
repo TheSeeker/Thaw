@@ -38,6 +38,8 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 
 	private boolean advancedMode = false;
 
+	private java.awt.Container panelAdded;
+
 	public QueueWatcher() {
 
 	}
@@ -55,8 +57,7 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 
 		panel = new JPanel();
 
-		GridLayout layout = new GridLayout(2, 1);
-		layout.setVgap(10);
+		GridLayout layout = new GridLayout(2, 1, 10, 10);
 		panel.setLayout(layout);
 
 		if(queuePanels[0].getPanel() != null)
@@ -84,11 +85,14 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 			mainPanel.addPropertyChangeListener(this);
 			mainPanel.setOneTouchExpandable(true);
 
-			core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"), mainPanel);
+			panelAdded = mainPanel;
 		} else {
-
-			core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"), panel);
+			panelAdded = panel;
 		}
+
+		core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"), 
+						    IconBox.minQueue,
+					    panelAdded);
 			
 		if(core.getConnectionManager() != null && core.getConnectionManager().isConnected()) {
 			core.getConnectionManager().addObserver(this);
@@ -114,10 +118,7 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 
 		core.getConfig().setValue("detailPanelFolded", ((new Boolean(folded)).toString()));
 
-		if(advancedMode)
-			core.getMainWindow().removeTab(mainPanel);
-		else
-			core.getMainWindow().removeTab(panel);
+		core.getMainWindow().removeTab(panelAdded);
 		
 		return true;
 	}

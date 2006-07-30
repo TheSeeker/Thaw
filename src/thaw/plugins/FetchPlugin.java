@@ -26,7 +26,9 @@ public class FetchPlugin implements thaw.core.Plugin {
 
 		fetchPanel = new FetchPanel(core, this);
 
-		core.getMainWindow().addTab(I18n.getMessage("thaw.common.download"), fetchPanel.getPanel());
+		core.getMainWindow().addTab(I18n.getMessage("thaw.common.download"), 
+					    IconBox.minDownloads,
+					    fetchPanel.getPanel());
 
 		return true;
 	}

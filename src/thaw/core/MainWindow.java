@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
+import javax.swing.Icon;
 import java.awt.Font;
 
 import thaw.i18n.I18n;
@@ -65,20 +66,25 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 		mainWindow = new JFrame("Thaw");
 
+		mainWindow.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
 		mainWindow.setVisible(false);
 
 		try {
-			mainWindow.setIconImage((new ImageIcon(getClass().getClassLoader().getResource("blueBunny.png"))).getImage());
-		} catch(java.lang.NullPointerException e) {
+			mainWindow.setIconImage(IconBox.blueBunny.getImage());
+		} catch(Throwable e) {
 			Logger.notice(this, "No icon");
 		}
 			
 		menuBar = new JMenuBar();
 		fileMenu = new JMenu(I18n.getMessage("thaw.menu.file"));
 
-		reconnectionFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.reconnect"));
-		optionsFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.options"));
-		quitFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.quit"));
+		reconnectionFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.reconnect"),
+							 IconBox.minReconnectAction);
+		optionsFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.options"),
+						    IconBox.minSettings);
+		quitFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.quit"),
+						 IconBox.minQuitAction);
 		
 		reconnectionFileMenuItem.addActionListener(this);
 		optionsFileMenuItem.addActionListener(this);
@@ -98,6 +104,8 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		menuBar.add(helpMenu);
 
 		tabbedPane = new JTabbedPane();
+
+		//tabbedPane.setTabPlacement(JTabbedPane.RIGHT);
 
 		statusBar = new JLabel();
 		setStatus(null);
@@ -143,6 +151,15 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 */
 	public boolean addTab(String tabName, java.awt.Component panel) {
 		tabbedPane.addTab(tabName, panel);
+
+		return true;
+	}
+
+	/**
+	 * @see #addTab(String, java.awt.Component)
+	 */
+	public boolean addTab(String tabName, Icon icon, java.awt.Component panel) {
+		tabbedPane.addTab(tabName, icon, panel);
 
 		return true;
 	}
@@ -232,8 +249,9 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 			new JLabel(I18n.getMessage("thaw.about.l1")),
 			new JLabel(I18n.getMessage("thaw.about.l2")),
 			new JLabel(I18n.getMessage("thaw.about.l3")),
-			new JLabel(I18n.getMessage("thaw.about.l4"))
-			//new JLabel(I18n.getMessage("thaw.about.l3")),
+			new JLabel(I18n.getMessage("thaw.about.l4")),
+			new JLabel(""),
+			new JLabel(I18n.getMessage("thaw.about.l6"))
 		};
 
 		labels[0].setFont(new Font("Dialog", Font.BOLD, 30));

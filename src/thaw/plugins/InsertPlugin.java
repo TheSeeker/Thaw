@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import javax.swing.JScrollPane;
 import java.io.File;
 
 import thaw.core.*;
@@ -21,6 +22,7 @@ public class InsertPlugin implements thaw.core.Plugin {
 	private Core core;
 
 	private InsertPanel insertPanel;
+	private JScrollPane scrollPane;
 
 	public InsertPlugin() {
 
@@ -35,7 +37,11 @@ public class InsertPlugin implements thaw.core.Plugin {
 		insertPanel = new InsertPanel(this,
 					      Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
 
-		core.getMainWindow().addTab(I18n.getMessage("thaw.common.insertion"), insertPanel.getPanel());
+		scrollPane = new JScrollPane(insertPanel.getPanel());
+
+		core.getMainWindow().addTab(I18n.getMessage("thaw.common.insertion"),
+					    IconBox.minInsertions,
+					    scrollPane);
 
 		return true;
 	}
@@ -44,7 +50,7 @@ public class InsertPlugin implements thaw.core.Plugin {
 	public boolean stop() {
 		Logger.info(this, "Stopping plugin \"InsertPlugin\" ...");
 
-		core.getMainWindow().removeTab(insertPanel.getPanel());
+		core.getMainWindow().removeTab(scrollPane);
 
 		return true;
 	}

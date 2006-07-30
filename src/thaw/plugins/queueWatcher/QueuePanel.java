@@ -86,9 +86,13 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		
 		if(isForInsertionQueue) {
 			label = new JLabel(I18n.getMessage("thaw.common.insertions"));
+			label.setIcon(IconBox.insertions);
 		} else {
 			label = new JLabel(I18n.getMessage("thaw.common.downloads"));
+			label.setIcon(IconBox.downloads);
 		}
+
+		label.setVerticalAlignment(JLabel.CENTER);
 
 		panel = new JPanel();
 		panel.setLayout(new BorderLayout());
