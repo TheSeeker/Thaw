@@ -10,8 +10,9 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
-//import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
+import java.awt.Font;
 
 import thaw.i18n.I18n;
 
@@ -41,9 +42,13 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 	private JMenuBar menuBar = null;
 	private JMenu fileMenu = null;
-	
+
+	private JMenuItem reconnectionFileMenuItem = null;
 	private JMenuItem optionsFileMenuItem = null;
 	private JMenuItem quitFileMenuItem = null;
+
+	private JMenu helpMenu = null;
+	private JMenuItem aboutHelpMenuItem = null;
 
 	private JTabbedPane tabbedPane = null;
 	private JLabel statusBar = null;
@@ -71,15 +76,26 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		menuBar = new JMenuBar();
 		fileMenu = new JMenu(I18n.getMessage("thaw.menu.file"));
 
+		reconnectionFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.reconnect"));
 		optionsFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.options"));
 		quitFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.quit"));
 		
+		reconnectionFileMenuItem.addActionListener(this);
 		optionsFileMenuItem.addActionListener(this);
 		quitFileMenuItem.addActionListener(this);
 
+		fileMenu.add(reconnectionFileMenuItem);
 		fileMenu.add(optionsFileMenuItem);
 		fileMenu.add(quitFileMenuItem);
 		menuBar.add(fileMenu);
+
+		helpMenu = new JMenu(I18n.getMessage("thaw.menu.help"));
+		
+		aboutHelpMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.about"));
+		aboutHelpMenuItem.addActionListener(this);
+
+		helpMenu.add(aboutHelpMenuItem);
+		menuBar.add(helpMenu);
 
 		tabbedPane = new JTabbedPane();
 
@@ -156,6 +172,17 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 * Called when an element from the menu is called.
 	 */
 	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == reconnectionFileMenuItem) {
+
+			core.getPluginManager().stopPlugins();
+			
+			core.initNodeConnection();
+
+			core.getPluginManager().loadPlugins();
+			core.getPluginManager().runPlugins();
+
+		}
+
 		if(e.getSource() == optionsFileMenuItem) {
 			core.getConfigWindow().setVisible(true);
 		}
@@ -165,6 +192,9 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 			endOfTheWorld();
 		}
 
+		if(e.getSource() == aboutHelpMenuItem) {
+			showDialogAbout();
+		}
 	}
 
 	/**
@@ -194,6 +224,23 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 	public String getStatus() {
 		return statusBar.getText();
+	}
+
+
+	public void showDialogAbout() {
+		JLabel[] labels = new JLabel[] {
+			new JLabel(I18n.getMessage("thaw.about.l1")),
+			new JLabel(I18n.getMessage("thaw.about.l2")),
+			new JLabel(I18n.getMessage("thaw.about.l3")),
+			new JLabel(I18n.getMessage("thaw.about.l4"))
+			//new JLabel(I18n.getMessage("thaw.about.l3")),
+		};
+
+		labels[0].setFont(new Font("Dialog", Font.BOLD, 30));
+
+		JOptionPane.showMessageDialog(null, labels, I18n.getMessage("thaw.about.title"),
+					      JOptionPane.INFORMATION_MESSAGE);
+		
 	}
 
 	
