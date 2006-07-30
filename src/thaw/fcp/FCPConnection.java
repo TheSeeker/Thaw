@@ -152,6 +152,11 @@ public class FCPConnection extends Observable {
 		bufferedOut = new FCPBufferedStream(this, maxUploadSpeed);
 		bufferedOut.startSender();
 
+		rawBytesWaiting = 0;
+		lockWriting = false;
+		lockReading = false;
+		lastWrite = 0;
+
 		Logger.info(this, "Connected");
 
 		setChanged();

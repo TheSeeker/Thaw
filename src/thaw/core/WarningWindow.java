@@ -19,12 +19,12 @@ public class WarningWindow {
 		if(core != null && core.getMainWindow() != null) {
 			JOptionPane.showMessageDialog(core.getMainWindow().getMainFrame(),
 						      warning,
-						      I18n.getMessage("thaw.warning.title"),
+						      "Thaw - "+I18n.getMessage("thaw.warning.title"),
 						      JOptionPane.WARNING_MESSAGE);
 		} else {
 			JOptionPane.showMessageDialog(null,
 						      warning,
-						      I18n.getMessage("thaw.warning.title"),
+						      "Thaw - "+I18n.getMessage("thaw.warning.title"),
 						      JOptionPane.WARNING_MESSAGE);
 		}
 	}

@@ -1,10 +1,11 @@
-
 package thaw.core;
 
 import java.util.Observer;
 import java.util.Observable;
 
 import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -16,7 +17,7 @@ import thaw.fcp.*;
 
 /**
  * A "core" contains references to all the main parts of Thaw.
- *
+ * The Core has all the functions needed to initialize Thaw / stop Thaw.
  */
 public class Core implements Observer {
 
@@ -84,7 +85,7 @@ public class Core implements Observer {
 			return false;
 
 		if(!initNodeConnection())
-			new WarningWindow(this, "Unable to connect to "+config.getValue("nodeAddress")+":"+
+			new WarningWindow(this, I18n.getMessage("thaw.warning.unableToConnectTo")+ " "+config.getValue("nodeAddress")+":"+
 					  config.getValue("nodePort"));
 
 		if(!initGraphics())
@@ -302,7 +303,7 @@ public class Core implements Observer {
 	 * Check if the connection can be interrupted safely.
 	 */
 	public boolean canDisconnect() {
-		return !connection.isWriting();
+		return connection == null || !connection.isWriting();
 	}
 
 	/**
@@ -315,13 +316,15 @@ public class Core implements Observer {
 			if(!canDisconnect()) {
 				int ret = JOptionPane.showOptionDialog((java.awt.Component)null,
 								       I18n.getMessage("thaw.warning.isWriting"),
-								       I18n.getMessage("thaw.warning.title"),
+								       "Thaw - "+I18n.getMessage("thaw.warning.title"),
 								       JOptionPane.YES_NO_OPTION, 
 								       JOptionPane.WARNING_MESSAGE,
 								       (javax.swing.Icon)null,
 								       (java.lang.Object[])null,
 								       (java.lang.Object)null);
-				if(ret == JOptionPane.CLOSED_OPTION || ret > 0)
+				if(ret == JOptionPane.CLOSED_OPTION
+				   || ret == JOptionPane.CANCEL_OPTION
+				   || ret == JOptionPane.NO_OPTION)
 					return;
 			}
 		}
@@ -345,12 +348,25 @@ public class Core implements Observer {
 	}
 
 
-
 	public void update(Observable o, Object target) {
 		Logger.debug(this, "Move on the connection (?)");
 
 		if(o == connection && !connection.isConnected()) {
 			int nmbReconnect = 0;
+
+			JDialog warningDialog = new JDialog();
+			warningDialog.setTitle("Thaw - reconnection");
+			warningDialog.setModal(false);
+			warningDialog.setSize(500, 40);
+
+			JPanel warningPanel = new JPanel();
+
+			JLabel warningLabel = new JLabel(I18n.getMessage("thaw.warning.autoreconnecting"),
+							 JLabel.CENTER);
+			warningPanel.add(warningLabel);
+			warningDialog.setContentPane(warningPanel);
+			
+			warningDialog.setVisible(true);
 
 			for(nmbReconnect = 0;
 			    nmbReconnect < MAX_CONNECT_TRIES ;
@@ -362,16 +378,36 @@ public class Core implements Observer {
 					// brouzouf
 				}
 				
-				Logger.info(this, "Trying to reconnect ... : "+ Integer.toString(nmbReconnect));
+				Logger.notice(this, "Trying to reconnect ... : "+ Integer.toString(nmbReconnect));
 
 				if(initNodeConnection())
 					break;
 			}
+
+			warningDialog.setVisible(false);
+
 			
 			if(nmbReconnect == MAX_CONNECT_TRIES) {
-				new WarningWindow(this, "We have been disconnected");
+				while(!initNodeConnection()) {
+					int ret = JOptionPane.showOptionDialog((java.awt.Component)null,
+									       I18n.getMessage("thaw.warning.disconnected"),
+									       "Thaw - "+I18n.getMessage("thaw.warning.title"),
+									       JOptionPane.YES_NO_OPTION, 
+									       JOptionPane.WARNING_MESSAGE,
+									       (javax.swing.Icon)null,
+									       (java.lang.Object[])null,
+									       (java.lang.Object)null);
+				if(ret == JOptionPane.CLOSED_OPTION
+				   || ret == JOptionPane.CANCEL_OPTION
+				   || ret == JOptionPane.NO_OPTION)
+					break;
+				}
+
 			}
-			
+
+			getPluginManager().stopPlugins();
+			getPluginManager().loadPlugins();
+			getPluginManager().runPlugins();
 		}
 	}
 
