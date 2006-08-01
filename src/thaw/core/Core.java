@@ -120,6 +120,7 @@ public class Core implements Observer {
 	 * Init the connection to the node.
 	 * If a connection is already established, it will disconnect, so 
 	 * if you called canDisconnect() before, then this function can be called safely.
+	 * @see #canDisconnect()
 	 */
 	public boolean initNodeConnection() {
 		if(getMainWindow() != null)

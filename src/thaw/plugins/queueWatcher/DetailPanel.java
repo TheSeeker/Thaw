@@ -162,7 +162,7 @@ public class DetailPanel implements Observer {
 				identifier.setText("N/A");
 
 			if(query.getThawPriority() != -1)
-				priority.setText(Integer.toString(query.getThawPriority()));
+				priority.setText(I18n.getMessage("thaw.plugin.priority.p"+Integer.toString(query.getThawPriority())));
 			else
 				priority.setText(I18n.getMessage("thaw.common.unknown"));
 			

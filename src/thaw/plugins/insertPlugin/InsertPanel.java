@@ -338,6 +338,8 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 			insertPlugin.insertFile(selectedFiles.getText(),
 						keyType, rev, name, privateKey, priority,
 						global, 0, mimeType);
+
+			selectedFiles.setText("");
 		}
 
 		if(e.getSource() == browseButton) {
