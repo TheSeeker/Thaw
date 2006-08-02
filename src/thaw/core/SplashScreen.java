@@ -24,7 +24,7 @@ public class SplashScreen {
 	}
 
 	public void display() {
-		splashScreen = new JFrame();
+		splashScreen = new JFrame("Thaw - Loading ...");
 
 		splashScreen.setLayout(new BorderLayout(10, 10));
 		

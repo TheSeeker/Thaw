@@ -169,11 +169,21 @@ public class Core implements Observer {
 				Logger.warning(this, "Unable to connect !");
 			}
 			
-			queryManager = new FCPQueryManager(connection);
-			queueManager = new FCPQueueManager(queryManager,
-							   config.getValue("thawId"),
-							   Integer.parseInt(config.getValue("maxSimultaneousDownloads")),
-							   Integer.parseInt(config.getValue("maxSimultaneousInsertions")));
+			if(queryManager == null)
+				queryManager = new FCPQueryManager(connection);
+			
+			if(queueManager == null)
+				queueManager = new FCPQueueManager(queryManager,
+								   config.getValue("thawId"),
+								   Integer.parseInt(config.getValue("maxSimultaneousDownloads")),
+								   Integer.parseInt(config.getValue("maxSimultaneousInsertions")));
+			else {
+				queueManager.setThawId(config.getValue("thawId"));
+				queueManager.setMaxDownloads(Integer.parseInt(config.getValue("maxSimultaneousDownloads")));
+				queueManager.setMaxInsertions(Integer.parseInt(config.getValue("maxSimultaneousInsertions")));
+				
+			}
+				
 
 
 
@@ -391,6 +401,8 @@ public class Core implements Observer {
 		Logger.debug(this, "Move on the connection (?)");
 
 		if(o == connection && !connection.isConnected()) {
+			disconnect();
+
 			int nmbReconnect = 0;
 
 			JDialog warningDialog = new JDialog();

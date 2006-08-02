@@ -94,9 +94,9 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 						    IconBox.minQueue,
 					    panelAdded);
 			
-		if(core.getConnectionManager() != null && core.getConnectionManager().isConnected()) {
-			core.getConnectionManager().addObserver(this);
-		}
+		//if(core.getConnectionManager() != null && core.getConnectionManager().isConnected()) {
+		//	core.getConnectionManager().addObserver(this);
+		//}
 
 		if(core.getQueueManager() != null)
 		    core.getQueueManager().addObserver(this);

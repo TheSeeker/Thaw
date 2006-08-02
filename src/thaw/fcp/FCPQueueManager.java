@@ -9,7 +9,7 @@ import thaw.core.Logger;
  * Manage a running and a pending queue of FCPTransferQuery.
  * Please notice that runningQueue contains too finished queries.
  */
-public class FCPQueueManager extends java.util.Observable implements Runnable {
+public class FCPQueueManager extends java.util.Observable implements Runnable, java.util.Observer {
 
 	private final static int PRIORITY_MIN = 6; /* So 0 to 6 */
 
@@ -29,18 +29,20 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 
 
 	/**
-	 * Calls setQueryManager() and then resetQueue().
+	 * Calls setQueryManager() and then resetQueues().
 	 */
 	public FCPQueueManager(FCPQueryManager queryManager,
 			       String thawId,
 			       int maxDownloads, int maxInsertions) {
 		lastId = 0;
-		this.thawId = thawId;
+		setThawId(thawId);
 		setMaxDownloads(maxDownloads);
 		setMaxInsertions(maxInsertions);
 
 		setQueryManager(queryManager);
-		resetQueue();
+		resetQueues();
+
+		queryManager.getConnection().addObserver(this);
 	}
 
 	/**
@@ -48,6 +50,10 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 	 */
 	public FCPQueryManager getQueryManager() {
 		return queryManager;
+	}
+
+	public void setThawId(String thawId) {
+		this.thawId = thawId;
 	}
 
 	public void setMaxDownloads(int maxDownloads) {
@@ -59,7 +65,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 	}
 
 	/**
-	 * You should call resetQueue() after calling this function.
+	 * You should call resetQueues() after calling this function.
 	 */
 	public void setQueryManager(FCPQueryManager queryManager) {
 		this.queryManager = queryManager;
@@ -69,8 +75,9 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 	/**
 	 * Will purge the current known queue.
 	 */
-	public void resetQueue() {
+	public void resetQueues() {
 		runningQueries = new Vector();
+
 		for(int i = 0; i <= PRIORITY_MIN ; i++)
 			pendingQueries[i] = new Vector();
 	}
@@ -374,7 +381,8 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 				return;
 
 			try {
-				schedule();
+				if(queryManager.getConnection().isConnected())
+					schedule();
 			} catch(java.util.ConcurrentModificationException e) {
 				Logger.notice(this, "Ordonnancor: Collision !");
 			} catch(Exception e) {
@@ -407,5 +415,18 @@ public class FCPQueueManager extends java.util.Observable implements Runnable {
 		return (thawId+"_"+ Integer.toString(lastId));
 	}
 
+	public void update(java.util.Observable o, Object arg) {
+		if(o == queryManager.getConnection()
+		   && !queryManager.getConnection().isConnected()) {
+			
+			/* Only the running queue ...
+			 * pending query are specifics to Thaw
+			 */
+			runningQueries = new Vector();
+
+			setChanged();
+			notifyObservers();
+		}
+	}
 }
 
