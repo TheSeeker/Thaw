@@ -20,6 +20,7 @@ import thaw.fcp.*;
  * The Core has all the functions needed to initialize Thaw / stop Thaw.
  */
 public class Core implements Observer {
+	private SplashScreen splashScreen = null;
 
 	private MainWindow mainWindow = null;
 	private Config config = null;
@@ -55,6 +56,13 @@ public class Core implements Observer {
 	}
 
 	/**
+	 * Gives a ref to the object managing the splash screen.
+	 */
+	public SplashScreen getSplashScreen() {
+		return splashScreen;
+	}
+
+	/**
 	 * Gives a ref to the object managing the main window.
 	 */
 	public MainWindow getMainWindow() {
@@ -81,19 +89,32 @@ public class Core implements Observer {
 	 * @return true is success, false if not
 	 */
 	public boolean initAll() {
+		splashScreen = new SplashScreen();
+
+		splashScreen.display();
+
+		splashScreen.setProgressionAndStatus(0, "Loading configuration ...");
 		if(!initConfig())
 			return false;
 
+		splashScreen.setProgressionAndStatus(10, "Connecting ...");
 		if(!initNodeConnection())
 			new WarningWindow(this, I18n.getMessage("thaw.warning.unableToConnectTo")+ " "+config.getValue("nodeAddress")+":"+ config.getValue("nodePort"));
 
+		splashScreen.setProgressionAndStatus(30, "Preparing the main window ...");
 		if(!initGraphics())
 			return false;
 
+		splashScreen.setProgressionAndStatus(40, "Loading plugins ...");
 		if(!initPluginManager())
 			return false;
 
+		splashScreen.setProgressionAndStatus(100, "Ready");
+
+
 		mainWindow.setStatus("Thaw "+Main.VERSION+" : "+I18n.getMessage("thaw.statusBar.ready"));
+
+		splashScreen.hide();
 
 		mainWindow.setVisible(true);
 
@@ -330,6 +351,9 @@ public class Core implements Observer {
 		Logger.info(this, "Stopping scheduler ...");
 		if(queueManager != null)
 		    queueManager.stopScheduler();
+
+		Logger.info(this, "Hidding main window ...");
+		mainWindow.setVisible(false);
 		
 		Logger.info(this, "Stopping plugins ...");
 		pluginManager.stopPlugins();

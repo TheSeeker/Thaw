@@ -62,7 +62,7 @@ public class StatusBar implements Runnable, Plugin {
 			    it.hasNext(); ) {
 				FCPTransferQuery query = (FCPTransferQuery)it.next();
 
-				if(query.isRunning()) {
+				if(query.isRunning() && !query.isFinished()) {
 					running++;
 					progressTotal += 100;
 					progressDone += query.getProgression();

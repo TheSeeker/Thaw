@@ -56,8 +56,15 @@ public class PluginManager {
 
 		Iterator pluginIt = pluginNames.iterator();
 
+		int progressJump = 10 / pluginNames.size();
+		core.getSplashScreen().setProgression(40);
+
 		while(pluginIt.hasNext()) {
 			String pluginName = (String)pluginIt.next();
+
+			core.getSplashScreen().setProgressionAndStatus(core.getSplashScreen().getProgression()+progressJump,
+								       "Loading plugin '"+pluginName+"' ...");
+
 			loadPlugin(pluginName);
 		}
 
@@ -73,11 +80,19 @@ public class PluginManager {
 		try {
 			pluginIt = plugins.values().iterator();
 			
+			int progressJump = 50 / plugins.size();
+
+			core.getSplashScreen().setProgression(50);
+
 			while(pluginIt.hasNext()) {
 				Plugin plugin = (Plugin)pluginIt.next();
 
 				try {
 					Logger.info(this, "Running plugin '"+plugin.getClass().getName()+"'");
+
+					core.getSplashScreen().setProgressionAndStatus(core.getSplashScreen().getProgression()+progressJump,
+										       "Starting plugin '"+plugin.getClass().getName()+"' ...");
+
 					plugin.run(core);
 				} catch(Exception e) {
 					Logger.error(this, "Unable to run the plugin '"+plugin.getClass().getName()+"' because: "+e+":");

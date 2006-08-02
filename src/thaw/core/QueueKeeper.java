@@ -28,7 +28,7 @@ import org.w3c.dom.NodeList;
 import thaw.fcp.*;
 
 /**
- * Used when Thaw start and stop: Save the queue state.
+ * Used when Thaw start and stop: Save the query not running (-> waiting in the Thaw queue)
  */
 public class QueueKeeper {
 	private final static int MIN_PRIORITY = 6;
