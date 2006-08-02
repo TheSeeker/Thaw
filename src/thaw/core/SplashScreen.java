@@ -42,12 +42,13 @@ public class SplashScreen {
 
 		splashScreen.pack();
 
-		splashScreen.setPreferredSize(new Dimension(SIZE_X, SIZE_Y));
+		splashScreen.setSize(SIZE_X, SIZE_Y);
+
 
 		Dimension screenSize =
 			Toolkit.getDefaultToolkit().getScreenSize();
 
-		Dimension splashSize = splashScreen.getPreferredSize();
+		Dimension splashSize = splashScreen.getSize();
 		splashScreen.setLocation(screenSize.width/2 - (splashSize.width/2),
 					 screenSize.height/2 - (splashSize.height/2));
 
