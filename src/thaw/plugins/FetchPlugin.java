@@ -3,7 +3,6 @@ package thaw.plugins;
 import javax.swing.JPanel;
 
 import thaw.core.*;
-import thaw.i18n.I18n;
 import thaw.plugins.fetchPlugin.*;
 
 import thaw.fcp.*;

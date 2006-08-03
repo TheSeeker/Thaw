@@ -15,7 +15,6 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 
 import thaw.core.*;
-import thaw.i18n.I18n;
 import thaw.plugins.queueWatcher.*;
 
 import thaw.fcp.*;

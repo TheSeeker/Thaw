@@ -19,8 +19,6 @@ import java.util.Observable;
 import java.util.Vector;
 import java.util.Iterator;
 
-import thaw.i18n.I18n;
-
 
 /**
  * PluginConfigPanel. Creates and manages the panel containing all the things to configure

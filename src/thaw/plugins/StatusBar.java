@@ -3,7 +3,6 @@ package thaw.plugins;
 import java.util.Vector;
 import java.util.Iterator;
 
-import thaw.i18n.I18n;
 import thaw.core.*;
 import thaw.fcp.*;
 

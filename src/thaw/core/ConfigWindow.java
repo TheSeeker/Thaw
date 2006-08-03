@@ -12,7 +12,6 @@ import java.util.Observable;
 import java.awt.GridLayout;
 import javax.swing.JOptionPane;
 
-import thaw.i18n.I18n;
 
 
 /**

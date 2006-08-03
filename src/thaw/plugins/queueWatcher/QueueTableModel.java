@@ -10,7 +10,6 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.JProgressBar;
 
 import thaw.core.*;
-import thaw.i18n.I18n;
 import thaw.fcp.*;
 
 public class QueueTableModel extends javax.swing.table.AbstractTableModel implements Observer {

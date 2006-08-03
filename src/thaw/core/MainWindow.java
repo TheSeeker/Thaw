@@ -18,8 +18,6 @@ import javax.swing.Icon;
 import java.awt.Font;
 import javax.swing.Box;
 
-import thaw.i18n.I18n;
-
 
 /**
  * MainWindow. This class create the main window.

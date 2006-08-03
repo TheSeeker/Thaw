@@ -37,7 +37,6 @@ import java.awt.datatransfer.StringSelection;
 import java.io.File;
 
 import thaw.core.*;
-import thaw.i18n.I18n;
 
 import thaw.fcp.*;
 

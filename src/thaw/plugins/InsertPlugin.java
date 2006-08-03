@@ -14,7 +14,6 @@ import javax.swing.JScrollPane;
 import java.io.File;
 
 import thaw.core.*;
-import thaw.i18n.I18n;
 import thaw.plugins.insertPlugin.*;
 import thaw.fcp.*;
 

@@ -12,9 +12,6 @@ import javax.swing.JLabel;
 import java.util.Observer;
 import java.util.Observable;
 
-import thaw.i18n.I18n;
-
-
 /**
  * NodeConfigPanel. Creates and manages the panel containing all the things to configure
  *  the settings to access the node.

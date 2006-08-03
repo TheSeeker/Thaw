@@ -12,7 +12,6 @@ import java.util.Observer;
 import java.util.Observable;
 
 import thaw.core.*;
-import thaw.i18n.I18n;
 import thaw.fcp.*;
 
 

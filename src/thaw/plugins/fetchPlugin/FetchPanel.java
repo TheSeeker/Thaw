@@ -28,7 +28,6 @@ import java.util.Iterator;
 
 import thaw.core.*;
 import thaw.plugins.FetchPlugin;
-import thaw.i18n.I18n;
 
 public class FetchPanel implements java.awt.event.ActionListener {
 

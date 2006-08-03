@@ -2,8 +2,6 @@ package thaw.core;
 
 import javax.swing.JOptionPane;
 
-import thaw.i18n.I18n;
-
 /**
  * Use to create a warning popup.
  * Currently this popup is simple as possible, but

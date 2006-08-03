@@ -11,8 +11,6 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.JOptionPane;
 
-
-import thaw.i18n.I18n;
 import thaw.fcp.*;
 
 /**

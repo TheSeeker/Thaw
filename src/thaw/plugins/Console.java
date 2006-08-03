@@ -16,7 +16,6 @@ import java.io.FileOutputStream;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-import thaw.i18n.I18n;
 import thaw.core.*;
 
 

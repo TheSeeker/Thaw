@@ -4,7 +4,6 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import java.util.Locale;
 
-import thaw.i18n.I18n;
 
 /**
  * Main class. Only used to display some informations and init the core.

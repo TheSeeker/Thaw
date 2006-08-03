@@ -11,8 +11,6 @@ import javax.swing.JCheckBox;
 import java.util.Observer;
 import java.util.Observable;
 
-import thaw.i18n.I18n;
-
 /**
  * Creates and manages the panel containing all the things to configure related to Thaw and only Thaw.
  */

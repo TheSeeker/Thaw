@@ -23,7 +23,6 @@ import java.io.File;
 import thaw.core.*;
 import thaw.plugins.QueueWatcher;
 import thaw.fcp.*;
-import thaw.i18n.I18n;
 
 
 public class DragAndDropManager implements DragGestureListener, DragSourceListener {

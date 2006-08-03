@@ -22,7 +22,6 @@ import java.util.Observable;
 import java.util.Vector;
 
 import thaw.core.*;
-import thaw.i18n.I18n;
 import thaw.plugins.InsertPlugin;
 import thaw.fcp.*;
 

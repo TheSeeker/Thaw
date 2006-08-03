@@ -12,7 +12,6 @@ import java.util.Observer;
 import java.util.Observable;
 import java.util.Random;
 
-import thaw.i18n.I18n;
 import thaw.core.*;
 import thaw.fcp.*;
 
