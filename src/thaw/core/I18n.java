@@ -23,12 +23,11 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-package thaw.i18n;
+package thaw.core;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import thaw.core.Logger;
 
 /**
  * @author David Roden &lt;droden@gmail.com&gt;
