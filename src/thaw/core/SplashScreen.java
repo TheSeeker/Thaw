@@ -1,6 +1,6 @@
 package thaw.core;
 
-import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.JProgressBar;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -15,7 +15,7 @@ public class SplashScreen {
 	public final static int SIZE_Y = 100;
 
 
-	public JFrame splashScreen;
+	public JDialog splashScreen;
 	public JProgressBar progressBar;
 	
 
@@ -24,21 +24,23 @@ public class SplashScreen {
 	}
 
 	public void display() {
-		splashScreen = new JFrame("Thaw - Loading ...");
+		splashScreen = new JDialog();
 
-		splashScreen.setLayout(new BorderLayout(10, 10));
+		splashScreen.setUndecorated(true);
+		splashScreen.setResizable(false);
+		splashScreen.getContentPane().setLayout(new BorderLayout(10, 10));
 		
 
 		JLabel thawLabel = new JLabel("   Thaw");
 		thawLabel.setFont(new Font("Dialog", Font.BOLD, 30));
 
-		splashScreen.add(thawLabel, BorderLayout.CENTER);
+		splashScreen.getContentPane().add(thawLabel, BorderLayout.CENTER);
 
 		progressBar = new JProgressBar(0, 100);
 		progressBar.setStringPainted(true);
 		progressBar.setString("Wake up Neo ...");
 
-		splashScreen.add(progressBar, BorderLayout.SOUTH);
+		splashScreen.getContentPane().add(progressBar, BorderLayout.SOUTH);
 
 		splashScreen.pack();
 
