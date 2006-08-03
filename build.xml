@@ -28,6 +28,10 @@
 		</javac>
 
 		<copy todir="${bin.dir}">
+		        <fileset file="gpl.txt" />
+			<fileset file="readme.txt" />
+		        <fileset dir="${images.dir}" />
+
 			<fileset dir="${src.dir}">
 				<include name="**/*.properties" />
 			</fileset>
@@ -36,21 +40,23 @@
 
 
 	<target name="run" depends="compile">
-		<java classname="thaw.core.Main" classpath="lib/hsqldb.jar:build" dir="build" fork="true" />
+		<java classname="thaw.core.Main" classpath="${hsqldb.location}:${bin.dir}" dir="${bin.dir}" fork="true" />
 	</target>
 
 
 	<target name="jar" depends="compile"	description="Make the Jar" >
+	        <available file="${hsqldb.location}" property="hsqldb_available" />
+
+		<fail unless="hsqldb_available" status="1"
+		       message="You need to download hsqldb.jar from http://sourceforge.net/projects/hsqldb/ and to put it in lib/" />
+
 		<jar jarfile="${lib.dir}/Thaw.jar" basedir="${bin.dir}">
 			<manifest>
 				<attribute name="Main-Class" value="thaw.core.Main"/>
 			</manifest>
+
 			<fileset dir="${bin.dir}"/>
-			<!-- hsqldb is not required for the moment -->
-			<!-- <fileset file="${hsqldb.location}"/> -->
-			<fileset file="gpl.txt" />
-			<fileset file="readme.txt" />
-			<fileset dir="${images.dir}" />
+			<ZipFileSet src="${hsqldb.location}"/>
 		</jar>
 	</target>
 
