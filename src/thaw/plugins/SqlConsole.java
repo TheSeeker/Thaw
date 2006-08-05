@@ -16,15 +16,12 @@ import java.awt.Font;
 import thaw.core.*;
 import thaw.fcp.*;
 
-import thaw.plugins.index.*;
-
 public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 	public final static int BUFFER_SIZE = 51200;
 
 	private Core core;
 	private Hsqldb hsqldb;
 
-	private IndexEditorPanel editorPanel;
 	private JPanel panel;
 
 	private JTextArea sqlArea;
