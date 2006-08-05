@@ -35,6 +35,10 @@ public class Console implements Plugin, LogListener, ActionListener {
 
 	private long maxLogSize = 5120;
 
+	public Console() {
+
+	}
+
 	public boolean run(Core core) {
 		this.core = core;
 		
