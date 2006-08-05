@@ -26,6 +26,12 @@ public class IconBox {
 	public static ImageIcon downloads;
 	public static ImageIcon minDownloads;
 
+	public static ImageIcon indexEditor;
+	public static ImageIcon minIndexEditor;
+
+	public static ImageIcon indexBrowser;
+	public static ImageIcon minIndexBrowser;
+
 	public static ImageIcon settings;
 	public static ImageIcon minSettings;
 
@@ -85,6 +91,17 @@ public class IconBox {
 			minSettings =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("min-preferences-system.png"));
 
+
+			indexEditor =
+				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("edit-find-replace.png"));
+			minIndexEditor =
+				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("min-edit-find-replace.png"));
+
+
+			indexBrowser =
+				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("edit-find.png"));
+			minIndexBrowser =
+				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("min-edit-find.png"));
 
 			reconnectAction =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("view-refresh.png"));

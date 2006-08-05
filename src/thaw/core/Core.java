@@ -97,7 +97,10 @@ public class Core implements Observer {
 
 		splashScreen.setProgressionAndStatus(10, "Connecting ...");
 		if(!initNodeConnection())
-			new WarningWindow(this, I18n.getMessage("thaw.warning.unableToConnectTo")+ " "+config.getValue("nodeAddress")+":"+ config.getValue("nodePort"));
+			new WarningWindow(this, I18n.getMessage("thaw.warning.unableToConnectTo")+
+					  " "+config.getValue("nodeAddress")+
+					  ":"+ config.getValue("nodePort"));
+
 
 		splashScreen.setProgressionAndStatus(30, "Preparing the main window ...");
 		if(!initGraphics())

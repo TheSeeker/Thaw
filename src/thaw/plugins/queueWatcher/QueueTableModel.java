@@ -8,18 +8,33 @@ import java.util.Observer;
 import javax.swing.event.TableModelListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.JProgressBar;
+import javax.swing.JTable;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableColumn;
+
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import java.util.Comparator;
+import java.util.Collections;
 
 import thaw.core.*;
 import thaw.fcp.*;
 
 public class QueueTableModel extends javax.swing.table.AbstractTableModel implements Observer {
-	private static final long serialVersionUID = 20060707;
+	private static final long serialVersionUID = 20060708;
 
 	private Vector columnNames = new Vector();
 
         private Vector queries = null;
 
 	private boolean isForInsertions = false;
+
+	
+	private boolean isSortedAsc = false;
+	private int sortedColumn = -1;
+	
+
 
 	public QueueTableModel(boolean isForInsertions) {
 		super();
@@ -36,6 +51,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		columnNames.add(I18n.getMessage("thaw.common.progress"));
 
 		resetTable();
+
 	}
 	
 
@@ -53,7 +69,16 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 	
 	public String getColumnName(int col) {
-		return (String)columnNames.get(col);
+		String result = (String)columnNames.get(col);
+
+		if(col == sortedColumn) {
+			if(isSortedAsc)
+				result = result + " >>";
+			else
+				result = result + " <<";
+		}
+
+		return result;
 	}
 	
 
@@ -141,6 +166,8 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		
 		queries.add(query);
 
+		sortTable();
+
 		notifyObservers();
 	}
 
@@ -148,6 +175,8 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		((Observable)query).deleteObserver(this);
 
 		queries.remove(query);
+
+		sortTable();
 
 		notifyObservers();
 	}
@@ -187,8 +216,155 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 
 	public void update(Observable o, Object arg) {
+		sortTable();
 		notifyObservers();
 	}
 
+
+	/**
+	 * @return false if nothing sorted
+	 */
+	public boolean sortTable() {
+		if(sortedColumn < 0 || queries.size() <= 0)
+			return false;
+
+		Collections.sort(queries, new QueryComparator(isSortedAsc, sortedColumn, isForInsertions));
+
+		return true;
+	}
+
+	
+	public class ColumnListener extends MouseAdapter {
+		private JTable table;
+				
+		public ColumnListener(JTable t) {
+			table = t;
+		}
+		
+		public void mouseClicked(MouseEvent e) {
+			TableColumnModel colModel = table.getColumnModel();
+			int columnModelIndex = colModel.getColumnIndexAtX(e.getX());
+			int modelIndex = colModel.getColumn(columnModelIndex).getModelIndex();
+			
+			int columnsCount = table.getColumnCount();
+
+			if (modelIndex < 0)
+				return;
+
+			if (sortedColumn == modelIndex)
+				isSortedAsc = !isSortedAsc;
+			else
+				sortedColumn = modelIndex;
+
+			
+			for (int i = 0; i < columnsCount; i++) { 
+				TableColumn column = colModel.getColumn(i);
+				column.setHeaderValue(getColumnName(column.getModelIndex()));
+			}
+
+			
+
+			table.getTableHeader().repaint();
+
+			sortTable();			
+		}
+	}
+	
+
+	public class QueryComparator implements Comparator {
+		private boolean isSortedAsc;
+		private int column;
+		private boolean isForInsertionTable;
+
+		public QueryComparator(boolean sortedAsc, int column,
+				       boolean isForInsertionTable) {
+			this.isSortedAsc = sortedAsc;
+			this.column = column;
+			this.isForInsertionTable = isForInsertionTable;
+		}
+		
+		public int compare(Object o1, Object o2) {
+			int result = 0;
+
+			if(!(o1 instanceof FCPTransferQuery)
+			   || !(o2 instanceof FCPTransferQuery))
+				return 0;
+
+			FCPTransferQuery q1 = (FCPTransferQuery)o1;
+			FCPTransferQuery q2 = (FCPTransferQuery)o2;
+
+			
+			if(column == 0) { /* File name */
+				if(q1.getFilename() == null)
+					return -1;
+
+				if(q2.getFilename() == null)
+					return 1;
+
+				result = q1.getFilename().compareTo(q2.getFilename());
+			}
+
+			if(column == 1) { /* Size */
+				result = (new Long(q1.getFileSize())).compareTo(new Long(q2.getFileSize()));
+			}
+
+			if( (column == 2 && !isForInsertionTable) ) { /* localPath */
+				if(q1.getPath() == null)
+					return -1;
+
+				if(q2.getPath() == null)
+					return 1;
+
+				result = q1.getPath().compareTo(q2.getPath());
+			}
+
+			if( (column == 2 && isForInsertionTable)
+			    || (column == 3 && !isForInsertionTable) ) { /* status */
+
+				if(q1.getStatus() == null)
+					return -1;
+
+				if(q2.getStatus() == null)
+					return 1;
+
+				result = q1.getStatus().compareTo(q2.getStatus());
+			}
+
+			if( (column == 3 && isForInsertionTable)
+			    || (column == 4 && !isForInsertionTable) ) { /* progress */
+				if(q1.getProgression() <= 0 
+				   && q2.getProgression() <= 0) {
+					if(q1.isRunning() && !q2.isRunning())
+						return 1;
+
+					if(q1.isRunning() && !q2.isRunning())
+						return -1;
+				}
+
+				result = (new Integer(q1.getProgression())).compareTo(new Integer(q2.getProgression()));
+			}
+			
+
+			if (!isSortedAsc)
+				result = -result;
+
+			return result;
+		}
+		
+		public boolean isSortedAsc() {
+			return isSortedAsc;
+		}
+
+		public boolean equals(Object obj) {
+			if (obj instanceof QueryComparator) {
+				QueryComparator compObj = (QueryComparator) obj;
+				return compObj.isSortedAsc() == isSortedAsc();
+			}
+			return false;
+		}
+
+	}
+
 }
+
 

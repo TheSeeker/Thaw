@@ -28,6 +28,7 @@ import javax.swing.JRadioButtonMenuItem;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.ButtonGroup;
+import javax.swing.table.JTableHeader;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -83,6 +84,11 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 		table.setShowGrid(true);
 		
+		JTableHeader header = table.getTableHeader();
+		header.setUpdateTableInRealTime(true);
+		header.addMouseListener(tableModel.new ColumnListener(table));
+		header.setReorderingAllowed(true);
+
 		if(isForInsertionQueue) {
 			label = new JLabel(I18n.getMessage("thaw.common.insertions"));
 			label.setIcon(IconBox.insertions);
