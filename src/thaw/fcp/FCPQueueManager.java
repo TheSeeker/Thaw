@@ -381,7 +381,8 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 				return;
 
 			try {
-				if(queryManager.getConnection().isConnected())
+				if(queryManager.getConnection().isConnected()
+				   && !queryManager.getConnection().isWritingLocked())
 					schedule();
 			} catch(java.util.ConcurrentModificationException e) {
 				Logger.notice(this, "Ordonnancor: Collision !");
