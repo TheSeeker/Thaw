@@ -78,7 +78,7 @@ public class PluginManager {
 		Iterator pluginIt;
 		
 		try {
-			pluginIt = plugins.values().iterator();
+			pluginIt = (new Vector(plugins.values())).iterator();
 			
 			int progressJump = 50 / plugins.size();
 

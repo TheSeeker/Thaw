@@ -103,22 +103,12 @@ public class Hsqldb extends LibraryPlugin {
 	}
 
 
-	public boolean execute(String query) {
+	public boolean execute(String query) throws java.sql.SQLException {
 		boolean result;
 		
-		try {
-			Statement stmt = connection.createStatement();
-			
-			result = stmt.execute(query);
-			
-		}
+		Statement stmt = connection.createStatement();
 		
-		catch(Exception e){
-			Logger.warning(this, "Exception '"+e.toString()+"' while running the following query:");
-			Logger.warning(this, query);
-
-			return false;
-		}
+		result = stmt.execute(query);
 
 		return result;
 	}
