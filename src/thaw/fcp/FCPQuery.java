@@ -1,10 +1,5 @@
 package thaw.fcp;
 
-
-/**
- * This interface was designed for file query (insertions / downloads)
- * but it's used sometimes for other things.
- */
 public interface FCPQuery {
 
 	/**
@@ -15,7 +10,7 @@ public interface FCPQuery {
 	/**
 	 * Definitive stop. Transfer is considered as failed.
 	 * @return false if really it *cannot* stop the query.
-	 * @param queueManger QueueManager gives access to QueryManager.
+	 * @param queueManager QueueManager gives access to QueryManager.
 	 */
 	public boolean stop(FCPQueueManager queueManager);
 

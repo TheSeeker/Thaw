@@ -18,6 +18,7 @@ import thaw.fcp.*;
 /**
  * This plugin, after a given time, restart all/some the failed downloads (if maxDownloads >= 0, downloads to restart are choosen randomly).
  * A not too bad example to show how to make plugins.
+ * @deprecated When this plugin was created, MaxRetries was stupidly set to 0 instead of -1 => now this plugin is useless.
  */
 public class Restarter implements Observer, Runnable, Plugin {
 

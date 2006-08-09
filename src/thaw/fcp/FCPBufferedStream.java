@@ -71,7 +71,7 @@ public class FCPBufferedStream implements Runnable {
 	}
 
 	/**
-	 * @see write(byte[])
+	 * @see #write(byte[])
 	 */
 	public boolean write(String data) {
 		try {

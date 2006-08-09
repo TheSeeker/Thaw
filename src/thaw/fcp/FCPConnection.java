@@ -15,9 +15,9 @@ import thaw.core.Logger;
  * This object manages directly the socket attached to the node.
  * After being instanciated, you should commit it to the FCPQueryManager, and then
  * commit the FCPQueryManager to the FCPQueueManager.
- * Call observer when connected / disconnected.
+ * Call observer when connected / disconnected.<br/>
  * WARNING: This FCP implement don't guarantee that messages are sent in the same order than initally put
- *          if the lock on writting is not set !
+ *          if the lock on writting is not set !<br/>
  * TODO: Add functions socketToFile(long size, File file) / fileToSocket(File file)
  */
 public class FCPConnection extends Observable {
@@ -315,7 +315,7 @@ public class FCPConnection extends Observable {
 	}
 
 	/**
-	 * @see read(int, byte[])
+	 * @see #read(int, byte[])
 	 */
 	public int read(byte[] buf) {
 		return read(buf.length, buf);

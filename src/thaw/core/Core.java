@@ -258,7 +258,7 @@ public class Core implements Observer {
 	
 	/**
 	 * To call before initGraphics() !
-	 * @arg lAndF LookAndFeel name
+	 * @param lAndF LookAndFeel name
 	 */
 	public static void setLookAndFeel(String lAndF) {
 		lookAndFeel = lAndF;
@@ -349,7 +349,7 @@ public class Core implements Observer {
 	/**
 	 * End of the world.
 	 * @param force if true, doesn't check if FCPConnection.isWritting().
-	 * @see exit()
+	 * @see #exit()
 	 */
 	public void exit(boolean force) {
 		if(!force) {

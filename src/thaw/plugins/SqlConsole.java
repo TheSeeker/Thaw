@@ -13,6 +13,8 @@ import java.sql.ResultSetMetaData;
 
 import java.awt.Font;
 
+import thaw.plugins.index.TableCreator;
+
 import thaw.core.*;
 import thaw.fcp.*;
 
@@ -151,14 +153,33 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 				addToConsole("Ok\n");
 				return;
 			}
+			
+			ResultSet result;
 
-			ResultSet result = hsqldb.executeQuery(cmd);
+			if(!cmd.toLowerCase().equals("drop_tables"))
+				result = hsqldb.executeQuery(cmd);
+			else {
+				TableCreator.dropTables(hsqldb);
+				addToConsole("Ok\n");
+				return;
+			}
+				
 			
 			if(result == null) {
 				addToConsole("(null)\n");
 				return;
 			}
 			
+			try {
+				if(result.getFetchSize() == 0) {
+					addToConsole("(done)\n");
+					return;
+				}
+			} catch(java.sql.SQLException e) {
+				addToConsole("(SE)\n");
+				return;
+			}
+
 			java.sql.SQLWarning warning = result.getWarnings();
 
 			while(warning != null) {
