@@ -2,7 +2,6 @@ package thaw.core;
 
 /**
  * Define what methods a plugin must implements.
- * WARNING: Constructor is NEVER called.
  */
 public interface Plugin {
 
