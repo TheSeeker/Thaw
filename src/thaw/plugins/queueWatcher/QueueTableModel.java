@@ -199,6 +199,11 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 
 	public synchronized void addQuery(FCPTransferQuery query) {
+		if(queries.contains(query)) {
+			Logger.notice(this, "addQuery() : Already known");
+			return;
+		}
+
 		((Observable)query).addObserver(this);
 
 		queries.add(query);
@@ -283,23 +288,25 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 			reloadQueue();
 			return;
 		}
-
-		FCPTransferQuery query = (FCPTransferQuery)arg;
-
-		if(query.getQueryType() == 1 && isForInsertions)
-			return;
-
-		if(query.getQueryType() == 2 && !isForInsertions)
-			return;
-
-		if(queueManager.isInTheQueues(query)) { // then it's an adding
-			addQuery(query);
-			return;
-		}
-
-		if(queries.contains(query)) {
-			removeQuery(query);
-			return;
+		
+		if(o == queueManager) {
+			FCPTransferQuery query = (FCPTransferQuery)arg;
+			
+			if(query.getQueryType() == 1 && isForInsertions)
+				return;
+			
+			if(query.getQueryType() == 2 && !isForInsertions)
+				return;
+			
+			if(queueManager.isInTheQueues(query)) { // then it's an adding
+				addQuery(query);
+				return;
+			}
+			
+			if(queries.contains(query)) {
+				removeQuery(query);
+				return;
+			}
 		}
 
 		Logger.warning(this, "update(): Unknow change ?!");

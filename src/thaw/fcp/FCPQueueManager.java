@@ -8,6 +8,7 @@ import thaw.core.Logger;
 /**
  * Manage a running and a pending queue of FCPTransferQuery.
  * Please notice that runningQueue contains too finished queries.
+ * Notify when: a query is added and when a query change to one queue to another.
  */
 public class FCPQueueManager extends java.util.Observable implements Runnable, java.util.Observer {
 
@@ -123,15 +124,15 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 			Logger.notice(this, "Key was already in one of the queues : "+query.getFilename());
 			return false;
 		}
-
-		Logger.debug(this, "Adding query to the pending queue ...");
+		
+		Logger.notice(this, "Adding query to the pending queue ...");
 		
 		pendingQueries[query.getThawPriority()].add(query);
 
 		setChanged();
 		notifyObservers(query);
 
-		Logger.debug(this, "Adding done");
+		Logger.notice(this, "Adding done");
 		return true;
 	}
 
