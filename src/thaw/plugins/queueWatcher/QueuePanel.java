@@ -198,7 +198,8 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 			if(value == null)
 				return null;
 
-			
+			FCPTransferQuery query = model.getQuery(row);				
+
 			if(value instanceof Integer) {
 
 				Integer progress = (Integer)value;
@@ -209,7 +210,14 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 				if(progress.intValue() >= 0) {
 					bar.setValue(progress.intValue());
-					bar.setString(progress.toString() + "%");
+					
+					String toAdd = "%";
+
+					if(!query.isProgressionReliable()
+					   && query.getProgression() != 0)
+						toAdd = toAdd + " [*]";
+
+					bar.setString(progress.toString() + toAdd);
 				} else {
 					bar.setValue(100);
 					bar.setString(I18n.getMessage("thaw.common.failed"));
@@ -226,8 +234,6 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 			if(!isSelected) {
 	
-				FCPTransferQuery query = model.getQuery(row);
-				
 				if(query == null)
 					return null;
 

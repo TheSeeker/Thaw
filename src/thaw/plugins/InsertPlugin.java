@@ -62,18 +62,19 @@ public class InsertPlugin implements thaw.core.Plugin {
 
 	/**
 	 * Note: public key is found from private one.
-	 * @param keyType : 0 = CHK ; 1 = KSK ; 2 = SSK
-	 * @param rev  : ignored if key == CHK
-	 * @param name : ignored if key == CHK
-	 * @param privateKey : ignored if key == CHK/KSK ; can be null if it has to be generated
+	 * @param fileList File list, separated by ';'
+	 * @param keyType 0 = CHK ; 1 = KSK ; 2 = SSK
+	 * @param rev  ignored if key == CHK
+	 * @param name ignored if key == CHK
+	 * @param privateKey ignored if key == CHK/KSK ; can be null if it has to be generated
 	 * @param persistence 0 = Forever ; 1 = Until node reboot ; 2 = Until the app disconnect
 	 * @param mimeType null = autodetect
 	 */
 	public boolean insertFile(String fileList, int keyType,
-				       int rev, String name,
-				       String privateKey,
-				       int priority, boolean global,
-				       int persistence, String mimeType) {
+				  int rev, String name,
+				  String privateKey,
+				  int priority, boolean global,
+				  int persistence, String mimeType) {
 
 		FCPClientPut clientPut = null;
 		String[] files = fileList.split(";");
