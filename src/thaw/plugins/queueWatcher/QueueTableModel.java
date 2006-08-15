@@ -200,7 +200,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 	public synchronized void addQuery(FCPTransferQuery query) {
 		((Observable)query).addObserver(this);
-		
+
 		queries.add(query);
 
 		sortTable();
@@ -213,15 +213,15 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	public synchronized void removeQuery(FCPTransferQuery query) {
 		((Observable)query).deleteObserver(this);
 
+		sortTable();
+
 		int changedRow = queries.indexOf(query);
 		
 		queries.remove(query);
 
-		sortTable();
-
-		if(changedRow >= 0)
+		if(changedRow >= 0) {
 			notifyObservers(new TableModelEvent(this, changedRow, changedRow, TableModelEvent.ALL_COLUMNS, TableModelEvent.DELETE));
-		else
+		}else
 			notifyObservers();
 	}
 
@@ -298,8 +298,6 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		}
 
 		if(queries.contains(query)) {
-			Logger.notice(this, "REMOVE");
-
 			removeQuery(query);
 			return;
 		}
