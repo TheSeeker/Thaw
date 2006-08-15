@@ -76,9 +76,9 @@ public class TableCreator {
 		sendQuery(db,
 			  "CREATE CACHED TABLE files ("
 			  + "id INTEGER IDENTITY NOT NULL,"
-			  + "publicKey VARCHAR(350)," // key ~= 100 + filename == 255 max
-			  + "mime VARCHAR(50),"
-			  + "size BIGINT,"
+			  + "publicKey VARCHAR(350) NOT NULL," // key ~= 100 + filename == 255 max => 350
+			  + "mime VARCHAR(50) NULL,"
+			  + "size BIGINT NULL,"
 			  + "catParent INTEGER NULL,"
 			  + "indexParent INTEGER NULL,"
 			  + "PRIMARY KEY (id),"
@@ -88,13 +88,18 @@ public class TableCreator {
 		sendQuery(db,
 			  "CREATE CACHED TABLE links ("
 			  + "id INTEGER IDENTITY NOT NULL,"
-			  + "indexName VARCHAR(255),"
-			  + "publicKey VARCHAR(350)," // key ~= 100 + filename == 255 max
+			  + "indexName VARCHAR(255) NOT NULL,"
+			  + "publicKey VARCHAR(350) NOT NULL," // key ~= 100 + filename == 255 max
+			  + "mark INTEGER NOT NULL,"
+			  + "comment VARCHAR(512) NOT NULL,"
 			  + "catParent INTEGER NULL,"
 			  + "indexParent INTEGER NULL,"
+			  + "indexTarget INTEGER NULL,"
 			  + "PRIMARY KEY (id),"
 			  + "FOREIGN KEY (catParent) REFERENCES fileCategories (id),"
-			  + "FOREIGN KEY (indexParent) REFERENCES indexes (id))");
+			  + "FOREIGN KEY (indexParent) REFERENCES indexes (id),"
+			  + "FOREIGN KEY (indexTarget) REFERENCES indexes (id))");
+		
 
 		sendQuery(db,
 			  "CREATE CACHED TABLE metadataNames ("

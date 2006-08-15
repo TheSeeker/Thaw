@@ -32,6 +32,10 @@ public class IconBox {
 	public static ImageIcon indexBrowser;
 	public static ImageIcon minIndexBrowser;
 
+	public static ImageIcon addToIndexAction;
+	
+	public static ImageIcon insertAndAddToIndexAction;
+
 	public static ImageIcon settings;
 	public static ImageIcon minSettings;
 
@@ -102,6 +106,11 @@ public class IconBox {
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("edit-find.png"));
 			minIndexBrowser =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("min-edit-find.png"));
+
+			addToIndexAction =
+				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("folder.png"));
+			insertAndAddToIndexAction =
+				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("folder-new.png"));
 
 			reconnectAction =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("view-refresh.png"));

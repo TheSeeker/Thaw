@@ -249,6 +249,21 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 		return false;
 	}
 
+	/**
+	 * Compare only the refs.
+	 */
+	public boolean isInTheQueues(FCPTransferQuery query) {
+		if(runningQueries.contains(query))
+			return true;
+
+		for(int i = 0 ; i < pendingQueries.length ; i++) {
+			if(pendingQueries[i].contains(query))
+				return true;
+		}
+		
+		return false;
+	}
+
 
 	/**
 	 * Compare using the key.

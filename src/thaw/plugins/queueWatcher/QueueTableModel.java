@@ -34,11 +34,13 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	private boolean isSortedAsc = false;
 	private int sortedColumn = -1;
 	
+	private FCPQueueManager queueManager;
 
 
-	public QueueTableModel(boolean isForInsertions) {
+	public QueueTableModel(boolean isForInsertions, FCPQueueManager queueManager) {
 		super();
 
+		this.queueManager = queueManager;
 		this.isForInsertions = isForInsertions;
 
 		columnNames.add(I18n.getMessage("thaw.common.file"));
@@ -51,7 +53,13 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		columnNames.add(I18n.getMessage("thaw.common.progress"));
 
 		resetTable();
-
+		
+		if(queueManager != null) {
+			reloadQueue();
+			queueManager.addObserver(this);
+		} else {
+			Logger.warning(this, "Unable to connect to QueueManager. Is the connection established ?");
+		}
 	}
 	
 
@@ -146,6 +154,9 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		return false;
 	}
 
+	/**
+	 * Don't call notifyObservers !
+	 */
 	public synchronized void resetTable() {
 
 		if(queries != null) {
@@ -158,7 +169,33 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 		queries = new Vector();
 
-		notifyObservers();
+	}
+
+	public synchronized void reloadQueue() {
+		resetTable();
+		
+		addQueries(queueManager.getRunningQueue());
+				
+		Vector[] pendings = queueManager.getPendingQueues();
+		
+		for(int i = 0;i < pendings.length ; i++)
+			addQueries(pendings[i]);
+		
+	}
+
+	public synchronized void addQueries(Vector queries) {
+		for(Iterator it = queries.iterator();
+		    it.hasNext();) {
+
+			FCPTransferQuery query = (FCPTransferQuery)it.next();
+
+			if(query.getQueryType() == 1 && !isForInsertions)
+				addQuery(query);
+
+			if(query.getQueryType() == 2 && isForInsertions)
+				addQuery(query);
+
+		}
 	}
 
 	public synchronized void addQuery(FCPTransferQuery query) {
@@ -168,17 +205,24 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 		sortTable();
 
-		notifyObservers();
+		int changedRow = queries.indexOf(query);
+
+		notifyObservers(new TableModelEvent(this, changedRow, changedRow, TableModelEvent.ALL_COLUMNS, TableModelEvent.INSERT));
 	}
 
 	public synchronized void removeQuery(FCPTransferQuery query) {
 		((Observable)query).deleteObserver(this);
 
+		int changedRow = queries.indexOf(query);
+		
 		queries.remove(query);
 
 		sortTable();
 
-		notifyObservers();
+		if(changedRow >= 0)
+			notifyObservers(new TableModelEvent(this, changedRow, changedRow, TableModelEvent.ALL_COLUMNS, TableModelEvent.DELETE));
+		else
+			notifyObservers();
 	}
 
 
@@ -206,18 +250,62 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 
 	public void notifyObservers() {
+		TableModelEvent event = new TableModelEvent(this);
+
+		notifyObservers(event);
+	}
+
+	public void notifyObservers(int changedRow) {
+		TableModelEvent event = new TableModelEvent(this, changedRow);
+
+		notifyObservers(event);
+	}
+
+	public void notifyObservers(TableModelEvent event) {
 		TableModelListener[] listeners = getTableModelListeners();
 
-		/* TODO : Sort queries by progression */
-
 		for(int i = 0 ; i < listeners.length ; i++) {
-			listeners[i].tableChanged(new TableModelEvent(this));
+			listeners[i].tableChanged(event);
 		}
 	}
 
-	public void update(Observable o, Object arg) {
+	public synchronized void update(Observable o, Object arg) {
+		int i;
+
 		sortTable();
-		notifyObservers();
+
+		if( (i = queries.indexOf(o)) >= 0) {
+			notifyObservers(i);
+			return;
+		}
+
+		if(arg == null) {
+			reloadQueue();
+			return;
+		}
+
+		FCPTransferQuery query = (FCPTransferQuery)arg;
+
+		if(query.getQueryType() == 1 && isForInsertions)
+			return;
+
+		if(query.getQueryType() == 2 && !isForInsertions)
+			return;
+
+		if(queueManager.isInTheQueues(query)) { // then it's an adding
+			addQuery(query);
+			return;
+		}
+
+		if(queries.contains(query)) {
+			Logger.notice(this, "REMOVE");
+
+			removeQuery(query);
+			return;
+		}
+
+		Logger.warning(this, "update(): Unknow change ?!");
+		reloadQueue();		
 	}
 
 

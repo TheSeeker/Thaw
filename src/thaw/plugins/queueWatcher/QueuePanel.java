@@ -72,13 +72,13 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 	private boolean insertionQueue = false;
 
-	public QueuePanel(Core core, DetailPanel detailPanel, boolean isForInsertionQueue) {
+	public QueuePanel(Core core, DetailPanel detailPanel, FCPQueueManager queueManager, boolean isForInsertionQueue) {
 		insertionQueue = isForInsertionQueue;
 
 		this.core = core;
 		this.detailPanel = detailPanel;
 		
-		tableModel = new QueueTableModel(isForInsertionQueue);
+		tableModel = new QueueTableModel(isForInsertionQueue, queueManager);
 
 		table = new JTable(tableModel);
 
@@ -389,7 +389,6 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 					if(query.stop(core.getQueueManager())) {
 						core.getQueueManager().remove(query);
-						tableModel.removeQuery(query);
 					}
 				}
 

@@ -19,7 +19,7 @@ import thaw.plugins.queueWatcher.*;
 
 import thaw.fcp.*;
 
-public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeListener {
+public class QueueWatcher implements thaw.core.Plugin, PropertyChangeListener {
 	private Core core;
 
 	//private JPanel mainPanel;
@@ -51,8 +51,8 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 
 		detailPanel = new DetailPanel(core);
 
-		queuePanels[0] = new QueuePanel(core, detailPanel, false); /* download */
-		queuePanels[1] = new QueuePanel(core, detailPanel, true); /* upload */
+		queuePanels[0] = new QueuePanel(core, detailPanel, core.getQueueManager(), false); /* download */
+		queuePanels[1] = new QueuePanel(core, detailPanel, core.getQueueManager(), true); /* upload */
 
 		panel = new JPanel();
 
@@ -90,19 +90,19 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 		}
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"), 
-						    IconBox.minQueue,
+					    IconBox.minQueue,
 					    panelAdded);
 			
 		//if(core.getConnectionManager() != null && core.getConnectionManager().isConnected()) {
 		//	core.getConnectionManager().addObserver(this);
 		//}
 
-		if(core.getQueueManager() != null)
-		    core.getQueueManager().addObserver(this);
-		else {
-		    Logger.warning(this, "Unable to connect to QueueManager. Is the connection established ?");
-		    return false;
-		}
+		//if(core.getQueueManager() != null)
+		//    core.getQueueManager().addObserver(this);
+		//else {
+		//    Logger.warning(this, "Unable to connect to QueueManager. Is the connection established ?");
+		//    return false;
+		//}
 		    
 		dnd = new DragAndDropManager(core, queuePanels);
 
@@ -145,6 +145,7 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 
 	}
 
+	/*
 	public void update(Observable o, Object arg) {
 		if(o == core.getConnectionManager()) {
 			queuePanels[0].resetTable();
@@ -174,6 +175,7 @@ public class QueueWatcher implements thaw.core.Plugin, Observer, PropertyChangeL
 		}
 		
 	}
+	*/
 
 	public void propertyChange(PropertyChangeEvent evt) {
 

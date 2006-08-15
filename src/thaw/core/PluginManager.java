@@ -126,7 +126,8 @@ public class PluginManager {
 				try {
 					plugin.stop();
 				} catch(Exception e) {
-					Logger.error(this, "Unable to run the plugin '"+plugin.getClass().getName()+"'");
+					Logger.error(this, "Unable to stop the plugin '"+plugin.getClass().getName()+"', because: "+e.toString());
+					e.printStackTrace();
 				}
 
 

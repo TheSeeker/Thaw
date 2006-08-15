@@ -1,5 +1,8 @@
 package thaw.fcp;
 
+/**
+ *
+ */
 public interface FCPQuery {
 
 	/**

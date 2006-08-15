@@ -11,7 +11,7 @@ import thaw.core.Logger;
 
 /**
  * notify() only when progress has really changes.
- * TODO: Put the fetchLock on FCPConnection. Not here.
+ * TODO: Use streams instead of writing directly the file.
  */
 public class FCPClientGet extends Observable implements Observer, FCPTransferQuery {
 	private final static int MAX_RETRIES = -1;

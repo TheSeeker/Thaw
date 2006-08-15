@@ -73,6 +73,8 @@ public class Hsqldb extends LibraryPlugin {
 		
 		try {
 			connection.commit();
+			executeQuery("SHUTDOWN");
+
 			connection.close();
 		} catch(java.sql.SQLException e) {
 			Logger.error(this, "SQLException while closing connection !");
@@ -92,7 +94,6 @@ public class Hsqldb extends LibraryPlugin {
 
 
 	public ResultSet executeQuery(String query) throws java.sql.SQLException {
-
 		ResultSet results;
 		
 		Statement stmt = connection.createStatement();
@@ -102,14 +103,4 @@ public class Hsqldb extends LibraryPlugin {
 		return results;
 	}
 
-
-	public boolean execute(String query) throws java.sql.SQLException {
-		boolean result;
-		
-		Statement stmt = connection.createStatement();
-		
-		result = stmt.execute(query);
-
-		return result;
-	}
 }

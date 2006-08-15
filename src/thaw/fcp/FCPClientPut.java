@@ -12,6 +12,7 @@ import thaw.core.Logger;
 
 /**
  * Allow to insert a simple file.
+ * TODO: Use streams instead of reading directly the file.
  */
 public class FCPClientPut extends Observable implements FCPTransferQuery, Observer {
 	private FCPQueueManager queueManager = null;

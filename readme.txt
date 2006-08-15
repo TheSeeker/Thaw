@@ -1,7 +1,7 @@
 COPYRIGHT
 =========
 
-Thaw copyright is held by the Freenet project ( http://www.freenetproject.org/ ).
+Thaw copyright is held by Freenet Project Incorporated.
 Thaw is distributed under the GPLv2 license. You
 can find it in a file called "gpl.txt" and joined with every copy of
 Thaw.

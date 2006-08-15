@@ -154,11 +154,18 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 				return;
 			}
 			
+			java.sql.Statement st = hsqldb.getConnection().createStatement();
+
 			ResultSet result;
 
-			if(!cmd.toLowerCase().equals("drop_tables"))
-				result = hsqldb.executeQuery(cmd);
-			else {
+			if(!cmd.toLowerCase().equals("drop_tables")) {
+				if(st.execute(cmd))
+					result = st.getResultSet();
+				else {
+					addToConsole("Ok\n");
+					return;
+				}
+			} else {
 				TableCreator.dropTables(hsqldb);
 				addToConsole("Ok\n");
 				return;
@@ -170,13 +177,8 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 				return;
 			}
 			
-			try {
-				if(result.getFetchSize() == 0) {
-					addToConsole("(done)\n");
-					return;
-				}
-			} catch(java.sql.SQLException e) {
-				addToConsole("(SE)\n");
+			if(result.getFetchSize() == 0) {
+				addToConsole("(done)\n");
 				return;
 			}
 
