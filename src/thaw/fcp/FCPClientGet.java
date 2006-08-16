@@ -38,9 +38,11 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	private long fileSize;
 
 	private boolean running = false;
-	private boolean successful = false;
+	private boolean successful = true;
 	private boolean fatal = true;
 	private boolean isLockOwner = false;
+
+	private boolean alreadySaved = false;
 	
 
 	/**
@@ -80,9 +82,15 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		this.progress = progress;
 		this.status = status;
+		
+		if(status == null) {
+			Logger.warning(this, "status == null ?!");
+			status = "(null)";
+		}
+
 		this.identifier = id;
 
-		successful = false;
+		successful = true;
 		running = true;
 
 		if(progress < 100) {
@@ -194,31 +202,33 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			Logger.debug(this, "DataFound!");
 
 			if(!isFinished()) {
-				status = "Available";
-				fileSize = (new Long(message.getValue("DataLength"))).longValue();
-				
-				progress = 100;
-				successful = true;
-				
-				if(isPersistent()) {
-					if(destinationDir != null) {
-
-						if(!fileExists(destinationDir))
-							saveFileTo(destinationDir);
-						else
-							Logger.info(this, "File already existing. Not rewrited");
-						
-					} else {
-						Logger.info(this, "Don't know where to put file, so file not asked to the node");
+				if(!alreadySaved) {
+					alreadySaved = true;
+					
+					status = "Available";
+					fileSize = (new Long(message.getValue("DataLength"))).longValue();
+					
+					progress = 100;
+					running = false;
+					successful = true;
+					
+					if(isPersistent()) {
+						if(destinationDir != null) {
+							
+							if(!fileExists(destinationDir)) {
+								saveFileTo(destinationDir);
+							} else
+								Logger.info(this, "File already existing. Not rewrited");
+							
+						} else {
+							Logger.info(this, "Don't know where to put file, so file not asked to the node");
+						}
 					}
-				}
-
-
-				fromTheNodeProgress = 100;
-				progressReliable = true;
 				
-				setChanged();
-				notifyObservers();
+					
+					setChanged();
+					notifyObservers();
+				}
 			}
 
 			return;
@@ -252,6 +262,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			successful = false;
 			fatal = true;
 
+			setChanged();
+			notifyObservers();
+
 			if(message.getValue("Fatal") != null &&
 			   message.getValue("Fatal").equals("false")) {
 				fatal = false;
@@ -266,14 +279,14 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			queueManager.getQueryManager().deleteObserver(this);
 
-			setChanged();
-			notifyObservers();
 			
 			return;
 		}
 
 		if(message.getMessageName().equals("GetFailed")) {
 			Logger.debug(this, "GetFailed !");
+
+			Logger.warning(this, "==== GET FAILED ===\n"+message.toString());
 
 			if(!isRunning()) { /* Must be a "GetFailed: cancelled by caller", so we simply ignore */
 				Logger.info(this, "Cancellation confirmed.");
@@ -301,6 +314,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			    queueManager.getQueryManager().deleteObserver(this);
 			} else {
 			    status = "Retrying";
+			    running = true;
+			    successful = true;
+			    progress = 0;
 			    start(queueManager);
 			}
 
@@ -318,10 +334,10 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			if(message.getValue("Total") != null
 			   && message.getValue("Succeeded") != null) {
 				fileSize = ((new Long(message.getValue("Total"))).longValue())*BLOCK_SIZE;
-				long required = (new Long(message.getValue("Required"))).longValue();
+				long required = (new Long(message.getValue("Total"))).longValue();
 				long succeeded = (new Long(message.getValue("Succeeded"))).longValue();
 
-				progress = (int)((succeeded * 99) / required);
+				progress = (int) ((long)((succeeded * 98) / required));
 
 				status = "Fetching";
 
@@ -329,6 +345,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				   message.getValue("FinalizedTotal").equals("true")) {
 					progressReliable = true;
 				}
+
+				successful = true;
+				running = true;
 
 				setChanged();
 				notifyObservers();
@@ -342,6 +361,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			fileSize = message.getAmountOfDataWaiting();
 
+			running = true;
+			successful = true;
+			progress = 99;
 			status = "Writing to disk";
 			Logger.info(this, "Receiving file ...");
 
@@ -354,6 +376,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				status = "Available";
 			} else {
 				Logger.warning(this, "Unable to fetch correctly the file. This may create problems on socket");
+				successful = false;
+				status = "Error while receveing the file";
 			}
 			
 			Logger.info(this, "File received");
@@ -401,13 +425,19 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				Logger.warning(this, "UnlockWaiter.run() : Wtf ?");
 			}
 
+			try {
+				Thread.sleep((new java.util.Random()).nextInt(1500));
+			} catch(java.lang.InterruptedException e) {
+
+			}
+
 			while(true) {
 				if(!connection.isReadingLocked()
 				   && (!connection.isWritingLocked()))
 					break;
 
 				try {
-					Thread.sleep(200);
+					Thread.sleep(500);
 				} catch(java.lang.InterruptedException e) {
 
 				}
@@ -463,6 +493,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		Logger.info(this, "Waiting socket avaibility ...");
 		status = "Waiting socket avaibility ...";
+		progress = 99;
+		running = true;
 
 		setChanged();
 		notifyObservers();
@@ -480,7 +512,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		destinationDir = dir;
 
 		status = "Requesting file";
-
+		progress = 99;
+		running = true;
 		setChanged();
 		notifyObservers();
 
@@ -541,7 +574,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		long origSize = size;
 		long startTime = System.currentTimeMillis();
 
-		boolean success = true;
+		boolean writingSuccessful = true;
 
 		while(size > 0) {
 
@@ -559,7 +592,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			if(amount <= -1) {
 				Logger.error(this, "Socket closed, damn !");
 				status = "Read error";
-				success = false;
+				successful = false;
+				writingSuccessful = false;
 				break;
 			}
 
@@ -569,6 +603,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				} catch(java.io.IOException e) {
 					Logger.error(this, "Unable to write file on disk ... out of space ? : "+e.toString());
 					status = "Write error";
+					writingSuccessful = false;
+					successful = false;
 					return false;
 				}
 			}
@@ -591,13 +627,13 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			try {
 				fileWriter.close();
 				
-				if(!success)
+				if(!writingSuccessful)
 					newFile.delete();
 
 			} catch(java.io.IOException e) {
 				Logger.notice(this, "Unable to close correctly file on disk !? : "+e.toString());
 			}
-		}
+		}   
 
 		Logger.info(this, "File written");
 
@@ -644,6 +680,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		removeRequest();
 
 		progress = 0;
+		running = false;
 		successful = false;
 		status = "Delayed";
 
@@ -662,6 +699,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		}
 
 		progress = 100;
+		running = false;
 		successful = false;
 		fatal = true;
 		status = "Stopped";
@@ -721,6 +759,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	}
 
 	public boolean isProgressionReliable() {
+		if(progress == 0 || progress >= 99)
+			return true;
+
 		return progressReliable;
 	}
 
@@ -825,6 +866,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		if(persistence == 2 && !isFinished()) {
 			progress = 0;
+			running = false;
 			status = "Waiting";
 		}
 		

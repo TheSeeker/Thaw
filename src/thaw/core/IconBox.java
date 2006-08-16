@@ -36,6 +36,8 @@ public class IconBox {
 	
 	public static ImageIcon insertAndAddToIndexAction;
 
+	public static ImageIcon clearAction;
+
 	public static ImageIcon settings;
 	public static ImageIcon minSettings;
 
@@ -89,6 +91,9 @@ public class IconBox {
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("go-first.png"));
 			minDownloads =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("min-go-first.png"));
+
+			clearAction =
+				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("edit-clear.png"));
 
 			settings =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("preferences-system.png"));

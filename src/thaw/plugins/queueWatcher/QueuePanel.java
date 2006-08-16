@@ -55,6 +55,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	private DetailPanel detailPanel;
 
 	private JPopupMenu rightClickMenu;
+	private JMenuItem clearFinishedItem;
 	private JMenuItem removeItem;
 	private JMenuItem cancelItem;
 	private JMenuItem delayItem;
@@ -72,13 +73,15 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 	private boolean insertionQueue = false;
 
-	public QueuePanel(Core core, DetailPanel detailPanel, FCPQueueManager queueManager, boolean isForInsertionQueue) {
+	public QueuePanel(Core core, DetailPanel detailPanel, 
+			  boolean isForInsertionQueue) {
+
 		insertionQueue = isForInsertionQueue;
 
 		this.core = core;
 		this.detailPanel = detailPanel;
 		
-		tableModel = new QueueTableModel(isForInsertionQueue, queueManager);
+		tableModel = new QueueTableModel(isForInsertionQueue, core.getQueueManager());
 
 		table = new JTable(tableModel);
 
@@ -111,6 +114,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		tableModel.addTableModelListener(table);
 		
 		rightClickMenu = new JPopupMenu();
+		clearFinishedItem = new JMenuItem(I18n.getMessage("thaw.common.clearFinished"));
 		removeItem = new JMenuItem(I18n.getMessage("thaw.common.removeFromTheList"));
 		cancelItem = new JMenuItem(I18n.getMessage("thaw.common.cancel"));
 		delayItem = new JMenuItem(I18n.getMessage("thaw.common.delay"));
@@ -130,7 +134,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		unknowPriority = new JRadioButtonMenuItem("Coin");
 		priorityGroup.add(unknowPriority);
 
-
+		rightClickMenu.add(clearFinishedItem);
 		rightClickMenu.add(removeItem);
 
 		if( Integer.parseInt(core.getConfig().getValue("maxSimultaneousDownloads")) >= 0
@@ -151,6 +155,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 			rightClickMenu.add(priorityMenu);
 		}
 
+		clearFinishedItem.addActionListener(this);
 		removeItem.addActionListener(this);
 		cancelItem.addActionListener(this);
 		copyKeysItem.addActionListener(this);
@@ -213,8 +218,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 					
 					String toAdd = "%";
 
-					if(!query.isProgressionReliable()
-					   && query.getProgression() != 0)
+					if(!query.isProgressionReliable())
 						toAdd = toAdd + " [*]";
 
 					bar.setString(progress.toString() + toAdd);
@@ -354,6 +358,11 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 			String keys = "";
 			File dir = null;
 
+			if(e.getSource() == clearFinishedItem) {
+				removeAllFinishedTransfers();
+				return;
+			}
+
 			if(e.getSource() == downloadItem) {
 				FileChooser fileChooser = new FileChooser();
 				fileChooser.setTitle(I18n.getMessage("thaw.common.downloadLocally"));
@@ -450,6 +459,20 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 			/* we dont care */
 		}
 		
+	}
+
+	public void removeAllFinishedTransfers() {
+		Vector queries = tableModel.getQueries();
+
+		for(Iterator it = queries.iterator();
+		    it.hasNext(); ) {
+			FCPTransferQuery query = (FCPTransferQuery)it.next();
+			if(query.isFinished()) {
+				if(query.stop(core.getQueueManager())) {
+					core.getQueueManager().remove(query);
+				}
+			}
+		}
 	}
 
 	/**

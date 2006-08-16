@@ -51,8 +51,8 @@ public class QueueWatcher implements thaw.core.Plugin, PropertyChangeListener {
 
 		detailPanel = new DetailPanel(core);
 
-		queuePanels[0] = new QueuePanel(core, detailPanel, core.getQueueManager(), false); /* download */
-		queuePanels[1] = new QueuePanel(core, detailPanel, core.getQueueManager(), true); /* upload */
+		queuePanels[0] = new QueuePanel(core, detailPanel, false); /* download */
+		queuePanels[1] = new QueuePanel(core, detailPanel, true); /* upload */
 
 		panel = new JPanel();
 
