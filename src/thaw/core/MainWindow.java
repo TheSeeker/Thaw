@@ -120,7 +120,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 		helpMenu.add(aboutHelpMenuItem);
 
-		menuBar.add(Box.createHorizontalGlue());
+		//menuBar.add(Box.createHorizontalGlue());
 		menuBar.add(helpMenu);
 
 		// TOOLBAR
