@@ -318,7 +318,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			if(message.getValue("Total") != null
 			   && message.getValue("Succeeded") != null) {
 				fileSize = ((new Long(message.getValue("Total"))).longValue())*BLOCK_SIZE;
-				long required = (new Long(message.getValue("Total"))).longValue();
+				long required = (new Long(message.getValue("Required"))).longValue();
 				long succeeded = (new Long(message.getValue("Succeeded"))).longValue();
 
 				progress = (int)((succeeded * 99) / required);
@@ -541,6 +541,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		long origSize = size;
 		long startTime = System.currentTimeMillis();
 
+		boolean success = true;
+
 		while(size > 0) {
 
 			int packet = PACKET_SIZE;
@@ -555,8 +557,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			amount = connection.read(packet, read);
 
 			if(amount <= -1) {
-				Logger.error(this, "Socket closed ?!");
+				Logger.error(this, "Socket closed, damn !");
 				status = "Read error";
+				success = false;
 				break;
 			}
 
@@ -573,6 +576,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			size = size - amount;
 			
 			if( System.currentTimeMillis() >= (startTime+3000)) {
+				status = "Writing to disk";
 				fromTheNodeProgress = (int) (((origSize-size) * 100) / origSize);
 				setChanged();
 				notifyObservers();
@@ -586,6 +590,10 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		if(reallyWrite) {
 			try {
 				fileWriter.close();
+				
+				if(!success)
+					newFile.delete();
+
 			} catch(java.io.IOException e) {
 				Logger.notice(this, "Unable to close correctly file on disk !? : "+e.toString());
 			}

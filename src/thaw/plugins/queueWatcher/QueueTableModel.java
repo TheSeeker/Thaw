@@ -172,15 +172,19 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 
 	public synchronized void reloadQueue() {
-		resetTable();
-		
-		addQueries(queueManager.getRunningQueue());
-				
-		Vector[] pendings = queueManager.getPendingQueues();
-		
-		for(int i = 0;i < pendings.length ; i++)
-			addQueries(pendings[i]);
-		
+		try {
+			resetTable();
+
+			addQueries(queueManager.getRunningQueue());
+			
+			Vector[] pendings = queueManager.getPendingQueues();
+			
+			for(int i = 0;i < pendings.length ; i++)
+				addQueries(pendings[i]);
+		} catch(java.util.ConcurrentModificationException e) {
+			Logger.warning(this, "reloadQueue: Collision !");
+			reloadQueue();
+		}		
 	}
 
 	public synchronized void addQueries(Vector queries) {

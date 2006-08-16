@@ -237,6 +237,7 @@ public class FCPConnection extends Observable {
 			return bufferedOut.write(data);
 		else {
 			Logger.notice(this, "rawWrite(), bufferedOut == null ? Socket closed ?");
+			disconnect();
 			return false;
 		}
 	}
@@ -324,21 +325,27 @@ public class FCPConnection extends Observable {
 
 	/**
 	 * @param lng Obsolete.
+	 * @return -1 Disconnection.
 	 */
 	public synchronized int read(int lng, byte[] buf) {
 		int rdBytes = 0;
 		try {
 			rdBytes = reader.read(buf);
 
+			if(rdBytes < 0) {
+				Logger.error(this, "Error while reading on the socket => disconnection");
+				disconnect();
+			}
+				
 			rawBytesWaiting = rawBytesWaiting - rdBytes;
 
 			//Logger.verbose(this, "Remaining: "+rawBytesWaiting);
 
 			return rdBytes;
 		} catch(java.io.IOException e) {
-			Logger.error(this, "IOException while reading raw bytes on socket, will probably cause troubles");
+			Logger.error(this, "IOException while reading raw bytes on socket => disconnection");
 			Logger.error(this, e.getMessage() + ":" +e.getCause());
-			System.exit(3);
+			disconnect();
 			return -2; /* -1 can mean eof */
 		}
 
