@@ -293,7 +293,7 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 
 	public String getKey() {
 		if(modifiable)
-			return publicKey.replace("SSK@", "USK@")+realName+"/"+revision+"/";
+			return publicKey.replaceFirst("SSK@", "USK@")+realName+"/"+revision+"/";
 		else
 			return publicKey;
 	}
