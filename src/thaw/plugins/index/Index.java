@@ -362,6 +362,9 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 	////// FILE LIST ////////
 
 	public void loadLists(String columnToSort, boolean asc) {
+		if(fileList != null)
+			return;
+
 		fileList = new Vector();
 
 		try {
@@ -416,7 +419,15 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 	}
 
 	public void unloadLists() {
-		//updateFileList();
+		for(Iterator it = fileList.iterator();
+		    it.hasNext(); ) {
+			thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+			if(file.getTransfer() != null && !file.getTransfer().isFinished()) {
+				Logger.info(this, "Transfer still runinng. No unloading");
+				return;
+			}
+		}
+
 		fileList = null;
 	}
 

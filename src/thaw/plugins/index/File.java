@@ -67,7 +67,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 
 		deduceFilenameFromKey();
 		
-		parent = parent;
+		this.parent = parent;
 	}
 
 	public File(Hsqldb db, Element fileElement, Index parent) {
