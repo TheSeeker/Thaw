@@ -90,7 +90,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 	
 
-	private String getPrintableSize(long size) {
+	public static String getPrintableSize(long size) {
 		if(size == 0)
 			return I18n.getMessage("thaw.common.unknown");
 
@@ -271,11 +271,15 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 
 	public void notifyObservers(TableModelEvent event) {
+		fireTableChanged(event);
+
+		/*
 		TableModelListener[] listeners = getTableModelListeners();
 
 		for(int i = 0 ; i < listeners.length ; i++) {
 			listeners[i].tableChanged(event);
 		}
+		*/
 	}
 
 	public synchronized void update(Observable o, Object arg) {

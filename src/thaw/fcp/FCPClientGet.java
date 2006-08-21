@@ -129,16 +129,21 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		this.fileSize = 0;
 		this.attempt = 0;
 		
+		status = "Waiting";
+
 		if(key.indexOf('/') == key.length()-1) {
 			filename = "index.html";
 		} else {
-			String cutcut[] = key.split("/");			
-			filename = cutcut[cutcut.length-1];
+			String cutcut[] = key.split("/");
+
+			if(!key.startsWith("USK@")) {
+				filename = cutcut[cutcut.length-1];
+			} else {
+				filename = cutcut[cutcut.length-2];
+			}
 		}
 
 		Logger.debug(this, "Query for getting "+key+" created");
-
-		status = "Waiting";
 
 	}
 

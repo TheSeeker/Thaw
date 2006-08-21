@@ -25,6 +25,14 @@ public class DefaultMIMETypes {
 	
 	/** Primary extension by MIME type number. */
 	private static HashMap primaryExtensionByMimeNumber = new HashMap();
+
+	/**
+	 * Just to be able to use thaw.core.Logger.
+	 */
+	public DefaultMIMETypes() {
+		
+	}
+
 	
 	/**
 	 * Add a MIME type, without any extensions.
@@ -62,7 +70,7 @@ public class DefaultMIMETypes {
 				if(mimeTypesByExtension.containsKey(ext)) {
 					// No big deal
 					Short s = (Short) mimeTypesByExtension.get(ext);
-					Logger.info(DefaultMIMETypes.class, "Extension "+ext+" assigned to "+byNumber(s.shortValue())+" in preference to "+number+":"+type);
+					Logger.notice(new DefaultMIMETypes(), "Extension "+ext+" assigned to "+byNumber(s.shortValue())+" in preference to "+number+":"+type);
 				} else {
 					// If only one, make it primary
 					if((outExtension == null) && (extensions.length == 1))

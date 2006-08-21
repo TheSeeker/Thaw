@@ -28,6 +28,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	private int priority = -1;
 	private boolean global = true;
 	private int persistence = 2;
+	private boolean getCHKOnly = false;
 
 	private int progress = 0;
 	private int toTheNodeProgress = 0;
@@ -59,7 +60,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	}
 
 	/**
-	 * To start a new insert.
+	 * To start a new insertion.
 	 * @param keyType : 0 = CHK ; 1 = KSK ; 2 = SSK
 	 * @param rev  : ignored if key == CHK
 	 * @param name : ignored if key == CHK
@@ -70,6 +71,19 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			    int rev, String name,
 			    String privateKey, int priority,
 			    boolean global, int persistence) {
+		this(file, keyType, rev, name, privateKey, priority, global, persistence,
+		     false);
+	}
+
+	/**
+	 * To start anew insertion.
+	 */
+	public FCPClientPut(File file, int keyType,
+			    int rev, String name,
+			    String privateKey, int priority,
+			    boolean global, int persistence,
+			    boolean getCHKOnly) {
+		this.getCHKOnly = getCHKOnly;
 		this.localFile = file;
 		this.name = file.getName();
 		fileSize = file.length();
@@ -338,16 +352,23 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		}
 
 		msg.setValue("Identifier", identifier);
-		msg.setValue("Verbosity", "512");
 		msg.setValue("MaxRetries", "-1");
 		msg.setValue("PriorityClass", Integer.toString(priority));
-		msg.setValue("GetCHKOnly", "false");
+
+		if(getCHKOnly) {
+			msg.setValue("GetCHKOnly", "true");
+			msg.setValue("Verbosity", "0");
+		} else {
+			msg.setValue("GetCHKOnly", "false");
+			msg.setValue("Verbosity", "512");
+		}
+
 		if(global)
 			msg.setValue("Global", "true");
 		else
 			msg.setValue("Global", "false");
 		msg.setValue("ClientToken", localFile.getPath());
-		
+
 		switch(persistence) {
 		case(0): msg.setValue("Persistence", "forever"); break;
 		case(1): msg.setValue("Persistence", "reboot"); break;
@@ -472,7 +493,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	public boolean stop(FCPQueueManager queueManager) {
 		if(removeRequest()) {
 			status = "Stopped";
-			finished = false;
+			finished = true;
 			successful = false;
 			fatal= true;
 			running = false;
@@ -511,11 +532,32 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				finished = false;
 				successful = false;
 
-				status = "Inserting";
-
-				publicKey = msg.getValue("URI");
+				if(keyType == 0)
+					publicKey = msg.getValue("URI") + "/" + getFilename();
+				else
+					publicKey = msg.getValue("URI");
 				publicKey = publicKey.replaceAll("freenet:", "");
 
+				Logger.info(this, "URIGenerated: "+publicKey);
+				
+				if(getCHKOnly) {
+					status = "CHK";
+
+					progress = 100;
+					toTheNodeProgress = 100;
+					running = false;
+					finished = true;
+					successful = true;
+					fatal = false;
+					sending = false;
+
+					setChanged();
+					notifyObservers();
+					queueManager.getQueryManager().deleteObserver(this);
+					return;
+				}
+				
+				status = "Inserting";
 				
 				if(keyType == 0)
 					publicKey = publicKey + "/" +name;
@@ -543,8 +585,10 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 					publicKey = publicKey + "/" + name;
 				if(keyType == 1)
 					publicKey = "KSK@"+name+"-" + Integer.toString(rev);
+				//if(keyType == 2)
+				//	publicKey = publicKey + "/" + name + "-" + Integer.toString(rev);
 				if(keyType == 2)
-					publicKey = publicKey + "/" + name + "-" + Integer.toString(rev);
+					publicKey = publicKey;
 				
 
 				status = "Finished";
@@ -904,7 +948,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			privateKey = null;
 
 		publicKey = (String)parameters.get("publicKey");
-		if(privateKey == null || publicKey.equals(""))
+		if(privateKey == null || publicKey == null || publicKey.equals(""))
 			publicKey = null;
 
 		priority = Integer.parseInt((String)parameters.get("priority"));

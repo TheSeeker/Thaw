@@ -45,6 +45,7 @@ public class FCPMessage {
 			
 
 		setMessageName(lines[i]);
+		Logger.info(this, "Message (Node >> Thaw): "+lines[i]);
 
 		
 		for(i++; i < lines.length ; i++) {
@@ -56,7 +57,7 @@ public class FCPMessage {
 			String[] affectation = lines[i].split("=");
 			
 			if(affectation.length < 2) {
-				Logger.notice(this, "Malformed message");
+				Logger.warning(this, "Malformed message");
 				continue;
 			}
 
@@ -83,8 +84,6 @@ public class FCPMessage {
 		if(name.indexOf("\n")>=0) {
 			Logger.notice(this, "Name shouldn't contain '\n'");
 		}
-
-		Logger.notice(this, "Message: "+name);
 
 		messageName = name;
 	}
@@ -132,6 +131,8 @@ public class FCPMessage {
 	 */
 	public String toString() {
 		String result = "";
+
+		Logger.info(this, "Message (Node << Thaw): "+getMessageName());
 
 		result = result + getMessageName() + "\n";
 

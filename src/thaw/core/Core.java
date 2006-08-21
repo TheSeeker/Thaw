@@ -411,6 +411,8 @@ public class Core implements Observer {
 			warningDialog.setModal(false);
 			warningDialog.setSize(500, 40);
 
+			warningDialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+
 			JPanel warningPanel = new JPanel();
 
 			JLabel warningLabel = new JLabel(I18n.getMessage("thaw.warning.autoreconnecting"),

@@ -46,6 +46,7 @@ public class TableCreator {
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "name VARCHAR(255) NOT NULL,"
 			  + "positionInTree INTEGER NOT NULL,"
+			  + "modifiableIndexes BOOLEAN NOT NULL,"
 			  + "parent INTEGER NULL,"
 			  + "PRIMARY KEY (id),"
 			  + "FOREIGN KEY (parent) REFERENCES indexCategories (id))");
@@ -58,45 +59,32 @@ public class TableCreator {
 			  + "publicKey VARCHAR(255) NOT NULL,"
 			  + "privateKey VARCHAR(255) NULL,"
 			  + "positionInTree INTEGER NOT NULL,"
+			  + "revision INTEGER NOT NULL,"
 			  + "parent INTEGER NULL,"			  
 			  + "PRIMARY KEY (id),"
 			  + "FOREIGN KEY (parent) REFERENCES indexCategories (id))");
 		
 		sendQuery(db,
-			  "CREATE CACHED TABLE fileCategories ("
-			  + "id INTEGER IDENTITY NOT NULL,"
-			  + "name VARCHAR(255) NOT NULL,"
-			  + "positionInTree INTEGER NULL," /* can be null if the user doesn't own the index */
-			  + "catParent INTEGER NULL,"
-			  + "indexParent INTEGER NULL,"
-			  + "PRIMARY KEY (id),"
-			  + "FOREIGN KEY (catParent) REFERENCES fileCategories (id),"
-			  + "FOREIGN KEY (indexParent) REFERENCES indexes (id))");
-
-		sendQuery(db,
 			  "CREATE CACHED TABLE files ("
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "publicKey VARCHAR(350) NOT NULL," // key ~= 100 + filename == 255 max => 350
+			  + "localPath VARCHAR(500) NULL,"
 			  + "mime VARCHAR(50) NULL,"
-			  + "size BIGINT NULL,"
-			  + "catParent INTEGER NULL,"
-			  + "indexParent INTEGER NULL,"
+			  + "size BIGINT NOT NULL,"
+			  + "category VARCHAR(255) NULL,"
+			  + "indexParent INTEGER NOT NULL,"
 			  + "PRIMARY KEY (id),"
-			  + "FOREIGN KEY (catParent) REFERENCES fileCategories (id),"
 			  + "FOREIGN KEY (indexParent) REFERENCES indexes (id))");
 
 		sendQuery(db,
 			  "CREATE CACHED TABLE links ("
-			  + "id INTEGER IDENTITY NOT NULL,"
-			  + "indexName VARCHAR(255) NOT NULL,"
+			  + "id INTEGER IDENTIFY NOT NULL,"
 			  + "publicKey VARCHAR(350) NOT NULL," // key ~= 100 + filename == 255 max
 			  + "mark INTEGER NOT NULL,"
 			  + "comment VARCHAR(512) NOT NULL,"
-			  + "catParent INTEGER NULL,"
-			  + "indexParent INTEGER NULL,"
+			  + "indexParent INTEGER NOT NULL,"
 			  + "indexTarget INTEGER NULL,"
 			  + "PRIMARY KEY (id),"
-			  + "FOREIGN KEY (catParent) REFERENCES fileCategories (id),"
 			  + "FOREIGN KEY (indexParent) REFERENCES indexes (id),"
 			  + "FOREIGN KEY (indexTarget) REFERENCES indexes (id))");
 		
@@ -126,7 +114,6 @@ public class TableCreator {
 		sendQuery(db, "DROP TABLE files");
 		sendQuery(db, "DROP TABLE links");
 		
-		sendQuery(db, "DROP TABLE fileCategories");
 		sendQuery(db, "DROP TABLE indexes");
 		sendQuery(db, "DROP TABLE indexCategories");				
 	}

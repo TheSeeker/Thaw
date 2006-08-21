@@ -104,17 +104,17 @@ public class QueueKeeper {
 		try {
 			xmlBuilder = xmlFactory.newDocumentBuilder();
 		} catch(javax.xml.parsers.ParserConfigurationException e) {
-			Logger.warning(new QueueKeeper(), "Unable to load queue because: "+e);
+			Logger.warning(new QueueKeeper(), "Unable to load queue because: "+e.toString());
 			return false;
 		}
 		
 		try {
 			xmlDoc = xmlBuilder.parse(file);
 		} catch(org.xml.sax.SAXException e) {
-			Logger.warning(new QueueKeeper(), "Unable to load queue because: "+e);
+			Logger.warning(new QueueKeeper(), "Unable to load queue because: "+e.toString());
 			return false;
 		} catch(java.io.IOException e) {
-			Logger.warning(new QueueKeeper(), "Unable to load queue because: "+e);
+			Logger.warning(new QueueKeeper(), "Unable to load queue because: "+e.toString());
 			return false;
 		}
 
@@ -150,6 +150,9 @@ public class QueueKeeper {
 	
 
 	private static Element saveQuery(FCPTransferQuery query, Document xmlDoc) {
+		if(!query.isPersistent())
+			return null;
+
 		if(query.isPersistent() && (query.isRunning() || query.isFinished()))
 			return null;
 

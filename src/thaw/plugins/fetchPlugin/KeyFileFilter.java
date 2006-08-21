@@ -44,7 +44,7 @@ public class KeyFileFilter {
 			String line = null;
 
 			while((line = in.readLine()) != null) {
-				String[] pieces = line.split("[^-\\?.a-zA-Z0-9,~%@/'_]");
+				String[] pieces = line.split("[^- \\?.a-zA-Z0-9,~%@/'_]");
 				
 				for(int i = 0 ; i < pieces.length ; i++) {
 					if(pieces[i].matches(".{3}@.*,.*"))

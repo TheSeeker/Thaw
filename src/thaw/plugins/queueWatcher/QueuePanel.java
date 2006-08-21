@@ -496,25 +496,18 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		}
 	}
 
-	public void mouseEntered(MouseEvent e) {
+	public void mouseEntered(MouseEvent e) { }
 
-	}
+	public void mouseExited(MouseEvent e) { }
 
-	public void mouseExited(MouseEvent e) {
+	public void mousePressed(MouseEvent e) { }
 
-	}
-
-	public void mousePressed(MouseEvent e) {
-
-	}
-
-	public void mouseReleased(MouseEvent e) {
-
-	}
+	public void mouseReleased(MouseEvent e) { }
 
 	public void keyPressed(KeyEvent e) { }
 
 	public void keyReleased(KeyEvent e) { refreshDetailPanel(); }
+
 	public void keyTyped(KeyEvent e) { }
 }
 
