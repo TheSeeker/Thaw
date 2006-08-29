@@ -55,6 +55,7 @@ public class PluginConfigPanel implements Observer, ActionListener {
 		// List is leave empty until windows is displayed (see update())
 		
 		pluginToAdd = new JTextField("", 30);
+		pluginToAdd.addActionListener(this);
 		
 		buttonPanel = new JPanel();
 		
@@ -125,7 +126,7 @@ public class PluginConfigPanel implements Observer, ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		if(e.getSource() == addButton) {
+		if(e.getSource() == addButton || e.getSource() == pluginToAdd) {
 			if(core.getPluginManager().loadPlugin(pluginToAdd.getText())
 			   && core.getPluginManager().runPlugin(pluginToAdd.getText())) {
 

@@ -24,25 +24,28 @@ public class SplashScreen {
 	}
 
 	public void display() {
+		JPanel panel = new JPanel();
 		splashScreen = new JDialog();
 
 		splashScreen.setUndecorated(true);
 		splashScreen.setResizable(false);
-		splashScreen.getContentPane().setLayout(new BorderLayout(10, 10));
+		
+		panel.setLayout(new BorderLayout(10, 10));
 		
 
 		JLabel thawLabel = new JLabel("   Thaw");
+		
 		thawLabel.setFont(new Font("Dialog", Font.BOLD, 30));
 
-		splashScreen.getContentPane().add(thawLabel, BorderLayout.CENTER);
+		panel.add(thawLabel, BorderLayout.CENTER);
 
 		progressBar = new JProgressBar(0, 100);
 		progressBar.setStringPainted(true);
 		progressBar.setString("Wake up Neo ...");
 
-		splashScreen.getContentPane().add(progressBar, BorderLayout.SOUTH);
+		panel.add(progressBar, BorderLayout.SOUTH);
 
-		splashScreen.pack();
+		splashScreen.getContentPane().add(panel);
 
 		splashScreen.setSize(SIZE_X, SIZE_Y);
 
@@ -56,7 +59,6 @@ public class SplashScreen {
 
 
 		splashScreen.setVisible(true);
-		splashScreen.pack();
 
 		splashScreen.setSize(SIZE_X, SIZE_Y);
 

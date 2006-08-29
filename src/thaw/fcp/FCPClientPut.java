@@ -357,11 +357,12 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 		if(getCHKOnly) {
 			msg.setValue("GetCHKOnly", "true");
-			msg.setValue("Verbosity", "0");
+			//msg.setValue("Verbosity", "0");
 		} else {
 			msg.setValue("GetCHKOnly", "false");
-			msg.setValue("Verbosity", "512");
+			//msg.setValue("Verbosity", "512");
 		}
+		msg.setValue("Verbosity", "512");
 
 		if(global)
 			msg.setValue("Global", "true");
