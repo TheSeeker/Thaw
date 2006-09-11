@@ -313,7 +313,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 		toTheNodeProgress= 0;
 
-		status = "Waiting socket availability";
+		status = "Waiting for socket availability";
 		
 		Logger.info(this, "Another file is being uploaded ... waiting ...");
 		
