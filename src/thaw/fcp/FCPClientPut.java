@@ -400,7 +400,10 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			progress = 0;
 			running = true;
 
-			status = "Inserting";
+			if (!getCHKOnly)
+				status = "Inserting";
+			else
+				status = "Computing";
 			
 			setChanged();
 			notifyObservers();
@@ -533,10 +536,8 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				finished = false;
 				successful = false;
 
-				if(keyType == 0)
-					publicKey = msg.getValue("URI") + "/" + getFilename();
-				else
-					publicKey = msg.getValue("URI");
+				publicKey = msg.getValue("URI");
+
 				publicKey = publicKey.replaceAll("freenet:", "");
 
 				Logger.info(this, "URIGenerated: "+publicKey);
@@ -707,7 +708,10 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 					//if(fileSize == 0)
 					//	fileSize = BLOCK_SIZE * required; // NOT RELIABLE
 
-					status = "Inserting";
+					if (!getCHKOnly)
+						status = "Inserting";
+					else
+						status = "Computing";
 					
 					setChanged();
 					notifyObservers();
@@ -830,7 +834,6 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	 * @return public key
 	 */
 	public String getFileKey() {
-
 		return publicKey;
 	}
 
@@ -844,7 +847,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		if(keyType == 0 && publicKey != null)
 			key = publicKey;
 		if(keyType == 0 && publicKey == null)
-			key = "CHK@coinCoin/"+name;
+			key = "CHK@";
 		if(keyType == 1)
 			key = "KSK@" + name + "-"+ Integer.toString(rev);
 		if(keyType == 2)
