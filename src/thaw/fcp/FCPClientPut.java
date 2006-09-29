@@ -535,7 +535,8 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			   || !msg.getValue("Identifier").equals(identifier))
 				return;
 
-			if(msg.getMessageName().equals("URIGenerated")) {
+			if(msg.getMessageName().equals("URIGenerated")
+			   || msg.getMessageName().equals("PutFetchable")) {
 				running = true;
 				finished = false;
 				successful = false;
@@ -544,7 +545,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 				publicKey = publicKey.replaceAll("freenet:", "");
 
-				Logger.info(this, "URIGenerated: "+publicKey);
+				Logger.info(this, msg.getMessageName()+": "+publicKey);
 				
 				if(getCHKOnly) {
 					status = "CHK";
