@@ -123,7 +123,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	 */
 	public FCPClientPut(String identifier, String publicKey,
 			    int priority, int persistence, boolean global,
-			    String filePath, String status, int progress,
+			    String filePath, String fileName, String status, int progress,
 			    long fileSize, FCPQueueManager queueManager) {
 		
 
@@ -175,7 +175,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			}
 
 
-			if(this.name.equals("null")) {
+			if(this.name.equals("null") || this.name.equals("CHK@")) {
 				Logger.warning(this, "The node returns \"null\" as filename. Using id !");
 				Logger.warning(this, "( URI="+publicKey +" )");
 				Logger.warning(this, "( Identifier="+identifier+" )");
@@ -194,9 +194,11 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				
 
 			}
-			
-			
 
+		}
+
+		if (fileName != null) { /* We want to force the filename */ /* See PersistentPut.TargetFilename */
+			this.name = fileName;
 		}
 		
 		this.publicKey = null;

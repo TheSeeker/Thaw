@@ -94,10 +94,10 @@ public class Logger {
 	 * As it. Similar to verbose()
 	 */
 	public static void asIt(Object o, String msg) {
-		//if(LOG_LEVEL >= 5) {
+		if(LOG_LEVEL >= 5) {
 			System.out.println(msg);
 			notifyLogListeners(msg);
-			//}
+		}
 	}
 
 

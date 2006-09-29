@@ -114,7 +114,7 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 			FCPClientPut clientPut = new FCPClientPut(msg.getValue("Identifier"),
 								  msg.getValue("URI"), // key
 								  priority, persistence, global,
-								  filePath,
+								  filePath, msg.getValue("TargetFilename"),
 								  "Inserting", 0, fileSize,
 								  queueManager);
 								  
