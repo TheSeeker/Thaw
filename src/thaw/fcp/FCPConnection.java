@@ -18,7 +18,7 @@ import thaw.core.Logger;
  * Call observer when connected / disconnected.<br/>
  * WARNING: This FCP implement don't guarantee that messages are sent in the same order than initally put
  *          if the lock on writting is not set !<br/>
- * TODO: Add functions socketToFile(long size, File file) / fileToSocket(File file)
+ * TODO: Add functions socketToStream(long size, OutputStream file) / streamToSocket(InputStream file)
  */
 public class FCPConnection extends Observable {
 	/** If == true, then will print on stdout
@@ -428,9 +428,9 @@ public class FCPConnection extends Observable {
 				return result;
 
 			} catch (java.io.IOException e) {
-				if(isConnected()) {
+				if(isConnected())
 					Logger.error(this, "IOException while reading but still connected, wtf? : "+e.toString());
-				} else
+				else
 					Logger.notice(this, "IOException. Disconnected.");
 
 				disconnect();

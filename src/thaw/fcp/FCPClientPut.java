@@ -377,6 +377,8 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		default: Logger.notice(this, "Unknow persistence !?"); break;
 		}
 
+		msg.setValue("TargetFilename", localFile.getName());
+
 		msg.setValue("UploadFrom", "direct");
 
 		msg.setAmountOfDataWaiting(localFile.length());
@@ -561,15 +563,6 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				
 				status = "Inserting";
 				
-				if(keyType == 0)
-					publicKey = publicKey + "/" +name;
-
-				/*
-				if(keyType > 0)
-					publicKey = publicKey + "/" + name + "-" + Integer.toString(rev);
-				*/
-				
-
 				setChanged();
 				notifyObservers();
 				return;

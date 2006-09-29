@@ -4,13 +4,14 @@ import java.util.Vector;
 
 
 public class SearchResult implements FileList {
+
 	private Vector fileList = null;
 
 	public SearchResult() {
 
 	}
 
-	public void loadLists(String fileColumnToSort, boolean asc) {
+	public void loadFiles(String columnToSort, boolean asc) {
 		fileList = new Vector();
 	}
 
@@ -22,11 +23,7 @@ public class SearchResult implements FileList {
 		return null;
 	}
 
-	public Vector getLinkList() {
-		return null;
-	}
-
-	public void unloadLists() {
+	public void unloadFiles() {
 		fileList = null;
 	}	
 

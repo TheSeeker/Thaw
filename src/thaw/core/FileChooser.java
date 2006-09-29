@@ -28,7 +28,7 @@ public class FileChooser {
 		if(v)
 			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		else
-			fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+			fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES); /* Directories -> Recursivity */
 	}
 	
 	/**
@@ -68,6 +68,13 @@ public class FileChooser {
 
 		return fileChooser.getSelectedFile();
 	}
+
+	
+	protected File[] expandRecursivly(File[] selectedFiles)
+	{
+		/* TODO */
+		return selectedFiles;
+	}
 	
 	/**
 	 * @return null if nothing choosed.
@@ -77,10 +84,8 @@ public class FileChooser {
 
 		if(!showDialog())
 			return null;
-
-		
-
-		return fileChooser.getSelectedFiles();
+	
+		return expandRecursivly(fileChooser.getSelectedFiles());
 	}
 
 }

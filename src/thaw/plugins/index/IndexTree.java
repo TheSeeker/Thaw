@@ -46,11 +46,12 @@ import thaw.gui.JDragTree;
 /**
  * Manages the index tree and its menu (right-click).
  */
-public class IndexTree implements MouseListener, ActionListener, java.util.Observer {
+public class IndexTree extends java.util.Observable implements MouseListener, ActionListener, java.util.Observer {
 	
 	private JPanel panel;
 
-	private JDragTree tree;
+	//private JDragTree tree;
+	private JTree tree;
 	private IndexCategory root;
 
 	private JPopupMenu indexCategoryMenu;
@@ -68,6 +69,7 @@ public class IndexTree implements MouseListener, ActionListener, java.util.Obser
 	private JMenuItem copyKey;
        
 	private boolean modifiables;
+	private boolean selectionOnly;
 
 	private IndexTreeNode selectedNode;
 
@@ -81,15 +83,18 @@ public class IndexTree implements MouseListener, ActionListener, java.util.Obser
 	 * @param modifiables If set to true, then only indexes having private keys will
 	 *                    be displayed else only indexes not having private keys will
 	 *                    be displayed.
+	 * @param queueManager Not used if selectionOnly is set to true
 	 */
-	public IndexTree(String name,
+	public IndexTree(String rootName,
 			 boolean modifiables,
+			 boolean selectionOnly,
 			 FCPQueueManager queueManager,
 			 Hsqldb db) {
 		this.queueManager = queueManager;
 
 		this.db = db;
 		this.modifiables = modifiables;
+		this.selectionOnly = selectionOnly;
 
 		panel = new JPanel();
 		panel.setLayout(new BorderLayout(10, 10));
@@ -145,14 +150,20 @@ public class IndexTree implements MouseListener, ActionListener, java.util.Obser
 		deleteIndex.addActionListener(this);
 		
 
-		root = new IndexCategory(db, queueManager, -1, null, name, modifiables);
+		root = new IndexCategory(db, queueManager, -1, null, rootName, modifiables);
 		root.loadChildren();
 
 		root.addObserver(this);
 
 		treeModel = new DefaultTreeModel(root);
-		tree = new JDragTree(treeModel);
-		tree.addMouseListener(this);
+
+		if (!selectionOnly) {
+			tree = new JDragTree(treeModel);
+			tree.addMouseListener(this);
+		} else {
+			tree = new JTree(treeModel);
+			tree.addMouseListener(this);
+		}
 
 		IndexTreeRenderer treeRenderer = new IndexTreeRenderer();
 		treeRenderer.setLeafIcon(IconBox.minIndex);
@@ -177,16 +188,21 @@ public class IndexTree implements MouseListener, ActionListener, java.util.Obser
 	}
 
 
-	public void mouseClicked(MouseEvent e) { }
+	public void mouseClicked(MouseEvent e) {
+		notifySelection(e);
+	}
+
 	public void mouseEntered(MouseEvent e) { }
 	public void mouseExited(MouseEvent e) { }
 
 	public void mousePressed(MouseEvent e) {
-		showPopupMenu(e);
+		if (!selectionOnly)
+			showPopupMenu(e);
 	}
 
 	public void mouseReleased(MouseEvent e) {
-		showPopupMenu(e);
+		if (!selectionOnly)
+			showPopupMenu(e);
 	}
 
 	protected void showPopupMenu(MouseEvent e) {
@@ -207,6 +223,18 @@ public class IndexTree implements MouseListener, ActionListener, java.util.Obser
 			if(selectedNode instanceof Index)
 				indexMenu.show(e.getComponent(), e.getX(), e.getY());
 		}
+	}
+
+	public void notifySelection(MouseEvent e) {
+		TreePath path = tree.getPathForLocation(e.getX(), e.getY());
+			
+		if(path == null)
+			return;
+
+		selectedNode = (IndexTreeNode)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
+
+		setChanged();
+		notifyObservers(selectedNode);
 	}
 
 	public void actionPerformed(ActionEvent e) {

@@ -177,7 +177,7 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 
 	public void delete() {
 		try {
-			loadLists(null, false);
+			loadFiles(null, false);
 
 			for(Iterator fileIt = fileList.iterator();
 			    fileIt.hasNext(); ) {
@@ -361,7 +361,7 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 
 	////// FILE LIST ////////
 
-	public void loadLists(String columnToSort, boolean asc) {
+	public void loadFiles(String columnToSort, boolean asc) {
 		if(fileList != null)
 			return;
 
@@ -414,11 +414,8 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 		return (thaw.plugins.index.File)fileList.get(index);
 	}
 
-	public Vector getLinkList() {
-		return null;
-	}
 
-	public void unloadLists() {
+	public void unloadFiles() {
 		for(Iterator it = fileList.iterator();
 		    it.hasNext(); ) {
 			thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
@@ -567,7 +564,7 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 		Element files = xmlDoc.createElement("files");
 
 		if(fileList == null) {
-			loadLists(null, true);
+			loadFiles(null, true);
 		}
 
 		for(Iterator it = getFileList().iterator();

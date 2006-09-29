@@ -25,6 +25,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JFileChooser;
 import javax.swing.JProgressBar;
+import javax.swing.JLabel;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -41,11 +42,11 @@ import thaw.core.*;
 import thaw.fcp.*;
 
 public class FileTable implements MouseListener, KeyListener, ActionListener {
+
+	private JPanel panel;
 	
 	private JTable table;
 	private FileListModel fileListModel;
-
-	private JPanel panel;
 
 	private FileList fileList = null;
 
@@ -66,12 +67,9 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 	public FileTable(boolean modifiables, FCPQueueManager queueManager) {
 		this.queueManager = queueManager;
-		panel = new JPanel();
-		panel.setLayout(new BorderLayout(10, 10));
 
 		this.modifiables = modifiables;
-
-		
+	
 		
 		rightClickMenu = new JPopupMenu();
 		
@@ -102,21 +100,27 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 		table.addMouseListener(this);
 
+		panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+		
+		panel.add(new JLabel(I18n.getMessage("thaw.plugin.index.fileList")), BorderLayout.NORTH);
+		panel.add(new JScrollPane(table));
+
 	}
 
 
-	public JScrollPane getPanel() {
-		return new JScrollPane(table);
+	public JPanel getPanel() {
+		return panel;
 	}
 
 	
 	public void setFileList(FileList fileList) {
 		if(this.fileList != null) {
-			this.fileList.unloadLists();
+			this.fileList.unloadFiles();
 		}
 		
 		if(fileList != null) {
-			fileList.loadLists(null, true);
+			fileList.loadFiles(null, true);
 		}
 
 		this.fileList = fileList;
@@ -180,7 +184,10 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		for(int i = 0 ; i < selectedRows.length ; i++) {
 
 			if(e.getSource() == removeFiles) {
-				index.removeFile((thaw.plugins.index.File)files.get(selectedRows[i]));
+				thaw.plugins.index.File file = (thaw.plugins.index.File)files.get(selectedRows[i]);
+				if (file.getTransfer() != null)
+					file.getTransfer().stop(queueManager);
+				index.removeFile(file);
 			}
 			
 			if(e.getSource() == insertFiles) {
@@ -353,13 +360,6 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		public void refresh(TableModelEvent e) {
 
 			fireTableChanged(e);
-			/*
-			TableModelListener[] listeners = getTableModelListeners();
-
-			for(int i = 0 ; i < listeners.length ; i++) {
-				listeners[i].tableChanged(e);
-			}
-			*/
 		}
 
 		public void update(java.util.Observable o, Object param) {
@@ -413,10 +413,12 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 					bar.setString(I18n.getMessage("thaw.common.ok"));
 
 				if(!query.isFinished()) {
-					if(query instanceof FCPClientGet)
+					/*if(query instanceof FCPClientGet)
 						bar.setString(I18n.getMessage("thaw.common.downloading"));
 					else
 						bar.setString(I18n.getMessage("thaw.common.uploading"));
+					*/
+					bar.setString(query.getStatus());
 				}
 
 				return bar;

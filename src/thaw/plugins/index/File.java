@@ -206,8 +206,6 @@ public class File extends java.util.Observable implements java.util.Observer {
 			else
 				st.setNull(6, Types.VARCHAR);
 
-			Logger.info(this, "PARENT : "+parent.getId());
-
 			st.setInt(7, parent.getId());
 
 			st.execute();

@@ -36,6 +36,8 @@ public class IconBox {
 	
 	public static ImageIcon insertAndAddToIndexAction;
 
+	public static ImageIcon makeALinkAction;
+
 	public static ImageIcon minIndex;
 
 	public static ImageIcon clearAction;
@@ -121,6 +123,9 @@ public class IconBox {
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("folder.png"));
 			insertAndAddToIndexAction =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("folder-new.png"));
+			makeALinkAction =
+				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("application-internet.png"));
+			
 
 			reconnectAction =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("view-refresh.png"));

@@ -28,11 +28,9 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	private JSplitPane split;
 
 	private JPanel listAndDetails;
-	private FileTable fileTable;
+	private Tables tables;
 	private FileDetailsEditor fileDetails;
 
-	private FileList fileList = null;
-	
 	private Hsqldb db;
 	private FCPQueueManager queueManager;
 
@@ -41,15 +39,15 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		this.db = db;
 		this.queueManager = queueManager;
 
-		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, queueManager, db);
+		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, false, queueManager, db);
 
 		listAndDetails = new JPanel();
 		listAndDetails.setLayout(new BorderLayout(10, 10));
 
-		fileTable = new FileTable(false, queueManager);
+		tables = new Tables(false, queueManager);
 		fileDetails = new FileDetailsEditor(false);
 
-		listAndDetails.add(fileTable.getPanel(), BorderLayout.CENTER);
+		listAndDetails.add(tables.getPanel(), BorderLayout.CENTER);
 		listAndDetails.add(fileDetails.getPanel(), BorderLayout.SOUTH);
 
 		split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
@@ -67,11 +65,11 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	public void save() {
 		indexTree.save();
 	}
-
-	public void setFileList(FileList l) {
-		this.fileList = l;
-		fileTable.setFileList(l);		
+	
+	protected void setFileList(FileList l) {
+		tables.getFileTable().setFileList(l);		
 	}
+	
 
 	public void valueChanged(javax.swing.event.TreeSelectionEvent e) {
 		javax.swing.tree.TreePath path = e.getPath();
