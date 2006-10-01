@@ -223,7 +223,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 				FCPClientPut insertion = new FCPClientPut(new java.io.File(file.getLocalPath()), 0, 0, null,
 									  null, 4,
-									  true, 2, false); /* getCHKOnly */
+									  true, 2, true); /* getCHKOnly */
 				insertion.start(queueManager);
 
 				file.setTransfer(insertion);

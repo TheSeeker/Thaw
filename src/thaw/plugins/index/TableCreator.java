@@ -53,15 +53,16 @@ public class TableCreator {
 
 		sendQuery(db,
 			  "CREATE CACHED TABLE indexes ("
-			  + "id INTEGER IDENTITY NOT NULL,"
-			  + "originalName VARCHAR(255) NOT NULL,"
-			  + "displayName VARCHAR(255) NULL,"
-			  + "publicKey VARCHAR(255) NOT NULL,"
-			  + "privateKey VARCHAR(255) NULL,"
-			  + "positionInTree INTEGER NOT NULL,"
-			  + "revision INTEGER NOT NULL,"
-			  + "parent INTEGER NULL,"			  
-			  + "PRIMARY KEY (id),"
+			  + "id INTEGER IDENTITY NOT NULL, "
+			  + "originalName VARCHAR(255) NOT NULL, "
+			  + "displayName VARCHAR(255) NULL, "
+			  + "publicKey VARCHAR(255) NOT NULL, "
+			  + "privateKey VARCHAR(255) NULL, "
+			  + "author VARCHAR(255) NULL, "
+			  + "positionInTree INTEGER NOT NULL, "
+			  + "revision INTEGER NOT NULL, "
+			  + "parent INTEGER NULL, "			  
+			  + "PRIMARY KEY (id), "
 			  + "FOREIGN KEY (parent) REFERENCES indexCategories (id))");
 		
 		sendQuery(db,

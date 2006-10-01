@@ -27,7 +27,7 @@ import org.w3c.dom.NodeList;
 /**
  * This class the thaw config.
  *
- * @author <a href="mailto:jflesch@nerim.net">Jerome Flesch</a>
+ * @author <a href="mailto:jflesch@gmail.com">Jerome Flesch</a>
  */
 public class Config {
 
@@ -291,15 +291,24 @@ public class Config {
 		return false;
 	}
 
+	/**
+	 * Set the value only if it doesn't exits.
+	 */
+	public void setDefaultValue(String name, String val) {
+		if (getValue(name) == null)
+			setValue(name, val);
+	}
 	
 	public void setDefaultValues() {
-		setValue("nodeAddress", "127.0.0.1");	
-		setValue("nodePort", "9481");
-		setValue("maxSimultaneousDownloads", "-1");
-		setValue("maxSimultaneousInsertions", "-1");
-		setValue("maxUploadSpeed", "-1");
-		setValue("thawId", "thaw_"+Integer.toString((new Random()).nextInt(1000)));
-		setValue("advancedMode", "false");
+		setDefaultValue("nodeAddress", "127.0.0.1");	
+		setDefaultValue("nodePort", "9481");
+		setDefaultValue("maxSimultaneousDownloads", "-1");
+		setDefaultValue("maxSimultaneousInsertions", "-1");
+		setDefaultValue("maxUploadSpeed", "-1");
+		setDefaultValue("thawId", "thaw_"+Integer.toString((new Random()).nextInt(1000)));
+		setDefaultValue("advancedMode", "false");
+		setDefaultValue("userNickname", "Another anonymous");
+		setDefaultValue("multipleSockets", "true");
 	}
 
 }

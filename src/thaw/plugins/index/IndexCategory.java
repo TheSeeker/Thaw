@@ -243,7 +243,7 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 
 		String query;
 
-		query = "SELECT id, originalName, displayName, publicKey, privateKey, positionInTree, revision FROM indexes";
+		query = "SELECT id, originalName, displayName, publicKey, privateKey, author, positionInTree, revision FROM indexes";
 
 		if(id < 0)
 			query = query + " WHERE parent IS NULL";
@@ -278,9 +278,12 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 				
 				int revision = result.getInt("revision");
 
+				String author = result.getString("author");
+
 				set(children, position, (new Index(db, queueManager, id, this,
 								   realName, displayName,
 								   publicKey, privateKey, revision,
+								   author,
 								   modifiables)).getTreeNode());
 			}
 		} catch (java.sql.SQLException e) {

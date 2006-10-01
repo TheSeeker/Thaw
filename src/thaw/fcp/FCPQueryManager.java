@@ -135,5 +135,36 @@ public class FCPQueryManager extends Observable implements Runnable {
 		}
 	}
 
+	
+	/**
+	 * This function is mainly used by FCPClientGet to have a separate socket to transfer the files.
+	 * If FCPConnection is allowed to duplicate itself, then it will duplicate it and create a dedicated FCPQueryManager for.
+	 * A FCPClientHello is sent with the given id.
+	 * @return This object if it cannot duplicate FCPConnection
+	 */
+	public FCPQueryManager duplicate(String connectionId) {
+		FCPConnection newConnection;
+		FCPQueryManager queryManager;
+
+		newConnection = connection.duplicate();
+
+		if (newConnection == connection)
+			return this;
+
+		queryManager = new FCPQueryManager(newConnection);
+
+		queryManager.startListening();
+
+		FCPClientHello clientHello = new FCPClientHello(queryManager, connectionId);
+		
+		if (!clientHello.start(null)) {
+			Logger.warning(this, "ID already used ?! Using initial socket ...");
+			newConnection.disconnect();
+			return this;
+		}
+
+		return queryManager;
+	}
+
 }
 

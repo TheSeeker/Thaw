@@ -33,7 +33,7 @@ import thaw.fcp.*;
 import thaw.plugins.Hsqldb;
 import thaw.core.*;
 
-public class Index extends java.util.Observable implements FileList, IndexTreeNode, java.util.Observer {
+public class Index extends java.util.Observable implements FileList, LinkList, IndexTreeNode, java.util.Observer {
 
 	private Hsqldb db;
 	private IndexTree tree;
@@ -50,6 +50,7 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 	private int revision = 0;
 
 	private Vector fileList;
+	private Vector linkList;
 
 	private DefaultMutableTreeNode treeNode;
 
@@ -60,11 +61,14 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 	private FCPTransferQuery transfer = null;
 	private java.io.File targetFile = null;
 
+	private String author = null;
+
+
 	public Index(Hsqldb db, FCPQueueManager queueManager,
 		     int id, IndexCategory parent,
 		     String realName, String displayName,
 		     String publicKey, String privateKey,
-		     int revision,
+		     int revision, String author, 
 		     boolean modifiable) {
 		this.queueManager = queueManager;
 
@@ -84,6 +88,8 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 		this.privateKey = privateKey;
 
 		this.revision = revision;
+
+		this.author = author;
 
 		treeNode.setUserObject(this);
 	}
@@ -120,21 +126,21 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 				id = 1;
 			}
 
-			st = c.prepareStatement("INSERT INTO indexes (id, originalName, displayName, publicKey, privateKey, positionInTree, revision, parent) "+
-						"VALUES (?, ?,?,?,?,?,?, ?)");
+			st = c.prepareStatement("INSERT INTO indexes (id, originalName, displayName, publicKey, privateKey, author, positionInTree, revision, parent) VALUES (?, ?,?,?,?,?, ?,?, ?)");
 			st.setInt(1, id);
 			st.setString(2, realName);
 			st.setString(3, displayName);
 			st.setString(4, publicKey);
 			st.setString(5, privateKey);
-			st.setInt(6, 0);
+			st.setString(6, author);
+			st.setInt(7, 0);
 
-			st.setInt(7, revision);
+			st.setInt(8, revision);
 
 			if(parent.getId() >= 0)
-				st.setInt(8, parent.getId());
+				st.setInt(9, parent.getId());
 			else
-				st.setNull(8, Types.INTEGER);
+				st.setNull(9, Types.INTEGER);
 			
 			st.execute();
 						
@@ -178,15 +184,17 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 	public void delete() {
 		try {
 			loadFiles(null, false);
+			loadLinks(null, false);
 
-			for(Iterator fileIt = fileList.iterator();
-			    fileIt.hasNext(); ) {
+			for(Iterator fileIt = fileList.iterator(); fileIt.hasNext(); ) {
 				thaw.plugins.index.File file = (thaw.plugins.index.File)fileIt.next();
 				file.delete();
 			}
 			    
-
-			/* TODO : Delete links */
+			for (Iterator linkIt = linkList.iterator(); linkIt.hasNext() ;) {
+				Link link = (Link)linkIt.next();
+				link.delete();
+			}
 
 			Connection c = db.getConnection();
 			PreparedStatement st = c.prepareStatement("DELETE FROM indexes WHERE id = ?");
@@ -244,7 +252,14 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 	}
 
 	public void purgeLinkList() {
-		/* TODO */
+		try {
+			Connection c = db.getConnection();
+			PreparedStatement st = c.prepareStatement("DELETE FROM links WHERE indexParent = ?");
+			st.setInt(1, getId());
+			st.execute();
+		} catch(SQLException e) {
+			Logger.warning(this, "Unable to purge da list ! Exception: "+e.toString());
+		}
 	}
 	
 	public void purgeFileList() {
@@ -261,7 +276,7 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 	public void save() {
 		try {
 			Connection c = db.getConnection();
-			PreparedStatement st = c.prepareStatement("UPDATE indexes SET originalName = ?, displayName = ?, publicKey = ?, privateKey = ?, positionInTree = ?, revision = ?, parent = ? WHERE id = ?");
+			PreparedStatement st = c.prepareStatement("UPDATE indexes SET originalName = ?, displayName = ?, publicKey = ?, privateKey = ?, positionInTree = ?, revision = ?, parent = ? , author = ? WHERE id = ?");
 
 			st.setString(1, realName);
 			st.setString(2, displayName);
@@ -278,8 +293,10 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 				st.setNull(7, Types.INTEGER);
 			else
 				st.setInt(7, ((IndexTreeNode)treeNode.getParent()).getId());
+
+			st.setString(8, author);
 			
-			st.setInt(8, getId());
+			st.setInt(9, getId());
 
 			st.execute();
 		} catch(SQLException e) {
@@ -338,6 +355,10 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 					java.io.File file = new java.io.File(transfer.getPath());
 
 					Logger.info(this, "Updating index ...");
+					
+					publicKey = transfer.getFileKey();
+
+					Logger.info(this, "Most up-to-date key found: " + publicKey);
 					
 					loadXML(file);
 					save();
@@ -456,11 +477,111 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 	 * Do the update all the files in the database.
 	 */
 	public void updateFileList() {		
-		for(Iterator it = fileList.iterator();
-		    it.hasNext();) {
+		for(Iterator it = fileList.iterator(); it.hasNext();) {
 			thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 			file.update();
 		}
+	}
+
+
+	//// LINKS ////
+
+	public void addLink(Link link) {
+		link.setParent(this);
+		link.insert();
+
+		if (linkList != null) {
+			linkList.add(link);
+
+			setChanged();
+			notifyObservers(link);
+		}
+	}
+
+	public void removeLink(Link link) {
+		link.delete();
+
+		if (linkList != null) {
+			linkList.remove(link);
+			setChanged();
+			notifyObservers(link);
+		}
+	}
+
+	/**
+	 * Update all the links in the database.
+	 */
+	public void updateLinkList() {
+		for(Iterator it = linkList.iterator(); it.hasNext();) {
+			Link link = (Link)it.next();
+			link.update();
+		}
+	}
+	
+	public void loadLinks(String columnToSort, boolean asc)
+	{
+		if(linkList != null)
+			return;
+
+		linkList = new Vector();
+
+		try {
+			String query = "SELECT id, publicKey, mark, comment, indexTarget FROM links WHERE indexParent = ?";
+
+			if(columnToSort != null) {
+				query = query + "ORDER BY " + columnToSort;
+
+				if(!asc)
+					query = query + " DESC";
+			}
+
+			PreparedStatement st = db.getConnection().prepareStatement(query);
+
+			st.setInt(1, getId());
+
+			if(st.execute()) {
+				ResultSet results = st.getResultSet();
+
+				while(results.next()) {
+					String[] split = publicKey.split("/");
+					try {
+						String indexName = split[split.length-2];
+						Link link = new Link(db, indexName, publicKey, this);
+						linkList.add(link);
+					} catch(Exception e) {
+						Logger.warning(this, "Unable to add index '"+publicKey+"' to the list because: "+e.toString());
+					}
+				}
+			}
+
+
+		} catch(java.sql.SQLException e) {
+			Logger.warning(this, "Unable to get the link list for index: '"+toString()+"' because: "+e.toString());
+		}
+
+	}
+
+	/* Returns a copy ! */
+	public Vector getLinkList()
+	{
+		Vector newList = new Vector();
+
+		for(Iterator it = linkList.iterator();
+		    it.hasNext();) {
+			newList.add(it.next());
+		}
+
+		return newList;
+	}
+
+	public Link getLink(int index)
+	{
+		return (Link)linkList.get(index);
+	}
+
+	public void unloadLinks()
+	{
+		linkList = null;
 	}
 
 
@@ -524,7 +645,7 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 			return;
 		}
 
-		serializer.setOutputProperty(OutputKeys.ENCODING,"ISO-8859-1");
+		serializer.setOutputProperty(OutputKeys.ENCODING,"UTF-8");
 		serializer.setOutputProperty(OutputKeys.INDENT,"yes");
 		
 		/* final step */
@@ -543,9 +664,14 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 		Text titleText = xmlDoc.createTextNode(toString());		
 		title.appendChild(titleText);
 
-		/* TODO : Allow to change username  + email */
 		Element owner = xmlDoc.createElement("owner");
-		Text ownerText = xmlDoc.createTextNode("Another anonymous");
+		Text ownerText;
+
+		if (author == null)
+			ownerText = xmlDoc.createTextNode("Another anonymous");
+		else
+			ownerText = xmlDoc.createTextNode(author);
+
 		owner.appendChild(ownerText);
 		
 		header.appendChild(title);
@@ -617,8 +743,10 @@ public class Index extends java.util.Observable implements FileList, IndexTreeNo
 		Element header = (Element)rootEl.getElementsByTagName("header").item(0);
 
 		realName = getHeaderElement(header, "title");
-		
-		/* TODO : Author */
+		author = getHeaderElement(header, "author");
+
+		if (author == null)
+			author = "Another anonymous";
 	}
 
 	public String getHeaderElement(Element header, String name) {

@@ -76,7 +76,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	}
 
 	/**
-	 * To start anew insertion.
+	 * To start a new insertion.
 	 */
 	public FCPClientPut(File file, int keyType,
 			    int rev, String name,
@@ -612,6 +612,9 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 					status = status + " (non-fatal)";
 					fatal = false;
 				}
+
+				Logger.warning(this, "==== PUT FAILED ===");
+				Logger.warning(this, msg.toString());
 
 				setChanged();
 				notifyObservers();

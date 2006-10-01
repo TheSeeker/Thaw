@@ -34,7 +34,7 @@ public class Core implements Observer {
 	private static String lookAndFeel = null;
 
 	public final static int MAX_CONNECT_TRIES = 3;
-	public final static int TIME_BETWEEN_EACH_TRY = 2500;
+	public final static int TIME_BETWEEN_EACH_TRY = 3000;
 
 
 	/**
@@ -131,8 +131,7 @@ public class Core implements Observer {
 		config = new Config();
 		config.loadConfig();
 
-		if(config.isEmpty())
-			config.setDefaultValues();
+		config.setDefaultValues();
 		
 		return true;
 	}
@@ -159,7 +158,8 @@ public class Core implements Observer {
 			if(connection == null) {
 				connection = new FCPConnection(config.getValue("nodeAddress"),
 							       Integer.parseInt(config.getValue("nodePort")),
-							       Integer.parseInt(config.getValue("maxUploadSpeed")));
+							       Integer.parseInt(config.getValue("maxUploadSpeed")),
+							       Boolean.valueOf(config.getValue("multipleSockets")).booleanValue());
 			} else {
 				connection.setNodeAddress(config.getValue("nodeAddress"));
 				connection.setNodePort(Integer.parseInt(config.getValue("nodePort")));

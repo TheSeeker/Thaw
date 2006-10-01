@@ -3,7 +3,6 @@ package thaw.fcp;
 import java.net.Socket;
 import java.io.InputStream;
 import java.io.OutputStream;
-/* import java.io.BufferedReader; */
 import java.io.BufferedInputStream;
 import java.util.Observable;
 
@@ -49,22 +48,29 @@ public class FCPConnection extends Observable {
 
 	private long lastWrite = 0; /* real writes ; System.currentTimeMillis() */
 
+	private boolean duplicationAllowed = true;
+
 
 	/**
 	 * Don't connect. Call connect() for that.
 	 * @param maxUploadSpeed in KB: -1 means no limit
+	 * @param duplicationAllowed FCPClientGet and FCPClientPut will be allowed to open a separate socket to transfer the files
 	 */
 	public FCPConnection(String nodeAddress,
 			     int port,
-			     int maxUploadSpeed)
+			     int maxUploadSpeed,
+			     boolean duplicationAllowed)
 	{
 		if(DEBUG_MODE) {
 			Logger.notice(this, "DEBUG_MODE ACTIVATED");
 		}
 
+		maxUploadSpeed = -1;
+
 		setNodeAddress(nodeAddress);
 		setNodePort(port);
 		setMaxUploadSpeed(maxUploadSpeed);
+		setDuplicationAllowed(duplicationAllowed);
 	}
 
 
@@ -80,6 +86,9 @@ public class FCPConnection extends Observable {
 		this.maxUploadSpeed = max;
 	}
 	
+	public void setDuplicationAllowed(boolean allowed) {
+		this.duplicationAllowed = allowed;
+	}
 	
 	public void disconnect() {
 		try {
@@ -89,7 +98,7 @@ public class FCPConnection extends Observable {
 			    Logger.info(this, "Disconnect(): Already disconnected.");
 		    }
 		} catch(java.io.IOException e) {
-			Logger.warning(this, "Unable to close cleanly the connection : "+e.toString());
+			Logger.warning(this, "Unable to close cleanly the connection : "+e.toString() +" ; "+e.getMessage());
 		}
 
 		socket = null;
@@ -130,7 +139,7 @@ public class FCPConnection extends Observable {
 			return false;
 		} catch(java.io.IOException e) {
 			Logger.error(this, "Error while trying to connect to "+nodeAddress+":"+port+" : "+
-				     e.toString());
+				     e.toString() + " ; "+e.getMessage());
 			socket = null;
 			return false;
 		}
@@ -144,7 +153,7 @@ public class FCPConnection extends Observable {
 			in = socket.getInputStream();
 			out = socket.getOutputStream();
 		} catch(java.io.IOException e) {
-			Logger.error(this, "Socket and connection established, but unable to get in/output streams ?! : "+e.toString());
+			Logger.error(this, "Socket and connection established, but unable to get in/output streams ?! : "+e.toString()+ " ; "+e.getMessage() );
 			return false;
 		}
 
@@ -252,7 +261,7 @@ public class FCPConnection extends Observable {
 				
 				out.write(data);
 			} catch(java.io.IOException e) {
-				Logger.warning(this, "Unable to write() on the socket ?! : "+ e.toString());
+				Logger.warning(this, "Unable to write() on the socket ?! : "+ e.toString()+ " ; "+e.getMessage());
 				disconnect();
 				return false;
 			}
@@ -344,7 +353,7 @@ public class FCPConnection extends Observable {
 			return rdBytes;
 		} catch(java.io.IOException e) {
 			Logger.error(this, "IOException while reading raw bytes on socket => disconnection");
-			Logger.error(this, e.getMessage() + ":" +e.getCause());
+			Logger.error(this, e.getMessage() + ":" +e.getCause().toString()+ " ; "+e.getMessage() );
 			disconnect();
 			return -2; /* -1 can mean eof */
 		}
@@ -429,9 +438,9 @@ public class FCPConnection extends Observable {
 
 			} catch (java.io.IOException e) {
 				if(isConnected())
-					Logger.error(this, "IOException while reading but still connected, wtf? : "+e.toString());
+					Logger.error(this, "IOException while reading but still connected, wtf? : "+e.toString()+ " ; "+e.getMessage() );
 				else
-					Logger.notice(this, "IOException. Disconnected.");
+					Logger.notice(this, "IOException. Disconnected. : "+e.toString() + " ; "+e.getMessage());
 
 				disconnect();
 
@@ -442,6 +451,30 @@ public class FCPConnection extends Observable {
 		}
 
 		return null;
+	}
+
+
+	/**
+	 * If duplicationAllowed, returns a copy of this object, using a different socket and differents lock / buffer.
+	 * If !duplicationAllowed, returns this object.
+	 * The duplicate socket is just connected but not initialized (ClientHello, etc).
+	 */
+	public FCPConnection duplicate() {
+		if (!duplicationAllowed)
+			return this;
+
+		Logger.info(this, "Duplicating connection to the node ...");
+
+		FCPConnection newConnection;
+
+		newConnection = new FCPConnection(nodeAddress, port, -1, duplicationAllowed); /* upload limit is useless here, since we can't do a global limit on all the connections */
+
+		if (!newConnection.connect()) {
+			Logger.warning(this, "Unable to duplicate socket !");
+			return this;
+		}
+
+		return newConnection;
 	}
 
 }

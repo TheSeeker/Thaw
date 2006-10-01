@@ -19,6 +19,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	private final static int BLOCK_SIZE = 32768;
 
 	private FCPQueueManager queueManager;
+	private FCPQueryManager duplicatedQueryManager;
 
 	private String key = null;
 	private String filename = null; /* Extract from the key */
@@ -136,11 +137,11 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		} else {
 			String cutcut[] = key.split("/");
 
-			if(!key.startsWith("USK@")) {
-				filename = cutcut[cutcut.length-1];
-			} else {
-				filename = cutcut[cutcut.length-2];
-			}
+			//if(!key.startsWith("USK@")) {
+			filename = cutcut[cutcut.length-1];
+			//} else {
+			//filename = cutcut[cutcut.length-2];
+			//}
 		}
 
 		Logger.debug(this, "Query for getting "+key+" created");
@@ -197,7 +198,14 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	
 	public void update(Observable o, Object arg) {
+
+		FCPQueryManager queryManager = null;
 		FCPMessage message = (FCPMessage)arg;
+
+		if (o instanceof FCPQueryManager)
+			queryManager = (FCPQueryManager)o;
+		else
+			queryManager = queueManager.getQueryManager(); /* default one */
 
 		if(message.getValue("Identifier") == null
 		   || !message.getValue("Identifier").equals(identifier))
@@ -291,6 +299,14 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		if(message.getMessageName().equals("GetFailed")) {
 			Logger.debug(this, "GetFailed !");
 
+			if (message.getValue("RedirectURI") != null) {
+				Logger.debug(this, "Redirected !");
+				key = message.getValue("RedirectURI");
+				status = "Redirected ...";
+				start(queueManager);
+				return;
+			}
+
 			Logger.warning(this, "==== GET FAILED ===\n"+message.toString());
 
 			if(!isRunning()) { /* Must be a "GetFailed: cancelled by caller", so we simply ignore */
@@ -376,7 +392,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			notifyObservers();
 
 
-			if(fetchDirectly(getPath(), fileSize, true)) {
+			if(fetchDirectly(queryManager.getConnection(), getPath(), fileSize, true)) {
 				successful = true;
 				status = "Available";
 			} else {
@@ -387,14 +403,22 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			
 			Logger.info(this, "File received");
 
-			queueManager.getQueryManager().getConnection().unlockReading();
-			queueManager.getQueryManager().getConnection().unlockWriting();
+			queryManager.getConnection().unlockReading();
+			queryManager.getConnection().unlockWriting();
+
+
 			isLockOwner= false;
 			
 			running = false;
 			progress = 100;
 
-			queueManager.getQueryManager().deleteObserver(this);
+			queryManager.deleteObserver(this);
+
+			if (queryManager != queueManager.getQueryManager()) {
+				queueManager.getQueryManager().deleteObserver(this);
+				queryManager.getConnection().disconnect();
+				duplicatedQueryManager = null;
+			}
 
 			setChanged();
 			notifyObservers();
@@ -495,9 +519,15 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			return false;
 		}
 
+		if (globalQueue) { /* If not global, we need to remain on the same socket */
+			duplicatedQueryManager = queueManager.getQueryManager().duplicate(identifier);
+			duplicatedQueryManager.addObserver(this);
+		} else
+			duplicatedQueryManager = queueManager.getQueryManager();
 
-		Logger.info(this, "Waiting socket avaibility ...");
-		status = "Waiting socket avaibility ...";
+
+		Logger.info(this, "Waiting for socket avaibility ...");
+		status = "Waiting for socket avaibility ...";
 		progress = 99;
 		running = true;
 
@@ -505,7 +535,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		notifyObservers();
 
 
-		Thread fork = new Thread(new UnlockWaiter(this, queueManager.getQueryManager().getConnection(), dir));
+		Thread fork = new Thread(new UnlockWaiter(this, duplicatedQueryManager.getConnection(), dir));
 		fork.start();
 
 		return true;
@@ -538,7 +568,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		
 		
-		queueManager.getQueryManager().writeMessage(getRequestStatus, false);
+		duplicatedQueryManager.writeMessage(getRequestStatus, false);
 
 		return true;
 	}
@@ -552,14 +582,10 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 
 
-	private boolean fetchDirectly(String file, long size, boolean reallyWrite) {
-		FCPConnection connection;
-
+	private boolean fetchDirectly(FCPConnection connection, String file, long size, boolean reallyWrite) {
 		File newFile = new File(file);
 		FileOutputStream fileWriter = null;
 
-
-		connection = queueManager.getQueryManager().getConnection();
 
 		if(reallyWrite) {
 			Logger.info(this, "Writing file to disk ...");

@@ -8,6 +8,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
+import javax.swing.JCheckBox;
 
 import java.util.Observer;
 import java.util.Observable;
@@ -42,6 +43,7 @@ public class NodeConfigPanel implements Observer {
 	private JLabel[] paramLabels = new JLabel[paramNames.length];
 	private JTextField[] paramFields = new JTextField[configNames.length];
 
+	private JCheckBox multipleSockets = null;
 	
 
 	public NodeConfigPanel(ConfigWindow configWindow, Core core) {
@@ -63,6 +65,11 @@ public class NodeConfigPanel implements Observer {
 			nodeConfigPanel.add(paramFields[i]);
 		}
 
+		multipleSockets = new JCheckBox(I18n.getMessage("thaw.config.multipleSockets"),
+						Boolean.valueOf(core.getConfig().getValue("multipleSockets")).booleanValue());
+		nodeConfigPanel.add(new JLabel(" "));
+		nodeConfigPanel.add(multipleSockets);
+
 		setVisibility(Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
 
 		configWindow.addObserver(this);
@@ -78,6 +85,7 @@ public class NodeConfigPanel implements Observer {
 			paramFields[i].setVisible(advancedMode);
 		}
 
+		multipleSockets.setVisible(advancedMode);
 	}
 
 	
@@ -86,6 +94,8 @@ public class NodeConfigPanel implements Observer {
 			for(int i=0;i < paramNames.length;i++) {
 				core.getConfig().setValue(configNames[i], paramFields[i].getText());
 			}
+
+			core.getConfig().setValue("multipleSockets", Boolean.toString(multipleSockets.isSelected()));
 
 			setVisibility(Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
 		}
@@ -100,6 +110,8 @@ public class NodeConfigPanel implements Observer {
 
 				paramFields[i].setText(value);
 			}
+
+			multipleSockets.setSelected(Boolean.valueOf(core.getConfig().getValue("multipleSockets")).booleanValue());
 		}
 	}
 
