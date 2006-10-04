@@ -132,16 +132,12 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		
 		status = "Waiting";
 
-		if(key.indexOf('/') == key.length()-1) {
-			filename = "index.html";
-		} else {
-			String cutcut[] = key.split("/");
-
-			//if(!key.startsWith("USK@")) {
+		String cutcut[] = key.split("/");
+		
+		if(!key.endsWith("/")) {
 			filename = cutcut[cutcut.length-1];
-			//} else {
-			//filename = cutcut[cutcut.length-2];
-			//}
+		} else {
+			filename = "index.html";
 		}
 
 		Logger.debug(this, "Query for getting "+key+" created");
@@ -519,12 +515,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			return false;
 		}
 
-		if (globalQueue) { /* If not global, we need to remain on the same socket */
-			duplicatedQueryManager = queueManager.getQueryManager().duplicate(identifier);
-			duplicatedQueryManager.addObserver(this);
-		} else
-			duplicatedQueryManager = queueManager.getQueryManager();
-
+		duplicatedQueryManager = queueManager.getQueryManager().duplicate(identifier);
+		duplicatedQueryManager.addObserver(this);
 
 		Logger.info(this, "Waiting for socket avaibility ...");
 		status = "Waiting for socket avaibility ...";
@@ -542,7 +534,11 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	}
 
 	public synchronized boolean continueSaveFileTo(String dir) {
-		Logger.debug(this, "Asking file to the node...");
+		try {
+			Thread.sleep(20000);
+		} catch(java.lang.InterruptedException e){
+		}
+		Logger.info(this, "Asking file '"+filename+"' to the node...");
 
 		destinationDir = dir;
 
@@ -565,8 +561,6 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		else
 			getRequestStatus.setValue("Global", "false");
 		getRequestStatus.setValue("OnlyData", "true");
-
-		
 		
 		duplicatedQueryManager.writeMessage(getRequestStatus, false);
 

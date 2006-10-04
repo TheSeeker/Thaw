@@ -79,7 +79,7 @@ public class TableCreator {
 
 		sendQuery(db,
 			  "CREATE CACHED TABLE links ("
-			  + "id INTEGER IDENTIFY NOT NULL,"
+			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "publicKey VARCHAR(350) NOT NULL," // key ~= 100 + filename == 255 max
 			  + "mark INTEGER NOT NULL,"
 			  + "comment VARCHAR(512) NOT NULL,"

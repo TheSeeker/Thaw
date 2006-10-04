@@ -71,6 +71,9 @@ public class FCPConnection extends Observable {
 		setNodePort(port);
 		setMaxUploadSpeed(maxUploadSpeed);
 		setDuplicationAllowed(duplicationAllowed);
+
+		lockWriting = false;
+		lockReading = false;
 	}
 
 

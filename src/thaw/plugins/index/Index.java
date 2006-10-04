@@ -310,7 +310,7 @@ public class Index extends java.util.Observable implements FileList, LinkList, I
 
 	public String getKey() {
 		if(modifiable)
-			return publicKey.replaceFirst("SSK@", "USK@")+realName+"/"+revision+"/";
+			return publicKey.replaceFirst("SSK@", "USK@")+realName+"/"+revision+"/"+realName+".xml";
 		else
 			return publicKey;
 	}

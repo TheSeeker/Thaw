@@ -257,7 +257,8 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 				try {
 					String[] cutcut = publicKey.split("/");
-					name = cutcut[cutcut.length-2];
+					name = cutcut[cutcut.length-1];
+					name = name.replaceAll(".xml", "");
 				} catch(Exception exc) {
 					Logger.warning(this, "Error while parsing index key: "+publicKey+" because: "+exc.toString() );
 					name = publicKey;
