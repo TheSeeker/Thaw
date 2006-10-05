@@ -579,14 +579,10 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				publicKey = msg.getValue("URI");
 				publicKey = publicKey.replaceAll("freenet:", "");
 
-				if(keyType == 0)
-					publicKey = publicKey + "/" + name;
 				if(keyType == 1)
 					publicKey = "KSK@"+name+"-" + Integer.toString(rev);
 				//if(keyType == 2)
 				//	publicKey = publicKey + "/" + name + "-" + Integer.toString(rev);
-				if(keyType == 2)
-					publicKey = publicKey;
 				
 
 				status = "Finished";
