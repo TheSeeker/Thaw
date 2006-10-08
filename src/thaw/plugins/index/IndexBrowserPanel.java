@@ -1,4 +1,4 @@
-package thaw.plugins;
+package thaw.plugins.index;
 
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -17,7 +17,7 @@ import java.awt.event.ActionEvent;
 import thaw.core.*;
 import thaw.fcp.*;
 
-import thaw.plugins.index.*;
+import thaw.plugins.Hsqldb;
 
 
 public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListener, ActionListener {
@@ -44,7 +44,7 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		listAndDetails = new JPanel();
 		listAndDetails.setLayout(new BorderLayout(10, 10));
 
-		tables = new Tables(false, queueManager);
+		tables = new Tables(false, db, queueManager, indexTree);
 		fileDetails = new FileDetailsEditor(false);
 
 		listAndDetails.add(tables.getPanel(), BorderLayout.CENTER);
@@ -65,18 +65,29 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	public void save() {
 		indexTree.save();
 	}
+
+
+	protected void setList(FileAndLinkList l) {
+		setFileList(l);
+		setLinkList(l);
+	}
 	
 	protected void setFileList(FileList l) {
 		tables.getFileTable().setFileList(l);		
+	}
+
+	protected void setLinkList(LinkList l) {
+		tables.getLinkTable().setLinkList(l);
 	}
 	
 
 	public void valueChanged(javax.swing.event.TreeSelectionEvent e) {
 		javax.swing.tree.TreePath path = e.getPath();
-		
+
+		setList(null);
+
 		if(path == null) {
 			Logger.notice(this, "Path null ?");
-			setFileList(null);
 			return;
 		}
 		
@@ -84,17 +95,19 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 
 		if(node == null) {
 			Logger.notice(this, "Node null ?");
-			setFileList(null);
 			return;
 		}
 
-		if(node instanceof FileList) {
+		if (node instanceof FileList) {
 			Logger.info(this, "FileList !");
 			setFileList((FileList)node);
-			return;
 		}
-		
-		setFileList(null);
+
+		if (node instanceof LinkList) {
+			Logger.info(this, "LinkList !");
+			setLinkList((LinkList)node);
+		}
+
 	}
 
 

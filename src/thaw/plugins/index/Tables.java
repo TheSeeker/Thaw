@@ -6,6 +6,8 @@ import java.awt.BorderLayout;
 
 import thaw.fcp.FCPQueueManager;
 
+import thaw.plugins.Hsqldb;
+
 /**
  * Contains a FileTable, a LinkTable, and a SearchBar
  */
@@ -16,12 +18,12 @@ public class Tables {
 	private FileTable fileTable;
 	private LinkTable linkTable;
 
-	public Tables(boolean modifiables, FCPQueueManager queueManager) {
+	public Tables(boolean modifiables, Hsqldb db, FCPQueueManager queueManager, IndexTree tree) {
 		panel = new JPanel();
 		panel.setLayout(new BorderLayout(10, 10));
 
 		fileTable = new FileTable(modifiables, queueManager);
-		linkTable = new LinkTable(modifiables, queueManager);
+		linkTable = new LinkTable(modifiables, db, queueManager, tree);
 
 		searchBar = new SearchBar(fileTable, linkTable);
 

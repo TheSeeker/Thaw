@@ -1,4 +1,4 @@
-package thaw.plugins;
+package thaw.plugins.index;
 
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -19,6 +19,8 @@ import thaw.fcp.*;
 
 import thaw.plugins.index.*;
 
+import thaw.plugins.Hsqldb;
+
 
 public class IndexEditorPanel implements java.util.Observer, javax.swing.event.TreeSelectionListener, ActionListener {
 	public final static int DEFAULT_INSERTION_PRIORITY = 4;
@@ -36,7 +38,8 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 	private JButton insertAndAddButton;
 	private JButton linkButton;
 	
-	private FileList fileList = null;
+	private FileList fileList = null; /* Index or SearchResult object */
+	private LinkList linkList = null;
 	
 	private Hsqldb db;
 	private FCPQueueManager queueManager;
@@ -47,12 +50,6 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 		this.queueManager = queueManager;
 
 		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.yourIndexes"), true, false, queueManager, db);
-
-		listAndDetails = new JPanel();
-		listAndDetails.setLayout(new BorderLayout(0, 0));
-
-		tables = new Tables(true, queueManager);
-		fileDetails = new FileDetailsEditor(true);
 
 		toolBar = new JToolBar();
 		toolBar.setFloatable(false);
@@ -74,6 +71,12 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 		toolBar.add(insertAndAddButton);
 		toolBar.addSeparator();
 		toolBar.add(linkButton);
+
+		tables = new Tables(true, db, queueManager, indexTree);
+		fileDetails = new FileDetailsEditor(true);
+
+		listAndDetails = new JPanel();
+		listAndDetails.setLayout(new BorderLayout(0, 0));
 
 		listAndDetails.add(toolBar, BorderLayout.NORTH);
 		listAndDetails.add(tables.getPanel(), BorderLayout.CENTER);
@@ -101,6 +104,17 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 		linkButton.setEnabled(a);
 	}
 
+	protected void setList(FileAndLinkList l) {
+		setLinkList(l);
+		setFileList(l);
+	}
+
+	protected void setLinkList(LinkList l) {
+		buttonsEnabled(l != null && l instanceof Index);
+		this.linkList = l;
+		tables.getLinkTable().setLinkList(l);
+	}
+
 	protected void setFileList(FileList l) {
 		buttonsEnabled(l != null && l instanceof Index);
 
@@ -111,9 +125,10 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 	public void valueChanged(javax.swing.event.TreeSelectionEvent e) {
 		javax.swing.tree.TreePath path = e.getPath();
 		
+		setList(null);
+
 		if(path == null) {
 			Logger.notice(this, "Path null ?");
-			setFileList(null);
 			return;
 		}
 		
@@ -121,16 +136,19 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 
 		if(node == null) {
 			Logger.notice(this, "Node null ?");
-			setFileList(null);
 			return;
 		}
 
-		if(node instanceof FileList) {			
+		if(node instanceof FileList) {
+			Logger.info(this, "FileList !");
 			setFileList((FileList)node);
-			return;
 		}
-		
-		setFileList(null);
+
+		if(node instanceof LinkList) {
+			Logger.info(this, "LinkList !");
+			setLinkList((LinkList)node);
+		}
+
 	}
 
 
@@ -189,14 +207,15 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 
 
 	public class LinkMaker implements Runnable {
-		public LinkMaker() {
-
-		}
+		public LinkMaker() { }
 
 		public void run() {
 			IndexSelecter indexSelecter = new IndexSelecter();
 			String indexKey = indexSelecter.askForAnIndexURI(db);
-			
+			if (indexKey != null) {
+				Link newLink = new Link(db, indexKey, (Index)linkList);
+				((Index)linkList).addLink(newLink);
+			}
 		}
 	}
 
@@ -204,8 +223,7 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 		if(o instanceof FCPClientPut) {
 			FCPClientPut clientPut = (FCPClientPut)o;
 			if(clientPut.isFinished()) {
-				queueManager.remove(clientPut);
-				
+				queueManager.remove(clientPut);				
 			}
 		}
 	}

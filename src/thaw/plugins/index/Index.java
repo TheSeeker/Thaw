@@ -33,7 +33,7 @@ import thaw.fcp.*;
 import thaw.plugins.Hsqldb;
 import thaw.core.*;
 
-public class Index extends java.util.Observable implements FileList, LinkList, IndexTreeNode, java.util.Observer {
+public class Index extends java.util.Observable implements FileAndLinkList, IndexTreeNode, java.util.Observer {
 
 	private Hsqldb db;
 	private IndexTree tree;
@@ -94,6 +94,10 @@ public class Index extends java.util.Observable implements FileList, LinkList, I
 		treeNode.setUserObject(this);
 	}
 
+	public void setParent(IndexCategory parent) {
+		this.parent = parent;
+	}
+
 	public DefaultMutableTreeNode getTreeNode() {
 		return treeNode;
 	}
@@ -137,7 +141,7 @@ public class Index extends java.util.Observable implements FileList, LinkList, I
 
 			st.setInt(8, revision);
 
-			if(parent.getId() >= 0)
+			if(parent != null && parent.getId() >= 0)
 				st.setInt(9, parent.getId());
 			else
 				st.setNull(9, Types.INTEGER);
@@ -183,8 +187,8 @@ public class Index extends java.util.Observable implements FileList, LinkList, I
 
 	public void delete() {
 		try {
-			loadFiles(null, false);
-			loadLinks(null, false);
+			loadFiles(null, true);
+			loadLinks(null, true);
 
 			for(Iterator fileIt = fileList.iterator(); fileIt.hasNext(); ) {
 				thaw.plugins.index.File file = (thaw.plugins.index.File)fileIt.next();
@@ -204,6 +208,23 @@ public class Index extends java.util.Observable implements FileList, LinkList, I
 			Logger.error(this, "Unable to delete the index '"+displayName+"', because: "+e.toString());
 		}
 	}
+
+
+	protected String changeRevision(String key, int move) {
+		try {
+			String newKey;
+			String[] split = key.split("/");
+			newKey = split[0] + "/" + split[1] + "/"
+				+ Integer.toString(Integer.parseInt(split[2])+move) + "/"
+				+ split[3];
+			
+		} catch (Exception e) {
+			Logger.warning(this, "Unable to add a revision to the key '"+key+"' because : "+e.toString());
+		}
+
+		return key;
+	}
+
 
 	public void update() {
 		targetFile = new java.io.File(toString()+".xml");
@@ -235,7 +256,7 @@ public class Index extends java.util.Observable implements FileList, LinkList, I
 			
 			Logger.info(this, "Getting last version");
 
-			clientGet = new FCPClientGet(publicKey, 4, 2, false, System.getProperty("java.io.tmpdir"));
+			clientGet = new FCPClientGet(changeRevision(publicKey, 1), 4, 2, false, System.getProperty("java.io.tmpdir"));
 			transfer = clientGet;
 			clientGet.addObserver(this);
 
@@ -257,6 +278,7 @@ public class Index extends java.util.Observable implements FileList, LinkList, I
 			PreparedStatement st = c.prepareStatement("DELETE FROM links WHERE indexParent = ?");
 			st.setInt(1, getId());
 			st.execute();
+			linkList = new Vector();
 		} catch(SQLException e) {
 			Logger.warning(this, "Unable to purge da list ! Exception: "+e.toString());
 		}
@@ -268,6 +290,7 @@ public class Index extends java.util.Observable implements FileList, LinkList, I
 			PreparedStatement st = c.prepareStatement("DELETE FROM files WHERE indexParent = ?");
 			st.setInt(1, getId());
 			st.execute();
+			fileList = new Vector();
 		} catch(SQLException e) {
 			Logger.warning(this, "Unable to purge da list ! Exception: "+e.toString());
 		}
@@ -383,8 +406,10 @@ public class Index extends java.util.Observable implements FileList, LinkList, I
 	////// FILE LIST ////////
 
 	public void loadFiles(String columnToSort, boolean asc) {
-		if(fileList != null)
+		if(fileList != null) {
+			Logger.notice(this, "Files already loaded, won't reload them");
 			return;
+		}
 
 		fileList = new Vector();
 
@@ -520,8 +545,10 @@ public class Index extends java.util.Observable implements FileList, LinkList, I
 	
 	public void loadLinks(String columnToSort, boolean asc)
 	{
-		if(linkList != null)
+		if(linkList != null) {
+			Logger.notice(this, "Links aleady loaded, won't reload ...");
 			return;
+		}
 
 		linkList = new Vector();
 
@@ -543,10 +570,8 @@ public class Index extends java.util.Observable implements FileList, LinkList, I
 				ResultSet results = st.getResultSet();
 
 				while(results.next()) {
-					String[] split = publicKey.split("/");
 					try {
-						String indexName = split[split.length-2];
-						Link link = new Link(db, indexName, publicKey, this);
+						Link link = new Link(db, results, this);
 						linkList.add(link);
 					} catch(Exception e) {
 						Logger.warning(this, "Unable to add index '"+publicKey+"' to the list because: "+e.toString());
@@ -683,6 +708,22 @@ public class Index extends java.util.Observable implements FileList, LinkList, I
 	public Element getXMLLinks(Document xmlDoc) {
 		Element links = xmlDoc.createElement("indexes");
 
+		if (linkList == null) {
+			loadLinks(null, true);
+		}
+
+		for (Iterator it = getLinkList().iterator();
+		     it.hasNext();) {
+			Link link = (Link)it.next();
+
+			Element xmlLink = link.getXML(xmlDoc);
+
+			if (xmlLink != null)
+				links.appendChild(xmlLink);
+			else
+				Logger.warning(this, "Unable to get XML for the link '"+link.getIndexName()+"' => Gruick da link");
+		}
+
 		return links;
 	}
 
@@ -769,14 +810,14 @@ public class Index extends java.util.Observable implements FileList, LinkList, I
 			if(list.item(i).getNodeType() == Node.ELEMENT_NODE) {
 				Element e = (Element)list.item(i);
 				
-				/* TODO : Links */
+				Link link = new Link(db, e, this);
+				addLink(link);
 			}
 		}
 		
 	}
 
 	public void loadFileList(Element rootEl) {
-		fileList = new Vector();
 		purgeFileList();
 
 		Element filesEl = (Element)rootEl.getElementsByTagName("files").item(0);
@@ -790,6 +831,20 @@ public class Index extends java.util.Observable implements FileList, LinkList, I
 				addFile(file);
 			}
 		}
+	}
+
+
+	static String getNameFromKey(String key) {
+		String name = null;
+		try {
+			String[] cutcut = key.split("/");
+			name = cutcut[cutcut.length-1];
+			name = name.replaceAll(".xml", "");
+		} catch (Exception e) {
+			Logger.warning(e, "thaw.plugins.index.Index: Error while parsing index key: "+key+" because: "+e.toString() );
+			name = key;
+		}
+		return name;
 	}
 
 }

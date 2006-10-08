@@ -2,6 +2,11 @@ package thaw.plugins.index;
 
 import java.sql.*;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
 
@@ -19,6 +24,30 @@ public class Link extends java.util.Observable {
 	public Link(Hsqldb hsqldb, String indexName, String key, Index parent) {
 		this.indexName = indexName;
 		this.key = key;
+		this.parent = parent;
+		this.db = hsqldb;
+	}
+
+	public Link(Hsqldb hsqldb, String key, Index parent) {
+		this(hsqldb, Index.getNameFromKey(key), key, parent);
+	}
+
+	public Link(Hsqldb hsqldb, ResultSet resultSet, Index parent) throws SQLException {
+		this.db = hsqldb;
+		this.id = resultSet.getInt("id");
+		this.key = resultSet.getString("publicKey");
+
+		this.indexName = Index.getNameFromKey(this.key);
+
+		this.parent = parent;
+	}
+
+	public Link(Hsqldb hsqldb, Element linkElement, Index parent) {
+		this.db = hsqldb;
+		this.key = linkElement.getAttribute("key");
+
+		this.indexName = Index.getNameFromKey(this.key);
+
 		this.parent = parent;
 	}
 
@@ -123,5 +152,14 @@ public class Link extends java.util.Observable {
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to update link to '"+indexName+"' because: "+e.toString());
 		}
+	}
+
+
+	public Element getXML(Document xmlDoc) {
+		Element link = xmlDoc.createElement("index");
+
+		link.setAttribute("key", key);
+
+		return link;
 	}
 }

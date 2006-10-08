@@ -3,6 +3,7 @@ package thaw.plugins.index;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import javax.swing.JTree;
+import javax.swing.tree.TreeSelectionModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -170,6 +171,9 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		tree.setCellRenderer(treeRenderer);
 
+		if (selectionOnly)
+			tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+
 		panel.add(new JScrollPane(tree));
 	}
 
@@ -255,14 +259,8 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 					Logger.warning(this, "UnsupportedEncodingException (UTF-8): "+exc.toString());
 				}
 
-				try {
-					String[] cutcut = publicKey.split("/");
-					name = cutcut[cutcut.length-1];
-					name = name.replaceAll(".xml", "");
-				} catch(Exception exc) {
-					Logger.warning(this, "Error while parsing index key: "+publicKey+" because: "+exc.toString() );
-					name = publicKey;
-				}
+				name = Index.getNameFromKey(publicKey);
+
 			} else
 				name = askAName(I18n.getMessage("thaw.plugin.index.indexName"),
 					       I18n.getMessage("thaw.plugin.index.newIndex"));
@@ -411,6 +409,20 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 								  hasFocus);
 
 		}
+	}
+
+
+	void addToRoot(IndexTreeNode node) {
+		node.setParent(root);
+		root.insert(node.getTreeNode(), root.getChildCount());
+		reloadModel(root);
+	}
+
+	/**
+	 * @param node can be null
+	 */
+	void reloadModel(DefaultMutableTreeNode node) {
+		treeModel.reload(node);
 	}
 
 }

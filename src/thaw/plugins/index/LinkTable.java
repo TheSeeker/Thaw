@@ -41,6 +41,9 @@ import java.util.Observer;
 import thaw.core.*;
 import thaw.fcp.*;
 
+import thaw.plugins.Hsqldb;
+
+
 public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 	private JPanel panel;
@@ -52,11 +55,20 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 	private FCPQueueManager queueManager;
 	private boolean modifiables;
 
+	private JPopupMenu rightClickMenu;
+	private JMenuItem removeLinks;
+	private JMenuItem addThisIndex;
+	private JMenuItem copyKey;
+	private IndexTree indexTree;
+
+	private Hsqldb db;
+
 	private int[] selectedRows;
 
-	public LinkTable (boolean modifiables, FCPQueueManager queueManager) {
+	public LinkTable (boolean modifiables, Hsqldb db, FCPQueueManager queueManager, IndexTree tree) {
 		this.modifiables = modifiables;
 		this.queueManager = queueManager;
+		this.db = db;
 
 		linkListModel = new LinkListModel();
 		table = new JTable(linkListModel);
@@ -68,6 +80,23 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		panel.add(new JLabel(I18n.getMessage("thaw.plugin.index.linkList")), BorderLayout.NORTH);
 		panel.add(new JScrollPane(table));
 		
+		rightClickMenu = new JPopupMenu();
+		removeLinks = new JMenuItem(I18n.getMessage("thaw.common.remove"));
+		addThisIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.addIndexFromLink"));
+		copyKey = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKey"));
+
+		removeLinks.addActionListener(this);
+		addThisIndex.addActionListener(this);
+		copyKey.addActionListener(this);
+
+		if (modifiables)
+			rightClickMenu.add(removeLinks);
+		rightClickMenu.add(addThisIndex);
+		rightClickMenu.add(copyKey);
+
+		table.addMouseListener(this);
+
+		indexTree = tree;
 	}
 
 	public JPanel getPanel() {
@@ -89,7 +118,12 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 	}
 
 	public void mouseClicked(MouseEvent e) {
-
+		if(e.getButton() == MouseEvent.BUTTON3
+		   && linkList != null) {
+			removeLinks.setEnabled(linkList instanceof Index);
+			selectedRows = table.getSelectedRows();
+			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
+		}
 	}
 
 	public void mouseEntered(MouseEvent e) { }
@@ -107,6 +141,43 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 	public void keyTyped(KeyEvent e) { }
 
 	public void actionPerformed(ActionEvent e) {
+		Vector links;
+		String keyList = "";
+
+		if (linkList == null)
+			return;
+
+		links = linkList.getLinkList();
+
+		for (int i = 0 ; i < selectedRows.length;  i++) {
+			
+			if (e.getSource() == removeLinks) {
+				Link link = (Link)links.get(selectedRows[i]);
+				((Index)linkList).removeLink(link);
+			}
+
+			if (e.getSource() == addThisIndex) {
+				Link link = (Link)links.get(selectedRows[i]);
+				Index index = new Index(db, queueManager, -2, null, Index.getNameFromKey(link.getKey()),
+							Index.getNameFromKey(link.getKey()), link.getKey(), null,
+							0, null, false);
+				index.create();
+				indexTree.addToRoot(index);
+			}
+
+			if (e.getSource() == copyKey) {
+				Link link = (Link)links.get(selectedRows[i]);
+				if (link.getKey() != null)
+					keyList = keyList + link.getKey() + "\n";
+			}
+		}
+
+		if(e.getSource() == copyKey) {
+			Toolkit tk = Toolkit.getDefaultToolkit();
+			StringSelection st = new StringSelection(keyList);
+			Clipboard cp = tk.getSystemClipboard();
+			cp.setContents(st, null);
+		}
 
 	}
 
@@ -134,7 +205,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 			}
 
 			if (newLinkList != null && (newLinkList instanceof Observable)) {
-				((Observable)newLinkList).deleteObserver(this);
+				((Observable)newLinkList).addObserver(this);
 			}
 
 			linkList = newLinkList;
@@ -161,6 +232,8 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 					link.addObserver(this);
 				}
 			}
+
+			refresh();
 
 		}
 
@@ -199,13 +272,12 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 			refresh(event);
 		}
 
-			public void refresh(int row) {
+		public void refresh(int row) {
 			TableModelEvent event = new TableModelEvent(this, row);
 			refresh(event);
 		}
 
 		public void refresh(TableModelEvent e) {
-
 			fireTableChanged(e);
 		}
 

@@ -73,7 +73,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 	public File(Hsqldb db, Element fileElement, Index parent) {
 		this.db = db;
 
-		id = Integer.parseInt(fileElement.getAttribute("id"));
+		id = Integer.parseInt(fileElement.getAttribute("id")); /* will be changed when inserted in the database */
 		publicKey = fileElement.getAttribute("key");
 		
 		localPath = null;
@@ -290,8 +290,10 @@ public class File extends java.util.Observable implements java.util.Observer {
 
 	
 	public Element getXML(Document xmlDoc) {
-		if(getPublicKey() == null)
+		if(getPublicKey() == null) {
+			Logger.notice(this, "No public key for file '"+fileName+"' => not added to the index");
 			return null;
+		}
 
 		Element file = xmlDoc.createElement("file");
 

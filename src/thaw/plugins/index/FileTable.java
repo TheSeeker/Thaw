@@ -358,7 +358,6 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		}
 
 		public void refresh(TableModelEvent e) {
-
 			fireTableChanged(e);
 		}
 

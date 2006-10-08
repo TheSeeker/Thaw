@@ -48,6 +48,10 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 
 	}
 
+	public void setParent(IndexCategory parent) {
+		this.parent = parent;
+	}
+
 	public DefaultMutableTreeNode getTreeNode() {
 		return this;
 	}

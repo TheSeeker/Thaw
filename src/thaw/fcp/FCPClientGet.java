@@ -217,17 +217,20 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 					status = "Available";
 					fileSize = (new Long(message.getValue("DataLength"))).longValue();
 					
-					progress = 100;
-					running = false;
-					successful = true;
-					
 					if(isPersistent()) {
 						if(destinationDir != null) {
 							
 							if(!fileExists(destinationDir)) {
+								progress = 99;
+								running = true;
+								successful = false;
 								saveFileTo(destinationDir);
-							} else
+							} else {
+								progress = 100;
+								running = false;
+								successful = true;
 								Logger.info(this, "File already existing. Not rewrited");
+							}
 							
 						} else {
 							Logger.info(this, "Don't know where to put file, so file not asked to the node");

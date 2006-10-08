@@ -7,6 +7,8 @@ import javax.swing.tree.MutableTreeNode;
 public interface IndexTreeNode {
 	
 	public DefaultMutableTreeNode getTreeNode();
+	
+	public void setParent(IndexCategory parent);
 
 	/**
 	 * get Id of this node in the database.

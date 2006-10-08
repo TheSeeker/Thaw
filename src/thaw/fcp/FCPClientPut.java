@@ -577,6 +577,15 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				running = false;
 
 				publicKey = msg.getValue("URI");
+
+				if (publicKey == null) {
+					status = "[Warning]";
+					Logger.warning(this, "PutSuccessful message without URI field ?!");
+					setChanged();
+					notifyObservers();
+					return;
+				}
+
 				publicKey = publicKey.replaceAll("freenet:", "");
 
 				if(keyType == 1)
