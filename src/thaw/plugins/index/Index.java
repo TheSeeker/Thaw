@@ -214,10 +214,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		try {
 			String newKey;
 			String[] split = key.split("/");
+
 			newKey = split[0] + "/" + split[1] + "/"
 				+ Integer.toString(Integer.parseInt(split[2])+move) + "/"
 				+ split[3];
 			
+			return newKey;
 		} catch (Exception e) {
 			Logger.warning(this, "Unable to add a revision to the key '"+key+"' because : "+e.toString());
 		}
@@ -254,9 +256,13 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		} else {
 			FCPClientGet clientGet;
 			
-			Logger.info(this, "Getting last version");
+			Logger.info(this, "Getting lastest version ...");
 
-			clientGet = new FCPClientGet(changeRevision(publicKey, 1), 4, 2, false, System.getProperty("java.io.tmpdir"));
+			String key = changeRevision(publicKey, 1);
+
+			Logger.info(this, "Key asked: "+key);
+
+			clientGet = new FCPClientGet(key, 4, 2, false, System.getProperty("java.io.tmpdir"));
 			transfer = clientGet;
 			clientGet.addObserver(this);
 
@@ -399,6 +405,13 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				}
 
 			}
+
+			if (transfer.isFinished() && !transfer.isSuccessful()) {
+				Logger.info(this, "Unable to get new version of the index");
+				transfer = null;
+				return;
+			}
+
 		}
 	}
 	
