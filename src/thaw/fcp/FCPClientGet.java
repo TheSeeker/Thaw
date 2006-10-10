@@ -214,18 +214,19 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				if(!alreadySaved) {
 					alreadySaved = true;
 					
-					status = "Available";
 					fileSize = (new Long(message.getValue("DataLength"))).longValue();
 					
 					if(isPersistent()) {
 						if(destinationDir != null) {
 							
 							if(!fileExists(destinationDir)) {
+								status = "Requesting file from the node";
 								progress = 99;
 								running = true;
 								successful = false;
 								saveFileTo(destinationDir);
 							} else {
+								status = "Available";
 								progress = 100;
 								running = false;
 								successful = true;
