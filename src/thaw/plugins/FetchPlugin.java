@@ -57,6 +57,7 @@ public class FetchPlugin implements thaw.core.Plugin {
 			String[] subKey = keys[i].split("\\?"); /* Because of VolodyA :p */
 
 			String key = subKey[0].replaceFirst("http://127.0.0.1:8888/", "");
+			key = key.replaceFirst("http://localhost/", "");
 			
 			try {
 				key = java.net.URLDecoder.decode(key, "UTF-8");

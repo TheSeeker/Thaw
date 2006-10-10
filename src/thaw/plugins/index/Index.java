@@ -63,12 +63,17 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	private String author = null;
 
+	private boolean freshIndex = false;
 
+	/**
+	 * The bigest constructor of the world ...
+	 * @param fresh If set to true, won't increment revision for the next update
+	 */
 	public Index(Hsqldb db, FCPQueueManager queueManager,
 		     int id, IndexCategory parent,
 		     String realName, String displayName,
 		     String publicKey, String privateKey,
-		     int revision, String author, 
+		     int revision, String author, boolean fresh, 
 		     boolean modifiable) {
 		this.queueManager = queueManager;
 
@@ -77,6 +82,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		this.db = db;
 		this.tree = tree;
 
+		this.freshIndex = fresh;
 		this.id = id;
 		this.parent = parent;
 		this.realName = realName;
@@ -258,7 +264,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			
 			Logger.info(this, "Getting lastest version ...");
 
-			String key = changeRevision(publicKey, 1);
+			String key;
+
+			if (!freshIndex)
+				key = changeRevision(publicKey, 1);
+			else
+				key = publicKey;
 
 			Logger.info(this, "Key asked: "+key);
 

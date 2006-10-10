@@ -252,6 +252,8 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 			if(!modifiables) {
 				publicKey = askAName(I18n.getMessage("thaw.plugin.index.indexKey"), "USK@");
+				publicKey = publicKey.replaceFirst("http://127.0.0.1/", "");
+				publicKey = publicKey.replaceFirst("http://localhost/", "");
 
 				try {
 					publicKey = java.net.URLDecoder.decode(publicKey, "UTF-8");
@@ -263,14 +265,14 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 			} else
 				name = askAName(I18n.getMessage("thaw.plugin.index.indexName"),
-					       I18n.getMessage("thaw.plugin.index.newIndex"));
+						I18n.getMessage("thaw.plugin.index.newIndex"));
 
 			if(name == null)
 				return;
 
 			IndexCategory parent = (IndexCategory)selectedNode;
 
-			Index index = new Index(db, queueManager, -2, parent, name, name, publicKey, null, 0, null, modifiables);
+			Index index = new Index(db, queueManager, -2, parent, name, name, publicKey, null, 0, null, true, modifiables);
 
 			if(modifiables)
 				index.generateKeys(queueManager);

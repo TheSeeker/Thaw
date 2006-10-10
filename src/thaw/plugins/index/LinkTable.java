@@ -160,7 +160,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 				Link link = (Link)links.get(selectedRows[i]);
 				Index index = new Index(db, queueManager, -2, null, Index.getNameFromKey(link.getKey()),
 							Index.getNameFromKey(link.getKey()), link.getKey(), null,
-							0, null, false);
+							0, null, true, false);
 				index.create();
 				indexTree.addToRoot(index);
 			}
