@@ -224,7 +224,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 								progress = 99;
 								running = true;
 								successful = false;
-								saveFileTo(destinationDir);
+								saveFileTo(destinationDir, false);
 							} else {
 								status = "Available";
 								progress = 100;
@@ -498,7 +498,11 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		}
 	}
 
-	public synchronized boolean saveFileTo(String dir) {
+	public boolean saveFileTo(String dir) {
+		return this.saveFileTo(dir, true);
+	}
+
+	public synchronized boolean saveFileTo(String dir, boolean checkStatus) {
 		fromTheNodeProgress = 0;
 
 		if(dir == null) {
@@ -509,7 +513,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		destinationDir = dir;
 
 
-		if(!isFinished() || !isSuccessful()) {
+		if(checkStatus && (!isFinished() || !isSuccessful())) {
 			Logger.warning(this, "Unable to fetch a file not finished");
 			return false;
 		}
@@ -518,6 +522,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			Logger.warning(this, "Not persistent, so unable to ask");
 			return false;
 		}
+
+		Logger.info(this, "Duplicating socket ...");
 
 		duplicatedQueryManager = queueManager.getQueryManager().duplicate(identifier);
 		duplicatedQueryManager.addObserver(this);
@@ -538,10 +544,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	}
 
 	public synchronized boolean continueSaveFileTo(String dir) {
-		try {
-			Thread.sleep(20000);
-		} catch(java.lang.InterruptedException e){
-		}
+
 		Logger.info(this, "Asking file '"+filename+"' to the node...");
 
 		destinationDir = dir;

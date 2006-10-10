@@ -263,6 +263,7 @@ public class FCPConnection extends Observable {
 				lastWrite = System.currentTimeMillis();
 				
 				out.write(data);
+				out.flush();
 			} catch(java.io.IOException e) {
 				Logger.warning(this, "Unable to write() on the socket ?! : "+ e.toString()+ " ; "+e.getMessage());
 				disconnect();
