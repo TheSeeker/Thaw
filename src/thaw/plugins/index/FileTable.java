@@ -204,7 +204,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			if(e.getSource() == downloadFiles) {
 				thaw.plugins.index.File file = index.getFile(selectedRows[i]);
 
-				FCPClientGet clientGet = new FCPClientGet(file.getPublicKey(), 4, 0, true,
+				FCPClientGet clientGet = new FCPClientGet(file.getPublicKey(), 4, 0, true, -1,
 									  destination.getPath());
 
 				queueManager.addQueryToThePendingQueue(clientGet);
@@ -292,7 +292,6 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 				for(Iterator it = files.iterator();
 				    it.hasNext(); ) {
 					thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
-					file.addObserver(this);
 				}
 
 			}	
@@ -362,15 +361,17 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		}
 
 		public void update(java.util.Observable o, Object param) {
-			if(param instanceof thaw.plugins.index.File) {
-
-				/* TODO : It can be a remove ... to check ... */
+			/*if(param instanceof thaw.plugins.index.File
+			   && o instanceof thaw.plugins.index.Index) {
 
 				thaw.plugins.index.File file = (thaw.plugins.index.File)param;
 				
 				file.deleteObserver(this);
-				file.addObserver(this);
-			}
+
+				if (((Index)o).isInIndex(file))
+					file.addObserver(this);
+				
+					}*/
 
 			refresh(); /* TODO : Do it more nicely ... :) */
 		}

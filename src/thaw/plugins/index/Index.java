@@ -96,7 +96,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		this.revision = revision;
 
 		this.author = author;
-
+		
 		treeNode.setUserObject(this);
 	}
 
@@ -189,6 +189,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to rename the index '"+this.displayName+"' in '"+name+"', because: "+e.toString());
 		}
+
 	}
 
 	public void delete() {
@@ -273,7 +274,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 			Logger.info(this, "Key asked: "+key);
 
-			clientGet = new FCPClientGet(key, 4, 2, false, System.getProperty("java.io.tmpdir"));
+			clientGet = new FCPClientGet(key, 4, 2, false, 1, System.getProperty("java.io.tmpdir"));
 			transfer = clientGet;
 			clientGet.addObserver(this);
 
@@ -373,6 +374,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 			Logger.debug(this, "Index public key: "+publicKey);
 			Logger.debug(this, "Index private key: "+privateKey);
+
 		}
 
 		if(o == transfer) {
@@ -424,6 +426,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			}
 
 		}
+
+		if (o instanceof thaw.plugins.index.File
+		    || o instanceof Link) {
+			setChanged();
+			notifyObservers(o);
+		}
 	}
 	
 
@@ -456,7 +464,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 				while(results.next()) {
 					thaw.plugins.index.File file = new thaw.plugins.index.File(db, results, this);
-					fileList.add(file);
+					addFileToList(file);
 				}
 			}
 
@@ -464,6 +472,9 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		} catch(java.sql.SQLException e) {
 			Logger.warning(this, "Unable to get the file list for index: '"+toString()+"' because: "+e.toString());
 		}
+
+		setChanged();
+		notifyObservers();
 	}
 
 	/**
@@ -495,21 +506,43 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			}
 		}
 
+		if (fileList != null) {
+			for (Iterator it  = fileList.iterator();
+			     it.hasNext();)
+				{
+					thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+					file.deleteObserver(this);
+				}
+		}
+
 		fileList = null;
 	}
 
 
+	/**
+	 * Note for myself: For external use only ! (file will be inserted in the database etc)
+	 */
 	public void addFile(thaw.plugins.index.File file) {
 		file.setParent(this);
 		file.insert();
 
-		if(fileList != null) {
-			fileList.add(file);
+		addFileToList(file);
 
-			setChanged();
-			notifyObservers(file);
-		}
+		setChanged();
+		notifyObservers(file);
 	}
+
+
+	/**
+	 * Won't notify
+	 */
+	protected void addFileToList(thaw.plugins.index.File file) {
+		if (fileList == null)
+			loadFiles(null, true);
+		file.addObserver(this);
+		fileList.add(file);
+	}
+
 
 	public void removeFile(thaw.plugins.index.File file) {
 		file.delete();
@@ -545,6 +578,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			setChanged();
 			notifyObservers(link);
 		}
+
 	}
 
 	public void removeLink(Link link) {
@@ -555,6 +589,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			setChanged();
 			notifyObservers(link);
 		}
+
 	}
 
 	/**
@@ -851,10 +886,13 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			if(list.item(i).getNodeType() == Node.ELEMENT_NODE) {
 				Element e = (Element)list.item(i);
 				
-				thaw.plugins.index.File file = new thaw.plugins.index.File(db, e, this);
-				addFile(file);
+				thaw.plugins.index.File file = new thaw.plugins.index.File(db, e, this);	
+				addFileToList(file);
 			}
 		}
+
+		setChanged();
+		notifyObservers();
 	}
 
 
@@ -869,6 +907,20 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			name = key;
 		}
 		return name;
+	}
+
+	
+	public Vector getIndexIds() {
+		Vector ids = new Vector();
+		ids.add(new Integer(getId()));
+		return ids;
+	}
+
+
+	public boolean isInIndex(thaw.plugins.index.File file) {
+		if (fileList == null)
+			loadFiles(null, true);
+		return fileList.contains(file);
 	}
 
 }

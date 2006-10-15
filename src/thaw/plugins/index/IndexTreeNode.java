@@ -1,5 +1,7 @@
 package thaw.plugins.index;
 
+import java.util.Vector;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 
@@ -46,6 +48,9 @@ public interface IndexTreeNode {
 	 * Get (public) key(s)
 	 */
 	public String getKey();
+
+
+	public Vector getIndexIds();
 
 	public void addObserver(java.util.Observer o);
 }

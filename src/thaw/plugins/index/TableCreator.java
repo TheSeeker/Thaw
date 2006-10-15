@@ -41,6 +41,8 @@ public class TableCreator {
 	 * Can be safely called, even if the tables already exist.
 	 */
 	public static void createTables(Hsqldb db) {
+		//sendQuery(db,
+		//	  "SET IGNORECASE TRUE");
 		sendQuery(db, 
 			  "CREATE CACHED TABLE indexCategories ("
 			  + "id INTEGER IDENTITY NOT NULL,"

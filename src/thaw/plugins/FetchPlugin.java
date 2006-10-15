@@ -68,7 +68,7 @@ public class FetchPlugin implements thaw.core.Plugin {
 			core.getQueueManager().addQueryToThePendingQueue(new FCPClientGet(key,
 											  priority,
 											  persistence,
-											  globalQueue,
+											  globalQueue, -1,
 											  destination));
 		}
 

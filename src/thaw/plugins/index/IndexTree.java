@@ -241,6 +241,23 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		notifyObservers(selectedNode);
 	}
 
+	public IndexTreeNode getSelectedNode() {
+		Object obj = tree.getLastSelectedPathComponent();
+
+		if (obj == null)
+			return null;
+
+		if (obj instanceof IndexTreeNode)
+			return (IndexTreeNode)obj;
+
+		if (obj instanceof DefaultMutableTreeNode)
+			return ((IndexTreeNode)(((DefaultMutableTreeNode)obj).getUserObject()));
+
+		Logger.notice(this, "getSelectedNode(): Unknow kind of node ?!");
+
+		return null;
+	}
+
 	public void actionPerformed(ActionEvent e) {
 		if(selectedNode == null)
 			return;

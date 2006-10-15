@@ -68,16 +68,15 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 
 
 	protected void setList(FileAndLinkList l) {
-		setFileList(l);
-		setLinkList(l);
+		tables.setList(l);
 	}
-	
+
 	protected void setFileList(FileList l) {
-		tables.getFileTable().setFileList(l);		
+		tables.setFileList(l);
 	}
 
 	protected void setLinkList(LinkList l) {
-		tables.getLinkTable().setLinkList(l);
+		tables.setLinkList(l);
 	}
 	
 

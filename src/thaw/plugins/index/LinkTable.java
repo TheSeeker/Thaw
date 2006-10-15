@@ -229,7 +229,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 				for(Iterator it = links.iterator();
 				    it.hasNext(); ) {
 					thaw.plugins.index.Link link = (thaw.plugins.index.Link)it.next();
-					link.addObserver(this);
+					//link.addObserver(this);
 				}
 			}
 
@@ -288,8 +288,8 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 				thaw.plugins.index.Link link = (thaw.plugins.index.Link)param;
 				
-				link.deleteObserver(this);
-				link.addObserver(this);
+				//link.deleteObserver(this);
+				//link.addObserver(this);
 			}
 
 			refresh(); /* TODO : Do it more nicely ... :) */

@@ -25,7 +25,7 @@ public class Tables {
 		fileTable = new FileTable(modifiables, queueManager);
 		linkTable = new LinkTable(modifiables, db, queueManager, tree);
 
-		searchBar = new SearchBar(fileTable, linkTable);
+		searchBar = new SearchBar(db, tree, this);
 
 		panel.add(searchBar.getPanel(), BorderLayout.NORTH);
 		panel.add(new JSplitPane(JSplitPane.VERTICAL_SPLIT,
@@ -34,13 +34,27 @@ public class Tables {
 	}
 
 
-	public FileTable getFileTable() {
+	protected FileTable getFileTable() {
 		return fileTable;
 	}
 
-	public LinkTable getLinkTable() {
+	protected LinkTable getLinkTable() {
 		return linkTable;
 	}
+
+	public void setLinkList(LinkList linkList) {
+		getLinkTable().setLinkList(linkList);
+	}
+
+	public void setFileList(FileList fileList) {
+		getFileTable().setFileList(fileList);
+	}
+
+	public void setList(FileAndLinkList l) {
+		setFileList(l);
+		setLinkList(l);
+	}
+
 
 	public JPanel getPanel() {
 		return panel;

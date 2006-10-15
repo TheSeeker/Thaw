@@ -63,7 +63,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 		publicKey = resultSet.getString("publicKey");
 		localPath = resultSet.getString("localPath");
 		size = resultSet.getLong("size");
-		category = resultSet.getString("category");
+		//category = resultSet.getString("category");
 
 		deduceFilenameFromKey();
 		
@@ -162,6 +162,11 @@ public class File extends java.util.Observable implements java.util.Observer {
 	}
 
 	public void insert() {
+		if (parent == null) {
+			Logger.notice(this, "insert(): No parent !");
+			return;
+		}
+
 		try {
 			PreparedStatement st;
 
@@ -216,6 +221,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 	}
 
 	public void delete() {
+
 		try {
 			PreparedStatement st;
 
@@ -230,6 +236,11 @@ public class File extends java.util.Observable implements java.util.Observer {
 	}
 
 	public void update() {
+		if (parent == null) {
+			Logger.notice(this, "update(): No parent !");
+			return;
+		}
+
 		try {
 			PreparedStatement st;
 

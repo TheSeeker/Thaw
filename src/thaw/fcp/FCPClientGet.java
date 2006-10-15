@@ -14,7 +14,7 @@ import thaw.core.Logger;
  * TODO: Use streams instead of writing directly the file.
  */
 public class FCPClientGet extends Observable implements Observer, FCPTransferQuery {
-	private final static int MAX_RETRIES = -1;
+	private int maxRetries = -1;
 	private final static int PACKET_SIZE = 1024;
 	private final static int BLOCK_SIZE = 32768;
 
@@ -73,9 +73,10 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	public FCPClientGet(String id, String key, int priority,
 			    int persistence, boolean globalQueue,
 			    String destinationDir, String status, int progress,
+			    int maxRetries,
 			    FCPQueueManager queueManager) {
 
-		this(key, priority, persistence, globalQueue, destinationDir);
+		this(key, priority, persistence, globalQueue, maxRetries, destinationDir);
 
 		progressReliable = false;
 
@@ -111,6 +112,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	 */
 	public FCPClientGet(String key, int priority,
 			    int persistence, boolean globalQueue,
+			    int maxRetries,
 			    String destinationDir) {	
 
 	
@@ -120,6 +122,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		progressReliable = false;
 		fromTheNodeProgress = 0;
 
+		this.maxRetries = maxRetries;
 		this.key = key;
 		this.priority = priority;
 		this.persistence = persistence;
@@ -164,7 +167,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		queryMessage.setValue("URI", getFileKey());
 		queryMessage.setValue("Identifier", identifier);
 		queryMessage.setValue("Verbosity", "1");
-		queryMessage.setValue("MaxRetries", Integer.toString(MAX_RETRIES));
+		queryMessage.setValue("MaxRetries", Integer.toString(maxRetries));
 		queryMessage.setValue("PriorityClass", Integer.toString(priority));
 
 		if(destinationDir != null)
@@ -318,7 +321,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			int code = Integer.parseInt(message.getValue("Code"));
 
-			if(MAX_RETRIES == -1 || attempt >= MAX_RETRIES || code == 25) {
+			if(maxRetries == -1 || attempt >= maxRetries || code == 25) {
 			    status = "Failed ("+message.getValue("CodeDescription")+")";
 			    progress = 100;
 			    running = false;
@@ -837,7 +840,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	}
 
 	public int getMaxAttempt() {
-		return MAX_RETRIES;
+		return maxRetries;
 	}
 
 	public boolean isSuccessful() {
@@ -870,12 +873,13 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		result.put("FileSize", Long.toString(fileSize));
 		result.put("Running", Boolean.toString(running));
 		result.put("Successful", Boolean.toString(successful));
+		result.put("MaxRetries", Integer.toString(maxRetries));
 
 		return result;
 	}
 
 	public boolean setParameters(HashMap parameters) {
-		
+
 		key            = (String)parameters.get("URI");
 
 		Logger.debug(this, "Resuming key : "+key);
@@ -895,6 +899,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		fileSize       = Long.parseLong((String)parameters.get("FileSize"));
 		running        = Boolean.valueOf((String)parameters.get("Running")).booleanValue();
 		successful     = Boolean.valueOf((String)parameters.get("Successful")).booleanValue();
+		maxRetries     = Integer.parseInt((String)parameters.get("MaxRetries"));
 
 		if(persistence == 2 && !isFinished()) {
 			progress = 0;

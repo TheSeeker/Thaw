@@ -112,14 +112,14 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 	protected void setLinkList(LinkList l) {
 		buttonsEnabled(l != null && l instanceof Index);
 		this.linkList = l;
-		tables.getLinkTable().setLinkList(l);
+		tables.setLinkList(l);
 	}
 
 	protected void setFileList(FileList l) {
 		buttonsEnabled(l != null && l instanceof Index);
 
 		this.fileList = l;
-		tables.getFileTable().setFileList(l);		
+		tables.setFileList(l);		
 	}
 
 	public void valueChanged(javax.swing.event.TreeSelectionEvent e) {
