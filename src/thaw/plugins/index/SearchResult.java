@@ -65,7 +65,7 @@ public class SearchResult extends Observable implements FileAndLinkList {
 
 		for (Iterator it = indexIds.iterator();
 		     it.hasNext(); i++) {
-			st.setInt(i, (Integer)it.next());
+			st.setInt(i, ((Integer)it.next()).intValue());
 		}
 
 		for (int j = 0 ; j < searchPatterns.length; j++) {
