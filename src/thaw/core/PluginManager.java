@@ -11,9 +11,9 @@ public class PluginManager {
 	private final static String[] defaultPlugins = {"thaw.plugins.QueueWatcher",
 							"thaw.plugins.InsertPlugin",
 							"thaw.plugins.FetchPlugin",
-							"thaw.plugins.StatusBar"};
-							//"thaw.plugins.IndexEditor",
-							//"thaw.plugins.IndexBrowser"};
+							"thaw.plugins.StatusBar",
+							"thaw.plugins.IndexEditor",
+							"thaw.plugins.IndexBrowser"};
 
 	private Core core = null;
 
