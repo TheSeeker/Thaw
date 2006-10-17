@@ -357,9 +357,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			if(message.getValue("Total") != null
 			   && message.getValue("Succeeded") != null) {
-				fileSize = ((new Long(message.getValue("Total"))).longValue())*BLOCK_SIZE;
-				long required = (new Long(message.getValue("Total"))).longValue();
-				long succeeded = (new Long(message.getValue("Succeeded"))).longValue();
+				fileSize = Long.parseLong(message.getValue("Total"))*BLOCK_SIZE;
+				long required = Long.parseLong(message.getValue("Total"));
+				long succeeded = Long.parseLong(message.getValue("Succeeded"));
 
 				progress = (int) ((long)((succeeded * 98) / required));
 

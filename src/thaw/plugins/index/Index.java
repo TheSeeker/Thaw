@@ -422,6 +422,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			if (transfer.isFinished() && !transfer.isSuccessful()) {
 				Logger.info(this, "Unable to get new version of the index");
 				transfer = null;
+				setChanged();
+				notifyObservers();
 				return;
 			}
 
