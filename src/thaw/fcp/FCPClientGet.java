@@ -531,8 +531,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		duplicatedQueryManager = queueManager.getQueryManager().duplicate(identifier);
 		duplicatedQueryManager.addObserver(this);
 
-		Logger.info(this, "Waiting for socket avaibility ...");
-		status = "Waiting for socket avaibility ...";
+		Logger.info(this, "Waiting for socket  ...");
+		status = "Waiting for socket availability ...";
 		progress = 99;
 		running = true;
 
