@@ -356,8 +356,14 @@ public class FCPConnection extends Observable {
 
 			return rdBytes;
 		} catch(java.io.IOException e) {
-			Logger.error(this, "IOException while reading raw bytes on socket => disconnection");
-			Logger.error(this, e.getMessage() + ":" +e.getCause().toString()+ " ; "+e.getMessage() );
+			Logger.error(this, "IOException while reading raw bytes on socket => disconnection:");
+			Logger.error(this, "   =========");
+			Logger.error(this, e.getMessage() + ":");
+			if (e.getCause() != null)
+				Logger.error(this, e.getCause().toString());
+			Logger.error(this, e.getMessage() );
+			Logger.error(this, "   =========");
+
 			disconnect();
 			return -2; /* -1 can mean eof */
 		}
