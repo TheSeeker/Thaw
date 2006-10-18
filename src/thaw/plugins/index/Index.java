@@ -531,10 +531,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			file.insert();
 
 			addFileToList(file);
-
+		
 			setChanged();
 			notifyObservers(file);
 		}
+		else
+			Logger.notice(this, "File already in the database for this index");
 	}
 
 
@@ -579,14 +581,20 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		if (!link.isInTheDatabase()) {
 			link.insert();
 
-			if (linkList != null) {
-				linkList.add(link);
-
-				setChanged();
-				notifyObservers(link);
-			}
+			addLinkToList(link);
+			setChanged();
+			notifyObservers(link);
 		}
+		else
+			Logger.notice(this, "Link already in the database for this index");
 
+	}
+
+	protected void addLinkToList(Link link) {
+		if (linkList == null)
+			loadLinks(null, true);
+
+		linkList.add(link);
 	}
 
 	public void removeLink(Link link) {
@@ -639,7 +647,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				while(results.next()) {
 					try {
 						Link link = new Link(db, results, this);
-						addLink(link);
+						addLinkToList(link);
 					} catch(Exception e) {
 						Logger.warning(this, "Unable to add index '"+publicKey+"' to the list because: "+e.toString());
 					}
