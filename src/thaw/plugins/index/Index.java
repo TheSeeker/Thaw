@@ -372,7 +372,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			publicKey = sskGenerator.getPublicKey();
 			privateKey = sskGenerator.getPrivateKey();
 
-			Logger.debug(this, "Index public key: "+publicKey);
+			Logger.debug(this, "Index public key: " +publicKey);
 			Logger.debug(this, "Index private key: "+privateKey);
 
 		}
@@ -526,12 +526,15 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	 */
 	public void addFile(thaw.plugins.index.File file) {
 		file.setParent(this);
-		file.insert();
 
-		addFileToList(file);
+		if (!file.isInTheDatabase()) {
+			file.insert();
 
-		setChanged();
-		notifyObservers(file);
+			addFileToList(file);
+
+			setChanged();
+			notifyObservers(file);
+		}
 	}
 
 
@@ -572,13 +575,16 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	public void addLink(Link link) {
 		link.setParent(this);
-		link.insert();
 
-		if (linkList != null) {
-			linkList.add(link);
+		if (!link.isInTheDatabase()) {
+			link.insert();
 
-			setChanged();
-			notifyObservers(link);
+			if (linkList != null) {
+				linkList.add(link);
+
+				setChanged();
+				notifyObservers(link);
+			}
 		}
 
 	}
@@ -633,7 +639,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				while(results.next()) {
 					try {
 						Link link = new Link(db, results, this);
-						linkList.add(link);
+						addLink(link);
 					} catch(Exception e) {
 						Logger.warning(this, "Unable to add index '"+publicKey+"' to the list because: "+e.toString());
 					}
@@ -889,7 +895,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				Element e = (Element)list.item(i);
 				
 				thaw.plugins.index.File file = new thaw.plugins.index.File(db, e, this);	
-				addFileToList(file);
+				addFile(file);
 			}
 		}
 

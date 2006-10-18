@@ -278,6 +278,39 @@ public class File extends java.util.Observable implements java.util.Observer {
 		}
 	}
 
+
+	public boolean isInTheDatabase() {
+		if (parent == null) {
+			Logger.notice(this, "isInTheDatabase(): No parent !");
+			return false;
+		}
+
+		try {
+			PreparedStatement st;
+
+			st = db.getConnection().prepareStatement("SELECT publicKey from files WHERE publicKey = ? AND indexParent = ?");
+
+			if(publicKey != null)
+				st.setString(1, publicKey);
+			else
+				st.setString(1, fileName);
+
+			st.setInt(2, getParent().getId());
+
+			if(st.execute()) {
+				ResultSet result = st.getResultSet();
+				if (result != null && result.next()) {
+					return true;
+				}
+			}
+
+		} catch(SQLException e) {
+
+		}
+		
+		return false;
+	}
+
 	
 	public void update(java.util.Observable o, Object param) {
 		if(o == transfer) {

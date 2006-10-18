@@ -119,6 +119,37 @@ public class Link extends java.util.Observable {
 	
 	}
 
+
+	public boolean isInTheDatabase() {
+		if (parent == null) {
+			Logger.notice(this, "isInTheDatabase(): No parent !");
+			return false;
+		}
+
+		try {
+			PreparedStatement st;
+
+			st = db.getConnection().prepareStatement("SELECT publicKey from links WHERE publicKey = ? AND indexParent = ?");
+
+			st.setString(1, key);
+
+			st.setInt(2, getParent().getId());
+
+			if(st.execute()) {
+				ResultSet result = st.getResultSet();
+				if (result != null && result.next()) {
+					return true;
+				}
+			}
+
+		} catch(SQLException e) {
+			Logger.error(this, "Unable to check if link '"+key+"' exists because: "+e.toString());
+		}
+		
+		return false;
+	}
+
+
 	public void delete() {
 		try {
 			PreparedStatement st;
