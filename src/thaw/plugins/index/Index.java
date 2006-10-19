@@ -264,12 +264,16 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 			String key;
 
-			if (!isEmpty())
-				key = changeRevision(publicKey, 1);
-			else
-				key = publicKey;
+			/* We will trust the node for the incrementation */
+			/*
+			  if (!isEmpty())
+			     key = changeRevision(publicKey, 1);
+			  else
+			     key = publicKey;
+			*/
 
-			//key = key.replaceFirst("USK@", "SSK@");
+			key = publicKey;
+
 
 			Logger.info(this, "Key asked: "+key);
 
