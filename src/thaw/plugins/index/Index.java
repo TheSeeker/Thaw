@@ -63,17 +63,15 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	private String author = null;
 
-	private boolean freshIndex = false;
 
 	/**
 	 * The bigest constructor of the world ...
-	 * @param fresh If set to true, won't increment revision for the next update
 	 */
 	public Index(Hsqldb db, FCPQueueManager queueManager,
 		     int id, IndexCategory parent,
 		     String realName, String displayName,
 		     String publicKey, String privateKey,
-		     int revision, String author, boolean fresh, 
+		     int revision, String author, 
 		     boolean modifiable) {
 		this.queueManager = queueManager;
 
@@ -82,7 +80,6 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		this.db = db;
 		this.tree = tree;
 
-		this.freshIndex = fresh;
 		this.id = id;
 		this.parent = parent;
 		this.realName = realName;
@@ -249,7 +246,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				
 				revision++;
 
-				clientPut = new FCPClientPut(targetFile, 2, revision, toString(), privateKey, 4, false, 2);
+				clientPut = new FCPClientPut(targetFile, 2, revision, toString(), privateKey, 4, false, 0);
 				transfer = clientPut;
 				clientPut.addObserver(this);
 
@@ -267,10 +264,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 			String key;
 
-			if (!freshIndex)
+			if (!isEmpty())
 				key = changeRevision(publicKey, 1);
 			else
 				key = publicKey;
+
+			//key = key.replaceFirst("USK@", "SSK@");
 
 			Logger.info(this, "Key asked: "+key);
 
@@ -397,7 +396,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 					java.io.File file = new java.io.File(transfer.getPath());
 
 					Logger.info(this, "Updating index ...");
-					
+				
 					publicKey = transfer.getFileKey();
 
 					Logger.info(this, "Most up-to-date key found: " + publicKey);
@@ -434,6 +433,19 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			setChanged();
 			notifyObservers(o);
 		}
+	}
+	
+
+	public boolean isEmpty() {
+		if (fileList == null)
+			loadFiles(null, true);
+		if (linkList == null)
+			loadLinks(null, true);
+
+		if (fileList.size() == 0 && linkList.size() == 0)
+			return true;
+
+		return false;
 	}
 	
 

@@ -366,7 +366,10 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 			new JLabel(I18n.getMessage("thaw.about.l3")),
 			new JLabel(I18n.getMessage("thaw.about.l4")),
 			new JLabel(""),
-			new JLabel(I18n.getMessage("thaw.about.l6"))
+			new JLabel(I18n.getMessage("thaw.about.l6")),
+			new JLabel(""),
+			new JLabel(I18n.getMessage("thaw.about.l7")),
+			new JLabel(I18n.getMessage("thaw.about.l8"))
 		};
 
 		labels[0].setFont(new Font("Dialog", Font.BOLD, 30));

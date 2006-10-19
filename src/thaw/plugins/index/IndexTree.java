@@ -289,7 +289,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 			IndexCategory parent = (IndexCategory)selectedNode;
 
-			Index index = new Index(db, queueManager, -2, parent, name, name, publicKey, null, 0, null, true, modifiables);
+			Index index = new Index(db, queueManager, -2, parent, name, name, publicKey, null, 0, null, modifiables);
 
 			if(modifiables)
 				index.generateKeys(queueManager);

@@ -287,7 +287,7 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 				set(children, position, (new Index(db, queueManager, id, this,
 								   realName, displayName,
 								   publicKey, privateKey, revision,
-								   author, false,
+								   author,
 								   modifiables)).getTreeNode());
 			}
 		} catch (java.sql.SQLException e) {
