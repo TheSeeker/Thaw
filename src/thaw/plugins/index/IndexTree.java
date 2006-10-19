@@ -38,6 +38,11 @@ import java.util.Enumeration;
 
 import java.awt.Color;
 
+
+import javax.swing.JToolBar;
+import javax.swing.JButton;
+
+
 import thaw.plugins.Hsqldb;
 import thaw.core.*;
 import thaw.fcp.*;
@@ -54,6 +59,10 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	//private JDragTree tree;
 	private JTree tree;
 	private IndexCategory root;
+
+	private JToolBar toolBar;
+	private JButton newIndex;
+	private JButton refreshAll;
 
 	private JPopupMenu indexCategoryMenu;
 	private JPopupMenu indexMenu;
@@ -174,7 +183,31 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		if (selectionOnly)
 			tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 
-		panel.add(new JScrollPane(tree));
+
+
+		toolBar = new JToolBar();
+
+		newIndex   = new JButton(IconBox.indexNew);
+		if (!modifiables)
+			newIndex.setToolTipText(I18n.getMessage("thaw.plugin.index.addIndex"));
+		else
+			newIndex.setToolTipText(I18n.getMessage("thaw.plugin.index.createIndex"));
+		newIndex.addActionListener(this);
+
+
+		if (!modifiables) {
+			refreshAll = new JButton(IconBox.refreshAction);
+			refreshAll.setToolTipText(I18n.getMessage("thaw.plugin.index.downloadIndexes"));
+			refreshAll.addActionListener(this);
+		}
+
+
+		toolBar.add(newIndex);
+		if (!modifiables)
+			toolBar.add(refreshAll);
+		
+		panel.add(toolBar, BorderLayout.NORTH);
+		panel.add(new JScrollPane(tree), BorderLayout.CENTER);
 	}
 
 
@@ -260,9 +293,10 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 	public void actionPerformed(ActionEvent e) {
 		if(selectedNode == null)
-			return;
+			selectedNode = root;
 
-		if(e.getSource() == addIndex) {
+		if(e.getSource() == addIndex
+		   || e.getSource() == newIndex) {
 			String name = null;
 
 			String publicKey = null;
@@ -287,7 +321,12 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			if(name == null)
 				return;
 
-			IndexCategory parent = (IndexCategory)selectedNode;
+			IndexCategory parent;
+
+			if (e.getSource() == addIndex)
+				parent = (IndexCategory)selectedNode;
+			else
+				parent = root;
 
 			Index index = new Index(db, queueManager, -2, parent, name, name, publicKey, null, 0, null, modifiables);
 
@@ -357,6 +396,10 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		if(e.getSource() == updateIndex
 		   || e.getSource() == updateIndexCategory) {
 			selectedNode.update();
+		}
+		
+		if (e.getSource() == refreshAll) {
+			root.update();
 		}
 
 		if(e.getSource() == copyKey

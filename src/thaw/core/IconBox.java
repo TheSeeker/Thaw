@@ -39,6 +39,9 @@ public class IconBox {
 	public static ImageIcon makeALinkAction;
 
 	public static ImageIcon minIndex;
+	public static ImageIcon indexNew;
+
+	public static ImageIcon refreshAction;
 
 	public static ImageIcon clearAction;
 
@@ -93,6 +96,8 @@ public class IconBox {
 
 			minIndex =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("index.png"));
+			indexNew =
+				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("index-new.png"));
 
 			downloads =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("go-first.png"));
@@ -131,6 +136,9 @@ public class IconBox {
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("view-refresh.png"));
 			minReconnectAction =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("min-view-refresh.png"));
+
+			refreshAction =
+				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("index-refresh.png"));
 
 			quitAction =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("system-log-out.png"));
