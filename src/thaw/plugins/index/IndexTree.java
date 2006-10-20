@@ -205,8 +205,9 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		toolBar.add(newIndex);
 		if (!modifiables)
 			toolBar.add(refreshAll);
-		
-		panel.add(toolBar, BorderLayout.NORTH);
+
+		if (!selectionOnly)
+			panel.add(toolBar, BorderLayout.NORTH);
 		panel.add(new JScrollPane(tree), BorderLayout.CENTER);
 	}
 

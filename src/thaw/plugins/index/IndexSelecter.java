@@ -9,6 +9,8 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 
+import javax.swing.JScrollPane;
+
 import thaw.plugins.Hsqldb;
 import thaw.core.I18n;
 import thaw.core.Logger;
@@ -84,8 +86,8 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 
 		indexPanel = new JPanel();
 		indexPanel.setLayout(new GridLayout(1, 2));
-		indexPanel.add(localIndexes.getPanel());
-		indexPanel.add(otherIndexes.getPanel());
+		indexPanel.add(new JScrollPane(localIndexes.getPanel()));
+		indexPanel.add(new JScrollPane(otherIndexes.getPanel()));
 
 		upPanel.add(indexPanel, BorderLayout.CENTER);
 		
@@ -100,7 +102,7 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 		frame.getContentPane().add(upPanel, BorderLayout.CENTER);
 		frame.getContentPane().add(downPanel, BorderLayout.SOUTH);
 
-		frame.setSize(400, 500);
+		frame.setSize(500, 400);
 
 		cancelButton.addActionListener(this);
 		okButton.addActionListener(this);
