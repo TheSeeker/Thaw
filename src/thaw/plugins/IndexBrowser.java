@@ -33,11 +33,13 @@ public class IndexBrowser implements Plugin {
 
 		TableCreator.createTables(hsqldb);
 
-		browserPanel = new IndexBrowserPanel(hsqldb, core.getQueueManager());
+		browserPanel = new IndexBrowserPanel(hsqldb, core.getQueueManager(), core.getConfig());
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.index.browser"),
 					    IconBox.minIndexBrowser,
 					    browserPanel.getPanel());
+
+		browserPanel.restoreState();
 
 		return true;
 	}
@@ -45,7 +47,7 @@ public class IndexBrowser implements Plugin {
 	public boolean stop() {
 		core.getMainWindow().removeTab(browserPanel.getPanel());
 
-		browserPanel.save();
+		browserPanel.saveState();
 
 		hsqldb.unregisterChild(this);
 

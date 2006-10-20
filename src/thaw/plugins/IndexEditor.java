@@ -38,13 +38,14 @@ public class IndexEditor implements Plugin {
 		TableCreator.createTables(hsqldb);
 
 		
-		editorPanel = new IndexEditorPanel(hsqldb, core.getQueueManager());
+		editorPanel = new IndexEditorPanel(hsqldb, core.getQueueManager(), core.getConfig());
 
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.index.editor"),
 					    IconBox.minIndexEditor,
 					    editorPanel.getPanel());
-					    
+		
+		editorPanel.restoreState();
 
 		return true;
 	}
@@ -53,7 +54,7 @@ public class IndexEditor implements Plugin {
 	public boolean stop() {
 		core.getMainWindow().removeTab(editorPanel.getPanel());
 
-		editorPanel.save();
+		editorPanel.saveState();
 
 		hsqldb.unregisterChild(this);
 

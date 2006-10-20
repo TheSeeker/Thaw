@@ -33,18 +33,19 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 
 	private Hsqldb db;
 	private FCPQueueManager queueManager;
+	private Config config;
 
-
-	public IndexBrowserPanel(Hsqldb db, FCPQueueManager queueManager) {
+	public IndexBrowserPanel(Hsqldb db, FCPQueueManager queueManager, Config config) {
 		this.db = db;
 		this.queueManager = queueManager;
+		this.config = config;
 
 		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, false, queueManager, db);
 
 		listAndDetails = new JPanel();
 		listAndDetails.setLayout(new BorderLayout(10, 10));
 
-		tables = new Tables(false, db, queueManager, indexTree);
+		tables = new Tables(false, db, queueManager, indexTree, config);
 		fileDetails = new FileDetailsEditor(false);
 
 		listAndDetails.add(tables.getPanel(), BorderLayout.CENTER);
@@ -55,15 +56,22 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 				       listAndDetails);
 
 		indexTree.addTreeSelectionListener(this);
+	}
 
+	public void restoreState() {
+		if (config.getValue("indexBrowserPanelSplitPosition") != null)
+			split.setDividerLocation(Integer.parseInt(config.getValue("indexBrowserPanelSplitPosition")));
+		tables.restoreState();
 	}
 
 	public JSplitPane getPanel() {
 		return split;
 	}
 
-	public void save() {
+	public void saveState() {
 		indexTree.save();
+		config.setValue("indexBrowserPanelSplitPosition", Integer.toString(split.getDividerLocation()));
+		tables.saveState();
 	}
 
 

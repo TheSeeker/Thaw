@@ -6,6 +6,7 @@ import java.awt.BorderLayout;
 
 import thaw.fcp.FCPQueueManager;
 
+import thaw.core.Config;
 import thaw.plugins.Hsqldb;
 
 /**
@@ -18,7 +19,12 @@ public class Tables {
 	private FileTable fileTable;
 	private LinkTable linkTable;
 
-	public Tables(boolean modifiables, Hsqldb db, FCPQueueManager queueManager, IndexTree tree) {
+	private JSplitPane split;
+	private Config config;
+
+	public Tables(boolean modifiables, Hsqldb db, FCPQueueManager queueManager, IndexTree tree, Config config) {
+		this.config = config;
+
 		panel = new JPanel();
 		panel.setLayout(new BorderLayout(10, 10));
 
@@ -27,12 +33,26 @@ public class Tables {
 
 		searchBar = new SearchBar(db, tree, this);
 
-		panel.add(searchBar.getPanel(), BorderLayout.NORTH);
-		panel.add(new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+		split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 					 linkTable.getPanel(),
-					 fileTable.getPanel()));
+				       fileTable.getPanel());
+
+		panel.add(searchBar.getPanel(), BorderLayout.NORTH);
+		panel.add(split, BorderLayout.CENTER);
 	}
 
+	public JPanel getPanel() {
+		return panel;
+	}
+
+	public void restoreState() {
+		if (config.getValue("indexFileLinkSplit") != null)
+			split.setDividerLocation(Integer.parseInt(config.getValue("indexFileLinkSplit")));
+	}
+
+	public void saveState() {
+		config.setValue("indexFileLinkSplit", Integer.toString(split.getDividerLocation()));
+	}
 
 	protected FileTable getFileTable() {
 		return fileTable;
@@ -54,12 +74,5 @@ public class Tables {
 		setFileList(l);
 		setLinkList(l);
 	}
-
-
-	public JPanel getPanel() {
-		return panel;
-	}
-
-
 
 }

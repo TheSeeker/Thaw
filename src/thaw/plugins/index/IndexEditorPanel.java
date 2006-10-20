@@ -43,11 +43,12 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 	
 	private Hsqldb db;
 	private FCPQueueManager queueManager;
-
-
-	public IndexEditorPanel(Hsqldb db, FCPQueueManager queueManager) {
+	private Config config;
+	
+	public IndexEditorPanel(Hsqldb db, FCPQueueManager queueManager, Config config) {
 		this.db = db;
 		this.queueManager = queueManager;
+		this.config = config;
 
 		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.yourIndexes"), true, false, queueManager, db);
 
@@ -72,7 +73,7 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 		toolBar.addSeparator();
 		toolBar.add(linkButton);
 
-		tables = new Tables(true, db, queueManager, indexTree);
+		tables = new Tables(true, db, queueManager, indexTree, config);
 		fileDetails = new FileDetailsEditor(true);
 
 		listAndDetails = new JPanel();
@@ -90,12 +91,20 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 
 	}
 
+	public void restoreState() {
+		if (config.getValue("indexEditorPanelSplitPosition") != null)
+			split.setDividerLocation(Integer.parseInt(config.getValue("indexEditorPanelSplitPosition")));
+		tables.restoreState();
+	}
+	
 	public JSplitPane getPanel() {
 		return split;
 	}
 
-	public void save() {
+	public void saveState() {
 		indexTree.save();
+		config.setValue("indexEditorPanelSplitPosition", Integer.toString(split.getDividerLocation()));
+		tables.saveState();
 	}
 
 	public void buttonsEnabled(boolean a) {
