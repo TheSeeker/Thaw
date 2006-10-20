@@ -152,6 +152,11 @@ public class File extends java.util.Observable implements java.util.Observer {
 	}
 
 	public void setTransfer(FCPTransferQuery query) {
+		if (transfer != null) {
+			Logger.notice(this, "A transfer is already running for this file");
+			return;
+		}
+
 		transfer = query;
 
 		if (transfer != null) {

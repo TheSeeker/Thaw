@@ -235,6 +235,11 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	public void update() {
 		targetFile = new java.io.File(toString()+".xml");
 
+		if (transfer != null) {
+			Logger.notice(this, "A transfer is already running");
+			return;
+		}
+
 		if(modifiable) {
 			FCPClientPut clientPut;
 
