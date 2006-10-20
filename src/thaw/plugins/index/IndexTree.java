@@ -304,6 +304,10 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 			if(!modifiables) {
 				publicKey = askAName(I18n.getMessage("thaw.plugin.index.indexKey"), "USK@");
+
+				if (publicKey == null)
+					return;
+
 				publicKey = publicKey.replaceFirst("http://127.0.0.1/", "");
 				publicKey = publicKey.replaceFirst("http://localhost/", "");
 
