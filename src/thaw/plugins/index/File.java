@@ -29,6 +29,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 	private FCPTransferQuery transfer = null; /* can be null */
 
 	private Index parent;
+	private int parentId;
 
 	private Hsqldb db;
 
@@ -49,7 +50,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 		size = (new java.io.File(path)).length();
 
 		this.category = category;
-		this.parent = parent;
+		setParent(parent);
 
 		if(transfer != null)
 			((java.util.Observable)transfer).addObserver(this);
@@ -63,6 +64,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 		publicKey = resultSet.getString("publicKey");
 		localPath = resultSet.getString("localPath");
 		size = resultSet.getLong("size");
+		parentId = resultSet.getInt("indexParent");
 		//category = resultSet.getString("category");
 
 		deduceFilenameFromKey();
@@ -114,10 +116,18 @@ public class File extends java.util.Observable implements java.util.Observer {
 
 	public void setParent(Index parent) {
 		this.parent = parent;
+		if (parent != null)
+			this.parentId = parent.getId();
+		else
+			this.parentId = -1;
 	}
 
 	public Index getParent() {
 		return parent;
+	}
+
+	public int getParentId() {
+		return parentId;
 	}
 
 	public String getFilename() {

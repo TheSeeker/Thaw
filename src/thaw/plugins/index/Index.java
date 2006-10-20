@@ -101,8 +101,16 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		this.parent = parent;
 	}
 
+	public IndexCategory getParent() {
+		return parent;
+	}
+
 	public DefaultMutableTreeNode getTreeNode() {
 		return treeNode;
+	}
+
+	public Index getIndex(int id) {
+		return (id == getId()) ? this : null;
 	}
 
 	public void generateKeys(FCPQueueManager queueManager) {
@@ -469,7 +477,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		fileList = new Vector();
 
 		try {
-			String query = "SELECT id, publicKey, mime, size, localPath, category FROM files WHERE indexParent = ?";
+			String query = "SELECT id, publicKey, mime, size, localPath, category, indexParent FROM files WHERE indexParent = ?";
 
 			if(columnToSort != null) {
 				query = query + "ORDER BY " + columnToSort;
@@ -517,6 +525,30 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	public thaw.plugins.index.File getFile(int index) {
 		return (thaw.plugins.index.File)fileList.get(index);
+	}
+
+	public int getFilePosition(thaw.plugins.index.File fileA) {
+		int pos = fileList.indexOf(fileA);
+
+		if (fileA.getPublicKey() == null)
+			return -1;
+
+		if (pos < 0) {
+			/* Manual research */
+			pos = 0;
+			for(Iterator it = fileList.iterator();
+			    it.hasNext();) {
+				thaw.plugins.index.File fileB = (thaw.plugins.index.File)it.next();
+
+				if (fileB.getPublicKey() != null
+				    && fileB.getPublicKey().equals(fileA.getPublicKey()))
+					return pos;
+				pos++;
+
+			}
+		}
+
+		return -1;
 	}
 
 
@@ -891,7 +923,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	public String getHeaderElement(Element header, String name) {
 		try {
-			Element sub = (Element)header.getElementsByTagName(name).item(0);
+			NodeList nl = header.getElementsByTagName(name);
+
+			if (nl == null)
+				return null;
+
+			Element sub = (Element)nl.item(0);
 			return ((Text)sub.getFirstChild()).getData();
 		} catch(Exception e) {
 			Logger.notice(this, "Unable to get header element '"+name+"', because: "+e.toString());

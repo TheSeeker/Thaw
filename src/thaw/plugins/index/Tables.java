@@ -28,15 +28,15 @@ public class Tables {
 		panel = new JPanel();
 		panel.setLayout(new BorderLayout(10, 10));
 
-		fileTable = new FileTable(modifiables, queueManager);
+		fileTable = new FileTable(modifiables, queueManager, tree, config, this);
 		linkTable = new LinkTable(modifiables, db, queueManager, tree);
 
 		searchBar = new SearchBar(db, tree, queueManager, this);
 
 		split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-					 linkTable.getPanel(),
+				       linkTable.getPanel(),
 				       fileTable.getPanel());
-
+		
 		panel.add(searchBar.getPanel(), BorderLayout.NORTH);
 		panel.add(split, BorderLayout.CENTER);
 	}

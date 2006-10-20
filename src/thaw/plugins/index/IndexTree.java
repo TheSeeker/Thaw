@@ -225,6 +225,9 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		return tree;
 	}
 
+	public IndexCategory getRoot() {
+		return root;
+	}
 
 	public void mouseClicked(MouseEvent e) {
 		notifySelection(e);

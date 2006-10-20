@@ -71,6 +71,8 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 	
 	private JMenuItem copyFileKeys;
 
+	private JMenuItem gotoIndex;
+
 	private FCPQueueManager queueManager;
 
 	private String sortColumn = null;
@@ -78,10 +80,16 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 	private int[] selectedRows;
 
-	public FileTable(boolean modifiables, FCPQueueManager queueManager) {
-		this.queueManager = queueManager;
+	private Config config;
+	private Tables tables;
+	private IndexTree tree;
 
+	public FileTable(boolean modifiables, FCPQueueManager queueManager, IndexTree tree, Config config, Tables tables) {
+		this.queueManager = queueManager;
+		this.config = config;
 		this.modifiables = modifiables;
+		this.tables = tables;
+		this.tree = tree;
 	
 		
 		rightClickMenu = new JPopupMenu();
@@ -105,6 +113,11 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		copyFileKeys = new JMenuItem(I18n.getMessage("thaw.common.copyKeysToClipboard"));
 		copyFileKeys.addActionListener(this);
 		rightClickMenu.add(copyFileKeys);
+
+		gotoIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.gotoIndex"));
+		gotoIndex.addActionListener(this);
+		gotoIndex.setEnabled(false);
+		rightClickMenu.add(gotoIndex);
 
 		fileListModel = new FileListModel();
 		table = new JTable(fileListModel);
@@ -149,6 +162,8 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 	public void mouseClicked(MouseEvent e) {
 		if(e.getButton() == MouseEvent.BUTTON3
 		   && fileList != null) {
+			gotoIndex.setEnabled(!(fileList instanceof Index));
+
 			selectedRows = table.getSelectedRows();
 			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
 		}
@@ -178,8 +193,44 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 		java.io.File destination = null;
 
+		if (e.getSource() == gotoIndex) {
+			if (selectedRows.length <= 0)
+				return;
+
+			thaw.plugins.index.File file = (thaw.plugins.index.File)fileList.getFileList().get(selectedRows[0]);
+
+			if (file.getParentId() == -1) {
+				Logger.notice(this, "No parent ? abnormal");
+				return;
+			}
+
+			Index parent = tree.getRoot().getIndex(file.getParentId());
+
+			if (parent == null) {
+				Logger.notice(this, "Cannot find again the parent ?! Id: "+Integer.toString(file.getParentId()));
+				return;
+			}
+			
+			tables.setList(parent);
+
+			int row;
+			
+			row = parent.getFilePosition(file);
+
+			if (row < 0)
+				Logger.notice(this, "File not found in the index ?! Index : "+parent.getKey()+" ; File: " +file.getPublicKey());
+			else
+				setSelectedRows(row, row);
+
+			return;
+		}
+
 		if(e.getSource() == downloadFiles) {
-			FileChooser fileChooser = new FileChooser();
+			FileChooser fileChooser ;
+			if (config.getValue("lastDestinationDirectory") == null)
+				fileChooser = new FileChooser();
+			else
+				fileChooser = new FileChooser(config.getValue("lastDestinationDirectory"));
 			fileChooser.setTitle(I18n.getMessage("thaw.plugin.fetch.destinationDirectory"));
 			fileChooser.setDirectoryOnly(true);
 			fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
@@ -188,6 +239,8 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 			if(destination == null)
 				return;
+
+			config.setValue("lastDestinationDirectory", destination.getPath());
 		}
 
 		if(e.getSource() == removeFiles) {
@@ -259,6 +312,11 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			Clipboard cp = tk.getSystemClipboard();
 			cp.setContents(st, null);
 		}
+	}
+
+
+	public void setSelectedRows(int min, int max) {
+		table.setRowSelectionInterval(min, max);
 	}
 	
 

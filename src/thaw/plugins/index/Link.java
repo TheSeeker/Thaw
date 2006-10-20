@@ -23,7 +23,10 @@ public class Link extends java.util.Observable {
 
 	public Link(Hsqldb hsqldb, String indexName, String key, Index parent) {
 		this.indexName = indexName;
-		this.key = key;
+		if (key != null)
+			this.key = key.trim();
+		else
+			this.key = null;
 		this.parent = parent;
 		this.db = hsqldb;
 	}
@@ -45,6 +48,9 @@ public class Link extends java.util.Observable {
 	public Link(Hsqldb hsqldb, Element linkElement, Index parent) {
 		this.db = hsqldb;
 		this.key = linkElement.getAttribute("key");
+
+		if (this.key != null)
+			this.key = this.key.trim();
 
 		this.indexName = Index.getNameFromKey(this.key);
 
@@ -69,6 +75,9 @@ public class Link extends java.util.Observable {
 
 	public void setIndexKey(String key) {
 		this.key = key;
+
+		if (this.key != null)
+			this.key = this.key.trim();
 
 		setChanged();
 		notifyObservers();

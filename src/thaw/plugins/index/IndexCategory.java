@@ -372,6 +372,9 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 
 	public Vector getIndexIds()
 	{
+		if(children == null)
+			children = loadChildren();
+
 		Vector result = new Vector();
 		
 		for(Iterator it = children.iterator();
@@ -382,6 +385,24 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 		
 		return result;
 	}
+
+
+	public Index getIndex(int id)
+	{
+		if(children == null)
+			children = loadChildren();
+
+		for(Iterator it = children.iterator();
+		    it.hasNext();) {
+			IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
+			Index result = node.getIndex(id);
+			if (result != null)
+				return result;
+		}
+		
+		return null;
+	}
+
 
 	public boolean isLeaf() {
 		return false;
