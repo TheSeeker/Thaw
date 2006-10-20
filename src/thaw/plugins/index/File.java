@@ -154,11 +154,25 @@ public class File extends java.util.Observable implements java.util.Observer {
 	public void setTransfer(FCPTransferQuery query) {
 		transfer = query;
 
-		if(transfer instanceof FCPClientPut)
-			((FCPClientPut)transfer).addObserver(this);
+		if (transfer != null) {
+			if(transfer instanceof FCPClientPut)
+				((FCPClientPut)transfer).addObserver(this);
+			if(transfer instanceof FCPClientGet)
+				((FCPClientGet)transfer).addObserver(this);
+		}
 
 		setChanged();
 		notifyObservers(query);
+	}
+
+	/* Try to find its download automagically */
+	public void setTransfer(FCPQueueManager queueManager) {
+		if (publicKey != null) {
+			setTransfer(queueManager.getTransfer(publicKey));
+		}
+
+		setChanged();
+		notifyObservers();
 	}
 
 	public void insert() {
@@ -315,8 +329,13 @@ public class File extends java.util.Observable implements java.util.Observer {
 	public void update(java.util.Observable o, Object param) {
 		if(o == transfer) {
 			if(transfer.isFinished() && transfer instanceof FCPClientPut) {
+				((FCPClientPut)transfer).deleteObserver(this);
 				setPublicKey(transfer.getFileKey());
 				update();
+			}
+
+			if(transfer.isFinished() && transfer instanceof FCPClientGet) {
+				((FCPClientGet)transfer).deleteObserver(this);
 			}
 
 			if(transfer.isFinished() && transfer.isSuccessful()) {

@@ -12,6 +12,8 @@ import java.awt.event.ActionEvent;
 
 import thaw.core.I18n;
 
+import thaw.fcp.FCPQueueManager;
+
 import thaw.plugins.Hsqldb;
 
 public class SearchBar implements ActionListener {
@@ -25,10 +27,13 @@ public class SearchBar implements ActionListener {
 
 	private Tables tables;
 
-	public SearchBar(Hsqldb db, IndexTree indexTree, Tables tables) {
+	private FCPQueueManager queueManager;
+
+	public SearchBar(Hsqldb db, IndexTree indexTree, FCPQueueManager queueManager, Tables tables) {
 		this.db = db;
 		this.tree = indexTree;
 		this.tables = tables;
+		this.queueManager = queueManager;
 
 		panel = new JPanel();
 		panel.setLayout(new BorderLayout(10, 10));
@@ -55,7 +60,10 @@ public class SearchBar implements ActionListener {
 		if (tree.getSelectedNode() == null)
 			return;
 
-		SearchResult sr = new SearchResult(db, userText.getText(), tree.getSelectedNode());
+		userText.setSelectionStart(0);
+		userText.setSelectionEnd(userText.getText().length());
+
+		SearchResult sr = new SearchResult(db, userText.getText(), tree.getSelectedNode(), queueManager);
 		tables.setList(sr);
 	}
 

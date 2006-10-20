@@ -9,10 +9,11 @@ import java.util.Observer;
 import java.sql.*;
 
 import thaw.plugins.Hsqldb;
+import thaw.fcp.FCPQueueManager;
 
 import thaw.core.Logger;
 
-public class SearchResult extends Observable implements FileAndLinkList {
+public class SearchResult extends Observable implements Observer, FileAndLinkList {
 
 	private Vector fileList = null;
 	private Vector linkList = null;
@@ -21,8 +22,10 @@ public class SearchResult extends Observable implements FileAndLinkList {
 	private Vector indexIds = null;
 
 	private Hsqldb db;
+	private FCPQueueManager queueManager;
 
-	public SearchResult(Hsqldb hsqldb, String search, IndexTreeNode node) {
+	public SearchResult(Hsqldb hsqldb, String search, IndexTreeNode node, FCPQueueManager queueManager) {
+		this.queueManager = queueManager;
 		this.search = search.split(" ");
 		this.indexIds = node.getIndexIds();
 		this.db = hsqldb;
@@ -91,6 +94,8 @@ public class SearchResult extends Observable implements FileAndLinkList {
 
 				while(results.next()) {
 					thaw.plugins.index.File file = new thaw.plugins.index.File(db, results, null);
+					file.setTransfer(queueManager);
+					file.addObserver(this);
 					fileList.add(file);
 				}
 			}
@@ -129,6 +134,12 @@ public class SearchResult extends Observable implements FileAndLinkList {
 	}
 
 
+	public void update(Observable o, Object param) {
+		setChanged();
+		notifyObservers(o);
+	}
+
+
 	public Vector getFileList() {
 		return fileList;
 	}
@@ -150,6 +161,12 @@ public class SearchResult extends Observable implements FileAndLinkList {
 
 
 	public void unloadFiles() {
+		for (Iterator it = fileList.iterator();
+		     it.hasNext();) {
+			thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+			file.deleteObserver(this);
+		}
+
 		fileList = null;
 	}
 

@@ -38,6 +38,16 @@ import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.swing.event.TableModelListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.JTableHeader;
+
+
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 import thaw.core.*;
 import thaw.fcp.*;
 
@@ -62,6 +72,9 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 	private JMenuItem copyFileKeys;
 
 	private FCPQueueManager queueManager;
+
+	private String sortColumn = null;
+	private boolean ascOrder = false;
 
 	private int[] selectedRows;
 
@@ -100,6 +113,10 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 		table.addMouseListener(this);
 
+		JTableHeader header = table.getTableHeader();
+		header.setUpdateTableInRealTime(true);
+		header.setReorderingAllowed(true);
+
 		panel = new JPanel();
 		panel.setLayout(new BorderLayout());
 		
@@ -120,7 +137,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		}
 		
 		if(fileList != null) {
-			fileList.loadFiles(null, true);
+			fileList.loadFiles(sortColumn, ascOrder);
 		}
 
 		this.fileList = fileList;
@@ -443,6 +460,5 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		}
 
 	}
-
 
 }

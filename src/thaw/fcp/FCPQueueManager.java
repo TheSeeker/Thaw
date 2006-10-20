@@ -270,6 +270,49 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 
 
 	/**
+	 * Not very reliable ?
+	 */
+	public FCPTransferQuery getTransfer(String key) {
+		boolean interrupted=true;
+
+		Iterator it;
+
+		while(interrupted) {
+			interrupted = false;
+
+			try {
+				for(it = runningQueries.iterator();
+				    it.hasNext(); )
+					{
+						FCPTransferQuery plop = (FCPTransferQuery)it.next();
+						if (plop.getFileKey() == key
+						    || key.equals(plop.getFileKey()))
+							return plop;
+					}
+				
+				for(int i = 0 ; i <= PRIORITY_MIN ; i++) {
+					for(it = pendingQueries[i].iterator();
+					    it.hasNext(); )
+						{
+							FCPTransferQuery plop = (FCPTransferQuery)it.next();
+							if (plop.getFileKey() == key
+							    || key.equals(plop.getFileKey()))
+								return plop;
+						}
+					
+				}
+			} catch(java.util.ConcurrentModificationException e) {
+				Logger.notice(this, "getTransfer(): Collission. Reitering");
+				interrupted = true;
+			}
+
+		}
+
+		return null;
+	}
+
+
+	/**
 	 * Compare using the key.
 	 */
 	public boolean isAlreadyPresent(FCPTransferQuery query) {

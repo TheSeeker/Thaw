@@ -482,6 +482,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 				while(results.next()) {
 					thaw.plugins.index.File file = new thaw.plugins.index.File(db, results, this);
+					file.setTransfer(queueManager);
 					addFileToList(file);
 				}
 			}
@@ -515,6 +516,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 
 	public void unloadFiles() {
+		/*
 		for(Iterator it = fileList.iterator();
 		    it.hasNext(); ) {
 			thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
@@ -523,6 +525,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				return;
 			}
 		}
+		*/
 
 		if (fileList != null) {
 			for (Iterator it  = fileList.iterator();

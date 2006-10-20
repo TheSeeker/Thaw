@@ -31,7 +31,7 @@ public class Tables {
 		fileTable = new FileTable(modifiables, queueManager);
 		linkTable = new LinkTable(modifiables, db, queueManager, tree);
 
-		searchBar = new SearchBar(db, tree, this);
+		searchBar = new SearchBar(db, tree, queueManager, this);
 
 		split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 					 linkTable.getPanel(),
