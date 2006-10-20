@@ -140,11 +140,11 @@ public class SearchResult extends Observable implements FileAndLinkList {
 
 
 	public thaw.plugins.index.File getFile(int index) {
-		return null;
+		return (thaw.plugins.index.File)fileList.get(index);
 	}
 
 	public Link getLink(int index) {
-		return null;
+		return (Link)linkList.get(index);
 	}
 
 

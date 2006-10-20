@@ -131,8 +131,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 	public void mouseClicked(MouseEvent e) {
 		if(e.getButton() == MouseEvent.BUTTON3
-		   && fileList != null
-		   && fileList instanceof Index) {
+		   && fileList != null) {
 			selectedRows = table.getSelectedRows();
 			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
 		}
@@ -153,15 +152,12 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 	public void keyTyped(KeyEvent e) { }
 
 	public void actionPerformed(ActionEvent e) {
-		if(fileList == null
-		   || !(fileList instanceof Index))
+		if(fileList == null)
 			return;
 
 		String keys = "";
 		
 		Vector files = null;
-
-		Index index = (Index)fileList;
 
 		java.io.File destination = null;
 
@@ -184,6 +180,8 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		for(int i = 0 ; i < selectedRows.length ; i++) {
 
 			if(e.getSource() == removeFiles) {
+				Index index = (Index)fileList;
+
 				thaw.plugins.index.File file = (thaw.plugins.index.File)files.get(selectedRows[i]);
 				if (file.getTransfer() != null)
 					file.getTransfer().stop(queueManager);
@@ -191,6 +189,8 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			}
 			
 			if(e.getSource() == insertFiles) {
+				Index index = (Index)fileList;
+
 				thaw.plugins.index.File file = index.getFile(selectedRows[i]);
 				
 				FCPClientPut clientPut = new FCPClientPut(new java.io.File(file.getLocalPath()),
@@ -202,7 +202,12 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			
 			
 			if(e.getSource() == downloadFiles) {
-				thaw.plugins.index.File file = index.getFile(selectedRows[i]);
+				thaw.plugins.index.File file = fileList.getFile(selectedRows[i]);
+
+				if (file == null) {
+					Logger.notice(this, "File disappeared ?");
+					continue;
+				}					
 
 				FCPClientGet clientGet = new FCPClientGet(file.getPublicKey(), 4, 0, true, -1,
 									  destination.getPath());
@@ -213,13 +218,13 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			}
 
 			if(e.getSource() == copyFileKeys) {
-				thaw.plugins.index.File file = index.getFile(selectedRows[i]);
+				thaw.plugins.index.File file = fileList.getFile(selectedRows[i]);
 				if(file.getPublicKey() != null)
 					keys = keys + file.getPublicKey() + "\n";
 			}
 
 			if(e.getSource() == recalculateKeys) {
-				thaw.plugins.index.File file = index.getFile(selectedRows[i]);
+				thaw.plugins.index.File file = fileList.getFile(selectedRows[i]);
 
 				FCPClientPut insertion = new FCPClientPut(new java.io.File(file.getLocalPath()), 0, 0, null,
 									  null, 4,
