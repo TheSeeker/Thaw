@@ -38,7 +38,7 @@ public class Link extends java.util.Observable {
 	public Link(Hsqldb hsqldb, ResultSet resultSet, Index parent) throws SQLException {
 		this.db = hsqldb;
 		this.id = resultSet.getInt("id");
-		this.key = resultSet.getString("publicKey");
+		this.key = resultSet.getString("publicKey").trim();
 
 		this.indexName = Index.getNameFromKey(this.key);
 

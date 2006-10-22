@@ -37,8 +37,11 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 	private boolean advancedMode = false;
 
+	private boolean needConnectionReset = false;
+
 	public ConfigWindow(Core core) {
 		this.core = core;
+		needConnectionReset = false;
 
 		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 
@@ -142,6 +145,10 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		return cancelButton;
 	}
 
+	public void willNeedConnectionReset() {
+		needConnectionReset = true;
+	}
+
 	/**
 	 * Called when apply button is pressed.
 	 */
@@ -174,9 +181,11 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 			/* should reinit the whole connection correctly */
 			core.getPluginManager().stopPlugins();
 
-			if(!core.initNodeConnection()) {
+			if(needConnectionReset && !core.initNodeConnection()) {
 				new WarningWindow(core, I18n.getMessage("thaw.warning.unableToConnectTo")+ " "+core.getConfig().getValue("nodeAddress")+":"+ core.getConfig().getValue("nodePort"));
 			}
+
+			needConnectionReset = false;
 
 			core.getPluginManager().loadPlugins();
 			core.getPluginManager().runPlugins();

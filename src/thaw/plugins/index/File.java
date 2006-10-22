@@ -61,7 +61,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 		this.db = db;
 
 		id = resultSet.getInt("id");
-		publicKey = resultSet.getString("publicKey");
+		publicKey = resultSet.getString("publicKey").trim();
 		localPath = resultSet.getString("localPath");
 		size = resultSet.getLong("size");
 		parentId = resultSet.getInt("indexParent");
@@ -77,6 +77,9 @@ public class File extends java.util.Observable implements java.util.Observer {
 
 		id = Integer.parseInt(fileElement.getAttribute("id")); /* will be changed when inserted in the database */
 		publicKey = fileElement.getAttribute("key");
+
+		if (publicKey != null)
+			publicKey = publicKey.trim();
 		
 		localPath = null;
 		

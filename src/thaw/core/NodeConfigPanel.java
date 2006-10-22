@@ -40,14 +40,19 @@ public class NodeConfigPanel implements Observer {
 		"thawId"
 	};
 
+	private final static String[] currentValues = new String[6];
+
+
 	private JLabel[] paramLabels = new JLabel[paramNames.length];
 	private JTextField[] paramFields = new JTextField[configNames.length];
 
 	private JCheckBox multipleSockets = null;
-	
+	private ConfigWindow configWindow = null;
+
 
 	public NodeConfigPanel(ConfigWindow configWindow, Core core) {
 		this.core = core;
+		this.configWindow = configWindow;
 
 		nodeConfigPanel = new JPanel();
 		nodeConfigPanel.setLayout(new GridLayout(15, 1));
@@ -60,6 +65,7 @@ public class NodeConfigPanel implements Observer {
 
 			paramLabels[i] = new JLabel(paramNames[i]);
 			paramFields[i] = new JTextField(value);
+			currentValues[i] = value;
 			
 			nodeConfigPanel.add(paramLabels[i]);
 			nodeConfigPanel.add(paramFields[i]);
@@ -88,9 +94,26 @@ public class NodeConfigPanel implements Observer {
 		multipleSockets.setVisible(advancedMode);
 	}
 
+
+	public boolean hasAValueChanged() {
+		for(int i=0; i < paramNames.length ; i++) {
+			if (!paramFields[i].getText().equals(currentValues[i]))
+				return true;
+		}
+
+		if (core.getConfig().getValue("multipleSockets") == null
+		    || !core.getConfig().getValue("multipleSockets").equals(Boolean.toString(multipleSockets.isSelected())))
+			return true;
+
+		return false;
+	}
+
 	
 	public void update(Observable o, Object arg) {
 		if(arg == core.getConfigWindow().getOkButton()) {
+			if (hasAValueChanged())
+				configWindow.willNeedConnectionReset();
+
 			for(int i=0;i < paramNames.length;i++) {
 				core.getConfig().setValue(configNames[i], paramFields[i].getText());
 			}
