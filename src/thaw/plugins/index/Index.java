@@ -319,7 +319,10 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		transfer = query;
 
 		if (transfer != null) {
-			transfer.addObserver(this);
+			if (transfer instanceof FCPClientGet)
+				((FCPClientGet)transfer).addObserver(this);
+			if (transfer instanceof FCPClientPut)
+				((FCPClientPut)transfer).addObserver(this);
 			update(((java.util.Observable)transfer), null);
 		}
 	}
@@ -342,7 +345,6 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			else
 				key = getPublicKey();
 
-			Logger.notice(this, "Seeking "+key);
 			setTransfer(queueManager.getTransfer(key));
 		}
 
