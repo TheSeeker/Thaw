@@ -307,7 +307,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		
 		Logger.info(this, "Key asked: "+key);
 		
-		clientGet = new FCPClientGet(key, 2, 2, false, 1, System.getProperty("java.io.tmpdir"));
+		clientGet = new FCPClientGet(key, 2, 2, false, -1, System.getProperty("java.io.tmpdir"));
 		transfer = clientGet;
 		clientGet.addObserver(this);
 		
