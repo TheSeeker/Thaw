@@ -89,9 +89,11 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		addThisIndex.addActionListener(this);
 		copyKey.addActionListener(this);
 
-		if (modifiables)
+		if (modifiables) {
 			rightClickMenu.add(removeLinks);
-		rightClickMenu.add(addThisIndex);
+			rightClickMenu.add(addThisIndex);
+		}
+
 		rightClickMenu.add(copyKey);
 
 		table.addMouseListener(this);

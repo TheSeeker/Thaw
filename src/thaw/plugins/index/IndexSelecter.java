@@ -141,7 +141,7 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 	public void update(java.util.Observable o, Object param) {
 		if (param instanceof Index) {
 			Index index = (Index)param;
-			selectedIndexKey = index.getKey();
+			selectedIndexKey = index.getPublicKey();
 
 			Logger.info(this, "Selected index key: "+selectedIndexKey);
 			keyField.setText(selectedIndexKey);

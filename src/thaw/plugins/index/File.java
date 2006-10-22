@@ -11,6 +11,8 @@ import java.util.Vector;
 import java.util.Iterator;
 
 import thaw.core.Logger;
+import thaw.core.FreenetURIHelper;
+
 import thaw.fcp.*;
 import thaw.plugins.Hsqldb;
 
@@ -32,6 +34,8 @@ public class File extends java.util.Observable implements java.util.Observer {
 	private int parentId;
 
 	private Hsqldb db;
+
+	private FCPQueueManager queueManager = null;
 
 	/**
 	 * @param path Local path
@@ -93,14 +97,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 	}
 	
 	public void deduceFilenameFromKey() {
-		if(publicKey.indexOf("/") < 0) {
-			fileName = publicKey;
-			publicKey = null;
-			return;
-		}
-
-		String[] keyParts = publicKey.split("/");
-		fileName = keyParts[keyParts.length-1];
+		fileName = FreenetURIHelper.getFilenameFromKey(publicKey);
 	}
 
 	public void setOptions(NodeList list) {
@@ -183,10 +180,49 @@ public class File extends java.util.Observable implements java.util.Observer {
 		notifyObservers(query);
 	}
 
+
+	public void recalculateCHK(FCPQueueManager queueManager) {
+		this.queueManager = queueManager;
+
+		FCPClientPut insertion = new FCPClientPut(new java.io.File(getLocalPath()), 0, 0, null,
+							  null, 4,
+							  true, 2, true); /* getCHKOnly */
+		queueManager.addQueryToThePendingQueue(insertion);
+		
+		setTransfer(insertion);
+	}
+
+	
+	public void download(String targetPath, FCPQueueManager queueManager) {
+		FCPClientGet clientGet = new FCPClientGet(getPublicKey(), 4, 0, true, -1, targetPath);
+
+		queueManager.addQueryToThePendingQueue(clientGet);
+		
+		setTransfer(clientGet);
+	}
+
+
+	public void insertOnFreenet(FCPQueueManager queueManager) {
+		FCPClientPut clientPut = new FCPClientPut(new java.io.File(getLocalPath()),
+							  0, 0, null, null, 4, true, 0);
+		queueManager.addQueryToThePendingQueue(clientPut);
+				
+		setTransfer(clientPut);
+	}
+
+
 	/* Try to find its download automagically */
 	public void setTransfer(FCPQueueManager queueManager) {
-		if (publicKey != null) {
-			setTransfer(queueManager.getTransfer(publicKey));
+		if (publicKey != null || fileName != null) {
+			FCPTransferQuery trans;
+
+			trans = queueManager.getTransfer(publicKey);
+
+			if (trans == null) {
+				trans = queueManager.getTransferByFilename(fileName);
+			}
+
+			setTransfer(trans);
 		}
 
 		setChanged();
@@ -347,6 +383,11 @@ public class File extends java.util.Observable implements java.util.Observer {
 	public void update(java.util.Observable o, Object param) {
 		if(o == transfer) {
 			if(transfer.isFinished() && transfer instanceof FCPClientPut) {
+				if (queueManager != null) {
+					queueManager.remove(transfer);
+					queueManager = null;
+				}
+
 				((FCPClientPut)transfer).deleteObserver(this);
 				setPublicKey(transfer.getFileKey());
 				update();

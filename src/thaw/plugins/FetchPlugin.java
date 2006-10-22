@@ -56,14 +56,7 @@ public class FetchPlugin implements thaw.core.Plugin {
 
 			String[] subKey = keys[i].split("\\?"); /* Because of VolodyA :p */
 
-			String key = subKey[0].replaceFirst("http://127.0.0.1:8888/", "");
-			key = key.replaceFirst("http://localhost/", "");
-			
-			try {
-				key = java.net.URLDecoder.decode(key, "UTF-8");
-			} catch (java.io.UnsupportedEncodingException e) {
-				Logger.warning(this, "UnsupportedEncodingException (UTF-8): "+e.toString());
-			}
+			String key = FreenetURIHelper.cleanURI(subKey[0]);
 
 			core.getQueueManager().addQueryToThePendingQueue(new FCPClientGet(key,
 											  priority,

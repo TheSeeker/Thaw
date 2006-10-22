@@ -33,9 +33,15 @@ public interface IndexTreeNode {
 	public void delete();
 
 	/**
-	 * Update from freenet / Update the freenet version. (recursive)
+	 * Update from freenet / Update the freenet version, depending of the index kind (recursive)
 	 */
 	public void update();
+
+	/**
+	 * Update from freenet using the given revision
+	 * @param rev -1 means the lastest
+	 */
+	public void updateFromFreenet(int rev);
 
 	public boolean isUpdating();
 
@@ -45,10 +51,10 @@ public interface IndexTreeNode {
 	public void save();
 
 	/**
-	 * Get (public) key(s)
+	 * Get key(s)
 	 */
-	public String getKey();
-
+	public String getPublicKey();
+	public String getPrivateKey();
 
 	public Vector getIndexIds();
 

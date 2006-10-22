@@ -218,7 +218,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			row = parent.getFilePosition(file);
 
 			if (row < 0)
-				Logger.notice(this, "File not found in the index ?! Index : "+parent.getKey()+" ; File: " +file.getPublicKey());
+				Logger.notice(this, "File not found in the index ?! Index : "+parent.getPublicKey()+" ; File: " +file.getPublicKey());
 			else
 				setSelectedRows(row, row);
 
@@ -262,12 +262,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 				Index index = (Index)fileList;
 
 				thaw.plugins.index.File file = index.getFile(selectedRows[i]);
-				
-				FCPClientPut clientPut = new FCPClientPut(new java.io.File(file.getLocalPath()),
-									  0, 0, null, null, 4, true, 0);
-				queueManager.addQueryToThePendingQueue(clientPut);
-				
-				file.setTransfer(clientPut);
+				file.insertOnFreenet(queueManager);
 			}
 			
 			
@@ -278,13 +273,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 					Logger.notice(this, "File disappeared ?");
 					continue;
 				}					
-
-				FCPClientGet clientGet = new FCPClientGet(file.getPublicKey(), 4, 0, true, -1,
-									  destination.getPath());
-
-				queueManager.addQueryToThePendingQueue(clientGet);
-				
-				file.setTransfer(clientGet);
+				file.download(destination.getPath(), queueManager);
 			}
 
 			if(e.getSource() == copyFileKeys) {
@@ -296,12 +285,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			if(e.getSource() == recalculateKeys) {
 				thaw.plugins.index.File file = fileList.getFile(selectedRows[i]);
 
-				FCPClientPut insertion = new FCPClientPut(new java.io.File(file.getLocalPath()), 0, 0, null,
-									  null, 4,
-									  true, 2, true); /* getCHKOnly */
-				insertion.start(queueManager);
-
-				file.setTransfer(insertion);
+				file.recalculateCHK(queueManager);
 			}
 
 		}

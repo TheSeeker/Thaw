@@ -107,7 +107,7 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 
 		for(Iterator it = children.iterator();
 		    it.hasNext();) {
-			IndexTreeNode child = (IndexTreeNode)it.next();
+			IndexTreeNode child = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
 			child.delete();
 		}
 
@@ -143,13 +143,25 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 		}
 	}
 
-	public String getKey() {
+	public String getPublicKey() {
 		String result = "";
 		
 		for(Iterator it = children.iterator();
 		    it.hasNext();) {
 			IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
-			result = result + node.getKey() + "\n";
+			result = result + node.getPublicKey() + "\n";
+		}
+		
+		return result;
+	}
+
+	public String getPrivateKey() {
+		String result = "";
+		
+		for(Iterator it = children.iterator();
+		    it.hasNext();) {
+			IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
+			result = result + node.getPrivateKey() + "\n";
 		}
 		
 		return result;
@@ -169,6 +181,12 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 	public void update() {
 		for (Enumeration e = children() ; e.hasMoreElements() ;) {
 			((IndexTreeNode)((DefaultMutableTreeNode)e.nextElement()).getUserObject()).update();
+		}
+	}
+
+	public void updateFromFreenet(int rev) {
+		for (Enumeration e = children() ; e.hasMoreElements() ;) {
+			((IndexTreeNode)((DefaultMutableTreeNode)e.nextElement()).getUserObject()).updateFromFreenet(rev);
 		}
 	}
 
@@ -284,11 +302,13 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 
 				String author = result.getString("author");
 
-				set(children, position, (new Index(db, queueManager, id, this,
-								   realName, displayName,
-								   publicKey, privateKey, revision,
-								   author,
-								   modifiables)).getTreeNode());
+				Index index = new Index(db, queueManager, id, this,
+							realName, displayName,
+							publicKey, privateKey, revision,
+							author,
+							modifiables);
+
+				set(children, position, index.getTreeNode());
 			}
 		} catch (java.sql.SQLException e) {
 			Logger.warning(this, "SQLException while getting child of index category '"+name+"': "+e.toString());

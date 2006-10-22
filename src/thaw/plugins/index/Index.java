@@ -63,6 +63,11 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	private String author = null;
 
+	private boolean rewriteKey = true;
+	
+
+	private FCPClientPut publicKeyRecalculation = null;
+
 
 	/**
 	 * The bigest constructor of the world ...
@@ -84,17 +89,24 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		this.parent = parent;
 		this.realName = realName;
 		this.displayName = displayName;
-		this.modifiable = modifiable;
-
-		this.publicKey = publicKey;
+		this.modifiable = (privateKey == null ? false : true);
 
 		this.privateKey = privateKey;
+		this.publicKey = publicKey;
+
+
+		if (modifiable == true && publicKey != null && publicKey.startsWith("USK@")) {
+			String[] split = FreenetURIHelper.convertUSKtoSSK(publicKey).split("/");
+			publicKey = split[0];
+		}
 
 		this.revision = revision;
 
 		this.author = author;
 		
 		treeNode.setUserObject(this);
+
+		setTransfer();
 	}
 
 	public void setParent(IndexCategory parent) {
@@ -222,24 +234,6 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	}
 
 
-	protected String changeRevision(String key, int move) {
-		try {
-			String newKey;
-			String[] split = key.split("/");
-
-			newKey = split[0] + "/" + split[1] + "/"
-				+ Integer.toString(Integer.parseInt(split[2])+move) + "/"
-				+ split[3];
-			
-			return newKey;
-		} catch (Exception e) {
-			Logger.warning(this, "Unable to add a revision to the key '"+key+"' because : "+e.toString());
-		}
-
-		return key;
-	}
-
-
 	public void update() {
 		targetFile = new java.io.File(toString()+".xml");
 
@@ -270,41 +264,114 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			} else {
 				Logger.warning(this, "Index not generated !");
 			}
+
+			setChanged();
+			notifyObservers();
 		} else {
-			FCPClientGet clientGet;
-			
-			Logger.info(this, "Getting lastest version ...");
-
-			String key;
-
-			/* We will trust the node for the incrementation */
-			/*
-			  if (!isEmpty())
-			     key = changeRevision(publicKey, 1);
-			  else
-			     key = publicKey;
-			*/
-
-			key = publicKey;
-
-
-			Logger.info(this, "Key asked: "+key);
-
-			clientGet = new FCPClientGet(key, 4, 2, false, 1, System.getProperty("java.io.tmpdir"));
-			transfer = clientGet;
-			clientGet.addObserver(this);
-
-			queueManager.addQueryToThePendingQueue(clientGet);
+			updateFromFreenet(-1);
 		}
+		
+	}
+
+	public void updateFromFreenet(int rev) {
+		FCPClientGet clientGet;
+		
+		Logger.info(this, "Getting lastest version ...");
+		
+		String key;
+		
+		/* We will trust the node for the incrementation
+		   execept if a rev is specified */
+
+		
+		if (rev >= 0) {
+			key = FreenetURIHelper.convertUSKtoSSK(publicKey);
+			key = FreenetURIHelper.changeSSKRevision(key, rev, 0);
+			rewriteKey = false;
+		} else {
+			if (!modifiable) {
+				key = publicKey;
+				rewriteKey = true;
+			} else {
+				key = getPublicKey();
+				rewriteKey = false;
+			}
+		}
+		
+		Logger.info(this, "Key asked: "+key);
+		
+		clientGet = new FCPClientGet(key, 4, 2, false, 1, System.getProperty("java.io.tmpdir"));
+		transfer = clientGet;
+		clientGet.addObserver(this);
+		
+		queueManager.addQueryToThePendingQueue(clientGet);
 
 		setChanged();
 		notifyObservers();
-		
 	}
 
 	public boolean isUpdating() {
 		return (transfer != null && (!transfer.isFinished()));
 	}
+
+
+	protected void setTransfer(FCPTransferQuery query) {
+		transfer = query;
+
+		if (transfer != null) {
+			update(((java.util.Observable)transfer), null);
+		}
+	}
+
+	protected void setTransfer() {
+		if (queueManager == null)
+			return;
+
+		if (getPublicKey() != null) {
+			if(!queueManager.isQueueCompletlyLoaded()) {
+				Thread th = new Thread(new WaitCompleteQueue());
+				th.start();
+				return;
+			}
+			
+			String key;
+
+			if (modifiable)
+				key = FreenetURIHelper.getPublicInsertionSSK(getPublicKey());
+			else
+				key = getPublicKey();
+
+			Logger.notice(this, "Seeking "+key);
+			setTransfer(queueManager.getTransfer(key));
+		}
+
+		setChanged();
+		notifyObservers();
+	}
+
+	private class WaitCompleteQueue implements Runnable {
+		public WaitCompleteQueue() { }
+
+		public void run() {
+			int tryNumber = 0;
+
+			while(!queueManager.isQueueCompletlyLoaded() && tryNumber < 120 /* 1min */) {
+				try {
+					Thread.sleep(500);
+				} catch(java.lang.InterruptedException e) {
+					/* \_o< */
+				}
+
+				tryNumber++;
+			}
+
+			if (tryNumber == 120)
+				return;
+
+			setTransfer();
+		}
+	}
+
 
 	public void purgeLinkList() {
 		try {
@@ -365,11 +432,21 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		return id;
 	}
 
-	public String getKey() {
-		if(modifiable)
-			return publicKey.replaceFirst("SSK@", "USK@")+realName+"/"+revision+"/"+realName+".xml";
-		else
+	public String getPublicKey() {
+		if (publicKey == null)
 			return publicKey;
+
+		if(publicKey.startsWith("SSK@")) { /* as it should when modifiable == true */
+			return publicKey.replaceFirst("SSK@", "USK@")+realName+"/"+revision+"/"+realName+".xml";
+		} else
+			return publicKey;
+	}
+
+	public String getPrivateKey() {
+		if (!modifiable)
+			return null;
+
+		return privateKey;
 	}
 
 	public String toString() {
@@ -382,7 +459,9 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		return true;
 	}
 
+
 	public void update(java.util.Observable o, Object p) {
+
 		if(o == sskGenerator) {
 			sskGenerator.deleteObserver(this);
 			publicKey = sskGenerator.getPublicKey();
@@ -414,7 +493,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 					Logger.info(this, "Updating index ...");
 				
-					publicKey = transfer.getFileKey();
+					if (rewriteKey)
+						publicKey = transfer.getFileKey();
 
 					Logger.info(this, "Most up-to-date key found: " + publicKey);
 					
@@ -975,14 +1055,14 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	static String getNameFromKey(String key) {
 		String name = null;
-		try {
-			String[] cutcut = key.split("/");
-			name = cutcut[cutcut.length-1];
-			name = name.replaceAll(".xml", "");
-		} catch (Exception e) {
-			Logger.warning(e, "thaw.plugins.index.Index: Error while parsing index key: "+key+" because: "+e.toString() );
-			name = key;
-		}
+
+		name = FreenetURIHelper.getFilenameFromKey(key);
+
+		if (name == null)
+			return null;
+
+		name = name.replaceAll(".xml", "");
+
 		return name;
 	}
 

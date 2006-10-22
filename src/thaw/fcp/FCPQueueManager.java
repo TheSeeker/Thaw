@@ -28,6 +28,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	private int lastId;
 	private String thawId;
 
+	private boolean queueCompleted;
 
 	/**
 	 * Calls setQueryManager() and then resetQueues().
@@ -36,6 +37,8 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 			       String thawId,
 			       int maxDownloads, int maxInsertions) {
 		lastId = 0;
+		queueCompleted = false;
+
 		setThawId(thawId);
 		setMaxDownloads(maxDownloads);
 		setMaxInsertions(maxInsertions);
@@ -44,6 +47,14 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 		resetQueues();
 
 		queryManager.getConnection().addObserver(this);
+	}
+
+	public boolean isQueueCompletlyLoaded() {
+		return queueCompleted;
+	}
+
+	public void setQueueCompleted() {
+		queueCompleted = true;
 	}
 
 	/**
@@ -277,6 +288,9 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 
 		Iterator it;
 
+		if (key == null)
+			return null;
+
 		while(interrupted) {
 			interrupted = false;
 
@@ -303,6 +317,54 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 				}
 			} catch(java.util.ConcurrentModificationException e) {
 				Logger.notice(this, "getTransfer(): Collission. Reitering");
+				interrupted = true;
+			}
+
+		}
+
+		return null;
+	}
+
+
+	/**
+	 * Not reliable
+	 */
+	public FCPTransferQuery getTransferByFilename(String name) {
+		boolean interrupted=true;
+
+		Iterator it;
+
+		if (name == null)
+			return null;
+
+		while(interrupted) {
+			interrupted = false;
+
+			try {
+				for(it = runningQueries.iterator();
+				    it.hasNext(); )
+					{
+						FCPTransferQuery plop = (FCPTransferQuery)it.next();
+
+						if (plop.getFilename() == name
+						    || name.equals(plop.getFilename()))
+							return plop;
+					}
+				
+				for(int i = 0 ; i <= PRIORITY_MIN ; i++) {
+					for(it = pendingQueries[i].iterator();
+					    it.hasNext(); )
+						{
+							FCPTransferQuery plop = (FCPTransferQuery)it.next();
+
+							if (plop.getFilename() == name
+							    || name.equals(plop.getFilename()))
+								return plop;
+						}
+					
+				}
+			} catch(java.util.ConcurrentModificationException e) {
+				Logger.notice(this, "getTransferByFilename(): Collission. Reitering");
 				interrupted = true;
 			}
 

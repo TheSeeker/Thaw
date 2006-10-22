@@ -391,7 +391,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	}
 
 	public void windowClosed(WindowEvent e) {
-		// add potential warnings here
+		// gni
 	}
 
 	public void windowDeactivated(WindowEvent e) {

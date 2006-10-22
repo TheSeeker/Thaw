@@ -2,6 +2,7 @@ package thaw.plugins.index;
 
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import javax.swing.JTree;
 import javax.swing.tree.TreeSelectionModel;
 import javax.swing.tree.TreeNode;
@@ -38,10 +39,13 @@ import java.util.Enumeration;
 
 import java.awt.Color;
 
+import javax.swing.JFrame;
 
 import javax.swing.JToolBar;
 import javax.swing.JButton;
 
+import javax.swing.JTextField;
+import javax.swing.JLabel;
 
 import thaw.plugins.Hsqldb;
 import thaw.core.*;
@@ -62,7 +66,9 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 	private JToolBar toolBar;
 	private JButton newIndex;
+	private JButton reuseIndex;
 	private JButton refreshAll;
+
 
 	private JPopupMenu indexCategoryMenu;
 	private JPopupMenu indexMenu;
@@ -75,8 +81,12 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	private JMenuItem deleteIndex;
 	private JMenuItem updateIndexCategory;
 	private JMenuItem updateIndex;
-	private JMenuItem copyKeys;
-	private JMenuItem copyKey;
+	private JMenuItem copyPublicKeys;
+	private JMenuItem copyPublicKey;
+	private JMenuItem copyPrivateKeys;
+	private JMenuItem copyPrivateKey;
+	private JMenuItem reloadFromFreenet;
+	
        
 	private boolean modifiables;
 	private boolean selectionOnly;
@@ -87,6 +97,13 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 	private Hsqldb db;
 	private FCPQueueManager queueManager;
+
+
+	/** used for a special form ***/
+	private int formState;
+	private JButton okButton = null;
+	private JButton cancelButton = null;
+	
 
 	/**
 	 * Menu is defined according to the 'modifiables' parameters.
@@ -131,21 +148,38 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			updateIndexCategory = new JMenuItem(I18n.getMessage("thaw.plugin.index.downloadIndexes"));
 		}
 
-		copyKey = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKey"));
-		copyKeys = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKey"));
+		copyPublicKey = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKey"));
+		copyPublicKeys = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKeys"));
+
+		if (modifiables) {
+			copyPrivateKey = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyPrivateKey"));
+			copyPrivateKeys = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyPrivateKey"));
+			copyPrivateKey.addActionListener(this);
+			copyPrivateKeys.addActionListener(this);
+
+			reloadFromFreenet = new JMenuItem(I18n.getMessage("thaw.plugin.index.reloadFromFreenet"));
+			reloadFromFreenet.addActionListener(this);
+		}
 
 		indexCategoryMenu.add(updateIndexCategory);
 		indexCategoryMenu.add(addIndex);
 		indexCategoryMenu.add(addIndexCategory);
-		indexCategoryMenu.add(copyKeys);
+		indexCategoryMenu.add(copyPublicKeys);
 		indexCategoryMenu.add(updateIndex);
 		indexCategoryMenu.add(renameIndexCategory);
 		indexCategoryMenu.add(deleteIndexCategory);
+		if (modifiables) {
+			indexCategoryMenu.add(copyPrivateKeys);
+		}
 
 		indexMenu.add(updateIndex);
-		indexMenu.add(copyKey);
+		indexMenu.add(copyPublicKey);
 		indexMenu.add(renameIndex);
 		indexMenu.add(deleteIndex);
+		if (modifiables) {
+			indexMenu.add(copyPrivateKey);
+			indexMenu.add(reloadFromFreenet);
+		}
 
 		addIndex.addActionListener(this);
 		addIndexCategory.addActionListener(this);
@@ -154,8 +188,8 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		updateIndexCategory.addActionListener(this);
 
 		updateIndex.addActionListener(this);
-		copyKey.addActionListener(this);
-		copyKeys.addActionListener(this);
+		copyPublicKey.addActionListener(this);
+		copyPublicKeys.addActionListener(this);
 		renameIndex.addActionListener(this);
 		deleteIndex.addActionListener(this);
 		
@@ -183,8 +217,6 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		if (selectionOnly)
 			tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 
-
-
 		toolBar = new JToolBar();
 
 		newIndex   = new JButton(IconBox.indexNew);
@@ -199,12 +231,18 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			refreshAll = new JButton(IconBox.refreshAction);
 			refreshAll.setToolTipText(I18n.getMessage("thaw.plugin.index.downloadIndexes"));
 			refreshAll.addActionListener(this);
+		} else {
+			reuseIndex = new JButton(IconBox.indexReuse);
+			reuseIndex.setToolTipText(I18n.getMessage("thaw.plugin.index.addAlreadyExisting"));
+			reuseIndex.addActionListener(this);
 		}
 
 
 		toolBar.add(newIndex);
 		if (!modifiables)
 			toolBar.add(refreshAll);
+		else
+			toolBar.add(reuseIndex);
 
 		if (!selectionOnly)
 			panel.add(toolBar, BorderLayout.NORTH);
@@ -303,6 +341,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		   || e.getSource() == newIndex) {
 			String name = null;
 
+			String keys[] = null;
 			String publicKey = null;
 
 			if(!modifiables) {
@@ -311,27 +350,21 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 				if (publicKey == null)
 					return;
 
-				publicKey = publicKey.replaceFirst("http://127.0.0.1/", "");
-				publicKey = publicKey.replaceFirst("http://localhost/", "");
-
-				try {
-					publicKey = java.net.URLDecoder.decode(publicKey, "UTF-8");
-				} catch(java.io.UnsupportedEncodingException exc) {
-					Logger.warning(this, "UnsupportedEncodingException (UTF-8): "+exc.toString());
-				}
+				publicKey = FreenetURIHelper.cleanURI(publicKey);
 
 				name = Index.getNameFromKey(publicKey);
 
-			} else
+			} else {
 				name = askAName(I18n.getMessage("thaw.plugin.index.indexName"),
-						I18n.getMessage("thaw.plugin.index.newIndex"));
+						I18n.getMessage("thaw.plugin.index.newIndex"));				
+			}
 
 			if(name == null)
 				return;
 
 			IndexCategory parent;
 
-			if (e.getSource() == addIndex)
+			if (selectedNode != null)
 				parent = (IndexCategory)selectedNode;
 			else
 				parent = root;
@@ -346,6 +379,15 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 			treeModel.reload(parent);
 		}
+
+
+		if (e.getSource() == reuseIndex) {
+			Thread newThread = new Thread(new IndexReuser());
+
+			newThread.start();
+		}
+
+
 
 		if(e.getSource() == addIndexCategory) {
 			String name = askAName(I18n.getMessage("thaw.plugin.index.categoryName"), 
@@ -405,23 +447,142 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		   || e.getSource() == updateIndexCategory) {
 			selectedNode.update();
 		}
+
+		if (e.getSource() == reloadFromFreenet) {
+			selectedNode.updateFromFreenet(-1);
+		}
 		
 		if (e.getSource() == refreshAll) {
 			root.update();
 		}
 
-		if(e.getSource() == copyKey
-		   || e.getSource() == copyKeys) {
+		if(e.getSource() == copyPublicKey
+		   || e.getSource() == copyPublicKeys) {
 			Toolkit tk = Toolkit.getDefaultToolkit();
-			StringSelection st = new StringSelection(selectedNode.getKey());
+			StringSelection st = new StringSelection(selectedNode.getPublicKey());
 			Clipboard cp = tk.getSystemClipboard();
 			cp.setContents(st, null);
 		}
 
+		
+		if(e.getSource() == copyPrivateKey
+		   || e.getSource() == copyPrivateKeys) {
+			Toolkit tk = Toolkit.getDefaultToolkit();
+			StringSelection st = new StringSelection(selectedNode.getPrivateKey());
+			Clipboard cp = tk.getSystemClipboard();
+			cp.setContents(st, null);
+		}
+
+		if (e.getSource() == okButton) {
+			formState = 1;
+		}
+
+		if (e.getSource() == cancelButton) {
+			formState = 2;
+		}
 	}
 
 	public String askAName(String prompt, String defVal) {
 		return JOptionPane.showInputDialog(prompt, defVal);
+	}
+
+
+	/* It's gruiiicckk */
+	private class IndexReuser implements Runnable {
+		public IndexReuser() {
+
+		}
+
+		public void run() {
+			String keys[];
+			String publicKey = null;
+			String privateKey = null;
+
+			keys = askKeys(true);
+			if (keys == null)
+				return;
+
+			publicKey = keys[0];
+			privateKey = keys[1];
+
+			try {
+				publicKey = java.net.URLDecoder.decode(publicKey, "UTF-8");
+			} catch(java.io.UnsupportedEncodingException exc) {
+				Logger.warning(this, "UnsupportedEncodingException (UTF-8): "+exc.toString());
+			}
+
+			String name = Index.getNameFromKey(publicKey);
+			
+			IndexCategory parent;
+
+			if (selectedNode != null && selectedNode instanceof IndexCategory)
+				parent = (IndexCategory)selectedNode;
+			else
+				parent = root;
+
+			Index index = new Index(db, queueManager, -2, parent, name, name, publicKey, privateKey, 0, null, modifiables);
+
+			index.create();
+			parent.insert(index.getTreeNode(), 0);
+			
+			treeModel.reload(parent);
+		}
+	}
+
+
+	public String[] askKeys(boolean askPrivateKey) {
+		//I18n.getMessage("thaw.plugin.index.indexKey")
+		formState = 0;
+
+		JFrame frame = new JFrame(I18n.getMessage("thaw.plugin.index.indexKey"));
+
+		frame.getContentPane().setLayout(new GridLayout(askPrivateKey ? 3 : 2, 2));
+
+		JTextField publicKeyField = new JTextField("USK@");
+		JTextField privateKeyField = new JTextField("SSK@");
+
+		frame.getContentPane().add(new JLabel(I18n.getMessage("thaw.plugin.index.indexKey")));
+		frame.getContentPane().add(publicKeyField);
+
+		if (askPrivateKey) {
+			frame.getContentPane().add(new JLabel(I18n.getMessage("thaw.plugin.index.indexPrivateKey")));
+			frame.getContentPane().add(privateKeyField);
+		}
+
+		cancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
+		okButton = new JButton(I18n.getMessage("thaw.common.ok"));
+
+		cancelButton.addActionListener(this);
+		okButton.addActionListener(this);
+
+		frame.getContentPane().add(cancelButton);
+		frame.getContentPane().add(okButton);
+
+		frame.setSize(500, 100);
+		frame.setVisible(true);
+		
+		while(formState == 0) {
+			try {
+				Thread.sleep(500);
+			} catch(InterruptedException e) {
+				/* \_o< */
+			}
+		}
+
+		frame.setVisible(false);
+
+		if (formState == 2)
+			return null;
+
+		String[] keys = new String[2];
+
+		keys[0] = publicKeyField.getText();
+		if (askPrivateKey)
+			keys[1] = privateKeyField.getText();
+		else
+			keys[1] = null;
+
+		return keys;
 	}
 
 	public void save() {

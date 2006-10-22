@@ -131,7 +131,7 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 		if(msg.getMessageName().equals("EndListPersistentRequests")) {
 			Logger.info(this, "End Of ListPersistentRequests.");
 			queueManager.getQueryManager().getConnection().unlockWriting();
-
+			queueManager.setQueueCompleted();
 			return;
 		}
 	}

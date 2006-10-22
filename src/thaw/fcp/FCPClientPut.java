@@ -85,8 +85,14 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			    boolean getCHKOnly) {
 		this.getCHKOnly = getCHKOnly;
 		this.localFile = file;
-		this.name = file.getName();
-		fileSize = file.length();
+
+		if (file != null) {
+			this.name = file.getName();
+			fileSize = file.length();
+		} else {
+			this.name = name;
+			fileSize = 0;
+		} 
 
 		this.keyType = keyType;
 		this.rev = rev;
@@ -334,7 +340,10 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 		status = "Sending to the node";
 
-		identifier = queueManager.getAnID() + "-"+ localFile.getName();
+		if (localFile != null)
+			identifier = queueManager.getAnID() + "-"+ localFile.getName();
+		else
+			identifier = queueManager.getAnID();
 
 		setChanged();
 		notifyObservers();
@@ -370,7 +379,9 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			msg.setValue("Global", "true");
 		else
 			msg.setValue("Global", "false");
-		msg.setValue("ClientToken", localFile.getPath());
+
+		if (localFile != null)
+			msg.setValue("ClientToken", localFile.getPath());
 
 		switch(persistence) {
 		case(0): msg.setValue("Persistence", "forever"); break;
@@ -379,12 +390,15 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		default: Logger.notice(this, "Unknow persistence !?"); break;
 		}
 
-		msg.setValue("TargetFilename", localFile.getName());
+		if (localFile != null)
+			msg.setValue("TargetFilename", localFile.getName());
+		else
+			msg.setValue("TargetFilename", name);
 
 		msg.setValue("UploadFrom", "direct");
 
-		msg.setAmountOfDataWaiting(localFile.length());
-		Logger.info(this, "Sending "+(new Long(localFile.length()))+" bytes on socket ...");
+		msg.setAmountOfDataWaiting(fileSize);
+		Logger.info(this, "Sending "+Long.toString(fileSize)+" bytes on socket ...");
 		
 		queueManager.getQueryManager().writeMessage(msg, false);
 
@@ -432,10 +446,15 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	private boolean sendFile() {
 		FCPConnection connection = queueManager.getQueryManager().getConnection();
 
-		long remaining = localFile.length();
+		long remaining = fileSize;
 		byte[] data = null;
 
 		FileInputStream in = null;
+
+		if (localFile == null) {
+			toTheNodeProgress = 100;
+			return true;
+		}
 
 		try {
 			in = new FileInputStream(localFile);
