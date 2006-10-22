@@ -260,7 +260,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				
 				revision++;
 
-				clientPut = new FCPClientPut(targetFile, 2, revision, toString(), privateKey, 4, false, 0);
+				clientPut = new FCPClientPut(targetFile, 2, revision, toString(), privateKey, 2, false, 0);
 				transfer = clientPut;
 				clientPut.addObserver(this);
 
@@ -307,7 +307,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		
 		Logger.info(this, "Key asked: "+key);
 		
-		clientGet = new FCPClientGet(key, 4, 2, false, 1, System.getProperty("java.io.tmpdir"));
+		clientGet = new FCPClientGet(key, 2, 2, false, 1, System.getProperty("java.io.tmpdir"));
 		transfer = clientGet;
 		clientGet.addObserver(this);
 		
