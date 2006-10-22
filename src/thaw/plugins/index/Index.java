@@ -1023,13 +1023,25 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	public String getHeaderElement(Element header, String name) {
 		try {
+			if (header == null)
+				return null;
+
 			NodeList nl = header.getElementsByTagName(name);
 
 			if (nl == null)
 				return null;
 
 			Element sub = (Element)nl.item(0);
-			return ((Text)sub.getFirstChild()).getData();
+
+			if (sub == null)
+				return null;
+
+			Text txt = (Text)sub.getFirstChild();
+
+			if (txt == null)
+				return null;
+
+			return txt.getData();
 		} catch(Exception e) {
 			Logger.notice(this, "Unable to get header element '"+name+"', because: "+e.toString());
 			return null;
