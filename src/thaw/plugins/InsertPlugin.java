@@ -1,15 +1,5 @@
 package thaw.plugins;
 
-import java.awt.GridLayout;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import javax.swing.JComboBox;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JButton;
-import javax.swing.ButtonGroup;
-import javax.swing.JRadioButton;
-import javax.swing.JTextField;
 import javax.swing.JScrollPane;
 import java.io.File;
 

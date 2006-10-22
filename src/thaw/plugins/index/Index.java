@@ -1,14 +1,9 @@
 package thaw.plugins.index;
 
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
-import javax.swing.event.TreeExpansionEvent;
-import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import java.sql.*;
 
-import java.util.Enumeration;
 import java.util.Vector;
 import java.util.Iterator;
 

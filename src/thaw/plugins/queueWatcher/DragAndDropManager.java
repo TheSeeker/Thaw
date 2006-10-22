@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.io.File;
 
 import thaw.core.*;
-import thaw.plugins.QueueWatcher;
 import thaw.fcp.*;
 
 

@@ -1,11 +1,6 @@
 package thaw.plugins;
 
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-
 import thaw.core.*;
-import thaw.fcp.*;
-
 import thaw.plugins.index.*;
 
 public class IndexEditor implements Plugin {

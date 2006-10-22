@@ -16,7 +16,6 @@ import java.awt.Font;
 import thaw.plugins.index.TableCreator;
 
 import thaw.core.*;
-import thaw.fcp.*;
 
 public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 	public final static int BUFFER_SIZE = 51200;

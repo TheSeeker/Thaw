@@ -1,11 +1,7 @@
 package thaw.core;
 
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.ActionListener;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 import javax.swing.JCheckBox;

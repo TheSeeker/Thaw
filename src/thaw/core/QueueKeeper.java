@@ -5,9 +5,6 @@ import java.util.HashMap;
 import java.io.File;
 import java.util.Iterator;
 import java.util.Vector;
-import java.util.Observer;
-
-
 /* XML */
 import org.w3c.dom.Document;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -15,7 +12,6 @@ import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.DOMImplementation;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Element;
-import org.w3c.dom.Text;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.Transformer;

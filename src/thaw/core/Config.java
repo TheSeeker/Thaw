@@ -3,7 +3,6 @@ package thaw.core;
 import java.util.HashMap;
 import java.util.Vector;
 import java.io.File;
-import java.util.Set;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -14,7 +13,6 @@ import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.DOMImplementation;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Element;
-import org.w3c.dom.Text;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.Transformer;

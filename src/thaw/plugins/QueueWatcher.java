@@ -3,14 +3,8 @@ package thaw.plugins;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import java.awt.GridLayout;
-import java.awt.BorderLayout;
-import javax.swing.JPanel;
-import javax.swing.JButton;
-import java.util.Observer;
-import java.util.Observable;
 import java.util.Vector;
 import java.util.Iterator;
-import javax.swing.JSplitPane;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 

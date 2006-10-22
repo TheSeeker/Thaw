@@ -2,8 +2,6 @@ package thaw.fcp;
 
 import java.util.Observer;
 import java.util.Observable;
-import java.util.HashMap;
-
 import thaw.core.Logger;
 
 /**

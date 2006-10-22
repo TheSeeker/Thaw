@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 import thaw.core.*;
-import thaw.fcp.*;
 
 public class Hsqldb extends LibraryPlugin {
 	private Core core;

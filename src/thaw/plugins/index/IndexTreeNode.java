@@ -3,7 +3,6 @@ package thaw.plugins.index;
 import java.util.Vector;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.MutableTreeNode;
 
 
 public interface IndexTreeNode {

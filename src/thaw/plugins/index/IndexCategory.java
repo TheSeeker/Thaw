@@ -2,18 +2,13 @@ package thaw.plugins.index;
 
 import java.sql.*;
 
-import javax.swing.JTree;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
-import javax.swing.event.TreeExpansionEvent;
-import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.Iterator;
-
-import java.sql.*;
 
 import thaw.fcp.*;
 import thaw.plugins.Hsqldb;

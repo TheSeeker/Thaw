@@ -5,9 +5,6 @@ import javax.swing.JTable;
 import javax.swing.JScrollPane;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-
-import javax.swing.event.TableModelListener;
 import javax.swing.event.TableModelEvent;
 
 import java.awt.event.ActionListener;
@@ -17,27 +14,18 @@ import java.awt.event.MouseEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
 
-import javax.swing.table.DefaultTableCellRenderer;
-import java.awt.Component;
-
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JMenu;
-import javax.swing.JFileChooser;
-import javax.swing.JProgressBar;
 import javax.swing.JLabel;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
 
 import java.util.Vector;
 import java.util.Iterator;
 
 import java.util.Observable;
-import java.util.Observer;
-
 import thaw.core.*;
 import thaw.fcp.*;
 

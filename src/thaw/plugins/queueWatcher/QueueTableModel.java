@@ -5,9 +5,7 @@ import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
 
-import javax.swing.event.TableModelListener;
 import javax.swing.event.TableModelEvent;
-import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableColumn;

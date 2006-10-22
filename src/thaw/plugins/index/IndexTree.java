@@ -5,24 +5,17 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import javax.swing.JTree;
 import javax.swing.tree.TreeSelectionModel;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeModel;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
-//import javax.swing.JMenu;
-import javax.swing.JRadioButtonMenuItem;
-
 import javax.swing.JOptionPane;
 
 import javax.swing.JScrollPane;
-
-import javax.swing.Icon;
 
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
@@ -32,10 +25,7 @@ import java.awt.event.ActionEvent;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
-
-import java.util.Enumeration;
 
 import java.awt.Color;
 

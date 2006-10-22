@@ -1,7 +1,5 @@
 package thaw.plugins;
 
-import javax.swing.JPanel;
-
 import thaw.core.*;
 import thaw.plugins.fetchPlugin.*;
 

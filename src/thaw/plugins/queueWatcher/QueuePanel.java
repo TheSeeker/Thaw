@@ -4,7 +4,6 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
-import javax.swing.event.TableModelEvent;
 import javax.swing.JProgressBar;
 import javax.swing.JFileChooser;
 import java.awt.BorderLayout;
@@ -14,8 +13,6 @@ import java.util.Iterator;
 
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.Color;
-import java.awt.Component;
-
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.KeyListener;

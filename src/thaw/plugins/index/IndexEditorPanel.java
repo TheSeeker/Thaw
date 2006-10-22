@@ -21,8 +21,6 @@ import java.util.Iterator;
 import thaw.core.*;
 import thaw.fcp.*;
 
-import thaw.plugins.index.*;
-
 import thaw.plugins.Hsqldb;
 
 

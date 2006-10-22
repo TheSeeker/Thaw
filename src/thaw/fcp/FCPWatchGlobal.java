@@ -1,7 +1,5 @@
 package thaw.fcp;
 
-import java.util.HashMap;
-
 public class FCPWatchGlobal implements FCPQuery {
 	private boolean watch;
 

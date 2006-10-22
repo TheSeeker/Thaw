@@ -2,13 +2,10 @@ package thaw.plugins.fetchPlugin;
 
 import java.awt.GridLayout;
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JButton;
-import javax.swing.ButtonGroup;
-import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
@@ -17,8 +14,6 @@ import javax.swing.JFileChooser;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.ClipboardOwner;
-import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 
