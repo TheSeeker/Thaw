@@ -91,6 +91,8 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 		if (modifiables) {
 			rightClickMenu.add(removeLinks);
+		}
+		else {
 			rightClickMenu.add(addThisIndex);
 		}
 

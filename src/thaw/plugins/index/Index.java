@@ -87,12 +87,19 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 		this.id = id;
 		this.parent = parent;
-		this.realName = realName;
-		this.displayName = displayName;
+		this.realName = realName.trim();
+		this.displayName = displayName.trim();
 		this.modifiable = (privateKey == null ? false : true);
 
-		this.privateKey = privateKey;
-		this.publicKey = publicKey;
+		if (privateKey != null)
+			this.privateKey = privateKey.trim();
+		else
+			this.privateKey = null;
+
+		if (publicKey != null)
+			this.publicKey = publicKey.trim();
+		else
+			this.publicKey = null;
 
 
 		if (modifiable == true && publicKey != null && publicKey.startsWith("USK@")) {

@@ -507,6 +507,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	public synchronized boolean saveFileTo(String dir, boolean checkStatus) {
 		fromTheNodeProgress = 0;
+		
+		Logger.info(this, "Saving file to '"+dir+"'");
 
 		if(dir == null) {
 			Logger.warning(this, "saveFileTo() : Can't save to null.");
@@ -592,12 +594,12 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 
 		if(reallyWrite) {
-			Logger.info(this, "Writing file to disk ...");
+			Logger.info(this, "Writing file to disk ... ('"+file+"')");
 			
 			try {
 				fileWriter = new FileOutputStream(newFile);
 			} catch(java.io.IOException e) {
-				Logger.error(this, "Unable to write file on disk ... perms ? : "+e.toString());
+				Logger.error(this, "Unable to write file on disk ... disk space / perms ? : "+e.toString());
 				status = "Write error";
 				return false;
 			}
