@@ -503,6 +503,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				
 					if (rewriteKey)
 						publicKey = transfer.getFileKey();
+					else
+						revision = FreenetURIHelper.getUSKRevision(transfer.getFileKey());
 
 					Logger.info(this, "Most up-to-date key found: " + publicKey);
 					

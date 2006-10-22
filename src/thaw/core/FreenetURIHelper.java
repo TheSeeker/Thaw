@@ -178,5 +178,20 @@ public class FreenetURIHelper {
 		return key;
 	}
 
+
+	public static int getUSKRevision(String key) {
+		String[] split;
+
+		if (key == null)
+			return -1;
+
+		split = key.split("/");
+
+		if (split.length < 3)
+			return -1;
+
+		return Integer.parseInt(split[2]);
+	}
+
 }
 
