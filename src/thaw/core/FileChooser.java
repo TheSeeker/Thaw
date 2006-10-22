@@ -69,17 +69,44 @@ public class FileChooser {
 		return fileChooser.getSelectedFile();
 	}
 
+
+	protected void expandRecursivly(File file, Vector vec) {
+		if (file.isFile()) {
+			vec.add(file);
+			return;
+		}
+
+		File[] files = file.listFiles();
+
+		if (files == null) {
+			Logger.notice(this, "Unable to parse directory '"+file.getPath()+"'");
+			return;
+		}
+
+		for (int i=0; i < files.length; i++) {
+			if (files[i].isFile())
+				vec.add(files[i]);
+			else
+				expandRecursivly(files[i],vec);
+		}
+		
+	}
 	
-	protected File[] expandRecursivly(File[] selectedFiles)
+	protected Vector expandRecursivly(File[] selectedFiles)
 	{
-		/* TODO */
-		return selectedFiles;
+		Vector files= new Vector();
+
+		for (int i = 0 ; i < selectedFiles.length ; i++) {
+			expandRecursivly(selectedFiles[i], files);
+		}
+
+		return files;
 	}
 	
 	/**
 	 * @return null if nothing choosed.
 	 */
-	public File[] askManyFiles() {
+	public Vector askManyFiles() {
 		fileChooser.setMultiSelectionEnabled(true);
 
 		if(!showDialog())

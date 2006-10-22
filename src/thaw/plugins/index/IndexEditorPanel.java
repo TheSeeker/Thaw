@@ -14,6 +14,10 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
+import java.util.Vector;
+import java.util.Iterator;
+
+
 import thaw.core.*;
 import thaw.fcp.*;
 
@@ -179,7 +183,7 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 			fileChooser.setDirectoryOnly(false);
 			fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
 			
-			java.io.File[] files = fileChooser.askManyFiles();
+			Vector files = fileChooser.askManyFiles();
 
 			if(files == null) {
 				Logger.info(this, "add[andInsert]Button : Cancelled");
@@ -188,24 +192,28 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 
 			String category = FileCategory.promptForACategory();
 
-			for(int i = 0 ; i < files.length ; i++) {
+			for(Iterator it = files.iterator();
+			    it.hasNext();) {
+
+				java.io.File ioFile = (java.io.File)it.next();
+
 				FCPTransferQuery insertion = null;
 
 				if(e.getSource() == insertAndAddButton) {
-					insertion = new FCPClientPut(files[i], 0, 0, null,
+					insertion = new FCPClientPut(ioFile, 0, 0, null,
 								     null, DEFAULT_INSERTION_PRIORITY,
 								     true, 0, false);
 					((FCPClientPut)insertion).addObserver(this);
 					queueManager.addQueryToThePendingQueue(insertion);
 				} else {
-					insertion = new FCPClientPut(files[i], 0, 0, null,
+					insertion = new FCPClientPut(ioFile, 0, 0, null,
 								     null, DEFAULT_INSERTION_PRIORITY,
 								     true, 2, true); /* getCHKOnly */
 					insertion.start(queueManager);
 				}
 
 
-				thaw.plugins.index.File file = new thaw.plugins.index.File(db, files[i].getPath(),
+				thaw.plugins.index.File file = new thaw.plugins.index.File(db, ioFile.getPath(),
 											   category, (Index)fileList,
 											   insertion);
 				

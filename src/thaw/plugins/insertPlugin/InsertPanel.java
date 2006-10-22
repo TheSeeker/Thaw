@@ -21,6 +21,8 @@ import java.util.Observer;
 import java.util.Observable;
 import java.util.Vector;
 
+import java.util.Iterator;
+
 import thaw.core.*;
 import thaw.plugins.InsertPlugin;
 import thaw.fcp.*;
@@ -343,7 +345,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 		if(e.getSource() == browseButton) {
 			FileChooser fileChooser = new FileChooser();
-			File[] files;
+			Vector files;
 
 			fileChooser.setTitle(I18n.getMessage("thaw.common.selectFile"));
 			fileChooser.setDirectoryOnly(false);
@@ -355,10 +357,19 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 			
 			String fileList = "";
 
-			for(int i = 0 ; i < files.length ; i++) {
+			int i;
+
+			i = 0;
+
+			for(Iterator it = files.iterator();
+			    it.hasNext(); ) {
+				File file = (File)it.next();
+
 				if(i >= 1)
 					fileList = fileList + ";";
-				fileList = fileList + files[i].getPath();
+				fileList = fileList + file.getPath();
+
+				i++;
 			}
 
 			selectedFiles.setText(fileList);
