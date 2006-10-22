@@ -567,7 +567,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		fileList = new Vector();
 
 		try {
-			String query = "SELECT id, publicKey, mime, size, localPath, category, indexParent FROM files WHERE indexParent = ?";
+			String query = "SELECT id, filename, publicKey, mime, size, localPath, category, indexParent FROM files WHERE indexParent = ?";
 
 			if(columnToSort != null) {
 				query = query + "ORDER BY " + columnToSort;

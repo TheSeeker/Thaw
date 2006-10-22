@@ -87,7 +87,7 @@ public class SearchResult extends Observable implements Observer, FileAndLinkLis
 		fileList = new Vector();
 
 		try {
-			PreparedStatement st = makeSearchQuery("id, publicKey, localPath, mime, size, category, indexParent",
+			PreparedStatement st = makeSearchQuery("id, filename, publicKey, localPath, mime, size, category, indexParent",
 							       "files", indexIds, search, columnToSort, asc);
 			if (st.execute()) {
 				ResultSet results = st.getResultSet();

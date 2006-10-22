@@ -149,7 +149,10 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 		for(Iterator it = children.iterator();
 		    it.hasNext();) {
 			IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
-			result = result + node.getPublicKey() + "\n";
+			result = result + node.getPublicKey();
+
+			if (it.hasNext())
+				result = result + "\n";
 		}
 		
 		return result;
@@ -161,7 +164,10 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 		for(Iterator it = children.iterator();
 		    it.hasNext();) {
 			IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
-			result = result + node.getPrivateKey() + "\n";
+			result = result + node.getPrivateKey();
+			
+			if (it.hasNext())
+				result = result + "\n";
 		}
 		
 		return result;

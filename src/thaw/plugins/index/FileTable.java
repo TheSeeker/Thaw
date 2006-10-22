@@ -322,7 +322,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			if(modifiables)
 				columnNames.add(I18n.getMessage("thaw.common.localPath"));
 
-			columnNames.add(I18n.getMessage("thaw.plugin.index.category"));
+			//columnNames.add(I18n.getMessage("thaw.plugin.index.category"));
 			columnNames.add(I18n.getMessage("thaw.common.key"));
 			columnNames.add(I18n.getMessage("thaw.common.status"));
 		}
@@ -390,16 +390,16 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			if(column == 2 && modifiables)
 				return file.getLocalPath();
 
+			//if( (column == 2 && !modifiables)
+			//    || (column == 3 && modifiables) )
+			//	return file.getCategory();
+
 			if( (column == 2 && !modifiables)
 			    || (column == 3 && modifiables) )
-				return file.getCategory();
-
-			if( (column == 3 && !modifiables)
-			    || (column == 4 && modifiables) )
 				return file.getPublicKey();
 
-			if( (column == 4 && !modifiables)
-			    || (column == 5 && modifiables) ) {
+			if( (column == 3 && !modifiables)
+			    || (column == 4 && modifiables) ) {
 				return file.getTransfer();
 			}
 

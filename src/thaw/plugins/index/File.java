@@ -65,6 +65,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 		this.db = db;
 
 		id = resultSet.getInt("id");
+		fileName = resultSet.getString("filename").trim();
 		publicKey = resultSet.getString("publicKey").trim();
 		localPath = resultSet.getString("localPath");
 		size = resultSet.getLong("size");
@@ -252,34 +253,36 @@ public class File extends java.util.Observable implements java.util.Observer {
 			}
 			
 
-			st = db.getConnection().prepareStatement("INSERT INTO files (id, publicKey, "+
+			st = db.getConnection().prepareStatement("INSERT INTO files (id, filename, publicKey, "+
 								       "localPath, mime, size, category, indexParent) "+
-								       "VALUES (?, ?, ?, ?, ?, ?, ?)");
+								       "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 			st.setInt(1, id);
 
+			st.setString(2, fileName);
+
 			if(publicKey != null)
-				st.setString(2, publicKey);
+				st.setString(3, publicKey);
 			else
-				st.setString(2, fileName);
+				st.setString(3, fileName);
 
 			if(localPath != null)
-				st.setString(3, localPath);
-			else
-				st.setNull(3, Types.VARCHAR);
-
-			if(mime != null)
-				st.setString(4, mime);
+				st.setString(4, localPath);
 			else
 				st.setNull(4, Types.VARCHAR);
 
-			st.setLong(5, size);
+			if(mime != null)
+				st.setString(5, mime);
+			else
+				st.setNull(5, Types.VARCHAR);
+
+			st.setLong(6, size);
 			
 			if(category != null)
-				st.setString(6, category);
+				st.setString(7, category);
 			else
-				st.setNull(6, Types.VARCHAR);
+				st.setNull(7, Types.VARCHAR);
 
-			st.setInt(7, parent.getId());
+			st.setInt(8, parent.getId());
 
 			st.execute();
 		} catch(SQLException e) {
@@ -312,33 +315,35 @@ public class File extends java.util.Observable implements java.util.Observer {
 		try {
 			PreparedStatement st;
 
-			st = db.getConnection().prepareStatement("UPDATE files SET publicKey = ?, localPath = ?, mime= ?, size = ?, category = ?, indexParent = ? WHERE id = ?");
+			st = db.getConnection().prepareStatement("UPDATE files SET filename = ?, publicKey = ?, localPath = ?, mime= ?, size = ?, category = ?, indexParent = ? WHERE id = ?");
+
+			st.setString(1, fileName);
 
 			if(publicKey != null)
-				st.setString(1, publicKey);
+				st.setString(2, publicKey);
 			else
-				st.setString(1, fileName);
+				st.setString(2, fileName);
 
 			if(localPath != null)
-				st.setString(2, localPath);
-			else
-				st.setNull(2, Types.VARCHAR);
-
-			if(mime != null)
-				st.setString(3, mime);
+				st.setString(3, localPath);
 			else
 				st.setNull(3, Types.VARCHAR);
 
-			st.setLong(4, size);
+			if(mime != null)
+				st.setString(4, mime);
+			else
+				st.setNull(4, Types.VARCHAR);
+
+			st.setLong(5, size);
 			
 			if(category != null)
-				st.setString(5, category);
+				st.setString(6, category);
 			else
-				st.setNull(5, Types.VARCHAR);
+				st.setNull(6, Types.VARCHAR);
 
-			st.setInt(6, getParent().getId());
+			st.setInt(7, getParent().getId());
 
-			st.setInt(7, id);
+			st.setInt(8, id);
 
 			st.execute();
 		} catch(SQLException e) {
