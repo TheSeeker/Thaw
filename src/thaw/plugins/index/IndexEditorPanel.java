@@ -72,8 +72,8 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 
 		buttonsEnabled(false);
 
-		toolBar.add(addButton);
 		toolBar.add(insertAndAddButton);
+		toolBar.add(addButton);
 		toolBar.addSeparator();
 		toolBar.add(linkButton);
 

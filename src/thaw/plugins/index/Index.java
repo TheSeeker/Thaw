@@ -319,6 +319,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		transfer = query;
 
 		if (transfer != null) {
+			transfer.addObserver(this);
 			update(((java.util.Observable)transfer), null);
 		}
 	}
