@@ -478,7 +478,15 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				queueManager.remove(transfer);
 
 				if(transfer instanceof FCPClientPut) {
-					targetFile.delete();
+					if (targetFile != null)
+						targetFile.delete();
+					else {
+						String path = ((FCPClientPut)transfer).getPath();
+						if (path != null) {
+							java.io.File fl = new java.io.File(path);
+							fl.delete();
+						}
+					} 
 					
 					transfer = null;
 					
