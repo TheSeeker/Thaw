@@ -165,8 +165,8 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 				Index index = new Index(db, queueManager, -2, null, Index.getNameFromKey(link.getKey()),
 							Index.getNameFromKey(link.getKey()), link.getKey(), null,
 							0, null, false);
-				index.create();
-				indexTree.addToRoot(index);
+				if (indexTree.addToRoot(index))
+					index.create();
 			}
 
 			if (e.getSource() == copyKey) {

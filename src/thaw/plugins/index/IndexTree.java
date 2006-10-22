@@ -47,6 +47,10 @@ import javax.swing.JButton;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 
+
+import java.sql.*;
+
+
 import thaw.plugins.Hsqldb;
 import thaw.core.*;
 import thaw.fcp.*;
@@ -214,8 +218,8 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		tree.setCellRenderer(treeRenderer);
 
-		if (selectionOnly)
-			tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		//if (selectionOnly)
+		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 
 		toolBar = new JToolBar();
 
@@ -643,16 +647,67 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	}
 
 
-	void addToRoot(IndexTreeNode node) {
+	public boolean addToRoot(IndexTreeNode node) {
+		if (alreadyExistingIndex(node.getPublicKey())) {
+			Logger.notice(this, "Index already added");
+			return false;
+		}
+
 		node.setParent(root);
 		root.insert(node.getTreeNode(), root.getChildCount());
 		reloadModel(root);
+
+		return true;
 	}
+
+	
+
+	public boolean alreadyExistingIndex(String key) {
+		String realKey = key.substring(0, 60).toLowerCase();
+
+		try {
+			Connection c = db.getConnection();
+			PreparedStatement st;
+
+			String query;
+
+			query = "SELECT id FROM indexes WHERE LOWER(publicKey) LIKE ?";
+
+			
+			if (modifiables)
+				query = query + " AND privateKey IS NOT NULL;";
+			else
+				query = query + " AND privateKey IS NULL;";
+			
+
+			Logger.info(this, query + " : " + realKey+"%");
+
+			st = c.prepareStatement(query);
+
+			st.setString(1, realKey+"%");
+
+			if (st.execute()) {
+				ResultSet results = st.getResultSet();
+
+				if (results.next()) {
+					return true;
+				}
+			}
+
+
+		} catch(java.sql.SQLException e) {
+			Logger.warning(this, "Exception while trying to check if '"+key+"' is already know: '"+e.toString()+"'");
+		}
+
+		return false;
+	}
+
+
 
 	/**
 	 * @param node can be null
 	 */
-	void reloadModel(DefaultMutableTreeNode node) {
+	public void reloadModel(DefaultMutableTreeNode node) {
 		treeModel.reload(node);
 	}
 
