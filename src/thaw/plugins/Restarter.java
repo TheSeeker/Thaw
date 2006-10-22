@@ -47,8 +47,8 @@ public class Restarter implements Observer, Runnable, Plugin {
 		try {
 			if(core.getConfig().getValue("restartInterval") != null
 			   && core.getConfig().getValue("restartFatals") != null) {
-				interval = Integer.parseInt(core.getConfig().getValue("restartInterval"));
-				restartFatals = Boolean.valueOf(core.getConfig().getValue("restartFatals")).booleanValue();
+				this.interval = Integer.parseInt(core.getConfig().getValue("restartInterval"));
+				this.restartFatals = Boolean.valueOf(core.getConfig().getValue("restartFatals")).booleanValue();
 			}
 		} catch(Exception e) { /* probably conversion errors */ /* Yes I know, it's dirty */
 			Logger.notice(this, "Unable to read / understand value from the config. Using default values");
@@ -56,43 +56,43 @@ public class Restarter implements Observer, Runnable, Plugin {
 
 		
 		/* Adding restart config tab to the config window */
-		configPanel = new JPanel();
-		configPanel.setLayout(new GridLayout(15, 1));
+		this.configPanel = new JPanel();
+		this.configPanel.setLayout(new GridLayout(15, 1));
 
-		restartIntervalLabel = new JLabel(I18n.getMessage("thaw.plugin.restarter.interval"));
-		restartIntervalField = new JTextField(Integer.toString(interval));
+		this.restartIntervalLabel = new JLabel(I18n.getMessage("thaw.plugin.restarter.interval"));
+		this.restartIntervalField = new JTextField(Integer.toString(this.interval));
 		
-		restartFatalsBox = new JCheckBox(I18n.getMessage("thaw.plugin.restarter.restartFatals"), restartFatals);
+		this.restartFatalsBox = new JCheckBox(I18n.getMessage("thaw.plugin.restarter.restartFatals"), this.restartFatals);
 
-		configPanel.add(restartIntervalLabel);
-		configPanel.add(restartIntervalField);
-		configPanel.add(restartFatalsBox);
+		this.configPanel.add(this.restartIntervalLabel);
+		this.configPanel.add(this.restartIntervalField);
+		this.configPanel.add(this.restartFatalsBox);
 
-		core.getConfigWindow().addTab(I18n.getMessage("thaw.plugin.restarter.configTabName"), configPanel);
+		core.getConfigWindow().addTab(I18n.getMessage("thaw.plugin.restarter.configTabName"), this.configPanel);
 		core.getConfigWindow().addObserver(this);
 
-		running = true;
-		restarter = new Thread(this);
-		restarter.start();
+		this.running = true;
+		this.restarter = new Thread(this);
+		this.restarter.start();
 
 		return true;
 	}
 
 
 	public boolean stop() {
-		core.getConfigWindow().removeTab(configPanel);
-		core.getConfigWindow().deleteObserver(this);
-		running = false;
+		this.core.getConfigWindow().removeTab(this.configPanel);
+		this.core.getConfigWindow().deleteObserver(this);
+		this.running = false;
 
 		return true;
 	}
 
 	
 	public void run() {
-		while(running) {
+		while(this.running) {
 			try {
 
-				for(timeElapsed = 0 ; timeElapsed < interval && running; timeElapsed++) {
+				for(this.timeElapsed = 0 ; this.timeElapsed < this.interval && this.running; this.timeElapsed++) {
 					Thread.sleep(1000);
 				}
 
@@ -103,13 +103,13 @@ public class Restarter implements Observer, Runnable, Plugin {
 			Logger.notice(this, "Restarting [some] failed downloads");
 
 			try {
-				if(!running)
+				if(!this.running)
 					break;
 				
-				int maxDownloads = core.getQueueManager().getMaxDownloads();
+				int maxDownloads = this.core.getQueueManager().getMaxDownloads();
 				int alreadyRunning = 0;
 				int failed = 0;
-				Vector runningQueue = core.getQueueManager().getRunningQueue();
+				Vector runningQueue = this.core.getQueueManager().getRunningQueue();
 			
 				
 				if(maxDownloads >= 0) {
@@ -127,7 +127,7 @@ public class Restarter implements Observer, Runnable, Plugin {
 						}
 						
 						if(query.isFinished() && !query.isSuccessful()
-						   && (restartFatals || !query.isFatallyFailed()) ) {
+						   && (this.restartFatals || !query.isFatallyFailed()) ) {
 							failed++;
 						}
 					}
@@ -147,9 +147,9 @@ public class Restarter implements Observer, Runnable, Plugin {
 								continue;
 
 							if(query.isFinished() && !query.isSuccessful()
-							   && (restartFatals || !query.isFatallyFailed())) {
+							   && (this.restartFatals || !query.isFatallyFailed())) {
 								if(i == toRestart) {
-									restartQuery(query);
+									this.restartQuery(query);
 									break;
 								}
 
@@ -171,8 +171,8 @@ public class Restarter implements Observer, Runnable, Plugin {
 						
 						if(query.getQueryType() == 1 && query.isFinished()
 						   && !query.isSuccessful()
-						   && (restartFatals || !query.isFatallyFailed()))
-							restartQuery(query);
+						   && (this.restartFatals || !query.isFatallyFailed()))
+							this.restartQuery(query);
 					}
 				}
 				
@@ -189,30 +189,30 @@ public class Restarter implements Observer, Runnable, Plugin {
 
 
 	public void restartQuery(FCPTransferQuery query) {
-		query.stop(core.getQueueManager());
+		query.stop(this.core.getQueueManager());
 
 		if(query.getMaxAttempt() >= 0)
 			query.setAttempt(0);
 		
-		query.start(core.getQueueManager());
+		query.start(this.core.getQueueManager());
 	}
 
 	public void update(Observable o, Object arg) {
-		if(o == core.getConfigWindow()) {
+		if(o == this.core.getConfigWindow()) {
 
-			if(arg == core.getConfigWindow().getOkButton()){
-				core.getConfig().setValue("restartInterval", restartIntervalField.getText());
-				core.getConfig().setValue("restartFatals",
-							  Boolean.toString(restartFatalsBox.isSelected()));
+			if(arg == this.core.getConfigWindow().getOkButton()){
+				this.core.getConfig().setValue("restartInterval", this.restartIntervalField.getText());
+				this.core.getConfig().setValue("restartFatals",
+							  Boolean.toString(this.restartFatalsBox.isSelected()));
 
 				/* Plugin will be stop() and start(), so no need to reload config */
 							  
 				return;
 			}
 
-			if(arg == core.getConfigWindow().getCancelButton()) {
-				restartIntervalField.setText(Integer.toString(interval));
-				restartFatalsBox.setSelected(restartFatals);
+			if(arg == this.core.getConfigWindow().getCancelButton()) {
+				this.restartIntervalField.setText(Integer.toString(this.interval));
+				this.restartFatalsBox.setSelected(this.restartFatals);
 				
 				return;
 			}

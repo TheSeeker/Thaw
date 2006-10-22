@@ -35,58 +35,58 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		this.queueManager = queueManager;
 		this.config = config;
 
-		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, false, queueManager, db);
+		this.indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, false, queueManager, db);
 
-		listAndDetails = new JPanel();
-		listAndDetails.setLayout(new BorderLayout(10, 10));
+		this.listAndDetails = new JPanel();
+		this.listAndDetails.setLayout(new BorderLayout(10, 10));
 
-		tables = new Tables(false, db, queueManager, indexTree, config);
-		fileDetails = new FileDetailsEditor(false);
+		this.tables = new Tables(false, db, queueManager, this.indexTree, config);
+		this.fileDetails = new FileDetailsEditor(false);
 
-		listAndDetails.add(tables.getPanel(), BorderLayout.CENTER);
-		listAndDetails.add(fileDetails.getPanel(), BorderLayout.SOUTH);
+		this.listAndDetails.add(this.tables.getPanel(), BorderLayout.CENTER);
+		this.listAndDetails.add(this.fileDetails.getPanel(), BorderLayout.SOUTH);
 
-		split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-				       indexTree.getPanel(),
-				       listAndDetails);
+		this.split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+				       this.indexTree.getPanel(),
+				       this.listAndDetails);
 
-		indexTree.addTreeSelectionListener(this);
+		this.indexTree.addTreeSelectionListener(this);
 	}
 
 	public void restoreState() {
-		if (config.getValue("indexBrowserPanelSplitPosition") != null)
-			split.setDividerLocation(Integer.parseInt(config.getValue("indexBrowserPanelSplitPosition")));
-		tables.restoreState();
+		if (this.config.getValue("indexBrowserPanelSplitPosition") != null)
+			this.split.setDividerLocation(Integer.parseInt(this.config.getValue("indexBrowserPanelSplitPosition")));
+		this.tables.restoreState();
 	}
 
 	public JSplitPane getPanel() {
-		return split;
+		return this.split;
 	}
 
 	public void saveState() {
-		indexTree.save();
-		config.setValue("indexBrowserPanelSplitPosition", Integer.toString(split.getDividerLocation()));
-		tables.saveState();
+		this.indexTree.save();
+		this.config.setValue("indexBrowserPanelSplitPosition", Integer.toString(this.split.getDividerLocation()));
+		this.tables.saveState();
 	}
 
 
 	protected void setList(FileAndLinkList l) {
-		tables.setList(l);
+		this.tables.setList(l);
 	}
 
 	protected void setFileList(FileList l) {
-		tables.setFileList(l);
+		this.tables.setFileList(l);
 	}
 
 	protected void setLinkList(LinkList l) {
-		tables.setLinkList(l);
+		this.tables.setLinkList(l);
 	}
 	
 
 	public void valueChanged(javax.swing.event.TreeSelectionEvent e) {
 		javax.swing.tree.TreePath path = e.getPath();
 
-		setList(null);
+		this.setList(null);
 
 		if(path == null) {
 			Logger.notice(this, "Path null ?");
@@ -102,12 +102,12 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 
 		if (node instanceof FileList) {
 			Logger.info(this, "FileList !");
-			setFileList((FileList)node);
+			this.setFileList((FileList)node);
 		}
 
 		if (node instanceof LinkList) {
 			Logger.info(this, "LinkList !");
-			setLinkList((LinkList)node);
+			this.setLinkList((LinkList)node);
 		}
 
 	}

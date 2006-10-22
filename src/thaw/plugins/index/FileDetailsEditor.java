@@ -8,12 +8,12 @@ public class FileDetailsEditor {
 	private JPanel panel;
 
 	public FileDetailsEditor(boolean modifiables) {
-		panel = new JPanel();
+		this.panel = new JPanel();
 	}
 
 
 	public JPanel getPanel() {
-		return panel;
+		return this.panel;
 	}
 
 }

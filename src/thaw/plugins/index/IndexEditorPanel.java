@@ -52,91 +52,91 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 		this.queueManager = queueManager;
 		this.config = config;
 
-		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.yourIndexes"), true, false, queueManager, db);
+		this.indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.yourIndexes"), true, false, queueManager, db);
 
-		toolBar = new JToolBar();
-		toolBar.setFloatable(false);
+		this.toolBar = new JToolBar();
+		this.toolBar.setFloatable(false);
 
-		addButton = new JButton(IconBox.addToIndexAction);
-		addButton.setToolTipText(I18n.getMessage("thaw.plugin.index.addFilesWithoutInserting"));
-		insertAndAddButton = new JButton(IconBox.insertAndAddToIndexAction);
-		insertAndAddButton.setToolTipText(I18n.getMessage("thaw.plugin.index.addFilesWithInserting"));
-		linkButton = new JButton(IconBox.makeALinkAction);
-		linkButton.setToolTipText(I18n.getMessage("thaw.plugin.index.addLink"));
+		this.addButton = new JButton(IconBox.addToIndexAction);
+		this.addButton.setToolTipText(I18n.getMessage("thaw.plugin.index.addFilesWithoutInserting"));
+		this.insertAndAddButton = new JButton(IconBox.insertAndAddToIndexAction);
+		this.insertAndAddButton.setToolTipText(I18n.getMessage("thaw.plugin.index.addFilesWithInserting"));
+		this.linkButton = new JButton(IconBox.makeALinkAction);
+		this.linkButton.setToolTipText(I18n.getMessage("thaw.plugin.index.addLink"));
 
-		addButton.addActionListener(this);
-		insertAndAddButton.addActionListener(this);
-		linkButton.addActionListener(this);
+		this.addButton.addActionListener(this);
+		this.insertAndAddButton.addActionListener(this);
+		this.linkButton.addActionListener(this);
 
-		buttonsEnabled(false);
+		this.buttonsEnabled(false);
 
-		toolBar.add(insertAndAddButton);
-		toolBar.add(addButton);
-		toolBar.addSeparator();
-		toolBar.add(linkButton);
+		this.toolBar.add(this.insertAndAddButton);
+		this.toolBar.add(this.addButton);
+		this.toolBar.addSeparator();
+		this.toolBar.add(this.linkButton);
 
-		tables = new Tables(true, db, queueManager, indexTree, config);
-		fileDetails = new FileDetailsEditor(true);
+		this.tables = new Tables(true, db, queueManager, this.indexTree, config);
+		this.fileDetails = new FileDetailsEditor(true);
 
-		listAndDetails = new JPanel();
-		listAndDetails.setLayout(new BorderLayout(0, 0));
+		this.listAndDetails = new JPanel();
+		this.listAndDetails.setLayout(new BorderLayout(0, 0));
 
-		listAndDetails.add(toolBar, BorderLayout.NORTH);
-		listAndDetails.add(tables.getPanel(), BorderLayout.CENTER);
-		listAndDetails.add(fileDetails.getPanel(), BorderLayout.SOUTH);
+		this.listAndDetails.add(this.toolBar, BorderLayout.NORTH);
+		this.listAndDetails.add(this.tables.getPanel(), BorderLayout.CENTER);
+		this.listAndDetails.add(this.fileDetails.getPanel(), BorderLayout.SOUTH);
 
-		split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-				       indexTree.getPanel(),
-				       listAndDetails);
+		this.split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+				       this.indexTree.getPanel(),
+				       this.listAndDetails);
 
-		indexTree.addTreeSelectionListener(this);
+		this.indexTree.addTreeSelectionListener(this);
 
 	}
 
 	public void restoreState() {
-		if (config.getValue("indexEditorPanelSplitPosition") != null)
-			split.setDividerLocation(Integer.parseInt(config.getValue("indexEditorPanelSplitPosition")));
-		tables.restoreState();
+		if (this.config.getValue("indexEditorPanelSplitPosition") != null)
+			this.split.setDividerLocation(Integer.parseInt(this.config.getValue("indexEditorPanelSplitPosition")));
+		this.tables.restoreState();
 	}
 	
 	public JSplitPane getPanel() {
-		return split;
+		return this.split;
 	}
 
 	public void saveState() {
-		indexTree.save();
-		config.setValue("indexEditorPanelSplitPosition", Integer.toString(split.getDividerLocation()));
-		tables.saveState();
+		this.indexTree.save();
+		this.config.setValue("indexEditorPanelSplitPosition", Integer.toString(this.split.getDividerLocation()));
+		this.tables.saveState();
 	}
 
 	public void buttonsEnabled(boolean a) {
-		addButton.setEnabled(a);
-		insertAndAddButton.setEnabled(a);
-		linkButton.setEnabled(a);
+		this.addButton.setEnabled(a);
+		this.insertAndAddButton.setEnabled(a);
+		this.linkButton.setEnabled(a);
 	}
 
 	protected void setList(FileAndLinkList l) {
-		setLinkList(l);
-		setFileList(l);
+		this.setLinkList(l);
+		this.setFileList(l);
 	}
 
 	protected void setLinkList(LinkList l) {
-		buttonsEnabled(l != null && l instanceof Index);
+		this.buttonsEnabled(l != null && l instanceof Index);
 		this.linkList = l;
-		tables.setLinkList(l);
+		this.tables.setLinkList(l);
 	}
 
 	protected void setFileList(FileList l) {
-		buttonsEnabled(l != null && l instanceof Index);
+		this.buttonsEnabled(l != null && l instanceof Index);
 
 		this.fileList = l;
-		tables.setFileList(l);		
+		this.tables.setFileList(l);		
 	}
 
 	public void valueChanged(javax.swing.event.TreeSelectionEvent e) {
 		javax.swing.tree.TreePath path = e.getPath();
 		
-		setList(null);
+		this.setList(null);
 
 		if(path == null) {
 			Logger.notice(this, "Path null ?");
@@ -152,30 +152,30 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 
 		if(node instanceof FileList) {
 			Logger.info(this, "FileList !");
-			setFileList((FileList)node);
+			this.setFileList((FileList)node);
 		}
 
 		if(node instanceof LinkList) {
 			Logger.info(this, "LinkList !");
-			setLinkList((LinkList)node);
+			this.setLinkList((LinkList)node);
 		}
 
 	}
 
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == linkButton) {
+		if (e.getSource() == this.linkButton) {
 			Thread linkMakerThread = new Thread(new LinkMaker());
 			linkMakerThread.start();
 		}
 
-		if(e.getSource() == addButton
-		   || e.getSource() == insertAndAddButton) {
+		if(e.getSource() == this.addButton
+		   || e.getSource() == this.insertAndAddButton) {
 			FileChooser fileChooser = new FileChooser();
 			
-			if(e.getSource() == addButton)
+			if(e.getSource() == this.addButton)
 				fileChooser.setTitle(I18n.getMessage("thaw.plugin.index.addFilesWithInserting"));
-			if(e.getSource() == insertAndAddButton)
+			if(e.getSource() == this.insertAndAddButton)
 				fileChooser.setTitle(I18n.getMessage("thaw.plugin.index.addFilesWithoutInserting"));
 
 			fileChooser.setDirectoryOnly(false);
@@ -197,25 +197,25 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 
 				FCPTransferQuery insertion = null;
 
-				if(e.getSource() == insertAndAddButton) {
+				if(e.getSource() == this.insertAndAddButton) {
 					insertion = new FCPClientPut(ioFile, 0, 0, null,
 								     null, DEFAULT_INSERTION_PRIORITY,
 								     true, 0, false);
 					((FCPClientPut)insertion).addObserver(this);
-					queueManager.addQueryToThePendingQueue(insertion);
+					this.queueManager.addQueryToThePendingQueue(insertion);
 				} else {
 					insertion = new FCPClientPut(ioFile, 0, 0, null,
 								     null, DEFAULT_INSERTION_PRIORITY,
 								     true, 2, true); /* getCHKOnly */
-					insertion.start(queueManager);
+					insertion.start(this.queueManager);
 				}
 
 
-				thaw.plugins.index.File file = new thaw.plugins.index.File(db, ioFile.getPath(),
-											   category, (Index)fileList,
+				thaw.plugins.index.File file = new thaw.plugins.index.File(this.db, ioFile.getPath(),
+											   category, (Index)this.fileList,
 											   insertion);
 				
-				((Index)fileList).addFile(file);
+				((Index)this.fileList).addFile(file);
 			}
 		}
 	}
@@ -226,10 +226,10 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 
 		public void run() {
 			IndexSelecter indexSelecter = new IndexSelecter();
-			String indexKey = indexSelecter.askForAnIndexURI(db);
+			String indexKey = indexSelecter.askForAnIndexURI(IndexEditorPanel.this.db);
 			if (indexKey != null) {
-				Link newLink = new Link(db, indexKey, (Index)linkList);
-				((Index)linkList).addLink(newLink);
+				Link newLink = new Link(IndexEditorPanel.this.db, indexKey, (Index)IndexEditorPanel.this.linkList);
+				((Index)IndexEditorPanel.this.linkList).addLink(newLink);
 			}
 		}
 	}
@@ -238,7 +238,7 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 		if(o instanceof FCPClientPut) {
 			FCPClientPut clientPut = (FCPClientPut)o;
 			if(clientPut.isFinished()) {
-				queueManager.remove(clientPut);				
+				this.queueManager.remove(clientPut);				
 			}
 		}
 	}

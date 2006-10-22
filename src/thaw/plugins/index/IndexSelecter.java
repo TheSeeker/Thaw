@@ -63,55 +63,55 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 	 * Returned null if canceled. Is blocking !
 	 */
 	public String askForAnIndexURI(Hsqldb db) {
-		frame = new JFrame(I18n.getMessage("thaw.plugin.index.selectIndex"));
+		this.frame = new JFrame(I18n.getMessage("thaw.plugin.index.selectIndex"));
 
-		frame.setVisible(false);
+		this.frame.setVisible(false);
 
-		upPanel = new JPanel();
+		this.upPanel = new JPanel();
 		Logger.info(this, "indexes");
-		localIndexes = new IndexTree(I18n.getMessage("thaw.plugin.index.yourIndexes"), true, true, null, db);
-		otherIndexes = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, true, null, db);
+		this.localIndexes = new IndexTree(I18n.getMessage("thaw.plugin.index.yourIndexes"), true, true, null, db);
+		this.otherIndexes = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, true, null, db);
 		Logger.info(this, "plus indexes");
 
-		fieldPanel = new JPanel();
-		keyField = new JTextField("");
+		this.fieldPanel = new JPanel();
+		this.keyField = new JTextField("");
 
-		downPanel = new JPanel();
-		cancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
-		okButton = new JButton(I18n.getMessage("thaw.common.ok"));
+		this.downPanel = new JPanel();
+		this.cancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
+		this.okButton = new JButton(I18n.getMessage("thaw.common.ok"));
 
-		upPanel.setLayout(new BorderLayout());
-		downPanel.setLayout(new GridLayout(1, 2));
-		fieldPanel.setLayout(new BorderLayout());
+		this.upPanel.setLayout(new BorderLayout());
+		this.downPanel.setLayout(new GridLayout(1, 2));
+		this.fieldPanel.setLayout(new BorderLayout());
 
-		indexPanel = new JPanel();
-		indexPanel.setLayout(new GridLayout(1, 2));
-		indexPanel.add(new JScrollPane(localIndexes.getPanel()));
-		indexPanel.add(new JScrollPane(otherIndexes.getPanel()));
+		this.indexPanel = new JPanel();
+		this.indexPanel.setLayout(new GridLayout(1, 2));
+		this.indexPanel.add(new JScrollPane(this.localIndexes.getPanel()));
+		this.indexPanel.add(new JScrollPane(this.otherIndexes.getPanel()));
 
-		upPanel.add(indexPanel, BorderLayout.CENTER);
+		this.upPanel.add(this.indexPanel, BorderLayout.CENTER);
 		
-		fieldPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.indexKey")), BorderLayout.WEST);
-		fieldPanel.add(keyField, BorderLayout.CENTER);
-		upPanel.add(fieldPanel, BorderLayout.SOUTH);
+		this.fieldPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.indexKey")), BorderLayout.WEST);
+		this.fieldPanel.add(this.keyField, BorderLayout.CENTER);
+		this.upPanel.add(this.fieldPanel, BorderLayout.SOUTH);
 
-		downPanel.add(okButton);
-		downPanel.add(cancelButton);
+		this.downPanel.add(this.okButton);
+		this.downPanel.add(this.cancelButton);
 
-		frame.getContentPane().setLayout(new BorderLayout(10, 10));
-		frame.getContentPane().add(upPanel, BorderLayout.CENTER);
-		frame.getContentPane().add(downPanel, BorderLayout.SOUTH);
+		this.frame.getContentPane().setLayout(new BorderLayout(10, 10));
+		this.frame.getContentPane().add(this.upPanel, BorderLayout.CENTER);
+		this.frame.getContentPane().add(this.downPanel, BorderLayout.SOUTH);
 
-		frame.setSize(500, 400);
+		this.frame.setSize(500, 400);
 
-		cancelButton.addActionListener(this);
-		okButton.addActionListener(this);
-		localIndexes.addObserver(this);
-		otherIndexes.addObserver(this);
+		this.cancelButton.addActionListener(this);
+		this.okButton.addActionListener(this);
+		this.localIndexes.addObserver(this);
+		this.otherIndexes.addObserver(this);
 
-		frame.setVisible(true);
+		this.frame.setVisible(true);
 
-		for (closeWin = false ; !closeWin ; ) {
+		for (this.closeWin = false ; !this.closeWin ; ) {
 			try {
 				Thread.sleep(500);
 			} catch(java.lang.InterruptedException e) {
@@ -119,51 +119,51 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 			}
 		}
 
-		frame.setVisible(false);
+		this.frame.setVisible(false);
 
-		frame = null;
+		this.frame = null;
 
-		upPanel = null;
-		localIndexes = null;
-		otherIndexes = null;
+		this.upPanel = null;
+		this.localIndexes = null;
+		this.otherIndexes = null;
 		
-		fieldPanel = null;
-		keyField = null;
+		this.fieldPanel = null;
+		this.keyField = null;
 		
-		downPanel = null;
-		cancelButton = null;
-		okButton = null;
+		this.downPanel = null;
+		this.cancelButton = null;
+		this.okButton = null;
 
-		return selectedIndexKey;
+		return this.selectedIndexKey;
 	}
 
 
 	public void update(java.util.Observable o, Object param) {
 		if (param instanceof Index) {
 			Index index = (Index)param;
-			selectedIndexKey = index.getPublicKey();
+			this.selectedIndexKey = index.getPublicKey();
 
-			Logger.info(this, "Selected index key: "+selectedIndexKey);
-			keyField.setText(selectedIndexKey);
+			Logger.info(this, "Selected index key: "+this.selectedIndexKey);
+			this.keyField.setText(this.selectedIndexKey);
 		}
 	}
 
 	public void actionPerformed(java.awt.event.ActionEvent e) {
-		if (e.getSource() == okButton) {
-			if (keyField.getText() == null || keyField.getText().equals(""))
-				selectedIndexKey = null;
+		if (e.getSource() == this.okButton) {
+			if (this.keyField.getText() == null || "".equals( this.keyField.getText() ))
+				this.selectedIndexKey = null;
 			else
-				selectedIndexKey = keyField.getText();
-			closeWin = true;
+				this.selectedIndexKey = this.keyField.getText();
+			this.closeWin = true;
 		}
 
-		if (e.getSource() == cancelButton) {
-			selectedIndexKey = null;
-			closeWin = true;
+		if (e.getSource() == this.cancelButton) {
+			this.selectedIndexKey = null;
+			this.closeWin = true;
 		}
 
-		localIndexes.deleteObserver(this);
-		otherIndexes.deleteObserver(this);
+		this.localIndexes.deleteObserver(this);
+		this.otherIndexes.deleteObserver(this);
 	}
 
 }

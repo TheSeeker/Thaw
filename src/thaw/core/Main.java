@@ -59,16 +59,16 @@ public class Main {
 
 		try {
 			while (args.length > count) {
-				if (args[count].equals("-?") || args[count].equals("-help")
-						|| args[count].equals("--help")
-						|| args[count].equals("/?")
-						|| args[count].equals("/help")) {
+				if ("-?".equals( args[count] ) || "-help".equals( args[count] )
+						|| "--help".equals( args[count] )
+						|| "/?".equals( args[count] )
+						|| "/help".equals( args[count] )) {
 					showHelp();
 					count++;
-				} else if (args[count].equals("-lf")) {
+				} else if ("-lf".equals( args[count] )) {
 					lookAndFeel = args[count + 1];
 					count = count + 2;
-				} else if (args[count].equals("-lc")) {
+				} else if ("-lc".equals( args[count] )) {
 					locale = args[count + 1];
 					count = count + 2;
 				} else {

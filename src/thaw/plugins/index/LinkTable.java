@@ -58,41 +58,41 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		this.queueManager = queueManager;
 		this.db = db;
 
-		linkListModel = new LinkListModel();
-		table = new JTable(linkListModel);
-		table.setShowGrid(true);
+		this.linkListModel = new LinkListModel();
+		this.table = new JTable(this.linkListModel);
+		this.table.setShowGrid(true);
 
-		panel = new JPanel();
-		panel.setLayout(new BorderLayout());
+		this.panel = new JPanel();
+		this.panel.setLayout(new BorderLayout());
 		
-		panel.add(new JLabel(I18n.getMessage("thaw.plugin.index.linkList")), BorderLayout.NORTH);
-		panel.add(new JScrollPane(table));
+		this.panel.add(new JLabel(I18n.getMessage("thaw.plugin.index.linkList")), BorderLayout.NORTH);
+		this.panel.add(new JScrollPane(this.table));
 		
-		rightClickMenu = new JPopupMenu();
-		removeLinks = new JMenuItem(I18n.getMessage("thaw.common.remove"));
-		addThisIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.addIndexFromLink"));
-		copyKey = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKey"));
+		this.rightClickMenu = new JPopupMenu();
+		this.removeLinks = new JMenuItem(I18n.getMessage("thaw.common.remove"));
+		this.addThisIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.addIndexFromLink"));
+		this.copyKey = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKey"));
 
-		removeLinks.addActionListener(this);
-		addThisIndex.addActionListener(this);
-		copyKey.addActionListener(this);
+		this.removeLinks.addActionListener(this);
+		this.addThisIndex.addActionListener(this);
+		this.copyKey.addActionListener(this);
 
 		if (modifiables) {
-			rightClickMenu.add(removeLinks);
+			this.rightClickMenu.add(this.removeLinks);
 		}
 		else {
-			rightClickMenu.add(addThisIndex);
+			this.rightClickMenu.add(this.addThisIndex);
 		}
 
-		rightClickMenu.add(copyKey);
+		this.rightClickMenu.add(this.copyKey);
 
-		table.addMouseListener(this);
+		this.table.addMouseListener(this);
 
-		indexTree = tree;
+		this.indexTree = tree;
 	}
 
 	public JPanel getPanel() {
-		return panel;
+		return this.panel;
 	}
 
 	public void setLinkList(LinkList linkList) {
@@ -106,15 +106,15 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 		this.linkList = linkList;
 
-		linkListModel.reloadLinkList(linkList);
+		this.linkListModel.reloadLinkList(linkList);
 	}
 
 	public void mouseClicked(MouseEvent e) {
 		if(e.getButton() == MouseEvent.BUTTON3
-		   && linkList != null) {
-			removeLinks.setEnabled(linkList instanceof Index);
-			selectedRows = table.getSelectedRows();
-			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
+		   && this.linkList != null) {
+			this.removeLinks.setEnabled(this.linkList instanceof Index);
+			this.selectedRows = this.table.getSelectedRows();
+			this.rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
 		}
 	}
 
@@ -136,35 +136,35 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		Vector links;
 		String keyList = "";
 
-		if (linkList == null)
+		if (this.linkList == null)
 			return;
 
-		links = linkList.getLinkList();
+		links = this.linkList.getLinkList();
 
-		for (int i = 0 ; i < selectedRows.length;  i++) {
+		for (int i = 0 ; i < this.selectedRows.length;  i++) {
 			
-			if (e.getSource() == removeLinks) {
-				Link link = (Link)links.get(selectedRows[i]);
-				((Index)linkList).removeLink(link);
+			if (e.getSource() == this.removeLinks) {
+				Link link = (Link)links.get(this.selectedRows[i]);
+				((Index)this.linkList).removeLink(link);
 			}
 
-			if (e.getSource() == addThisIndex) {
-				Link link = (Link)links.get(selectedRows[i]);
-				Index index = new Index(db, queueManager, -2, null, Index.getNameFromKey(link.getKey()),
+			if (e.getSource() == this.addThisIndex) {
+				Link link = (Link)links.get(this.selectedRows[i]);
+				Index index = new Index(this.db, this.queueManager, -2, null, Index.getNameFromKey(link.getKey()),
 							Index.getNameFromKey(link.getKey()), link.getKey(), null,
 							0, null, false);
-				if (indexTree.addToRoot(index))
+				if (this.indexTree.addToRoot(index))
 					index.create();
 			}
 
-			if (e.getSource() == copyKey) {
-				Link link = (Link)links.get(selectedRows[i]);
+			if (e.getSource() == this.copyKey) {
+				Link link = (Link)links.get(this.selectedRows[i]);
 				if (link.getKey() != null)
 					keyList = keyList + link.getKey() + "\n";
 			}
 		}
 
-		if(e.getSource() == copyKey) {
+		if(e.getSource() == this.copyKey) {
 			Toolkit tk = Toolkit.getDefaultToolkit();
 			StringSelection st = new StringSelection(keyList);
 			Clipboard cp = tk.getSystemClipboard();
@@ -176,6 +176,11 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 
 	public class LinkListModel extends javax.swing.table.AbstractTableModel implements java.util.Observer {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public Vector columnNames;
 
 		public Vector links = null; /* thaw.plugins.index.Link Vector */
@@ -185,68 +190,68 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		public LinkListModel() {
 			super();
 
-			columnNames = new Vector();
+			this.columnNames = new Vector();
 
-			columnNames.add(I18n.getMessage("thaw.plugin.index.index"));
-			columnNames.add(I18n.getMessage("thaw.common.key"));
+			this.columnNames.add(I18n.getMessage("thaw.plugin.index.index"));
+			this.columnNames.add(I18n.getMessage("thaw.common.key"));
 		}
 
 		public void reloadLinkList(LinkList newLinkList) {
-			if (linkList != null && (linkList instanceof Observable)) {
-				((Observable)linkList).deleteObserver(this);
+			if (this.linkList != null && (this.linkList instanceof Observable)) {
+				((Observable)this.linkList).deleteObserver(this);
 			}
 
 			if (newLinkList != null && (newLinkList instanceof Observable)) {
 				((Observable)newLinkList).addObserver(this);
 			}
 
-			linkList = newLinkList;
+			this.linkList = newLinkList;
 
 
-			if(links != null) {
-				for(Iterator it = links.iterator();
+			if(this.links != null) {
+				for(Iterator it = this.links.iterator();
 				    it.hasNext(); ) {
 					thaw.plugins.index.Link link = (thaw.plugins.index.Link)it.next();
 					link.deleteObserver(this);
 				}
 			}
 
-			links = null;
+			this.links = null;
 			
-			if(linkList != null) {
-				links = linkList.getLinkList();
+			if(this.linkList != null) {
+				this.links = this.linkList.getLinkList();
 			}
 
-			if(links != null) {
-				for(Iterator it = links.iterator();
+			if(this.links != null) {
+				for(Iterator it = this.links.iterator();
 				    it.hasNext(); ) {
 					thaw.plugins.index.Link link = (thaw.plugins.index.Link)it.next();
 					//link.addObserver(this);
 				}
 			}
 
-			refresh();
+			this.refresh();
 
 		}
 
 		public int getRowCount() {
-			if (links == null)
+			if (this.links == null)
 				return 0;
 
-			return links.size();
+			return this.links.size();
 		}
 		
 
 		public int getColumnCount() {
-			return columnNames.size();
+			return this.columnNames.size();
 		}
 
 		public String getColumnName(int column) {
-			return (String)columnNames.get(column);
+			return (String)this.columnNames.get(column);
 		}
 
 		public Object getValueAt(int row, int column) {
-			thaw.plugins.index.Link link = (thaw.plugins.index.Link)links.get(row);
+			thaw.plugins.index.Link link = (thaw.plugins.index.Link)this.links.get(row);
 
 			switch(column) {
 			case(0): return link.getIndexName();
@@ -256,35 +261,31 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		}
 
 		public void refresh() {
-			if(linkList != null) {				
-				links = linkList.getLinkList();
+			if(this.linkList != null) {				
+				this.links = this.linkList.getLinkList();
 			}
 
 			TableModelEvent event = new TableModelEvent(this);
-			refresh(event);
+			this.refresh(event);
 		}
 
 		public void refresh(int row) {
 			TableModelEvent event = new TableModelEvent(this, row);
-			refresh(event);
+			this.refresh(event);
 		}
 
 		public void refresh(TableModelEvent e) {
-			fireTableChanged(e);
+			this.fireTableChanged(e);
 		}
 
 		public void update(java.util.Observable o, Object param) {
 			if(param instanceof thaw.plugins.index.Link) {
-
-				/* TODO : It can be a remove ... to check ... */
-
-				thaw.plugins.index.Link link = (thaw.plugins.index.Link)param;
 				
 				//link.deleteObserver(this);
 				//link.addObserver(this);
 			}
 
-			refresh(); /* TODO : Do it more nicely ... :) */
+			this.refresh(); /* TODO : Do it more nicely ... :) */
 		}
 	}
 

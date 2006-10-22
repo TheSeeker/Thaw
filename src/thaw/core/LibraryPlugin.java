@@ -13,18 +13,18 @@ public abstract class LibraryPlugin implements Plugin {
 	public abstract boolean stop();
 
 	public void registerChild(Plugin child) {
-		nmbRegistered++;
+		this.nmbRegistered++;
 
-		if(nmbRegistered == 1)
-			realStart();
+		if(this.nmbRegistered == 1)
+			this.realStart();
 	}
 
 
 	public void unregisterChild(Plugin child) {
-		nmbRegistered--;
+		this.nmbRegistered--;
 		
-		if(nmbRegistered == 0)
-			realStop();
+		if(this.nmbRegistered == 0)
+			this.realStop();
 	}
 
 	public abstract void realStart();

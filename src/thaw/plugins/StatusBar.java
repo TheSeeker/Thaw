@@ -19,18 +19,18 @@ public class StatusBar implements Runnable, Plugin {
 	public boolean run(Core core) {
 		this.core = core;
 
-		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
+		this.advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 		
-		running = true;
-		refresher = new Thread(this);
+		this.running = true;
+		this.refresher = new Thread(this);
 
-		refresher.start();
+		this.refresher.start();
 
 		return true;
 	}
 
 	public void run() {
-		while(running) {
+		while(this.running) {
 
 			try {
 				Thread.sleep(INTERVAL);
@@ -38,7 +38,7 @@ public class StatusBar implements Runnable, Plugin {
 				// pfff :P
 			}
 
-			updateStatusBar();
+			this.updateStatusBar();
 
 		}
 
@@ -55,7 +55,7 @@ public class StatusBar implements Runnable, Plugin {
 		int total = 0;
 		
 		try {
-			Vector runningQueue = core.getQueueManager().getRunningQueue();
+			Vector runningQueue = this.core.getQueueManager().getRunningQueue();
 
 			for(Iterator it = runningQueue.iterator();
 			    it.hasNext(); ) {
@@ -78,7 +78,7 @@ public class StatusBar implements Runnable, Plugin {
 				}
 			}
 			
-			Vector[] pendingQueues = core.getQueueManager().getPendingQueues();
+			Vector[] pendingQueues = this.core.getQueueManager().getPendingQueues();
 
 			for(int i =0 ; i < pendingQueues.length; i++) {
 				
@@ -89,7 +89,7 @@ public class StatusBar implements Runnable, Plugin {
 
 		} catch(java.util.ConcurrentModificationException e) {
 			Logger.notice(this, "Collision !");
-			core.getMainWindow().setStatus(core.getMainWindow().getStatus()+"*");
+			this.core.getMainWindow().setStatus(this.core.getMainWindow().getStatus()+"*");
 			return;
 		}
 		
@@ -97,7 +97,7 @@ public class StatusBar implements Runnable, Plugin {
 
 		String status = "Thaw "+Main.VERSION;
 
-		if(advancedMode) {
+		if(this.advancedMode) {
 			status = status
 				+ SEPARATOR + I18n.getMessage("thaw.plugin.statistics.globalProgression") + " "
 				+ Integer.toString(progressDone) + "/" + Integer.toString(progressTotal);
@@ -113,15 +113,15 @@ public class StatusBar implements Runnable, Plugin {
 			+ SEPARATOR + I18n.getMessage("thaw.plugin.statistics.pending") + " "
 			+ Integer.toString(pending) + "/" + Integer.toString(total);
 			
-		core.getMainWindow().setStatus(status);
+		this.core.getMainWindow().setStatus(status);
 
 	}
 
 
 	public boolean stop() {
-		running = false;
+		this.running = false;
 
-		core.getMainWindow().setStatus("Thaw "+Main.VERSION);
+		this.core.getMainWindow().setStatus("Thaw "+Main.VERSION);
 
 		return true;
 	}

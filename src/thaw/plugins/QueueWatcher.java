@@ -43,49 +43,49 @@ public class QueueWatcher implements thaw.core.Plugin, PropertyChangeListener {
 		
 		Logger.info(this, "Starting plugin \"QueueWatcher\" ...");
 
-		detailPanel = new DetailPanel(core);
+		this.detailPanel = new DetailPanel(core);
 
-		queuePanels[0] = new QueuePanel(core, detailPanel, false); /* download */
-		queuePanels[1] = new QueuePanel(core, detailPanel, true); /* upload */
+		this.queuePanels[0] = new QueuePanel(core, this.detailPanel, false); /* download */
+		this.queuePanels[1] = new QueuePanel(core, this.detailPanel, true); /* upload */
 
-		panel = new JPanel();
+		this.panel = new JPanel();
 
 		GridLayout layout = new GridLayout(2, 1, 10, 10);
-		panel.setLayout(layout);
+		this.panel.setLayout(layout);
 
-		if(queuePanels[0].getPanel() != null)
-			panel.add(queuePanels[0].getPanel());
+		if(this.queuePanels[0].getPanel() != null)
+			this.panel.add(this.queuePanels[0].getPanel());
 
-		if(queuePanels[1].getPanel() != null)
-			panel.add(queuePanels[1].getPanel());
+		if(this.queuePanels[1].getPanel() != null)
+			this.panel.add(this.queuePanels[1].getPanel());
 		
-		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
+		this.advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 		
-		if(advancedMode) {
-			mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, detailPanel.getPanel(), panel);
+		if(this.advancedMode) {
+			this.mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, this.detailPanel.getPanel(), this.panel);
 			
 			if(core.getConfig().getValue("detailPanelFolded") == null
 			   || ((new Boolean(core.getConfig().getValue("detailPanelFolded"))).booleanValue()) == true) {
-				folded = true;
-				detailPanel.getPanel().setVisible(false);
-				mainPanel.setDividerLocation(1);
+				this.folded = true;
+				this.detailPanel.getPanel().setVisible(false);
+				this.mainPanel.setDividerLocation(1);
 			} else {
-				folded = false;
-				detailPanel.getPanel().setVisible(true);
-				mainPanel.setDividerLocation(DIVIDER_LOCATION);
+				this.folded = false;
+				this.detailPanel.getPanel().setVisible(true);
+				this.mainPanel.setDividerLocation(DIVIDER_LOCATION);
 			}
 			
-			mainPanel.addPropertyChangeListener(this);
-			mainPanel.setOneTouchExpandable(true);
+			this.mainPanel.addPropertyChangeListener(this);
+			this.mainPanel.setOneTouchExpandable(true);
 
-			panelAdded = mainPanel;
+			this.panelAdded = this.mainPanel;
 		} else {
-			panelAdded = panel;
+			this.panelAdded = this.panel;
 		}
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"), 
 					    IconBox.minQueue,
-					    panelAdded);
+					    this.panelAdded);
 			
 		//if(core.getConnectionManager() != null && core.getConnectionManager().isConnected()) {
 		//	core.getConnectionManager().addObserver(this);
@@ -98,7 +98,7 @@ public class QueueWatcher implements thaw.core.Plugin, PropertyChangeListener {
 		//    return false;
 		//}
 		    
-		dnd = new DragAndDropManager(core, queuePanels);
+		this.dnd = new DragAndDropManager(core, this.queuePanels);
 
 		return true;
 	}
@@ -109,9 +109,9 @@ public class QueueWatcher implements thaw.core.Plugin, PropertyChangeListener {
 	public boolean stop() {
 		Logger.info(this, "Stopping plugin \"QueueWatcher\" ...");
 
-		core.getConfig().setValue("detailPanelFolded", ((new Boolean(folded)).toString()));
+		this.core.getConfig().setValue("detailPanelFolded", ((new Boolean(this.folded)).toString()));
 
-		core.getMainWindow().removeTab(panelAdded);
+		this.core.getMainWindow().removeTab(this.panelAdded);
 		
 		return true;
 	}
@@ -130,10 +130,10 @@ public class QueueWatcher implements thaw.core.Plugin, PropertyChangeListener {
 			FCPTransferQuery query = (FCPTransferQuery)it.next();
 
 			if(query.getQueryType() == 1)
-				queuePanels[0].addToTable(query);
+				this.queuePanels[0].addToTable(query);
 
 			if(query.getQueryType() == 2)
-				queuePanels[1].addToTable(query);
+				this.queuePanels[1].addToTable(query);
 
 		}
 
@@ -173,23 +173,23 @@ public class QueueWatcher implements thaw.core.Plugin, PropertyChangeListener {
 
 	public void propertyChange(PropertyChangeEvent evt) {
 
-		if(evt.getPropertyName().equals("dividerLocation")) {
+		if("dividerLocation".equals( evt.getPropertyName() )) {
 
-			if(System.currentTimeMillis() - lastChange < 500) {
-				lastChange = System.currentTimeMillis();
+			if(System.currentTimeMillis() - this.lastChange < 500) {
+				this.lastChange = System.currentTimeMillis();
 				return;
 			}
 
-			lastChange = System.currentTimeMillis();
+			this.lastChange = System.currentTimeMillis();
 
-			folded = !folded;
+			this.folded = !this.folded;
 
-			if(folded) {
-				detailPanel.getPanel().setVisible(false);
-				mainPanel.setDividerLocation(1);
+			if(this.folded) {
+				this.detailPanel.getPanel().setVisible(false);
+				this.mainPanel.setDividerLocation(1);
 			} else {
-				detailPanel.getPanel().setVisible(true);
-				mainPanel.setDividerLocation(DIVIDER_LOCATION);
+				this.detailPanel.getPanel().setVisible(true);
+				this.mainPanel.setDividerLocation(DIVIDER_LOCATION);
 			}
 
 		}

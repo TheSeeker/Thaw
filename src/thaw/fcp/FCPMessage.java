@@ -19,7 +19,7 @@ public class FCPMessage {
 
 
 	public FCPMessage() {
-		fields = new Hashtable();
+		this.fields = new Hashtable();
 	}
 
 	/**
@@ -27,7 +27,7 @@ public class FCPMessage {
 	 */
 	public FCPMessage(String rawMessage) {
 		this();
-		loadFromRawMessage(rawMessage);
+		this.loadFromRawMessage(rawMessage);
 	}
 
 
@@ -39,19 +39,19 @@ public class FCPMessage {
 
 		String[] lines = rawMessage.split("\n");
 
-		for(i = 0 ; lines[i].equals("");) {
+		for(i = 0 ; "".equals( lines[i] );) {
 			i++;
 		}
 			
 
-		setMessageName(lines[i]);
+		this.setMessageName(lines[i]);
 		Logger.info(this, "Message (Node >> Thaw): "+lines[i]);
 
 		
 		for(i++; i < lines.length ; i++) {
 			/* Empty lines are ignored. */
 			/* Line not containing '=' (like "Data" or "EndMessage") are ignored */
-			if(lines[i].equals("") || !(lines[i].indexOf("=") >= 0))
+			if("".equals( lines[i] ) || !(lines[i].indexOf("=") >= 0))
 				continue;
 
 			String[] affectation = lines[i].split("=");
@@ -61,11 +61,11 @@ public class FCPMessage {
 				continue;
 			}
 
-			setValue(affectation[0], affectation[1]);
+			this.setValue(affectation[0], affectation[1]);
 		}
 
-		if(getMessageName().equals("ProtocolError")) {
-			Logger.notice(this, "PROTOCOL ERROR:"+toString());
+		if("ProtocolError".equals( this.getMessageName() )) {
+			Logger.notice(this, "PROTOCOL ERROR:"+this.toString());
 		}
 
 		return true;
@@ -73,11 +73,11 @@ public class FCPMessage {
 
 
 	public String getMessageName() {
-		return messageName;
+		return this.messageName;
 	}
 
 	public void setMessageName(String name) {	
-		if(name == null || name.equals("")) {
+		if(name == null || "".equals( name )) {
 			Logger.notice(this, "Setting name to empty ? weird");
 		}
 		
@@ -85,24 +85,24 @@ public class FCPMessage {
 			Logger.notice(this, "Name shouldn't contain '\n'");
 		}
 
-		messageName = name;
+		this.messageName = name;
 	}
 
 	public String getValue(String field) {
-		return ((String)fields.get(field));
+		return ((String)this.fields.get(field));
 	}
 
 	public void setValue(String field, String value) {
-		if(field.equals("DataLength")) {
-			setAmountOfDataWaiting((new Long(value)).longValue());
+		if("DataLength".equals( field )) {
+			this.setAmountOfDataWaiting((new Long(value)).longValue());
 		}
 
 		if(value == null) {
-			fields.remove(field);
+			this.fields.remove(field);
 			return;
 		}
 
-		fields.put(field, value);
+		this.fields.put(field, value);
 	}
 
 	
@@ -111,7 +111,7 @@ public class FCPMessage {
 	 * @return if > 0 : Data are still waiting (except if the message name is "PersistentPut" !), if == 0 : No data waiting, if < 0 : These data are now unavailable.
 	 */
 	public long getAmountOfDataWaiting() {
-		return dataWaiting;
+		return this.dataWaiting;
 	}
 
 	
@@ -132,20 +132,20 @@ public class FCPMessage {
 	public String toString() {
 		String result = "";
 
-		Logger.info(this, "Message (Node << Thaw): "+getMessageName());
+		Logger.info(this, "Message (Node << Thaw): "+this.getMessageName());
 
-		result = result + getMessageName() + "\n";
+		result = result + this.getMessageName() + "\n";
 
-		for(Enumeration fieldNames = fields.keys() ; fieldNames.hasMoreElements();) {
+		for(Enumeration fieldNames = this.fields.keys() ; fieldNames.hasMoreElements();) {
 			String fieldName = ((String)fieldNames.nextElement());
 
-			result = result + fieldName + "=" + getValue(fieldName) + "\n";
+			result = result + fieldName + "=" + this.getValue(fieldName) + "\n";
 		}
 
-		if(getAmountOfDataWaiting() == 0)
+		if(this.getAmountOfDataWaiting() == 0)
 			result = result + "EndMessage\n";
 		else {
-			result = result + "DataLength="+ (new Long(getAmountOfDataWaiting())).toString() + "\n";
+			result = result + "DataLength="+ (new Long(this.getAmountOfDataWaiting())).toString() + "\n";
 			result = result + "Data\n";
 		}
 

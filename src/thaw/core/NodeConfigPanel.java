@@ -50,8 +50,8 @@ public class NodeConfigPanel implements Observer {
 		this.core = core;
 		this.configWindow = configWindow;
 
-		nodeConfigPanel = new JPanel();
-		nodeConfigPanel.setLayout(new GridLayout(15, 1));
+		this.nodeConfigPanel = new JPanel();
+		this.nodeConfigPanel.setLayout(new GridLayout(15, 1));
 		
 		for(int i=0; i < paramNames.length ; i++) {
 			String value;
@@ -59,46 +59,46 @@ public class NodeConfigPanel implements Observer {
 			if( (value = core.getConfig().getValue(configNames[i])) == null)
 				value = "";
 
-			paramLabels[i] = new JLabel(paramNames[i]);
-			paramFields[i] = new JTextField(value);
+			this.paramLabels[i] = new JLabel(paramNames[i]);
+			this.paramFields[i] = new JTextField(value);
 			currentValues[i] = value;
 			
-			nodeConfigPanel.add(paramLabels[i]);
-			nodeConfigPanel.add(paramFields[i]);
+			this.nodeConfigPanel.add(this.paramLabels[i]);
+			this.nodeConfigPanel.add(this.paramFields[i]);
 		}
 
-		multipleSockets = new JCheckBox(I18n.getMessage("thaw.config.multipleSockets"),
+		this.multipleSockets = new JCheckBox(I18n.getMessage("thaw.config.multipleSockets"),
 						Boolean.valueOf(core.getConfig().getValue("multipleSockets")).booleanValue());
-		nodeConfigPanel.add(new JLabel(" "));
-		nodeConfigPanel.add(multipleSockets);
+		this.nodeConfigPanel.add(new JLabel(" "));
+		this.nodeConfigPanel.add(this.multipleSockets);
 
-		setVisibility(Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
+		this.setVisibility(Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
 
 		configWindow.addObserver(this);
 	}
 
 	public JPanel getPanel() {
-		return nodeConfigPanel;
+		return this.nodeConfigPanel;
 	}
 
 	private void setVisibility(boolean advancedMode) {
 		for(int i= 2; i < paramNames.length;i++) {
-			paramLabels[i].setVisible(advancedMode);
-			paramFields[i].setVisible(advancedMode);
+			this.paramLabels[i].setVisible(advancedMode);
+			this.paramFields[i].setVisible(advancedMode);
 		}
 
-		multipleSockets.setVisible(advancedMode);
+		this.multipleSockets.setVisible(advancedMode);
 	}
 
 
 	public boolean hasAValueChanged() {
 		for(int i=0; i < paramNames.length ; i++) {
-			if (!paramFields[i].getText().equals(currentValues[i]))
+			if (!this.paramFields[i].getText().equals(currentValues[i]))
 				return true;
 		}
 
-		if (core.getConfig().getValue("multipleSockets") == null
-		    || !core.getConfig().getValue("multipleSockets").equals(Boolean.toString(multipleSockets.isSelected())))
+		if (this.core.getConfig().getValue("multipleSockets") == null
+		    || !this.core.getConfig().getValue("multipleSockets").equals(Boolean.toString(this.multipleSockets.isSelected())))
 			return true;
 
 		return false;
@@ -106,31 +106,31 @@ public class NodeConfigPanel implements Observer {
 
 	
 	public void update(Observable o, Object arg) {
-		if(arg == core.getConfigWindow().getOkButton()) {
-			if (hasAValueChanged())
-				configWindow.willNeedConnectionReset();
+		if(arg == this.core.getConfigWindow().getOkButton()) {
+			if (this.hasAValueChanged())
+				this.configWindow.willNeedConnectionReset();
 
 			for(int i=0;i < paramNames.length;i++) {
-				core.getConfig().setValue(configNames[i], paramFields[i].getText());
+				this.core.getConfig().setValue(configNames[i], this.paramFields[i].getText());
 			}
 
-			core.getConfig().setValue("multipleSockets", Boolean.toString(multipleSockets.isSelected()));
+			this.core.getConfig().setValue("multipleSockets", Boolean.toString(this.multipleSockets.isSelected()));
 
-			setVisibility(Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
+			this.setVisibility(Boolean.valueOf(this.core.getConfig().getValue("advancedMode")).booleanValue());
 		}
 
 
-		if(arg == core.getConfigWindow().getCancelButton()) {
+		if(arg == this.core.getConfigWindow().getCancelButton()) {
 			for(int i=0;i < paramNames.length;i++) {
 				String value;
 
-				if( (value = core.getConfig().getValue(configNames[i])) == null)
+				if( (value = this.core.getConfig().getValue(configNames[i])) == null)
 					value = "";
 
-				paramFields[i].setText(value);
+				this.paramFields[i].setText(value);
 			}
 
-			multipleSockets.setSelected(Boolean.valueOf(core.getConfig().getValue("multipleSockets")).booleanValue());
+			this.multipleSockets.setSelected(Boolean.valueOf(this.core.getConfig().getValue("multipleSockets")).booleanValue());
 		}
 	}
 

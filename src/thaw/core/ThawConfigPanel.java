@@ -30,45 +30,45 @@ public class ThawConfigPanel implements Observer {
 		if(core.getConfig().getValue("advancedMode") == null)
 			core.getConfig().setValue("advancedMode", "false");
 
-		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
+		this.advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 		
 
-		thawConfigPanel = new JPanel();
-		thawConfigPanel.setLayout(new GridLayout(15, 1));
+		this.thawConfigPanel = new JPanel();
+		this.thawConfigPanel.setLayout(new GridLayout(15, 1));
 
-		advancedModeBox = new JCheckBox(I18n.getMessage("thaw.config.advancedMode"), advancedMode);
+		this.advancedModeBox = new JCheckBox(I18n.getMessage("thaw.config.advancedMode"), this.advancedMode);
 
-		nicknameLabel = new JLabel(I18n.getMessage("thaw.config.nickname"));
+		this.nicknameLabel = new JLabel(I18n.getMessage("thaw.config.nickname"));
 
 		if (core.getConfig().getValue("userNickname") == null)
-			nicknameField = new JTextField("Another anonymous");
+			this.nicknameField = new JTextField("Another anonymous");
 		else
-			nicknameField = new JTextField(core.getConfig().getValue("userNickname"));
+			this.nicknameField = new JTextField(core.getConfig().getValue("userNickname"));
 
-		thawConfigPanel.add(advancedModeBox);
-		thawConfigPanel.add(new JLabel(" "));
-		thawConfigPanel.add(nicknameLabel);
-		thawConfigPanel.add(nicknameField);
+		this.thawConfigPanel.add(this.advancedModeBox);
+		this.thawConfigPanel.add(new JLabel(" "));
+		this.thawConfigPanel.add(this.nicknameLabel);
+		this.thawConfigPanel.add(this.nicknameField);
 
 		configWindow.addObserver(this);
 	}
 
 
 	public JPanel getPanel() {
-		return thawConfigPanel;
+		return this.thawConfigPanel;
 	}
 
 
 	public void update(Observable o, Object arg) {
-		if(arg == core.getConfigWindow().getOkButton()) {
-			advancedMode = advancedModeBox.isSelected();
-			core.getConfig().setValue("advancedMode", Boolean.toString(advancedMode));
-			core.getConfig().setValue("userNickname", nicknameField.getText());
+		if(arg == this.core.getConfigWindow().getOkButton()) {
+			this.advancedMode = this.advancedModeBox.isSelected();
+			this.core.getConfig().setValue("advancedMode", Boolean.toString(this.advancedMode));
+			this.core.getConfig().setValue("userNickname", this.nicknameField.getText());
 		}
 
-		if(arg == core.getConfigWindow().getCancelButton()) {
-			advancedModeBox.setSelected(advancedMode);
-			nicknameField.setText(core.getConfig().getValue("userNickname"));
+		if(arg == this.core.getConfigWindow().getCancelButton()) {
+			this.advancedModeBox.setSelected(this.advancedMode);
+			this.nicknameField.setText(this.core.getConfig().getValue("userNickname"));
 		}
 	}
 

@@ -26,32 +26,32 @@ public class IndexEditor implements Plugin {
 			}
 		}
 
-		hsqldb = (Hsqldb)core.getPluginManager().getPlugin("thaw.plugins.Hsqldb");
+		this.hsqldb = (Hsqldb)core.getPluginManager().getPlugin("thaw.plugins.Hsqldb");
 
-		hsqldb.registerChild(this);
+		this.hsqldb.registerChild(this);
 
-		TableCreator.createTables(hsqldb);
+		TableCreator.createTables(this.hsqldb);
 
 		
-		editorPanel = new IndexEditorPanel(hsqldb, core.getQueueManager(), core.getConfig());
+		this.editorPanel = new IndexEditorPanel(this.hsqldb, core.getQueueManager(), core.getConfig());
 
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.index.editor"),
 					    IconBox.minIndexEditor,
-					    editorPanel.getPanel());
+					    this.editorPanel.getPanel());
 		
-		editorPanel.restoreState();
+		this.editorPanel.restoreState();
 
 		return true;
 	}
 
 
 	public boolean stop() {
-		core.getMainWindow().removeTab(editorPanel.getPanel());
+		this.core.getMainWindow().removeTab(this.editorPanel.getPanel());
 
-		editorPanel.saveState();
+		this.editorPanel.saveState();
 
-		hsqldb.unregisterChild(this);
+		this.hsqldb.unregisterChild(this);
 
 		return true;
 	}

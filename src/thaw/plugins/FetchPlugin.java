@@ -21,11 +21,11 @@ public class FetchPlugin implements thaw.core.Plugin {
 		
 		Logger.info(this, "Starting plugin \"FetchPlugin\" ...");
 
-		fetchPanel = new FetchPanel(core, this);
+		this.fetchPanel = new FetchPanel(core, this);
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.common.download"), 
 					    IconBox.minDownloads,
-					    fetchPanel.getPanel());
+					    this.fetchPanel.getPanel());
 
 		return true;
 	}
@@ -34,7 +34,7 @@ public class FetchPlugin implements thaw.core.Plugin {
 	public boolean stop() {
 		Logger.info(this, "Stopping plugin \"FetchPlugin\" ...");
 
-		core.getMainWindow().removeTab(fetchPanel.getPanel());
+		this.core.getMainWindow().removeTab(this.fetchPanel.getPanel());
 
 		return true;
 	}
@@ -56,7 +56,7 @@ public class FetchPlugin implements thaw.core.Plugin {
 
 			String key = FreenetURIHelper.cleanURI(subKey[0]);
 
-			core.getQueueManager().addQueryToThePendingQueue(new FCPClientGet(key,
+			this.core.getQueueManager().addQueryToThePendingQueue(new FCPClientGet(key,
 											  priority,
 											  persistence,
 											  globalQueue, -1,

@@ -82,14 +82,14 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 		this.advancedMode = advancedMode;
 
-		globalPanel = new JPanel();
+		this.globalPanel = new JPanel();
 
-		mainPanel = new JPanel();
-		mainPanel.setLayout(new BorderLayout(10, 10));
+		this.mainPanel = new JPanel();
+		this.mainPanel.setLayout(new BorderLayout(10, 10));
 
 		if(advancedMode) {
-			subPanel = new JPanel();
-			subPanel.setLayout(new GridLayout(3,2, 20, 20));
+			this.subPanel = new JPanel();
+			this.subPanel.setLayout(new GridLayout(3,2, 20, 20));
 		}
 
 		
@@ -97,42 +97,42 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 		JPanel subSubPanel = new JPanel();
 		subSubPanel.setLayout(new GridLayout(3, 1));
-		browseLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.filesToInsert"));
-		subSubPanel.add(browseLabel);
-		selectedFiles = new JTextField(20);
-		selectedFiles.setEditable(true);
-		subSubPanel.add(selectedFiles);
-		browseButton = new JButton(I18n.getMessage("thaw.common.selectFiles"));
-		browseButton.addActionListener(this);
-		subSubPanel.add(browseButton);
+		this.browseLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.filesToInsert"));
+		subSubPanel.add(this.browseLabel);
+		this.selectedFiles = new JTextField(20);
+		this.selectedFiles.setEditable(true);
+		subSubPanel.add(this.selectedFiles);
+		this.browseButton = new JButton(I18n.getMessage("thaw.common.selectFiles"));
+		this.browseButton.addActionListener(this);
+		subSubPanel.add(this.browseButton);
 
 		if(advancedMode)
-			subPanel.add(subSubPanel);
+			this.subPanel.add(subSubPanel);
 		else
-			mainPanel.add(subSubPanel, BorderLayout.CENTER);
+			this.mainPanel.add(subSubPanel, BorderLayout.CENTER);
 
 
 		// KEY TYPE SELECTION
 
 		subSubPanel = new JPanel();
 		subSubPanel.setLayout(new GridLayout(4, 1));
-		selectKeyLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.selectKey"));
-		subSubPanel.add(selectKeyLabel);
-		keyRadioButtons = new JRadioButton[3];
-		keyRadioButtons[0] = new JRadioButton(I18n.getMessage("thaw.plugin.insert.CHK"));
-		keyRadioButtons[0].setSelected(true);
-		keyType = 0;
-		keyRadioButtons[1] = new JRadioButton(I18n.getMessage("thaw.plugin.insert.KSK"));
-		keyRadioButtons[2] = new JRadioButton(I18n.getMessage("thaw.plugin.insert.SSK"));
-		keyRadioGroup = new ButtonGroup();
-		for(int i = 0 ; i < keyRadioButtons.length ; i++) {
-			keyRadioButtons[i].addItemListener(this);
-			keyRadioGroup.add(keyRadioButtons[i]);
-			subSubPanel.add(keyRadioButtons[i]);
+		this.selectKeyLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.selectKey"));
+		subSubPanel.add(this.selectKeyLabel);
+		this.keyRadioButtons = new JRadioButton[3];
+		this.keyRadioButtons[0] = new JRadioButton(I18n.getMessage("thaw.plugin.insert.CHK"));
+		this.keyRadioButtons[0].setSelected(true);
+		this.keyType = 0;
+		this.keyRadioButtons[1] = new JRadioButton(I18n.getMessage("thaw.plugin.insert.KSK"));
+		this.keyRadioButtons[2] = new JRadioButton(I18n.getMessage("thaw.plugin.insert.SSK"));
+		this.keyRadioGroup = new ButtonGroup();
+		for(int i = 0 ; i < this.keyRadioButtons.length ; i++) {
+			this.keyRadioButtons[i].addItemListener(this);
+			this.keyRadioGroup.add(this.keyRadioButtons[i]);
+			subSubPanel.add(this.keyRadioButtons[i]);
 		}
 
 		if(advancedMode)
-			subPanel.add(subSubPanel);
+			this.subPanel.add(subSubPanel);
 
 
 		/* GLOBAL */
@@ -140,24 +140,24 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		subSubPanel = new JPanel();
 		subSubPanel.setLayout(new GridLayout(4, 1));
 
-		globalStr = new String[] {
+		this.globalStr = new String[] {
 			I18n.getMessage("thaw.common.true"),
 			I18n.getMessage("thaw.common.false"),
 		};
 
-		globalLabel = new JLabel(I18n.getMessage("thaw.common.globalQueue"));
-		subSubPanel.add(globalLabel);
-		globalSelecter = new JComboBox(globalStr);
-		globalSelecter.setSelectedItem(I18n.getMessage("thaw.common.true"));
-		subSubPanel.add(globalSelecter);
+		this.globalLabel = new JLabel(I18n.getMessage("thaw.common.globalQueue"));
+		subSubPanel.add(this.globalLabel);
+		this.globalSelecter = new JComboBox(this.globalStr);
+		this.globalSelecter.setSelectedItem(I18n.getMessage("thaw.common.true"));
+		subSubPanel.add(this.globalSelecter);
 
 		if(advancedMode)
-			subPanel.add(subSubPanel);
+			this.subPanel.add(subSubPanel);
 
 
 		// PRIORITY SELECTION
 
-		priorities = new String[] {
+		this.priorities = new String[] {
 			I18n.getMessage("thaw.plugin.priority.p0"),
 			I18n.getMessage("thaw.plugin.priority.p1"),
 			I18n.getMessage("thaw.plugin.priority.p2"),
@@ -169,15 +169,15 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		};
 
 		subSubPanel.setLayout(new GridLayout(4, 1));
-		priorityLabel = new JLabel(I18n.getMessage("thaw.common.priority"));
-		subSubPanel.add(priorityLabel);
-		prioritySelecter = new JComboBox(priorities);
-		prioritySelecter.setSelectedItem(I18n.getMessage("thaw.plugin.priority.p4"));
-		subSubPanel.add(prioritySelecter);
+		this.priorityLabel = new JLabel(I18n.getMessage("thaw.common.priority"));
+		subSubPanel.add(this.priorityLabel);
+		this.prioritySelecter = new JComboBox(this.priorities);
+		this.prioritySelecter.setSelectedItem(I18n.getMessage("thaw.plugin.priority.p4"));
+		subSubPanel.add(this.prioritySelecter);
 
 		if(advancedMode) {
-			subPanel.add(subSubPanel);
-			subPanel.add(subSubPanel);
+			this.subPanel.add(subSubPanel);
+			this.subPanel.add(subSubPanel);
 		}
 
 		// REVISION SELECTION
@@ -185,24 +185,24 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		subSubPanel = new JPanel();
 		subSubPanel.setLayout(new GridLayout(4, 1));
 
-		selectRevLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.selectRev"));
-		subSubPanel.add(selectRevLabel);
-		revField = new JTextField(4);
-		revField.setEditable(true);
-		subSubPanel.add(revField);
+		this.selectRevLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.selectRev"));
+		subSubPanel.add(this.selectRevLabel);
+		this.revField = new JTextField(4);
+		this.revField.setEditable(true);
+		subSubPanel.add(this.revField);
 
 		// NAME
-		selectNameLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.selectName"));
-		subSubPanel.add(selectNameLabel);
-		nameField = new JTextField(10);
-		nameField.setEditable(true);
-		subSubPanel.add(nameField);
+		this.selectNameLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.selectName"));
+		subSubPanel.add(this.selectNameLabel);
+		this.nameField = new JTextField(10);
+		this.nameField.setEditable(true);
+		subSubPanel.add(this.nameField);
 
 		if(advancedMode)
-			subPanel.add(subSubPanel);
+			this.subPanel.add(subSubPanel);
 
 
-		setRevAndNameVisible(false);
+		this.setRevAndNameVisible(false);
 
 
 		// MIME TYPE
@@ -210,20 +210,20 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		subSubPanel = new JPanel();
 		subSubPanel.setLayout(new GridLayout(4, 1));
 		
-		mimeLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.mime"));
+		this.mimeLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.mime"));
 		
 		Vector mimes = (Vector)DefaultMIMETypes.getAllMIMETypes().clone();
 		mimes.add(0, "");
 
-		mimeField = new JComboBox(mimes);
-		mimeField.setEditable(true);
-		mimeField.setPreferredSize(new Dimension(75, 20));
+		this.mimeField = new JComboBox(mimes);
+		this.mimeField.setEditable(true);
+		this.mimeField.setPreferredSize(new Dimension(75, 20));
 
-		subSubPanel.add(mimeLabel);
-		subSubPanel.add(mimeField);
+		subSubPanel.add(this.mimeLabel);
+		subSubPanel.add(this.mimeField);
 				       
 		if(advancedMode)
-			subPanel.add(subSubPanel);
+			this.subPanel.add(subSubPanel);
 
 
 		// PUBLIC / PRIVATE KEY
@@ -231,51 +231,51 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		subSubPanel = new JPanel();
 		subSubPanel.setLayout(new GridLayout(4, 1));
 
-		publicKeyLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.publicKey"));
-		subSubPanel.add(publicKeyLabel);
-		publicKeyField = new JTextField(20);
-		publicKeyField.setEditable(true);
-		subSubPanel.add(publicKeyField);
+		this.publicKeyLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.publicKey"));
+		subSubPanel.add(this.publicKeyLabel);
+		this.publicKeyField = new JTextField(20);
+		this.publicKeyField.setEditable(true);
+		subSubPanel.add(this.publicKeyField);
 
-		privateKeyLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.privateKey"));
-		subSubPanel.add(privateKeyLabel);
-		privateKeyField = new JTextField(20);
-		privateKeyField.setEditable(true);
-		subSubPanel.add(privateKeyField);
-
-		if(advancedMode)
-			subPanel.add(subSubPanel);
-
-		setKeysVisible(false);
+		this.privateKeyLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.privateKey"));
+		subSubPanel.add(this.privateKeyLabel);
+		this.privateKeyField = new JTextField(20);
+		this.privateKeyField.setEditable(true);
+		subSubPanel.add(this.privateKeyField);
 
 		if(advancedMode)
-			mainPanel.add(subPanel, BorderLayout.CENTER);
+			this.subPanel.add(subSubPanel);
 
-		letsGoButton = new JButton(I18n.getMessage("thaw.plugin.insert.insertAction"));
-		letsGoButton.setPreferredSize(new Dimension(200, 40));
-
-		letsGoButton.addActionListener(this);
-
-		mainPanel.add(letsGoButton, BorderLayout.SOUTH);
+		this.setKeysVisible(false);
 
 		if(advancedMode)
-			mainPanel.setSize(400, 400);
+			this.mainPanel.add(this.subPanel, BorderLayout.CENTER);
+
+		this.letsGoButton = new JButton(I18n.getMessage("thaw.plugin.insert.insertAction"));
+		this.letsGoButton.setPreferredSize(new Dimension(200, 40));
+
+		this.letsGoButton.addActionListener(this);
+
+		this.mainPanel.add(this.letsGoButton, BorderLayout.SOUTH);
+
+		if(advancedMode)
+			this.mainPanel.setSize(400, 400);
 		else
-			mainPanel.setSize(150, 250);
+			this.mainPanel.setSize(150, 250);
 
-		globalPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
+		this.globalPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
-		globalPanel.add(mainPanel);
+		this.globalPanel.add(this.mainPanel);
 	}
 
 	
 	public JPanel getPanel() {
-		return globalPanel;
+		return this.globalPanel;
 	}
 
 
 	public void actionPerformed(ActionEvent e) {
-		if(e.getSource() == letsGoButton) {
+		if(e.getSource() == this.letsGoButton) {
 			int rev = -1;
 			String name = null;
 			String privateKey = null;
@@ -283,32 +283,32 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 			boolean global = true;
 			//int persistence = 0;
 
-			if(selectedFiles.getText() == null
-			   || selectedFiles.getText().equals("")) {
+			if(this.selectedFiles.getText() == null
+			   || "".equals( this.selectedFiles.getText() )) {
 				new WarningWindow(null, I18n.getMessage("thaw.plugin.insert.specifyFile"));
 				return;
 			}
 
-			if(keyType == 1 || keyType == 2) {
-				if(nameField.getText() == null
-				   || nameField.getText().equals("")
-				   || revField.getText() == null
-				   || revField.getText().equals("")) {
+			if(this.keyType == 1 || this.keyType == 2) {
+				if(this.nameField.getText() == null
+				   || "".equals( this.nameField.getText() )
+				   || this.revField.getText() == null
+				   || this.revField.getText().equals("")) {
 					new WarningWindow(null, I18n.getMessage("thaw.plugin.insert.specifyNameAndRev"));
 					return;
 				}
 
-				rev = Integer.parseInt(revField.getText());
-				name = nameField.getText();
+				rev = Integer.parseInt(this.revField.getText());
+				name = this.nameField.getText();
 			}
 
-			if(keyType == 2) {
-				if(privateKeyField.getText() != null
-				   && !privateKeyField.getText().equals("")) {
-					privateKey = privateKeyField.getText();
+			if(this.keyType == 2) {
+				if(this.privateKeyField.getText() != null
+				   && !"".equals( this.privateKeyField.getText() )) {
+					privateKey = this.privateKeyField.getText();
 
 					if(privateKey != null
-					   && !privateKey.equals("")) {
+					   && !"".equals( privateKey )) {
 						privateKey = privateKey.replaceFirst("SSK@", "");
 						privateKey = privateKey.replaceFirst("USK@", "");
 						String[] split = privateKey.split("/");
@@ -320,30 +320,30 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 			}
 
 			for(int i = 0 ; i <= MIN_PRIORITY ; i++) {
-				if(I18n.getMessage("thaw.plugin.priority.p"+ Integer.toString(i)).equals((String)prioritySelecter.getSelectedItem())) {
+				if(I18n.getMessage("thaw.plugin.priority.p"+ Integer.toString(i)).equals(this.prioritySelecter.getSelectedItem())) {
 					priority = i;
 				}
 			}
 
-			if(((String)globalSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.true")))
+			if(((String)this.globalSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.true")))
 				global = true;
-			if(((String)globalSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.false")))
+			if(((String)this.globalSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.false")))
 				global = false;
 			
 
 			String mimeType = null;
 			
-			if(mimeField.getSelectedItem() != null && !((String)mimeField.getSelectedItem()).equals(""))
-				mimeType = (String)mimeField.getSelectedItem();
+			if(this.mimeField.getSelectedItem() != null && !((String)this.mimeField.getSelectedItem()).equals(""))
+				mimeType = (String)this.mimeField.getSelectedItem();
 
-			insertPlugin.insertFile(selectedFiles.getText(),
-						keyType, rev, name, privateKey, priority,
+			this.insertPlugin.insertFile(this.selectedFiles.getText(),
+						this.keyType, rev, name, privateKey, priority,
 						global, 0, mimeType);
 
-			selectedFiles.setText("");
+			this.selectedFiles.setText("");
 		}
 
-		if(e.getSource() == browseButton) {
+		if(e.getSource() == this.browseButton) {
 			FileChooser fileChooser = new FileChooser();
 			Vector files;
 
@@ -372,55 +372,55 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 				i++;
 			}
 
-			selectedFiles.setText(fileList);
+			this.selectedFiles.setText(fileList);
 			
-			if(keyType != 0)
-				nameField.setText(getFileNameFromPath());
+			if(this.keyType != 0)
+				this.nameField.setText(this.getFileNameFromPath());
 		}
 	}
 
 
 	public String getFileNameFromPath() {
-		if(selectedFiles.getText() == null || selectedFiles.getText().equals(""))
+		if(this.selectedFiles.getText() == null || "".equals( this.selectedFiles.getText() ))
 			return "";
 		
-		String[] cutcut = selectedFiles.getText().split(File.separator.replaceAll("\\\\", "\\\\\\\\"));
+		String[] cutcut = this.selectedFiles.getText().split(File.separator.replaceAll("\\\\", "\\\\\\\\"));
 
 		return cutcut[cutcut.length - 1];
 	}
 
 	public void itemStateChanged(ItemEvent e) {
-		if(e.getItem() == keyRadioButtons[0]
+		if(e.getItem() == this.keyRadioButtons[0]
 		   && e.getStateChange() == ItemEvent.SELECTED) { /* CHK */
-			setKeysVisible(false);
-			setRevAndNameVisible(false);
+			this.setKeysVisible(false);
+			this.setRevAndNameVisible(false);
 			
-			resetOptionalFields();
+			this.resetOptionalFields();
 
-			keyType = 0;
+			this.keyType = 0;
 
 			return;
 		}
 
-		if(e.getItem() == keyRadioButtons[1]
+		if(e.getItem() == this.keyRadioButtons[1]
 		   && e.getStateChange() == ItemEvent.SELECTED) { /* KSK */
-			setKeysVisible(false);
-			setRevAndNameVisible(true);
+			this.setKeysVisible(false);
+			this.setRevAndNameVisible(true);
 
-			resetOptionalFields();
+			this.resetOptionalFields();
 
-			keyType = 1;
+			this.keyType = 1;
 			return;
 		}
 
-		if(e.getItem() == keyRadioButtons[2]
+		if(e.getItem() == this.keyRadioButtons[2]
 		   && e.getStateChange() == ItemEvent.SELECTED) { /* SSK */
-			setRevAndNameVisible(true);
-			setKeysVisible(true);
+			this.setRevAndNameVisible(true);
+			this.setKeysVisible(true);
 
-			resetOptionalFields();
+			this.resetOptionalFields();
 
-			keyType = 2;
+			this.keyType = 2;
 			return;
 		}
 	}
@@ -431,29 +431,29 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 	}
 
 	private void setRevAndNameVisible(boolean v) {
-		selectRevLabel.setVisible(v);
-		revField.setVisible(v);
+		this.selectRevLabel.setVisible(v);
+		this.revField.setVisible(v);
 		
-		selectNameLabel.setVisible(v);
-		nameField.setVisible(v);
+		this.selectNameLabel.setVisible(v);
+		this.nameField.setVisible(v);
 	}
 
 	private void setKeysVisible(boolean v) {
-		publicKeyLabel.setVisible(v);
-		publicKeyField.setVisible(v);
-		privateKeyLabel.setVisible(v);
-		privateKeyField.setVisible(v);
+		this.publicKeyLabel.setVisible(v);
+		this.publicKeyField.setVisible(v);
+		this.privateKeyLabel.setVisible(v);
+		this.privateKeyField.setVisible(v);
 	}
 	
 	private void resetOptionalFields() {
-		revField.setText("0");
-		nameField.setText(getFileNameFromPath());
-		privateKeyField.setText("");
-		publicKeyField.setText("");
+		this.revField.setText("0");
+		this.nameField.setText(this.getFileNameFromPath());
+		this.privateKeyField.setText("");
+		this.publicKeyField.setText("");
 	}
 
 	public void update(Observable o, Object param) {
-		if(o == lastInsert) {
+		if(o == this.lastInsert) {
 			FCPClientPut clientPut = (FCPClientPut)o;
 			
 			if(clientPut.getKeyType() == 2) {
@@ -464,9 +464,9 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 					publicKey = publicKey.replaceFirst("SSK@", "");
 					publicKey = publicKey.replaceFirst("USK@", "");
 					String[] split = publicKey.split("/");
-					publicKeyField.setText(split[0]);
+					this.publicKeyField.setText(split[0]);
 				} else {
-					publicKeyField.setText("");
+					this.publicKeyField.setText("");
 				}
 
 				if(clientPut.getPrivateKey() != null) {
@@ -474,15 +474,15 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 					privateKey = privateKey.replaceFirst("SSK@", "");
 					privateKey = privateKey.replaceFirst("USK@", "");
 					String[] split = privateKey.split("/");
-					privateKeyField.setText(split[0]);
+					this.privateKeyField.setText(split[0]);
 					
 				} else {
-					privateKeyField.setText("");				
+					this.privateKeyField.setText("");				
 				}
 
 			} else {
-				publicKeyField.setText("");
-				privateKeyField.setText("");
+				this.publicKeyField.setText("");
+				this.privateKeyField.setText("");
 			}			
 
 		} else {

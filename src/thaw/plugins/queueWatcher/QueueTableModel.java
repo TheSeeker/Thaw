@@ -41,19 +41,19 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		this.queueManager = queueManager;
 		this.isForInsertions = isForInsertions;
 
-		columnNames.add(I18n.getMessage("thaw.common.file"));
-		columnNames.add(I18n.getMessage("thaw.common.size"));
+		this.columnNames.add(I18n.getMessage("thaw.common.file"));
+		this.columnNames.add(I18n.getMessage("thaw.common.size"));
 		
 		if(!isForInsertions)
-			columnNames.add(I18n.getMessage("thaw.common.localPath"));
+			this.columnNames.add(I18n.getMessage("thaw.common.localPath"));
 
-		columnNames.add(I18n.getMessage("thaw.common.status"));
-		columnNames.add(I18n.getMessage("thaw.common.progress"));
+		this.columnNames.add(I18n.getMessage("thaw.common.status"));
+		this.columnNames.add(I18n.getMessage("thaw.common.progress"));
 
-		resetTable();
+		this.resetTable();
 		
 		if(queueManager != null) {
-			reloadQueue();
+			this.reloadQueue();
 			queueManager.addObserver(this);
 		} else {
 			Logger.warning(this, "Unable to connect to QueueManager. Is the connection established ?");
@@ -64,21 +64,21 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 	
 	public int getRowCount() {
-		if(queries != null)
-			return queries.size();
+		if(this.queries != null)
+			return this.queries.size();
 		else
 			return 0;
 	}
 	
 	public int getColumnCount() {
-		return columnNames.size();
+		return this.columnNames.size();
 	}
 	
 	public String getColumnName(int col) {
-		String result = (String)columnNames.get(col);
+		String result = (String)this.columnNames.get(col);
 
-		if(col == sortedColumn) {
-			if(isSortedAsc)
+		if(col == this.sortedColumn) {
+			if(this.isSortedAsc)
 				result = result + " >>";
 			else
 				result = result + " <<";
@@ -111,10 +111,10 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 
 	public Object getValueAt(int row, int column) {
-		if(row >= queries.size())
+		if(row >= this.queries.size())
 			return null;
 
-		FCPTransferQuery query = (FCPTransferQuery)queries.get(row);
+		FCPTransferQuery query = (FCPTransferQuery)this.queries.get(row);
 		
 		if(column == 0) {
 			return query.getFilename();
@@ -124,20 +124,20 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 			return getPrintableSize(query.getFileSize());
 		}
 
-		if(!isForInsertions && column == 2) {
+		if(!this.isForInsertions && column == 2) {
 			if(query.getPath() != null)
 				return query.getPath();
 			else
 				return I18n.getMessage("thaw.common.unspecified");
 		}
 
-		if( (isForInsertions && column == 2)
-		    || (!isForInsertions && column == 3) ) {
+		if( (this.isForInsertions && column == 2)
+		    || (!this.isForInsertions && column == 3) ) {
 			return query.getStatus();
 		}
 
-		if( (isForInsertions && column == 3
-		     || (!isForInsertions && column == 4) ) ) {
+		if( (this.isForInsertions && column == 3
+		     || (!this.isForInsertions && column == 4) ) ) {
 			if(!query.isFinished() || query.isSuccessful())
 				return new Integer(query.getProgression());
 			else
@@ -157,31 +157,31 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	 */
 	public synchronized void resetTable() {
 
-		if(queries != null) {
-			for(Iterator it = queries.iterator();
+		if(this.queries != null) {
+			for(Iterator it = this.queries.iterator();
 			    it.hasNext();) {
 				Observable query = (Observable)it.next();
 				query.deleteObserver(this);
 			}
 		}
 
-		queries = new Vector();
+		this.queries = new Vector();
 
 	}
 
 	public synchronized void reloadQueue() {
 		try {
-			resetTable();
+			this.resetTable();
 
-			addQueries(queueManager.getRunningQueue());
+			this.addQueries(this.queueManager.getRunningQueue());
 			
-			Vector[] pendings = queueManager.getPendingQueues();
+			Vector[] pendings = this.queueManager.getPendingQueues();
 			
 			for(int i = 0;i < pendings.length ; i++)
-				addQueries(pendings[i]);
+				this.addQueries(pendings[i]);
 		} catch(java.util.ConcurrentModificationException e) {
 			Logger.warning(this, "reloadQueue: Collision !");
-			reloadQueue();
+			this.reloadQueue();
 		}		
 	}
 
@@ -191,51 +191,51 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 			FCPTransferQuery query = (FCPTransferQuery)it.next();
 
-			if(query.getQueryType() == 1 && !isForInsertions)
-				addQuery(query);
+			if(query.getQueryType() == 1 && !this.isForInsertions)
+				this.addQuery(query);
 
-			if(query.getQueryType() == 2 && isForInsertions)
-				addQuery(query);
+			if(query.getQueryType() == 2 && this.isForInsertions)
+				this.addQuery(query);
 
 		}
 	}
 
 	public synchronized void addQuery(FCPTransferQuery query) {
-		if(queries.contains(query)) {
+		if(this.queries.contains(query)) {
 			Logger.notice(this, "addQuery() : Already known");
 			return;
 		}
 
 		((Observable)query).addObserver(this);
 
-		queries.add(query);
+		this.queries.add(query);
 
-		sortTable();
+		this.sortTable();
 
-		int changedRow = queries.indexOf(query);
+		int changedRow = this.queries.indexOf(query);
 
-		notifyObservers(new TableModelEvent(this, changedRow, changedRow, TableModelEvent.ALL_COLUMNS, TableModelEvent.INSERT));
+		this.notifyObservers(new TableModelEvent(this, changedRow, changedRow, TableModelEvent.ALL_COLUMNS, TableModelEvent.INSERT));
 	}
 
 	public synchronized void removeQuery(FCPTransferQuery query) {
 		((Observable)query).deleteObserver(this);
 
-		sortTable();
+		this.sortTable();
 
-		int changedRow = queries.indexOf(query);
+		int changedRow = this.queries.indexOf(query);
 		
-		queries.remove(query);
+		this.queries.remove(query);
 
 		if(changedRow >= 0) {
-			notifyObservers(new TableModelEvent(this, changedRow, changedRow, TableModelEvent.ALL_COLUMNS, TableModelEvent.DELETE));
+			this.notifyObservers(new TableModelEvent(this, changedRow, changedRow, TableModelEvent.ALL_COLUMNS, TableModelEvent.DELETE));
 		}else
-			notifyObservers();
+			this.notifyObservers();
 	}
 
 
 	public synchronized FCPTransferQuery getQuery(int row) {
 		try {
-			return (FCPTransferQuery)queries.get(row);
+			return (FCPTransferQuery)this.queries.get(row);
 		} catch(java.lang.ArrayIndexOutOfBoundsException e) {
 			Logger.notice(this, "Query not found, row: "+row);
 			return null;
@@ -248,7 +248,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	public synchronized Vector getQueries() {
 		Vector newVect = new Vector();
 
-		for(Iterator queryIt = queries.iterator() ;
+		for(Iterator queryIt = this.queries.iterator() ;
 		    queryIt.hasNext();) {
 			newVect.add(queryIt.next());
 		}
@@ -259,17 +259,17 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	public void notifyObservers() {
 		TableModelEvent event = new TableModelEvent(this);
 
-		notifyObservers(event);
+		this.notifyObservers(event);
 	}
 
 	public void notifyObservers(int changedRow) {
 		TableModelEvent event = new TableModelEvent(this, changedRow);
 
-		notifyObservers(event);
+		this.notifyObservers(event);
 	}
 
 	public void notifyObservers(TableModelEvent event) {
-		fireTableChanged(event);
+		this.fireTableChanged(event);
 
 		/*
 		TableModelListener[] listeners = getTableModelListeners();
@@ -283,40 +283,40 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	public synchronized void update(Observable o, Object arg) {
 		int i;
 
-		sortTable();
+		this.sortTable();
 
-		if( (i = queries.indexOf(o)) >= 0) {
-			notifyObservers(i);
+		if( (i = this.queries.indexOf(o)) >= 0) {
+			this.notifyObservers(i);
 			return;
 		}
 
 		if(arg == null) {
-			reloadQueue();
+			this.reloadQueue();
 			return;
 		}
 		
-		if(o == queueManager) {
+		if(o == this.queueManager) {
 			FCPTransferQuery query = (FCPTransferQuery)arg;
 			
-			if(query.getQueryType() == 1 && isForInsertions)
+			if(query.getQueryType() == 1 && this.isForInsertions)
 				return;
 			
-			if(query.getQueryType() == 2 && !isForInsertions)
+			if(query.getQueryType() == 2 && !this.isForInsertions)
 				return;
 			
-			if(queueManager.isInTheQueues(query)) { // then it's an adding
-				addQuery(query);
+			if(this.queueManager.isInTheQueues(query)) { // then it's an adding
+				this.addQuery(query);
 				return;
 			}
 			
-			if(queries.contains(query)) {
-				removeQuery(query);
+			if(this.queries.contains(query)) {
+				this.removeQuery(query);
 				return;
 			}
 		}
 
 		Logger.warning(this, "update(): Unknow change ?!");
-		reloadQueue();		
+		this.reloadQueue();		
 	}
 
 
@@ -324,10 +324,10 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	 * @return false if nothing sorted
 	 */
 	public boolean sortTable() {
-		if(sortedColumn < 0 || queries.size() <= 0)
+		if(this.sortedColumn < 0 || this.queries.size() <= 0)
 			return false;
 
-		Collections.sort(queries, new QueryComparator(isSortedAsc, sortedColumn, isForInsertions));
+		Collections.sort(this.queries, new QueryComparator(this.isSortedAsc, this.sortedColumn, this.isForInsertions));
 
 		return true;
 	}
@@ -337,35 +337,35 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		private JTable table;
 				
 		public ColumnListener(JTable t) {
-			table = t;
+			this.table = t;
 		}
 		
 		public void mouseClicked(MouseEvent e) {
-			TableColumnModel colModel = table.getColumnModel();
+			TableColumnModel colModel = this.table.getColumnModel();
 			int columnModelIndex = colModel.getColumnIndexAtX(e.getX());
 			int modelIndex = colModel.getColumn(columnModelIndex).getModelIndex();
 			
-			int columnsCount = table.getColumnCount();
+			int columnsCount = this.table.getColumnCount();
 
 			if (modelIndex < 0)
 				return;
 
-			if (sortedColumn == modelIndex)
-				isSortedAsc = !isSortedAsc;
+			if (QueueTableModel.this.sortedColumn == modelIndex)
+				QueueTableModel.this.isSortedAsc = !QueueTableModel.this.isSortedAsc;
 			else
-				sortedColumn = modelIndex;
+				QueueTableModel.this.sortedColumn = modelIndex;
 
 			
 			for (int i = 0; i < columnsCount; i++) { 
 				TableColumn column = colModel.getColumn(i);
-				column.setHeaderValue(getColumnName(column.getModelIndex()));
+				column.setHeaderValue(QueueTableModel.this.getColumnName(column.getModelIndex()));
 			}
 
 			
 
-			table.getTableHeader().repaint();
+			this.table.getTableHeader().repaint();
 
-			sortTable();			
+			QueueTableModel.this.sortTable();			
 		}
 	}
 	
@@ -393,7 +393,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 			FCPTransferQuery q2 = (FCPTransferQuery)o2;
 
 			
-			if(column == 0) { /* File name */
+			if(this.column == 0) { /* File name */
 				if(q1.getFilename() == null)
 					return -1;
 
@@ -403,11 +403,11 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 				result = q1.getFilename().compareTo(q2.getFilename());
 			}
 
-			if(column == 1) { /* Size */
+			if(this.column == 1) { /* Size */
 				result = (new Long(q1.getFileSize())).compareTo(new Long(q2.getFileSize()));
 			}
 
-			if( (column == 2 && !isForInsertionTable) ) { /* localPath */
+			if( (this.column == 2 && !this.isForInsertionTable) ) { /* localPath */
 				if(q1.getPath() == null)
 					return -1;
 
@@ -417,8 +417,8 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 				result = q1.getPath().compareTo(q2.getPath());
 			}
 
-			if( (column == 2 && isForInsertionTable)
-			    || (column == 3 && !isForInsertionTable) ) { /* status */
+			if( (this.column == 2 && this.isForInsertionTable)
+			    || (this.column == 3 && !this.isForInsertionTable) ) { /* status */
 
 				if(q1.getStatus() == null)
 					return -1;
@@ -429,8 +429,8 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 				result = q1.getStatus().compareTo(q2.getStatus());
 			}
 
-			if( (column == 3 && isForInsertionTable)
-			    || (column == 4 && !isForInsertionTable) ) { /* progress */
+			if( (this.column == 3 && this.isForInsertionTable)
+			    || (this.column == 4 && !this.isForInsertionTable) ) { /* progress */
 				if(q1.getProgression() <= 0 
 				   && q2.getProgression() <= 0) {
 					if(q1.isRunning() && !q2.isRunning())
@@ -444,24 +444,27 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 			}
 			
 
-			if (!isSortedAsc)
+			if (!this.isSortedAsc)
 				result = -result;
 
 			return result;
 		}
 		
 		public boolean isSortedAsc() {
-			return isSortedAsc;
+			return this.isSortedAsc;
 		}
 
 		public boolean equals(Object obj) {
 			if (obj instanceof QueryComparator) {
 				QueryComparator compObj = (QueryComparator) obj;
-				return compObj.isSortedAsc() == isSortedAsc();
+				return compObj.isSortedAsc() == this.isSortedAsc();
 			}
 			return false;
 		}
-
+		
+		public int hashCode(){
+			return super.hashCode();
+		}
 	}
 
 }

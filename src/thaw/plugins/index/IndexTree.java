@@ -117,201 +117,201 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		this.modifiables = modifiables;
 		this.selectionOnly = selectionOnly;
 
-		panel = new JPanel();
-		panel.setLayout(new BorderLayout(10, 10));
+		this.panel = new JPanel();
+		this.panel.setLayout(new BorderLayout(10, 10));
 		
-		indexCategoryMenu = new JPopupMenu();
-		indexMenu = new JPopupMenu();
+		this.indexCategoryMenu = new JPopupMenu();
+		this.indexMenu = new JPopupMenu();
 
 		if(modifiables)
-			addIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.createIndex"));
+			this.addIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.createIndex"));
 		else
-			addIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.addIndex"));
+			this.addIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.addIndex"));
 
-		addIndexCategory = new JMenuItem(I18n.getMessage("thaw.plugin.index.addCategory"));
-		renameIndexCategory = new JMenuItem(I18n.getMessage("thaw.plugin.index.rename"));
-		renameIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.rename"));
-		deleteIndexCategory = new JMenuItem(I18n.getMessage("thaw.plugin.index.delete"));
-		deleteIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.delete"));
+		this.addIndexCategory = new JMenuItem(I18n.getMessage("thaw.plugin.index.addCategory"));
+		this.renameIndexCategory = new JMenuItem(I18n.getMessage("thaw.plugin.index.rename"));
+		this.renameIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.rename"));
+		this.deleteIndexCategory = new JMenuItem(I18n.getMessage("thaw.plugin.index.delete"));
+		this.deleteIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.delete"));
 		
 		if(modifiables) {
-			updateIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.insertIndex"));
-			updateIndexCategory = new JMenuItem(I18n.getMessage("thaw.plugin.index.insertIndexes"));
+			this.updateIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.insertIndex"));
+			this.updateIndexCategory = new JMenuItem(I18n.getMessage("thaw.plugin.index.insertIndexes"));
 		} else {
-			updateIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.downloadIndex"));
-			updateIndexCategory = new JMenuItem(I18n.getMessage("thaw.plugin.index.downloadIndexes"));
+			this.updateIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.downloadIndex"));
+			this.updateIndexCategory = new JMenuItem(I18n.getMessage("thaw.plugin.index.downloadIndexes"));
 		}
 
-		copyPublicKey = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKey"));
-		copyPublicKeys = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKeys"));
+		this.copyPublicKey = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKey"));
+		this.copyPublicKeys = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKeys"));
 
 		if (modifiables) {
-			copyPrivateKey = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyPrivateKey"));
-			copyPrivateKeys = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyPrivateKey"));
-			copyPrivateKey.addActionListener(this);
-			copyPrivateKeys.addActionListener(this);
+			this.copyPrivateKey = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyPrivateKey"));
+			this.copyPrivateKeys = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyPrivateKey"));
+			this.copyPrivateKey.addActionListener(this);
+			this.copyPrivateKeys.addActionListener(this);
 
-			reloadFromFreenet = new JMenuItem(I18n.getMessage("thaw.plugin.index.reloadFromFreenet"));
-			reloadFromFreenet.addActionListener(this);
+			this.reloadFromFreenet = new JMenuItem(I18n.getMessage("thaw.plugin.index.reloadFromFreenet"));
+			this.reloadFromFreenet.addActionListener(this);
 		}
 
-		indexCategoryMenu.add(updateIndexCategory);
-		indexCategoryMenu.add(addIndex);
-		indexCategoryMenu.add(addIndexCategory);
-		indexCategoryMenu.add(copyPublicKeys);
-		indexCategoryMenu.add(updateIndex);
-		indexCategoryMenu.add(renameIndexCategory);
-		indexCategoryMenu.add(deleteIndexCategory);
+		this.indexCategoryMenu.add(this.updateIndexCategory);
+		this.indexCategoryMenu.add(this.addIndex);
+		this.indexCategoryMenu.add(this.addIndexCategory);
+		this.indexCategoryMenu.add(this.copyPublicKeys);
+		this.indexCategoryMenu.add(this.updateIndex);
+		this.indexCategoryMenu.add(this.renameIndexCategory);
+		this.indexCategoryMenu.add(this.deleteIndexCategory);
 		if (modifiables) {
-			indexCategoryMenu.add(copyPrivateKeys);
+			this.indexCategoryMenu.add(this.copyPrivateKeys);
 		}
 
-		indexMenu.add(updateIndex);
-		indexMenu.add(copyPublicKey);
-		indexMenu.add(renameIndex);
-		indexMenu.add(deleteIndex);
+		this.indexMenu.add(this.updateIndex);
+		this.indexMenu.add(this.copyPublicKey);
+		this.indexMenu.add(this.renameIndex);
+		this.indexMenu.add(this.deleteIndex);
 		if (modifiables) {
-			indexMenu.add(copyPrivateKey);
-			indexMenu.add(reloadFromFreenet);
+			this.indexMenu.add(this.copyPrivateKey);
+			this.indexMenu.add(this.reloadFromFreenet);
 		}
 
-		addIndex.addActionListener(this);
-		addIndexCategory.addActionListener(this);
-		renameIndexCategory.addActionListener(this);
-		deleteIndexCategory.addActionListener(this);
-		updateIndexCategory.addActionListener(this);
+		this.addIndex.addActionListener(this);
+		this.addIndexCategory.addActionListener(this);
+		this.renameIndexCategory.addActionListener(this);
+		this.deleteIndexCategory.addActionListener(this);
+		this.updateIndexCategory.addActionListener(this);
 
-		updateIndex.addActionListener(this);
-		copyPublicKey.addActionListener(this);
-		copyPublicKeys.addActionListener(this);
-		renameIndex.addActionListener(this);
-		deleteIndex.addActionListener(this);
+		this.updateIndex.addActionListener(this);
+		this.copyPublicKey.addActionListener(this);
+		this.copyPublicKeys.addActionListener(this);
+		this.renameIndex.addActionListener(this);
+		this.deleteIndex.addActionListener(this);
 		
 
-		root = new IndexCategory(db, queueManager, -1, null, rootName, modifiables);
-		root.loadChildren();
+		this.root = new IndexCategory(db, queueManager, -1, null, rootName, modifiables);
+		this.root.loadChildren();
 
-		root.addObserver(this);
+		this.root.addObserver(this);
 
-		treeModel = new DefaultTreeModel(root);
+		this.treeModel = new DefaultTreeModel(this.root);
 
 		if (!selectionOnly) {
-			tree = new JDragTree(treeModel);
-			tree.addMouseListener(this);
+			this.tree = new JDragTree(this.treeModel);
+			this.tree.addMouseListener(this);
 		} else {
-			tree = new JTree(treeModel);
-			tree.addMouseListener(this);
+			this.tree = new JTree(this.treeModel);
+			this.tree.addMouseListener(this);
 		}
 
 		IndexTreeRenderer treeRenderer = new IndexTreeRenderer();
 		treeRenderer.setLeafIcon(IconBox.minIndex);
 
-		tree.setCellRenderer(treeRenderer);
+		this.tree.setCellRenderer(treeRenderer);
 
 		//if (selectionOnly)
-		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		this.tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 
-		toolBar = new JToolBar();
+		this.toolBar = new JToolBar();
 
-		newIndex   = new JButton(IconBox.indexNew);
+		this.newIndex   = new JButton(IconBox.indexNew);
 		if (!modifiables)
-			newIndex.setToolTipText(I18n.getMessage("thaw.plugin.index.addIndex"));
+			this.newIndex.setToolTipText(I18n.getMessage("thaw.plugin.index.addIndex"));
 		else
-			newIndex.setToolTipText(I18n.getMessage("thaw.plugin.index.createIndex"));
-		newIndex.addActionListener(this);
+			this.newIndex.setToolTipText(I18n.getMessage("thaw.plugin.index.createIndex"));
+		this.newIndex.addActionListener(this);
 
 
 		if (!modifiables) {
-			refreshAll = new JButton(IconBox.refreshAction);
-			refreshAll.setToolTipText(I18n.getMessage("thaw.plugin.index.downloadIndexes"));
-			refreshAll.addActionListener(this);
+			this.refreshAll = new JButton(IconBox.refreshAction);
+			this.refreshAll.setToolTipText(I18n.getMessage("thaw.plugin.index.downloadIndexes"));
+			this.refreshAll.addActionListener(this);
 		} else {
-			reuseIndex = new JButton(IconBox.indexReuse);
-			reuseIndex.setToolTipText(I18n.getMessage("thaw.plugin.index.addAlreadyExisting"));
-			reuseIndex.addActionListener(this);
+			this.reuseIndex = new JButton(IconBox.indexReuse);
+			this.reuseIndex.setToolTipText(I18n.getMessage("thaw.plugin.index.addAlreadyExisting"));
+			this.reuseIndex.addActionListener(this);
 		}
 
 
-		toolBar.add(newIndex);
+		this.toolBar.add(this.newIndex);
 		if (!modifiables)
-			toolBar.add(refreshAll);
+			this.toolBar.add(this.refreshAll);
 		else
-			toolBar.add(reuseIndex);
+			this.toolBar.add(this.reuseIndex);
 
 		if (!selectionOnly)
-			panel.add(toolBar, BorderLayout.NORTH);
-		panel.add(new JScrollPane(tree), BorderLayout.CENTER);
+			this.panel.add(this.toolBar, BorderLayout.NORTH);
+		this.panel.add(new JScrollPane(this.tree), BorderLayout.CENTER);
 	}
 
 
 	public javax.swing.JComponent getPanel() {
-		return panel;
+		return this.panel;
 	}
 
 	public void addTreeSelectionListener(javax.swing.event.TreeSelectionListener tsl) {
-		tree.addTreeSelectionListener(tsl);
+		this.tree.addTreeSelectionListener(tsl);
 	}
 
 
 	public JTree getTree() {
-		return tree;
+		return this.tree;
 	}
 
 	public IndexCategory getRoot() {
-		return root;
+		return this.root;
 	}
 
 	public void mouseClicked(MouseEvent e) {
-		notifySelection(e);
+		this.notifySelection(e);
 	}
 
 	public void mouseEntered(MouseEvent e) { }
 	public void mouseExited(MouseEvent e) { }
 
 	public void mousePressed(MouseEvent e) {
-		if (!selectionOnly)
-			showPopupMenu(e);
+		if (!this.selectionOnly)
+			this.showPopupMenu(e);
 	}
 
 	public void mouseReleased(MouseEvent e) {
-		if (!selectionOnly)
-			showPopupMenu(e);
+		if (!this.selectionOnly)
+			this.showPopupMenu(e);
 	}
 
 	protected void showPopupMenu(MouseEvent e) {
 		if(e.isPopupTrigger()) {
-			TreePath path = tree.getPathForLocation(e.getX(), e.getY());
+			TreePath path = this.tree.getPathForLocation(e.getX(), e.getY());
 			
 			if(path == null)
 				return;
 
-			selectedNode = (IndexTreeNode)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
+			this.selectedNode = (IndexTreeNode)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
 
-			if(selectedNode == null)
+			if(this.selectedNode == null)
 				return;
 
-			if(selectedNode instanceof IndexCategory)
-				indexCategoryMenu.show(e.getComponent(), e.getX(), e.getY());
+			if(this.selectedNode instanceof IndexCategory)
+				this.indexCategoryMenu.show(e.getComponent(), e.getX(), e.getY());
 			
-			if(selectedNode instanceof Index)
-				indexMenu.show(e.getComponent(), e.getX(), e.getY());
+			if(this.selectedNode instanceof Index)
+				this.indexMenu.show(e.getComponent(), e.getX(), e.getY());
 		}
 	}
 
 	public void notifySelection(MouseEvent e) {
-		TreePath path = tree.getPathForLocation(e.getX(), e.getY());
+		TreePath path = this.tree.getPathForLocation(e.getX(), e.getY());
 			
 		if(path == null)
 			return;
 
-		selectedNode = (IndexTreeNode)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
+		this.selectedNode = (IndexTreeNode)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
 
-		setChanged();
-		notifyObservers(selectedNode);
+		this.setChanged();
+		this.notifyObservers(this.selectedNode);
 	}
 
 	public IndexTreeNode getSelectedNode() {
-		Object obj = tree.getLastSelectedPathComponent();
+		Object obj = this.tree.getLastSelectedPathComponent();
 
 		if (obj == null)
 			return null;
@@ -328,18 +328,17 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		if(selectedNode == null)
-			selectedNode = root;
+		if(this.selectedNode == null)
+			this.selectedNode = this.root;
 
-		if(e.getSource() == addIndex
-		   || e.getSource() == newIndex) {
+		if(e.getSource() == this.addIndex
+		   || e.getSource() == this.newIndex) {
 			String name = null;
 
-			String keys[] = null;
 			String publicKey = null;
 
-			if(!modifiables) {
-				publicKey = askAName(I18n.getMessage("thaw.plugin.index.indexKey"), "USK@");
+			if(!this.modifiables) {
+				publicKey = this.askAName(I18n.getMessage("thaw.plugin.index.indexKey"), "USK@");
 
 				if (publicKey == null)
 					return;
@@ -349,7 +348,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 				name = Index.getNameFromKey(publicKey);
 
 			} else {
-				name = askAName(I18n.getMessage("thaw.plugin.index.indexName"),
+				name = this.askAName(I18n.getMessage("thaw.plugin.index.indexName"),
 						I18n.getMessage("thaw.plugin.index.newIndex"));				
 			}
 
@@ -358,24 +357,24 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 			IndexCategory parent;
 
-			if (selectedNode != null)
-				parent = (IndexCategory)selectedNode;
+			if (this.selectedNode != null)
+				parent = (IndexCategory)this.selectedNode;
 			else
-				parent = root;
+				parent = this.root;
 
-			Index index = new Index(db, queueManager, -2, parent, name, name, publicKey, null, 0, null, modifiables);
+			Index index = new Index(this.db, this.queueManager, -2, parent, name, name, publicKey, null, 0, null, this.modifiables);
 
-			if(modifiables)
-				index.generateKeys(queueManager);
+			if(this.modifiables)
+				index.generateKeys(this.queueManager);
 
 			index.create();
 			parent.insert(index.getTreeNode(), 0);
 
-			treeModel.reload(parent);
+			this.treeModel.reload(parent);
 		}
 
 
-		if (e.getSource() == reuseIndex) {
+		if (e.getSource() == this.reuseIndex) {
 			Thread newThread = new Thread(new IndexReuser());
 
 			newThread.start();
@@ -383,96 +382,96 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 
 
-		if(e.getSource() == addIndexCategory) {
-			String name = askAName(I18n.getMessage("thaw.plugin.index.categoryName"), 
+		if(e.getSource() == this.addIndexCategory) {
+			String name = this.askAName(I18n.getMessage("thaw.plugin.index.categoryName"), 
 					       I18n.getMessage("thaw.plugin.index.newCategory"));
 
 			if(name == null)
 				return;
 
-			IndexCategory parent = (IndexCategory)selectedNode;
+			IndexCategory parent = (IndexCategory)this.selectedNode;
 
 			/* the id will be defined when created */
-			IndexCategory cat = new IndexCategory(db, queueManager, -2, parent,
-							      name, modifiables);
+			IndexCategory cat = new IndexCategory(this.db, this.queueManager, -2, parent,
+							      name, this.modifiables);
 			cat.create();
 			parent.insert(cat, 0);
 
-			treeModel.reload(parent);
+			this.treeModel.reload(parent);
 		}
 
-		if(e.getSource() == renameIndexCategory
-		   || e.getSource() == renameIndex) {
+		if(e.getSource() == this.renameIndexCategory
+		   || e.getSource() == this.renameIndex) {
 			
 			String newName;
 
-			if(e.getSource() == renameIndexCategory)
-				newName = askAName(I18n.getMessage("thaw.plugin.index.categoryName"), 
-						   selectedNode.toString());
+			if(e.getSource() == this.renameIndexCategory)
+				newName = this.askAName(I18n.getMessage("thaw.plugin.index.categoryName"), 
+						   this.selectedNode.toString());
 			else
-				newName = askAName(I18n.getMessage("thaw.plugin.index.indexName"), 
-						   selectedNode.toString());
+				newName = this.askAName(I18n.getMessage("thaw.plugin.index.indexName"), 
+						   this.selectedNode.toString());
 
 			if(newName == null)
 				return;
 
-			selectedNode.rename(newName);
+			this.selectedNode.rename(newName);
 
-			treeModel.reload(selectedNode.getTreeNode());
+			this.treeModel.reload(this.selectedNode.getTreeNode());
 		}
 
-		if(e.getSource() == deleteIndexCategory
-		   || e.getSource() == deleteIndex) {
+		if(e.getSource() == this.deleteIndexCategory
+		   || e.getSource() == this.deleteIndex) {
 
-			MutableTreeNode parent = (MutableTreeNode)selectedNode.getTreeNode().getParent();
-
-			if(parent != null)
-				parent.remove(selectedNode.getTreeNode());
-
-			selectedNode.delete();
+			MutableTreeNode parent = (MutableTreeNode)this.selectedNode.getTreeNode().getParent();
 
 			if(parent != null)
-				treeModel.reload(parent);
+				parent.remove(this.selectedNode.getTreeNode());
+
+			this.selectedNode.delete();
+
+			if(parent != null)
+				this.treeModel.reload(parent);
 			else
-				treeModel.reload();
+				this.treeModel.reload();
 		}
 
-		if(e.getSource() == updateIndex
-		   || e.getSource() == updateIndexCategory) {
-			selectedNode.update();
+		if(e.getSource() == this.updateIndex
+		   || e.getSource() == this.updateIndexCategory) {
+			this.selectedNode.update();
 		}
 
-		if (e.getSource() == reloadFromFreenet) {
-			selectedNode.updateFromFreenet(-1);
+		if (e.getSource() == this.reloadFromFreenet) {
+			this.selectedNode.updateFromFreenet(-1);
 		}
 		
-		if (e.getSource() == refreshAll) {
-			root.update();
+		if (e.getSource() == this.refreshAll) {
+			this.root.update();
 		}
 
-		if(e.getSource() == copyPublicKey
-		   || e.getSource() == copyPublicKeys) {
+		if(e.getSource() == this.copyPublicKey
+		   || e.getSource() == this.copyPublicKeys) {
 			Toolkit tk = Toolkit.getDefaultToolkit();
-			StringSelection st = new StringSelection(selectedNode.getPublicKey());
+			StringSelection st = new StringSelection(this.selectedNode.getPublicKey());
 			Clipboard cp = tk.getSystemClipboard();
 			cp.setContents(st, null);
 		}
 
 		
-		if(e.getSource() == copyPrivateKey
-		   || e.getSource() == copyPrivateKeys) {
+		if(e.getSource() == this.copyPrivateKey
+		   || e.getSource() == this.copyPrivateKeys) {
 			Toolkit tk = Toolkit.getDefaultToolkit();
-			StringSelection st = new StringSelection(selectedNode.getPrivateKey());
+			StringSelection st = new StringSelection(this.selectedNode.getPrivateKey());
 			Clipboard cp = tk.getSystemClipboard();
 			cp.setContents(st, null);
 		}
 
-		if (e.getSource() == okButton) {
-			formState = 1;
+		if (e.getSource() == this.okButton) {
+			this.formState = 1;
 		}
 
-		if (e.getSource() == cancelButton) {
-			formState = 2;
+		if (e.getSource() == this.cancelButton) {
+			this.formState = 2;
 		}
 	}
 
@@ -492,7 +491,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			String publicKey = null;
 			String privateKey = null;
 
-			keys = askKeys(true);
+			keys = IndexTree.this.askKeys(true);
 			if (keys == null)
 				return;
 
@@ -509,24 +508,24 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			
 			IndexCategory parent;
 
-			if (selectedNode != null && selectedNode instanceof IndexCategory)
-				parent = (IndexCategory)selectedNode;
+			if (IndexTree.this.selectedNode != null && IndexTree.this.selectedNode instanceof IndexCategory)
+				parent = (IndexCategory)IndexTree.this.selectedNode;
 			else
-				parent = root;
+				parent = IndexTree.this.root;
 
-			Index index = new Index(db, queueManager, -2, parent, name, name, publicKey, privateKey, 0, null, modifiables);
+			Index index = new Index(IndexTree.this.db, IndexTree.this.queueManager, -2, parent, name, name, publicKey, privateKey, 0, null, IndexTree.this.modifiables);
 
 			index.create();
 			parent.insert(index.getTreeNode(), 0);
 			
-			treeModel.reload(parent);
+			IndexTree.this.treeModel.reload(parent);
 		}
 	}
 
 
 	public String[] askKeys(boolean askPrivateKey) {
 		//I18n.getMessage("thaw.plugin.index.indexKey")
-		formState = 0;
+		this.formState = 0;
 
 		JFrame frame = new JFrame(I18n.getMessage("thaw.plugin.index.indexKey"));
 
@@ -543,19 +542,19 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			frame.getContentPane().add(privateKeyField);
 		}
 
-		cancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
-		okButton = new JButton(I18n.getMessage("thaw.common.ok"));
+		this.cancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
+		this.okButton = new JButton(I18n.getMessage("thaw.common.ok"));
 
-		cancelButton.addActionListener(this);
-		okButton.addActionListener(this);
+		this.cancelButton.addActionListener(this);
+		this.okButton.addActionListener(this);
 
-		frame.getContentPane().add(cancelButton);
-		frame.getContentPane().add(okButton);
+		frame.getContentPane().add(this.cancelButton);
+		frame.getContentPane().add(this.okButton);
 
 		frame.setSize(500, 100);
 		frame.setVisible(true);
 		
-		while(formState == 0) {
+		while(this.formState == 0) {
 			try {
 				Thread.sleep(500);
 			} catch(InterruptedException e) {
@@ -565,7 +564,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		frame.setVisible(false);
 
-		if (formState == 2)
+		if (this.formState == 2)
 			return null;
 
 		String[] keys = new String[2];
@@ -580,7 +579,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	}
 
 	public void save() {
-		root.save();
+		this.root.save();
 	}
 
 
@@ -589,15 +588,20 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		    && (param == null) ) {
 			Index index = (Index)o;
 
-			treeModel.nodeChanged(index.getTreeNode());
+			this.treeModel.nodeChanged(index.getTreeNode());
 			if(index.getTreeNode().getParent() != null)
-				treeModel.nodeChanged(index.getTreeNode().getParent());
+				this.treeModel.nodeChanged(index.getTreeNode().getParent());
 
 		}
 	}
 
 
 	public class IndexTreeRenderer extends DefaultTreeCellRenderer {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 
 		public IndexTreeRenderer() {
 			super();
@@ -610,7 +614,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 								       boolean leaf,
 								       int row,
 								       boolean hasFocus) {
-			setBackgroundNonSelectionColor(Color.WHITE);
+			this.setBackgroundNonSelectionColor(Color.WHITE);
 
 			if(value instanceof DefaultMutableTreeNode) {
 				Object o = ((DefaultMutableTreeNode)value).getUserObject();
@@ -619,7 +623,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 					Index index = (Index)o;
 
 					if(index.isUpdating()) {
-						setBackgroundNonSelectionColor(Color.LIGHT_GRAY);
+						this.setBackgroundNonSelectionColor(Color.LIGHT_GRAY);
 					}
 				}
 			}
@@ -638,14 +642,14 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 
 	public boolean addToRoot(IndexTreeNode node) {
-		if (alreadyExistingIndex(node.getPublicKey())) {
+		if (this.alreadyExistingIndex(node.getPublicKey())) {
 			Logger.notice(this, "Index already added");
 			return false;
 		}
 
-		node.setParent(root);
-		root.insert(node.getTreeNode(), root.getChildCount());
-		reloadModel(root);
+		node.setParent(this.root);
+		this.root.insert(node.getTreeNode(), this.root.getChildCount());
+		this.reloadModel(this.root);
 
 		return true;
 	}
@@ -656,7 +660,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		String realKey = key.substring(0, 60).toLowerCase();
 
 		try {
-			Connection c = db.getConnection();
+			Connection c = this.db.getConnection();
 			PreparedStatement st;
 
 			String query;
@@ -664,7 +668,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			query = "SELECT id FROM indexes WHERE LOWER(publicKey) LIKE ?";
 
 			
-			if (modifiables)
+			if (this.modifiables)
 				query = query + " AND privateKey IS NOT NULL;";
 			else
 				query = query + " AND privateKey IS NULL;";
@@ -698,7 +702,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	 * @param node can be null
 	 */
 	public void reloadModel(DefaultMutableTreeNode node) {
-		treeModel.reload(node);
+		this.treeModel.reload(node);
 	}
 
 }

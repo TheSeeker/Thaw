@@ -4,6 +4,8 @@ import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JTabbedPane;
 import javax.swing.JLabel;
+import javax.swing.WindowConstants;
+
 import java.awt.BorderLayout;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -76,100 +78,100 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	public MainWindow(Core core) {
 		this.core = core;
 
-		mainWindow = new JFrame("Thaw");
+		this.mainWindow = new JFrame("Thaw");
 
-		mainWindow.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		this.mainWindow.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
-		mainWindow.setVisible(false);
+		this.mainWindow.setVisible(false);
 
 		try {
-			mainWindow.setIconImage(IconBox.blueBunny.getImage());
+			this.mainWindow.setIconImage(IconBox.blueBunny.getImage());
 		} catch(Throwable e) {
 			Logger.notice(this, "No icon");
 		}
 		
 		// MENUS
 	
-		menuBar = new JMenuBar();
-		fileMenu = new JMenu(I18n.getMessage("thaw.menu.file"));
+		this.menuBar = new JMenuBar();
+		this.fileMenu = new JMenu(I18n.getMessage("thaw.menu.file"));
 
-		reconnectionFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.reconnect"),
+		this.reconnectionFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.reconnect"),
 							 IconBox.minReconnectAction);
-		optionsFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.options"),
+		this.optionsFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.options"),
 						    IconBox.minSettings);
-		quitFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.quit"),
+		this.quitFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.quit"),
 						 IconBox.minQuitAction);
 		
-		reconnectionFileMenuItem.addActionListener(this);
-		optionsFileMenuItem.addActionListener(this);
-		quitFileMenuItem.addActionListener(this);
+		this.reconnectionFileMenuItem.addActionListener(this);
+		this.optionsFileMenuItem.addActionListener(this);
+		this.quitFileMenuItem.addActionListener(this);
 
-		fileMenu.add(reconnectionFileMenuItem);
-		fileMenu.add(optionsFileMenuItem);
-		fileMenu.add(quitFileMenuItem);
+		this.fileMenu.add(this.reconnectionFileMenuItem);
+		this.fileMenu.add(this.optionsFileMenuItem);
+		this.fileMenu.add(this.quitFileMenuItem);
 
-		menuBar.add(fileMenu);
+		this.menuBar.add(this.fileMenu);
 
-		helpMenu = new JMenu(I18n.getMessage("thaw.menu.help"));
+		this.helpMenu = new JMenu(I18n.getMessage("thaw.menu.help"));
 		
-		aboutHelpMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.about"));
-		aboutHelpMenuItem.addActionListener(this);
+		this.aboutHelpMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.about"));
+		this.aboutHelpMenuItem.addActionListener(this);
 
-		helpMenu.add(aboutHelpMenuItem);
+		this.helpMenu.add(this.aboutHelpMenuItem);
 
 		//menuBar.add(Box.createHorizontalGlue());
-		menuBar.add(helpMenu);
+		this.menuBar.add(this.helpMenu);
 
 		// TOOLBAR
-		toolBar = new JToolBar(I18n.getMessage("thaw.toolbar.title"));
+		this.toolBar = new JToolBar(I18n.getMessage("thaw.toolbar.title"));
 
-		connectButton = new JButton(IconBox.connectAction);
-		connectButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.connect"));
-		disconnectButton = new JButton(IconBox.disconnectAction);
-		disconnectButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.disconnect"));
+		this.connectButton = new JButton(IconBox.connectAction);
+		this.connectButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.connect"));
+		this.disconnectButton = new JButton(IconBox.disconnectAction);
+		this.disconnectButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.disconnect"));
 
-		settingsButton = new JButton(IconBox.settings);
-		settingsButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.settings"));
+		this.settingsButton = new JButton(IconBox.settings);
+		this.settingsButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.settings"));
 
-		quitButton = new JButton(IconBox.quitAction);
-		quitButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.quit"));
+		this.quitButton = new JButton(IconBox.quitAction);
+		this.quitButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.quit"));
 		
 
-		connectButton.addActionListener(this);
-		disconnectButton.addActionListener(this);
-		settingsButton.addActionListener(this);
-		quitButton.addActionListener(this);
+		this.connectButton.addActionListener(this);
+		this.disconnectButton.addActionListener(this);
+		this.settingsButton.addActionListener(this);
+		this.quitButton.addActionListener(this);
 
-		toolBar.add(connectButton);
-		toolBar.add(disconnectButton);
-		toolBar.addSeparator();
-		toolBar.add(settingsButton);
-		toolBar.addSeparator();
-		toolBar.add(quitButton);
+		this.toolBar.add(this.connectButton);
+		this.toolBar.add(this.disconnectButton);
+		this.toolBar.addSeparator();
+		this.toolBar.add(this.settingsButton);
+		this.toolBar.addSeparator();
+		this.toolBar.add(this.quitButton);
 
-		updateToolBar();
+		this.updateToolBar();
 
 		// TABBED PANE
 		
-		tabbedPane = new JTabbedPane();
+		this.tabbedPane = new JTabbedPane();
 
 		// STATUS BAR
 		
-		statusBar = new JLabel();
-		setStatus(null);
-		statusBar.setSize(500, 30);
+		this.statusBar = new JLabel();
+		this.setStatus(null);
+		this.statusBar.setSize(500, 30);
 
 
-		mainWindow.getContentPane().setLayout(new BorderLayout());
+		this.mainWindow.getContentPane().setLayout(new BorderLayout());
 
-		mainWindow.setJMenuBar(menuBar);
-		mainWindow.getContentPane().add(toolBar, BorderLayout.NORTH);
-		mainWindow.getContentPane().add(tabbedPane, BorderLayout.CENTER);
-		mainWindow.getContentPane().add(statusBar, BorderLayout.SOUTH);
+		this.mainWindow.setJMenuBar(this.menuBar);
+		this.mainWindow.getContentPane().add(this.toolBar, BorderLayout.NORTH);
+		this.mainWindow.getContentPane().add(this.tabbedPane, BorderLayout.CENTER);
+		this.mainWindow.getContentPane().add(this.statusBar, BorderLayout.SOUTH);
 
-		mainWindow.setSize(790, 550);
+		this.mainWindow.setSize(790, 550);
 		
-		mainWindow.addWindowListener(this);
+		this.mainWindow.addWindowListener(this);
 
 		core.getConnectionManager().addObserver(this);
 	}
@@ -179,12 +181,12 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 * Make the window visible or not.
 	 */
 	public void setVisible(boolean v) {
-		mainWindow.setVisible(v);
+		this.mainWindow.setVisible(v);
 	}
 
 	
 	public JFrame getMainFrame() {
-		return mainWindow;
+		return this.mainWindow;
 	}
 
 
@@ -194,7 +196,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 * @return In the future, it's possible that it will sometimes return null.
 	 */
 	public JTabbedPane getTabbedPane() {
-		return tabbedPane;
+		return this.tabbedPane;
 	}
 
 	/**
@@ -202,7 +204,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 * In the future, even if the interface, this function should remain available.
 	 */
 	public boolean addTab(String tabName, java.awt.Component panel) {
-		tabbedPane.addTab(tabName, panel);
+		this.tabbedPane.addTab(tabName, panel);
 
 		return true;
 	}
@@ -211,7 +213,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 * @see #addTab(String, java.awt.Component)
 	 */
 	public boolean addTab(String tabName, Icon icon, java.awt.Component panel) {
-		tabbedPane.addTab(tabName, icon, panel);
+		this.tabbedPane.addTab(tabName, icon, panel);
 
 		return true;
 	}
@@ -221,7 +223,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 * Used to remove a tab from the main window.
 	 */
 	public boolean removeTab(java.awt.Component panel) {
-		tabbedPane.remove(panel);
+		this.tabbedPane.remove(panel);
 
 		return true;
 	}
@@ -233,7 +235,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 * @return Check it does not return null.
 	 */
 	public JMenuBar getMenuBar() {
-		return menuBar;
+		return this.menuBar;
 	}
 
 
@@ -241,64 +243,64 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 * Called when an element from the menu is called.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		if(e.getSource() == connectButton) {
-			core.getPluginManager().stopPlugins();			
+		if(e.getSource() == this.connectButton) {
+			this.core.getPluginManager().stopPlugins();			
 
-			if(!core.initNodeConnection())
-				unableToConnect();
+			if(!this.core.initNodeConnection())
+				this.unableToConnect();
 
-			core.getPluginManager().runPlugins();
+			this.core.getPluginManager().runPlugins();
 		}
 
-		if(e.getSource() == disconnectButton) {
-			if(!core.canDisconnect()) {
-				if(!core.askDeconnectionConfirmation())
+		if(e.getSource() == this.disconnectButton) {
+			if(!this.core.canDisconnect()) {
+				if(!this.core.askDeconnectionConfirmation())
 					return;
 			}
 
-			core.getPluginManager().stopPlugins();
+			this.core.getPluginManager().stopPlugins();
 
-			core.disconnect();
+			this.core.disconnect();
 
-			core.getPluginManager().runPlugins();
+			this.core.getPluginManager().runPlugins();
 		}
 
-		if(e.getSource() == settingsButton) {
-			core.getConfigWindow().setVisible(true);
+		if(e.getSource() == this.settingsButton) {
+			this.core.getConfigWindow().setVisible(true);
 		}
 
-		if(e.getSource() == quitButton) {
-			core.exit();
+		if(e.getSource() == this.quitButton) {
+			this.core.exit();
 		}
 
-		if(e.getSource() == reconnectionFileMenuItem) {
+		if(e.getSource() == this.reconnectionFileMenuItem) {
 
-			if(!core.canDisconnect()) {
-				if(!core.askDeconnectionConfirmation())
+			if(!this.core.canDisconnect()) {
+				if(!this.core.askDeconnectionConfirmation())
 					return;
 			}
 
-			core.getPluginManager().stopPlugins();
+			this.core.getPluginManager().stopPlugins();
 			
-			if(!core.initNodeConnection())
-				unableToConnect();
+			if(!this.core.initNodeConnection())
+				this.unableToConnect();
 			
-			core.getPluginManager().loadPlugins();
-			core.getPluginManager().runPlugins();
+			this.core.getPluginManager().loadPlugins();
+			this.core.getPluginManager().runPlugins();
 
 		}
 
-		if(e.getSource() == optionsFileMenuItem) {
-			core.getConfigWindow().setVisible(true);
+		if(e.getSource() == this.optionsFileMenuItem) {
+			this.core.getConfigWindow().setVisible(true);
 		}
 
 		
-		if(e.getSource() == quitFileMenuItem) {
-			endOfTheWorld();
+		if(e.getSource() == this.quitFileMenuItem) {
+			this.endOfTheWorld();
 		}
 
-		if(e.getSource() == aboutHelpMenuItem) {
-			showDialogAbout();
+		if(e.getSource() == this.aboutHelpMenuItem) {
+			this.showDialogAbout();
 		}
 	}
 
@@ -306,23 +308,23 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 * Warns the user by a popup.
 	 */
 	protected void unableToConnect() {
-		new WarningWindow(core, 
+		new WarningWindow(this.core, 
 				  I18n.getMessage("thaw.warning.unableToConnectTo")+
-				  " "+core.getConfig().getValue("nodeAddress")+":"+ core.getConfig().getValue("nodePort"));
+				  " "+this.core.getConfig().getValue("nodeAddress")+":"+ this.core.getConfig().getValue("nodePort"));
 	}
 
 	public void update(java.util.Observable o, Object arg) {
-		updateToolBar();
+		this.updateToolBar();
 	}
 
 
 	public void updateToolBar() {
-		if(core.getConnectionManager().isConnected()) {
-			connectButton.setEnabled(false);
-			disconnectButton.setEnabled(true);
+		if(this.core.getConnectionManager().isConnected()) {
+			this.connectButton.setEnabled(false);
+			this.disconnectButton.setEnabled(true);
 		} else {
-			connectButton.setEnabled(true);
-			disconnectButton.setEnabled(false);
+			this.connectButton.setEnabled(true);
+			this.disconnectButton.setEnabled(false);
 		}
 	}
 
@@ -330,11 +332,11 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 * Called when window is closed or 'quit' is choosed is the menu.
 	 */
 	public void endOfTheWorld() {
-		if(core == null) {
+		if(this.core == null) {
 			Logger.error(this, "Warning, no ref to core, exiting brutaly");
 			System.exit(0);
 		} else {
-			core.exit();
+			this.core.exit();
 		}	
 	}
 
@@ -345,14 +347,14 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 */
 	public void setStatus(String status) {
 		if(status != null)
-			statusBar.setText(status);
+			this.statusBar.setText(status);
 		else
-			statusBar.setText(" ");/* not empty else the status bar disappear */
+			this.statusBar.setText(" ");/* not empty else the status bar disappear */
 	}
 
 
 	public String getStatus() {
-		return statusBar.getText();
+		return this.statusBar.getText();
 	}
 
 
@@ -383,8 +385,8 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 	public void windowClosing(WindowEvent e) {
 		/* Should be in windowClosed(), but doesn't seem to work */
-		if(e.getSource() == mainWindow)
-			endOfTheWorld();
+		if(e.getSource() == this.mainWindow)
+			this.endOfTheWorld();
 	}
 
 	public void windowClosed(WindowEvent e) {

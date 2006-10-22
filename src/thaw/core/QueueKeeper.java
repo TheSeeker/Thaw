@@ -53,7 +53,7 @@ public class QueueKeeper {
 		}
 
 		if(queryEl.getAttribute("type") == null
-		   || queryEl.getAttribute("type").equals("1")) {
+		   || "1".equals( queryEl.getAttribute("type") )) {
 			newQuery = new FCPClientGet(queueManager, params);
 		} else {
 			newQuery = new FCPClientPut(queueManager, params);

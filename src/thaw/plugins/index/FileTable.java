@@ -78,55 +78,55 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		this.tree = tree;
 	
 		
-		rightClickMenu = new JPopupMenu();
+		this.rightClickMenu = new JPopupMenu();
 		
 		if(modifiables) {
-			removeFiles = new JMenuItem(I18n.getMessage("thaw.common.remove"));
-			insertFiles = new JMenuItem(I18n.getMessage("thaw.plugin.index.insert"));
-			recalculateKeys = new JMenuItem(I18n.getMessage("thaw.plugin.index.recalculateKeys"));
-			removeFiles.addActionListener(this);
-			insertFiles.addActionListener(this);
-			recalculateKeys.addActionListener(this);
-			rightClickMenu.add(removeFiles);
-			rightClickMenu.add(insertFiles);
-			rightClickMenu.add(recalculateKeys);
+			this.removeFiles = new JMenuItem(I18n.getMessage("thaw.common.remove"));
+			this.insertFiles = new JMenuItem(I18n.getMessage("thaw.plugin.index.insert"));
+			this.recalculateKeys = new JMenuItem(I18n.getMessage("thaw.plugin.index.recalculateKeys"));
+			this.removeFiles.addActionListener(this);
+			this.insertFiles.addActionListener(this);
+			this.recalculateKeys.addActionListener(this);
+			this.rightClickMenu.add(this.removeFiles);
+			this.rightClickMenu.add(this.insertFiles);
+			this.rightClickMenu.add(this.recalculateKeys);
 		} else {
-			downloadFiles   = new JMenuItem(I18n.getMessage("thaw.common.action.download"));
-			downloadFiles.addActionListener(this);
-			rightClickMenu.add(downloadFiles);
+			this.downloadFiles   = new JMenuItem(I18n.getMessage("thaw.common.action.download"));
+			this.downloadFiles.addActionListener(this);
+			this.rightClickMenu.add(this.downloadFiles);
 		}
 
-		copyFileKeys = new JMenuItem(I18n.getMessage("thaw.common.copyKeysToClipboard"));
-		copyFileKeys.addActionListener(this);
-		rightClickMenu.add(copyFileKeys);
+		this.copyFileKeys = new JMenuItem(I18n.getMessage("thaw.common.copyKeysToClipboard"));
+		this.copyFileKeys.addActionListener(this);
+		this.rightClickMenu.add(this.copyFileKeys);
 
-		gotoIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.gotoIndex"));
-		gotoIndex.addActionListener(this);
-		gotoIndex.setEnabled(false);
-		rightClickMenu.add(gotoIndex);
+		this.gotoIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.gotoIndex"));
+		this.gotoIndex.addActionListener(this);
+		this.gotoIndex.setEnabled(false);
+		this.rightClickMenu.add(this.gotoIndex);
 
-		fileListModel = new FileListModel();
-		table = new JTable(fileListModel);
-		table.setShowGrid(true);
-		table.setDefaultRenderer( table.getColumnClass(0), new FileRenderer() );
+		this.fileListModel = new FileListModel();
+		this.table = new JTable(this.fileListModel);
+		this.table.setShowGrid(true);
+		this.table.setDefaultRenderer( this.table.getColumnClass(0), new FileRenderer() );
 
-		table.addMouseListener(this);
+		this.table.addMouseListener(this);
 
-		JTableHeader header = table.getTableHeader();
+		JTableHeader header = this.table.getTableHeader();
 		header.setUpdateTableInRealTime(true);
 		header.setReorderingAllowed(true);
 
-		panel = new JPanel();
-		panel.setLayout(new BorderLayout());
+		this.panel = new JPanel();
+		this.panel.setLayout(new BorderLayout());
 		
-		panel.add(new JLabel(I18n.getMessage("thaw.plugin.index.fileList")), BorderLayout.NORTH);
-		panel.add(new JScrollPane(table));
+		this.panel.add(new JLabel(I18n.getMessage("thaw.plugin.index.fileList")), BorderLayout.NORTH);
+		this.panel.add(new JScrollPane(this.table));
 
 	}
 
 
 	public JPanel getPanel() {
-		return panel;
+		return this.panel;
 	}
 
 	
@@ -136,22 +136,22 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		}
 		
 		if(fileList != null) {
-			fileList.loadFiles(sortColumn, ascOrder);
+			fileList.loadFiles(this.sortColumn, this.ascOrder);
 		}
 
 		this.fileList = fileList;
 
-		fileListModel.reloadFileList(fileList);
+		this.fileListModel.reloadFileList(fileList);
 	}
 
 
 	public void mouseClicked(MouseEvent e) {
 		if(e.getButton() == MouseEvent.BUTTON3
-		   && fileList != null) {
-			gotoIndex.setEnabled(!(fileList instanceof Index));
+		   && this.fileList != null) {
+			this.gotoIndex.setEnabled(!(this.fileList instanceof Index));
 
-			selectedRows = table.getSelectedRows();
-			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
+			this.selectedRows = this.table.getSelectedRows();
+			this.rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
 		}
 	}
 
@@ -170,7 +170,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 	public void keyTyped(KeyEvent e) { }
 
 	public void actionPerformed(ActionEvent e) {
-		if(fileList == null)
+		if(this.fileList == null)
 			return;
 
 		String keys = "";
@@ -179,25 +179,25 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 		java.io.File destination = null;
 
-		if (e.getSource() == gotoIndex) {
-			if (selectedRows.length <= 0)
+		if (e.getSource() == this.gotoIndex) {
+			if (this.selectedRows.length <= 0)
 				return;
 
-			thaw.plugins.index.File file = (thaw.plugins.index.File)fileList.getFileList().get(selectedRows[0]);
+			thaw.plugins.index.File file = (thaw.plugins.index.File)this.fileList.getFileList().get(this.selectedRows[0]);
 
 			if (file.getParentId() == -1) {
 				Logger.notice(this, "No parent ? abnormal");
 				return;
 			}
 
-			Index parent = tree.getRoot().getIndex(file.getParentId());
+			Index parent = this.tree.getRoot().getIndex(file.getParentId());
 
 			if (parent == null) {
 				Logger.notice(this, "Cannot find again the parent ?! Id: "+Integer.toString(file.getParentId()));
 				return;
 			}
 			
-			tables.setList(parent);
+			this.tables.setList(parent);
 
 			int row;
 			
@@ -206,17 +206,17 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			if (row < 0)
 				Logger.notice(this, "File not found in the index ?! Index : "+parent.getPublicKey()+" ; File: " +file.getPublicKey());
 			else
-				setSelectedRows(row, row);
+				this.setSelectedRows(row, row);
 
 			return;
 		}
 
-		if(e.getSource() == downloadFiles) {
+		if(e.getSource() == this.downloadFiles) {
 			FileChooser fileChooser ;
-			if (config.getValue("lastDestinationDirectory") == null)
+			if (this.config.getValue("lastDestinationDirectory") == null)
 				fileChooser = new FileChooser();
 			else
-				fileChooser = new FileChooser(config.getValue("lastDestinationDirectory"));
+				fileChooser = new FileChooser(this.config.getValue("lastDestinationDirectory"));
 			fileChooser.setTitle(I18n.getMessage("thaw.plugin.fetch.destinationDirectory"));
 			fileChooser.setDirectoryOnly(true);
 			fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
@@ -226,57 +226,57 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			if(destination == null)
 				return;
 
-			config.setValue("lastDestinationDirectory", destination.getPath());
+			this.config.setValue("lastDestinationDirectory", destination.getPath());
 		}
 
-		if(e.getSource() == removeFiles) {
-			files = fileList.getFileList();
+		if(e.getSource() == this.removeFiles) {
+			files = this.fileList.getFileList();
 		}
 
-		for(int i = 0 ; i < selectedRows.length ; i++) {
+		for(int i = 0 ; i < this.selectedRows.length ; i++) {
 
-			if(e.getSource() == removeFiles) {
-				Index index = (Index)fileList;
+			if(e.getSource() == this.removeFiles) {
+				Index index = (Index)this.fileList;
 
-				thaw.plugins.index.File file = (thaw.plugins.index.File)files.get(selectedRows[i]);
+				thaw.plugins.index.File file = (thaw.plugins.index.File)files.get(this.selectedRows[i]);
 				if (file.getTransfer() != null)
-					file.getTransfer().stop(queueManager);
+					file.getTransfer().stop(this.queueManager);
 				index.removeFile(file);
 			}
 			
-			if(e.getSource() == insertFiles) {
-				Index index = (Index)fileList;
+			if(e.getSource() == this.insertFiles) {
+				Index index = (Index)this.fileList;
 
-				thaw.plugins.index.File file = index.getFile(selectedRows[i]);
-				file.insertOnFreenet(queueManager);
+				thaw.plugins.index.File file = index.getFile(this.selectedRows[i]);
+				file.insertOnFreenet(this.queueManager);
 			}
 			
 			
-			if(e.getSource() == downloadFiles) {
-				thaw.plugins.index.File file = fileList.getFile(selectedRows[i]);
+			if(e.getSource() == this.downloadFiles) {
+				thaw.plugins.index.File file = this.fileList.getFile(this.selectedRows[i]);
 
 				if (file == null) {
 					Logger.notice(this, "File disappeared ?");
 					continue;
 				}					
-				file.download(destination.getPath(), queueManager);
+				file.download(destination.getPath(), this.queueManager);
 			}
 
-			if(e.getSource() == copyFileKeys) {
-				thaw.plugins.index.File file = fileList.getFile(selectedRows[i]);
+			if(e.getSource() == this.copyFileKeys) {
+				thaw.plugins.index.File file = this.fileList.getFile(this.selectedRows[i]);
 				if(file.getPublicKey() != null)
 					keys = keys + file.getPublicKey() + "\n";
 			}
 
-			if(e.getSource() == recalculateKeys) {
-				thaw.plugins.index.File file = fileList.getFile(selectedRows[i]);
+			if(e.getSource() == this.recalculateKeys) {
+				thaw.plugins.index.File file = this.fileList.getFile(this.selectedRows[i]);
 
-				file.recalculateCHK(queueManager);
+				file.recalculateCHK(this.queueManager);
 			}
 
 		}
 
-		if(e.getSource() == copyFileKeys) {
+		if(e.getSource() == this.copyFileKeys) {
 			Toolkit tk = Toolkit.getDefaultToolkit();
 			StringSelection st = new StringSelection(keys);
 			Clipboard cp = tk.getSystemClipboard();
@@ -286,11 +286,16 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 
 	public void setSelectedRows(int min, int max) {
-		table.setRowSelectionInterval(min, max);
+		this.table.setRowSelectionInterval(min, max);
 	}
 	
 
 	public class FileListModel extends javax.swing.table.AbstractTableModel implements java.util.Observer {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public Vector columnNames;
 
 		public Vector files = null; /* thaw.plugins.index.File Vector */
@@ -300,72 +305,72 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		public FileListModel() {
 			super();
 
-			columnNames = new Vector();
+			this.columnNames = new Vector();
 
-			columnNames.add(I18n.getMessage("thaw.common.file"));
-			columnNames.add(I18n.getMessage("thaw.common.size"));
+			this.columnNames.add(I18n.getMessage("thaw.common.file"));
+			this.columnNames.add(I18n.getMessage("thaw.common.size"));
 			
-			if(modifiables)
-				columnNames.add(I18n.getMessage("thaw.common.localPath"));
+			if(FileTable.this.modifiables)
+				this.columnNames.add(I18n.getMessage("thaw.common.localPath"));
 
 			//columnNames.add(I18n.getMessage("thaw.plugin.index.category"));
-			columnNames.add(I18n.getMessage("thaw.common.key"));
-			columnNames.add(I18n.getMessage("thaw.common.status"));
+			this.columnNames.add(I18n.getMessage("thaw.common.key"));
+			this.columnNames.add(I18n.getMessage("thaw.common.status"));
 		}
 
 		public void reloadFileList(FileList newFileList) {
-			if(fileList != null && (fileList instanceof Observable)) {
-				((Observable)fileList).deleteObserver(this);
+			if(this.fileList != null && (this.fileList instanceof Observable)) {
+				((Observable)this.fileList).deleteObserver(this);
 			}
 
 			if(newFileList != null && (newFileList instanceof Observable)) {
 				((Observable)newFileList).addObserver(this);
 			}
 
-			fileList = newFileList;
+			this.fileList = newFileList;
 
-			if(files != null) {
-				for(Iterator it = files.iterator();
+			if(this.files != null) {
+				for(Iterator it = this.files.iterator();
 				    it.hasNext(); ) {
 					thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 					file.deleteObserver(this);
 				}
 			}
 
-			files = null;
+			this.files = null;
 			
-			if(fileList != null) {
-				files = fileList.getFileList();
+			if(this.fileList != null) {
+				this.files = this.fileList.getFileList();
 			}
 
-			if(files != null) {
-				for(Iterator it = files.iterator();
+			if(this.files != null) {
+				for(Iterator it = this.files.iterator();
 				    it.hasNext(); ) {
 					thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 				}
 
 			}	
 
-			refresh();
+			this.refresh();
 		}
 
 		public int getRowCount() {
-			if(files == null)
+			if(this.files == null)
 				return 0;
 
-			return files.size();
+			return this.files.size();
 		}
 
 		public int getColumnCount() {
-			return columnNames.size();
+			return this.columnNames.size();
 		}
 
 		public String getColumnName(int column) {
-			return (String)columnNames.get(column);
+			return (String)this.columnNames.get(column);
 		}
 
 		public Object getValueAt(int row, int column) {
-			thaw.plugins.index.File file = (thaw.plugins.index.File)files.get(row);
+			thaw.plugins.index.File file = (thaw.plugins.index.File)this.files.get(row);
 
 			if(column == 0)
 				return file.getFilename();
@@ -373,19 +378,19 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			if(column == 1)
 				return new Long(file.getSize());
 
-			if(column == 2 && modifiables)
+			if(column == 2 && FileTable.this.modifiables)
 				return file.getLocalPath();
 
 			//if( (column == 2 && !modifiables)
 			//    || (column == 3 && modifiables) )
 			//	return file.getCategory();
 
-			if( (column == 2 && !modifiables)
-			    || (column == 3 && modifiables) )
+			if( (column == 2 && !FileTable.this.modifiables)
+			    || (column == 3 && FileTable.this.modifiables) )
 				return file.getPublicKey();
 
-			if( (column == 3 && !modifiables)
-			    || (column == 4 && modifiables) ) {
+			if( (column == 3 && !FileTable.this.modifiables)
+			    || (column == 4 && FileTable.this.modifiables) ) {
 				return file.getTransfer();
 			}
 
@@ -393,21 +398,21 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		}
 
 		public void refresh() {
-			if(fileList != null) {				
-				files = fileList.getFileList();
+			if(this.fileList != null) {				
+				this.files = this.fileList.getFileList();
 			}
 
 			TableModelEvent event = new TableModelEvent(this);
-			refresh(event);
+			this.refresh(event);
 		}
 
 		public void refresh(int row) {
 			TableModelEvent event = new TableModelEvent(this, row);
-			refresh(event);
+			this.refresh(event);
 		}
 
 		public void refresh(TableModelEvent e) {
-			fireTableChanged(e);
+			this.fireTableChanged(e);
 		}
 
 		public void update(java.util.Observable o, Object param) {
@@ -423,7 +428,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 				
 					}*/
 
-			refresh(); /* TODO : Do it more nicely ... :) */
+			this.refresh(); /* TODO : Do it more nicely ... :) */
 		}
 	}
 

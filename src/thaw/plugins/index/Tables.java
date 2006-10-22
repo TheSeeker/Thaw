@@ -25,54 +25,54 @@ public class Tables {
 	public Tables(boolean modifiables, Hsqldb db, FCPQueueManager queueManager, IndexTree tree, Config config) {
 		this.config = config;
 
-		panel = new JPanel();
-		panel.setLayout(new BorderLayout(10, 10));
+		this.panel = new JPanel();
+		this.panel.setLayout(new BorderLayout(10, 10));
 
-		fileTable = new FileTable(modifiables, queueManager, tree, config, this);
-		linkTable = new LinkTable(modifiables, db, queueManager, tree);
+		this.fileTable = new FileTable(modifiables, queueManager, tree, config, this);
+		this.linkTable = new LinkTable(modifiables, db, queueManager, tree);
 
-		searchBar = new SearchBar(db, tree, queueManager, this);
+		this.searchBar = new SearchBar(db, tree, queueManager, this);
 
-		split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-				       linkTable.getPanel(),
-				       fileTable.getPanel());
+		this.split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+				       this.linkTable.getPanel(),
+				       this.fileTable.getPanel());
 		
-		panel.add(searchBar.getPanel(), BorderLayout.NORTH);
-		panel.add(split, BorderLayout.CENTER);
+		this.panel.add(this.searchBar.getPanel(), BorderLayout.NORTH);
+		this.panel.add(this.split, BorderLayout.CENTER);
 	}
 
 	public JPanel getPanel() {
-		return panel;
+		return this.panel;
 	}
 
 	public void restoreState() {
-		if (config.getValue("indexFileLinkSplit") != null)
-			split.setDividerLocation(Integer.parseInt(config.getValue("indexFileLinkSplit")));
+		if (this.config.getValue("indexFileLinkSplit") != null)
+			this.split.setDividerLocation(Integer.parseInt(this.config.getValue("indexFileLinkSplit")));
 	}
 
 	public void saveState() {
-		config.setValue("indexFileLinkSplit", Integer.toString(split.getDividerLocation()));
+		this.config.setValue("indexFileLinkSplit", Integer.toString(this.split.getDividerLocation()));
 	}
 
 	protected FileTable getFileTable() {
-		return fileTable;
+		return this.fileTable;
 	}
 
 	protected LinkTable getLinkTable() {
-		return linkTable;
+		return this.linkTable;
 	}
 
 	public void setLinkList(LinkList linkList) {
-		getLinkTable().setLinkList(linkList);
+		this.getLinkTable().setLinkList(linkList);
 	}
 
 	public void setFileList(FileList fileList) {
-		getFileTable().setFileList(fileList);
+		this.getFileTable().setFileList(fileList);
 	}
 
 	public void setList(FileAndLinkList l) {
-		setFileList(l);
-		setLinkList(l);
+		this.setFileList(l);
+		this.setLinkList(l);
 	}
 
 }

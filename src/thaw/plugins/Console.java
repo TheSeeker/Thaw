@@ -42,41 +42,41 @@ public class Console implements Plugin, LogListener, ActionListener {
 	public boolean run(Core core) {
 		this.core = core;
 		
-		consolePanel = new JPanel();
-		consolePanel.setLayout(new BorderLayout());
+		this.consolePanel = new JPanel();
+		this.consolePanel.setLayout(new BorderLayout());
 		
-		logArea = new JTextArea();
-		logArea.setEditable(false);
-		saveToFile = new JButton(I18n.getMessage("thaw.plugin.console.saveToFile"));
+		this.logArea = new JTextArea();
+		this.logArea.setEditable(false);
+		this.saveToFile = new JButton(I18n.getMessage("thaw.plugin.console.saveToFile"));
 		
-		saveToFile.addActionListener(this);
+		this.saveToFile.addActionListener(this);
 
-		consolePanel.add(new JScrollPane(logArea), BorderLayout.CENTER);
-		consolePanel.add(saveToFile, BorderLayout.SOUTH);
+		this.consolePanel.add(new JScrollPane(this.logArea), BorderLayout.CENTER);
+		this.consolePanel.add(this.saveToFile, BorderLayout.SOUTH);
 
-		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.console.console"), consolePanel);
+		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.console.console"), this.consolePanel);
 
 		if(core.getConfig().getValue("consoleMaxLogSize") == null)
-			core.getConfig().setValue("consoleMaxLogSize", ((new Long(maxLogSize)).toString()) );
+			core.getConfig().setValue("consoleMaxLogSize", ((new Long(this.maxLogSize)).toString()) );
 		else {
 			try {
-				maxLogSize = (new Long(core.getConfig().getValue("consoleMaxLogSize"))).longValue();
+				this.maxLogSize = (new Long(core.getConfig().getValue("consoleMaxLogSize"))).longValue();
 			} catch(Exception e) {
 				Logger.notice(this, "Invalide size given in configuration ! Using default one.");
-				core.getConfig().setValue("consoleMaxLogSize", (new Long(maxLogSize)).toString());
+				core.getConfig().setValue("consoleMaxLogSize", (new Long(this.maxLogSize)).toString());
 			}
 		}
 
-		configPanel = new JPanel();
-		configPanel.setLayout(new GridLayout(15, 1));
+		this.configPanel = new JPanel();
+		this.configPanel.setLayout(new GridLayout(15, 1));
 
-		sizeLabel = new JLabel(I18n.getMessage("thaw.plugin.console.maxSize"));
-		sizeField = new JTextField(core.getConfig().getValue("consoleMaxLogSize"));
+		this.sizeLabel = new JLabel(I18n.getMessage("thaw.plugin.console.maxSize"));
+		this.sizeField = new JTextField(core.getConfig().getValue("consoleMaxLogSize"));
 
-		configPanel.add(sizeLabel);
-		configPanel.add(sizeField);
+		this.configPanel.add(this.sizeLabel);
+		this.configPanel.add(this.sizeField);
 
-		core.getConfigWindow().addTab(I18n.getMessage("thaw.plugin.console.console"), configPanel);
+		core.getConfigWindow().addTab(I18n.getMessage("thaw.plugin.console.console"), this.configPanel);
 		
 		Logger.addLogListener(this);
 
@@ -86,19 +86,19 @@ public class Console implements Plugin, LogListener, ActionListener {
 
 
 	public boolean stop() {
-		core.getConfig().setValue("consoleMaxLogSize", sizeField.getText() );
+		this.core.getConfig().setValue("consoleMaxLogSize", this.sizeField.getText() );
 
 		Logger.removeLogListener(this);
 
-		core.getConfigWindow().removeTab(configPanel);
-		core.getMainWindow().removeTab(consolePanel);
+		this.core.getConfigWindow().removeTab(this.configPanel);
+		this.core.getMainWindow().removeTab(this.consolePanel);
 
 		return true;
 	}
 
 
 	public void actionPerformed(ActionEvent e) {
-		if(e.getSource() == saveToFile) {
+		if(e.getSource() == this.saveToFile) {
 			FileChooser fileChooser = new FileChooser();
 
 			fileChooser.setTitle(I18n.getMessage("thaw.plugin.console.console"));
@@ -109,7 +109,7 @@ public class Console implements Plugin, LogListener, ActionListener {
 
 			if(file != null) {
 				Logger.info(this, "Saving logs ...");
-				writeLogsToFile(file);
+				this.writeLogsToFile(file);
 				Logger.info(this, "Saving done.");
 			}
 
@@ -130,7 +130,7 @@ public class Console implements Plugin, LogListener, ActionListener {
 		}
 
 		try {
-			output.write(logArea.getText().getBytes("UTF-8"));
+			output.write(this.logArea.getText().getBytes("UTF-8"));
 		} catch(java.io.IOException e) {
 			Logger.error(this, "IOException while writing logs ... out of space ?");
 			return;
@@ -145,13 +145,13 @@ public class Console implements Plugin, LogListener, ActionListener {
 	}
 
 	public void newLogLine(String line) {
-		String text = logArea.getText() + "\n" + line;
+		String text = this.logArea.getText() + "\n" + line;
 
-		if(text.length() > maxLogSize) {
-			text = text.substring((int)(text.length() - maxLogSize));
+		if(text.length() > this.maxLogSize) {
+			text = text.substring((int)(text.length() - this.maxLogSize));
 		}
 
-		logArea.setText(text);
+		this.logArea.setText(text);
 	}
 
 

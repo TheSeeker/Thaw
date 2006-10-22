@@ -35,36 +35,36 @@ public class SearchBar implements ActionListener {
 		this.tables = tables;
 		this.queueManager = queueManager;
 
-		panel = new JPanel();
-		panel.setLayout(new BorderLayout(10, 10));
+		this.panel = new JPanel();
+		this.panel.setLayout(new BorderLayout(10, 10));
 
-		userText = new JTextField("");
-		validationButton = new JButton("  "+I18n.getMessage("thaw.common.search")+"  ");
+		this.userText = new JTextField("");
+		this.validationButton = new JButton("  "+I18n.getMessage("thaw.common.search")+"  ");
 
-		panel.add(new JLabel(I18n.getMessage("thaw.plugin.index.search.label")), BorderLayout.WEST);
-		panel.add(userText, BorderLayout.CENTER);
-		panel.add(validationButton, BorderLayout.EAST);
+		this.panel.add(new JLabel(I18n.getMessage("thaw.plugin.index.search.label")), BorderLayout.WEST);
+		this.panel.add(this.userText, BorderLayout.CENTER);
+		this.panel.add(this.validationButton, BorderLayout.EAST);
 
-		userText.addActionListener(this);
-		validationButton.addActionListener(this);
+		this.userText.addActionListener(this);
+		this.validationButton.addActionListener(this);
 	}
 
 	public JPanel getPanel() {
-		return panel;
+		return this.panel;
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		if (userText.getText() == null)
+		if (this.userText.getText() == null)
 			return;
 
-		if (tree.getSelectedNode() == null)
+		if (this.tree.getSelectedNode() == null)
 			return;
 
-		userText.setSelectionStart(0);
-		userText.setSelectionEnd(userText.getText().length());
+		this.userText.setSelectionStart(0);
+		this.userText.setSelectionEnd(this.userText.getText().length());
 
-		SearchResult sr = new SearchResult(db, userText.getText(), tree.getSelectedNode(), queueManager);
-		tables.setList(sr);
+		SearchResult sr = new SearchResult(this.db, this.userText.getText(), this.tree.getSelectedNode(), this.queueManager);
+		this.tables.setList(sr);
 	}
 
 }

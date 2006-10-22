@@ -55,7 +55,7 @@ public class Link extends java.util.Observable {
 	}
 
 	public String getKey() {
-		return key;
+		return this.key;
 	}
 
 	public void setParent(Index index) {
@@ -63,11 +63,11 @@ public class Link extends java.util.Observable {
 	}
 
 	public Index getParent() {
-		return parent;
+		return this.parent;
 	}
 
 	public String getIndexName() {
-		return indexName;
+		return this.indexName;
 	}
 
 	public void setIndexKey(String key) {
@@ -76,50 +76,50 @@ public class Link extends java.util.Observable {
 		if (this.key != null)
 			this.key = this.key.trim();
 
-		setChanged();
-		notifyObservers();
+		this.setChanged();
+		this.notifyObservers();
 	}
 
 	public String getIndexKey() {
-		return key;
+		return this.key;
 	}
 
 	public void insert() {
 		try {
 			PreparedStatement st;
 
-			st = db.getConnection().prepareStatement("SELECT id FROM links ORDER BY id DESC LIMIT 1");
+			st = this.db.getConnection().prepareStatement("SELECT id FROM links ORDER BY id DESC LIMIT 1");
 
 			try {
 				if(st.execute()) {
 					ResultSet result = st.getResultSet();
 					result.next();
-					id = result.getInt("id")+1;
+					this.id = result.getInt("id")+1;
 				} else
-					id = 1;
+					this.id = 1;
 			} catch(SQLException e) {
-				id = 1;
+				this.id = 1;
 			}
 			
 
-			st = db.getConnection().prepareStatement("INSERT INTO links (id, publicKey, "+
+			st = this.db.getConnection().prepareStatement("INSERT INTO links (id, publicKey, "+
 								 "mark, comment, indexParent, indexTarget) "+
 								 "VALUES (?, ?, ?, ?, ?, ?)");
-			st.setInt(1, id);
+			st.setInt(1, this.id);
 
-			if(key != null)
-				st.setString(2, key);
+			if(this.key != null)
+				st.setString(2, this.key);
 			else
-				st.setString(2, indexName);
+				st.setString(2, this.indexName);
 
 			st.setInt(3, 0);
 			st.setString(4, "No comment");
-			st.setInt(5, parent.getId());
+			st.setInt(5, this.parent.getId());
 			st.setNull(6, Types.INTEGER);
 
 			st.execute();
 		} catch(SQLException e) {
-			Logger.error(this, "Unable to insert link to '"+indexName+"' because: "+e.toString());
+			Logger.error(this, "Unable to insert link to '"+this.indexName+"' because: "+e.toString());
 		}
 		
 	
@@ -127,7 +127,7 @@ public class Link extends java.util.Observable {
 
 
 	public boolean isInTheDatabase() {
-		if (parent == null) {
+		if (this.parent == null) {
 			Logger.notice(this, "isInTheDatabase(): No parent !");
 			return false;
 		}
@@ -135,11 +135,11 @@ public class Link extends java.util.Observable {
 		try {
 			PreparedStatement st;
 
-			st = db.getConnection().prepareStatement("SELECT publicKey from links WHERE publicKey = ? AND indexParent = ?");
+			st = this.db.getConnection().prepareStatement("SELECT publicKey from links WHERE publicKey = ? AND indexParent = ?");
 
-			st.setString(1, key);
+			st.setString(1, this.key);
 
-			st.setInt(2, getParent().getId());
+			st.setInt(2, this.getParent().getId());
 
 			if(st.execute()) {
 				ResultSet result = st.getResultSet();
@@ -149,7 +149,7 @@ public class Link extends java.util.Observable {
 			}
 
 		} catch(SQLException e) {
-			Logger.error(this, "Unable to check if link '"+key+"' exists because: "+e.toString());
+			Logger.error(this, "Unable to check if link '"+this.key+"' exists because: "+e.toString());
 		}
 		
 		return false;
@@ -160,13 +160,13 @@ public class Link extends java.util.Observable {
 		try {
 			PreparedStatement st;
 
-			st = db.getConnection().prepareStatement("DELETE FROM links WHERE id = ?");
-			st.setInt(1, id);
+			st = this.db.getConnection().prepareStatement("DELETE FROM links WHERE id = ?");
+			st.setInt(1, this.id);
 
 			st.execute();
 
 		} catch(SQLException e) {
-			Logger.error(this, "Unable to remove link to '"+indexName+"' because: "+e.toString());
+			Logger.error(this, "Unable to remove link to '"+this.indexName+"' because: "+e.toString());
 		}
 	}
 
@@ -174,20 +174,20 @@ public class Link extends java.util.Observable {
 		try {
 			PreparedStatement st;
 
-			st = db.getConnection().prepareStatement("UPDATE links SET publicKey = ?, indexParent = ? WHERE id = ?");
+			st = this.db.getConnection().prepareStatement("UPDATE links SET publicKey = ?, indexParent = ? WHERE id = ?");
 
-			if(key != null)
-				st.setString(1, key);
+			if(this.key != null)
+				st.setString(1, this.key);
 			else
-				st.setString(1, indexName);
+				st.setString(1, this.indexName);
 
-			st.setInt(2, getParent().getId());
+			st.setInt(2, this.getParent().getId());
 
-			st.setInt(3, id);
+			st.setInt(3, this.id);
 
 			st.execute();
 		} catch(SQLException e) {
-			Logger.error(this, "Unable to update link to '"+indexName+"' because: "+e.toString());
+			Logger.error(this, "Unable to update link to '"+this.indexName+"' because: "+e.toString());
 		}
 	}
 
@@ -195,7 +195,7 @@ public class Link extends java.util.Observable {
 	public Element getXML(Document xmlDoc) {
 		Element link = xmlDoc.createElement("index");
 
-		link.setAttribute("key", key);
+		link.setAttribute("key", this.key);
 
 		return link;
 	}

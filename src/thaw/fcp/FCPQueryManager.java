@@ -17,9 +17,9 @@ public class FCPQueryManager extends Observable implements Runnable {
 
 
 	public FCPQueryManager(FCPConnection connection) {
-		me = null;
-		latestMessage = null;
-		setConnection(connection);
+		this.me = null;
+		this.latestMessage = null;
+		this.setConnection(connection);
 	}
 
 	/**
@@ -34,15 +34,15 @@ public class FCPQueryManager extends Observable implements Runnable {
 	 * Try to not directly call functions from FCPConnection.
 	 */
 	public FCPConnection getConnection() {
-		return connection;
+		return this.connection;
 	}
 
 	public boolean writeMessage(FCPMessage message) {
-		return connection.write(message.toString());
+		return this.connection.write(message.toString());
 	}
 
 	public boolean writeMessage(FCPMessage message, boolean checkLock) {
-		return connection.write(message.toString(), checkLock);
+		return this.connection.write(message.toString(), checkLock);
 
 	}
 
@@ -61,19 +61,19 @@ public class FCPQueryManager extends Observable implements Runnable {
 
 			String read = new String("");
 
-			read = connection.readLine();
+			read = this.connection.readLine();
 			
 			if(read == null) {
 				Logger.notice(this, "readLine() returned null => disconnected ?");
 				return null;
 			}
 
-			if(read.equals("Data")) {
+			if("Data".equals( read )) {
 				withData = true;
 				break;
 			}
 
-			if(read.equals("EndMessage")) {
+			if("EndMessage".equals( read )) {
 				break;
 			}
 
@@ -86,7 +86,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 
 		if(withData) {
 			long dataWaiting = (new Long(result.getValue("DataLength"))).longValue();
-			connection.setRawDataWaiting(dataWaiting);
+			this.connection.setRawDataWaiting(dataWaiting);
 			Logger.info(this, "Achtung data: "+(new Long(dataWaiting)).toString());			
 		}
 
@@ -100,14 +100,14 @@ public class FCPQueryManager extends Observable implements Runnable {
 	public void run() {
 
 		while(true) {
-			latestMessage = readMessage();
+			this.latestMessage = this.readMessage();
 			
 			Logger.verbose(this, "Message received. Notifying observers");
 
-			if(latestMessage != null) {
+			if(this.latestMessage != null) {
 				try {
-					setChanged();
-					notifyObservers(latestMessage);
+					this.setChanged();
+					this.notifyObservers(this.latestMessage);
 				} catch(Exception e) {
 					/* it's really bad ... because if data are waiting on the socket ... */
 					Logger.error(this, "EXCEPTION FROM ONE OF LISTENER : "+e.toString());
@@ -127,9 +127,9 @@ public class FCPQueryManager extends Observable implements Runnable {
 	 * Create the thread listening for incoming message.
 	 */
 	public void startListening() {
-		if(connection.isConnected()) {
-			me = new Thread(this);
-			me.start();
+		if(this.connection.isConnected()) {
+			this.me = new Thread(this);
+			this.me.start();
 		} else {
 			Logger.warning(this, "Not connected, so not listening on the socket");
 		}
@@ -146,9 +146,9 @@ public class FCPQueryManager extends Observable implements Runnable {
 		FCPConnection newConnection;
 		FCPQueryManager queryManager;
 
-		newConnection = connection.duplicate();
+		newConnection = this.connection.duplicate();
 
-		if (newConnection == connection)
+		if (newConnection == this.connection)
 			return this;
 
 		queryManager = new FCPQueryManager(newConnection);

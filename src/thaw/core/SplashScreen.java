@@ -25,10 +25,10 @@ public class SplashScreen {
 
 	public void display() {
 		JPanel panel = new JPanel();
-		splashScreen = new JDialog();
+		this.splashScreen = new JDialog();
 
-		splashScreen.setUndecorated(true);
-		splashScreen.setResizable(false);
+		this.splashScreen.setUndecorated(true);
+		this.splashScreen.setResizable(false);
 		
 		panel.setLayout(new BorderLayout(10, 10));
 		
@@ -39,28 +39,28 @@ public class SplashScreen {
 
 		panel.add(thawLabel, BorderLayout.CENTER);
 
-		progressBar = new JProgressBar(0, 100);
-		progressBar.setStringPainted(true);
-		progressBar.setString("Wake up Neo ...");
+		this.progressBar = new JProgressBar(0, 100);
+		this.progressBar.setStringPainted(true);
+		this.progressBar.setString("Wake up Neo ...");
 
-		panel.add(progressBar, BorderLayout.SOUTH);
+		panel.add(this.progressBar, BorderLayout.SOUTH);
 
-		splashScreen.getContentPane().add(panel);
+		this.splashScreen.getContentPane().add(panel);
 
-		splashScreen.setSize(SIZE_X, SIZE_Y);
+		this.splashScreen.setSize(SIZE_X, SIZE_Y);
 
 
 		Dimension screenSize =
 			Toolkit.getDefaultToolkit().getScreenSize();
 
-		Dimension splashSize = splashScreen.getSize();
-		splashScreen.setLocation(screenSize.width/2 - (splashSize.width/2),
+		Dimension splashSize = this.splashScreen.getSize();
+		this.splashScreen.setLocation(screenSize.width/2 - (splashSize.width/2),
 					 screenSize.height/2 - (splashSize.height/2));
 
 
-		splashScreen.setVisible(true);
+		this.splashScreen.setVisible(true);
 
-		splashScreen.setSize(SIZE_X, SIZE_Y);
+		this.splashScreen.setSize(SIZE_X, SIZE_Y);
 
 	}
 
@@ -68,33 +68,33 @@ public class SplashScreen {
 	 * @param progress In pourcent
 	 */
 	public void setProgression(int progress) {
-		if(progressBar != null)
-			progressBar.setValue(progress);
+		if(this.progressBar != null)
+			this.progressBar.setValue(progress);
 	}
 
 	public int getProgression() {
-		if(progressBar != null)
-			return progressBar.getValue();
+		if(this.progressBar != null)
+			return this.progressBar.getValue();
 		else
 			return -1;
 	}
 
 
 	public void setStatus(String status) {
-		if(progressBar != null)
-			progressBar.setString(status);
+		if(this.progressBar != null)
+			this.progressBar.setString(status);
 	}
 
 	public void setProgressionAndStatus(int progress, String status) {
-		setProgression(progress);
-		setStatus(status);
+		this.setProgression(progress);
+		this.setStatus(status);
 	}
 
 
 	public void hide() {
-		splashScreen.setVisible(false);
-		splashScreen = null;
-		progressBar = null;
+		this.splashScreen.setVisible(false);
+		this.splashScreen = null;
+		this.progressBar = null;
 	}
 
 }

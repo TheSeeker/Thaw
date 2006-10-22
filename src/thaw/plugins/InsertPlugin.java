@@ -23,14 +23,14 @@ public class InsertPlugin implements thaw.core.Plugin {
 		
 		Logger.info(this, "Starting plugin \"InsertPlugin\" ...");
 
-		insertPanel = new InsertPanel(this,
+		this.insertPanel = new InsertPanel(this,
 					      Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
 
-		scrollPane = new JScrollPane(insertPanel.getPanel());
+		this.scrollPane = new JScrollPane(this.insertPanel.getPanel());
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.common.insertion"),
 					    IconBox.minInsertions,
-					    scrollPane);
+					    this.scrollPane);
 
 		return true;
 	}
@@ -39,7 +39,7 @@ public class InsertPlugin implements thaw.core.Plugin {
 	public boolean stop() {
 		Logger.info(this, "Stopping plugin \"InsertPlugin\" ...");
 
-		core.getMainWindow().removeTab(scrollPane);
+		this.core.getMainWindow().removeTab(this.scrollPane);
 
 		return true;
 	}
@@ -70,13 +70,13 @@ public class InsertPlugin implements thaw.core.Plugin {
 		String[] files = fileList.split(";");
 
 		if(keyType > 0 && files.length > 1) {
-			new WarningWindow(core, "Can't insert multiple SSH@ / KSK@ files at the same time. Use jSite.");
+			new WarningWindow(this.core, "Can't insert multiple SSH@ / KSK@ files at the same time. Use jSite.");
 			return false;
 		}
 
 		for(int i = 0 ; i < files.length ; i++) {
 
-			if(privateKey != null && !privateKey.equals("")) {
+			if(privateKey != null && !"".equals( privateKey )) {
 				clientPut = new FCPClientPut(new File(files[i]), keyType, rev, name,
 							     "USK@"+privateKey+"/", priority,
 							     global, persistence);
@@ -91,10 +91,10 @@ public class InsertPlugin implements thaw.core.Plugin {
 				clientPut.setMetadata("ContentType", mimeType);
 			}
 
-			insertPanel.setLastInserted(clientPut);
-			clientPut.addObserver(insertPanel);
+			this.insertPanel.setLastInserted(clientPut);
+			clientPut.addObserver(this.insertPanel);
 			
-			core.getQueueManager().addQueryToThePendingQueue(clientPut);
+			this.core.getQueueManager().addQueryToThePendingQueue(clientPut);
 
 		}
 		

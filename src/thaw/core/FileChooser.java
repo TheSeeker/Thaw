@@ -12,23 +12,23 @@ public class FileChooser {
 	private JFileChooser fileChooser = null;
 
 	public FileChooser() {
-		fileChooser = new JFileChooser();
+		this.fileChooser = new JFileChooser();
 	}
 
 	public FileChooser(String path) {
-		fileChooser = new JFileChooser(path);
-		fileChooser.setDragEnabled(true);
+		this.fileChooser = new JFileChooser(path);
+		this.fileChooser.setDragEnabled(true);
 	}
 
 	public void setTitle(String title) {
-		fileChooser.setDialogTitle(title);
+		this.fileChooser.setDialogTitle(title);
 	}
 
 	public void setDirectoryOnly(boolean v) {
 		if(v)
-			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			this.fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		else
-			fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES); /* Directories -> Recursivity */
+			this.fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES); /* Directories -> Recursivity */
 	}
 	
 	/**
@@ -36,18 +36,18 @@ public class FileChooser {
 	 * @see javax.swing.JFileChooser#setDialogType(int)
 	 */
 	public void setDialogType(int type) {
-		fileChooser.setDialogType(type);
+		this.fileChooser.setDialogType(type);
 	}
 
 	protected boolean showDialog() {
 		int result = 0;
 
-		if(fileChooser.getDialogType() == JFileChooser.OPEN_DIALOG) {
-			result = fileChooser.showOpenDialog(null);
+		if(this.fileChooser.getDialogType() == JFileChooser.OPEN_DIALOG) {
+			result = this.fileChooser.showOpenDialog(null);
 		}
 
-		if(fileChooser.getDialogType() == JFileChooser.SAVE_DIALOG) {
-			result = fileChooser.showSaveDialog(null);
+		if(this.fileChooser.getDialogType() == JFileChooser.SAVE_DIALOG) {
+			result = this.fileChooser.showSaveDialog(null);
 		}
 
 		if(result == JFileChooser.APPROVE_OPTION)
@@ -61,12 +61,12 @@ public class FileChooser {
 	 * @return null if nothing choosed.
 	 */
 	public File askOneFile() {
-		fileChooser.setMultiSelectionEnabled(false);
+		this.fileChooser.setMultiSelectionEnabled(false);
 
-		if(!showDialog())
+		if(!this.showDialog())
 			return null;
 
-		return fileChooser.getSelectedFile();
+		return this.fileChooser.getSelectedFile();
 	}
 
 
@@ -87,7 +87,7 @@ public class FileChooser {
 			if (files[i].isFile())
 				vec.add(files[i]);
 			else
-				expandRecursivly(files[i],vec);
+				this.expandRecursivly(files[i],vec);
 		}
 		
 	}
@@ -97,7 +97,7 @@ public class FileChooser {
 		Vector files= new Vector();
 
 		for (int i = 0 ; i < selectedFiles.length ; i++) {
-			expandRecursivly(selectedFiles[i], files);
+			this.expandRecursivly(selectedFiles[i], files);
 		}
 
 		return files;
@@ -107,12 +107,12 @@ public class FileChooser {
 	 * @return null if nothing choosed.
 	 */
 	public Vector askManyFiles() {
-		fileChooser.setMultiSelectionEnabled(true);
+		this.fileChooser.setMultiSelectionEnabled(true);
 
-		if(!showDialog())
+		if(!this.showDialog())
 			return null;
 	
-		return expandRecursivly(fileChooser.getSelectedFiles());
+		return this.expandRecursivly(this.fileChooser.getSelectedFiles());
 	}
 
 }

@@ -47,8 +47,8 @@ public class DetailPanel implements Observer {
 	public DetailPanel(Core core) {
 		this.core = core;
 		
-		panel = new JPanel();
-		subPanel = new JPanel();
+		this.panel = new JPanel();
+		this.subPanel = new JPanel();
 
 		String[] fieldNames = { I18n.getMessage("thaw.common.file"),
 					I18n.getMessage("thaw.common.size"),
@@ -62,52 +62,52 @@ public class DetailPanel implements Observer {
 					I18n.getMessage("thaw.common.globalQueue")
 		};
 
-		subPanel.setLayout(new GridLayout(fieldNames.length*2, 1));
+		this.subPanel.setLayout(new GridLayout(fieldNames.length*2, 1));
 
 		for(int i=0; i < (fieldNames.length * 2) ; i++) {
 
 			if(i%2 == 0) {
 				JLabel newLabel = new JLabel(fieldNames[i/2]);
-				subPanel.add(newLabel);
+				this.subPanel.add(newLabel);
 			} else {
 				JComponent field = null;
 
-				switch(((int)i/2)) {
-				case(0): field = file; file.setEditable(false); break;
-				case(1): field = size; size.setEditable(false); break;
+				switch((i/2)) {
+				case(0): field = this.file; this.file.setEditable(false); break;
+				case(1): field = this.size; this.size.setEditable(false); break;
 				case(2):
-					field = progress; 
-					progress.setString("");
-					progress.setStringPainted(true);
+					field = this.progress; 
+					this.progress.setString("");
+					this.progress.setStringPainted(true);
 					break;
 				case(3):
-					field = withTheNodeProgress;
-					withTheNodeProgress.setString("");
-					withTheNodeProgress.setStringPainted(true);
+					field = this.withTheNodeProgress;
+					this.withTheNodeProgress.setString("");
+					this.withTheNodeProgress.setStringPainted(true);
 					break;
-				case(4): field = status; status.setEditable(false); break;
-				case(5): field = key; key.setEditable(false);break;
-				case(6): field = path; path.setEditable(false); break;
-				case(7): field = priority; priority.setEditable(false); break;
-				case(8): field = identifier; identifier.setEditable(false); break;
-				case(9): field = globalQueue; globalQueue.setEditable(false); break;
+				case(4): field = this.status; this.status.setEditable(false); break;
+				case(5): field = this.key; this.key.setEditable(false);break;
+				case(6): field = this.path; this.path.setEditable(false); break;
+				case(7): field = this.priority; this.priority.setEditable(false); break;
+				case(8): field = this.identifier; this.identifier.setEditable(false); break;
+				case(9): field = this.globalQueue; this.globalQueue.setEditable(false); break;
 				default: Logger.error(this, "Gouli goula ? ... is going to crash :p"); break;
 				}
 
-				subPanel.add(field);
+				this.subPanel.add(field);
 			}
 
 		} /* for (i < fieldNames.length) */
 
-		subPanel.setPreferredSize(dim);
+		this.subPanel.setPreferredSize(dim);
 
-		panel.add(subPanel);
+		this.panel.add(this.subPanel);
 
 	}
 
 
 	public JPanel getPanel() {
-		return panel;
+		return this.panel;
 	}
 
 	
@@ -120,88 +120,88 @@ public class DetailPanel implements Observer {
 		if(this.query != null)
 			((Observable)this.query).addObserver(this);
 
-		refreshAll();
+		this.refreshAll();
 	}
 
 	public void update(Observable o, Object arg) {
-		refresh();
+		this.refresh();
 	}
 
 
 	public void refresh() {
-		if(query != null) {
-			withTheNodeProgress.setValue(query.getTransferWithTheNodeProgression());
-			withTheNodeProgress.setString(Integer.toString(query.getTransferWithTheNodeProgression()) + "%");
+		if(this.query != null) {
+			this.withTheNodeProgress.setValue(this.query.getTransferWithTheNodeProgression());
+			this.withTheNodeProgress.setString(Integer.toString(this.query.getTransferWithTheNodeProgression()) + "%");
 
-			progress.setValue(query.getProgression());
-			if(!query.isFinished() || query.isSuccessful()) {
-				String progression = Integer.toString(query.getProgression()) + "%";
+			this.progress.setValue(this.query.getProgression());
+			if(!this.query.isFinished() || this.query.isSuccessful()) {
+				String progression = Integer.toString(this.query.getProgression()) + "%";
 
-				if(!query.isProgressionReliable())
+				if(!this.query.isProgressionReliable())
 					progression = progression + " ("+I18n.getMessage("thaw.common.estimation")+")";
 
-				progress.setString(progression);
+				this.progress.setString(progression);
 			} else
-				progress.setString(I18n.getMessage("thaw.common.failed"));
+				this.progress.setString(I18n.getMessage("thaw.common.failed"));
 			
-			if(query.getFileKey() != null)
-				key.setText(query.getFileKey());
+			if(this.query.getFileKey() != null)
+				this.key.setText(this.query.getFileKey());
 			else
-				key.setText(I18n.getMessage("thaw.common.unknown"));
+				this.key.setText(I18n.getMessage("thaw.common.unknown"));
 
-			if(query.getFileSize() == 0)
-				size.setText(I18n.getMessage("thaw.common.unknown"));
+			if(this.query.getFileSize() == 0)
+				this.size.setText(I18n.getMessage("thaw.common.unknown"));
 			else
-				size.setText((new Long(query.getFileSize())).toString()+" B");
+				this.size.setText((new Long(this.query.getFileSize())).toString()+" B");
 
-			status.setText(query.getStatus());
-			if(query.getIdentifier() != null)
-				identifier.setText(query.getIdentifier());
+			this.status.setText(this.query.getStatus());
+			if(this.query.getIdentifier() != null)
+				this.identifier.setText(this.query.getIdentifier());
 			else
-				identifier.setText("N/A");
+				this.identifier.setText("N/A");
 
-			if(query.getThawPriority() != -1)
-				priority.setText(I18n.getMessage("thaw.plugin.priority.p"+Integer.toString(query.getThawPriority())));
+			if(this.query.getThawPriority() != -1)
+				this.priority.setText(I18n.getMessage("thaw.plugin.priority.p"+Integer.toString(this.query.getThawPriority())));
 			else
-				priority.setText(I18n.getMessage("thaw.common.unknown"));
+				this.priority.setText(I18n.getMessage("thaw.common.unknown"));
 			
 		} else {
-			withTheNodeProgress.setValue(0);
-			withTheNodeProgress.setString("");
-			progress.setValue(0);
-			progress.setString("");
-			status.setText("");
-			identifier.setText("");
-			size.setText("");
-			priority.setText("");
-			key.setText("");
+			this.withTheNodeProgress.setValue(0);
+			this.withTheNodeProgress.setString("");
+			this.progress.setValue(0);
+			this.progress.setString("");
+			this.status.setText("");
+			this.identifier.setText("");
+			this.size.setText("");
+			this.priority.setText("");
+			this.key.setText("");
 
 			
 		}
 	}
 
 	public void refreshAll() {
-		refresh();
+		this.refresh();
 
-		if(query != null) {
+		if(this.query != null) {
 
-			file.setText(query.getFilename());
+			this.file.setText(this.query.getFilename());
 
-			if(query.getPath() != null)
-				path.setText(query.getPath());
+			if(this.query.getPath() != null)
+				this.path.setText(this.query.getPath());
 			else
-				path.setText(I18n.getMessage("thaw.common.unspecified"));
+				this.path.setText(I18n.getMessage("thaw.common.unspecified"));
 			
-			if(query.isGlobal())
-				globalQueue.setText(I18n.getMessage("thaw.common.yes"));
+			if(this.query.isGlobal())
+				this.globalQueue.setText(I18n.getMessage("thaw.common.yes"));
 			else
-				globalQueue.setText(I18n.getMessage("thaw.common.no"));
+				this.globalQueue.setText(I18n.getMessage("thaw.common.no"));
 
 		} else {
-			file.setText("");
-			key.setText("");
-			path.setText("");
-			globalQueue.setText("");
+			this.file.setText("");
+			this.key.setText("");
+			this.path.setText("");
+			this.globalQueue.setText("");
 		}
 
 	}

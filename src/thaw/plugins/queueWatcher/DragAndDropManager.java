@@ -38,7 +38,7 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 		this.core = core;
 		this.queuePanels = queuePanels;
 
-		dragSource = DragSource.getDefaultDragSource();
+		this.dragSource = DragSource.getDefaultDragSource();
 
 		for(int i = 0 ; i < queuePanels.length ; i++) {
 			this.dragSource.createDefaultDragGestureRecognizer(queuePanels[i].getTable(),
@@ -54,15 +54,20 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 
 	private class FileTransferHandler extends TransferHandler {
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		protected  Transferable createTransferable(JComponent c) {
-			if(c == queuePanels[0].getTable()) {
-				queuePanels[0].reloadSelections();
-				return new DragableFinishedTransfers(queuePanels[0].getSelectedQueries(), false);
+			if(c == DragAndDropManager.this.queuePanels[0].getTable()) {
+				DragAndDropManager.this.queuePanels[0].reloadSelections();
+				return new DragableFinishedTransfers(DragAndDropManager.this.queuePanels[0].getSelectedQueries(), false);
 			}
 
-			if(c == queuePanels[1].getTable()) {
-				queuePanels[1].reloadSelections();
-				return new DragableFinishedTransfers(queuePanels[1].getSelectedQueries(), true);
+			if(c == DragAndDropManager.this.queuePanels[1].getTable()) {
+				DragAndDropManager.this.queuePanels[1].reloadSelections();
+				return new DragableFinishedTransfers(DragAndDropManager.this.queuePanels[1].getSelectedQueries(), true);
 			}
 
 			return null;
@@ -74,7 +79,7 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 		try {
 			Transferable transferable;
 
-			transferable = getTransferableFor(dge.getComponent());
+			transferable = this.getTransferableFor(dge.getComponent());
 
 			dge.startDrag(DragSource.DefaultCopyDrop, transferable);
 
@@ -106,7 +111,7 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 		
 
 		private Vector getQueries() {
-			return queries;
+			return this.queries;
 		}
 
 		public Object getTransferData(DataFlavor flavor) {
@@ -115,7 +120,7 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 
 				Vector fileList = new Vector();
 
-				for(Iterator queryIt = queries.iterator();
+				for(Iterator queryIt = this.queries.iterator();
 				    queryIt.hasNext();) {
 					FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
 
@@ -123,7 +128,7 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 						continue;
 
 					if(query.getPath() == null) // We need a path !
-						query.saveFileTo(tmpDir);
+						query.saveFileTo(DragAndDropManager.this.tmpDir);
 
 					fileList.add(new File(query.getPath()));
 				}
@@ -136,7 +141,7 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 			   || flavor.equals(DataFlavor.stringFlavor) ) {
 				String result = "";
 
-				for(Iterator queryIt = queries.iterator();
+				for(Iterator queryIt = this.queries.iterator();
 				    queryIt.hasNext();) {
 					FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
 
@@ -146,7 +151,7 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 					if(query.getPath() == null) // We need a path !
 						continue;
 
-					if(!insert)
+					if(!this.insert)
 						result = result +query.getPath()+"\n";
 					else
 						result = result + query.getFileKey() + "\n";
@@ -159,12 +164,12 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 		}
 		
 		public DataFlavor[] getTransferDataFlavors() {
-			return FLAVORS;
+			return this.FLAVORS;
 		}
 
 		public boolean isDataFlavorSupported(DataFlavor flavor) {
-			for(int i = 0 ; i < FLAVORS.length ; i++)
-				if(FLAVORS[i] == flavor || FLAVORS[i].equals(flavor))
+			for(int i = 0 ; i < this.FLAVORS.length ; i++)
+				if(this.FLAVORS[i] == flavor || this.FLAVORS[i].equals(flavor))
 					return true;
 
 			return false;
@@ -176,14 +181,14 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 
 	private Transferable getTransferableFor(Component c) {
 
-		if(c == queuePanels[0].getTable()) {
-			queuePanels[0].reloadSelections();
-			return new DragableFinishedTransfers(queuePanels[0].getSelectedQueries(), false);
+		if(c == this.queuePanels[0].getTable()) {
+			this.queuePanels[0].reloadSelections();
+			return new DragableFinishedTransfers(this.queuePanels[0].getSelectedQueries(), false);
 		}
 
-		if(c == queuePanels[1].getTable()) {
-			queuePanels[1].reloadSelections();
-			return new DragableFinishedTransfers(queuePanels[1].getSelectedQueries(), true);
+		if(c == this.queuePanels[1].getTable()) {
+			this.queuePanels[1].reloadSelections();
+			return new DragableFinishedTransfers(this.queuePanels[1].getSelectedQueries(), true);
 		}
 
 		return null;

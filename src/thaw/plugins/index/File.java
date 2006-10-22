@@ -44,17 +44,17 @@ public class File extends java.util.Observable implements java.util.Observer {
 	public File(Hsqldb db, String path, String category, Index parent, FCPTransferQuery transfer) {
 		this.db = db;
 
-		id = -1;
-		localPath = path;
+		this.id = -1;
+		this.localPath = path;
 		this.transfer = transfer;
 
-		String[] pathElements = localPath.split(java.io.File.separator.replaceAll("\\\\", "\\\\\\\\"));
-		fileName = pathElements[pathElements.length-1];
+		String[] pathElements = this.localPath.split(java.io.File.separator.replaceAll("\\\\", "\\\\\\\\"));
+		this.fileName = pathElements[pathElements.length-1];
 
-		size = (new java.io.File(path)).length();
+		this.size = (new java.io.File(path)).length();
 
 		this.category = category;
-		setParent(parent);
+		this.setParent(parent);
 
 		if(transfer != null)
 			((java.util.Observable)transfer).addObserver(this);
@@ -64,15 +64,15 @@ public class File extends java.util.Observable implements java.util.Observer {
 	public File(Hsqldb db, ResultSet resultSet, Index parent) throws SQLException {
 		this.db = db;
 
-		id = resultSet.getInt("id");
-		fileName = resultSet.getString("filename").trim();
-		publicKey = resultSet.getString("publicKey").trim();
-		localPath = resultSet.getString("localPath");
-		size = resultSet.getLong("size");
-		parentId = resultSet.getInt("indexParent");
+		this.id = resultSet.getInt("id");
+		this.fileName = resultSet.getString("filename").trim();
+		this.publicKey = resultSet.getString("publicKey").trim();
+		this.localPath = resultSet.getString("localPath");
+		this.size = resultSet.getLong("size");
+		this.parentId = resultSet.getInt("indexParent");
 		//category = resultSet.getString("category");
 
-		deduceFilenameFromKey();
+		this.deduceFilenameFromKey();
 		
 		this.parent = parent;
 	}
@@ -80,25 +80,25 @@ public class File extends java.util.Observable implements java.util.Observer {
 	public File(Hsqldb db, Element fileElement, Index parent) {
 		this.db = db;
 
-		id = Integer.parseInt(fileElement.getAttribute("id")); /* will be changed when inserted in the database */
-		publicKey = fileElement.getAttribute("key");
+		this.id = Integer.parseInt(fileElement.getAttribute("id")); /* will be changed when inserted in the database */
+		this.publicKey = fileElement.getAttribute("key");
 
-		if (publicKey != null)
-			publicKey = publicKey.trim();
+		if (this.publicKey != null)
+			this.publicKey = this.publicKey.trim();
 		
-		localPath = null;
+		this.localPath = null;
 		
-		size = Long.parseLong(fileElement.getAttribute("size"));
+		this.size = Long.parseLong(fileElement.getAttribute("size"));
 		
-		setOptions(fileElement.getChildNodes());
+		this.setOptions(fileElement.getChildNodes());
 
-		deduceFilenameFromKey();
+		this.deduceFilenameFromKey();
 
 		this.parent = parent;
 	}
 	
 	public void deduceFilenameFromKey() {
-		fileName = FreenetURIHelper.getFilenameFromKey(publicKey);
+		this.fileName = FreenetURIHelper.getFilenameFromKey(this.publicKey);
 	}
 
 	public void setOptions(NodeList list) {
@@ -106,8 +106,8 @@ public class File extends java.util.Observable implements java.util.Observer {
 			if(list.item(i).getNodeType() == Node.ELEMENT_NODE) {
 				Element option = (Element)list.item(i);
 
-				if(option.getAttribute("name").equals("category"))
-					category = option.getAttribute("value");
+				if("category".equals( option.getAttribute("name") ))
+					this.category = option.getAttribute("value");
 				else {
 					/* TODO */
 				}
@@ -124,114 +124,114 @@ public class File extends java.util.Observable implements java.util.Observer {
 	}
 
 	public Index getParent() {
-		return parent;
+		return this.parent;
 	}
 
 	public int getParentId() {
-		return parentId;
+		return this.parentId;
 	}
 
 	public String getFilename() {
-		return fileName;
+		return this.fileName;
 	}
 
 	public long getSize() {
-		return size;
+		return this.size;
 	}
 
 	public String getLocalPath() {
-		return localPath;
+		return this.localPath;
 	}
 
 	public String getCategory() {
-		return category;
+		return this.category;
 	}
 
 	public String getPublicKey() {
-		return publicKey;
+		return this.publicKey;
 	}
 
 	public void setPublicKey(String publicKey) {
 		this.publicKey = publicKey;
 
-		setChanged();
-		notifyObservers();
+		this.setChanged();
+		this.notifyObservers();
 	}
 
 	public FCPTransferQuery getTransfer() {
-		return transfer;
+		return this.transfer;
 	}
 
 	public void setTransfer(FCPTransferQuery query) {
-		if (transfer != null) {
+		if (this.transfer != null) {
 			Logger.notice(this, "A transfer is already running for this file");
 			return;
 		}
 
-		transfer = query;
+		this.transfer = query;
 
-		if (transfer != null) {
-			if(transfer instanceof FCPClientPut)
-				((FCPClientPut)transfer).addObserver(this);
-			if(transfer instanceof FCPClientGet)
-				((FCPClientGet)transfer).addObserver(this);
+		if (this.transfer != null) {
+			if(this.transfer instanceof FCPClientPut)
+				((FCPClientPut)this.transfer).addObserver(this);
+			if(this.transfer instanceof FCPClientGet)
+				((FCPClientGet)this.transfer).addObserver(this);
 		}
 
-		setChanged();
-		notifyObservers(query);
+		this.setChanged();
+		this.notifyObservers(query);
 	}
 
 
 	public void recalculateCHK(FCPQueueManager queueManager) {
 		this.queueManager = queueManager;
 
-		FCPClientPut insertion = new FCPClientPut(new java.io.File(getLocalPath()), 0, 0, null,
+		FCPClientPut insertion = new FCPClientPut(new java.io.File(this.getLocalPath()), 0, 0, null,
 							  null, 4,
 							  true, 2, true); /* getCHKOnly */
 		queueManager.addQueryToThePendingQueue(insertion);
 		
-		setTransfer(insertion);
+		this.setTransfer(insertion);
 	}
 
 	
 	public void download(String targetPath, FCPQueueManager queueManager) {
-		FCPClientGet clientGet = new FCPClientGet(getPublicKey(), 4, 0, true, -1, targetPath);
+		FCPClientGet clientGet = new FCPClientGet(this.getPublicKey(), 4, 0, true, -1, targetPath);
 
 		queueManager.addQueryToThePendingQueue(clientGet);
 		
-		setTransfer(clientGet);
+		this.setTransfer(clientGet);
 	}
 
 
 	public void insertOnFreenet(FCPQueueManager queueManager) {
-		FCPClientPut clientPut = new FCPClientPut(new java.io.File(getLocalPath()),
+		FCPClientPut clientPut = new FCPClientPut(new java.io.File(this.getLocalPath()),
 							  0, 0, null, null, 4, true, 0);
 		queueManager.addQueryToThePendingQueue(clientPut);
 				
-		setTransfer(clientPut);
+		this.setTransfer(clientPut);
 	}
 
 
 	/* Try to find its download automagically */
 	public void setTransfer(FCPQueueManager queueManager) {
-		if (publicKey != null || fileName != null) {
+		if (this.publicKey != null || this.fileName != null) {
 			FCPTransferQuery trans;
 
-			trans = queueManager.getTransfer(publicKey);
+			trans = queueManager.getTransfer(this.publicKey);
 
 			if (trans == null) {
-				trans = queueManager.getTransferByFilename(fileName);
+				trans = queueManager.getTransferByFilename(this.fileName);
 			}
 
-			setTransfer(trans);
+			this.setTransfer(trans);
 		}
 
-		setChanged();
-		notifyObservers();
+		this.setChanged();
+		this.notifyObservers();
 	}
 
 	public void insert() {
-		if (parent == null) {
+		if (this.parent == null) {
 			Logger.notice(this, "insert(): No parent !");
 			return;
 		}
@@ -239,54 +239,54 @@ public class File extends java.util.Observable implements java.util.Observer {
 		try {
 			PreparedStatement st;
 
-			st = db.getConnection().prepareStatement("SELECT id FROM files ORDER BY id DESC LIMIT 1");
+			st = this.db.getConnection().prepareStatement("SELECT id FROM files ORDER BY id DESC LIMIT 1");
 
 			try {
 				if(st.execute()) {
 					ResultSet result = st.getResultSet();
 					result.next();
-					id = result.getInt("id")+1;
+					this.id = result.getInt("id")+1;
 				} else
-					id = 1;
+					this.id = 1;
 			} catch(SQLException e) {
-				id = 1;
+				this.id = 1;
 			}
 			
 
-			st = db.getConnection().prepareStatement("INSERT INTO files (id, filename, publicKey, "+
+			st = this.db.getConnection().prepareStatement("INSERT INTO files (id, filename, publicKey, "+
 								       "localPath, mime, size, category, indexParent) "+
 								       "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-			st.setInt(1, id);
+			st.setInt(1, this.id);
 
-			st.setString(2, fileName);
+			st.setString(2, this.fileName);
 
-			if(publicKey != null)
-				st.setString(3, publicKey);
+			if(this.publicKey != null)
+				st.setString(3, this.publicKey);
 			else
-				st.setString(3, fileName);
+				st.setString(3, this.fileName);
 
-			if(localPath != null)
-				st.setString(4, localPath);
+			if(this.localPath != null)
+				st.setString(4, this.localPath);
 			else
 				st.setNull(4, Types.VARCHAR);
 
-			if(mime != null)
-				st.setString(5, mime);
+			if(this.mime != null)
+				st.setString(5, this.mime);
 			else
 				st.setNull(5, Types.VARCHAR);
 
-			st.setLong(6, size);
+			st.setLong(6, this.size);
 			
-			if(category != null)
-				st.setString(7, category);
+			if(this.category != null)
+				st.setString(7, this.category);
 			else
 				st.setNull(7, Types.VARCHAR);
 
-			st.setInt(8, parent.getId());
+			st.setInt(8, this.parent.getId());
 
 			st.execute();
 		} catch(SQLException e) {
-			Logger.error(this, "Unable to insert file '"+fileName+"' because: "+e.toString());
+			Logger.error(this, "Unable to insert file '"+this.fileName+"' because: "+e.toString());
 		}
 		
 	}
@@ -296,18 +296,18 @@ public class File extends java.util.Observable implements java.util.Observer {
 		try {
 			PreparedStatement st;
 
-			st = db.getConnection().prepareStatement("DELETE FROM files WHERE id = ?");
-			st.setInt(1, id);
+			st = this.db.getConnection().prepareStatement("DELETE FROM files WHERE id = ?");
+			st.setInt(1, this.id);
 
 			st.execute();
 
 		} catch(SQLException e) {
-			Logger.error(this, "Unable to remove file '"+fileName+"' because: "+e.toString());
+			Logger.error(this, "Unable to remove file '"+this.fileName+"' because: "+e.toString());
 		}	
 	}
 
 	public void update() {
-		if (parent == null) {
+		if (this.parent == null) {
 			Logger.notice(this, "update(): No parent !");
 			return;
 		}
@@ -315,45 +315,45 @@ public class File extends java.util.Observable implements java.util.Observer {
 		try {
 			PreparedStatement st;
 
-			st = db.getConnection().prepareStatement("UPDATE files SET filename = ?, publicKey = ?, localPath = ?, mime= ?, size = ?, category = ?, indexParent = ? WHERE id = ?");
+			st = this.db.getConnection().prepareStatement("UPDATE files SET filename = ?, publicKey = ?, localPath = ?, mime= ?, size = ?, category = ?, indexParent = ? WHERE id = ?");
 
-			st.setString(1, fileName);
+			st.setString(1, this.fileName);
 
-			if(publicKey != null)
-				st.setString(2, publicKey);
+			if(this.publicKey != null)
+				st.setString(2, this.publicKey);
 			else
-				st.setString(2, fileName);
+				st.setString(2, this.fileName);
 
-			if(localPath != null)
-				st.setString(3, localPath);
+			if(this.localPath != null)
+				st.setString(3, this.localPath);
 			else
 				st.setNull(3, Types.VARCHAR);
 
-			if(mime != null)
-				st.setString(4, mime);
+			if(this.mime != null)
+				st.setString(4, this.mime);
 			else
 				st.setNull(4, Types.VARCHAR);
 
-			st.setLong(5, size);
+			st.setLong(5, this.size);
 			
-			if(category != null)
-				st.setString(6, category);
+			if(this.category != null)
+				st.setString(6, this.category);
 			else
 				st.setNull(6, Types.VARCHAR);
 
-			st.setInt(7, getParent().getId());
+			st.setInt(7, this.getParent().getId());
 
-			st.setInt(8, id);
+			st.setInt(8, this.id);
 
 			st.execute();
 		} catch(SQLException e) {
-			Logger.error(this, "Unable to update file '"+fileName+"' because: "+e.toString());
+			Logger.error(this, "Unable to update file '"+this.fileName+"' because: "+e.toString());
 		}
 	}
 
 
 	public boolean isInTheDatabase() {
-		if (parent == null) {
+		if (this.parent == null) {
 			Logger.notice(this, "isInTheDatabase(): No parent !");
 			return false;
 		}
@@ -361,14 +361,14 @@ public class File extends java.util.Observable implements java.util.Observer {
 		try {
 			PreparedStatement st;
 
-			st = db.getConnection().prepareStatement("SELECT publicKey from files WHERE publicKey = ? AND indexParent = ?");
+			st = this.db.getConnection().prepareStatement("SELECT publicKey from files WHERE publicKey = ? AND indexParent = ?");
 
-			if(publicKey != null)
-				st.setString(1, publicKey);
+			if(this.publicKey != null)
+				st.setString(1, this.publicKey);
 			else
-				st.setString(1, fileName);
+				st.setString(1, this.fileName);
 
-			st.setInt(2, getParent().getId());
+			st.setInt(2, this.getParent().getId());
 
 			if(st.execute()) {
 				ResultSet result = st.getResultSet();
@@ -386,50 +386,50 @@ public class File extends java.util.Observable implements java.util.Observer {
 
 	
 	public void update(java.util.Observable o, Object param) {
-		if(o == transfer) {
-			if(transfer.isFinished() && transfer instanceof FCPClientPut) {
-				if (queueManager != null) {
-					queueManager.remove(transfer);
-					queueManager = null;
+		if(o == this.transfer) {
+			if(this.transfer.isFinished() && this.transfer instanceof FCPClientPut) {
+				if (this.queueManager != null) {
+					this.queueManager.remove(this.transfer);
+					this.queueManager = null;
 				}
 
-				((FCPClientPut)transfer).deleteObserver(this);
-				setPublicKey(transfer.getFileKey());
-				update();
+				((FCPClientPut)this.transfer).deleteObserver(this);
+				this.setPublicKey(this.transfer.getFileKey());
+				this.update();
 			}
 
-			if(transfer.isFinished() && transfer instanceof FCPClientGet) {
-				((FCPClientGet)transfer).deleteObserver(this);
+			if(this.transfer.isFinished() && this.transfer instanceof FCPClientGet) {
+				((FCPClientGet)this.transfer).deleteObserver(this);
 			}
 
-			if(transfer.isFinished() && transfer.isSuccessful()) {
-				transfer = null;
+			if(this.transfer.isFinished() && this.transfer.isSuccessful()) {
+				this.transfer = null;
 			}
 
-			setChanged();
-			notifyObservers();
+			this.setChanged();
+			this.notifyObservers();
 		}
 	}
 
 	public int getId() {
-		return id;
+		return this.id;
 	}
 
 	
 	public Element getXML(Document xmlDoc) {
-		if(getPublicKey() == null) {
-			Logger.notice(this, "No public key for file '"+fileName+"' => not added to the index");
+		if(this.getPublicKey() == null) {
+			Logger.notice(this, "No public key for file '"+this.fileName+"' => not added to the index");
 			return null;
 		}
 
 		Element file = xmlDoc.createElement("file");
 
-		file.setAttribute("id", Integer.toString(getId()));
-		file.setAttribute("key", getPublicKey());
-		file.setAttribute("size", Long.toString(getSize()));
-		file.setAttribute("mime", DefaultMIMETypes.guessMIMEType(fileName));
+		file.setAttribute("id", Integer.toString(this.getId()));
+		file.setAttribute("key", this.getPublicKey());
+		file.setAttribute("size", Long.toString(this.getSize()));
+		file.setAttribute("mime", DefaultMIMETypes.guessMIMEType(this.fileName));
 
-		for(Iterator it = getOptionElements(xmlDoc).iterator();
+		for(Iterator it = this.getOptionElements(xmlDoc).iterator();
 		    it.hasNext(); ) {
 			Element e = (Element)it.next();
 			file.appendChild(e);
@@ -444,10 +444,10 @@ public class File extends java.util.Observable implements java.util.Observer {
 	public Vector getOptionElements(Document xmlDoc) {
 		Vector options = new Vector();
 
-		if(category != null) {
+		if(this.category != null) {
 			Element categoryEl = xmlDoc.createElement("option");
 			categoryEl.setAttribute("name", "category");
-			categoryEl.setAttribute("value", category);
+			categoryEl.setAttribute("value", this.category);
 
 			options.add(categoryEl);
 		}

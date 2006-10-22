@@ -47,22 +47,22 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 	public void update(Observable o, Object param) {
 		FCPMessage msg = (FCPMessage)param;
 
-		if(msg.getMessageName().equals("PersistentGet")) {
+		if("PersistentGet".equals( msg.getMessageName() )) {
 			Logger.info(this, "Resuming from PersistentGet");
 			
 			int persistence = 0;
 
-			if(msg.getValue("PersistenceType").equals("reboot"))
+			if("reboot".equals( msg.getValue("PersistenceType") ))
 				persistence = 1;
 
 			boolean global = true;
 
-			if(msg.getValue("Global").equals("false"))
+			if("false".equals( msg.getValue("Global") ))
 				global = false;
 
 			String destinationDir = null;
 
-			if(msg.getValue("Identifier").startsWith(thawId))
+			if(msg.getValue("Identifier").startsWith(this.thawId))
 				destinationDir = msg.getValue("ClientToken");
 
 			int priority = Integer.parseInt(msg.getValue("PriorityClass"));
@@ -72,18 +72,18 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 								  msg.getValue("URI"), // key
 								  priority, persistence, global,
 								  destinationDir, "Fetching", 0,
-								  -1, queueManager);
+								  -1, this.queueManager);
 								  
 								  
-			if(queueManager.addQueryToTheRunningQueue(clientGet, false))
-				queueManager.getQueryManager().addObserver(clientGet);
+			if(this.queueManager.addQueryToTheRunningQueue(clientGet, false))
+				this.queueManager.getQueryManager().addObserver(clientGet);
 			else
 				Logger.info(this, "Already in the running queue");
 
 		}
 
 
-		if(msg.getMessageName().equals("PersistentPut")) {
+		if("PersistentPut".equals( msg.getMessageName() )) {
 			Logger.info(this, "Resuming from PersistentPut");
 			
 			int persistence = 0;
@@ -96,7 +96,7 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 
 			boolean global = true;
 
-			if(msg.getValue("Global").equals("false"))
+			if("false".equals( msg.getValue("Global") ))
 				global = false;
 
 			int priority = Integer.parseInt(msg.getValue("PriorityClass"));
@@ -108,7 +108,7 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 
 			String filePath=null;
 
-			if(msg.getValue("Identifier").startsWith(thawId))
+			if(msg.getValue("Identifier").startsWith(this.thawId))
 				filePath = msg.getValue("ClientToken");
 
 			FCPClientPut clientPut = new FCPClientPut(msg.getValue("Identifier"),
@@ -116,11 +116,11 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 								  priority, persistence, global,
 								  filePath, msg.getValue("TargetFilename"),
 								  "Inserting", 0, fileSize,
-								  queueManager);
+								  this.queueManager);
 								  
 								  
-			if(queueManager.addQueryToTheRunningQueue(clientPut, false))
-				queueManager.getQueryManager().addObserver(clientPut);
+			if(this.queueManager.addQueryToTheRunningQueue(clientPut, false))
+				this.queueManager.getQueryManager().addObserver(clientPut);
 			else
 				Logger.info(this, "Already in the running queue");
 			
@@ -128,10 +128,10 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 			return;
 		}
 
-		if(msg.getMessageName().equals("EndListPersistentRequests")) {
+		if("EndListPersistentRequests".equals( msg.getMessageName() )) {
 			Logger.info(this, "End Of ListPersistentRequests.");
-			queueManager.getQueryManager().getConnection().unlockWriting();
-			queueManager.setQueueCompleted();
+			this.queueManager.getQueryManager().getConnection().unlockWriting();
+			this.queueManager.setQueueCompleted();
 			return;
 		}
 	}

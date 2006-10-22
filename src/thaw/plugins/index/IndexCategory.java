@@ -17,6 +17,10 @@ import thaw.core.*;
 
 public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNode {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private int id;
 	private IndexCategory parent;
 	private String name;
@@ -39,7 +43,7 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 		this.db = db;
 		this.queueManager = queueManager;
 
-		setUserObject(this);
+		this.setUserObject(this);
 
 	}
 
@@ -58,7 +62,7 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 		try {
 			/* Rahh ! Hsqldb doesn't support getGeneratedKeys() ! 8/ */
 
-			Connection c = db.getConnection();
+			Connection c = this.db.getConnection();
 			PreparedStatement st;
 
 			st = c.prepareStatement("SELECT id FROM indexCategories ORDER BY id DESC LIMIT 1");
@@ -67,22 +71,22 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 			try {
 				ResultSet key = st.getResultSet();
 				key.next();
-				id = key.getInt(1) + 1;
+				this.id = key.getInt(1) + 1;
 			} catch(SQLException e) {
-				id = 0;
+				this.id = 0;
 			}
 
 			st = c.prepareStatement("INSERT INTO indexCategories (id, name, positionInTree, modifiableIndexes, parent) "+
 								  "VALUES (?, ?,?,?,?)");
 
-			st.setInt(1, id);
-			st.setString(2, name);
+			st.setInt(1, this.id);
+			st.setString(2, this.name);
 			st.setInt(3, 0);
 
-			st.setBoolean(4, modifiables);
+			st.setBoolean(4, this.modifiables);
 
-			if(parent.getId() >= 0)
-				st.setInt(5, parent.getId());
+			if(this.parent.getId() >= 0)
+				st.setInt(5, this.parent.getId());
 			else
 				st.setNull(5, Types.INTEGER);
 			
@@ -97,38 +101,38 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 	}
 
 	public void delete() {
-		if(children == null)
-			children = loadChildren();
+		if(this.children == null)
+			this.children = this.loadChildren();
 
-		for(Iterator it = children.iterator();
+		for(Iterator it = this.children.iterator();
 		    it.hasNext();) {
 			IndexTreeNode child = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
 			child.delete();
 		}
 
-		children = null;
+		this.children = null;
 
 		try {
-			if(id < 0)
+			if(this.id < 0)
 				return;
 			
-			Connection c = db.getConnection();
+			Connection c = this.db.getConnection();
 			PreparedStatement st = c.prepareStatement("DELETE FROM indexCategories WHERE id = ?");
-			st.setInt(1, id);
+			st.setInt(1, this.id);
 			st.execute();
 		} catch(SQLException e) {
-			Logger.error(this, "Unable to delete the index category '"+name+"', because: "+e.toString());
+			Logger.error(this, "Unable to delete the index category '"+this.name+"', because: "+e.toString());
 		}
 	}
 
 	public void rename(String name) {
 
 		try {
-			Connection c = db.getConnection();
+			Connection c = this.db.getConnection();
 			PreparedStatement st = c.prepareStatement("UPDATE indexCategories SET name = ? WHERE id = ?");
 			
 			st.setString(1, name);
-			st.setInt(2, id);
+			st.setInt(2, this.id);
 
 			st.execute();
 
@@ -141,7 +145,7 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 	public String getPublicKey() {
 		String result = "";
 		
-		for(Iterator it = children.iterator();
+		for(Iterator it = this.children.iterator();
 		    it.hasNext();) {
 			IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
 			result = result + node.getPublicKey();
@@ -156,7 +160,7 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 	public String getPrivateKey() {
 		String result = "";
 		
-		for(Iterator it = children.iterator();
+		for(Iterator it = this.children.iterator();
 		    it.hasNext();) {
 			IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
 			result = result + node.getPrivateKey();
@@ -169,10 +173,10 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 	}
 
 	public void addObserver(java.util.Observer o) {
-		if(children == null)
-			children = loadChildren();
+		if(this.children == null)
+			this.children = this.loadChildren();
 
-		for(Iterator it = children.iterator();
+		for(Iterator it = this.children.iterator();
 		    it.hasNext();) {
 			IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
 			node.addObserver(o);
@@ -180,19 +184,19 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 	}
 
 	public void update() {
-		for (Enumeration e = children() ; e.hasMoreElements() ;) {
+		for (Enumeration e = this.children() ; e.hasMoreElements() ;) {
 			((IndexTreeNode)((DefaultMutableTreeNode)e.nextElement()).getUserObject()).update();
 		}
 	}
 
 	public void updateFromFreenet(int rev) {
-		for (Enumeration e = children() ; e.hasMoreElements() ;) {
+		for (Enumeration e = this.children() ; e.hasMoreElements() ;) {
 			((IndexTreeNode)((DefaultMutableTreeNode)e.nextElement()).getUserObject()).updateFromFreenet(rev);
 		}
 	}
 
 	public boolean isUpdating() {
-		for (Enumeration e = children() ; e.hasMoreElements() ;) {
+		for (Enumeration e = this.children() ; e.hasMoreElements() ;) {
 			if(((IndexTreeNode)((DefaultMutableTreeNode)e.nextElement())).isUpdating())
 				return true;
 		}
@@ -201,42 +205,42 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 	}
 
 	public void save() {
-		saveThis();
+		this.saveThis();
 
-		for (Enumeration e = children() ; e.hasMoreElements() ;) {
+		for (Enumeration e = this.children() ; e.hasMoreElements() ;) {
 			((IndexTreeNode)((DefaultMutableTreeNode)e.nextElement()).getUserObject()).save();
 		}
 	}
 
 
 	public void saveThis() {
-		if(getId() < 0)
+		if(this.getId() < 0)
 			return;
 
 		try {
-			Connection c = db.getConnection();
+			Connection c = this.db.getConnection();
 			PreparedStatement st = c.prepareStatement("UPDATE indexCategories SET name = ?, positionInTree = ?, modifiableIndexes = ?, parent = ? WHERE id = ?");
 
-			st.setString(1, name);
-			st.setInt(2, getParent().getIndex(this));
+			st.setString(1, this.name);
+			st.setInt(2, this.getParent().getIndex(this));
 			
-			st.setBoolean(3, modifiables);
+			st.setBoolean(3, this.modifiables);
 
-			if( ((IndexTreeNode)getParent()).getId() < 0)
+			if( ((IndexTreeNode)this.getParent()).getId() < 0)
 				st.setNull(4, Types.INTEGER);
 			else
-				st.setInt(4, ((IndexTreeNode)getParent()).getId());
+				st.setInt(4, ((IndexTreeNode)this.getParent()).getId());
 			
-			st.setInt(5, getId());
+			st.setInt(5, this.getId());
 
 			st.execute();
 		} catch(SQLException e) {
-			Logger.error(this, "Unable to save index category state '"+toString()+"' because : "+e.toString());
+			Logger.error(this, "Unable to save index category state '"+this.toString()+"' because : "+e.toString());
 		}
 	}
 
 	public int getId() {
-		return id;
+		return this.id;
 	}
 
 	public Vector loadChildren() {
@@ -244,16 +248,16 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 
 		Logger.debug(this, "loadChildren()");
 
-		loadChildCategories(children);
-		loadChildIndexes(children);
+		this.loadChildCategories(children);
+		this.loadChildIndexes(children);
 
-		cleanChildList(children);
+		this.cleanChildList(children);
 		
 		Logger.debug(this, "Children: "+children.size());
 
 		for(Iterator it = children.iterator();
 		    it.hasNext(); ) {
-			add((MutableTreeNode)it.next());
+			this.add((MutableTreeNode)it.next());
 		}
 
 		return children;
@@ -268,12 +272,12 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 
 		query = "SELECT id, originalName, displayName, publicKey, privateKey, author, positionInTree, revision FROM indexes";
 
-		if(id < 0)
+		if(this.id < 0)
 			query = query + " WHERE parent IS NULL";
 		else
-			query = query + " WHERE parent = "+Integer.toString(id);
+			query = query + " WHERE parent = "+Integer.toString(this.id);
 
-		if(modifiables) {
+		if(this.modifiables) {
 			query = query + " AND privateKey IS NOT NULL";
 		} else {
 			query = query + " AND privateKey IS NULL";
@@ -282,10 +286,10 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 		query = query + " ORDER BY positionInTree DESC";
 
 		try {
-			result = db.executeQuery(query);
+			result = this.db.executeQuery(query);
 
 			if(result == null) {
-				Logger.warning(this, "Unable to get child indexes for '"+toString()+"'");
+				Logger.warning(this, "Unable to get child indexes for '"+this.toString()+"'");
 				return;
 			}
 			
@@ -303,16 +307,16 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 
 				String author = result.getString("author");
 
-				Index index = new Index(db, queueManager, id, this,
+				Index index = new Index(this.db, this.queueManager, id, this,
 							realName, displayName,
 							publicKey, privateKey, revision,
 							author,
-							modifiables);
+							this.modifiables);
 
-				set(children, position, index.getTreeNode());
+				this.set(children, position, index.getTreeNode());
 			}
 		} catch (java.sql.SQLException e) {
-			Logger.warning(this, "SQLException while getting child of index category '"+name+"': "+e.toString());
+			Logger.warning(this, "SQLException while getting child of index category '"+this.name+"': "+e.toString());
 		}
 
 	}
@@ -325,12 +329,12 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 
 		query = "SELECT id, name, positionInTree, modifiableIndexes FROM indexCategories";
 
-		if(id < 0)
+		if(this.id < 0)
 			query = query + " WHERE parent IS NULL";
 		else
-			query = query + " WHERE parent = "+Integer.toString(id);
+			query = query + " WHERE parent = "+Integer.toString(this.id);
 
-		if(modifiables) {
+		if(this.modifiables) {
 			query = query + " AND modifiableIndexes = TRUE";
 		} else {
 			query = query + " AND modifiableIndexes = FALSE";
@@ -339,10 +343,10 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 		query = query + " ORDER BY positionInTree DESC";
 
 		try {
-			result = db.executeQuery(query);
+			result = this.db.executeQuery(query);
 			
 			if(result == null) {
-				Logger.error(this, "Unable to get child categories for '"+toString()+"'");
+				Logger.error(this, "Unable to get child categories for '"+this.toString()+"'");
 				return;
 			}
 
@@ -351,12 +355,12 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 				int position = result.getInt("positionInTree");
 				String name = result.getString("name");
 				
-				IndexCategory cat = new IndexCategory(db, queueManager, id, this, name, modifiables);
+				IndexCategory cat = new IndexCategory(this.db, this.queueManager, id, this, name, this.modifiables);
 				cat.loadChildren();
-				set(children, position, cat);
+				this.set(children, position, cat);
 			}
 		} catch (java.sql.SQLException e) {
-			Logger.error(this, "SQLException while getting child of index category '"+name+"': "+e.toString());
+			Logger.error(this, "SQLException while getting child of index category '"+this.name+"': "+e.toString());
 		}
 
 	}
@@ -388,17 +392,17 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 	}
 
 	public String toString() {
-		return name;
+		return this.name;
 	}
 
 	public Vector getIndexIds()
 	{
-		if(children == null)
-			children = loadChildren();
+		if(this.children == null)
+			this.children = this.loadChildren();
 
 		Vector result = new Vector();
 		
-		for(Iterator it = children.iterator();
+		for(Iterator it = this.children.iterator();
 		    it.hasNext();) {
 			IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
 			result.addAll(node.getIndexIds());
@@ -410,10 +414,10 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 
 	public Index getIndex(int id)
 	{
-		if(children == null)
-			children = loadChildren();
+		if(this.children == null)
+			this.children = this.loadChildren();
 
-		for(Iterator it = children.iterator();
+		for(Iterator it = this.children.iterator();
 		    it.hasNext();) {
 			IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
 			Index result = node.getIndex(id);

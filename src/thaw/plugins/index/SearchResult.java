@@ -59,7 +59,7 @@ public class SearchResult extends Observable implements Observer, FileAndLinkLis
 				query = query + " DESC";
 		}
 
-		Connection c = db.getConnection();
+		Connection c = this.db.getConnection();
 		st = c.prepareStatement(query);
 
 		int i;
@@ -79,99 +79,99 @@ public class SearchResult extends Observable implements Observer, FileAndLinkLis
 	}
 
 	public void loadFiles(String columnToSort, boolean asc) {
-		if (fileList != null) {
+		if (this.fileList != null) {
 			Logger.notice(this, "Files already loaded, won't reload them");
 			return;
 		}
 
-		fileList = new Vector();
+		this.fileList = new Vector();
 
 		try {
-			PreparedStatement st = makeSearchQuery("id, filename, publicKey, localPath, mime, size, category, indexParent",
-							       "files", indexIds, search, columnToSort, asc);
+			PreparedStatement st = this.makeSearchQuery("id, filename, publicKey, localPath, mime, size, category, indexParent",
+							       "files", this.indexIds, this.search, columnToSort, asc);
 			if (st.execute()) {
 				ResultSet results = st.getResultSet();
 
 				while(results.next()) {
-					thaw.plugins.index.File file = new thaw.plugins.index.File(db, results, null);
-					file.setTransfer(queueManager);
+					thaw.plugins.index.File file = new thaw.plugins.index.File(this.db, results, null);
+					file.setTransfer(this.queueManager);
 					file.addObserver(this);
-					fileList.add(file);
+					this.fileList.add(file);
 				}
 			}
 		} catch(SQLException e) {
 			Logger.warning(this, "Exception while searching: "+e.toString());
 		}
 
-		setChanged();
-		notifyObservers();
+		this.setChanged();
+		this.notifyObservers();
 	}
 
 	public void loadLinks(String columnToSort, boolean asc) {
-		if (linkList != null) {
+		if (this.linkList != null) {
 			Logger.notice(this, "Links already loaded, won't reload them");
 			return;
 		}
-		linkList = new Vector();
+		this.linkList = new Vector();
 
 		try {
-			PreparedStatement st = makeSearchQuery("id, publicKey, mark, comment, indexTarget, indexParent",
-							       "links", indexIds, search, columnToSort, asc);
+			PreparedStatement st = this.makeSearchQuery("id, publicKey, mark, comment, indexTarget, indexParent",
+							       "links", this.indexIds, this.search, columnToSort, asc);
 			if (st.execute()) {
 				ResultSet results = st.getResultSet();
 
 				while(results.next()) {
-					Link link = new Link(db, results, null);
-					linkList.add(link);
+					Link link = new Link(this.db, results, null);
+					this.linkList.add(link);
 				}
 			}
 		} catch(SQLException e) {
 			Logger.warning(this, "Exception while searching: "+e.toString());
 		}
 
-		setChanged();
-		notifyObservers();
+		this.setChanged();
+		this.notifyObservers();
 	}
 
 
 	public void update(Observable o, Object param) {
-		setChanged();
-		notifyObservers(o);
+		this.setChanged();
+		this.notifyObservers(o);
 	}
 
 
 	public Vector getFileList() {
-		return fileList;
+		return this.fileList;
 	}
 
 	public Vector getLinkList() {
-		return linkList;
+		return this.linkList;
 	}
 
 
 
 	public thaw.plugins.index.File getFile(int index) {
-		return (thaw.plugins.index.File)fileList.get(index);
+		return (thaw.plugins.index.File)this.fileList.get(index);
 	}
 
 	public Link getLink(int index) {
-		return (Link)linkList.get(index);
+		return (Link)this.linkList.get(index);
 	}
 
 
 
 	public void unloadFiles() {
-		for (Iterator it = fileList.iterator();
+		for (Iterator it = this.fileList.iterator();
 		     it.hasNext();) {
 			thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 			file.deleteObserver(this);
 		}
 
-		fileList = null;
+		this.fileList = null;
 	}
 
 	public void unloadLinks() {
-		fileList = null;
+		this.fileList = null;
 	}
 
 }

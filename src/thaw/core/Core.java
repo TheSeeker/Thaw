@@ -7,8 +7,10 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JFrame;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.JOptionPane;
+import javax.swing.WindowConstants;
 
 import thaw.fcp.*;
 
@@ -49,35 +51,35 @@ public class Core implements Observer {
 	 * Gives a ref to the object containing the config.
 	 */
 	public Config getConfig() {
-		return config;
+		return this.config;
 	}
 
 	/**
 	 * Gives a ref to the object managing the splash screen.
 	 */
 	public SplashScreen getSplashScreen() {
-		return splashScreen;
+		return this.splashScreen;
 	}
 
 	/**
 	 * Gives a ref to the object managing the main window.
 	 */
 	public MainWindow getMainWindow() {
-		return mainWindow;
+		return this.mainWindow;
 	}
 
 	/**
 	 * Gives a ref to the object managing the config window.
 	 */
 	public ConfigWindow getConfigWindow() {
-		return configWindow;
+		return this.configWindow;
 	}
 
 	/**
 	 * Gives a ref to the plugin manager.
 	 */
 	public PluginManager getPluginManager() {
-		return pluginManager;
+		return this.pluginManager;
 	}
 
 
@@ -86,37 +88,37 @@ public class Core implements Observer {
 	 * @return true is success, false if not
 	 */
 	public boolean initAll() {
-		splashScreen = new SplashScreen();
+		this.splashScreen = new SplashScreen();
 
-		splashScreen.display();
+		this.splashScreen.display();
 
-		splashScreen.setProgressionAndStatus(0, "Loading configuration ...");
-		if(!initConfig())
+		this.splashScreen.setProgressionAndStatus(0, "Loading configuration ...");
+		if(!this.initConfig())
 			return false;
 
-		splashScreen.setProgressionAndStatus(10, "Connecting ...");
-		if(!initNodeConnection())
+		this.splashScreen.setProgressionAndStatus(10, "Connecting ...");
+		if(!this.initNodeConnection())
 			new WarningWindow(this, I18n.getMessage("thaw.warning.unableToConnectTo")+
-					  " "+config.getValue("nodeAddress")+
-					  ":"+ config.getValue("nodePort"));
+					  " "+this.config.getValue("nodeAddress")+
+					  ":"+ this.config.getValue("nodePort"));
 
 
-		splashScreen.setProgressionAndStatus(30, "Preparing the main window ...");
-		if(!initGraphics())
+		this.splashScreen.setProgressionAndStatus(30, "Preparing the main window ...");
+		if(!this.initGraphics())
 			return false;
 
-		splashScreen.setProgressionAndStatus(40, "Loading plugins ...");
-		if(!initPluginManager())
+		this.splashScreen.setProgressionAndStatus(40, "Loading plugins ...");
+		if(!this.initPluginManager())
 			return false;
 
-		splashScreen.setProgressionAndStatus(100, "Ready");
+		this.splashScreen.setProgressionAndStatus(100, "Ready");
 
 
-		mainWindow.setStatus("Thaw "+Main.VERSION+" : "+I18n.getMessage("thaw.statusBar.ready"));
+		this.mainWindow.setStatus("Thaw "+Main.VERSION+" : "+I18n.getMessage("thaw.statusBar.ready"));
 
-		splashScreen.hide();
+		this.splashScreen.hide();
 
-		mainWindow.setVisible(true);
+		this.mainWindow.setVisible(true);
 
 		return true;
 	}
@@ -127,10 +129,10 @@ public class Core implements Observer {
 	 * Init configuration. May re-set I18n.
 	 */
 	public boolean initConfig() {
-		config = new Config();
-		config.loadConfig();
+		this.config = new Config();
+		this.config.loadConfig();
 
-		config.setDefaultValues();
+		this.config.setDefaultValues();
 		
 		return true;
 	}
@@ -143,78 +145,78 @@ public class Core implements Observer {
 	 * @see #canDisconnect()
 	 */
 	public boolean initNodeConnection() {
-		if(getMainWindow() != null)
-			getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.connecting"));
+		if(this.getMainWindow() != null)
+			this.getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.connecting"));
 
 		try {
-			if(queueManager != null)
-				queueManager.stopScheduler();
+			if(this.queueManager != null)
+				this.queueManager.stopScheduler();
 
-			if(connection != null && connection.isConnected()) {
-				disconnect();
+			if(this.connection != null && this.connection.isConnected()) {
+				this.disconnect();
 			}
 			
-			if(connection == null) {
-				connection = new FCPConnection(config.getValue("nodeAddress"),
-							       Integer.parseInt(config.getValue("nodePort")),
-							       Integer.parseInt(config.getValue("maxUploadSpeed")),
-							       Boolean.valueOf(config.getValue("multipleSockets")).booleanValue());
+			if(this.connection == null) {
+				this.connection = new FCPConnection(this.config.getValue("nodeAddress"),
+							       Integer.parseInt(this.config.getValue("nodePort")),
+							       Integer.parseInt(this.config.getValue("maxUploadSpeed")),
+							       Boolean.valueOf(this.config.getValue("multipleSockets")).booleanValue());
 			} else {
-				connection.setNodeAddress(config.getValue("nodeAddress"));
-				connection.setNodePort(Integer.parseInt(config.getValue("nodePort")));
-				connection.setMaxUploadSpeed(Integer.parseInt(config.getValue("maxUploadSpeed")));
+				this.connection.setNodeAddress(this.config.getValue("nodeAddress"));
+				this.connection.setNodePort(Integer.parseInt(this.config.getValue("nodePort")));
+				this.connection.setMaxUploadSpeed(Integer.parseInt(this.config.getValue("maxUploadSpeed")));
 			}
 			
-			if(!connection.connect()) {
+			if(!this.connection.connect()) {
 				Logger.warning(this, "Unable to connect !");
 			}
 			
-			if(queryManager == null)
-				queryManager = new FCPQueryManager(connection);
+			if(this.queryManager == null)
+				this.queryManager = new FCPQueryManager(this.connection);
 			
-			if(queueManager == null)
-				queueManager = new FCPQueueManager(queryManager,
-								   config.getValue("thawId"),
-								   Integer.parseInt(config.getValue("maxSimultaneousDownloads")),
-								   Integer.parseInt(config.getValue("maxSimultaneousInsertions")));
+			if(this.queueManager == null)
+				this.queueManager = new FCPQueueManager(this.queryManager,
+								   this.config.getValue("thawId"),
+								   Integer.parseInt(this.config.getValue("maxSimultaneousDownloads")),
+								   Integer.parseInt(this.config.getValue("maxSimultaneousInsertions")));
 			else {
-				queueManager.setThawId(config.getValue("thawId"));
-				queueManager.setMaxDownloads(Integer.parseInt(config.getValue("maxSimultaneousDownloads")));
-				queueManager.setMaxInsertions(Integer.parseInt(config.getValue("maxSimultaneousInsertions")));
+				this.queueManager.setThawId(this.config.getValue("thawId"));
+				this.queueManager.setMaxDownloads(Integer.parseInt(this.config.getValue("maxSimultaneousDownloads")));
+				this.queueManager.setMaxInsertions(Integer.parseInt(this.config.getValue("maxSimultaneousInsertions")));
 				
 			}
 				
 
 
 
-			if(connection.isConnected()) {
-				queryManager.startListening();
+			if(this.connection.isConnected()) {
+				this.queryManager.startListening();
 
-				QueueKeeper.loadQueue(queueManager, "thaw.queue.xml");
+				QueueKeeper.loadQueue(this.queueManager, "thaw.queue.xml");
 
 
-				clientHello = new FCPClientHello(queryManager, config.getValue("thawId"));
+				this.clientHello = new FCPClientHello(this.queryManager, this.config.getValue("thawId"));
 				
-				if(!clientHello.start(null)) {
+				if(!this.clientHello.start(null)) {
 					Logger.warning(this, "Id already used !");
-					connection.disconnect();
-					new WarningWindow(this, "Unable to connect to "+config.getValue("nodeAddress")+":"+config.getValue("nodePort"));
+					this.connection.disconnect();
+					new WarningWindow(this, "Unable to connect to "+this.config.getValue("nodeAddress")+":"+this.config.getValue("nodePort"));
 					return false;
 				} else {
 					Logger.debug(this, "Hello successful");
-					Logger.debug(this, "Node name    : "+clientHello.getNodeName());
-					Logger.debug(this, "FCP  version : "+clientHello.getNodeFCPVersion());
-					Logger.debug(this, "Node version : "+clientHello.getNodeVersion());
+					Logger.debug(this, "Node name    : "+this.clientHello.getNodeName());
+					Logger.debug(this, "FCP  version : "+this.clientHello.getNodeFCPVersion());
+					Logger.debug(this, "Node version : "+this.clientHello.getNodeVersion());
 					
-					queueManager.startScheduler();
+					this.queueManager.startScheduler();
 
-					queueManager.restartNonPersistent();
+					this.queueManager.restartNonPersistent();
 					
 					FCPWatchGlobal watchGlobal = new FCPWatchGlobal(true);
-					watchGlobal.start(queueManager);
+					watchGlobal.start(this.queueManager);
 					
-					FCPQueueLoader queueLoader = new FCPQueueLoader(config.getValue("thawId"));
-					queueLoader.start(queueManager);
+					FCPQueueLoader queueLoader = new FCPQueueLoader(this.config.getValue("thawId"));
+					queueLoader.start(this.queueManager);
 					
 				}
 								   
@@ -228,22 +230,22 @@ public class Core implements Observer {
 			return false;
 		}
 
-		if(connection.isConnected())
-			connection.addObserver(this);
+		if(this.connection.isConnected())
+			this.connection.addObserver(this);
 
-		if(getMainWindow() != null)
-			getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.ready"));
+		if(this.getMainWindow() != null)
+			this.getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.ready"));
 
 		return true;
 	}
 
 
 	public FCPConnection getConnectionManager() {
-		return connection;
+		return this.connection;
 	}
 
 	public FCPQueueManager getQueueManager() {
-		return queueManager;
+		return this.queueManager;
 	}
 
 	/**
@@ -251,7 +253,7 @@ public class Core implements Observer {
 	 * was initiated.
 	 */
 	public FCPClientHello getClientHello() {
-		return clientHello;
+		return this.clientHello;
 	}
 
 	
@@ -291,14 +293,14 @@ public class Core implements Observer {
 	 * Init graphics.
 	 */
 	public boolean initGraphics() {
-		initializeLookAndFeel();
+		this.initializeLookAndFeel();
 
 		IconBox.loadIcons();
 
-		mainWindow = new MainWindow(this);
+		this.mainWindow = new MainWindow(this);
 
-		configWindow = new ConfigWindow(this);
-		configWindow.setVisible(false);
+		this.configWindow = new ConfigWindow(this);
+		this.configWindow.setVisible(false);
 
 		return true;
 	}
@@ -307,12 +309,12 @@ public class Core implements Observer {
 	 * Init plugin manager.
 	 */
 	public boolean initPluginManager() {
-		pluginManager = new PluginManager(this);
+		this.pluginManager = new PluginManager(this);
 
-		if(!pluginManager.loadPlugins())
+		if(!this.pluginManager.loadPlugins())
 			return false;
 		
-		if(!pluginManager.runPlugins())
+		if(!this.pluginManager.runPlugins())
 			return false;
 
 		return true;
@@ -322,7 +324,7 @@ public class Core implements Observer {
 	 * End of the world.
 	 */
 	public void exit() {
-		exit(false);
+		this.exit(false);
 	}
 
 
@@ -331,18 +333,18 @@ public class Core implements Observer {
 	 */
 	public void disconnect() {
 		Logger.info(this, "Disconnecting");
-		connection.deleteObserver(this);
-		connection.disconnect();
+		this.connection.deleteObserver(this);
+		this.connection.disconnect();
 
 		Logger.info(this, "Saving queue state");
-		QueueKeeper.saveQueue(queueManager, "thaw.queue.xml");
+		QueueKeeper.saveQueue(this.queueManager, "thaw.queue.xml");
 	}
 
 	/**
 	 * Check if the connection can be interrupted safely.
 	 */
 	public boolean canDisconnect() {
-		return connection == null || !connection.isWriting();
+		return this.connection == null || !this.connection.isWriting();
 	}
 
 	/**
@@ -352,26 +354,26 @@ public class Core implements Observer {
 	 */
 	public void exit(boolean force) {
 		if(!force) {
-			if(!canDisconnect()) {
-				if(!askDeconnectionConfirmation())
+			if(!this.canDisconnect()) {
+				if(!this.askDeconnectionConfirmation())
 					return;
 			}
 		}
 
 		Logger.info(this, "Stopping scheduler ...");
-		if(queueManager != null)
-		    queueManager.stopScheduler();
+		if(this.queueManager != null)
+		    this.queueManager.stopScheduler();
 
 		Logger.info(this, "Hidding main window ...");
-		mainWindow.setVisible(false);
+		this.mainWindow.setVisible(false);
 		
 		Logger.info(this, "Stopping plugins ...");
-		pluginManager.stopPlugins();
+		this.pluginManager.stopPlugins();
 
-		disconnect();
+		this.disconnect();
 
 		Logger.info(this, "Saving configuration ...");
-		if(!config.saveConfig()) {
+		if(!this.config.saveConfig()) {
 			Logger.error(this, "Config was not saved correctly !");
 		}
 
@@ -400,8 +402,8 @@ public class Core implements Observer {
 	public void update(Observable o, Object target) {
 		Logger.debug(this, "Move on the connection (?)");
 
-		if(o == connection && !connection.isConnected()) {
-			disconnect();
+		if(o == this.connection && !this.connection.isConnected()) {
+			this.disconnect();
 
 			int nmbReconnect = 0;
 
@@ -410,12 +412,12 @@ public class Core implements Observer {
 			warningDialog.setModal(false);
 			warningDialog.setSize(500, 40);
 
-			warningDialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+			warningDialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 
 			JPanel warningPanel = new JPanel();
 
 			JLabel warningLabel = new JLabel(I18n.getMessage("thaw.warning.autoreconnecting"),
-							 JLabel.CENTER);
+							 SwingConstants.CENTER);
 			warningPanel.add(warningLabel);
 			warningDialog.setContentPane(warningPanel);
 			
@@ -433,7 +435,7 @@ public class Core implements Observer {
 				
 				Logger.notice(this, "Trying to reconnect ... : "+ Integer.toString(nmbReconnect));
 
-				if(initNodeConnection())
+				if(this.initNodeConnection())
 					break;
 			}
 
@@ -441,7 +443,7 @@ public class Core implements Observer {
 
 			
 			if(nmbReconnect == MAX_CONNECT_TRIES) {
-				while(!initNodeConnection()) {
+				while(!this.initNodeConnection()) {
 					int ret = JOptionPane.showOptionDialog((java.awt.Component)null,
 									       I18n.getMessage("thaw.warning.disconnected"),
 									       "Thaw - "+I18n.getMessage("thaw.warning.title"),
@@ -458,9 +460,9 @@ public class Core implements Observer {
 
 			}
 
-			getPluginManager().stopPlugins();
-			getPluginManager().loadPlugins();
-			getPluginManager().runPlugins();
+			this.getPluginManager().stopPlugins();
+			this.getPluginManager().loadPlugins();
+			this.getPluginManager().runPlugins();
 		}
 	}
 

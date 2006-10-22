@@ -34,31 +34,31 @@ public class Hsqldb extends LibraryPlugin {
 	public void realStart() {
 		Logger.info(this, "Connecting to the database ...");
 
-		if(core.getConfig().getValue("hsqldb.url") == null)
-			core.getConfig().setValue("hsqldb.url", "jdbc:hsqldb:file:thaw.db");
+		if(this.core.getConfig().getValue("hsqldb.url") == null)
+			this.core.getConfig().setValue("hsqldb.url", "jdbc:hsqldb:file:thaw.db");
 
 		try {
-			connect();
+			this.connect();
 		} catch (java.sql.SQLException e) {
-			Logger.error(this, "SQLException while connecting to the database '"+core.getConfig().getValue("hsqldb.url")+"'");
+			Logger.error(this, "SQLException while connecting to the database '"+this.core.getConfig().getValue("hsqldb.url")+"'");
 			e.printStackTrace();
 		}
 	}
 
 
 	public void connect() throws java.sql.SQLException {
-		if(core.getConfig().getValue("hsqldb.url") == null)
-			core.getConfig().setValue("hsqldb.url", "jdbc:hsqldb:file:thaw.db");
+		if(this.core.getConfig().getValue("hsqldb.url") == null)
+			this.core.getConfig().setValue("hsqldb.url", "jdbc:hsqldb:file:thaw.db");
 
-		if(connection != null)
-			disconnect();
+		if(this.connection != null)
+			this.disconnect();
 
-		connection = DriverManager.getConnection(core.getConfig().getValue("hsqldb.url"),
+		this.connection = DriverManager.getConnection(this.core.getConfig().getValue("hsqldb.url"),
 							 "sa", "");
 	}
 
 	public void disconnect() throws java.sql.SQLException {
-		connection.close();
+		this.connection.close();
 	}
 
 
@@ -71,10 +71,10 @@ public class Hsqldb extends LibraryPlugin {
 		Logger.info(this, "Disconnecting from the database ...");
 		
 		try {
-			connection.commit();
-			executeQuery("SHUTDOWN");
+			this.connection.commit();
+			this.executeQuery("SHUTDOWN");
 
-			connection.close();
+			this.connection.close();
 		} catch(java.sql.SQLException e) {
 			Logger.error(this, "SQLException while closing connection !");
 			e.printStackTrace();
@@ -88,14 +88,14 @@ public class Hsqldb extends LibraryPlugin {
 
 
 	public Connection getConnection() {
-		return connection;
+		return this.connection;
 	}
 
 
 	public ResultSet executeQuery(String query) throws java.sql.SQLException {
 		ResultSet results;
 		
-		Statement stmt = connection.createStatement();
+		Statement stmt = this.connection.createStatement();
 			
 		results = stmt.executeQuery(query);
 

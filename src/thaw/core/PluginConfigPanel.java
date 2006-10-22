@@ -41,51 +41,51 @@ public class PluginConfigPanel implements Observer, ActionListener {
 
 		this.core = core;
 
-		pluginConfigPanel = new JPanel();
+		this.pluginConfigPanel = new JPanel();
 
-		pluginConfigPanel.setLayout(new BorderLayout());
+		this.pluginConfigPanel.setLayout(new BorderLayout());
 
-		pluginsLoaded = new JLabel(I18n.getMessage("thaw.config.pluginsLoaded"));
+		this.pluginsLoaded = new JLabel(I18n.getMessage("thaw.config.pluginsLoaded"));
 		
 		pluginNames = core.getConfig().getPluginNames();
-		pluginList = new JList();
+		this.pluginList = new JList();
 		// List is leave empty until windows is displayed (see update())
 		
-		pluginToAdd = new JTextField("", 30);
-		pluginToAdd.addActionListener(this);
+		this.pluginToAdd = new JTextField("", 30);
+		this.pluginToAdd.addActionListener(this);
 		
-		buttonPanel = new JPanel();
+		this.buttonPanel = new JPanel();
 		
 		GridLayout layout = new GridLayout(2, 1);
 		layout.setVgap(10);
-		buttonPanel.setLayout(layout);
+		this.buttonPanel.setLayout(layout);
 		
-		subButtonPanel = new JPanel();
+		this.subButtonPanel = new JPanel();
 		
-		subButtonPanel.setLayout(new GridLayout(1, 2));
+		this.subButtonPanel.setLayout(new GridLayout(1, 2));
 
-		addButton = new JButton(I18n.getMessage("thaw.common.add"));
-		removeButton = new JButton(I18n.getMessage("thaw.common.remove"));
+		this.addButton = new JButton(I18n.getMessage("thaw.common.add"));
+		this.removeButton = new JButton(I18n.getMessage("thaw.common.remove"));
 
-		addButton.addActionListener(this);
-		removeButton.addActionListener(this);
+		this.addButton.addActionListener(this);
+		this.removeButton.addActionListener(this);
 		
-		buttonPanel.add(removeButton);
+		this.buttonPanel.add(this.removeButton);
 
-		subButtonPanel.add(pluginToAdd);
-		subButtonPanel.add(addButton);
-		buttonPanel.add(subButtonPanel);
+		this.subButtonPanel.add(this.pluginToAdd);
+		this.subButtonPanel.add(this.addButton);
+		this.buttonPanel.add(this.subButtonPanel);
 		
-		pluginConfigPanel.add(pluginsLoaded, BorderLayout.NORTH);
-		pluginConfigPanel.add(pluginList, BorderLayout.CENTER);
-		pluginConfigPanel.add(buttonPanel, BorderLayout.SOUTH);
+		this.pluginConfigPanel.add(this.pluginsLoaded, BorderLayout.NORTH);
+		this.pluginConfigPanel.add(this.pluginList, BorderLayout.CENTER);
+		this.pluginConfigPanel.add(this.buttonPanel, BorderLayout.SOUTH);
 
 		configWindow.addObserver(this);
 	}
 
 
 	public JPanel getPanel() {
-		return pluginConfigPanel;
+		return this.pluginConfigPanel;
 	}
 
 	/**
@@ -94,23 +94,23 @@ public class PluginConfigPanel implements Observer, ActionListener {
 	 */
 	public void update(Observable o, Object arg) {
 		if(arg == null) // Warns us window is now visible
-			refreshList();
+			this.refreshList();
 	}
 
 	public void refreshList() {
 		//pluginList.setListData(core.getConfig().getPluginNames());
 		
-		Iterator pluginNames = core.getConfig().getPluginNames().iterator();
+		Iterator pluginNames = this.core.getConfig().getPluginNames().iterator();
 
 		Vector toPutInTheList = new Vector();
 
 		while(pluginNames.hasNext()) {
 			String name = (String)pluginNames.next();
 			toPutInTheList.add(name +
-					   " ("+core.getPluginManager().getPlugin(name).getNameForUser()+")");
+					   " ("+this.core.getPluginManager().getPlugin(name).getNameForUser()+")");
 		}
 
-		pluginList.setListData(toPutInTheList);
+		this.pluginList.setListData(toPutInTheList);
 	}
 	
 
@@ -123,34 +123,34 @@ public class PluginConfigPanel implements Observer, ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		if(e.getSource() == addButton || e.getSource() == pluginToAdd) {
-			if(core.getPluginManager().loadPlugin(pluginToAdd.getText())
-			   && core.getPluginManager().runPlugin(pluginToAdd.getText())) {
+		if(e.getSource() == this.addButton || e.getSource() == this.pluginToAdd) {
+			if(this.core.getPluginManager().loadPlugin(this.pluginToAdd.getText())
+			   && this.core.getPluginManager().runPlugin(this.pluginToAdd.getText())) {
 
-				core.getConfig().addPlugin(pluginToAdd.getText());
-				refreshList();
+				this.core.getConfig().addPlugin(this.pluginToAdd.getText());
+				this.refreshList();
 
 			} else {
-				Logger.error(this, "Unable to load '"+pluginToAdd.getText()+"'");
-				JOptionPane.showMessageDialog(core.getConfigWindow().getFrame(),
-							      "Unable to load plugin '"+pluginToAdd.getText()+"'",
+				Logger.error(this, "Unable to load '"+this.pluginToAdd.getText()+"'");
+				JOptionPane.showMessageDialog(this.core.getConfigWindow().getFrame(),
+							      "Unable to load plugin '"+this.pluginToAdd.getText()+"'",
 							      "Unable to load plugin",
 							      JOptionPane.ERROR_MESSAGE);
 			}
 		}
 
 
-		if(e.getSource() == removeButton) {
-			String pluginName = getClassName((String)pluginList.getSelectedValue());
+		if(e.getSource() == this.removeButton) {
+			String pluginName = this.getClassName((String)this.pluginList.getSelectedValue());
 
-			if(core.getPluginManager().stopPlugin(pluginName)
-			   && core.getPluginManager().unloadPlugin(pluginName)) {
+			if(this.core.getPluginManager().stopPlugin(pluginName)
+			   && this.core.getPluginManager().unloadPlugin(pluginName)) {
 				
-				core.getConfig().removePlugin(pluginName);
-				refreshList();
+				this.core.getConfig().removePlugin(pluginName);
+				this.refreshList();
 			} else {
 				Logger.error(this, "Unable to unload '"+pluginName+"'");
-				JOptionPane.showMessageDialog(core.getConfigWindow().getFrame(),
+				JOptionPane.showMessageDialog(this.core.getConfigWindow().getFrame(),
 							      "Unable to unload plugin '"+pluginName+"'",
 							      "Unable to unload plugin",
 							      JOptionPane.ERROR_MESSAGE);

@@ -34,7 +34,7 @@ public class PluginManager {
 	 * Returns the whole plugin list.
 	 */
 	public LinkedHashMap getPlugins() {
-		return plugins;
+		return this.plugins;
 	}
 
 
@@ -43,31 +43,31 @@ public class PluginManager {
 	 * Reload if already loaded.
 	 */
 	public boolean loadPlugins() {
-		plugins = new LinkedHashMap();
+		this.plugins = new LinkedHashMap();
 
 		Vector pluginNames;
 
-		if(core.getConfig().getPluginNames().size() == 0) {
+		if(this.core.getConfig().getPluginNames().size() == 0) {
 			/* Then we load the config with the default plugins */
 			for(int i = 0 ; i < defaultPlugins.length ; i++) {
-				core.getConfig().addPlugin(defaultPlugins[i]);
+				this.core.getConfig().addPlugin(defaultPlugins[i]);
 			}
 		}
 
-		pluginNames = core.getConfig().getPluginNames();
+		pluginNames = this.core.getConfig().getPluginNames();
 
 		Iterator pluginIt = pluginNames.iterator();
 
 		int progressJump = 10 / pluginNames.size();
-		core.getSplashScreen().setProgression(40);
+		this.core.getSplashScreen().setProgression(40);
 
 		while(pluginIt.hasNext()) {
 			String pluginName = (String)pluginIt.next();
 
-			core.getSplashScreen().setProgressionAndStatus(core.getSplashScreen().getProgression()+progressJump,
+			this.core.getSplashScreen().setProgressionAndStatus(this.core.getSplashScreen().getProgression()+progressJump,
 								       "Loading plugin '"+pluginName+"' ...");
 
-			loadPlugin(pluginName);
+			this.loadPlugin(pluginName);
 		}
 
 		return true;
@@ -80,11 +80,11 @@ public class PluginManager {
 		Iterator pluginIt;
 		
 		try {
-			pluginIt = (new Vector(plugins.values())).iterator();
+			pluginIt = (new Vector(this.plugins.values())).iterator();
 			
-			int progressJump = 50 / plugins.size();
+			int progressJump = 50 / this.plugins.size();
 
-			core.getSplashScreen().setProgression(50);
+			this.core.getSplashScreen().setProgression(50);
 
 			while(pluginIt.hasNext()) {
 				Plugin plugin = (Plugin)pluginIt.next();
@@ -92,10 +92,10 @@ public class PluginManager {
 				try {
 					Logger.info(this, "Running plugin '"+plugin.getClass().getName()+"'");
 
-					core.getSplashScreen().setProgressionAndStatus(core.getSplashScreen().getProgression()+progressJump,
+					this.core.getSplashScreen().setProgressionAndStatus(this.core.getSplashScreen().getProgression()+progressJump,
 										       "Starting plugin '"+plugin.getClass().getName()+"' ...");
 
-					plugin.run(core);
+					plugin.run(this.core);
 				} catch(Exception e) {
 					Logger.error(this, "Unable to run the plugin '"+plugin.getClass().getName()+"' because: "+e+":");
 					e.printStackTrace();
@@ -120,7 +120,7 @@ public class PluginManager {
 		Iterator pluginIt;
 		
 		try {
-			pluginIt = plugins.values().iterator();
+			pluginIt = this.plugins.values().iterator();
 			
 			while(pluginIt.hasNext()) {
 				Plugin plugin = (Plugin)pluginIt.next();
@@ -151,12 +151,12 @@ public class PluginManager {
 		Logger.info(this, "Loading plugin: '"+className+"'");
 
 		try {
-			if(plugins.get(className) != null) {
+			if(this.plugins.get(className) != null) {
 				Logger.warning(this, "loadPlugin(): Plugin '"+className+"' already loaded");
 				return false;
 			}
 
-			plugins.put(className, Class.forName(className).newInstance());
+			this.plugins.put(className, Class.forName(className).newInstance());
 			
 		} catch(Exception e) {
 			Logger.warning(this, "loadPlugin('"+className+"'): Exception: "+e);
@@ -174,7 +174,7 @@ public class PluginManager {
 		Logger.info(this, "Starting plugin: '"+className+"'");
 
 		try {
-			((Plugin)plugins.get(className)).run(core);
+			((Plugin)this.plugins.get(className)).run(this.core);
 			
 		} catch(Exception e) {
 			Logger.warning(this, "runPlugin('"+className+"'): Exception: "+e);
@@ -192,7 +192,7 @@ public class PluginManager {
 		Logger.info(this, "Stopping plugin: '"+className+"'");
 
 		try {
-			((Plugin)plugins.get(className)).stop();
+			((Plugin)this.plugins.get(className)).stop();
 			
 		} catch(Exception e) {
 			Logger.warning(this, "runPlugin('"+className+"'): Exception: "+e);
@@ -208,12 +208,12 @@ public class PluginManager {
 	 */
 	public boolean unloadPlugin(String className) {
 		try {
-			if(plugins.get(className) == null) {
+			if(this.plugins.get(className) == null) {
 				Logger.warning(this, "unloadPlugin(): Plugin '"+className+"' already unloaded");
 				return false;
 			}
 
-			plugins.put(className, null);
+			this.plugins.put(className, null);
 			
 		} catch(Exception e) {
 			Logger.warning(this, "unloadPlugin('"+className+"'): Exception: "+e);
@@ -224,6 +224,6 @@ public class PluginManager {
 	}
 
 	public Plugin getPlugin(String className) {
-		return (Plugin)plugins.get(className);
+		return (Plugin)this.plugins.get(className);
 	}
 }

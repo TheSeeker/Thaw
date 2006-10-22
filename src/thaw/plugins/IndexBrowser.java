@@ -27,29 +27,29 @@ public class IndexBrowser implements Plugin {
 			}
 		}
 
-		hsqldb = (Hsqldb)core.getPluginManager().getPlugin("thaw.plugins.Hsqldb");
+		this.hsqldb = (Hsqldb)core.getPluginManager().getPlugin("thaw.plugins.Hsqldb");
 
-		hsqldb.registerChild(this);
+		this.hsqldb.registerChild(this);
 
-		TableCreator.createTables(hsqldb);
+		TableCreator.createTables(this.hsqldb);
 
-		browserPanel = new IndexBrowserPanel(hsqldb, core.getQueueManager(), core.getConfig());
+		this.browserPanel = new IndexBrowserPanel(this.hsqldb, core.getQueueManager(), core.getConfig());
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.index.browser"),
 					    IconBox.minIndexBrowser,
-					    browserPanel.getPanel());
+					    this.browserPanel.getPanel());
 
-		browserPanel.restoreState();
+		this.browserPanel.restoreState();
 
 		return true;
 	}
 
 	public boolean stop() {
-		core.getMainWindow().removeTab(browserPanel.getPanel());
+		this.core.getMainWindow().removeTab(this.browserPanel.getPanel());
 
-		browserPanel.saveState();
+		this.browserPanel.saveState();
 
-		hsqldb.unregisterChild(this);
+		this.hsqldb.unregisterChild(this);
 
 		return true;
 	}
