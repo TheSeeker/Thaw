@@ -51,6 +51,10 @@ import thaw.gui.JDragTree;
  * Manages the index tree and its menu (right-click).
  */
 public class IndexTree extends java.util.Observable implements MouseListener, ActionListener, java.util.Observer {
+
+	public final static Color SELECTION_COLOR = new Color(190, 190, 190);
+	public final static Color LOADING_COLOR = new Color(230, 230, 230);
+	public final static Color LOADING_SELECTION_COLOR = new Color(150, 150, 150);
 	
 	private JPanel panel;
 
@@ -623,6 +627,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 								       int row,
 								       boolean hasFocus) {
 			this.setBackgroundNonSelectionColor(Color.WHITE);
+			this.setBackgroundSelectionColor(SELECTION_COLOR);
 
 			if(value instanceof DefaultMutableTreeNode) {
 				Object o = ((DefaultMutableTreeNode)value).getUserObject();
@@ -631,7 +636,8 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 					Index index = (Index)o;
 
 					if(index.isUpdating()) {
-						this.setBackgroundNonSelectionColor(Color.LIGHT_GRAY);
+						this.setBackgroundNonSelectionColor(LOADING_COLOR);
+						this.setBackgroundSelectionColor(LOADING_SELECTION_COLOR);
 					}
 				}
 			}
