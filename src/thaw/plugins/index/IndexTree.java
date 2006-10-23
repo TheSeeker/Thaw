@@ -368,6 +368,10 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 				index.generateKeys(this.queueManager);
 
 			index.create();
+
+			if (!this.modifiables)
+				index.update();
+
 			parent.insert(index.getTreeNode(), 0);
 
 			this.treeModel.reload(parent);
@@ -399,6 +403,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 			this.treeModel.reload(parent);
 		}
+
 
 		if(e.getSource() == this.renameIndexCategory
 		   || e.getSource() == this.renameIndex) {
@@ -516,6 +521,9 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			Index index = new Index(IndexTree.this.db, IndexTree.this.queueManager, -2, parent, name, name, publicKey, privateKey, 0, null, IndexTree.this.modifiables);
 
 			index.create();
+			
+			index.updateFromFreenet(-1);
+
 			parent.insert(index.getTreeNode(), 0);
 			
 			IndexTree.this.treeModel.reload(parent);
