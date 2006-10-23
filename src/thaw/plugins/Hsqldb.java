@@ -25,6 +25,7 @@ public class Hsqldb extends LibraryPlugin {
 		} catch (Exception e) {
 			Logger.error(this, "ERROR: failed to load HSQLDB JDBC driver.");
 			e.printStackTrace();
+			System.exit(1);
 			return false;
 		}
 
