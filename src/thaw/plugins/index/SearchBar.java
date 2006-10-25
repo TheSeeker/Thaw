@@ -57,9 +57,6 @@ public class SearchBar implements ActionListener {
 		if (this.userText.getText() == null)
 			return;
 
-		if (this.tree.getSelectedNode() == null)
-			return;
-
 		this.userText.setSelectionStart(0);
 		this.userText.setSelectionEnd(this.userText.getText().length());
 

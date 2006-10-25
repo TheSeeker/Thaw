@@ -27,7 +27,10 @@ public class SearchResult extends Observable implements Observer, FileAndLinkLis
 	public SearchResult(Hsqldb hsqldb, String search, IndexTreeNode node, FCPQueueManager queueManager) {
 		this.queueManager = queueManager;
 		this.search = search.split(" ");
-		this.indexIds = node.getIndexIds();
+		if (node == null)
+			this.indexIds = null;
+		else
+			this.indexIds = node.getIndexIds();
 		this.db = hsqldb;
 	}
 
@@ -36,15 +39,21 @@ public class SearchResult extends Observable implements Observer, FileAndLinkLis
 		String query = "";
 		PreparedStatement st;
 
-		query = "SELECT "+fields+" FROM "+table+" WHERE (FALSE";
+		query = "SELECT "+fields+" FROM "+table +" WHERE ";
 
-		for (Iterator it = indexIds.iterator();
-		     it.hasNext();) {
-			it.next();
-			query = query + " OR indexParent = ?";
+		if (indexIds != null) {
+			query = query +"(FALSE";
+			
+			for (Iterator it = indexIds.iterator();
+			     it.hasNext();) {
+				it.next();
+				query = query + " OR indexParent = ?";
+			}
+			
+			query = query + ") AND ";
 		}
-
-		query = query + ") AND (TRUE";
+		
+		query = query + "(TRUE";
 
 		for (int i = 0 ; i < searchPatterns.length; i++) {
 			query = query + " AND LOWER(publicKey) LIKE ?";
@@ -66,9 +75,11 @@ public class SearchResult extends Observable implements Observer, FileAndLinkLis
 
 		i = 1;
 
-		for (Iterator it = indexIds.iterator();
-		     it.hasNext(); i++) {
-			st.setInt(i, ((Integer)it.next()).intValue());
+		if (indexIds != null) {
+			for (Iterator it = indexIds.iterator();
+			     it.hasNext(); i++) {
+				st.setInt(i, ((Integer)it.next()).intValue());
+			}
 		}
 
 		for (int j = 0 ; j < searchPatterns.length; j++) {
