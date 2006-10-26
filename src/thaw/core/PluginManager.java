@@ -78,36 +78,33 @@ public class PluginManager {
 	 */
 	public boolean runPlugins() {
 		Iterator pluginIt;
-		
-		try {
-			pluginIt = (new Vector(this.plugins.values())).iterator();
-			
-			int progressJump = 50 / this.plugins.size();
 
-			this.core.getSplashScreen().setProgression(50);
-
-			while(pluginIt.hasNext()) {
-				Plugin plugin = (Plugin)pluginIt.next();
-
-				try {
-					Logger.info(this, "Running plugin '"+plugin.getClass().getName()+"'");
-
-					this.core.getSplashScreen().setProgressionAndStatus(this.core.getSplashScreen().getProgression()+progressJump,
-										       "Starting plugin '"+plugin.getClass().getName()+"' ...");
-
-					plugin.run(this.core);
-				} catch(Exception e) {
-					Logger.error(this, "Unable to run the plugin '"+plugin.getClass().getName()+"' because: "+e+":");
-					e.printStackTrace();
-				}
-
-
-			}
-		} catch(NullPointerException e) {
-			Logger.notice(this, "No plugin to run");
+		if (this.plugins == null) {
+			Logger.error(this, "No plugin to run ?!");
 			return false;
 		}
 		
+		pluginIt = (new Vector(this.plugins.values())).iterator();
+			
+		int progressJump = 50 / this.plugins.size();
+
+		this.core.getSplashScreen().setProgression(50);
+
+		while(pluginIt.hasNext()) {
+			Plugin plugin = (Plugin)pluginIt.next();
+
+			try {
+				Logger.info(this, "Running plugin '"+plugin.getClass().getName()+"'");
+
+				this.core.getSplashScreen().setProgressionAndStatus(this.core.getSplashScreen().getProgression()+progressJump,
+										    "Starting plugin '"+plugin.getClass().getName()+"' ...");
+
+				plugin.run(this.core);
+			} catch(Exception e) {
+				Logger.error(this, "Unable to run the plugin '"+plugin.getClass().getName()+"' because: "+e+":");
+				e.printStackTrace();
+			}
+		}
 
 		return true;
 	}
@@ -118,27 +115,27 @@ public class PluginManager {
 	 */
 	public boolean stopPlugins() {
 		Iterator pluginIt;
-		
-		try {
-			pluginIt = this.plugins.values().iterator();
-			
-			while(pluginIt.hasNext()) {
-				Plugin plugin = (Plugin)pluginIt.next();
-				
-				try {
-					plugin.stop();
-				} catch(Exception e) {
-					Logger.error(this, "Unable to stop the plugin '"+plugin.getClass().getName()+"', because: "+e.toString());
-					e.printStackTrace();
-				}
 
-
-			}
-		} catch(NullPointerException e) {
-			Logger.notice(this, "No plugin to load");
+		if (this.plugins == null) {
+			Logger.error(this, "No plugin to stop ?!");
 			return false;
 		}
+		    
 		
+		pluginIt = this.plugins.values().iterator();
+			
+		while(pluginIt.hasNext()) {
+			Plugin plugin = (Plugin)pluginIt.next();
+
+			try {
+				plugin.stop();
+			} catch(Exception e) {
+				Logger.error(this, "Unable to stop the plugin "+
+					     "'"+plugin.getClass().getName()+"'"+
+					     ", because: "+e.toString());
+				e.printStackTrace();
+			}
+		}
 
 		return true;
 	}

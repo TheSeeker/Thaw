@@ -1010,7 +1010,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		Element header = (Element)rootEl.getElementsByTagName("header").item(0);
 
 		this.realName = this.getHeaderElement(header, "title");
-		this.author = this.getHeaderElement(header, "author");
+		this.author = this.getHeaderElement(header, "owner");
 
 		if (this.author == null)
 			this.author = "Another anonymous";
