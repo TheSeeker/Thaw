@@ -361,7 +361,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 			IndexCategory parent;
 
-			if (this.selectedNode != null)
+			if (this.selectedNode != null && (this.selectedNode instanceof IndexCategory))
 				parent = (IndexCategory)this.selectedNode;
 			else
 				parent = this.root;
