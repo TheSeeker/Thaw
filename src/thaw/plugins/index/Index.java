@@ -277,7 +277,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	public void updateFromFreenet(int rev) {
 		FCPClientGet clientGet;
-		
+
 		Logger.info(this, "Getting lastest version ...");
 		
 		String key;
@@ -301,12 +301,19 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		}
 		
 		Logger.info(this, "Key asked: "+key);
+
 		
 		clientGet = new FCPClientGet(key, 2, 2, false, -1, System.getProperty("java.io.tmpdir"));
 		this.transfer = clientGet;
 		clientGet.addObserver(this);
-		
-		this.queueManager.addQueryToThePendingQueue(clientGet);
+
+		/*
+		 * These requests are usually quite fast, and don't consume a lot
+		 * of bandwith / CPU. So we can skip the queue and start immediatly
+		 * (and like this, they won't appear in the queue)
+		 */
+		//this.queueManager.addQueryToThePendingQueue(clientGet);
+		clientGet.start(queueManager);
 
 		this.setChanged();
 		this.notifyObservers();
