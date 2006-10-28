@@ -94,12 +94,17 @@ public class PluginManager {
 			Plugin plugin = (Plugin)pluginIt.next();
 
 			try {
-				Logger.info(this, "Running plugin '"+plugin.getClass().getName()+"'");
+				if (plugin != null) {
+					Logger.info(this, "Running plugin '"+plugin.getClass().getName()+"'");
+					
+					this.core.getSplashScreen().setProgressionAndStatus(this.core.getSplashScreen().getProgression()+progressJump,
+											    "Starting plugin '"+plugin.getClass().getName()+"' ...");
+					plugin.run(this.core);
 
-				this.core.getSplashScreen().setProgressionAndStatus(this.core.getSplashScreen().getProgression()+progressJump,
-										    "Starting plugin '"+plugin.getClass().getName()+"' ...");
+				}
+				else
+					Logger.notice(this, "Plugin == null ?");
 
-				plugin.run(this.core);
 			} catch(Exception e) {
 				Logger.error(this, "Unable to run the plugin '"+plugin.getClass().getName()+"' because: "+e+":");
 				e.printStackTrace();
@@ -128,7 +133,10 @@ public class PluginManager {
 			Plugin plugin = (Plugin)pluginIt.next();
 
 			try {
-				plugin.stop();
+				if (plugin != null)
+					plugin.stop();
+				else
+					Logger.notice(this, "Plugin == null ?!!");
 			} catch(Exception e) {
 				Logger.error(this, "Unable to stop the plugin "+
 					     "'"+plugin.getClass().getName()+"'"+
@@ -210,7 +218,7 @@ public class PluginManager {
 				return false;
 			}
 
-			this.plugins.put(className, null);
+			this.plugins.remove(className);
 			
 		} catch(Exception e) {
 			Logger.warning(this, "unloadPlugin('"+className+"'): Exception: "+e);
