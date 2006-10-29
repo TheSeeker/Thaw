@@ -245,8 +245,10 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 		if (tmpdir == null)
 			tmpdir = "";
+		else
+			tmpdir = tmpdir + java.io.File.separator;
 
-		this.targetFile = new java.io.File(tmpdir + java.io.File.separator + this.toString()+".xml");
+		this.targetFile = new java.io.File(tmpdir + this.toString()+".xml");
 
 		if (this.transfer != null) {
 			Logger.notice(this, "A transfer is already running");
@@ -535,10 +537,6 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 		if(o == this.transfer) {
 			if(this.transfer.isFinished() && this.transfer.isSuccessful()) {
-
-				if (this.transfer.stop(this.queueManager))
-					this.queueManager.remove(this.transfer);
-
 				if(this.transfer instanceof FCPClientPut) {
 					if (this.targetFile != null)
 						this.targetFile.delete();
@@ -549,6 +547,11 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 							fl.delete();
 						}
 					}
+
+					((FCPClientPut)this.transfer).deleteObserver(this);
+
+					if (this.transfer.stop(this.queueManager))
+						this.queueManager.remove(this.transfer);
 
 					this.transfer = null;
 
