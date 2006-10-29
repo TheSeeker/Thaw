@@ -10,7 +10,7 @@ import thaw.core.Logger;
 public class FCPBufferedStream implements Runnable {
 	private FCPConnection connection;
 	private int maxUploadSpeed;
-	
+
 	private byte outputBuffer[];
 
 	public final static int OUTPUT_BUFFER_SIZE = 102400;
@@ -30,7 +30,7 @@ public class FCPBufferedStream implements Runnable {
 				 int maxUploadSpeed) {
 		this.connection = connection;
 		this.maxUploadSpeed = maxUploadSpeed;
-		
+
 		if(maxUploadSpeed >= 0) {
 			this.outputBuffer = new byte[OUTPUT_BUFFER_SIZE];
 			this.packetSize = (maxUploadSpeed * 1024) / (1000/INTERVAL);
@@ -82,7 +82,7 @@ public class FCPBufferedStream implements Runnable {
 	private boolean readOutputBuffer(byte[] data) {
 		for(int i = 0; i < data.length ; i++) {
 			data[i] = this.outputBuffer[this.readCursor];
-			
+
 			this.readCursor++;
 
 			if(this.readCursor >= OUTPUT_BUFFER_SIZE)
@@ -100,29 +100,29 @@ public class FCPBufferedStream implements Runnable {
 	public void flush() {
 		while(this.waiting > 0) {
 			this.sleep(INTERVAL);
-		}		
+		}
 	}
 
 
 	public void run() {
 		byte[] data;
-		
+
 		while(this.running) { /* Wild and freeeeeee */
 			if(this.waiting > 0) {
 				int to_read = this.packetSize;
-				
+
 				if(this.waiting < to_read)
 					to_read = this.waiting;
-				
+
 				data = new byte[to_read];
-				
+
 				this.readOutputBuffer(data);
-				
+
 				this.connection.realRawWrite(data);
 			}
 
 			this.sleep(INTERVAL);
-		}		
+		}
 	}
 
 	/**

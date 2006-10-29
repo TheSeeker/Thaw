@@ -157,7 +157,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 			int ret = JOptionPane.showOptionDialog((java.awt.Component)null,
 								       I18n.getMessage("thaw.warning.isWritingSoApplyLater"),
 								       I18n.getMessage("thaw.warning.title"),
-								       JOptionPane.YES_NO_OPTION, 
+								       JOptionPane.YES_NO_OPTION,
 								       JOptionPane.WARNING_MESSAGE,
 								       (javax.swing.Icon)null,
 								       (java.lang.Object[])null,

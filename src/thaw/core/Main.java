@@ -19,7 +19,7 @@ public class Main {
 	 * Look & feel use by GUI front end
 	 */
 	private static String lookAndFeel = null;
-	
+
 
 	/**
 	 * Locale (null = default)
@@ -50,7 +50,7 @@ public class Main {
 
 	/**
 	 * This method parses the command line arguments
-	 * 
+	 *
 	 * @param args the arguments
 	 */
 	private static void parseCommandLine(String[] args) {

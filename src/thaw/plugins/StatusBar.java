@@ -20,7 +20,7 @@ public class StatusBar implements Runnable, Plugin {
 		this.core = core;
 
 		this.advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
-		
+
 		this.running = true;
 		this.refresher = new Thread(this);
 
@@ -53,7 +53,7 @@ public class StatusBar implements Runnable, Plugin {
 		int running = 0;
 		int pending = 0;
 		int total = 0;
-		
+
 		try {
 			Vector runningQueue = this.core.getQueueManager().getRunningQueue();
 
@@ -77,11 +77,11 @@ public class StatusBar implements Runnable, Plugin {
 					failed++;
 				}
 			}
-			
+
 			Vector[] pendingQueues = this.core.getQueueManager().getPendingQueues();
 
 			for(int i =0 ; i < pendingQueues.length; i++) {
-				
+
 				progressTotal += pendingQueues[i].size() * 100;
 				pending += pendingQueues[i].size();
 
@@ -92,7 +92,7 @@ public class StatusBar implements Runnable, Plugin {
 			this.core.getMainWindow().setStatus(this.core.getMainWindow().getStatus()+"*");
 			return;
 		}
-		
+
 		total = finished + failed + running + pending;
 
 		String status = "Thaw "+Main.VERSION;
@@ -112,7 +112,7 @@ public class StatusBar implements Runnable, Plugin {
 			+ Integer.toString(running) + "/" + Integer.toString(total)
 			+ SEPARATOR + I18n.getMessage("thaw.plugin.statistics.pending") + " "
 			+ Integer.toString(pending) + "/" + Integer.toString(total);
-			
+
 		this.core.getMainWindow().setStatus(status);
 
 	}

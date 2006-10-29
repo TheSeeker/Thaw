@@ -32,5 +32,5 @@ public class FCPWatchGlobal implements FCPQuery {
 	public int getQueryType() {
 		return 0;
 	}
-	
+
 }

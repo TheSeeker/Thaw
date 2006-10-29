@@ -9,20 +9,20 @@ import thaw.core.Logger;
  * Holds the default MIME types.
  */
 public class DefaultMIMETypes {
-	
+
 	/** Default MIME type - what to set it to if we don't know any better */
 	public static final String DEFAULT_MIME_TYPE = "application/octet-stream";
-	
+
 	/** MIME types: number -> name */
 	private static Vector mimeTypesByNumber = new Vector();
-	
+
 	/** MIME types: name -> number */
 	private static HashMap mimeTypesByName = new HashMap();
-	
+
 	/** MIME types by extension. One extension maps to one MIME type, but not necessarily
 	 * the other way around. */
 	private static HashMap mimeTypesByExtension = new HashMap();
-	
+
 	/** Primary extension by MIME type number. */
 	private static HashMap primaryExtensionByMimeNumber = new HashMap();
 
@@ -30,10 +30,10 @@ public class DefaultMIMETypes {
 	 * Just to be able to use thaw.core.Logger.
 	 */
 	public DefaultMIMETypes() {
-		
+
 	}
 
-	
+
 	/**
 	 * Add a MIME type, without any extensions.
 	 * @param number The number of the MIME type for compression. This *must not change*
@@ -81,7 +81,7 @@ public class DefaultMIMETypes {
 		}
 		if(outExtension != null)
 			primaryExtensionByMimeNumber.put(t, outExtension);
-				
+
 	}
 
 	/**
@@ -99,7 +99,7 @@ public class DefaultMIMETypes {
 	protected static synchronized void addMIMEType(short number, String type, String extensions, String outExtension) {
 		addMIMEType(number, type, extensions.split(" "), outExtension);
 	}
-	
+
 	/**
 	 * Get a known MIME type by number.
 	 */
@@ -108,7 +108,7 @@ public class DefaultMIMETypes {
 			return null;
 		return (String) mimeTypesByNumber.get(x);
 	}
-	
+
 	/**
 	 * Get the number of a MIME type, or -1 if it is not in the table of known MIME
 	 * types, in which case it will have to be sent uncompressed.
@@ -118,15 +118,15 @@ public class DefaultMIMETypes {
 		if(x != null) return x.shortValue();
 		else return -1;
 	}
-	
+
 	/* From toad's /etc/mime.types
-	 * cat /etc/mime.types | sed "/^$/d;/#/d" | tr --squeeze '\t' ' ' | 
-	 * (y=0; while read x; do echo "$x" | 
+	 * cat /etc/mime.types | sed "/^$/d;/#/d" | tr --squeeze '\t' ' ' |
+	 * (y=0; while read x; do echo "$x" |
 	 * sed -n "s/^\([^ ]*\)$/addMIMEType\($y, \"\1\"\);/p;s/^\([^ (),]\+\) \(.*\)$/addMIMEType\($y, \"\1\", \"\2\"\);/p;"; y=$((y+1)); done)
 	 */
 
 	// FIXME should we support aliases?
-	
+
 	static {
 		addMIMEType((short)0, "application/activemessage");
 		addMIMEType((short)1, "application/andrew-inset", "ez");
@@ -742,7 +742,7 @@ public class DefaultMIMETypes {
 		addMIMEType((short)611, "x-conference/x-cooltalk", "ice");
 		addMIMEType((short)612, "x-world/x-vrml", "vrm vrml wrl", "vrml");
 	}
-	
+
 	/** Guess a MIME type from a filename */
 	public synchronized static String guessMIMEType(String arg) {
 		int x = arg.lastIndexOf('.');
@@ -760,7 +760,7 @@ public class DefaultMIMETypes {
 		if(typeNumber < 0) return null;
 		return (String) primaryExtensionByMimeNumber.get(new Short(typeNumber));
 	}
-	
+
 	public synchronized static boolean isValidExt(String expectedMimeType, String oldExt) {
 		Short s = (Short) mimeTypesByExtension.get(oldExt);
 		if(s == null) return false;

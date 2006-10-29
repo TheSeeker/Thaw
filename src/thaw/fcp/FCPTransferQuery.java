@@ -31,7 +31,7 @@ public interface FCPTransferQuery extends FCPQuery {
 	 * Always between -1 and 6.
 	 */
 	public int getThawPriority();
-	
+
 	/**
 	 * Currently the same than Thaw priority.
 	 */

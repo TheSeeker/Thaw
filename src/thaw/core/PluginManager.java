@@ -30,7 +30,7 @@ public class PluginManager {
 	}
 
 
-	/** 
+	/**
 	 * Returns the whole plugin list.
 	 */
 	public LinkedHashMap getPlugins() {
@@ -73,7 +73,7 @@ public class PluginManager {
 		return true;
 	}
 
-	/** 
+	/**
 	 * Start plugins.
 	 */
 	public boolean runPlugins() {
@@ -83,9 +83,9 @@ public class PluginManager {
 			Logger.error(this, "No plugin to run ?!");
 			return false;
 		}
-		
+
 		pluginIt = (new Vector(this.plugins.values())).iterator();
-			
+
 		int progressJump = 50 / this.plugins.size();
 
 		this.core.getSplashScreen().setProgression(50);
@@ -96,7 +96,7 @@ public class PluginManager {
 			try {
 				if (plugin != null) {
 					Logger.info(this, "Running plugin '"+plugin.getClass().getName()+"'");
-					
+
 					this.core.getSplashScreen().setProgressionAndStatus(this.core.getSplashScreen().getProgression()+progressJump,
 											    "Starting plugin '"+plugin.getClass().getName()+"' ...");
 					plugin.run(this.core);
@@ -125,10 +125,10 @@ public class PluginManager {
 			Logger.error(this, "No plugin to stop ?!");
 			return false;
 		}
-		    
-		
+
+
 		pluginIt = this.plugins.values().iterator();
-			
+
 		while(pluginIt.hasNext()) {
 			Plugin plugin = (Plugin)pluginIt.next();
 
@@ -162,7 +162,7 @@ public class PluginManager {
 			}
 
 			this.plugins.put(className, Class.forName(className).newInstance());
-			
+
 		} catch(Exception e) {
 			Logger.warning(this, "loadPlugin('"+className+"'): Exception: "+e);
 			return false;
@@ -180,7 +180,7 @@ public class PluginManager {
 
 		try {
 			((Plugin)this.plugins.get(className)).run(this.core);
-			
+
 		} catch(Exception e) {
 			Logger.warning(this, "runPlugin('"+className+"'): Exception: "+e);
 			return false;
@@ -188,7 +188,7 @@ public class PluginManager {
 
 		return true;
 	}
-	
+
 
 	/**
 	 * Stop a given plugin.
@@ -198,7 +198,7 @@ public class PluginManager {
 
 		try {
 			((Plugin)this.plugins.get(className)).stop();
-			
+
 		} catch(Exception e) {
 			Logger.warning(this, "runPlugin('"+className+"'): Exception: "+e);
 			return false;
@@ -219,7 +219,7 @@ public class PluginManager {
 			}
 
 			this.plugins.remove(className);
-			
+
 		} catch(Exception e) {
 			Logger.warning(this, "unloadPlugin('"+className+"'): Exception: "+e);
 			return false;

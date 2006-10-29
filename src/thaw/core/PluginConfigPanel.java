@@ -27,7 +27,7 @@ public class PluginConfigPanel implements Observer, ActionListener {
 
 	private JLabel pluginsLoaded = null;
 	private JList pluginList = null;
-	
+
 	private JPanel buttonPanel = null;
 	private JButton removeButton = null;
 
@@ -46,22 +46,22 @@ public class PluginConfigPanel implements Observer, ActionListener {
 		this.pluginConfigPanel.setLayout(new BorderLayout());
 
 		this.pluginsLoaded = new JLabel(I18n.getMessage("thaw.config.pluginsLoaded"));
-		
+
 		pluginNames = core.getConfig().getPluginNames();
 		this.pluginList = new JList();
 		// List is leave empty until windows is displayed (see update())
-		
+
 		this.pluginToAdd = new JTextField("", 30);
 		this.pluginToAdd.addActionListener(this);
-		
+
 		this.buttonPanel = new JPanel();
-		
+
 		GridLayout layout = new GridLayout(2, 1);
 		layout.setVgap(10);
 		this.buttonPanel.setLayout(layout);
-		
+
 		this.subButtonPanel = new JPanel();
-		
+
 		this.subButtonPanel.setLayout(new GridLayout(1, 2));
 
 		this.addButton = new JButton(I18n.getMessage("thaw.common.add"));
@@ -69,13 +69,13 @@ public class PluginConfigPanel implements Observer, ActionListener {
 
 		this.addButton.addActionListener(this);
 		this.removeButton.addActionListener(this);
-		
+
 		this.buttonPanel.add(this.removeButton);
 
 		this.subButtonPanel.add(this.pluginToAdd);
 		this.subButtonPanel.add(this.addButton);
 		this.buttonPanel.add(this.subButtonPanel);
-		
+
 		this.pluginConfigPanel.add(this.pluginsLoaded, BorderLayout.NORTH);
 		this.pluginConfigPanel.add(this.pluginList, BorderLayout.CENTER);
 		this.pluginConfigPanel.add(this.buttonPanel, BorderLayout.SOUTH);
@@ -99,7 +99,7 @@ public class PluginConfigPanel implements Observer, ActionListener {
 
 	public void refreshList() {
 		//pluginList.setListData(core.getConfig().getPluginNames());
-		
+
 		Iterator pluginNames = this.core.getConfig().getPluginNames().iterator();
 
 		Vector toPutInTheList = new Vector();
@@ -112,7 +112,7 @@ public class PluginConfigPanel implements Observer, ActionListener {
 
 		this.pluginList.setListData(toPutInTheList);
 	}
-	
+
 
 	/**
 	 * Return the class name contained in an option name from the list.
@@ -145,7 +145,6 @@ public class PluginConfigPanel implements Observer, ActionListener {
 
 			if(this.core.getPluginManager().stopPlugin(pluginName)
 			   && this.core.getPluginManager().unloadPlugin(pluginName)) {
-				
 				this.core.getConfig().removePlugin(pluginName);
 				this.refreshList();
 			} else {

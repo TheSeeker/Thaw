@@ -133,14 +133,14 @@ public class Core implements Observer {
 		this.config.loadConfig();
 
 		this.config.setDefaultValues();
-		
+
 		return true;
 	}
 
-	
+
 	/**
 	 * Init the connection to the node.
-	 * If a connection is already established, it will disconnect, so 
+	 * If a connection is already established, it will disconnect, so
 	 * if you called canDisconnect() before, then this function can be called safely.
 	 * @see #canDisconnect()
 	 */
@@ -155,7 +155,7 @@ public class Core implements Observer {
 			if(this.connection != null && this.connection.isConnected()) {
 				this.disconnect();
 			}
-			
+
 			if(this.connection == null) {
 				this.connection = new FCPConnection(this.config.getValue("nodeAddress"),
 							       Integer.parseInt(this.config.getValue("nodePort")),
@@ -166,14 +166,14 @@ public class Core implements Observer {
 				this.connection.setNodePort(Integer.parseInt(this.config.getValue("nodePort")));
 				this.connection.setMaxUploadSpeed(Integer.parseInt(this.config.getValue("maxUploadSpeed")));
 			}
-			
+
 			if(!this.connection.connect()) {
 				Logger.warning(this, "Unable to connect !");
 			}
-			
+
 			if(this.queryManager == null)
 				this.queryManager = new FCPQueryManager(this.connection);
-			
+
 			if(this.queueManager == null)
 				this.queueManager = new FCPQueueManager(this.queryManager,
 								   this.config.getValue("thawId"),
@@ -183,9 +183,9 @@ public class Core implements Observer {
 				this.queueManager.setThawId(this.config.getValue("thawId"));
 				this.queueManager.setMaxDownloads(Integer.parseInt(this.config.getValue("maxSimultaneousDownloads")));
 				this.queueManager.setMaxInsertions(Integer.parseInt(this.config.getValue("maxSimultaneousInsertions")));
-				
+
 			}
-				
+
 
 
 
@@ -196,7 +196,7 @@ public class Core implements Observer {
 
 
 				this.clientHello = new FCPClientHello(this.queryManager, this.config.getValue("thawId"));
-				
+
 				if(!this.clientHello.start(null)) {
 					Logger.warning(this, "Id already used !");
 					this.connection.disconnect();
@@ -207,19 +207,19 @@ public class Core implements Observer {
 					Logger.debug(this, "Node name    : "+this.clientHello.getNodeName());
 					Logger.debug(this, "FCP  version : "+this.clientHello.getNodeFCPVersion());
 					Logger.debug(this, "Node version : "+this.clientHello.getNodeVersion());
-					
+
 					this.queueManager.startScheduler();
 
 					this.queueManager.restartNonPersistent();
-					
+
 					FCPWatchGlobal watchGlobal = new FCPWatchGlobal(true);
 					watchGlobal.start(this.queueManager);
-					
+
 					FCPQueueLoader queueLoader = new FCPQueueLoader(this.config.getValue("thawId"));
 					queueLoader.start(this.queueManager);
-					
+
 				}
-								   
+
 			} else {
 				return false;
 			}
@@ -256,7 +256,7 @@ public class Core implements Observer {
 		return this.clientHello;
 	}
 
-	
+
 	/**
 	 * To call before initGraphics() !
 	 * @param lAndF LookAndFeel name
@@ -313,7 +313,7 @@ public class Core implements Observer {
 
 		if(!this.pluginManager.loadPlugins())
 			return false;
-		
+
 		if(!this.pluginManager.runPlugins())
 			return false;
 
@@ -366,7 +366,7 @@ public class Core implements Observer {
 
 		Logger.info(this, "Hidding main window ...");
 		this.mainWindow.setVisible(false);
-		
+
 		Logger.info(this, "Stopping plugins ...");
 		this.pluginManager.stopPlugins();
 
@@ -386,7 +386,7 @@ public class Core implements Observer {
 		int ret = JOptionPane.showOptionDialog((java.awt.Component)null,
 						       I18n.getMessage("thaw.warning.isWriting"),
 						       "Thaw - "+I18n.getMessage("thaw.warning.title"),
-						       JOptionPane.YES_NO_OPTION, 
+						       JOptionPane.YES_NO_OPTION,
 						       JOptionPane.WARNING_MESSAGE,
 						       (javax.swing.Icon)null,
 						       (java.lang.Object[])null,
@@ -420,19 +420,19 @@ public class Core implements Observer {
 							 SwingConstants.CENTER);
 			warningPanel.add(warningLabel);
 			warningDialog.setContentPane(warningPanel);
-			
+
 			warningDialog.setVisible(true);
 
 			for(nmbReconnect = 0;
 			    nmbReconnect < MAX_CONNECT_TRIES ;
 			    nmbReconnect++) {
-				
+
 				try {
 					Thread.sleep(TIME_BETWEEN_EACH_TRY);
 				} catch(java.lang.InterruptedException e) {
 					// brouzouf
 				}
-				
+
 				Logger.notice(this, "Trying to reconnect ... : "+ Integer.toString(nmbReconnect));
 
 				if(this.initNodeConnection())
@@ -441,13 +441,13 @@ public class Core implements Observer {
 
 			warningDialog.setVisible(false);
 
-			
+
 			if(nmbReconnect == MAX_CONNECT_TRIES) {
 				while(!this.initNodeConnection()) {
 					int ret = JOptionPane.showOptionDialog((java.awt.Component)null,
 									       I18n.getMessage("thaw.warning.disconnected"),
 									       "Thaw - "+I18n.getMessage("thaw.warning.title"),
-									       JOptionPane.YES_NO_OPTION, 
+									       JOptionPane.YES_NO_OPTION,
 									       JOptionPane.WARNING_MESSAGE,
 									       (javax.swing.Icon)null,
 									       (java.lang.Object[])null,

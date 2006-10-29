@@ -6,9 +6,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 
 public interface IndexTreeNode {
-	
+
 	public DefaultMutableTreeNode getTreeNode();
-	
+
 	public void setParent(IndexCategory parent);
 
 	/**
@@ -25,7 +25,7 @@ public interface IndexTreeNode {
 	 * Change the name of the node.
 	 */
 	public void rename(String name);
-	
+
 	/**
 	 * Remove the node from the database. (recursive)
 	 */

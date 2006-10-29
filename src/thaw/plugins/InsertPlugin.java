@@ -20,7 +20,7 @@ public class InsertPlugin implements thaw.core.Plugin {
 
 	public boolean run(Core core) {
 		this.core = core;
-		
+
 		Logger.info(this, "Starting plugin \"InsertPlugin\" ...");
 
 		this.insertPanel = new InsertPanel(this,
@@ -85,7 +85,7 @@ public class InsertPlugin implements thaw.core.Plugin {
 							     null, priority,
 							     global, persistence);
 			}
-			
+
 			if(mimeType != null) {
 				Logger.notice(this, "Mime type forced to "+mimeType);
 				clientPut.setMetadata("ContentType", mimeType);
@@ -93,14 +93,12 @@ public class InsertPlugin implements thaw.core.Plugin {
 
 			this.insertPanel.setLastInserted(clientPut);
 			clientPut.addObserver(this.insertPanel);
-			
+
 			this.core.getQueueManager().addQueryToThePendingQueue(clientPut);
 
 		}
-		
+
 		return true;
 	}
-				       
-				       
-				       
+
 }

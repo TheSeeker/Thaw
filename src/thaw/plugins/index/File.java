@@ -73,7 +73,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 		//category = resultSet.getString("category");
 
 		this.deduceFilenameFromKey();
-		
+
 		this.parent = parent;
 	}
 
@@ -85,18 +85,18 @@ public class File extends java.util.Observable implements java.util.Observer {
 
 		if (this.publicKey != null)
 			this.publicKey = this.publicKey.trim();
-		
+
 		this.localPath = null;
-		
+
 		this.size = Long.parseLong(fileElement.getAttribute("size"));
-		
+
 		this.setOptions(fileElement.getChildNodes());
 
 		this.deduceFilenameFromKey();
 
 		this.parent = parent;
 	}
-	
+
 	public void deduceFilenameFromKey() {
 		this.fileName = FreenetURIHelper.getFilenameFromKey(this.publicKey);
 	}
@@ -189,16 +189,15 @@ public class File extends java.util.Observable implements java.util.Observer {
 							  null, 4,
 							  true, 2, true); /* getCHKOnly */
 		queueManager.addQueryToThePendingQueue(insertion);
-		
+
 		this.setTransfer(insertion);
 	}
 
-	
 	public void download(String targetPath, FCPQueueManager queueManager) {
 		FCPClientGet clientGet = new FCPClientGet(this.getPublicKey(), 4, 0, true, -1, targetPath);
 
 		queueManager.addQueryToThePendingQueue(clientGet);
-		
+
 		this.setTransfer(clientGet);
 	}
 
@@ -207,7 +206,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 		FCPClientPut clientPut = new FCPClientPut(new java.io.File(this.getLocalPath()),
 							  0, 0, null, null, 4, true, 0);
 		queueManager.addQueryToThePendingQueue(clientPut);
-				
+
 		this.setTransfer(clientPut);
 	}
 
@@ -251,7 +250,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 			} catch(SQLException e) {
 				this.id = 1;
 			}
-			
+
 
 			st = this.db.getConnection().prepareStatement("INSERT INTO files (id, filename, publicKey, "+
 								       "localPath, mime, size, category, indexParent) "+
@@ -276,7 +275,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 				st.setNull(5, Types.VARCHAR);
 
 			st.setLong(6, this.size);
-			
+
 			if(this.category != null)
 				st.setString(7, this.category);
 			else
@@ -288,7 +287,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to insert file '"+this.fileName+"' because: "+e.toString());
 		}
-		
+
 	}
 
 	public void delete() {
@@ -303,7 +302,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to remove file '"+this.fileName+"' because: "+e.toString());
-		}	
+		}
 	}
 
 	public void update() {
@@ -335,7 +334,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 				st.setNull(4, Types.VARCHAR);
 
 			st.setLong(5, this.size);
-			
+
 			if(this.category != null)
 				st.setString(6, this.category);
 			else
@@ -380,11 +379,11 @@ public class File extends java.util.Observable implements java.util.Observer {
 		} catch(SQLException e) {
 
 		}
-		
+
 		return false;
 	}
 
-	
+
 	public void update(java.util.Observable o, Object param) {
 		if(o == this.transfer) {
 			if(this.transfer.isFinished() && this.transfer instanceof FCPClientPut) {
@@ -415,7 +414,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 		return this.id;
 	}
 
-	
+
 	public Element getXML(Document xmlDoc) {
 		if(this.getPublicKey() == null) {
 			Logger.notice(this, "No public key for file '"+this.fileName+"' => not added to the index");

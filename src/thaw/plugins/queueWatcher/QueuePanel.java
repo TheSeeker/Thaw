@@ -72,20 +72,20 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 	private boolean insertionQueue = false;
 
-	public QueuePanel(Core core, DetailPanel detailPanel, 
+	public QueuePanel(Core core, DetailPanel detailPanel,
 			  boolean isForInsertionQueue) {
 
 		this.insertionQueue = isForInsertionQueue;
 
 		this.core = core;
 		this.detailPanel = detailPanel;
-		
+
 		this.tableModel = new QueueTableModel(isForInsertionQueue, core.getQueueManager());
 
 		this.table = new JTable(this.tableModel);
 
 		this.table.setShowGrid(true);
-		
+
 		JTableHeader header = this.table.getTableHeader();
 		header.setUpdateTableInRealTime(true);
 		header.addMouseListener(this.tableModel.new ColumnListener(this.table));
@@ -111,7 +111,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		this.table.setDefaultRenderer( this.table.getColumnClass(0), new ProgressRenderer(this.table, this.tableModel, isForInsertionQueue) );
 
 		this.tableModel.addTableModelListener(this.table);
-		
+
 		this.rightClickMenu = new JPopupMenu();
 		this.clearFinishedItem = new JMenuItem(I18n.getMessage("thaw.common.clearFinished"));
 		this.removeItem = new JMenuItem(I18n.getMessage("thaw.common.removeFromTheList"));
@@ -143,13 +143,13 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		if( Integer.parseInt(core.getConfig().getValue("maxSimultaneousDownloads")) >= 0
 		   || Integer.parseInt(core.getConfig().getValue("maxSimultaneousInsertions")) >= 0)
 			this.rightClickMenu.add(this.delayItem);
-		
+
 		if(!isForInsertionQueue)
 			this.rightClickMenu.add(this.downloadItem);
 
 		this.rightClickMenu.add(this.forceRestartItem);
 		this.rightClickMenu.add(this.copyKeysItem);
-		
+
 		if( Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue() == true) {
 			this.rightClickMenu.add(priorityMenu);
 		}
@@ -168,7 +168,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		/* If a queue is already existing, we need to add it */
 		if(core.getQueueManager() != null) {
 			this.addToTable(core.getQueueManager().getRunningQueue());
-			
+
 			Vector[] pendingQueues = core.getQueueManager().getPendingQueues();
 			for(int i = 0 ; i < pendingQueues.length ; i++) {
 				this.addToTable(pendingQueues[i]);
@@ -202,7 +202,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 			if(value == null)
 				return null;
 
-			FCPTransferQuery query = this.model.getQuery(row);				
+			FCPTransferQuery query = this.model.getQuery(row);
 
 			if(value instanceof Integer) {
 
@@ -214,7 +214,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 				if(progress.intValue() >= 0) {
 					bar.setValue(progress.intValue());
-					
+
 					String toAdd = "%";
 
 					if(!query.isProgressionReliable())
@@ -236,7 +236,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 									     row, column);
 
 			if(!isSelected) {
-	
+
 				if(query == null)
 					return null;
 
@@ -249,7 +249,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 				if(query.isRunning() && !query.isFinished())
 					cell.setBackground(this.RUNNING);
 			}
-			
+
 
 			return cell;
 		}
@@ -283,7 +283,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		for(int i = 0 ; i < this.selectedRows.length; i++) {
 			queries.add(initialQueries.get(this.selectedRows[i]));
 		}
-		
+
 		return queries;
 	}
 
@@ -307,9 +307,9 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		try {
 			for(Iterator queryIt = queries.iterator();
 			    queryIt.hasNext();) {
-				
+
 				FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
-				
+
 				this.addToTable(query);
 			}
 
@@ -321,7 +321,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 	public void refreshDetailPanel() {
 		int selected = this.table.getSelectedRow();
-		
+
 
 		if(selected != -1) {
 			FCPTransferQuery query = this.tableModel.getQuery(selected);
@@ -372,7 +372,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 				if(dir == null)
 					return;
 			}
-			
+
 			int prioritySelected = 0;
 
 			for(prioritySelected = 0;
@@ -385,13 +385,13 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 			if(prioritySelected > QueuePanel.this.MIN_PRIORITY)
 				prioritySelected = -1;
-			
+
 			for(Iterator queryIt = this.queries.iterator() ; queryIt.hasNext() ;) {
 				FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
 
 				if(query == null)
 					continue;
-		
+
 				if(prioritySelected >= 0) {
 					if(query.isPersistent()) {
 						query.setFCPPriority(prioritySelected);
@@ -423,7 +423,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 					if(query.getMaxAttempt() >= 0)
 						query.setAttempt(0);
 
-					query.start(QueuePanel.this.core.getQueueManager());					
+					query.start(QueuePanel.this.core.getQueueManager());
 				}
 
 				if(this.e.getSource() == QueuePanel.this.copyKeysItem) {
@@ -431,7 +431,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 					   && !"".equals( query.getFileKey() ))
 						keys = keys + query.getFileKey() + "\n";
 				}
-				
+
 				if(this.e.getSource() == QueuePanel.this.downloadItem
 				   && dir != null) {
 					if(query.isPersistent()) {
@@ -441,23 +441,22 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 							query.updatePersistentRequest(true);
 					}
 				}
-				
+
 			} /* for i in selectedRows */
-			
-			
-			
+
+
 			if(this.e.getSource() == QueuePanel.this.copyKeysItem) {
 				StringSelection st = new StringSelection(keys);
 				Clipboard cp = tk.getSystemClipboard();
 				cp.setContents(st, this);
 			}
-			
+
 		}
 
 		public void lostOwnership(Clipboard clipboard, java.awt.datatransfer.Transferable contents) {
 			/* we dont care */
 		}
-		
+
 	}
 
 	public void removeAllFinishedTransfers() {

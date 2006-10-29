@@ -44,7 +44,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	private boolean isLockOwner = false;
 
 	private boolean alreadySaved = false;
-	
+
 
 	/**
 	 * See setParameters().
@@ -62,7 +62,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			this.queueManager.getQueryManager().deleteObserver(this);
 			this.queueManager.getQueryManager().addObserver(this);
 		}
-		
+
 	}
 
 
@@ -84,7 +84,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		this.progress = progress;
 		this.status = status;
-		
+
 		if(status == null) {
 			Logger.warning(this, "status == null ?!");
 			status = "(null)";
@@ -101,7 +101,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			this.fromTheNodeProgress = 100;
 			this.progressReliable = true;
 		}
-		
+
 	}
 
 
@@ -113,9 +113,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	public FCPClientGet(String key, int priority,
 			    int persistence, boolean globalQueue,
 			    int maxRetries,
-			    String destinationDir) {	
+			    String destinationDir) {
 
-	
+
 		if(globalQueue && persistence >= 2)
 			globalQueue = false; /* else protocol error */
 
@@ -132,11 +132,11 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		this.progress = 0;
 		this.fileSize = 0;
 		this.attempt = 0;
-		
+
 		this.status = "Waiting";
 
 		String cutcut[] = key.split("/");
-		
+
 		if(!key.endsWith("/")) {
 			this.filename = cutcut[cutcut.length-1];
 		} else {
@@ -195,7 +195,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		return true;
 	}
 
-	
+
 	public void update(Observable o, Object arg) {
 
 		FCPQueryManager queryManager = null;
@@ -216,12 +216,12 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			if(!this.isFinished()) {
 				if(!this.alreadySaved) {
 					this.alreadySaved = true;
-					
+
 					this.fileSize = (new Long(message.getValue("DataLength"))).longValue();
-					
+
 					if(this.isPersistent()) {
 						if(this.destinationDir != null) {
-							
+
 							if(!this.fileExists(this.destinationDir)) {
 								this.status = "Requesting file from the node";
 								this.progress = 99;
@@ -235,13 +235,12 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 								this.successful = true;
 								Logger.info(this, "File already existing. Not rewrited");
 							}
-							
+
 						} else {
 							Logger.info(this, "Don't know where to put file, so file not asked to the node");
 						}
 					}
-				
-					
+
 					this.setChanged();
 					this.notifyObservers();
 				}
@@ -255,13 +254,13 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			this.identifier = null;
 			this.start(this.queueManager);
-			
+
 			this.setChanged();
 			this.notifyObservers();
 
 			return;
 		}
-		
+
 		if("ProtocolError".equals( message.getMessageName() )) {
 			Logger.debug(this, "ProtocolError !");
 
@@ -295,7 +294,6 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			this.queueManager.getQueryManager().deleteObserver(this);
 
-			
 			return;
 		}
 
@@ -326,7 +324,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			    this.progress = 100;
 			    this.running = false;
 			    this.successful = false;
-			    
+
 			    this.fatal = true;
 
 			    if(message.getValue("Fatal") != null &&
@@ -403,7 +401,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				this.successful = false;
 				this.status = "Error while receveing the file";
 			}
-			
+
 			Logger.info(this, "File received");
 
 			queryManager.getConnection().unlockReading();
@@ -411,7 +409,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 
 			this.isLockOwner= false;
-			
+
 			this.running = false;
 			this.progress = 100;
 
@@ -425,19 +423,17 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			this.setChanged();
 			this.notifyObservers();
-			
+
 
 			return;
 		}
 
-		if(message.getMessageName().equals("PersistentGet")) {			
+		if(message.getMessageName().equals("PersistentGet")) {
 			Logger.debug(this, "PersistentGet !");
-			
 			return;
 		}
-		
+
 		Logger.warning(this, "Unknow message : "+message.getMessageName() + " !");
-		
 	}
 
 
@@ -474,17 +470,17 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 				}
 			}
-			
+
 			if(!this.connection.lockReading()) {
 				/* Ah ben oué mais non */
-				this.run();
+				this.run(); /* TODO: It's dirty => To change ! */
 				return;
 			}
 
 			if(!this.connection.lockWriting()) {
 				/* Ah ben oué mais non */
 				this.connection.unlockReading();
-				this.run();
+				this.run(); /* TODO: It's dirty => To change ! */
 				return;
 			}
 
@@ -507,7 +503,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	public synchronized boolean saveFileTo(String dir, boolean checkStatus) {
 		this.fromTheNodeProgress = 0;
-		
+
 		Logger.info(this, "Saving file to '"+dir+"'");
 
 		if(dir == null) {
@@ -565,7 +561,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		}
 
 		FCPMessage getRequestStatus = new FCPMessage();
-		
+
 		getRequestStatus.setMessageName("GetRequestStatus");
 		getRequestStatus.setValue("Identifier", this.identifier);
 		if(this.globalQueue)
@@ -573,7 +569,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		else
 			getRequestStatus.setValue("Global", "false");
 		getRequestStatus.setValue("OnlyData", "true");
-		
+
 		this.duplicatedQueryManager.writeMessage(getRequestStatus, false);
 
 		return true;
@@ -595,7 +591,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		if(reallyWrite) {
 			Logger.info(this, "Writing file to disk ... ('"+file+"')");
-			
+
 			try {
 				fileWriter = new FileOutputStream(newFile);
 			} catch(java.io.IOException e) {
@@ -618,7 +614,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			int packet = PACKET_SIZE;
 			byte[] read;
 			int amount;
-			
+
 			if(size < (long)packet)
 				packet = (int)size;
 
@@ -645,9 +641,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 					return false;
 				}
 			}
-			
+
 			size = size - amount;
-			
+
 			if( System.currentTimeMillis() >= (startTime+3000)) {
 				this.status = "Writing to disk";
 				this.fromTheNodeProgress = (int) (((origSize-size) * 100) / origSize);
@@ -663,14 +659,14 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		if(reallyWrite) {
 			try {
 				fileWriter.close();
-				
+
 				if(!writingSuccessful)
 					newFile.delete();
 
 			} catch(java.io.IOException e) {
 				Logger.notice(this, "Unable to close correctly file on disk !? : "+e.toString());
 			}
-		}   
+		}
 
 		Logger.info(this, "File written");
 
@@ -678,10 +674,10 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		return true;
 	}
 
-	
+
 	public boolean removeRequest() {
 		FCPMessage stopMessage = new FCPMessage();
-		
+
 		if(!this.isPersistent()) {
 			Logger.notice(this, "Can't remove non persistent request.");
 			return false;
@@ -693,14 +689,14 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		}
 
 		stopMessage.setMessageName("RemovePersistentRequest");
-		
+
 		if(this.globalQueue)
 			stopMessage.setValue("Global", "true");
 		else
 			stopMessage.setValue("Global", "false");
-		
+
 		stopMessage.setValue("Identifier", this.identifier);
-		
+
 		this.queueManager.getQueryManager().writeMessage(stopMessage);
 
 		this.running = false;
@@ -709,7 +705,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	}
 
 	public boolean pause(FCPQueueManager queryManager) {
-		/* TODO ? : Reduce the priority 
+		/* TODO ? : Reduce the priority
 		   instead of stopping */
 
 		Logger.info(this, "Pausing fetching of the key : "+this.getFileKey());
@@ -723,7 +719,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		this.setChanged();
 		this.notifyObservers();
-		
+
 		return true;
 
 	}
@@ -742,7 +738,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		this.status = "Stopped";
 		this.setChanged();
 		this.notifyObservers();
-		
+
 		return true;
 	}
 
@@ -750,14 +746,14 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	public void updatePersistentRequest(boolean clientToken) {
 		if(!this.isPersistent())
 			return;
-		
+
 		FCPMessage msg = new FCPMessage();
 
 		msg.setMessageName("ModifyPersistentRequest");
 		msg.setValue("Global", Boolean.toString(this.globalQueue));
 		msg.setValue("Identifier", this.identifier);
 		msg.setValue("PriorityClass", Integer.toString(this.priority));
-		
+
 		if(clientToken && this.destinationDir != null)
 			msg.setValue("ClientToken", this.destinationDir);
 
@@ -776,7 +772,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	public void setFCPPriority(int prio) {
 		Logger.info(this, "Setting priority to "+Integer.toString(prio));
-	
+
 		this.priority = prio;
 
 		this.setChanged();
@@ -786,7 +782,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	public int getQueryType() {
 		return 1;
 	}
-	
+
 	public String getStatus() {
 		return this.status;
 	}
@@ -908,7 +904,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			this.running = false;
 			this.status = "Waiting";
 		}
-		
+
 		return true;
 	}
 

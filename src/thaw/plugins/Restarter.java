@@ -54,14 +54,14 @@ public class Restarter implements Observer, Runnable, Plugin {
 			Logger.notice(this, "Unable to read / understand value from the config. Using default values");
 		}
 
-		
+
 		/* Adding restart config tab to the config window */
 		this.configPanel = new JPanel();
 		this.configPanel.setLayout(new GridLayout(15, 1));
 
 		this.restartIntervalLabel = new JLabel(I18n.getMessage("thaw.plugin.restarter.interval"));
 		this.restartIntervalField = new JTextField(Integer.toString(this.interval));
-		
+
 		this.restartFatalsBox = new JCheckBox(I18n.getMessage("thaw.plugin.restarter.restartFatals"), this.restartFatals);
 
 		this.configPanel.add(this.restartIntervalLabel);
@@ -87,7 +87,7 @@ public class Restarter implements Observer, Runnable, Plugin {
 		return true;
 	}
 
-	
+
 	public void run() {
 		while(this.running) {
 			try {
@@ -97,7 +97,7 @@ public class Restarter implements Observer, Runnable, Plugin {
 				}
 
 			} catch(java.lang.InterruptedException e) {
-				// We really really really don't care.			
+				// We really really really don't care.
 			}
 
 			Logger.notice(this, "Restarting [some] failed downloads");
@@ -105,44 +105,42 @@ public class Restarter implements Observer, Runnable, Plugin {
 			try {
 				if(!this.running)
 					break;
-				
+
 				int maxDownloads = this.core.getQueueManager().getMaxDownloads();
 				int alreadyRunning = 0;
 				int failed = 0;
 				Vector runningQueue = this.core.getQueueManager().getRunningQueue();
-			
-				
+
 				if(maxDownloads >= 0) {
 					/* We count how many are really running
 					   and we write down those which are failed */
 					for(Iterator it = runningQueue.iterator();
 					    it.hasNext();) {
 						FCPTransferQuery query = (FCPTransferQuery)it.next();
-						
+
 						if(query.getQueryType() != 1)
 							continue;
 
 						if(query.isRunning() && !query.isFinished()) {
 							alreadyRunning++;
 						}
-						
+
 						if(query.isFinished() && !query.isSuccessful()
 						   && (this.restartFatals || !query.isFatallyFailed()) ) {
 							failed++;
 						}
 					}
-					
-					
+
 					/* We choose randomly the ones to restart */
 					while(alreadyRunning < maxDownloads && failed > 0) {
 						int toRestart = (new Random()).nextInt(failed);
-						
+
 						Iterator it = runningQueue.iterator();
 						int i = 0;
 
 						while(it.hasNext()) {
 							FCPTransferQuery query = (FCPTransferQuery)it.next();
-							
+
 							if(query.getQueryType() != 1)
 								continue;
 
@@ -168,22 +166,20 @@ public class Restarter implements Observer, Runnable, Plugin {
 					for(Iterator it = runningQueue.iterator();
 					    it.hasNext();) {
 						FCPTransferQuery query = (FCPTransferQuery)it.next();
-						
+
 						if(query.getQueryType() == 1 && query.isFinished()
 						   && !query.isSuccessful()
 						   && (this.restartFatals || !query.isFatallyFailed()))
 							this.restartQuery(query);
 					}
 				}
-				
-				
 
 			} catch(java.util.ConcurrentModificationException e) {
 				Logger.notice(this, "Collision ! Sorry I will restart failed downloads later ...");
 			} catch(Exception e) {
 				Logger.error(this, "Exception : "+e);
 			}
-			
+
 		}
 	}
 
@@ -193,7 +189,7 @@ public class Restarter implements Observer, Runnable, Plugin {
 
 		if(query.getMaxAttempt() >= 0)
 			query.setAttempt(0);
-		
+
 		query.start(this.core.getQueueManager());
 	}
 
@@ -206,14 +202,14 @@ public class Restarter implements Observer, Runnable, Plugin {
 							  Boolean.toString(this.restartFatalsBox.isSelected()));
 
 				/* Plugin will be stop() and start(), so no need to reload config */
-							  
+
 				return;
 			}
 
 			if(arg == this.core.getConfigWindow().getCancelButton()) {
 				this.restartIntervalField.setText(Integer.toString(this.interval));
 				this.restartFatalsBox.setSelected(this.restartFatals);
-				
+
 				return;
 			}
 		}

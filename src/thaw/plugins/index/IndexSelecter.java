@@ -26,7 +26,7 @@ import thaw.core.Logger;
  * |  |                |  |               |
  * |  |-- Cat1         |  |-- Cat1        |
  * |  |    |-- Index1  |  |    |-- Index1 |
- * |  |    |-- Index2  |  |    |-- Index2 | 
+ * |  |    |-- Index2  |  |    |-- Index2 |
  * |  ...              |  ...             |
  * |                   |                  |
  * *-------------------*------------------*
@@ -44,10 +44,10 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 	private JPanel indexPanel;
 	private IndexTree localIndexes;
 	private IndexTree otherIndexes;
-	
+
 	private JPanel fieldPanel;
 	private JTextField keyField;
-	
+
 	private JPanel downPanel;
 	private JButton cancelButton;
 	private JButton okButton;
@@ -90,7 +90,7 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 		this.indexPanel.add(new JScrollPane(this.otherIndexes.getPanel()));
 
 		this.upPanel.add(this.indexPanel, BorderLayout.CENTER);
-		
+
 		this.fieldPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.indexKey")), BorderLayout.WEST);
 		this.fieldPanel.add(this.keyField, BorderLayout.CENTER);
 		this.upPanel.add(this.fieldPanel, BorderLayout.SOUTH);
@@ -126,10 +126,10 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 		this.upPanel = null;
 		this.localIndexes = null;
 		this.otherIndexes = null;
-		
+
 		this.fieldPanel = null;
 		this.keyField = null;
-		
+
 		this.downPanel = null;
 		this.cancelButton = null;
 		this.okButton = null;

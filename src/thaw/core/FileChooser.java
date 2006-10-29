@@ -30,7 +30,7 @@ public class FileChooser {
 		else
 			this.fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES); /* Directories -> Recursivity */
 	}
-	
+
 	/**
 	 * @param type JFileChooser.OPEN_DIALOG / JFileChooser.SAVE_DIALOG
 	 * @see javax.swing.JFileChooser#setDialogType(int)
@@ -89,9 +89,9 @@ public class FileChooser {
 			else
 				this.expandRecursivly(files[i],vec);
 		}
-		
+
 	}
-	
+
 	protected Vector expandRecursivly(File[] selectedFiles)
 	{
 		Vector files= new Vector();
@@ -102,7 +102,7 @@ public class FileChooser {
 
 		return files;
 	}
-	
+
 	/**
 	 * @return null if nothing choosed.
 	 */
@@ -111,7 +111,7 @@ public class FileChooser {
 
 		if(!this.showDialog())
 			return null;
-	
+
 		return this.expandRecursivly(this.fileChooser.getSelectedFiles());
 	}
 

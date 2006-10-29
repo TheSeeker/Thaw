@@ -81,7 +81,6 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	protected void setLinkList(LinkList l) {
 		this.tables.setLinkList(l);
 	}
-	
 
 	public void valueChanged(javax.swing.event.TreeSelectionEvent e) {
 		javax.swing.tree.TreePath path = e.getPath();
@@ -92,7 +91,7 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 			Logger.notice(this, "Path null ?");
 			return;
 		}
-		
+
 		IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
 
 		if(node == null) {

@@ -35,7 +35,6 @@ public class FetchPanel implements java.awt.event.ActionListener {
 	private JTextArea fileList = null;
 	private JButton pasteButton = null;
 	private JButton loadListButton = null;
-	
 
 	private JPanel belowPanel = null; /* 1 x 2 */
 
@@ -73,7 +72,7 @@ public class FetchPanel implements java.awt.event.ActionListener {
 
 		this.validationButton = new JButton(I18n.getMessage("thaw.common.fetch"));
 		this.validationButton.setPreferredSize(new Dimension(300, 40));
-		
+
 		this.validationButton.addActionListener(this);
 
 		this.filePanel = new JPanel();
@@ -90,7 +89,7 @@ public class FetchPanel implements java.awt.event.ActionListener {
 
 		this.pasteButton = new JButton(I18n.getMessage("thaw.plugin.fetch.pasteFromClipboard"));
 		this.pasteButton.addActionListener(this);
-		
+
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new GridLayout(1,2));
 		buttonPanel.add(this.pasteButton);
@@ -100,10 +99,9 @@ public class FetchPanel implements java.awt.event.ActionListener {
 		this.filePanel.add(new JScrollPane(this.fileList), BorderLayout.CENTER);
 		this.filePanel.add(buttonPanel, BorderLayout.SOUTH);
 
-		
+
 		/* below panel */
 
-		
 		this.belowPanel = new JPanel();
 		if(this.advancedMode)
 			this.belowPanel.setLayout(new GridLayout(2, 2, 10, 10));
@@ -124,20 +122,19 @@ public class FetchPanel implements java.awt.event.ActionListener {
 			I18n.getMessage("thaw.plugin.priority.p3"),
 			I18n.getMessage("thaw.plugin.priority.p4"),
 			I18n.getMessage("thaw.plugin.priority.p5"),
-			I18n.getMessage("thaw.plugin.priority.p6") 
-			
+			I18n.getMessage("thaw.plugin.priority.p6")
 		};
 		this.prioritySelecter = new JComboBox(this.priorities);
 		this.prioritySelecter.setSelectedItem(I18n.getMessage("thaw.plugin.priority.p4"));
 
 		this.priorityPanel.add(this.priorityLabel);
 		this.priorityPanel.add(this.prioritySelecter);
-		
+
 
 		/* QUEUE */
 		this.queuePanel = new JPanel();
 	        this.queuePanel.setLayout(new GridLayout(2, 1, 5, 5));
-		
+
 		this.queueLabel = new JLabel(I18n.getMessage("thaw.common.globalQueue"));
 		this.queues = new String [] {
 			I18n.getMessage("thaw.common.true"),
@@ -153,15 +150,15 @@ public class FetchPanel implements java.awt.event.ActionListener {
 
 		this.dstChoosePanel = new JPanel();
 		this.dstChoosePanel.setLayout(new GridLayout(3,1, 5, 5));
-		
+
 		this.destinationField = new JTextField("");
 		if(core.getConfig().getValue("lastDestinationDirectory") != null)
 			this.destinationField.setText(core.getConfig().getValue("lastDestinationDirectory"));
 		this.destinationField.setEditable(true);
-		
+
 		this.destinationButton = new JButton(I18n.getMessage("thaw.plugin.fetch.chooseDestination"));
 		this.destinationButton.addActionListener(this);
-		
+
 		this.dstChoosePanel.add(this.destinationLabel);
 		this.dstChoosePanel.add(this.destinationField);
 		this.dstChoosePanel.add(this.destinationButton);
@@ -173,14 +170,14 @@ public class FetchPanel implements java.awt.event.ActionListener {
 		}
 
 		this.belowPanel.add(this.dstChoosePanel);
-		
+
 		if(!this.advancedMode) {
 			this.belowPanel.add(new JPanel());
 		}
 
 		this.centeredPart.add(this.filePanel, BorderLayout.CENTER);
 		this.centeredPart.add(this.belowPanel, BorderLayout.SOUTH);
-		
+
 		this.mainPanel.add(this.centeredPart, BorderLayout.CENTER);
 		this.mainPanel.add(this.validationButton, BorderLayout.SOUTH);
 	}
@@ -190,7 +187,7 @@ public class FetchPanel implements java.awt.event.ActionListener {
 		return this.mainPanel;
 	}
 
-	
+
 	public void actionPerformed(java.awt.event.ActionEvent e) {
 		if(e.getSource() == this.validationButton) {
 			int priority = 6;
@@ -200,7 +197,6 @@ public class FetchPanel implements java.awt.event.ActionListener {
 			if(((String)this.queueSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.false")))
 				globalQueue = false;
 
-			
 			for(int i = 0; i < this.priorities.length ; i++) {
 				if(((String)this.prioritySelecter.getSelectedItem()).equals(I18n.getMessage("thaw.plugin.priority.p"+i)))
 					priority = i;
@@ -210,7 +206,6 @@ public class FetchPanel implements java.awt.event.ActionListener {
 				new thaw.core.WarningWindow(this.core, I18n.getMessage("thaw.plugin.fetch.chooseADestination"));
 				return;
 			}
-			
 
 
 			this.fetchPlugin.fetchFiles(this.fileList.getText().split("\n"),
@@ -231,7 +226,7 @@ public class FetchPanel implements java.awt.event.ActionListener {
 			}
 
 			File dir = null;
-			
+
 			fileChooser.setTitle(I18n.getMessage("thaw.plugin.fetch.destinationDirectory"));
 			fileChooser.setDirectoryOnly(true);
 			fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
@@ -277,14 +272,14 @@ public class FetchPanel implements java.awt.event.ActionListener {
 			fileChooser.setTitle(I18n.getMessage("thaw.plugin.fetch.loadKeyListFromFile"));
 			fileChooser.setDirectoryOnly(false);
 			fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
-			
+
 			toParse = fileChooser.askOneFile();
 
 			if(toParse == null) {
 				Logger.info(this, "Nothing to parse");
 				return;
 			}
-			
+
 			Vector keys = KeyFileFilter.extractKeys(toParse);
 
 			if(keys == null || keys.size() <= 0) {
@@ -300,9 +295,8 @@ public class FetchPanel implements java.awt.event.ActionListener {
 
 				result = result + key + "\n";
 			}
-			
-			this.fileList.setText(result);
 
+			this.fileList.setText(result);
 		}
 	}
 }

@@ -44,7 +44,8 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 			this.dragSource.createDefaultDragGestureRecognizer(queuePanels[i].getTable(),
 									   DnDConstants.ACTION_COPY_OR_MOVE,
 									   this);
-			
+
+			/* TODO: Finish DnD support */
 			//queuePanels[i].getTable().setTransferHandler(new FileTransferHandler());
 			//queuePanels[i].getTable().setDragEnabled(true);
 
@@ -53,10 +54,6 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 
 
 	private class FileTransferHandler extends TransferHandler {
-
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		protected  Transferable createTransferable(JComponent c) {
@@ -90,7 +87,7 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 	}
 
 
-	
+
 	private class DragableFinishedTransfers implements Transferable{
 		public final DataFlavor[] FLAVORS = {
 			DataFlavor.javaFileListFlavor,
@@ -108,7 +105,7 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 			this.queries = queries;
 			this.insert = insert;
 		}
-		
+
 
 		private Vector getQueries() {
 			return this.queries;
@@ -162,7 +159,7 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 
 			return null;
 		}
-		
+
 		public DataFlavor[] getTransferDataFlavors() {
 			return this.FLAVORS;
 		}
@@ -201,12 +198,12 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 		int myaction = e.getDropAction();
 
 		if( (myaction & DnDConstants.ACTION_COPY) != 0) {
-			context.setCursor(DragSource.DefaultCopyDrop);   
+			context.setCursor(DragSource.DefaultCopyDrop);
 		} else {
-			context.setCursor(DragSource.DefaultCopyNoDrop);   
+			context.setCursor(DragSource.DefaultCopyNoDrop);
 		}
-    
-		
+
+
 	}
 
 	public void dragOver(DragSourceDragEvent e) { }
@@ -216,5 +213,5 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 	}
 
 	public void dropActionChanged (DragSourceDragEvent e) { }
-	
+
 }

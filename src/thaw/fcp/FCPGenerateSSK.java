@@ -12,7 +12,7 @@ public class FCPGenerateSSK extends Observable implements FCPQuery, Observer {
 
 	private FCPQueueManager queueManager = null;
 
-	
+
 	public FCPGenerateSSK() {
 
 	}
@@ -30,11 +30,11 @@ public class FCPGenerateSSK extends Observable implements FCPQuery, Observer {
 		msg.setValue("Identifier", this.identifier);
 
 		queueManager.getQueryManager().writeMessage(msg);
-	
+
 		return true;
 	}
 
-	
+
 	public void update (Observable o, Object param) {
 		FCPMessage msg = (FCPMessage)param;
 
@@ -59,9 +59,9 @@ public class FCPGenerateSSK extends Observable implements FCPQuery, Observer {
 			return;
 		}
 
-		
+
 	}
-	
+
 
 	public boolean stop(FCPQueueManager queueManager) {
 		queueManager.getQueryManager().deleteObserver(this);

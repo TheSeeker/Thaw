@@ -31,7 +31,7 @@ public class ThawConfigPanel implements Observer {
 			core.getConfig().setValue("advancedMode", "false");
 
 		this.advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
-		
+
 
 		this.thawConfigPanel = new JPanel();
 		this.thawConfigPanel.setLayout(new GridLayout(15, 1));

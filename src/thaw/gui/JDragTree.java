@@ -32,15 +32,12 @@ import javax.swing.tree.*;
 
 public class JDragTree extends JTree implements DragGestureListener, DragSourceListener {
 
-	 /**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	//	DropTargetListener interface object...
-	 private class CDropTargetListener implements DropTargetListener 
-	 { 	
-	 	
+	private class CDropTargetListener implements DropTargetListener
+	{
+
 		 // Fields...
 		 private TreePath        _pathLast       = null;
 		 private Rectangle2D     _raCueLine      = new Rectangle2D.Float();
@@ -101,7 +98,7 @@ public class JDragTree extends JTree implements DragGestureListener, DragSourceL
 		 */
 		 public void dragOver(DropTargetDragEvent e)
 		 {
-             if( e==null || this._raGhost == null || this._ptLast == null || 
+             if( e==null || this._raGhost == null || this._ptLast == null ||
                  JDragTree.this._ptOffset == null || JDragTree.this._imgGhost == null || this._raCueLine == null ) {
                  return;
              }
@@ -123,7 +120,7 @@ public class JDragTree extends JTree implements DragGestureListener, DragSourceL
              if( g2 == null ) {
                  return;
              }
-             
+
 			 // If a drag image is not supported by the platform, then draw my own drag image
 			 if (!DragSource.isDragImageSupported())
 			 {
@@ -329,7 +326,7 @@ public class JDragTree extends JTree implements DragGestureListener, DragSourceL
 			 return true;
 		 }
 	}
-	 
+
 	/**
 	* This represents a TreePath (a node in a JTree) that can be transferred between a drag source and a drop target.
 	*/
@@ -362,10 +359,10 @@ public class JDragTree extends JTree implements DragGestureListener, DragSourceL
 			else
 				throw new UnsupportedFlavorException(flavor);
 		}
-	} 
+	}
 
 	private static Logger logger = Logger.getLogger(JDragTree.class.getName());
-	
+
 	private TreePath        _pathSource;                // The path being dragged
 	private BufferedImage   _imgGhost;                  // The 'drag image'
 	private Point           _ptOffset = new Point();    // Where, in the drag image, the mouse was clicked
@@ -373,7 +370,7 @@ public class JDragTree extends JTree implements DragGestureListener, DragSourceL
 	// The type of DnD object being dragged...
 	public final static DataFlavor TREEPATH_FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, "TreePath");
 	private DataFlavor[]    _flavors = { TREEPATH_FLAVOR };
-	
+
 	private DragSource dragSource = null;
 	private DragGestureRecognizer dgRecognizer = null;
 	private DropTarget dropTarget = null;
@@ -385,7 +382,7 @@ public class JDragTree extends JTree implements DragGestureListener, DragSourceL
 		super(root);
 		this.initialize();
 	}
-	
+
 	/**
 	 * @param root
 	 */
@@ -393,10 +390,7 @@ public class JDragTree extends JTree implements DragGestureListener, DragSourceL
 		super(model);
 		this.initialize();
 	}
-	
-	/**
-	 * 
-	 */
+
 	private void initialize() {
 		// install drag n drop support
 		this.dragSource = DragSource.getDefaultDragSource();
@@ -407,7 +401,7 @@ public class JDragTree extends JTree implements DragGestureListener, DragSourceL
 		this.dgRecognizer.setSourceActions(this.dgRecognizer.getSourceActions() & ~InputEvent.BUTTON3_MASK & ~InputEvent.BUTTON2_MASK);
 		this.dropTarget = new DropTarget(this, new CDropTargetListener());
 	}
-	
+
 	/**
 	 * @param path
 	 * @return

@@ -8,7 +8,7 @@ public class FCPListPersistentRequests implements FCPQuery {
 
 	public boolean start(FCPQueueManager queueManager) {
 		FCPMessage newMessage = new FCPMessage();
-		
+
 		newMessage.setMessageName("ListPersistentRequests");
 
 		queueManager.getQueryManager().writeMessage(newMessage);
@@ -23,7 +23,5 @@ public class FCPListPersistentRequests implements FCPQuery {
 	public int getQueryType() {
 		return 0;
 	}
-	
-
 
 }

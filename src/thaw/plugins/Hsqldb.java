@@ -70,7 +70,7 @@ public class Hsqldb extends LibraryPlugin {
 
 	public void realStop() {
 		Logger.info(this, "Disconnecting from the database ...");
-		
+
 		try {
 			this.connection.commit();
 			this.executeQuery("SHUTDOWN");
@@ -95,9 +95,9 @@ public class Hsqldb extends LibraryPlugin {
 
 	public ResultSet executeQuery(String query) throws java.sql.SQLException {
 		ResultSet results;
-		
+
 		Statement stmt = this.connection.createStatement();
-			
+
 		results = stmt.executeQuery(query);
 
 		return results;

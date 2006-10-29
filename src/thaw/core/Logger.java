@@ -23,7 +23,7 @@ public class Logger {
 	public final static int LOG_LEVEL = 3;
 
 	private static Vector logListeners = null;
-	
+
 
 	protected static void displayErr(String msg) {
 		System.err.println(msg);
@@ -57,7 +57,7 @@ public class Logger {
 		if(LOG_LEVEL >= 2)
 			display("[NOTICE ] " +o.getClass().getName()+": "+msg);
 	}
-	
+
 
 	public static void info(Object o, String msg) {
 		info(o, msg, false);
@@ -80,7 +80,7 @@ public class Logger {
 	}
 
 
-	/** 
+	/**
 	 * Verbose. Too Verbose.
 	 */
 	public static void verbose(Object o, String msg) {
@@ -109,16 +109,15 @@ public class Logger {
 			logListeners = new Vector();
 
 		logListeners.add(logListener);
-		
 	}
-	
+
 	public static void removeLogListener(LogListener logListener) {
 		if(logListeners == null)
 			return;
 
 		logListeners.remove(logListener);
 	}
-	
+
 
 	private static void notifyLogListeners(String line) {
 		if(logListeners == null)
@@ -128,7 +127,7 @@ public class Logger {
 		    it.hasNext(); ) {
 			LogListener logListener = (LogListener)it.next();
 
-			logListener.newLogLine(line);			
+			logListener.newLogLine(line);
 		}
 	}
 

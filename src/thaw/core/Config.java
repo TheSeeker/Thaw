@@ -120,13 +120,13 @@ public class Config {
 			return false;
 		}
 
-		
+
 		Document xmlDoc = null;
 		DocumentBuilderFactory xmlFactory = null;
 		DocumentBuilder xmlBuilder = null;
-		
+
 		Element rootEl = null;
-				
+
 		xmlFactory = DocumentBuilderFactory.newInstance();
 
 		try {
@@ -135,7 +135,7 @@ public class Config {
 			Logger.warning(this, "Unable to load config because: "+e);
 			return false;
 		}
-		
+
 		try {
 			xmlDoc = xmlBuilder.parse(this.configFile);
 		} catch(org.xml.sax.SAXException e) {
@@ -147,7 +147,7 @@ public class Config {
 		}
 
 		rootEl = xmlDoc.getDocumentElement();
-		
+
 
 		NodeList params = rootEl.getElementsByTagName("param");
 
@@ -173,7 +173,7 @@ public class Config {
 				this.pluginNames.add(pluginEl.getAttribute("name"));
 			}
 		}
-		
+
 
 		return true;
 	}
@@ -200,16 +200,16 @@ public class Config {
 		} catch(java.io.IOException e) {
 			Logger.warning(this, "Error while checking perms to save config: "+e);
 		}
-			
-		
-		
+
+
+
 		configOut = new StreamResult(this.configFile);
-		
+
 		Document xmlDoc = null;
 		DocumentBuilderFactory xmlFactory = null;
 		DocumentBuilder xmlBuilder = null;
 		DOMImplementation impl = null;
-		
+
 		Element rootEl = null;
 
 		xmlFactory = DocumentBuilderFactory.newInstance();
@@ -223,12 +223,12 @@ public class Config {
 
 
 		impl = xmlBuilder.getDOMImplementation();
-		
+
 		xmlDoc = impl.createDocument(null, "config", null);
-		
+
 		rootEl = xmlDoc.getDocumentElement();
 
-		
+
 		Iterator entries = this.parameters.keySet().iterator();
 
 		while(entries.hasNext()) {
@@ -238,10 +238,10 @@ public class Config {
 			Element paramEl = xmlDoc.createElement("param");
 			paramEl.setAttribute("name", entry);
 			paramEl.setAttribute("value", value);
-			
+
 			rootEl.appendChild(paramEl);
 		}
-		
+
 		Iterator plugins = this.pluginNames.iterator();
 
 		while(plugins.hasNext()) {
@@ -253,7 +253,7 @@ public class Config {
 			rootEl.appendChild(pluginEl);
 		}
 
-		
+
 		/* Serialization */
 		DOMSource domSource = new DOMSource(xmlDoc);
 		TransformerFactory transformFactory = TransformerFactory.newInstance();
@@ -269,17 +269,17 @@ public class Config {
 
 		serializer.setOutputProperty(OutputKeys.ENCODING,"UTF-8");
 		serializer.setOutputProperty(OutputKeys.INDENT,"yes");
-		
+
 		/* final step */
 		try {
 			serializer.transform(domSource, configOut);
 		} catch(javax.xml.transform.TransformerException e) {
 			Logger.error(this, "Unable to save configuration because: "+e.toString());
-			return false;	
+			return false;
 		}
 
 
-		return true;	
+		return true;
 	}
 
 
@@ -296,9 +296,9 @@ public class Config {
 		if (this.getValue(name) == null)
 			this.setValue(name, val);
 	}
-	
+
 	public void setDefaultValues() {
-		this.setDefaultValue("nodeAddress", "127.0.0.1");	
+		this.setDefaultValue("nodeAddress", "127.0.0.1");
 		this.setDefaultValue("nodePort", "9481");
 		this.setDefaultValue("maxSimultaneousDownloads", "-1");
 		this.setDefaultValue("maxSimultaneousInsertions", "-1");

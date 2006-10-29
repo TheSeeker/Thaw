@@ -88,11 +88,11 @@ public class FCPConnection extends Observable {
 	public void setMaxUploadSpeed(int max) {
 		this.maxUploadSpeed = max;
 	}
-	
+
 	public void setDuplicationAllowed(boolean allowed) {
 		this.duplicationAllowed = allowed;
 	}
-	
+
 	public void disconnect() {
 		try {
 		    if(this.isConnected())
@@ -126,7 +126,7 @@ public class FCPConnection extends Observable {
 			Logger.warning(this, "Address or port not defined ! Unable to connect\n");
 			return false;
 		}
-		
+
 		Logger.info(this, "Connection to "+this.nodeAddress+":"+ Integer.toString(this.port) +"...");
 
 		if(this.socket != null && !this.socket.isClosed())
@@ -146,12 +146,12 @@ public class FCPConnection extends Observable {
 			this.socket = null;
 			return false;
 		}
-		
+
 		if(!this.socket.isConnected()) {
 			Logger.warning(this, "Unable to connect, but no exception ?! WTF ?\n");
 			Logger.warning(this, "Will try to continue ...\n");
 		}
-		
+
 		try {
 			this.in = this.socket.getInputStream();
 			this.out = this.socket.getOutputStream();
@@ -173,14 +173,14 @@ public class FCPConnection extends Observable {
 
 		this.setChanged();
 		this.notifyObservers();
-		
+
 		return true;
 	}
 
 	public boolean isOutputBufferEmpty() {
 		return this.bufferedOut.isOutputBufferEmpty();
 	}
-	
+
 	public boolean isConnected() {
 		if(this.socket == null)
 			return false;
@@ -200,7 +200,7 @@ public class FCPConnection extends Observable {
 
 		return true;
 	}
-	
+
 	public synchronized boolean lockReading() {
 		if(this.lockReading) {
 			Logger.notice(this, "Reading already locked! You can't lock it !");
@@ -261,7 +261,7 @@ public class FCPConnection extends Observable {
 		if(this.out != null && this.socket != null && this.socket.isConnected()) {
 			try {
 				this.lastWrite = System.currentTimeMillis();
-				
+
 				this.out.write(data);
 				this.out.flush();
 			} catch(java.io.IOException e) {
@@ -277,7 +277,7 @@ public class FCPConnection extends Observable {
 		return true;
 	}
 
-	
+
 	public boolean isWriting() {
 		if( !this.isConnected() )
 			return false;
@@ -349,7 +349,7 @@ public class FCPConnection extends Observable {
 				Logger.error(this, "Error while reading on the socket => disconnection");
 				this.disconnect();
 			}
-				
+
 			this.rawBytesWaiting = this.rawBytesWaiting - rdBytes;
 
 			//Logger.verbose(this, "Remaining: "+rawBytesWaiting);
@@ -375,17 +375,15 @@ public class FCPConnection extends Observable {
 	 * @return null if disconnected or error
 	 */
 	public String readLine() {
-		
-
 
 		/* SECURITY */
 		if(this.rawBytesWaiting > 0) {
 			Logger.error(this, "RAW BYTES STILL WAITING ON SOCKET. THIS IS ABNORMAL.");
 			Logger.error(this, "Will drop them.");
-			
+
 			while(this.rawBytesWaiting > 0) {
 				int to_read = 1024;
-				
+
 				if(to_read > this.rawBytesWaiting)
 					to_read = (int)this.rawBytesWaiting;
 
@@ -400,14 +398,14 @@ public class FCPConnection extends Observable {
 
 
 		String result;
-		
+
 		if(this.in != null && this.reader != null && this.socket != null && this.socket.isConnected()) {
 			try {
 				for(int i = 0; i < this.recvBytes.length ; i++)
 					this.recvBytes[i] = 0;
 
 				result = "";
-				
+
 				int c = 0;
 				int i = 0; /* position in recvBytes */
 
@@ -424,7 +422,7 @@ public class FCPConnection extends Observable {
 
 						return null;
 					}
-					
+
 					if(c == '\n')
 						break;
 
@@ -443,7 +441,7 @@ public class FCPConnection extends Observable {
 						Logger.asIt(this, "Thaw <<< Node : Unknow chars in message. Not displayed");
 				}
 
-				
+
 				return result;
 
 			} catch (java.io.IOException e) {

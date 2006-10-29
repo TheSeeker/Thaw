@@ -23,5 +23,5 @@ public interface FCPQuery {
 	 * @return 0 : Meaningless ; 1 : Download ; 2 : Upload ; >= 2 : ?
 	 */
 	public int getQueryType();
-	
+
 }

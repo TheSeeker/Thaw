@@ -43,16 +43,16 @@ public class SearchResult extends Observable implements Observer, FileAndLinkLis
 
 		if (indexIds != null) {
 			query = query +"(FALSE";
-			
+
 			for (Iterator it = indexIds.iterator();
 			     it.hasNext();) {
 				it.next();
 				query = query + " OR indexParent = ?";
 			}
-			
+
 			query = query + ") AND ";
 		}
-		
+
 		query = query + "(TRUE";
 
 		for (int i = 0 ; i < searchPatterns.length; i++) {
@@ -63,7 +63,7 @@ public class SearchResult extends Observable implements Observer, FileAndLinkLis
 
 		if(columnToSort != null) {
 			query = query + "ORDER BY " + columnToSort;
-			
+
 			if(!asc)
 				query = query + " DESC";
 		}

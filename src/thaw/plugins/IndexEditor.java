@@ -32,14 +32,14 @@ public class IndexEditor implements Plugin {
 
 		TableCreator.createTables(this.hsqldb);
 
-		
+
 		this.editorPanel = new IndexEditorPanel(this.hsqldb, core.getQueueManager(), core.getConfig());
 
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.index.editor"),
 					    IconBox.minIndexEditor,
 					    this.editorPanel.getPanel());
-		
+
 		this.editorPanel.restoreState();
 
 		return true;

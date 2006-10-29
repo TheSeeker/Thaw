@@ -39,14 +39,14 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 	private JButton addButton;
 	private JButton insertAndAddButton;
 	private JButton linkButton;
-	
+
 	private FileList fileList = null; /* Index or SearchResult object */
 	private LinkList linkList = null;
-	
+
 	private Hsqldb db;
 	private FCPQueueManager queueManager;
 	private Config config;
-	
+
 	public IndexEditorPanel(Hsqldb db, FCPQueueManager queueManager, Config config) {
 		this.db = db;
 		this.queueManager = queueManager;
@@ -98,7 +98,7 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 			this.split.setDividerLocation(Integer.parseInt(this.config.getValue("indexEditorPanelSplitPosition")));
 		this.tables.restoreState();
 	}
-	
+
 	public JSplitPane getPanel() {
 		return this.split;
 	}
@@ -130,19 +130,19 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 		this.buttonsEnabled(l != null && l instanceof Index);
 
 		this.fileList = l;
-		this.tables.setFileList(l);		
+		this.tables.setFileList(l);
 	}
 
 	public void valueChanged(javax.swing.event.TreeSelectionEvent e) {
 		javax.swing.tree.TreePath path = e.getPath();
-		
+
 		this.setList(null);
 
 		if(path == null) {
 			Logger.notice(this, "Path null ?");
 			return;
 		}
-		
+
 		IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
 
 		if(node == null) {
@@ -172,7 +172,7 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 		if(e.getSource() == this.addButton
 		   || e.getSource() == this.insertAndAddButton) {
 			FileChooser fileChooser = new FileChooser();
-			
+
 			if(e.getSource() == this.addButton)
 				fileChooser.setTitle(I18n.getMessage("thaw.plugin.index.addFilesWithInserting"));
 			if(e.getSource() == this.insertAndAddButton)
@@ -180,7 +180,7 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 
 			fileChooser.setDirectoryOnly(false);
 			fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
-			
+
 			Vector files = fileChooser.askManyFiles();
 
 			if(files == null) {
@@ -214,7 +214,7 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 				thaw.plugins.index.File file = new thaw.plugins.index.File(this.db, ioFile.getPath(),
 											   category, (Index)this.fileList,
 											   insertion);
-				
+
 				((Index)this.fileList).addFile(file);
 			}
 		}
@@ -238,7 +238,7 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 		if(o instanceof FCPClientPut) {
 			FCPClientPut clientPut = (FCPClientPut)o;
 			if(clientPut.isFinished()) {
-				this.queueManager.remove(clientPut);				
+				this.queueManager.remove(clientPut);
 			}
 		}
 	}

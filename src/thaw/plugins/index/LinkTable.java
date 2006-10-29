@@ -64,10 +64,10 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 		this.panel = new JPanel();
 		this.panel.setLayout(new BorderLayout());
-		
+
 		this.panel.add(new JLabel(I18n.getMessage("thaw.plugin.index.linkList")), BorderLayout.NORTH);
 		this.panel.add(new JScrollPane(this.table));
-		
+
 		this.rightClickMenu = new JPopupMenu();
 		this.removeLinks = new JMenuItem(I18n.getMessage("thaw.common.remove"));
 		this.addThisIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.addIndexFromLink"));
@@ -99,7 +99,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		if(this.linkList != null) {
 			this.linkList.unloadLinks();
 		}
-		
+
 		if(linkList != null) {
 			linkList.loadLinks(null, true);
 		}
@@ -142,7 +142,6 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		links = this.linkList.getLinkList();
 
 		for (int i = 0 ; i < this.selectedRows.length;  i++) {
-			
 			if (e.getSource() == this.removeLinks) {
 				Link link = (Link)links.get(this.selectedRows[i]);
 				((Index)this.linkList).removeLink(link);
@@ -176,9 +175,6 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 
 	public class LinkListModel extends javax.swing.table.AbstractTableModel implements java.util.Observer {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		public Vector columnNames;
@@ -217,7 +213,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 			}
 
 			this.links = null;
-			
+
 			if(this.linkList != null) {
 				this.links = this.linkList.getLinkList();
 			}
@@ -240,7 +236,6 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 			return this.links.size();
 		}
-		
 
 		public int getColumnCount() {
 			return this.columnNames.size();
@@ -261,7 +256,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		}
 
 		public void refresh() {
-			if(this.linkList != null) {				
+			if(this.linkList != null) {
 				this.links = this.linkList.getLinkList();
 			}
 
@@ -280,7 +275,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 		public void update(java.util.Observable o, Object param) {
 			if(param instanceof thaw.plugins.index.Link) {
-				
+
 				//link.deleteObserver(this);
 				//link.addObserver(this);
 			}

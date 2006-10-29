@@ -40,21 +40,21 @@ import thaw.fcp.*;
 public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 	private JPanel panel;
-	
+
 	private JTable table;
 	private FileListModel fileListModel;
 
 	private FileList fileList = null;
 
 	private boolean modifiables;
-	
+
 	private JPopupMenu rightClickMenu;
 	private JMenuItem removeFiles;
 	private JMenuItem insertFiles;
 	private JMenuItem recalculateKeys;
 
 	private JMenuItem downloadFiles;
-	
+
 	private JMenuItem copyFileKeys;
 
 	private JMenuItem gotoIndex;
@@ -76,10 +76,10 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		this.modifiables = modifiables;
 		this.tables = tables;
 		this.tree = tree;
-	
-		
+
+
 		this.rightClickMenu = new JPopupMenu();
-		
+
 		if(modifiables) {
 			this.removeFiles = new JMenuItem(I18n.getMessage("thaw.common.remove"));
 			this.insertFiles = new JMenuItem(I18n.getMessage("thaw.plugin.index.insert"));
@@ -118,7 +118,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 		this.panel = new JPanel();
 		this.panel.setLayout(new BorderLayout());
-		
+
 		this.panel.add(new JLabel(I18n.getMessage("thaw.plugin.index.fileList")), BorderLayout.NORTH);
 		this.panel.add(new JScrollPane(this.table));
 
@@ -129,12 +129,12 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		return this.panel;
 	}
 
-	
+
 	public void setFileList(FileList fileList) {
 		if(this.fileList != null) {
 			this.fileList.unloadFiles();
 		}
-		
+
 		if(fileList != null) {
 			fileList.loadFiles(this.sortColumn, this.ascOrder);
 		}
@@ -174,7 +174,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			return;
 
 		String keys = "";
-		
+
 		Vector files = null;
 
 		java.io.File destination = null;
@@ -196,11 +196,11 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 				Logger.notice(this, "Cannot find again the parent ?! Id: "+Integer.toString(file.getParentId()));
 				return;
 			}
-			
+
 			this.tables.setList(parent);
 
 			int row;
-			
+
 			row = parent.getFilePosition(file);
 
 			if (row < 0)
@@ -220,7 +220,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			fileChooser.setTitle(I18n.getMessage("thaw.plugin.fetch.destinationDirectory"));
 			fileChooser.setDirectoryOnly(true);
 			fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
-			
+
 			destination = fileChooser.askOneFile();
 
 			if(destination == null)
@@ -243,22 +243,21 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 					file.getTransfer().stop(this.queueManager);
 				index.removeFile(file);
 			}
-			
+
 			if(e.getSource() == this.insertFiles) {
 				Index index = (Index)this.fileList;
 
 				thaw.plugins.index.File file = index.getFile(this.selectedRows[i]);
 				file.insertOnFreenet(this.queueManager);
 			}
-			
-			
+
 			if(e.getSource() == this.downloadFiles) {
 				thaw.plugins.index.File file = this.fileList.getFile(this.selectedRows[i]);
 
 				if (file == null) {
 					Logger.notice(this, "File disappeared ?");
 					continue;
-				}					
+				}
 				file.download(destination.getPath(), this.queueManager);
 			}
 
@@ -288,12 +287,9 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 	public void setSelectedRows(int min, int max) {
 		this.table.setRowSelectionInterval(min, max);
 	}
-	
+
 
 	public class FileListModel extends javax.swing.table.AbstractTableModel implements java.util.Observer {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		public Vector columnNames;
@@ -309,7 +305,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 			this.columnNames.add(I18n.getMessage("thaw.common.file"));
 			this.columnNames.add(I18n.getMessage("thaw.common.size"));
-			
+
 			if(FileTable.this.modifiables)
 				this.columnNames.add(I18n.getMessage("thaw.common.localPath"));
 
@@ -338,7 +334,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			}
 
 			this.files = null;
-			
+
 			if(this.fileList != null) {
 				this.files = this.fileList.getFileList();
 			}
@@ -349,7 +345,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 					thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 				}
 
-			}	
+			}
 
 			this.refresh();
 		}
@@ -398,7 +394,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		}
 
 		public void refresh() {
-			if(this.fileList != null) {				
+			if(this.fileList != null) {
 				this.files = this.fileList.getFileList();
 			}
 
@@ -420,12 +416,12 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			   && o instanceof thaw.plugins.index.Index) {
 
 				thaw.plugins.index.File file = (thaw.plugins.index.File)param;
-				
+
 				file.deleteObserver(this);
 
 				if (((Index)o).isInIndex(file))
 					file.addObserver(this);
-				
+
 					}*/
 
 			this.refresh(); /* TODO : Do it more nicely ... :) */
@@ -435,7 +431,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 	private class FileRenderer extends DefaultTableCellRenderer {
 		private final static long serialVersionUID = 20060821;
-		
+
 		public FileRenderer() {
 
 		}
@@ -454,13 +450,13 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 				bar.setStringPainted(true);
 				bar.setBorderPainted(false);
-				
+
 				if((query instanceof FCPClientPut && query.getProgression() > 0)
 				   || (query instanceof FCPClientGet && query.getProgression() < 100) )
 					bar.setValue(query.getProgression());
 				else
 					bar.setValue(query.getTransferWithTheNodeProgression());
-				
+
 				if(query.isFinished() && !query.isSuccessful())
 					bar.setString(I18n.getMessage("thaw.common.failed"));
 
@@ -478,7 +474,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 				return bar;
 			}
-			
+
 			if(value instanceof Long) {
 				return super.getTableCellRendererComponent(table,
 									   thaw.plugins.queueWatcher.QueueTableModel.getPrintableSize(((Long)value).longValue()),

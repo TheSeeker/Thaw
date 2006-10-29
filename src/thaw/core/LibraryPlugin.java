@@ -22,7 +22,7 @@ public abstract class LibraryPlugin implements Plugin {
 
 	public void unregisterChild(Plugin child) {
 		this.nmbRegistered--;
-		
+
 		if(this.nmbRegistered == 0)
 			this.realStop();
 	}

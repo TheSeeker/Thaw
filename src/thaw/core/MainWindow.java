@@ -63,7 +63,6 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	private JButton disconnectButton = null;
 	private JButton settingsButton = null;
 	private JButton quitButton = null;
-	
 
 	private JTabbedPane tabbedPane = null;
 	private JLabel statusBar = null;
@@ -89,9 +88,9 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		} catch(Throwable e) {
 			Logger.notice(this, "No icon");
 		}
-		
+
 		// MENUS
-	
+
 		this.menuBar = new JMenuBar();
 		this.fileMenu = new JMenu(I18n.getMessage("thaw.menu.file"));
 
@@ -101,7 +100,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 						    IconBox.minSettings);
 		this.quitFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.quit"),
 						 IconBox.minQuitAction);
-		
+
 		this.reconnectionFileMenuItem.addActionListener(this);
 		this.optionsFileMenuItem.addActionListener(this);
 		this.quitFileMenuItem.addActionListener(this);
@@ -113,7 +112,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		this.menuBar.add(this.fileMenu);
 
 		this.helpMenu = new JMenu(I18n.getMessage("thaw.menu.help"));
-		
+
 		this.aboutHelpMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.about"));
 		this.aboutHelpMenuItem.addActionListener(this);
 
@@ -135,7 +134,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 		this.quitButton = new JButton(IconBox.quitAction);
 		this.quitButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.quit"));
-		
+
 
 		this.connectButton.addActionListener(this);
 		this.disconnectButton.addActionListener(this);
@@ -152,11 +151,11 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		this.updateToolBar();
 
 		// TABBED PANE
-		
+
 		this.tabbedPane = new JTabbedPane();
 
 		// STATUS BAR
-		
+
 		this.statusBar = new JLabel();
 		this.setStatus(null);
 		this.statusBar.setSize(500, 30);
@@ -170,7 +169,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		this.mainWindow.getContentPane().add(this.statusBar, BorderLayout.SOUTH);
 
 		this.mainWindow.setSize(790, 550);
-		
+
 		this.mainWindow.addWindowListener(this);
 
 		core.getConnectionManager().addObserver(this);
@@ -184,13 +183,13 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		this.mainWindow.setVisible(v);
 	}
 
-	
+
 	public JFrame getMainFrame() {
 		return this.mainWindow;
 	}
 
 
-	/** 
+	/**
 	 * Should not be used.
 	 * @see #addTab(String, java.awt.Component)
 	 * @return In the future, it's possible that it will sometimes return null.
@@ -218,7 +217,6 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		return true;
 	}
 
-	
 	/**
 	 * Used to remove a tab from the main window.
 	 */
@@ -228,7 +226,6 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		return true;
 	}
 
-	
 	/**
 	 * Used by plugins to add their own menu. Not recommanded for the moment.
 	 * Need to find a more elegant way.
@@ -244,7 +241,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == this.connectButton) {
-			this.core.getPluginManager().stopPlugins();			
+			this.core.getPluginManager().stopPlugins();
 
 			if(!this.core.initNodeConnection())
 				this.unableToConnect();
@@ -281,10 +278,10 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 			}
 
 			this.core.getPluginManager().stopPlugins();
-			
+
 			if(!this.core.initNodeConnection())
 				this.unableToConnect();
-			
+
 			this.core.getPluginManager().loadPlugins();
 			this.core.getPluginManager().runPlugins();
 
@@ -294,7 +291,6 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 			this.core.getConfigWindow().setVisible(true);
 		}
 
-		
 		if(e.getSource() == this.quitFileMenuItem) {
 			this.endOfTheWorld();
 		}
@@ -308,7 +304,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 * Warns the user by a popup.
 	 */
 	protected void unableToConnect() {
-		new WarningWindow(this.core, 
+		new WarningWindow(this.core,
 				  I18n.getMessage("thaw.warning.unableToConnectTo")+
 				  " "+this.core.getConfig().getValue("nodeAddress")+":"+ this.core.getConfig().getValue("nodePort"));
 	}
@@ -337,7 +333,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 			System.exit(0);
 		} else {
 			this.core.exit();
-		}	
+		}
 	}
 
 
@@ -375,10 +371,9 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 		JOptionPane.showMessageDialog(null, labels, I18n.getMessage("thaw.about.title"),
 					      JOptionPane.INFORMATION_MESSAGE);
-		
 	}
 
-	
+
 	public void windowActivated(WindowEvent e) {
 
 	}

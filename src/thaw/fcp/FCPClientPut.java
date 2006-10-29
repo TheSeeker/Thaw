@@ -43,7 +43,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	private boolean successful = false;
 	private boolean fatal = true;
 	private boolean sending = false;
-	
+
 	private FCPGenerateSSK sskGenerator = null;
 	private boolean lockOwner = false;
 
@@ -92,7 +92,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		} else {
 			this.name = name;
 			this.fileSize = 0;
-		} 
+		}
 
 		this.keyType = keyType;
 		this.rev = rev;
@@ -115,7 +115,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		this.attempt = 0;
 
 		this.identifier = null;
-		
+
 		this.running = false;
 		this.finished = false;
 		this.successful = false;
@@ -131,16 +131,16 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			    int priority, int persistence, boolean global,
 			    String filePath, String fileName, String status, int progress,
 			    long fileSize, FCPQueueManager queueManager) {
-		
+
 
 		if(fileSize > 0)
 			this.fileSize = fileSize;
 
 		this.toTheNodeProgress = 100;
-		
+
 		this.queueManager = queueManager;
 		this.identifier = identifier;
-		
+
 		if(publicKey.startsWith("CHK"))
 			this.keyType = 0;
 		if(publicKey.startsWith("KSK"))
@@ -161,9 +161,9 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			this.localFile = new File(filePath);
 			if(this.localFile.length() > 0)
 				this.fileSize = this.localFile.length();
-			
+
 		} else {
-			
+
 
 			String[] plop = publicKey.split("/");
 			this.name = plop[plop.length-1];
@@ -197,7 +197,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 					}
 				}
-				
+
 
 			}
 
@@ -206,7 +206,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		if (fileName != null) { /* We want to force the filename */ /* See PersistentPut.TargetFilename */
 			this.name = fileName;
 		}
-		
+
 		this.publicKey = null;
 
 		this.priority = priority;
@@ -215,7 +215,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		this.persistence = persistence;
 
 		this.progress = progress;
-		
+
 		this.status = status;
 		this.running = true;
 		this.finished = false;
@@ -245,22 +245,22 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 
 		queueManager.getQueryManager().addObserver(this);
-		
+
 		this.progress = 0;
 		this.finished = false;
 		this.successful = false;
 		this.running = false;
-		
+
 		if(this.keyType == 2 && this.privateKey == null) {
 			this.generateSSK();
 		}
-		
+
 		if( (this.keyType == 2 && this.privateKey != null) || this.keyType != 2) {
 			this.startInsert();
 		}
-		
+
 		this.setChanged();
-		this.notifyObservers();		
+		this.notifyObservers();
 
 		return true;
 	}
@@ -322,13 +322,13 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		this.toTheNodeProgress= 0;
 
 		this.status = "Waiting for socket availability";
-		
+
 		Logger.info(this, "Another file is being uploaded ... waiting ...");
-		
+
 		Thread fork = new Thread(new UnlockWaiter(this, connection));
-		
+
 		fork.start();
-		
+
 		return true;
 	}
 
@@ -399,10 +399,10 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 		msg.setAmountOfDataWaiting(this.fileSize);
 		Logger.info(this, "Sending "+Long.toString(this.fileSize)+" bytes on socket ...");
-		
+
 		this.queueManager.getQueryManager().writeMessage(msg, false);
 
-		
+
 		Logger.info(this, "Sending file to the node");
 		boolean ret = this.sendFile();
 		Logger.info(this, "File sent (or not :p)");
@@ -422,7 +422,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				this.status = "Inserting";
 			else
 				this.status = "Computing";
-			
+
 			this.setChanged();
 			this.notifyObservers();
 
@@ -467,13 +467,13 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		long origSize = remaining;
 
 		while(remaining > 0) {
-			int to_read = PACKET_SIZE;			
+			int to_read = PACKET_SIZE;
 
 			if(remaining < to_read)
 				to_read = (int)remaining;
 
 			data = new byte[to_read];
-			
+
 			try {
 				if(in.read(data) < 0) {
 					Logger.error(this, "Error while reading file ?!");
@@ -483,7 +483,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				Logger.error(this, "IOException while reading file! proobleeem");
 				return false;
 			}
-				
+
 			if(!connection.rawWrite(data)) {
 				Logger.error(this, "Error while writing file on socket ! Disconnected ?");
 				return false;
@@ -513,7 +513,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			/* we will suppose its ok ... */
 			Logger.notice(this, "available() die (hu ?)");
 		}
-		
+
 		return true;
 	}
 
@@ -524,7 +524,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			this.successful = false;
 			this.fatal= true;
 			this.running = false;
-			
+
 			this.setChanged();
 			this.notifyObservers();
 
@@ -538,7 +538,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		if(o == this.sskGenerator) {
 			this.privateKey = this.sskGenerator.getPrivateKey();
 			this.publicKey = this.sskGenerator.getPublicKey() + "/" + this.name;
-			
+
 			this.setChanged();
 			this.notifyObservers();
 
@@ -565,7 +565,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				this.publicKey = this.publicKey.replaceAll("freenet:", "");
 
 				Logger.info(this, msg.getMessageName()+": "+this.publicKey);
-				
+
 				if(this.getCHKOnly) {
 					this.status = "CHK";
 
@@ -582,9 +582,9 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 					this.queueManager.getQueryManager().deleteObserver(this);
 					return;
 				}
-				
+
 				this.status = "Inserting";
-				
+
 				this.setChanged();
 				this.notifyObservers();
 				return;
@@ -611,7 +611,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 					this.publicKey = "KSK@"+this.name+"-" + Integer.toString(this.rev);
 				//if(keyType == 2)
 				//	publicKey = publicKey + "/" + name + "-" + Integer.toString(rev);
-				
+
 
 				this.status = "Finished";
 
@@ -659,7 +659,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 				this.status = "Protocol error ("+msg.getValue("CodeDescription")+")";
 
-				if(msg.getValue("Fatal") != null && 
+				if(msg.getValue("Fatal") != null &&
 				   msg.getValue("Fatal").equals("false")) {
 					this.status = this.status + " (non-fatal)";
 					this.fatal = false;
@@ -686,7 +686,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 			if(msg.getMessageName().equals("StartedCompression")) {
 				this.status = "Compressing";
-				
+
 				this.setChanged();
 				this.notifyObservers();
 
@@ -721,9 +721,9 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 					long total = (new Long(msg.getValue("Total"))).longValue();
 					//long required = (new Long(msg.getValue("Required"))).longValue();
 					long succeeded = (new Long(msg.getValue("Succeeded"))).longValue();
-					
+
 					this.progress = (int)((succeeded * 99) / total);
-				
+
 					this.running = true;
 					this.finished = false;
 					this.successful = false;
@@ -735,7 +735,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 						this.status = "Inserting";
 					else
 						this.status = "Computing";
-					
+
 					this.setChanged();
 					this.notifyObservers();
 				}
@@ -786,16 +786,16 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			FCPMessage msg = new FCPMessage();
 			msg.setMessageName("RemovePersistentRequest");
 			msg.setValue("Identifier", this.identifier);
-			
+
 			if(this.global)
 				msg.setValue("Global", "true");
 			else
 				msg.setValue("Global", "false");
-			
+
 			this.queueManager.getQueryManager().writeMessage(msg);
-			
+
 			this.running = false;
-			
+
 			this.queueManager.getQueryManager().deleteObserver(this);
 		} else {
 			Logger.notice(this, "Nothing to remove");
@@ -815,7 +815,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		msg.setValue("Global", Boolean.toString(this.global));
 		msg.setValue("Identifier", this.identifier);
 		msg.setValue("PriorityClass", Integer.toString(this.priority));
-		
+
 		if(clientToken && this.getPath() != null)
 			msg.setValue("ClientToken", this.getPath());
 
@@ -829,7 +829,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	public int getFCPPriority() {
 		return this.priority;
 	}
-	
+
 	public void setFCPPriority(int prio) {
 		Logger.info(this, "Setting priority to "+Integer.toString(prio));
 
@@ -839,7 +839,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		this.notifyObservers();
 	}
 
-	
+
 
 	public String getStatus() {
 		return this.status;
@@ -925,9 +925,6 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		return ((!this.successful) && this.fatal);
 	}
 
-	/**
-	 * not tested : TODO : to test it
-	 */
 	public HashMap getParameters() {
 		HashMap result = new HashMap();
 
@@ -942,9 +939,9 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		result.put("priority", Integer.toString(this.priority));
 		result.put("global", Boolean.toString(this.global));
 		result.put("persistence", Integer.toString(this.persistence));
-		
+
 		result.put("progress", Integer.toString(this.progress));
-		
+
 		result.put("status", this.status);
 
 		result.put("attempt", Integer.toString(this.attempt));
@@ -957,11 +954,9 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		return result;
 	}
 
-	/**
-	 * not tested ; TODO : to test it
-	 */
+
 	public boolean setParameters(HashMap parameters) {
-		
+
 		this.localFile = new File((String)parameters.get("localFile"));
 
 		this.fileSize = this.localFile.length();
@@ -998,8 +993,8 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		if(this.persistence == 2 && !this.isFinished()) {
 			this.progress = 0;
 			this.status = "Waiting";
-		} 		
-	
+		}
+
 		return true;
 	}
 

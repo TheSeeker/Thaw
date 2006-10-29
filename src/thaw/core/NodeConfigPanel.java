@@ -18,7 +18,7 @@ public class NodeConfigPanel implements Observer {
 	private JPanel nodeConfigPanel = null;
 
 
-	private final static String[] paramNames = { 
+	private final static String[] paramNames = {
 		I18n.getMessage("thaw.config.nodeAddress"),
 		I18n.getMessage("thaw.config.nodePort"),
 		I18n.getMessage("thaw.config.maxSimultaneousDownloads"),
@@ -52,17 +52,17 @@ public class NodeConfigPanel implements Observer {
 
 		this.nodeConfigPanel = new JPanel();
 		this.nodeConfigPanel.setLayout(new GridLayout(15, 1));
-		
+
 		for(int i=0; i < paramNames.length ; i++) {
 			String value;
-			
+
 			if( (value = core.getConfig().getValue(configNames[i])) == null)
 				value = "";
 
 			this.paramLabels[i] = new JLabel(paramNames[i]);
 			this.paramFields[i] = new JTextField(value);
 			currentValues[i] = value;
-			
+
 			this.nodeConfigPanel.add(this.paramLabels[i]);
 			this.nodeConfigPanel.add(this.paramFields[i]);
 		}
@@ -104,7 +104,7 @@ public class NodeConfigPanel implements Observer {
 		return false;
 	}
 
-	
+
 	public void update(Observable o, Object arg) {
 		if(arg == this.core.getConfigWindow().getOkButton()) {
 			if (this.hasAValueChanged())

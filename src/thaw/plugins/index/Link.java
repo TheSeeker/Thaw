@@ -100,7 +100,6 @@ public class Link extends java.util.Observable {
 			} catch(SQLException e) {
 				this.id = 1;
 			}
-			
 
 			st = this.db.getConnection().prepareStatement("INSERT INTO links (id, publicKey, "+
 								 "mark, comment, indexParent, indexTarget) "+
@@ -121,8 +120,7 @@ public class Link extends java.util.Observable {
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to insert link to '"+this.indexName+"' because: "+e.toString());
 		}
-		
-	
+
 	}
 
 
@@ -151,7 +149,7 @@ public class Link extends java.util.Observable {
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to check if link '"+this.key+"' exists because: "+e.toString());
 		}
-		
+
 		return false;
 	}
 

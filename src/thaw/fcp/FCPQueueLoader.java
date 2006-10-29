@@ -20,13 +20,13 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 
 	public boolean start(FCPQueueManager queueManager) {
 		this.queueManager = queueManager;
-		
+
 		queueManager.getQueryManager().addObserver(this);
-		
+
 
 		FCPListPersistentRequests listPersistent = new FCPListPersistentRequests();
 		boolean ret = listPersistent.start(queueManager);
-		
+
 		if(ret)
 			queueManager.getQueryManager().getConnection().lockWriting();
 
@@ -49,7 +49,7 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 
 		if("PersistentGet".equals( msg.getMessageName() )) {
 			Logger.info(this, "Resuming from PersistentGet");
-			
+
 			int persistence = 0;
 
 			if("reboot".equals( msg.getValue("PersistenceType") ))
@@ -73,8 +73,7 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 								  priority, persistence, global,
 								  destinationDir, "Fetching", 0,
 								  -1, this.queueManager);
-								  
-								  
+
 			if(this.queueManager.addQueryToTheRunningQueue(clientGet, false))
 				this.queueManager.getQueryManager().addObserver(clientGet);
 			else
@@ -85,14 +84,12 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 
 		if("PersistentPut".equals( msg.getMessageName() )) {
 			Logger.info(this, "Resuming from PersistentPut");
-			
+
 			int persistence = 0;
 
-			/* TOFIX : Node doesn't return PersistenceType */
-			/*
-			if(msg.getValue("PersistenceType").equals("reboot"))
+			if(msg.getValue("PersistenceType") != null
+			   && msg.getValue("PersistenceType").equals("reboot"))
 				persistence = 1;
-			*/
 
 			boolean global = true;
 
@@ -117,13 +114,12 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 								  filePath, msg.getValue("TargetFilename"),
 								  "Inserting", 0, fileSize,
 								  this.queueManager);
-								  
-								  
+
+
 			if(this.queueManager.addQueryToTheRunningQueue(clientPut, false))
 				this.queueManager.getQueryManager().addObserver(clientPut);
 			else
 				Logger.info(this, "Already in the running queue");
-			
 
 			return;
 		}

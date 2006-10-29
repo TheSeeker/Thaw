@@ -92,7 +92,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 			this.subPanel.setLayout(new GridLayout(3,2, 20, 20));
 		}
 
-		
+
 		// FILE SELECTION
 
 		JPanel subSubPanel = new JPanel();
@@ -164,8 +164,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 			I18n.getMessage("thaw.plugin.priority.p3"),
 			I18n.getMessage("thaw.plugin.priority.p4"),
 			I18n.getMessage("thaw.plugin.priority.p5"),
-			I18n.getMessage("thaw.plugin.priority.p6") 
-			
+			I18n.getMessage("thaw.plugin.priority.p6")
 		};
 
 		subSubPanel.setLayout(new GridLayout(4, 1));
@@ -209,9 +208,9 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 		subSubPanel = new JPanel();
 		subSubPanel.setLayout(new GridLayout(4, 1));
-		
+
 		this.mimeLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.mime"));
-		
+
 		Vector mimes = (Vector)DefaultMIMETypes.getAllMIMETypes().clone();
 		mimes.add(0, "");
 
@@ -221,7 +220,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 		subSubPanel.add(this.mimeLabel);
 		subSubPanel.add(this.mimeField);
-				       
+
 		if(advancedMode)
 			this.subPanel.add(subSubPanel);
 
@@ -268,7 +267,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		this.globalPanel.add(this.mainPanel);
 	}
 
-	
+
 	public JPanel getPanel() {
 		return this.globalPanel;
 	}
@@ -329,10 +328,9 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 				global = true;
 			if(((String)this.globalSelecter.getSelectedItem()).equals(I18n.getMessage("thaw.common.false")))
 				global = false;
-			
 
 			String mimeType = null;
-			
+
 			if(this.mimeField.getSelectedItem() != null && !((String)this.mimeField.getSelectedItem()).equals(""))
 				mimeType = (String)this.mimeField.getSelectedItem();
 
@@ -354,7 +352,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 				Logger.info(this, "Nothing selected");
 				return;
 			}
-			
+
 			String fileList = "";
 
 			int i;
@@ -373,7 +371,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 			}
 
 			this.selectedFiles.setText(fileList);
-			
+
 			if(this.keyType != 0)
 				this.nameField.setText(this.getFileNameFromPath());
 		}
@@ -383,7 +381,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 	public String getFileNameFromPath() {
 		if(this.selectedFiles.getText() == null || "".equals( this.selectedFiles.getText() ))
 			return "";
-		
+
 		String[] cutcut = this.selectedFiles.getText().split(File.separator.replaceAll("\\\\", "\\\\\\\\"));
 
 		return cutcut[cutcut.length - 1];
@@ -394,7 +392,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		   && e.getStateChange() == ItemEvent.SELECTED) { /* CHK */
 			this.setKeysVisible(false);
 			this.setRevAndNameVisible(false);
-			
+
 			this.resetOptionalFields();
 
 			this.keyType = 0;
@@ -433,7 +431,6 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 	private void setRevAndNameVisible(boolean v) {
 		this.selectRevLabel.setVisible(v);
 		this.revField.setVisible(v);
-		
 		this.selectNameLabel.setVisible(v);
 		this.nameField.setVisible(v);
 	}
@@ -444,7 +441,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		this.privateKeyLabel.setVisible(v);
 		this.privateKeyField.setVisible(v);
 	}
-	
+
 	private void resetOptionalFields() {
 		this.revField.setText("0");
 		this.nameField.setText(this.getFileNameFromPath());
@@ -455,10 +452,10 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 	public void update(Observable o, Object param) {
 		if(o == this.lastInsert) {
 			FCPClientPut clientPut = (FCPClientPut)o;
-			
+
 			if(clientPut.getKeyType() == 2) {
 				Logger.info(this, "Updating display");
-				
+
 				if(clientPut.getPublicKey() != null) {
 					String publicKey = clientPut.getPublicKey();
 					publicKey = publicKey.replaceFirst("SSK@", "");
@@ -475,15 +472,15 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 					privateKey = privateKey.replaceFirst("USK@", "");
 					String[] split = privateKey.split("/");
 					this.privateKeyField.setText(split[0]);
-					
+
 				} else {
-					this.privateKeyField.setText("");				
+					this.privateKeyField.setText("");
 				}
 
 			} else {
 				this.publicKeyField.setText("");
 				this.privateKeyField.setText("");
-			}			
+			}
 
 		} else {
 			o.deleteObserver(this);

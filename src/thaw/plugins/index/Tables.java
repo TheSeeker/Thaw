@@ -14,7 +14,7 @@ import thaw.plugins.Hsqldb;
  */
 public class Tables {
 	private JPanel panel;
-	
+
 	private SearchBar searchBar;
 	private FileTable fileTable;
 	private LinkTable linkTable;
@@ -36,7 +36,7 @@ public class Tables {
 		this.split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 				       this.linkTable.getPanel(),
 				       this.fileTable.getPanel());
-		
+
 		this.panel.add(this.searchBar.getPanel(), BorderLayout.NORTH);
 		this.panel.add(this.split, BorderLayout.CENTER);
 	}

@@ -135,9 +135,9 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 			Logger.notice(this, "Key was already in one of the queues : "+query.getFilename());
 			return false;
 		}
-		
+
 		Logger.notice(this, "Adding query to the pending queue ...");
-		
+
 		this.pendingQueries[query.getThawPriority()].add(query);
 
 		this.setChanged();
@@ -164,7 +164,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 		}
 
 		if(!callStart && query.getIdentifier().startsWith(this.thawId)) {
-			/* It's a resumed query => We to adapt the next Id 
+			/* It's a resumed query => We to adapt the next Id
 			 * to avoid collisions.
 			 */
 
@@ -173,7 +173,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 				String[] subId = query.getIdentifier().split("-");
 				subId = subId[0].split("_");
 				int id = Integer.parseInt(subId[subId.length-1]);
-				
+
 				if(id > this.lastId) {
 					this.lastId = id;
 				}
@@ -189,14 +189,14 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 
 		if(callStart)
 			query.start(this);
-		
+
 		Logger.debug(this, "Adding done");
 
 		return true;
 	}
 
 
-	
+
 	/**
 	 * *Doesn't* call stop() from the query.
 	 */
@@ -222,9 +222,8 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 		}
 
 		Logger.info(this, "Restart done.");
-		    
 	}
-	
+
 	public void remove(FCPTransferQuery query) {
 		this.runningQueries.remove(query);
 
@@ -235,7 +234,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 		this.notifyObservers(query);
 	}
 
-	
+
 	private boolean isTheSame(FCPTransferQuery queryA,
 				  FCPTransferQuery queryB) {
 		if(queryA.getQueryType() != queryB.getQueryType())
@@ -256,7 +255,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 			}
 			return false;
 		}
-		
+
 		if(queryA.getFilename().equals(queryB.getFilename())) {
 			Logger.debug(this, "isTheSame(): Filename");
 			return true;
@@ -275,7 +274,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 			if(this.pendingQueries[i].contains(query))
 				return true;
 		}
-		
+
 		return false;
 	}
 
@@ -303,7 +302,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 						    || key.equals(plop.getFileKey()))
 							return plop;
 					}
-				
+
 				for(int i = 0 ; i <= PRIORITY_MIN ; i++) {
 					for(it = this.pendingQueries[i].iterator();
 					    it.hasNext(); )
@@ -313,7 +312,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 							    || key.equals(plop.getFileKey()))
 								return plop;
 						}
-					
+
 				}
 			} catch(java.util.ConcurrentModificationException e) {
 				Logger.notice(this, "getTransfer(): Collission. Reitering");
@@ -350,7 +349,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 						    || name.equals(plop.getFilename()))
 							return plop;
 					}
-				
+
 				for(int i = 0 ; i <= PRIORITY_MIN ; i++) {
 					for(it = this.pendingQueries[i].iterator();
 					    it.hasNext(); )
@@ -361,7 +360,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 							    || name.equals(plop.getFilename()))
 								return plop;
 						}
-					
+
 				}
 			} catch(java.util.ConcurrentModificationException e) {
 				Logger.notice(this, "getTransferByFilename(): Collission. Reitering");
@@ -393,7 +392,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 						if(this.isTheSame(plop, query))
 							return true;
 					}
-				
+
 				for(int i = 0 ; i <= PRIORITY_MIN ; i++) {
 					for(it = this.pendingQueries[i].iterator();
 					    it.hasNext(); )
@@ -402,7 +401,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 							if(this.isTheSame(plop, query))
 								return true;
 						}
-					
+
 				}
 			} catch(java.util.ConcurrentModificationException e) {
 				Logger.notice(this, "isAlreadyPresent(): Collission. Reitering");
@@ -417,7 +416,6 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 
 
 	public void schedule() {
-		
 			/* We count the running query to see if there is an empty slot */
 
 			int runningInsertions = 0;
@@ -448,24 +446,24 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 					    it.hasNext()
 						    && ( (this.maxInsertions <= -1 || runningInsertions < this.maxInsertions)
 							|| (this.maxDownloads <= -1 || runningDownloads < this.maxDownloads) ); ) {
-						
+
 						FCPTransferQuery query = (FCPTransferQuery)it.next();
-						
+
 						if( (query.getQueryType() == 1
 						     && (this.maxDownloads <= -1 || runningDownloads < this.maxDownloads) )
 						    || (query.getQueryType() == 2
 							&& (this.maxInsertions <= -1 || runningInsertions < this.maxInsertions)) ) {
-							
+
 							Logger.debug(this, "Scheduler : Moving a query from pendingQueue to the runningQueue");
 							this.pendingQueries[priority].remove(query);
-							
+
 							it = this.pendingQueries[priority].iterator(); /* We reset iterator */
-							
+
 							this.addQueryToTheRunningQueue(query);
-							
+
 							if(query.getQueryType() == 1)
 								runningDownloads++;
-							
+
 							if(query.getQueryType() == 2)
 								runningInsertions++;
 
@@ -473,9 +471,6 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 								Thread.sleep(300);
 							} catch(java.lang.InterruptedException e) { }
 						}
-
-						
-						
 					}
 				} catch(java.util.ConcurrentModificationException e) {
 					Logger.notice(this, "Collision.");
@@ -543,7 +538,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	public void update(java.util.Observable o, Object arg) {
 		if(o == this.queryManager.getConnection()
 		   && !this.queryManager.getConnection().isConnected()) {
-			
+
 			/* Only the running queue ...
 			 * pending query are specifics to Thaw
 			 */

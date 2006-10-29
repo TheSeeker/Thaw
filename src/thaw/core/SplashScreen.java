@@ -17,7 +17,7 @@ public class SplashScreen {
 
 	public JDialog splashScreen;
 	public JProgressBar progressBar;
-	
+
 
 	public SplashScreen() {
 
@@ -29,12 +29,12 @@ public class SplashScreen {
 
 		this.splashScreen.setUndecorated(true);
 		this.splashScreen.setResizable(false);
-		
+
 		panel.setLayout(new BorderLayout(10, 10));
-		
+
 
 		JLabel thawLabel = new JLabel("   Thaw");
-		
+
 		thawLabel.setFont(new Font("Dialog", Font.BOLD, 30));
 
 		panel.add(thawLabel, BorderLayout.CENTER);

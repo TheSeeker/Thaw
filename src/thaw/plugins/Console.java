@@ -24,7 +24,7 @@ import thaw.core.*;
  */
 public class Console implements Plugin, LogListener, ActionListener {
 	private Core core;
-	
+
 	private JPanel consolePanel;
 	private JTextArea logArea;
 	private JButton saveToFile;
@@ -41,14 +41,14 @@ public class Console implements Plugin, LogListener, ActionListener {
 
 	public boolean run(Core core) {
 		this.core = core;
-		
+
 		this.consolePanel = new JPanel();
 		this.consolePanel.setLayout(new BorderLayout());
-		
+
 		this.logArea = new JTextArea();
 		this.logArea.setEditable(false);
 		this.saveToFile = new JButton(I18n.getMessage("thaw.plugin.console.saveToFile"));
-		
+
 		this.saveToFile.addActionListener(this);
 
 		this.consolePanel.add(new JScrollPane(this.logArea), BorderLayout.CENTER);
@@ -77,7 +77,7 @@ public class Console implements Plugin, LogListener, ActionListener {
 		this.configPanel.add(this.sizeField);
 
 		core.getConfigWindow().addTab(I18n.getMessage("thaw.plugin.console.console"), this.configPanel);
-		
+
 		Logger.addLogListener(this);
 
 		return true;
@@ -104,7 +104,7 @@ public class Console implements Plugin, LogListener, ActionListener {
 			fileChooser.setTitle(I18n.getMessage("thaw.plugin.console.console"));
 			fileChooser.setDirectoryOnly(false);
 			fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
-			
+
 			File file = fileChooser.askOneFile();
 
 			if(file != null) {
@@ -119,7 +119,7 @@ public class Console implements Plugin, LogListener, ActionListener {
 
 	public void writeLogsToFile(File file) {
 		/* A la bourrin */
-		
+
 		FileOutputStream output;
 
 		try {

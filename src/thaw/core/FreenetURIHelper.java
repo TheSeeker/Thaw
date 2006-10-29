@@ -14,6 +14,7 @@ public class FreenetURIHelper {
 
 		uri = uri.replaceFirst("http://127.0.0.1:8888/", "");
 		uri = uri.replaceFirst("http://localhost/", "");
+		uri = uri.replaceFirst("freenet:", "");
 
 		try {
 				uri = java.net.URLDecoder.decode(uri, "UTF-8");
@@ -28,10 +29,10 @@ public class FreenetURIHelper {
 	public static String getFilenameFromKey(String key) {
 		String filename;
 		String cutcut[] = key.split("/");
-	
+
 		if (key == null)
 			return null;
-	
+
 		if(!key.endsWith("/")) {
 			filename = cutcut[cutcut.length-1];
 		} else {
@@ -97,7 +98,7 @@ public class FreenetURIHelper {
 		String[] split = USK.split("/");
 
 		USK = "";
-		
+
 		for (int i = 0 ; i < split.length ; i++) {
 			switch (i) {
 			case(0):
@@ -171,7 +172,7 @@ public class FreenetURIHelper {
 				key = key + "-" + changeRev(subsplit[subsplit.length-1], rev, offset);
 				break;
 			default:
-				key = key + "/" + split[i];				
+				key = key + "/" + split[i];
 			}
 		}
 

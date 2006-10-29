@@ -40,7 +40,7 @@ public class QueueWatcher implements thaw.core.Plugin, PropertyChangeListener {
 
 	public boolean run(Core core) {
 		this.core = core;
-		
+
 		Logger.info(this, "Starting plugin \"QueueWatcher\" ...");
 
 		this.detailPanel = new DetailPanel(core);
@@ -58,12 +58,12 @@ public class QueueWatcher implements thaw.core.Plugin, PropertyChangeListener {
 
 		if(this.queuePanels[1].getPanel() != null)
 			this.panel.add(this.queuePanels[1].getPanel());
-		
+
 		this.advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
-		
+
 		if(this.advancedMode) {
 			this.mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, this.detailPanel.getPanel(), this.panel);
-			
+
 			if(core.getConfig().getValue("detailPanelFolded") == null
 			   || ((new Boolean(core.getConfig().getValue("detailPanelFolded"))).booleanValue()) == true) {
 				this.folded = true;
@@ -74,7 +74,7 @@ public class QueueWatcher implements thaw.core.Plugin, PropertyChangeListener {
 				this.detailPanel.getPanel().setVisible(true);
 				this.mainPanel.setDividerLocation(DIVIDER_LOCATION);
 			}
-			
+
 			this.mainPanel.addPropertyChangeListener(this);
 			this.mainPanel.setOneTouchExpandable(true);
 
@@ -83,10 +83,10 @@ public class QueueWatcher implements thaw.core.Plugin, PropertyChangeListener {
 			this.panelAdded = this.panel;
 		}
 
-		core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"), 
+		core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"),
 					    IconBox.minQueue,
 					    this.panelAdded);
-			
+
 		//if(core.getConnectionManager() != null && core.getConnectionManager().isConnected()) {
 		//	core.getConnectionManager().addObserver(this);
 		//}
@@ -97,13 +97,11 @@ public class QueueWatcher implements thaw.core.Plugin, PropertyChangeListener {
 		//    Logger.warning(this, "Unable to connect to QueueManager. Is the connection established ?");
 		//    return false;
 		//}
-		    
+
 		this.dnd = new DragAndDropManager(core, this.queuePanels);
 
 		return true;
 	}
-
-	
 
 
 	public boolean stop() {
@@ -112,7 +110,7 @@ public class QueueWatcher implements thaw.core.Plugin, PropertyChangeListener {
 		this.core.getConfig().setValue("detailPanelFolded", ((new Boolean(this.folded)).toString()));
 
 		this.core.getMainWindow().removeTab(this.panelAdded);
-		
+
 		return true;
 	}
 
@@ -138,38 +136,6 @@ public class QueueWatcher implements thaw.core.Plugin, PropertyChangeListener {
 		}
 
 	}
-
-	/*
-	public void update(Observable o, Object arg) {
-		if(o == core.getConnectionManager()) {
-			queuePanels[0].resetTable();
-			queuePanels[1].resetTable();
-		}
-
-
-		if(o == core.getQueueManager()) {
-
-			FCPQueueManager manager = (FCPQueueManager)o;
-			
-			try {
-				queuePanels[0].resetTable();
-				queuePanels[1].resetTable();
-				
-				addToPanels(manager.getRunningQueue());
-				
-				Vector[] pendings = manager.getPendingQueues();
-				
-				for(int i = 0;i < pendings.length ; i++)
-					addToPanels(pendings[i]);
-				
-			} catch(java.util.ConcurrentModificationException e) {
-				Logger.notice(this, "Collision while updating queue panels");
-			}
-
-		}
-		
-	}
-	*/
 
 	public void propertyChange(PropertyChangeEvent evt) {
 

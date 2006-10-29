@@ -105,7 +105,7 @@ public class FCPClientHello implements FCPQuery, Observer {
 		FCPMessage answer = (FCPMessage)arg;
 
 		if(o == this.queryManager) {
-			
+
 			if("NodeHello".equals( answer.getMessageName() )) {
 				this.successful = true;
 				Logger.info(this, "Received a nodeHello");

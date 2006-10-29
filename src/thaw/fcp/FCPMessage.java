@@ -42,12 +42,10 @@ public class FCPMessage {
 		for(i = 0 ; "".equals( lines[i] );) {
 			i++;
 		}
-			
 
 		this.setMessageName(lines[i]);
 		Logger.info(this, "Message (Node >> Thaw): "+lines[i]);
 
-		
 		for(i++; i < lines.length ; i++) {
 			/* Empty lines are ignored. */
 			/* Line not containing '=' (like "Data" or "EndMessage") are ignored */
@@ -55,7 +53,7 @@ public class FCPMessage {
 				continue;
 
 			String[] affectation = lines[i].split("=");
-			
+
 			if(affectation.length < 2) {
 				Logger.warning(this, "Malformed message");
 				continue;
@@ -76,11 +74,11 @@ public class FCPMessage {
 		return this.messageName;
 	}
 
-	public void setMessageName(String name) {	
+	public void setMessageName(String name) {
 		if(name == null || "".equals( name )) {
 			Logger.notice(this, "Setting name to empty ? weird");
 		}
-		
+
 		if(name.indexOf("\n")>=0) {
 			Logger.notice(this, "Name shouldn't contain '\n'");
 		}
@@ -105,7 +103,7 @@ public class FCPMessage {
 		this.fields.put(field, value);
 	}
 
-	
+
 	/**
 	 * Returns the amount of data waiting on socket (in octets).
 	 * @return if > 0 : Data are still waiting (except if the message name is "PersistentPut" !), if == 0 : No data waiting, if < 0 : These data are now unavailable.
@@ -114,7 +112,7 @@ public class FCPMessage {
 		return this.dataWaiting;
 	}
 
-	
+
 	public void setAmountOfDataWaiting(long amount) {
 		if(amount == 0) {
 			Logger.warning(this, "Setting amount of data waiting to 0 ?! Abnormal !");

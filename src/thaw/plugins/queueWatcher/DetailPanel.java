@@ -17,8 +17,6 @@ import thaw.fcp.*;
 
 /**
  * Right panel of queueWatcher plugin. Show details about a transfer.
- * Possible evolution: Display what is return by FCPTransferQuery.getParameters() 
- * (doing an exception for the progressbar).
  */
 public class DetailPanel implements Observer {
 
@@ -31,7 +29,7 @@ public class DetailPanel implements Observer {
 	private JTextField size       = new JTextField();
 	private JProgressBar progress = new JProgressBar(0, 100);
 	private JProgressBar withTheNodeProgress = new JProgressBar(0, 100);
-	private JTextField status     = new JTextField(); 
+	private JTextField status     = new JTextField();
 	private JTextField key        = new JTextField();
 	private JTextField path       = new JTextField();
 	private JTextField priority   = new JTextField();
@@ -46,7 +44,7 @@ public class DetailPanel implements Observer {
 
 	public DetailPanel(Core core) {
 		this.core = core;
-		
+
 		this.panel = new JPanel();
 		this.subPanel = new JPanel();
 
@@ -76,7 +74,7 @@ public class DetailPanel implements Observer {
 				case(0): field = this.file; this.file.setEditable(false); break;
 				case(1): field = this.size; this.size.setEditable(false); break;
 				case(2):
-					field = this.progress; 
+					field = this.progress;
 					this.progress.setString("");
 					this.progress.setStringPainted(true);
 					break;
@@ -110,13 +108,13 @@ public class DetailPanel implements Observer {
 		return this.panel;
 	}
 
-	
+
 	public void setQuery(FCPTransferQuery query) {
 		if(this.query != null)
 			((Observable)this.query).deleteObserver(this);
 
 		this.query = query;
-		
+
 		if(this.query != null)
 			((Observable)this.query).addObserver(this);
 
@@ -143,7 +141,7 @@ public class DetailPanel implements Observer {
 				this.progress.setString(progression);
 			} else
 				this.progress.setString(I18n.getMessage("thaw.common.failed"));
-			
+
 			if(this.query.getFileKey() != null)
 				this.key.setText(this.query.getFileKey());
 			else
@@ -164,7 +162,7 @@ public class DetailPanel implements Observer {
 				this.priority.setText(I18n.getMessage("thaw.plugin.priority.p"+Integer.toString(this.query.getThawPriority())));
 			else
 				this.priority.setText(I18n.getMessage("thaw.common.unknown"));
-			
+
 		} else {
 			this.withTheNodeProgress.setValue(0);
 			this.withTheNodeProgress.setString("");
@@ -175,8 +173,6 @@ public class DetailPanel implements Observer {
 			this.size.setText("");
 			this.priority.setText("");
 			this.key.setText("");
-
-			
 		}
 	}
 
@@ -191,7 +187,7 @@ public class DetailPanel implements Observer {
 				this.path.setText(this.query.getPath());
 			else
 				this.path.setText(I18n.getMessage("thaw.common.unspecified"));
-			
+
 			if(this.query.isGlobal())
 				this.globalQueue.setText(I18n.getMessage("thaw.common.yes"));
 			else

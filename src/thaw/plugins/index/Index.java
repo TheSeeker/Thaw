@@ -38,7 +38,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	private String realName;
 	private String displayName;
 	private boolean modifiable;
-	
+
 	private String publicKey; /* without the filename ! */
 	private String privateKey;
 
@@ -59,7 +59,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	private String author = null;
 
 	private boolean rewriteKey = true;
-	
+
 
 	private FCPClientPut publicKeyRecalculation = null;
 
@@ -71,7 +71,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		     int id, IndexCategory parent,
 		     String realName, String displayName,
 		     String publicKey, String privateKey,
-		     int revision, String author, 
+		     int revision, String author,
 		     boolean modifiable) {
 		this.queueManager = queueManager;
 
@@ -105,7 +105,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		this.revision = revision;
 
 		this.author = author;
-		
+
 		this.treeNode.setUserObject(this);
 
 		this.setTransfer();
@@ -139,7 +139,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	public boolean create() {
 		try {
 			/* Rahh ! Hsqldb doesn't support getGeneratedKeys() ! 8/ */
-			
+
 			Connection c = this.db.getConnection();
 			PreparedStatement st;
 
@@ -148,7 +148,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			st.execute();
 
 			try {
-				ResultSet key = st.getResultSet();		
+				ResultSet key = st.getResultSet();
 				key.next();
 				this.id = key.getInt(1) + 1;
 			} catch(SQLException e) {
@@ -170,9 +170,9 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				st.setInt(9, this.parent.getId());
 			else
 				st.setNull(9, Types.INTEGER);
-			
+
 			st.execute();
-						
+
 			return true;
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to insert the new index in the db, because: "+e.toString());
@@ -197,11 +197,11 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				st.setString(2, name);
 				st.setInt(3, this.id);
 			}
-			
+
 			st.execute();
 
 			this.displayName = name;
-			
+
 			if(this.modifiable)
 				this.realName = name;
 
@@ -220,7 +220,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				thaw.plugins.index.File file = (thaw.plugins.index.File)fileIt.next();
 				file.delete();
 			}
-			    
+
 			for (Iterator linkIt = this.linkList.iterator(); linkIt.hasNext() ;) {
 				Link link = (Link)linkIt.next();
 				link.delete();
@@ -252,7 +252,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 			if(this.targetFile.exists()) {
 				Logger.info(this, "Inserting new version");
-				
+
 				this.revision++;
 
 				clientPut = new FCPClientPut(this.targetFile, 2, this.revision, this.toString(), this.privateKey, 2, false, 0);
@@ -272,20 +272,20 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		} else {
 			this.updateFromFreenet(-1);
 		}
-		
+
 	}
 
 	public void updateFromFreenet(int rev) {
 		FCPClientGet clientGet;
 
 		Logger.info(this, "Getting lastest version ...");
-		
+
 		String key;
-		
+
 		/* We will trust the node for the incrementation
 		   execept if a rev is specified */
 
-		
+
 		if (rev >= 0) {
 			key = FreenetURIHelper.convertUSKtoSSK(this.publicKey);
 			key = FreenetURIHelper.changeSSKRevision(key, rev, 0);
@@ -299,10 +299,10 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				this.rewriteKey = false;
 			}
 		}
-		
+
 		Logger.info(this, "Key asked: "+key);
 
-		
+
 		clientGet = new FCPClientGet(key, 2, 2, false, -1, System.getProperty("java.io.tmpdir"));
 		this.transfer = clientGet;
 		clientGet.addObserver(this);
@@ -346,7 +346,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				th.start();
 				return;
 			}
-			
+
 			String key;
 
 			if (this.modifiable)
@@ -396,7 +396,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			Logger.warning(this, "Unable to purge da list ! Exception: "+e.toString());
 		}
 	}
-	
+
 	public void purgeFileList() {
 		try {
 			Connection c = this.db.getConnection();
@@ -422,7 +422,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			else
 				st.setNull(4, Types.VARCHAR);
 			st.setInt(5, this.treeNode.getParent().getIndex(this.treeNode));
-			
+
 			st.setInt(6, this.revision);
 
 			if( ((IndexTreeNode)this.treeNode.getParent()).getId() < 0)
@@ -431,7 +431,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				st.setInt(7, ((IndexTreeNode)this.treeNode.getParent()).getId());
 
 			st.setString(8, this.author);
-			
+
 			st.setInt(9, this.getId());
 
 			st.execute();
@@ -487,7 +487,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		if(o == this.transfer) {
 			if(this.transfer.isFinished() && this.transfer.isSuccessful()) {
 
-				this.queueManager.remove(this.transfer);
+				if (this.transfer.stop(this.queueManager))
+					this.queueManager.remove(this.transfer);
 
 				if(this.transfer instanceof FCPClientPut) {
 					if (this.targetFile != null)
@@ -498,40 +499,40 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 							java.io.File fl = new java.io.File(path);
 							fl.delete();
 						}
-					} 
-					
+					}
+
 					this.transfer = null;
-					
+
 					this.setChanged();
 					this.notifyObservers();
-					
+
 					return;
 				}
-				
+
 				if(this.transfer instanceof FCPClientGet) {
 					java.io.File file = new java.io.File(this.transfer.getPath());
 
 					Logger.info(this, "Updating index ...");
-				
+
 					if (this.rewriteKey)
 						this.publicKey = this.transfer.getFileKey();
 					else
 						this.revision = FreenetURIHelper.getUSKRevision(this.transfer.getFileKey());
 
 					Logger.info(this, "Most up-to-date key found: " + this.publicKey);
-					
+
 					this.loadXML(file);
 					this.save();
 
 					Logger.info(this, "Update done.");
 
 					file.delete();
-					
+
 					this.transfer = null;
-					
+
 					this.setChanged();
 					this.notifyObservers();
-					
+
 					return;
 				}
 
@@ -553,7 +554,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			this.notifyObservers(o);
 		}
 	}
-	
+
 
 	public boolean isEmpty() {
 		if (this.fileList == null)
@@ -566,7 +567,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 		return false;
 	}
-	
+
 
 	////// FILE LIST ////////
 
@@ -689,7 +690,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			file.insert();
 
 			this.addFileToList(file);
-		
+
 			this.setChanged();
 			this.notifyObservers(file);
 		}
@@ -723,7 +724,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	/**
 	 * Do the update all the files in the database.
 	 */
-	public void updateFileList() {		
+	public void updateFileList() {
 		for(Iterator it = this.fileList.iterator(); it.hasNext();) {
 			thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 			file.update();
@@ -775,7 +776,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			link.update();
 		}
 	}
-	
+
 	public void loadLinks(String columnToSort, boolean asc)
 	{
 		if(this.linkList != null) {
@@ -846,7 +847,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	//// XML ////
 
 	public void generateXML(java.io.File file) {
-		
+
 		FileOutputStream outputStream;
 
 		try {
@@ -869,7 +870,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		StreamResult streamResult = new StreamResult(out);
 
 		Document xmlDoc;
-		
+
 		DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder xmlBuilder;
 
@@ -889,7 +890,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		rootEl.appendChild(this.getXMLHeader(xmlDoc));
 		rootEl.appendChild(this.getXMLLinks(xmlDoc));
 		rootEl.appendChild(this.getXMLFileList(xmlDoc));
-		
+
 		/* Serialization */
 		DOMSource domSource = new DOMSource(xmlDoc);
 		TransformerFactory transformFactory = TransformerFactory.newInstance();
@@ -905,7 +906,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 		serializer.setOutputProperty(OutputKeys.ENCODING,"UTF-8");
 		serializer.setOutputProperty(OutputKeys.INDENT,"yes");
-		
+
 		/* final step */
 		try {
 			serializer.transform(domSource, streamResult);
@@ -917,9 +918,9 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	public Element getXMLHeader(Document xmlDoc) {
 		Element header = xmlDoc.createElement("header");
-		
+
 		Element title = xmlDoc.createElement("title");
-		Text titleText = xmlDoc.createTextNode(this.toString());		
+		Text titleText = xmlDoc.createTextNode(this.toString());
 		title.appendChild(titleText);
 
 		Element owner = xmlDoc.createElement("owner");
@@ -931,7 +932,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			ownerText = xmlDoc.createTextNode(this.author);
 
 		owner.appendChild(ownerText);
-		
+
 		header.appendChild(title);
 		header.appendChild(owner);
 
@@ -992,7 +993,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			Logger.error(this, "Unable to load index because: "+e.toString());
 			return;
 		}
-		
+
 		Document xmlDoc;
 
 		try {
@@ -1059,12 +1060,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		for(int i = 0; i < list.getLength() ; i++) {
 			if(list.item(i).getNodeType() == Node.ELEMENT_NODE) {
 				Element e = (Element)list.item(i);
-				
+
 				Link link = new Link(this.db, e, this);
 				this.addLink(link);
 			}
 		}
-		
+
 	}
 
 	public void loadFileList(Element rootEl) {
@@ -1076,8 +1077,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		for(int i = 0; i < list.getLength() ; i++) {
 			if(list.item(i).getNodeType() == Node.ELEMENT_NODE) {
 				Element e = (Element)list.item(i);
-				
-				thaw.plugins.index.File file = new thaw.plugins.index.File(this.db, e, this);	
+
+				thaw.plugins.index.File file = new thaw.plugins.index.File(this.db, e, this);
 				this.addFile(file);
 			}
 		}
@@ -1100,7 +1101,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		return name;
 	}
 
-	
+
 	public Vector getIndexIds() {
 		Vector ids = new Vector();
 		ids.add(new Integer(this.getId()));

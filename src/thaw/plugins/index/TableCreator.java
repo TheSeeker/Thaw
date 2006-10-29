@@ -35,7 +35,7 @@ public class TableCreator {
 	public static void createTables(Hsqldb db) {
 		//sendQuery(db,
 		//	  "SET IGNORECASE TRUE");
-		sendQuery(db, 
+		sendQuery(db,
 			  "CREATE CACHED TABLE indexCategories ("
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "name VARCHAR(255) NOT NULL,"
@@ -55,7 +55,7 @@ public class TableCreator {
 			  + "author VARCHAR(255) NULL, "
 			  + "positionInTree INTEGER NOT NULL, "
 			  + "revision INTEGER NOT NULL, "
-			  + "parent INTEGER NULL, "			  
+			  + "parent INTEGER NULL, "
 			  + "PRIMARY KEY (id), "
 			  + "FOREIGN KEY (parent) REFERENCES indexCategories (id))");
 
@@ -63,7 +63,7 @@ public class TableCreator {
 			  "CREATE CACHED TABLE categories ("
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "name VARCHAR(255) NOT NULL)");
-		
+
 		sendQuery(db,
 			  "CREATE CACHED TABLE files ("
 			  + "id INTEGER IDENTITY NOT NULL,"
@@ -89,7 +89,6 @@ public class TableCreator {
 			  + "PRIMARY KEY (id),"
 			  + "FOREIGN KEY (indexParent) REFERENCES indexes (id),"
 			  + "FOREIGN KEY (indexTarget) REFERENCES indexes (id))");
-		
 
 		sendQuery(db,
 			  "CREATE CACHED TABLE metadataNames ("
@@ -115,9 +114,9 @@ public class TableCreator {
 
 		sendQuery(db, "DROP TABLE files");
 		sendQuery(db, "DROP TABLE links");
-		
+
 		sendQuery(db, "DROP TABLE indexes");
-		sendQuery(db, "DROP TABLE indexCategories");				
+		sendQuery(db, "DROP TABLE indexCategories");
 	}
 
 

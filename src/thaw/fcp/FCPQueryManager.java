@@ -7,7 +7,7 @@ import thaw.core.Logger;
 /**
  * Manage all fcp messages (see corresponding object of each kind of query).
  * Call observers each type a new message is received. The given object is
- * the 
+ * the message.
  */
 public class FCPQueryManager extends Observable implements Runnable {
 	private Thread me;
@@ -54,7 +54,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 		String whatsUp = new String("");
 		FCPMessage result = new FCPMessage();
 		boolean withData;
-		
+
 		withData = false;
 
 		while(true) {
@@ -62,7 +62,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 			String read = new String("");
 
 			read = this.connection.readLine();
-			
+
 			if(read == null) {
 				Logger.notice(this, "readLine() returned null => disconnected ?");
 				return null;
@@ -87,7 +87,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 		if(withData) {
 			long dataWaiting = (new Long(result.getValue("DataLength"))).longValue();
 			this.connection.setRawDataWaiting(dataWaiting);
-			Logger.info(this, "Achtung data: "+(new Long(dataWaiting)).toString());			
+			Logger.info(this, "Achtung data: "+(new Long(dataWaiting)).toString());
 		}
 
 		return result;
@@ -101,7 +101,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 
 		while(true) {
 			this.latestMessage = this.readMessage();
-			
+
 			Logger.verbose(this, "Message received. Notifying observers");
 
 			if(this.latestMessage != null) {
@@ -112,7 +112,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 					/* it's really bad ... because if data are waiting on the socket ... */
 					Logger.error(this, "EXCEPTION FROM ONE OF LISTENER : "+e.toString());
 					Logger.error(this, "ERROR : "+e.getMessage());
-					e.printStackTrace();						     
+					e.printStackTrace();
 				}
 			} else {
 				Logger.info(this, "Stopping listening");
@@ -122,7 +122,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 
 	}
 
-	
+
 	/**
 	 * Create the thread listening for incoming message.
 	 */
@@ -135,7 +135,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 		}
 	}
 
-	
+
 	/**
 	 * This function is mainly used by FCPClientGet to have a separate socket to transfer the files.
 	 * If FCPConnection is allowed to duplicate itself, then it will duplicate it and create a dedicated FCPQueryManager for.
@@ -156,7 +156,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 		queryManager.startListening();
 
 		FCPClientHello clientHello = new FCPClientHello(queryManager, connectionId);
-		
+
 		if (!clientHello.start(null)) {
 			Logger.warning(this, "ID already used ?! Using initial socket ...");
 			newConnection.disconnect();

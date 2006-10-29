@@ -12,8 +12,8 @@ public class IconBox {
 	 */
 	public static ImageIcon blueBunny;
 
-	public static ImageIcon connectAction; 
-	public static ImageIcon minConnectAction; 
+	public static ImageIcon connectAction;
+	public static ImageIcon minConnectAction;
 
 	public static ImageIcon disconnectAction;
 
@@ -33,7 +33,7 @@ public class IconBox {
 	public static ImageIcon minIndexBrowser;
 
 	public static ImageIcon addToIndexAction;
-	
+
 	public static ImageIcon insertAndAddToIndexAction;
 
 	public static ImageIcon makeALinkAction;
@@ -71,26 +71,26 @@ public class IconBox {
 	public static void loadIcons() {
 		try {
 
-			blueBunny = 
+			blueBunny =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("blueBunny.png"));
 
 
-			connectAction = 
+			connectAction =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("go-jump.png"));
 			minConnectAction =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("min-go-jump.png"));
 
 
-			disconnectAction = 
+			disconnectAction =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("process-stop.png"));
 
 			queue =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("system-search.png"));
-			minQueue = 
+			minQueue =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("min-system-search.png"));
 
 
-			insertions = 
+			insertions =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("go-next.png"));
 			minInsertions =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("min-go-next.png"));
@@ -102,7 +102,7 @@ public class IconBox {
 			indexNew =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("index-new.png"));
 
-			indexReuse = 
+			indexReuse =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("index-existing.png"));
 
 
@@ -137,7 +137,7 @@ public class IconBox {
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("folder-new.png"));
 			makeALinkAction =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("application-internet.png"));
-			
+
 
 			reconnectAction =
 				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("view-refresh.png"));
