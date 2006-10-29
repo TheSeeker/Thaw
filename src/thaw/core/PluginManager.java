@@ -12,8 +12,8 @@ public class PluginManager {
 							"thaw.plugins.InsertPlugin",
 							"thaw.plugins.FetchPlugin",
 							"thaw.plugins.StatusBar",
-							"thaw.plugins.IndexEditor",
-							"thaw.plugins.IndexBrowser"};
+							"thaw.plugins.IndexBrowser",
+							"thaw.plugins.IndexEditor"};
 
 	private Core core = null;
 

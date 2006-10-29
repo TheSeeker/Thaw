@@ -22,7 +22,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.OutputStream;
+import java.io.PipedOutputStream;
+import java.io.InputStream;
+import java.io.PipedInputStream;
 import java.io.FileOutputStream;
+
 
 import thaw.fcp.*;
 import thaw.plugins.Hsqldb;
@@ -237,7 +241,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 
 	public void update() {
-		this.targetFile = new java.io.File(this.toString()+".xml");
+		String tmpdir = System.getProperty("java.io.tmpdir");
+
+		if (tmpdir == null)
+			tmpdir = "";
+
+		this.targetFile = new java.io.File(tmpdir + java.io.File.separator + this.toString()+".xml");
 
 		if (this.transfer != null) {
 			Logger.notice(this, "A transfer is already running");
@@ -248,7 +257,17 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			FCPClientPut clientPut;
 
 			Logger.info(this, "Generating index ...");
-			this.generateXML(this.targetFile);
+
+			FileOutputStream outputStream;
+
+			try {
+				outputStream = new FileOutputStream(targetFile);
+			} catch(java.io.FileNotFoundException e) {
+				Logger.warning(this, "Unable to create file '"+targetFile.toString()+"' ! not generated !");
+				return;
+			}
+
+			this.generateXML(outputStream);
 
 			if(this.targetFile.exists()) {
 				Logger.info(this, "Inserting new version");
@@ -303,9 +322,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		Logger.info(this, "Key asked: "+key);
 
 
-		clientGet = new FCPClientGet(key, 2, 2, false, -1, System.getProperty("java.io.tmpdir"));
+		clientGet = new FCPClientGet(key, 2, 2, false, -1, null);
 		this.transfer = clientGet;
-		clientGet.addObserver(this);
 
 		/*
 		 * These requests are usually quite fast, and don't consume a lot
@@ -315,12 +333,43 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		//this.queueManager.addQueryToThePendingQueue(clientGet);
 		clientGet.start(queueManager);
 
+		Thread downloadAndParse = new Thread(new DownloadAndParse(clientGet, rewriteKey));
+		downloadAndParse.start();
+
 		this.setChanged();
 		this.notifyObservers();
 	}
 
 	public boolean isUpdating() {
 		return (this.transfer != null && (!this.transfer.isFinished()));
+	}
+
+
+	private class DownloadAndParse implements Runnable {
+		FCPClientGet clientGet;
+		boolean rewriteKey;
+
+		public DownloadAndParse(FCPClientGet clientGet, boolean rewriteKey) {
+			this.clientGet = clientGet;
+		}
+
+		public void run() {
+			loadXML(clientGet.getInputStream());
+
+			if (rewriteKey)
+				publicKey = transfer.getFileKey();
+			else
+				revision = FreenetURIHelper.getUSKRevision(transfer.getFileKey());
+
+			Logger.info(this, "Most up-to-date key found: " + publicKey);
+
+			save();
+
+			transfer = null;
+
+			setChanged();
+			notifyObservers();
+		}
 	}
 
 
@@ -500,33 +549,6 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 							fl.delete();
 						}
 					}
-
-					this.transfer = null;
-
-					this.setChanged();
-					this.notifyObservers();
-
-					return;
-				}
-
-				if(this.transfer instanceof FCPClientGet) {
-					java.io.File file = new java.io.File(this.transfer.getPath());
-
-					Logger.info(this, "Updating index ...");
-
-					if (this.rewriteKey)
-						this.publicKey = this.transfer.getFileKey();
-					else
-						this.revision = FreenetURIHelper.getUSKRevision(this.transfer.getFileKey());
-
-					Logger.info(this, "Most up-to-date key found: " + this.publicKey);
-
-					this.loadXML(file);
-					this.save();
-
-					Logger.info(this, "Update done.");
-
-					file.delete();
 
 					this.transfer = null;
 
@@ -846,26 +868,6 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	//// XML ////
 
-	public void generateXML(java.io.File file) {
-
-		FileOutputStream outputStream;
-
-		try {
-			outputStream = new FileOutputStream(file);
-		} catch(java.io.FileNotFoundException e) {
-			Logger.warning(this, "Unable to create file '"+file+"' ! not generated !");
-			return;
-		}
-
-		this.generateXML(outputStream);
-
-		try {
-			outputStream.close();
-		} catch(java.io.IOException e) {
-			Logger.error(this, "Unable to close stream because: "+e.toString());
-		}
-	}
-
 	public void generateXML(OutputStream out) {
 		StreamResult streamResult = new StreamResult(out);
 
@@ -983,7 +985,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		return files;
 	}
 
-	public void loadXML(java.io.File file) {
+	public void loadXML(java.io.InputStream input) {
 		DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder xmlBuilder;
 
@@ -997,7 +999,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		Document xmlDoc;
 
 		try {
-			xmlDoc = xmlBuilder.parse(file);
+			xmlDoc = xmlBuilder.parse(input);
 		} catch(org.xml.sax.SAXException e) {
 			Logger.error(this, "Unable to load index because: "+e.toString());
 			return;

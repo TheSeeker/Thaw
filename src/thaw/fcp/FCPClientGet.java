@@ -2,6 +2,10 @@ package thaw.fcp;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Observer;
 import java.util.Observable;
 
@@ -45,6 +49,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	private boolean alreadySaved = false;
 
+	private PipedOutputStream pipedOutputStream = new PipedOutputStream();
+
 
 	/**
 	 * See setParameters().
@@ -69,6 +75,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	/**
 	 * Used to resume query from persistent queue of the node.
 	 * Think of adding this FCPClientGet as a queryManager observer.
+	 * @param destinationDir if null, then you are expected to use the streams (see getInputStream())
 	 */
 	public FCPClientGet(String id, String key, int priority,
 			    int persistence, boolean globalQueue,
@@ -107,7 +114,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	/**
 	 * Only for initial queries : To resume queries, use FCPClientGet(FCPQueueManager, Hashmap).
-	 * @param destinationDir if null, won't be automatically saved
+	 * @param destinationDir if null, you're expected to use the streams
 	 * @param persistence 0 = Forever ; 1 = Until node reboot ; 2 = Until the app disconnect
 	 */
 	public FCPClientGet(String key, int priority,
@@ -393,7 +400,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			this.notifyObservers();
 
 
-			if(this.fetchDirectly(queryManager.getConnection(), this.getPath(), this.fileSize, true)) {
+			if(this.fetchDirectly(queryManager.getConnection(), this.fileSize, true)) {
 				this.successful = true;
 				this.status = "Available";
 			} else {
@@ -583,21 +590,29 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	}
 
 
+	private boolean fetchDirectly(FCPConnection connection, long size, boolean reallyWrite) {
+		String file = this.getPath();
+		File newFile = null;
+		OutputStream outputStream = null;
 
-	private boolean fetchDirectly(FCPConnection connection, String file, long size, boolean reallyWrite) {
-		File newFile = new File(file);
-		FileOutputStream fileWriter = null;
-
+		if (file != null) {
+			newFile = new File(file);
+		}
 
 		if(reallyWrite) {
-			Logger.info(this, "Writing file to disk ... ('"+file+"')");
+			Logger.info(this, "Getting file from node ... ");
 
-			try {
-				fileWriter = new FileOutputStream(newFile);
-			} catch(java.io.IOException e) {
-				Logger.error(this, "Unable to write file on disk ... disk space / perms ? : "+e.toString());
-				this.status = "Write error";
-				return false;
+			if (newFile != null) {
+				try {
+					outputStream = new FileOutputStream(newFile);
+				} catch(java.io.IOException e) {
+					Logger.error(this, "Unable to write file on disk ... disk space / perms ? : "+e.toString());
+					this.status = "Write error";
+					return false;
+				}
+			} else {
+				Logger.info(this, "Use PipedOutputStream");
+				outputStream = pipedOutputStream;
 			}
 		} else {
 			Logger.info(this, "File is supposed already written. Not rewriting.");
@@ -632,7 +647,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			if(reallyWrite) {
 				try {
-					fileWriter.write(read, 0, amount);
+					outputStream.write(read, 0, amount);
 				} catch(java.io.IOException e) {
 					Logger.error(this, "Unable to write file on disk ... out of space ? : "+e.toString());
 					this.status = "Write error";
@@ -658,9 +673,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		if(reallyWrite) {
 			try {
-				fileWriter.close();
+				outputStream.close();
 
-				if(!writingSuccessful)
+				if(!writingSuccessful && newFile != null)
 					newFile.delete();
 
 			} catch(java.io.IOException e) {
@@ -673,6 +688,17 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		return true;
 	}
+
+
+	public InputStream getInputStream() {
+		try {
+			return new PipedInputStream(pipedOutputStream);
+		} catch(java.io.IOException e) {
+			Logger.error(this, "Error while instanciating PipedInputStream: "+e.toString());
+			return null;
+		}
+	}
+
 
 
 	public boolean removeRequest() {
