@@ -211,7 +211,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	}
 
 	public void windowDeactivated(WindowEvent e) {
-		// C'est pas comme si on en avait quelque chose à foutre :p
+		// C'est pas comme si on en avait quelque chose a foutre :p
 	}
 
 	public void windowDeiconified(WindowEvent e) {

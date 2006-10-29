@@ -88,6 +88,8 @@ public class Link extends java.util.Observable {
 		try {
 			PreparedStatement st;
 
+			db.lockWriting();
+
 			st = this.db.getConnection().prepareStatement("SELECT id FROM links ORDER BY id DESC LIMIT 1");
 
 			try {
@@ -120,6 +122,8 @@ public class Link extends java.util.Observable {
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to insert link to '"+this.indexName+"' because: "+e.toString());
 		}
+
+		db.unlockWriting();
 
 	}
 

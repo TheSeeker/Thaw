@@ -13,6 +13,8 @@ public class Hsqldb extends LibraryPlugin {
 
 	private Connection connection;
 
+	private int writeLock;
+
 	public Hsqldb() {
 
 	}
@@ -30,6 +32,22 @@ public class Hsqldb extends LibraryPlugin {
 		}
 
 		return true;
+	}
+
+
+	public void lockWriting() {
+		while(writeLock > 0) {
+			try {
+				Thread.sleep(100);
+			} catch(java.lang.InterruptedException e) {
+				/* \_o< */
+			}
+		}
+		writeLock++;
+	}
+
+	public synchronized void unlockWriting() {
+		writeLock = 0;
 	}
 
 	public void realStart() {

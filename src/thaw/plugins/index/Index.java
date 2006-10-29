@@ -143,6 +143,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	public boolean create() {
 		try {
 			/* Rahh ! Hsqldb doesn't support getGeneratedKeys() ! 8/ */
+			db.lockWriting();
 
 			Connection c = this.db.getConnection();
 			PreparedStatement st;
@@ -177,9 +178,13 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 			st.execute();
 
+			db.unlockWriting();
+
 			return true;
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to insert the new index in the db, because: "+e.toString());
+
+			db.unlockWriting();
 
 			return false;
 		}
@@ -327,6 +332,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		clientGet = new FCPClientGet(key, 2, 2, false, -1, null);
 		this.transfer = clientGet;
 
+		clientGet.addObserver(this);
+
 		/*
 		 * These requests are usually quite fast, and don't consume a lot
 		 * of bandwith / CPU. So we can skip the queue and start immediatly
@@ -357,20 +364,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 		public void run() {
 			loadXML(clientGet.getInputStream());
-
-			if (rewriteKey)
-				publicKey = transfer.getFileKey();
-			else
-				revision = FreenetURIHelper.getUSKRevision(transfer.getFileKey());
-
-			Logger.info(this, "Most up-to-date key found: " + publicKey);
-
 			save();
-
-			transfer = null;
-
-			setChanged();
-			notifyObservers();
 		}
 	}
 
@@ -460,7 +454,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		}
 	}
 
-	public void save() {
+	public synchronized void save() {
 		try {
 			Connection c = this.db.getConnection();
 			PreparedStatement st = c.prepareStatement("UPDATE indexes SET originalName = ?, displayName = ?, publicKey = ?, privateKey = ?, positionInTree = ?, revision = ?, parent = ? , author = ? WHERE id = ?");
@@ -561,9 +555,30 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 					return;
 				}
 
+				if (this.transfer instanceof FCPClientGet) {
+					((FCPClientGet)this.transfer).deleteObserver(this);
+
+					if (rewriteKey)
+						publicKey = transfer.getFileKey();
+					else
+						revision = FreenetURIHelper.getUSKRevision(transfer.getFileKey());
+
+					Logger.info(this, "Most up-to-date key found: " + publicKey);
+
+					/* Reminder: These requests are non-peristent */
+					//if (this.transfer.stop(this.queueManager))
+					//	this.queueManager.remove(this.transfer);
+					this.queueManager.remove(this.transfer);
+
+					this.transfer = null;
+
+					this.setChanged();
+					this.notifyObservers();
+				}
+
 			}
 
-			if (this.transfer.isFinished() && !this.transfer.isSuccessful()) {
+			if (this.transfer != null && this.transfer.isFinished() && !this.transfer.isSuccessful()) {
 				Logger.info(this, "Unable to get new version of the index");
 				this.transfer = null;
 				this.setChanged();
@@ -988,7 +1003,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		return files;
 	}
 
-	public void loadXML(java.io.InputStream input) {
+	public synchronized void loadXML(java.io.InputStream input) {
 		DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder xmlBuilder;
 

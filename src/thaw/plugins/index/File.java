@@ -229,11 +229,13 @@ public class File extends java.util.Observable implements java.util.Observer {
 		this.notifyObservers();
 	}
 
-	public void insert() {
+	public synchronized void insert() {
 		if (this.parent == null) {
 			Logger.notice(this, "insert(): No parent !");
 			return;
 		}
+
+		db.lockWriting();
 
 		try {
 			PreparedStatement st;
@@ -288,6 +290,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 			Logger.error(this, "Unable to insert file '"+this.fileName+"' because: "+e.toString());
 		}
 
+		db.unlockWriting();
 	}
 
 	public void delete() {
