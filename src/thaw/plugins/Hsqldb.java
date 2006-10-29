@@ -16,7 +16,7 @@ public class Hsqldb extends LibraryPlugin {
 	private int writeLock;
 
 	public Hsqldb() {
-
+		writeLock = 0;
 	}
 
 	public boolean run(Core core) {
