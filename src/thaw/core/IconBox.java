@@ -1,6 +1,7 @@
 package thaw.core;
 
 import javax.swing.ImageIcon;
+import java.net.URL;
 
 /**
  * This class is simply an helper to find and load quickly some common icons.
@@ -65,98 +66,66 @@ public class IconBox {
 
 	}
 
-	/**
-	 * no warranty
-	 */
-	public static void loadIcons() {
-		try {
+	protected static ImageIcon loadIcon(String fileName) {
+		ImageIcon imageIcon;
+		URL url;
+		Class daClass;
+		ClassLoader classLoader;
 
-			blueBunny =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("blueBunny.png"));
+		daClass = (new IconBox()).getClass();
 
-
-			connectAction =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("go-jump.png"));
-			minConnectAction =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("min-go-jump.png"));
-
-
-			disconnectAction =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("process-stop.png"));
-
-			queue =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("system-search.png"));
-			minQueue =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("min-system-search.png"));
-
-
-			insertions =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("go-next.png"));
-			minInsertions =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("min-go-next.png"));
-
-
-			minIndex =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("index.png"));
-
-			indexNew =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("index-new.png"));
-
-			indexReuse =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("index-existing.png"));
-
-
-			downloads =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("go-first.png"));
-			minDownloads =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("min-go-first.png"));
-
-			clearAction =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("edit-clear.png"));
-
-			settings =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("preferences-system.png"));
-			minSettings =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("min-preferences-system.png"));
-
-
-			indexEditor =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("edit-find-replace.png"));
-			minIndexEditor =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("min-edit-find-replace.png"));
-
-
-			indexBrowser =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("edit-find.png"));
-			minIndexBrowser =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("min-edit-find.png"));
-
-			addToIndexAction =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("folder.png"));
-			insertAndAddToIndexAction =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("folder-new.png"));
-			makeALinkAction =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("application-internet.png"));
-
-
-			reconnectAction =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("view-refresh.png"));
-			minReconnectAction =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("min-view-refresh.png"));
-
-			refreshAction =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("view-refresh.png"));
-
-			quitAction =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("system-log-out.png"));
-			minQuitAction =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("min-system-log-out.png"));
-
-			search =
-				new ImageIcon((new IconBox()).getClass().getClassLoader().getResource("system-search.png"));
-		} catch(Exception e) {
-			Logger.notice(new IconBox(), "Exception while loading icons: "+e);
+		if (daClass == null) {
+			Logger.error(new IconBox(), "Icon '"+fileName+"' not found ! (Class)");
+			return null;
 		}
+
+		classLoader = daClass.getClassLoader();
+
+		if (classLoader == null) {
+			Logger.error(new IconBox(), "Icon '"+fileName+"' not found ! (Class)");
+			return null;
+		}
+
+		url = classLoader.getResource(fileName);
+
+		if (url == null) {
+			Logger.error(new IconBox(), "Icon '"+fileName+"' not found ! (Class)");
+			return null;
+		}
+
+		return new ImageIcon(url);
+	}
+
+	public static void loadIcons() {
+		blueBunny = loadIcon("blueBunny.png");
+		connectAction = loadIcon("go-jump.png");
+		minConnectAction = loadIcon("min-go-jump.png");
+		disconnectAction = loadIcon("process-stop.png");
+		queue = loadIcon("system-search.png");
+		minQueue = loadIcon("min-system-search.png");
+		insertions = loadIcon("go-next.png");
+		minInsertions = loadIcon("min-go-next.png");
+		minIndex = loadIcon("index.png");
+		indexNew = loadIcon("index-new.png");
+		indexReuse = loadIcon("index-existing.png");
+		downloads = loadIcon("go-first.png");
+		minDownloads = loadIcon("min-go-first.png");
+		clearAction = loadIcon("edit-clear.png");
+		settings = loadIcon("preferences-system.png");
+		minSettings = loadIcon("min-preferences-system.png");
+		indexEditor = loadIcon("edit-find-replace.png");
+		minIndexEditor = loadIcon("min-edit-find-replace.png");
+		indexBrowser = loadIcon("edit-find.png");
+		minIndexBrowser = loadIcon("min-edit-find.png");
+		addToIndexAction = loadIcon("folder.png");
+		insertAndAddToIndexAction = loadIcon("folder-new.png");
+		makeALinkAction = loadIcon("application-internet.png");
+		reconnectAction = loadIcon("view-refresh.png");
+		minReconnectAction = loadIcon("min-view-refresh.png");
+		refreshAction = loadIcon("view-refresh.png");
+		quitAction = loadIcon("system-log-out.png");
+		minQuitAction = loadIcon("min-system-log-out.png");
+		search = loadIcon("system-search.png");
 	}
 
 }
