@@ -437,7 +437,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			st.execute();
 			this.linkList = new Vector();
 		} catch(SQLException e) {
-			Logger.warning(this, "Unable to purge da list ! Exception: "+e.toString());
+			Logger.error(this, "Unable to purge da list ! Exception: "+e.toString());
 		}
 	}
 
@@ -449,7 +449,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			st.execute();
 			this.fileList = new Vector();
 		} catch(SQLException e) {
-			Logger.warning(this, "Unable to purge da list ! Exception: "+e.toString());
+			Logger.error(this, "Unable to purge da list ! Exception: "+e.toString());
 		}
 	}
 
@@ -644,7 +644,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 
 		} catch(java.sql.SQLException e) {
-			Logger.warning(this, "Unable to get the file list for index: '"+this.toString()+"' because: "+e.toString());
+			Logger.error(this, "Unable to get the file list for index: '"+this.toString()+"' because: "+e.toString());
 		}
 
 		this.setChanged();
@@ -854,7 +854,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 
 		} catch(java.sql.SQLException e) {
-			Logger.warning(this, "Unable to get the link list for index: '"+this.toString()+"' because: "+e.toString());
+			Logger.error(this, "Unable to get the link list for index: '"+this.toString()+"' because: "+e.toString());
 		}
 
 	}
@@ -1099,6 +1099,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 				thaw.plugins.index.File file = new thaw.plugins.index.File(this.db, e, this);
 				this.addFile(file);
+
 			}
 		}
 

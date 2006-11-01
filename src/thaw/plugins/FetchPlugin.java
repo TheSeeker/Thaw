@@ -7,6 +7,8 @@ import javax.swing.JFrame;
 import javax.swing.JButton;
 import javax.swing.WindowConstants;
 
+import javax.swing.JMenuItem;
+
 import thaw.core.*;
 import thaw.plugins.fetchPlugin.*;
 
@@ -19,6 +21,7 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 
 	private JFrame fetchFrame = null;
 	private JButton buttonInToolBar = null;
+	private JMenuItem menuItem = null;
 
 	private QueueWatcher queueWatcher;
 
@@ -52,6 +55,8 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 		buttonInToolBar.setToolTipText(I18n.getMessage("thaw.common.download"));
 		buttonInToolBar.addActionListener(this);
 
+		menuItem = new JMenuItem(I18n.getMessage("thaw.common.addDownloads"));
+		menuItem.addActionListener(this);
 
 		if(core.getPluginManager().getPlugin("thaw.plugins.QueueWatcher") == null) {
 			Logger.info(this, "Loading QueueWatcher plugin");
@@ -66,6 +71,9 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 		queueWatcher = (QueueWatcher)core.getPluginManager().getPlugin("thaw.plugins.QueueWatcher");
 
 		queueWatcher.addButtonToTheToolbar(buttonInToolBar);
+
+		/* WARNING: This menu item can't be remove cleanly ... :/ */
+		queueWatcher.addMenuItemToTheDownloadTable(menuItem);
 
 		return true;
 	}
@@ -87,8 +95,7 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == buttonInToolBar)
-			fetchFrame.setVisible(true);
+		fetchFrame.setVisible(true);
 	}
 
 	public void fetchFiles(String[] keys, int priority,

@@ -10,6 +10,8 @@ import javax.swing.WindowConstants;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
+import javax.swing.JMenuItem;
+
 import thaw.core.*;
 import thaw.plugins.insertPlugin.*;
 import thaw.fcp.*;
@@ -22,6 +24,8 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 
 	private JFrame insertionFrame;
 	private JButton buttonInToolBar;
+
+	private JMenuItem menuItem;
 
 	private QueueWatcher queueWatcher;
 
@@ -61,6 +65,9 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 		buttonInToolBar.setToolTipText(I18n.getMessage("thaw.common.insertion"));
 		buttonInToolBar.addActionListener(this);
 
+		menuItem = new JMenuItem(I18n.getMessage("thaw.common.addInsertions"));
+		menuItem.addActionListener(this);
+
 		if(core.getPluginManager().getPlugin("thaw.plugins.QueueWatcher") == null) {
 			Logger.info(this, "Loading QueueWatcher plugin");
 
@@ -74,6 +81,9 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 		queueWatcher = (QueueWatcher)core.getPluginManager().getPlugin("thaw.plugins.QueueWatcher");
 
 		queueWatcher.addButtonToTheToolbar(buttonInToolBar);
+
+		/* WARNING: This menu item can't be remove cleanly ... :/ */
+		queueWatcher.addMenuItemToTheInsertionTable(menuItem);
 
 		return true;
 	}
@@ -97,8 +107,7 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == buttonInToolBar)
-			insertionFrame.setVisible(true);
+		insertionFrame.setVisible(true);
 	}
 
 

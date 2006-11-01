@@ -176,6 +176,10 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		}
 	}
 
+	public void addMenuItem(JMenuItem item) {
+		rightClickMenu.insert(item, 0);
+	}
+
 
 	private class ProgressRenderer extends DefaultTableCellRenderer {
 		private final static long serialVersionUID = 20060709;

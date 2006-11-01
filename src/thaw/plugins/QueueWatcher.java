@@ -112,6 +112,14 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 	}
 
 
+	public void addMenuItemToTheDownloadTable(javax.swing.JMenuItem item) {
+		queuePanels[0].addMenuItem(item);
+	}
+
+	public void addMenuItemToTheInsertionTable(javax.swing.JMenuItem item) {
+		queuePanels[1].addMenuItem(item);
+	}
+
 	public String getNameForUser() {
 		return I18n.getMessage("thaw.common.status");
 	}
