@@ -3,15 +3,28 @@ package thaw.plugins;
 import javax.swing.JScrollPane;
 import java.io.File;
 
+import javax.swing.JFrame;
+import javax.swing.JButton;
+import javax.swing.WindowConstants;
+
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
 import thaw.core.*;
 import thaw.plugins.insertPlugin.*;
 import thaw.fcp.*;
 
-public class InsertPlugin implements thaw.core.Plugin {
+public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 	private Core core;
 
 	private InsertPanel insertPanel;
 	private JScrollPane scrollPane;
+
+	private JFrame insertionFrame;
+	private JButton buttonInToolBar;
+
+	private QueueWatcher queueWatcher;
+
 
 	public InsertPlugin() {
 
@@ -28,9 +41,39 @@ public class InsertPlugin implements thaw.core.Plugin {
 
 		this.scrollPane = new JScrollPane(this.insertPanel.getPanel());
 
-		core.getMainWindow().addTab(I18n.getMessage("thaw.common.insertion"),
-					    IconBox.minInsertions,
-					    this.scrollPane);
+		//core.getMainWindow().addTab(I18n.getMessage("thaw.common.insertion"),
+		//			    IconBox.minInsertions,
+		//			    this.scrollPane);
+
+		insertionFrame = new JFrame(I18n.getMessage("thaw.common.insertion"));
+		insertionFrame.setVisible(false);
+		insertionFrame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		insertionFrame.setContentPane(scrollPane);
+
+		if (core.getConfig().getValue("advancedMode") == null
+		    || Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue()) {
+			insertionFrame.setSize(750, 450);
+		} else {
+			insertionFrame.setSize(350, 200);
+		}
+
+		buttonInToolBar = new JButton(IconBox.insertions);
+		buttonInToolBar.setToolTipText(I18n.getMessage("thaw.common.insertion"));
+		buttonInToolBar.addActionListener(this);
+
+		if(core.getPluginManager().getPlugin("thaw.plugins.QueueWatcher") == null) {
+			Logger.info(this, "Loading QueueWatcher plugin");
+
+			if(!core.getPluginManager().loadPlugin("thaw.plugins.QueueWatcher")
+			   || !core.getPluginManager().runPlugin("thaw.plugins.QueueWatcher")) {
+				Logger.error(this, "Unable to load thaw.plugins.QueueWatcher !");
+				return false;
+			}
+		}
+
+		queueWatcher = (QueueWatcher)core.getPluginManager().getPlugin("thaw.plugins.QueueWatcher");
+
+		queueWatcher.addButtonToTheToolbar(buttonInToolBar);
 
 		return true;
 	}
@@ -39,7 +82,10 @@ public class InsertPlugin implements thaw.core.Plugin {
 	public boolean stop() {
 		Logger.info(this, "Stopping plugin \"InsertPlugin\" ...");
 
-		this.core.getMainWindow().removeTab(this.scrollPane);
+		//this.core.getMainWindow().removeTab(this.scrollPane);
+
+		if (queueWatcher != null)
+			queueWatcher.removeButtonFromTheToolbar(buttonInToolBar);
 
 		return true;
 	}
@@ -47,6 +93,12 @@ public class InsertPlugin implements thaw.core.Plugin {
 
 	public String getNameForUser() {
 		return I18n.getMessage("thaw.common.insertion");
+	}
+
+
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == buttonInToolBar)
+			insertionFrame.setVisible(true);
 	}
 
 
@@ -97,6 +149,8 @@ public class InsertPlugin implements thaw.core.Plugin {
 			this.core.getQueueManager().addQueryToThePendingQueue(clientPut);
 
 		}
+
+		insertionFrame.setVisible(false);
 
 		return true;
 	}

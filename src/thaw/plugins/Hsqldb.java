@@ -35,7 +35,7 @@ public class Hsqldb extends LibraryPlugin {
 	}
 
 
-	public void lockWriting() {
+	public synchronized void lockWriting() {
 		while(writeLock > 0) {
 			try {
 				Thread.sleep(100);

@@ -7,13 +7,16 @@ import java.util.Vector;
 import java.util.Iterator;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+
 
 import thaw.core.*;
 import thaw.plugins.queueWatcher.*;
 
 import thaw.fcp.*;
 
-public class QueueWatcher implements thaw.core.Plugin, PropertyChangeListener {
+public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, PropertyChangeListener, ChangeListener {
 	private Core core;
 
 	//private JPanel mainPanel;
@@ -83,22 +86,16 @@ public class QueueWatcher implements thaw.core.Plugin, PropertyChangeListener {
 			this.panelAdded = this.panel;
 		}
 
+		setMainWindow(core.getMainWindow());
+
 		core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"),
 					    IconBox.minQueue,
 					    this.panelAdded);
-
-		//if(core.getConnectionManager() != null && core.getConnectionManager().isConnected()) {
-		//	core.getConnectionManager().addObserver(this);
-		//}
-
-		//if(core.getQueueManager() != null)
-		//    core.getQueueManager().addObserver(this);
-		//else {
-		//    Logger.warning(this, "Unable to connect to QueueManager. Is the connection established ?");
-		//    return false;
-		//}
+		core.getMainWindow().getTabbedPane().addChangeListener(this);
 
 		this.dnd = new DragAndDropManager(core, this.queuePanels);
+
+		stateChanged(null);
 
 		return true;
 	}
@@ -137,6 +134,9 @@ public class QueueWatcher implements thaw.core.Plugin, PropertyChangeListener {
 
 	}
 
+	/**
+	 * Called when the split bar position changes.
+	 */
 	public void propertyChange(PropertyChangeEvent evt) {
 
 		if("dividerLocation".equals( evt.getPropertyName() )) {
@@ -162,4 +162,24 @@ public class QueueWatcher implements thaw.core.Plugin, PropertyChangeListener {
 
 	}
 
+	/**
+	 * Called when the JTabbedPane changed (ie change in the selected tab, etc)
+	 * @param e can be null.
+	 */
+	public void stateChanged(ChangeEvent e) {
+		int tabId;
+
+		tabId = core.getMainWindow().getTabbedPane().indexOfTab(I18n.getMessage("thaw.common.status"));
+
+		if (tabId < 0) {
+			Logger.warning(this, "Unable to find back the tab !");
+			return;
+		}
+
+		if (core.getMainWindow().getTabbedPane().getSelectedIndex() == tabId) {
+			displayButtonsInTheToolbar();
+		} else {
+			hideButtonsInTheToolbar();
+		}
+	}
 }

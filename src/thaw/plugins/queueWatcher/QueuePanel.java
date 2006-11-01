@@ -264,6 +264,10 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 			this.resetPriorityRadioButtons();
 		} else {
 			FCPTransferQuery query = this.tableModel.getQuery(this.selectedRows[0]);
+
+			if (query == null)
+				return;
+
 			this.priorityRadioButton[query.getFCPPriority()].setSelected(true);
 		}
 	}

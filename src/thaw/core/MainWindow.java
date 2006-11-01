@@ -17,6 +17,9 @@ import javax.swing.JButton;
 import javax.swing.Icon;
 import java.awt.Font;
 
+import java.util.Vector;
+import java.util.Iterator;
+
 
 /**
  * MainWindow. This class create the main window.
@@ -69,6 +72,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 	private Core core = null; /* core is called back when exit() */
 
+	private Object lastToolBarModifier = null;
 
 	/**
 	 * Creates a new <code>MainWindow</code> instance, and so a new Swing window.
@@ -122,8 +126,6 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		this.menuBar.add(this.helpMenu);
 
 		// TOOLBAR
-		this.toolBar = new JToolBar(I18n.getMessage("thaw.toolbar.title"));
-
 		this.connectButton = new JButton(IconBox.connectAction);
 		this.connectButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.connect"));
 		this.disconnectButton = new JButton(IconBox.disconnectAction);
@@ -135,20 +137,11 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		this.quitButton = new JButton(IconBox.quitAction);
 		this.quitButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.quit"));
 
-
 		this.connectButton.addActionListener(this);
 		this.disconnectButton.addActionListener(this);
 		this.settingsButton.addActionListener(this);
 		this.quitButton.addActionListener(this);
 
-		this.toolBar.add(this.connectButton);
-		this.toolBar.add(this.disconnectButton);
-		this.toolBar.addSeparator();
-		this.toolBar.add(this.settingsButton);
-		this.toolBar.addSeparator();
-		this.toolBar.add(this.quitButton);
-
-		this.updateToolBar();
 
 		// TABBED PANE
 
@@ -164,7 +157,8 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		this.mainWindow.getContentPane().setLayout(new BorderLayout());
 
 		this.mainWindow.setJMenuBar(this.menuBar);
-		this.mainWindow.getContentPane().add(this.toolBar, BorderLayout.NORTH);
+
+		/* Toolbar adding: */ changeButtonsInTheToolbar(this, null);
 		this.mainWindow.getContentPane().add(this.tabbedPane, BorderLayout.CENTER);
 		this.mainWindow.getContentPane().add(this.statusBar, BorderLayout.SOUTH);
 
@@ -197,6 +191,54 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	public JTabbedPane getTabbedPane() {
 		return this.tabbedPane;
 	}
+
+	/**
+	 * @param modifier Correspond to the caller object: it's a security to avoid that a modifier wipe out the buttons from another one
+	 */
+	public void changeButtonsInTheToolbar(Object modifier, Vector newButtons) {
+		JToolBar newToolBar;
+
+		Logger.debug(this, "Called by "+modifier.getClass().getName());
+
+		if (lastToolBarModifier == null || newButtons != null || lastToolBarModifier == modifier) {
+			lastToolBarModifier = modifier;
+		} else {
+			/* Only the modifer who added the buttons can remove them */
+			return;
+		}
+
+		newToolBar = new JToolBar(I18n.getMessage("thaw.toolbar.title"));
+
+		newToolBar.add(this.connectButton);
+		newToolBar.add(this.disconnectButton);
+		newToolBar.addSeparator();
+		newToolBar.add(this.settingsButton);
+		newToolBar.addSeparator();
+
+		if (newButtons != null) {
+			newToolBar.addSeparator();
+			for (Iterator it = newButtons.iterator();
+			     it.hasNext();) {
+				JButton button = (JButton)it.next();
+				if (button != null)
+					newToolBar.add(button);
+				else
+					newToolBar.addSeparator();
+			}
+			newToolBar.addSeparator();
+			newToolBar.addSeparator();
+		}
+
+		newToolBar.add(this.quitButton);
+		newToolBar.setFloatable(false);
+
+		if (this.toolBar != null)
+			this.mainWindow.getContentPane().remove(this.toolBar);
+		this.toolBar = newToolBar;
+		this.mainWindow.getContentPane().add(this.toolBar, BorderLayout.NORTH);
+		this.updateToolBar();
+	}
+
 
 	/**
 	 * Used to add a tab in the main window.
