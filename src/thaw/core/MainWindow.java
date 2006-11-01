@@ -216,7 +216,6 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		newToolBar.addSeparator();
 
 		if (newButtons != null) {
-			newToolBar.addSeparator();
 			for (Iterator it = newButtons.iterator();
 			     it.hasNext();) {
 				JButton button = (JButton)it.next();
@@ -225,7 +224,6 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 				else
 					newToolBar.addSeparator();
 			}
-			newToolBar.addSeparator();
 			newToolBar.addSeparator();
 		}
 
