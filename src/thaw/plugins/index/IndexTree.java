@@ -329,6 +329,25 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		return null;
 	}
 
+
+	public void startUpdateFromThisNode(IndexTreeNode node) {
+		Thread th = new Thread(new Updater(node));
+		th.start();
+	}
+
+	private class Updater implements Runnable {
+		IndexTreeNode node;
+
+		public Updater(IndexTreeNode node) {
+			this.node = node;
+		}
+
+		public void run() {
+			node.update();
+		}
+	}
+
+
 	public void actionPerformed(ActionEvent e) {
 		if(this.selectedNode == null)
 			this.selectedNode = this.root;
@@ -445,15 +464,15 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		if(e.getSource() == this.updateIndex
 		   || e.getSource() == this.updateIndexCategory) {
-			this.selectedNode.update();
+			startUpdateFromThisNode(this.selectedNode);
 		}
 
 		if (e.getSource() == this.reloadFromFreenet) {
-			this.selectedNode.updateFromFreenet(-1);
+			startUpdateFromThisNode(this.selectedNode);
 		}
 
 		if (e.getSource() == this.refreshAll) {
-			this.root.update();
+			startUpdateFromThisNode(this.selectedNode);
 		}
 
 		if(e.getSource() == this.copyPublicKey

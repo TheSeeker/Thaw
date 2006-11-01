@@ -237,6 +237,10 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		this.updateToolBar();
 	}
 
+	public void resetLastKnowToolBarModifier() {
+		lastToolBarModifier = null;
+	}
+
 
 	/**
 	 * Used to add a tab in the main window.

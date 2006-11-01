@@ -172,7 +172,7 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 		tabId = core.getMainWindow().getTabbedPane().indexOfTab(I18n.getMessage("thaw.common.status"));
 
 		if (tabId < 0) {
-			Logger.warning(this, "Unable to find back the tab !");
+			Logger.warning(this, "Unable to find the tab !");
 			return;
 		}
 

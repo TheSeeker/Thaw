@@ -315,7 +315,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 			}
 		}
 
-		Logger.warning(this, "update(): Unknow change ?!");
+		Logger.notice(this, "update(): unknow change");
 		this.reloadQueue();
 	}
 

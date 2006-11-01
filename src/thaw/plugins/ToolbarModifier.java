@@ -29,6 +29,7 @@ public class ToolbarModifier {
 
 	public void setMainWindow(MainWindow target) {
 		this.mainWindow = target;
+		this.mainWindow.resetLastKnowToolBarModifier();
 	}
 
 	public void addButtonToTheToolbar(JButton button) {
@@ -47,6 +48,10 @@ public class ToolbarModifier {
 
 	public void displayButtonsInTheToolbar() {
 		if (mainWindow != null) {
+			if (buttons.size() == 0) {
+				Logger.notice(this, "No button to display ?");
+			}
+
 			mainWindow.changeButtonsInTheToolbar(this, buttons);
 			areDisplayed = true;
 		} else

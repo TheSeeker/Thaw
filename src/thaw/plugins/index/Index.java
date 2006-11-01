@@ -334,14 +334,6 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 		clientGet.addObserver(this);
 
-		/*
-		 * These requests are usually quite fast, and don't consume a lot
-		 * of bandwith / CPU. So we can skip the queue and start immediatly
-		 * (and like this, they won't appear in the queue)
-		 */
-		//this.queueManager.addQueryToThePendingQueue(clientGet);
-		clientGet.start(queueManager);
-
 		Thread downloadAndParse = new Thread(new DownloadAndParse(clientGet, rewriteKey));
 		downloadAndParse.start();
 
@@ -363,6 +355,13 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		}
 
 		public void run() {
+			/*
+			 * These requests are usually quite fast, and don't consume a lot
+			 * of bandwith / CPU. So we can skip the queue and start immediatly
+			 * (and like this, they won't appear in the queue)
+			 */
+			//this.queueManager.addQueryToThePendingQueue(clientGet);
+			clientGet.start(queueManager);
 			loadXML(clientGet.getInputStream());
 			save();
 		}
