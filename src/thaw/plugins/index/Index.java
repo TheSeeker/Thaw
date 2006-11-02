@@ -1002,7 +1002,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		return files;
 	}
 
-	public synchronized void loadXML(java.io.InputStream input) {
+	public void loadXML(java.io.InputStream input) {
 		DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder xmlBuilder;
 
@@ -1070,7 +1070,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		}
 	}
 
-	public void loadLinks(Element rootEl) {
+	public synchronized void loadLinks(Element rootEl) {
 		this.purgeLinkList();
 
 		Element links = (Element)rootEl.getElementsByTagName("indexes").item(0);
@@ -1087,7 +1087,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	}
 
-	public void loadFileList(Element rootEl) {
+	public synchronized void loadFileList(Element rootEl) {
 		this.purgeFileList();
 
 		Element filesEl = (Element)rootEl.getElementsByTagName("files").item(0);
