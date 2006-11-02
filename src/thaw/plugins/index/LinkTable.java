@@ -218,14 +218,6 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 				this.links = this.linkList.getLinkList();
 			}
 
-			if(this.links != null) {
-				for(Iterator it = this.links.iterator();
-				    it.hasNext(); ) {
-					thaw.plugins.index.Link link = (thaw.plugins.index.Link)it.next();
-					//link.addObserver(this);
-				}
-			}
-
 			this.refresh();
 
 		}

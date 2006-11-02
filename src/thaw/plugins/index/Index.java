@@ -364,6 +364,9 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			clientGet.start(queueManager);
 			loadXML(clientGet.getInputStream());
 			save();
+
+			setChanged();
+			notifyObservers();
 		}
 	}
 
@@ -430,6 +433,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 
 	public void purgeLinkList() {
+		unloadLinks();
 		try {
 			Connection c = this.db.getConnection();
 			PreparedStatement st = c.prepareStatement("DELETE FROM links WHERE indexParent = ?");
@@ -442,6 +446,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	}
 
 	public void purgeFileList() {
+		unloadFiles();
 		try {
 			Connection c = this.db.getConnection();
 			PreparedStatement st = c.prepareStatement("DELETE FROM files WHERE indexParent = ?");
@@ -611,10 +616,6 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	////// FILE LIST ////////
 
 	public void loadFiles(String columnToSort, boolean asc) {
-		if(this.fileList != null) {
-			Logger.notice(this, "Files already loaded, won't reload them");
-			return;
-		}
 
 		this.fileList = new Vector();
 
@@ -695,17 +696,6 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 
 	public void unloadFiles() {
-		/*
-		for(Iterator it = fileList.iterator();
-		    it.hasNext(); ) {
-			thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
-			if(file.getTransfer() != null && !file.getTransfer().isFinished()) {
-				Logger.info(this, "Transfer still runinng. No unloading");
-				return;
-			}
-		}
-		*/
-
 		if (this.fileList != null) {
 			for (Iterator it  = this.fileList.iterator();
 			     it.hasNext();)
@@ -780,8 +770,9 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			link.insert();
 
 			this.addLinkToList(link);
-			this.setChanged();
-			this.notifyObservers(link);
+
+			setChanged();
+			notifyObservers(link);
 		}
 		else
 			Logger.notice(this, "Link already in the database for this index");
@@ -818,11 +809,6 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	public void loadLinks(String columnToSort, boolean asc)
 	{
-		if(this.linkList != null) {
-			Logger.notice(this, "Links aleady loaded, won't reload ...");
-			return;
-		}
-
 		this.linkList = new Vector();
 
 		try {
@@ -856,6 +842,9 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		} catch(java.sql.SQLException e) {
 			Logger.error(this, "Unable to get the link list for index: '"+this.toString()+"' because: "+e.toString());
 		}
+
+		setChanged();
+		notifyObservers();
 
 	}
 
@@ -1085,6 +1074,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			}
 		}
 
+		setChanged();
+		notifyObservers();
 	}
 
 	public void loadFileList(Element rootEl) {

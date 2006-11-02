@@ -339,14 +339,6 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 				this.files = this.fileList.getFileList();
 			}
 
-			if(this.files != null) {
-				for(Iterator it = this.files.iterator();
-				    it.hasNext(); ) {
-					thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
-				}
-
-			}
-
 			this.refresh();
 		}
 
@@ -366,6 +358,9 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		}
 
 		public Object getValueAt(int row, int column) {
+			if (row >= this.files.size())
+				return null;
+
 			thaw.plugins.index.File file = (thaw.plugins.index.File)this.files.get(row);
 
 			if(column == 0)
