@@ -13,7 +13,7 @@ import java.util.Locale;
 public class Main {
 
 	public final static String VERSION="0.6 WIP r@custom@";
-	//public final static String VERSION="0.5.9 Beta";
+	//public final static String VERSION="0.5.9b Beta";
 
 	/**
 	 * Look & feel use by GUI front end

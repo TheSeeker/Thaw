@@ -468,7 +468,8 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		}
 
 		if (e.getSource() == this.reloadFromFreenet) {
-			startUpdateFromThisNode(this.selectedNode);
+			//startUpdateFromThisNode(this.selectedNode);
+			selectedNode.updateFromFreenet(-1);
 		}
 
 		if (e.getSource() == this.refreshAll) {
