@@ -2,8 +2,6 @@ package thaw.fcp;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Observer;
@@ -31,6 +29,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	private int persistence = 0;
 	private boolean globalQueue = false;
 	private String destinationDir = null;
+	private String finalPath = null;
 
 	private int attempt = -1;
 	private String status;
@@ -48,8 +47,6 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	private boolean isLockOwner = false;
 
 	private boolean alreadySaved = false;
-
-	private PipedOutputStream pipedOutputStream = new PipedOutputStream();
 
 
 	/**
@@ -75,7 +72,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	/**
 	 * Used to resume query from persistent queue of the node.
 	 * Think of adding this FCPClientGet as a queryManager observer.
-	 * @param destinationDir if null, then you are expected to use the streams (see getInputStream())
+	 * @param destinationDir if null, then a temporary file will be create (path determined only when the file is availabed ; this file will be deleted on jvm exit)
 	 */
 	public FCPClientGet(String id, String key, int priority,
 			    int persistence, boolean globalQueue,
@@ -114,7 +111,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	/**
 	 * Only for initial queries : To resume queries, use FCPClientGet(FCPQueueManager, Hashmap).
-	 * @param destinationDir if null, you're expected to use the streams
+	 * @param destinationDir if null => temporary file
 	 * @param persistence 0 = Forever ; 1 = Until node reboot ; 2 = Until the app disconnect
 	 */
 	public FCPClientGet(String key, int priority,
@@ -597,23 +594,28 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		if (file != null) {
 			newFile = new File(file);
+		} else {
+			try {
+				Logger.info(this, "Using temporary file");
+				newFile = File.createTempFile("thaw_", ".tmp");
+				finalPath = newFile.getPath();
+				newFile.deleteOnExit();
+			} catch(java.io.IOException e) {
+				Logger.error(this, "Error while creating temporary file: "+e.toString());
+			}
 		}
 
 		if(reallyWrite) {
 			Logger.info(this, "Getting file from node ... ");
 
-			if (newFile != null) {
-				try {
-					outputStream = new FileOutputStream(newFile);
-				} catch(java.io.IOException e) {
-					Logger.error(this, "Unable to write file on disk ... disk space / perms ? : "+e.toString());
-					this.status = "Write error";
-					return false;
-				}
-			} else {
-				Logger.info(this, "Use PipedOutputStream");
-				outputStream = pipedOutputStream;
+			try {
+				outputStream = new FileOutputStream(newFile);
+			} catch(java.io.IOException e) {
+				Logger.error(this, "Unable to write file on disk ... disk space / perms ? : "+e.toString());
+				this.status = "Write error";
+				return false;
 			}
+
 		} else {
 			Logger.info(this, "File is supposed already written. Not rewriting.");
 		}
@@ -687,16 +689,6 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 
 		return true;
-	}
-
-
-	public InputStream getInputStream() {
-		try {
-			return new PipedInputStream(pipedOutputStream);
-		} catch(java.io.IOException e) {
-			Logger.error(this, "Error while instanciating PipedInputStream: "+e.toString());
-			return null;
-		}
 	}
 
 
@@ -840,6 +832,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	}
 
 	public String getPath() {
+		if (finalPath != null)
+			return finalPath;
+
 		if(this.destinationDir != null)
 			return this.destinationDir + File.separator + this.filename;
 

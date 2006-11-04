@@ -22,11 +22,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.OutputStream;
-import java.io.PipedOutputStream;
 import java.io.InputStream;
-import java.io.PipedInputStream;
 import java.io.FileOutputStream;
-
+import java.io.FileInputStream;
 
 import thaw.fcp.*;
 import thaw.plugins.Hsqldb;
@@ -64,6 +62,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	private boolean rewriteKey = true;
 
+	private boolean xmlParserReady = false;
 
 	private FCPClientPut publicKeyRecalculation = null;
 
@@ -281,7 +280,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 				this.revision++;
 
-				clientPut = new FCPClientPut(this.targetFile, 2, this.revision, this.toString(), this.privateKey, 2, false, 0);
+				clientPut = new FCPClientPut(this.targetFile, 2, this.revision, this.toString(), this.privateKey, 2, true, 0);
 				this.transfer = clientPut;
 				clientPut.addObserver(this);
 
@@ -334,8 +333,13 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 		clientGet.addObserver(this);
 
-		Thread downloadAndParse = new Thread(new DownloadAndParse(clientGet, rewriteKey));
-		downloadAndParse.start();
+		/*
+		 * These requests are usually quite fast, and don't consume a lot
+		 * of bandwith / CPU. So we can skip the queue and start immediatly
+		 * (and like this, they won't appear in the queue)
+		 */
+		//this.queueManager.addQueryToThePendingQueue(clientGet);
+		clientGet.start(queueManager);
 
 		this.setChanged();
 		this.notifyObservers();
@@ -343,31 +347,6 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	public boolean isUpdating() {
 		return (this.transfer != null && (!this.transfer.isFinished()));
-	}
-
-
-	private class DownloadAndParse implements Runnable {
-		FCPClientGet clientGet;
-		boolean rewriteKey;
-
-		public DownloadAndParse(FCPClientGet clientGet, boolean rewriteKey) {
-			this.clientGet = clientGet;
-		}
-
-		public void run() {
-			/*
-			 * These requests are usually quite fast, and don't consume a lot
-			 * of bandwith / CPU. So we can skip the queue and start immediatly
-			 * (and like this, they won't appear in the queue)
-			 */
-			//this.queueManager.addQueryToThePendingQueue(clientGet);
-			clientGet.start(queueManager);
-			loadXML(clientGet.getInputStream());
-			save();
-
-			setChanged();
-			notifyObservers();
-		}
 	}
 
 
@@ -573,6 +552,14 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 					//if (this.transfer.stop(this.queueManager))
 					//	this.queueManager.remove(this.transfer);
 					this.queueManager.remove(this.transfer);
+
+					if (transfer.getPath() == null) {
+						Logger.error(this, "No path ?!");
+						return;
+					}
+
+					loadXML(transfer.getPath());
+					(new java.io.File(transfer.getPath())).delete();
 
 					this.transfer = null;
 
@@ -991,7 +978,15 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		return files;
 	}
 
-	public void loadXML(java.io.InputStream input) {
+	public void loadXML(String filePath) {
+		try {
+			loadXML(new FileInputStream(filePath));
+		} catch(java.io.FileNotFoundException e) {
+			Logger.error(this, "Unable to load XML: FileNotFoundException ('"+filePath+"') ! : "+e.toString());
+		}
+	}
+
+	public synchronized void loadXML(java.io.InputStream input) {
 		DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder xmlBuilder;
 
@@ -1005,7 +1000,10 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		Document xmlDoc;
 
 		try {
+			Logger.info(this, "XML parser ready");
+			xmlParserReady = true;
 			xmlDoc = xmlBuilder.parse(input);
+			Logger.info(this, "Index parsed");
 		} catch(org.xml.sax.SAXException e) {
 			Logger.error(this, "Unable to load index because: "+e.toString());
 			return;
