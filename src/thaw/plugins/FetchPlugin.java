@@ -110,11 +110,12 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 
 			String key = FreenetURIHelper.cleanURI(subKey[0]);
 
-			this.core.getQueueManager().addQueryToThePendingQueue(new FCPClientGet(key,
-											  priority,
-											  persistence,
-											  globalQueue, -1,
-											  destination));
+			if (key != null)
+				this.core.getQueueManager().addQueryToThePendingQueue(new FCPClientGet(key,
+												       priority,
+												       persistence,
+												       globalQueue, -1,
+												       destination));
 		}
 
 		fetchFrame.setVisible(false);

@@ -22,6 +22,14 @@ public class FreenetURIHelper {
 			Logger.warning(new FreenetURIHelper(), "UnsupportedEncodingException (UTF-8): "+e.toString());
 		}
 
+		if (uri.indexOf("CHK@") < 0
+		    && uri.indexOf("USK@") < 0
+		    && uri.indexOf("KSK@") < 0
+		    && uri.indexOf("SSK@") < 0) {
+			Logger.notice(new FreenetURIHelper(), "Not a valid key: "+uri);
+			return null;
+		}
+
 		return uri;
 	}
 

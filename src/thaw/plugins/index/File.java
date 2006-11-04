@@ -37,6 +37,16 @@ public class File extends java.util.Observable implements java.util.Observer {
 
 	private FCPQueueManager queueManager = null;
 
+
+	public File(Hsqldb db, String publicKey, Index parent) {
+		this.db = db;
+		this.id = -1;
+		this.publicKey = publicKey;
+		deduceFilenameFromKey();
+
+		this.size = 0;
+	}
+
 	/**
 	 * @param path Local path
 	 * @param transfer Corresponding tranfer (can be null).
@@ -402,6 +412,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 
 			if(this.transfer.isFinished() && this.transfer instanceof FCPClientGet) {
 				((FCPClientGet)this.transfer).deleteObserver(this);
+				this.size = (new java.io.File(transfer.getPath())).length();
 			}
 
 			if(this.transfer.isFinished() && this.transfer.isSuccessful()) {

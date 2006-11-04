@@ -366,8 +366,12 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			if(column == 0)
 				return file.getFilename();
 
-			if(column == 1)
-				return new Long(file.getSize());
+			if(column == 1) {
+				if (file.getSize() > 0)
+					return new Long(file.getSize());
+				else
+					return I18n.getMessage("thaw.common.unknown");
+			}
 
 			if(column == 2 && FileTable.this.modifiables)
 				return file.getLocalPath();

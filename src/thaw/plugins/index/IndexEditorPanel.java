@@ -10,7 +10,14 @@ import javax.swing.JButton;
 
 import javax.swing.JFileChooser;
 
+import javax.swing.JOptionPane;
+
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
+
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
@@ -38,6 +45,7 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 	private JToolBar toolBar;
 	private JButton addButton;
 	private JButton insertAndAddButton;
+	private JButton addKeyButton;
 	private JButton linkButton;
 
 	private FileList fileList = null; /* Index or SearchResult object */
@@ -61,19 +69,23 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 		this.addButton.setToolTipText(I18n.getMessage("thaw.plugin.index.addFilesWithoutInserting"));
 		this.insertAndAddButton = new JButton(IconBox.insertAndAddToIndexAction);
 		this.insertAndAddButton.setToolTipText(I18n.getMessage("thaw.plugin.index.addFilesWithInserting"));
+		this.addKeyButton = new JButton(IconBox.key);
+		this.addKeyButton.setToolTipText(I18n.getMessage("thaw.plugin.index.addKeys"));
 		this.linkButton = new JButton(IconBox.makeALinkAction);
 		this.linkButton.setToolTipText(I18n.getMessage("thaw.plugin.index.addLink"));
 
 		this.addButton.addActionListener(this);
 		this.insertAndAddButton.addActionListener(this);
 		this.linkButton.addActionListener(this);
+		this.addKeyButton.addActionListener(this);
 
 		this.buttonsEnabled(false);
 
-		this.toolBar.add(this.insertAndAddButton);
-		this.toolBar.add(this.addButton);
+		this.toolBar.add(insertAndAddButton);
+		this.toolBar.add(addButton);
+		this.toolBar.add(addKeyButton);
 		this.toolBar.addSeparator();
-		this.toolBar.add(this.linkButton);
+		this.toolBar.add(linkButton);
 
 		this.tables = new Tables(true, db, queueManager, this.indexTree, config);
 		this.fileDetails = new FileDetailsEditor(true);
@@ -113,6 +125,7 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 		this.addButton.setEnabled(a);
 		this.insertAndAddButton.setEnabled(a);
 		this.linkButton.setEnabled(a);
+		this.addKeyButton.setEnabled(a);
 	}
 
 	protected void setList(FileAndLinkList l) {
@@ -169,6 +182,14 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 			linkMakerThread.start();
 		}
 
+		if (e.getSource() == this.addKeyButton) {
+			if (fileList instanceof Index) {
+				Thread keyAdder = new Thread(new KeyAdder((Index)fileList));
+				keyAdder.start();
+			} else
+				Logger.warning(this, "Not in an index ?!");
+		}
+
 		if(e.getSource() == this.addButton
 		   || e.getSource() == this.insertAndAddButton) {
 			FileChooser fileChooser = new FileChooser();
@@ -220,8 +241,66 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 		}
 	}
 
+	private class KeyAdder implements Runnable, ActionListener {
+		JFrame frame = null;
+		JLabel header = null;
+		JTextArea textArea = null;
+		JPanel buttonPanel = null;
+		JButton cancelButton = null;
+		JButton okButton = null;
 
-	public class LinkMaker implements Runnable {
+		Index parent;
+
+		public KeyAdder(Index parent) {
+			this.parent = parent;
+		}
+
+		public void run() {
+			frame = new JFrame(I18n.getMessage("thaw.plugins.insert.addKeys"));
+			frame.setVisible(false);
+
+			header = new JLabel(I18n.getMessage("thaw.plugin.fetch.keyList"));
+			textArea = new JTextArea();
+			buttonPanel = new JPanel();
+			cancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
+			okButton = new JButton(I18n.getMessage("thaw.common.ok"));
+
+			cancelButton.addActionListener(this);
+			okButton.addActionListener(this);
+
+			frame.getContentPane().setLayout(new BorderLayout());
+			frame.getContentPane().add(header, BorderLayout.NORTH);
+			frame.getContentPane().add(textArea, BorderLayout.CENTER);
+
+			buttonPanel.setLayout(new GridLayout(1, 2));
+			buttonPanel.add(okButton);
+			buttonPanel.add(cancelButton);
+
+			frame.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+
+			frame.setSize(500, 300);
+
+			frame.setVisible(true);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			frame.setVisible(false);
+
+			String[] keys = textArea.getText().split("\n");
+
+			for (int i = 0 ; i < keys.length ; i++) {
+				String key = FreenetURIHelper.cleanURI(keys[i]);
+
+				if (key != null) {
+					thaw.plugins.index.File file = new thaw.plugins.index.File(db, key, parent);
+					parent.addFile(file);
+				}
+			}
+
+		}
+	}
+
+	private class LinkMaker implements Runnable {
 		public LinkMaker() { }
 
 		public void run() {

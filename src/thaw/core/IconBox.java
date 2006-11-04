@@ -59,6 +59,9 @@ public class IconBox {
 
 	public static ImageIcon search;
 
+	public static ImageIcon key;
+
+
 	/**
 	 * Not really used
 	 */
@@ -126,6 +129,7 @@ public class IconBox {
 		quitAction = loadIcon("system-log-out.png");
 		minQuitAction = loadIcon("min-system-log-out.png");
 		search = loadIcon("system-search.png");
+		key = loadIcon("key.png");
 	}
 
 }
