@@ -34,7 +34,7 @@ public class SearchResult extends Observable implements Observer, FileAndLinkLis
 		this.db = hsqldb;
 	}
 
-	protected PreparedStatement makeSearchQuery(String fields, String table, Vector indexIds, String[] searchPatterns,
+	protected PreparedStatement makeSearchQuery(String fields, String searchField, String table, Vector indexIds, String[] searchPatterns,
 					 String columnToSort, boolean asc) throws SQLException {
 		String query = "";
 		PreparedStatement st;
@@ -56,7 +56,7 @@ public class SearchResult extends Observable implements Observer, FileAndLinkLis
 		query = query + "(TRUE";
 
 		for (int i = 0 ; i < searchPatterns.length; i++) {
-			query = query + " AND LOWER(publicKey) LIKE ?";
+			query = query + " AND LOWER("+searchField+") LIKE ?";
 		}
 
 		query = query +")";
@@ -98,7 +98,7 @@ public class SearchResult extends Observable implements Observer, FileAndLinkLis
 		this.fileList = new Vector();
 
 		try {
-			PreparedStatement st = this.makeSearchQuery("id, filename, publicKey, localPath, mime, size, category, indexParent",
+			PreparedStatement st = this.makeSearchQuery("id, filename, publicKey, localPath, mime, size, category, indexParent", "filename",
 							       "files", this.indexIds, this.search, columnToSort, asc);
 			if (st.execute()) {
 				ResultSet results = st.getResultSet();
@@ -111,7 +111,7 @@ public class SearchResult extends Observable implements Observer, FileAndLinkLis
 				}
 			}
 		} catch(SQLException e) {
-			Logger.warning(this, "Exception while searching: "+e.toString());
+			Logger.error(this, "Exception while searching: "+e.toString());
 		}
 
 		this.setChanged();
@@ -126,7 +126,7 @@ public class SearchResult extends Observable implements Observer, FileAndLinkLis
 		this.linkList = new Vector();
 
 		try {
-			PreparedStatement st = this.makeSearchQuery("id, publicKey, mark, comment, indexTarget, indexParent",
+			PreparedStatement st = this.makeSearchQuery("id, publicKey, mark, comment, indexTarget, indexParent", "publicKey",
 							       "links", this.indexIds, this.search, columnToSort, asc);
 			if (st.execute()) {
 				ResultSet results = st.getResultSet();
@@ -137,7 +137,7 @@ public class SearchResult extends Observable implements Observer, FileAndLinkLis
 				}
 			}
 		} catch(SQLException e) {
-			Logger.warning(this, "Exception while searching: "+e.toString());
+			Logger.error(this, "Exception while searching: "+e.toString());
 		}
 
 		this.setChanged();
