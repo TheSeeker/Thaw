@@ -46,8 +46,10 @@ public class Tables {
 	}
 
 	public void restoreState() {
-		if (this.config.getValue("indexFileLinkSplit") != null)
-			this.split.setDividerLocation(Integer.parseInt(this.config.getValue("indexFileLinkSplit")));
+		if (config.getValue("indexFileLinkSplit") != null)
+			split.setDividerLocation(Integer.parseInt(this.config.getValue("indexFileLinkSplit")));
+		else
+			split.setDividerLocation(100);
 	}
 
 	public void saveState() {

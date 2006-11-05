@@ -54,9 +54,10 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	}
 
 	public void restoreState() {
-		if (this.config.getValue("indexBrowserPanelSplitPosition") != null)
-			this.split.setDividerLocation(Integer.parseInt(this.config.getValue("indexBrowserPanelSplitPosition")));
-		this.tables.restoreState();
+		if (config.getValue("indexBrowserPanelSplitPosition") != null)
+			split.setDividerLocation(Integer.parseInt(this.config.getValue("indexBrowserPanelSplitPosition")));
+
+		tables.restoreState();
 	}
 
 	public JSplitPane getPanel() {

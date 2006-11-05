@@ -106,9 +106,10 @@ public class IndexEditorPanel implements java.util.Observer, javax.swing.event.T
 	}
 
 	public void restoreState() {
-		if (this.config.getValue("indexEditorPanelSplitPosition") != null)
-			this.split.setDividerLocation(Integer.parseInt(this.config.getValue("indexEditorPanelSplitPosition")));
-		this.tables.restoreState();
+		if (config.getValue("indexEditorPanelSplitPosition") != null)
+			split.setDividerLocation(Integer.parseInt(this.config.getValue("indexEditorPanelSplitPosition")));
+
+		tables.restoreState();
 	}
 
 	public JSplitPane getPanel() {
