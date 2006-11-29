@@ -15,6 +15,8 @@ import thaw.core.Logger;
  * TODO: Use streams instead of reading directly the file.
  */
 public class FCPClientPut extends Observable implements FCPTransferQuery, Observer {
+	public final static int DEFAULT_INSERTION_PRIORITY = 4;
+
 	private FCPQueueManager queueManager = null;
 	private final static int BLOCK_SIZE = 32768;
 
@@ -535,18 +537,18 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	}
 
 	public void update(Observable o, Object param) {
-		if(o == this.sskGenerator) {
-			this.privateKey = this.sskGenerator.getPrivateKey();
-			this.publicKey = this.sskGenerator.getPublicKey() + "/" + this.name;
+		if(o == sskGenerator) {
+			privateKey = sskGenerator.getPrivateKey();
+			publicKey = sskGenerator.getPublicKey() + "/" + this.name;
 
-			this.setChanged();
-			this.notifyObservers();
+			setChanged();
+			notifyObservers();
 
-			this.startInsert();
+			startInsert();
 			return;
 		}
 
-		if(o == this.queueManager.getQueryManager()) {
+		if(o == queueManager.getQueryManager()) {
 			FCPMessage msg = (FCPMessage)param;
 
 			if(msg == null
@@ -857,11 +859,11 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	 * @return public key
 	 */
 	public String getFileKey() {
-		return this.publicKey;
+		return publicKey;
 	}
 
 	public int getKeyType() {
-		return this.keyType;
+		return keyType;
 	}
 
 	public String getInsertionKey() {

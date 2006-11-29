@@ -40,7 +40,7 @@ public class TableCreator {
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "name VARCHAR(255) NOT NULL,"
 			  + "positionInTree INTEGER NOT NULL,"
-			  + "modifiableIndexes BOOLEAN NOT NULL,"
+			  + "modifiableIndexes BOOLEAN NOT NULL," /* Obsolete */
 			  + "parent INTEGER NULL,"
 			  + "PRIMARY KEY (id),"
 			  + "FOREIGN KEY (parent) REFERENCES indexCategories (id))");

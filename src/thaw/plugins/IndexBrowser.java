@@ -35,7 +35,7 @@ public class IndexBrowser implements Plugin {
 
 		this.browserPanel = new IndexBrowserPanel(this.hsqldb, core.getQueueManager(), core.getConfig());
 
-		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.index.browser"),
+		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.index.indexes"),
 					    IconBox.minIndexBrowser,
 					    this.browserPanel.getPanel());
 
@@ -45,11 +45,12 @@ public class IndexBrowser implements Plugin {
 	}
 
 	public boolean stop() {
-		this.core.getMainWindow().removeTab(this.browserPanel.getPanel());
+		if (browserPanel != null) {
+			core.getMainWindow().removeTab(browserPanel.getPanel());
+			browserPanel.saveState();
+		}
 
-		this.browserPanel.saveState();
-
-		this.hsqldb.unregisterChild(this);
+		hsqldb.unregisterChild(this);
 
 		return true;
 	}

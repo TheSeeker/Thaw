@@ -334,11 +334,11 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 			if(this.mimeField.getSelectedItem() != null && !((String)this.mimeField.getSelectedItem()).equals(""))
 				mimeType = (String)this.mimeField.getSelectedItem();
 
-			this.insertPlugin.insertFile(this.selectedFiles.getText(),
-						this.keyType, rev, name, privateKey, priority,
+			insertPlugin.insertFile(selectedFiles.getText(),
+						keyType, rev, name, privateKey, priority,
 						global, 0, mimeType);
 
-			this.selectedFiles.setText("");
+			selectedFiles.setText("");
 		}
 
 		if(e.getSource() == this.browseButton) {

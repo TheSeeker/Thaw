@@ -61,12 +61,12 @@ public class FileChooser {
 	 * @return null if nothing choosed.
 	 */
 	public File askOneFile() {
-		this.fileChooser.setMultiSelectionEnabled(false);
+		fileChooser.setMultiSelectionEnabled(false);
 
-		if(!this.showDialog())
+		if(!showDialog())
 			return null;
 
-		return this.fileChooser.getSelectedFile();
+		return fileChooser.getSelectedFile();
 	}
 
 

@@ -60,4 +60,6 @@ public interface IndexTreeNode {
 	public Index getIndex(int id);
 
 	public void addObserver(java.util.Observer o);
+
+	public boolean isModifiable();
 }

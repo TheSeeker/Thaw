@@ -39,7 +39,6 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	private IndexCategory parent;
 	private String realName;
 	private String displayName;
-	private boolean modifiable;
 
 	private String publicKey; /* without the filename ! */
 	private String privateKey;
@@ -69,13 +68,14 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	/**
 	 * The bigest constructor of the world ...
+	 * @param revision Ignored if the index is not modifiable (=> deduced from the publicKey)
 	 */
 	public Index(Hsqldb db, FCPQueueManager queueManager,
 		     int id, IndexCategory parent,
 		     String realName, String displayName,
 		     String publicKey, String privateKey,
-		     int revision, String author,
-		     boolean modifiable) {
+		     int revision,
+		     String author) {
 		this.queueManager = queueManager;
 
 		this.treeNode = new DefaultMutableTreeNode(displayName, false);
@@ -87,7 +87,6 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		this.parent = parent;
 		this.realName = realName.trim();
 		this.displayName = displayName.trim();
-		this.modifiable = (privateKey == null ? false : true);
 
 		if (privateKey != null)
 			this.privateKey = privateKey.trim();
@@ -100,12 +99,15 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			this.publicKey = null;
 
 
-		if (modifiable == true && publicKey != null && publicKey.startsWith("USK@")) {
+		if (privateKey != null && publicKey != null && publicKey.startsWith("USK@")) {
 			String[] split = FreenetURIHelper.convertUSKtoSSK(publicKey).split("/");
 			publicKey = split[0];
 		}
 
-		this.revision = revision;
+		if (publicKey != null && publicKey.startsWith("USK@"))
+			this.revision = FreenetURIHelper.getUSKRevision(publicKey);
+		else
+			this.revision = revision;
 
 		this.author = author;
 
@@ -127,10 +129,10 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	}
 
 	public Index getIndex(int id) {
-		return (id == this.getId()) ? this : null;
+		return (id == getId()) ? this : null;
 	}
 
-	public void generateKeys(FCPQueueManager queueManager) {
+	public void generateKeys() {
 		this.publicKey = "N/A";
 		this.privateKey = "N/A";
 
@@ -195,7 +197,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			Connection c = this.db.getConnection();
 			PreparedStatement st;
 
-			if(!this.modifiable) {
+			if(privateKey == null) {
 				st = c.prepareStatement("UPDATE indexes SET displayName = ? WHERE id = ?");
 				st.setString(1, name);
 				st.setInt(2, this.id);
@@ -210,7 +212,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 			this.displayName = name;
 
-			if(this.modifiable)
+			if(privateKey != null)
 				this.realName = name;
 
 		} catch(SQLException e) {
@@ -259,7 +261,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			return;
 		}
 
-		if(this.modifiable) {
+		if(privateKey != null) {
 			FCPClientPut clientPut;
 
 			Logger.info(this, "Generating index ...");
@@ -312,16 +314,16 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 
 		if (rev >= 0) {
-			key = FreenetURIHelper.convertUSKtoSSK(this.publicKey);
+			key = FreenetURIHelper.convertUSKtoSSK(publicKey);
 			key = FreenetURIHelper.changeSSKRevision(key, rev, 0);
-			this.rewriteKey = false;
+			rewriteKey = false;
 		} else {
-			if (!this.modifiable) {
-				key = this.publicKey;
-				this.rewriteKey = true;
+			if (privateKey == null) {
+				key = publicKey;
+				rewriteKey = true;
 			} else {
-				key = this.getPublicKey();
-				this.rewriteKey = false;
+				key = getPublicKey();
+				rewriteKey = false;
 			}
 		}
 
@@ -375,7 +377,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 			String key;
 
-			if (this.modifiable)
+			if (privateKey != null)
 				key = FreenetURIHelper.getPublicInsertionSSK(this.getPublicKey());
 			else
 				key = this.getPublicKey();
@@ -464,7 +466,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 			st.execute();
 		} catch(SQLException e) {
-			Logger.error(this, "Unable to save index state '"+this.toString()+"' because : "+e.toString());
+			Logger.error(this, "Unable to save index state '"+toString()+"' because : "+e.toString());
 		}
 	}
 
@@ -473,26 +475,33 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	}
 
 	public String getPublicKey() {
-		if (this.publicKey == null)
-			return this.publicKey;
+		if (publicKey == null)
+			return publicKey;
 
-		if(this.publicKey.startsWith("SSK@")) { /* as it should when modifiable == true */
-			return this.publicKey.replaceFirst("SSK@", "USK@")+this.realName+"/"+this.revision+"/"+this.realName+".xml";
+		if (publicKey.startsWith("SSK@")) { /* as it should when privateKey is known */
+			if (publicKey.endsWith("/"))
+				return publicKey.replaceFirst("SSK@", "USK@")+realName+"/"+revision+"/"+realName+".xml";
+			else
+				return publicKey.replaceFirst("SSK@", "USK@")+"/"+realName+"/"+revision+"/"+realName+".xml";
 		} else
-			return this.publicKey;
+			return publicKey;
 	}
 
 	public String getPrivateKey() {
-		if (!this.modifiable)
-			return null;
-
-		return this.privateKey;
+		return privateKey;
 	}
 
 	public String toString() {
-		if(this.displayName != null)
-			return this.displayName;
-		return this.realName;
+		String toDisp;
+
+		if(displayName != null)
+			toDisp = displayName;
+		toDisp = realName;
+
+		if (revision > 0)
+			toDisp += " (r"+Integer.toString(revision)+")";
+
+		return toDisp;
 	}
 
 	public boolean isLeaf() {
@@ -548,9 +557,11 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 					Logger.info(this, "Most up-to-date key found: " + publicKey);
 
+
 					/* Reminder: These requests are non-peristent */
 					//if (this.transfer.stop(this.queueManager))
 					//	this.queueManager.remove(this.transfer);
+
 					this.queueManager.remove(this.transfer);
 
 					if (transfer.getPath() == null) {
@@ -562,6 +573,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 					(new java.io.File(transfer.getPath())).delete();
 
 					this.transfer = null;
+
+					save();
 
 					this.setChanged();
 					this.notifyObservers();
@@ -1117,6 +1130,9 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		return ids;
 	}
 
+	public boolean isModifiable() {
+		return (privateKey != null);
+	}
 
 	public boolean isInIndex(thaw.plugins.index.File file) {
 		if (this.fileList == null)

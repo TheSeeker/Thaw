@@ -16,8 +16,6 @@ import thaw.plugins.Hsqldb;
 
 
 public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListener, ActionListener {
-	public final static int DEFAULT_INSERTION_PRIORITY = 4;
-
 	private IndexTree indexTree;
 
 	private JSplitPane split;
@@ -35,7 +33,7 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		this.queueManager = queueManager;
 		this.config = config;
 
-		this.indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, false, queueManager, db);
+		this.indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, queueManager, db);
 
 		this.listAndDetails = new JPanel();
 		this.listAndDetails.setLayout(new BorderLayout(10, 10));

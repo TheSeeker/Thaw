@@ -21,21 +21,18 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 	private int id;
 	private IndexCategory parent;
 	private String name;
-	private boolean modifiables;
 
 	private Hsqldb db;
 	private FCPQueueManager queueManager;
 
 	public IndexCategory(Hsqldb db, FCPQueueManager queueManager,
 			     int id, IndexCategory parent,
-			     String name,
-			     boolean modifiables) {
+			     String name) {
 		super(name, true);
 
 		this.id = id;
 		this.name = name;
 		this.parent = parent;
-		this.modifiables = modifiables;
 
 		this.db = db;
 		this.queueManager = queueManager;
@@ -73,19 +70,18 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 				this.id = 0;
 			}
 
-			st = c.prepareStatement("INSERT INTO indexCategories (id, name, positionInTree, modifiableIndexes, parent) "+
-								  "VALUES (?, ?,?,?,?)");
+			st = c.prepareStatement("INSERT INTO indexCategories (id, name, positionInTree, parent) "+
+								  "VALUES (?, ?,?,?)");
 
 			st.setInt(1, this.id);
 			st.setString(2, this.name);
 			st.setInt(3, 0);
 
-			st.setBoolean(4, this.modifiables);
 
 			if(this.parent.getId() >= 0)
-				st.setInt(5, this.parent.getId());
+				st.setInt(4, this.parent.getId());
 			else
-				st.setNull(5, Types.INTEGER);
+				st.setNull(4, Types.INTEGER);
 
 			st.execute();
 
@@ -98,6 +94,9 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 	}
 
 	public void delete() {
+		if (this.id < 0) /* Operation not allowed */
+			return;
+
 		if(this.children == null)
 			this.children = this.loadChildren();
 
@@ -110,9 +109,6 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 		this.children = null;
 
 		try {
-			if(this.id < 0)
-				return;
-
 			Connection c = this.db.getConnection();
 			PreparedStatement st = c.prepareStatement("DELETE FROM indexCategories WHERE id = ?");
 			st.setInt(1, this.id);
@@ -216,19 +212,17 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 
 		try {
 			Connection c = this.db.getConnection();
-			PreparedStatement st = c.prepareStatement("UPDATE indexCategories SET name = ?, positionInTree = ?, modifiableIndexes = ?, parent = ? WHERE id = ?");
+			PreparedStatement st = c.prepareStatement("UPDATE indexCategories SET name = ?, positionInTree = ?, parent = ? WHERE id = ?");
 
 			st.setString(1, this.name);
 			st.setInt(2, this.getParent().getIndex(this));
 
-			st.setBoolean(3, this.modifiables);
-
 			if( ((IndexTreeNode)this.getParent()).getId() < 0)
-				st.setNull(4, Types.INTEGER);
+				st.setNull(3, Types.INTEGER);
 			else
-				st.setInt(4, ((IndexTreeNode)this.getParent()).getId());
+				st.setInt(3, ((IndexTreeNode)this.getParent()).getId());
 
-			st.setInt(5, this.getId());
+			st.setInt(4, this.getId());
 
 			st.execute();
 		} catch(SQLException e) {
@@ -274,12 +268,6 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 		else
 			query = query + " WHERE parent = "+Integer.toString(this.id);
 
-		if(this.modifiables) {
-			query = query + " AND privateKey IS NOT NULL";
-		} else {
-			query = query + " AND privateKey IS NULL";
-		}
-
 		query = query + " ORDER BY positionInTree DESC";
 
 		try {
@@ -304,11 +292,11 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 
 				String author = result.getString("author");
 
-				Index index = new Index(this.db, this.queueManager, id, this,
+				Index index = new Index(db, queueManager, id, this,
 							realName, displayName,
-							publicKey, privateKey, revision,
-							author,
-							this.modifiables);
+							publicKey, privateKey,
+							revision,
+							author);
 
 				this.set(children, position, index.getTreeNode());
 			}
@@ -324,18 +312,12 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 
 		String query;
 
-		query = "SELECT id, name, positionInTree, modifiableIndexes FROM indexCategories";
+		query = "SELECT id, name, positionInTree FROM indexCategories";
 
 		if(this.id < 0)
 			query = query + " WHERE parent IS NULL";
 		else
 			query = query + " WHERE parent = "+Integer.toString(this.id);
-
-		if(this.modifiables) {
-			query = query + " AND modifiableIndexes = TRUE";
-		} else {
-			query = query + " AND modifiableIndexes = FALSE";
-		}
 
 		query = query + " ORDER BY positionInTree DESC";
 
@@ -352,7 +334,7 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 				int position = result.getInt("positionInTree");
 				String name = result.getString("name");
 
-				IndexCategory cat = new IndexCategory(this.db, this.queueManager, id, this, name, this.modifiables);
+				IndexCategory cat = new IndexCategory(this.db, this.queueManager, id, this, name);
 				cat.loadChildren();
 				this.set(children, position, cat);
 			}
@@ -423,6 +405,24 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 		}
 
 		return null;
+	}
+
+	/**
+	 * Returns true only if all its child are modifiable
+	 */
+	public boolean isModifiable()
+	{
+		if(children == null)
+			children = loadChildren();
+
+		for(Iterator it = children.iterator();
+		    it.hasNext();) {
+			IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
+			if (!node.isModifiable())
+				return false;
+		}
+
+		return true;
 	}
 
 

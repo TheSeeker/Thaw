@@ -15,6 +15,7 @@ import thaw.core.FreenetURIHelper;
 
 import thaw.fcp.*;
 import thaw.plugins.Hsqldb;
+import thaw.core.Logger;
 
 import thaw.plugins.insertPlugin.DefaultMIMETypes;
 
@@ -134,7 +135,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 	}
 
 	public Index getParent() {
-		return this.parent;
+		return parent;
 	}
 
 	public int getParentId() {
@@ -173,17 +174,17 @@ public class File extends java.util.Observable implements java.util.Observer {
 	}
 
 	public void setTransfer(FCPTransferQuery query) {
-		if (this.transfer != null) {
+		if (transfer != null) {
 			Logger.notice(this, "A transfer is already running for this file");
 			return;
 		}
 
-		this.transfer = query;
+		transfer = query;
 
-		if (this.transfer != null) {
-			if(this.transfer instanceof FCPClientPut)
+		if (transfer != null) {
+			if(transfer instanceof FCPClientPut)
 				((FCPClientPut)this.transfer).addObserver(this);
-			if(this.transfer instanceof FCPClientGet)
+			if(transfer instanceof FCPClientGet)
 				((FCPClientGet)this.transfer).addObserver(this);
 		}
 
@@ -195,7 +196,12 @@ public class File extends java.util.Observable implements java.util.Observer {
 	public void recalculateCHK(FCPQueueManager queueManager) {
 		this.queueManager = queueManager;
 
-		FCPClientPut insertion = new FCPClientPut(new java.io.File(this.getLocalPath()), 0, 0, null,
+		if (getLocalPath() == null) {
+			Logger.notice(this, "Trying to recalculate key from a file where we don't have the local path");
+			return;
+		}
+
+		FCPClientPut insertion = new FCPClientPut(new java.io.File(getLocalPath()), 0, 0, null,
 							  null, 4,
 							  true, 2, true); /* getCHKOnly */
 		queueManager.addQueryToThePendingQueue(insertion);
@@ -204,39 +210,39 @@ public class File extends java.util.Observable implements java.util.Observer {
 	}
 
 	public void download(String targetPath, FCPQueueManager queueManager) {
-		FCPClientGet clientGet = new FCPClientGet(this.getPublicKey(), 4, 0, true, -1, targetPath);
+		FCPClientGet clientGet = new FCPClientGet(getPublicKey(), 4, 0, true, -1, targetPath);
 
 		queueManager.addQueryToThePendingQueue(clientGet);
 
-		this.setTransfer(clientGet);
+		setTransfer(clientGet);
 	}
 
 
 	public void insertOnFreenet(FCPQueueManager queueManager) {
-		FCPClientPut clientPut = new FCPClientPut(new java.io.File(this.getLocalPath()),
+		FCPClientPut clientPut = new FCPClientPut(new java.io.File(getLocalPath()),
 							  0, 0, null, null, 4, true, 0);
 		queueManager.addQueryToThePendingQueue(clientPut);
 
-		this.setTransfer(clientPut);
+		setTransfer(clientPut);
 	}
 
 
 	/* Try to find its download automagically */
 	public void setTransfer(FCPQueueManager queueManager) {
-		if (this.publicKey != null || this.fileName != null) {
+		if (publicKey != null || fileName != null) {
 			FCPTransferQuery trans;
 
-			trans = queueManager.getTransfer(this.publicKey);
+			trans = queueManager.getTransfer(publicKey);
 
 			if (trans == null) {
-				trans = queueManager.getTransferByFilename(this.fileName);
+				trans = queueManager.getTransferByFilename(fileName);
 			}
 
-			this.setTransfer(trans);
+			setTransfer(trans);
 		}
 
-		this.setChanged();
-		this.notifyObservers();
+		setChanged();
+		notifyObservers();
 	}
 
 	public synchronized void insert() {
@@ -399,15 +405,18 @@ public class File extends java.util.Observable implements java.util.Observer {
 
 	public void update(java.util.Observable o, Object param) {
 		if(o == this.transfer) {
-			if(this.transfer.isFinished() && this.transfer instanceof FCPClientPut) {
-				if (this.queueManager != null) {
-					this.queueManager.remove(this.transfer);
-					this.queueManager = null;
+			if (transfer.getFileKey() != null)
+				setPublicKey(transfer.getFileKey());
+
+			if (transfer.isFinished() && transfer instanceof FCPClientPut) {
+				if (queueManager != null) {
+					queueManager.remove(this.transfer);
+					queueManager = null;
 				}
 
-				((FCPClientPut)this.transfer).deleteObserver(this);
-				this.setPublicKey(this.transfer.getFileKey());
-				this.update();
+				((FCPClientPut)transfer).deleteObserver(this);
+				setPublicKey(transfer.getFileKey());
+				update();
 			}
 
 			if(this.transfer.isFinished() && this.transfer instanceof FCPClientGet) {
@@ -468,4 +477,15 @@ public class File extends java.util.Observable implements java.util.Observer {
 		return options;
 	}
 
+	/**
+	 * Modifiable in the database
+	 */
+	public boolean isModifiable() {
+		if (getParent() == null) {
+			Logger.warning(this, "No parent ?!");
+			return false;
+		}
+
+		return getParent().isModifiable();
+	}
 }

@@ -106,8 +106,15 @@ public class PluginConfigPanel implements Observer, ActionListener {
 
 		while(pluginNames.hasNext()) {
 			String name = (String)pluginNames.next();
-			toPutInTheList.add(name +
-					   " ("+this.core.getPluginManager().getPlugin(name).getNameForUser()+")");
+			Plugin plugin = core.getPluginManager().getPlugin(name);
+
+			if (plugin != null) {
+				toPutInTheList.add(name +
+						   " ("+plugin.getNameForUser()+")");
+			} else {
+				toPutInTheList.add(name +
+						   " (Plugin missing)");
+			}
 		}
 
 		this.pluginList.setListData(toPutInTheList);
@@ -140,16 +147,22 @@ public class PluginConfigPanel implements Observer, ActionListener {
 		}
 
 
-		if(e.getSource() == this.removeButton) {
-			String pluginName = this.getClassName((String)this.pluginList.getSelectedValue());
+		if(e.getSource() == removeButton) {
+			String pluginName = getClassName((String)pluginList.getSelectedValue());
 
-			if(this.core.getPluginManager().stopPlugin(pluginName)
-			   && this.core.getPluginManager().unloadPlugin(pluginName)) {
-				this.core.getConfig().removePlugin(pluginName);
-				this.refreshList();
+			if (((String)pluginList.getSelectedValue()).indexOf("Plugin missing") > 0) {
+				core.getConfig().removePlugin(pluginName);
+				refreshList();
+				return;
+			}
+
+			if(core.getPluginManager().stopPlugin(pluginName)
+			   && core.getPluginManager().unloadPlugin(pluginName)) {
+				core.getConfig().removePlugin(pluginName);
+				refreshList();
 			} else {
-				Logger.error(this, "Unable to unload '"+pluginName+"'");
-				JOptionPane.showMessageDialog(this.core.getConfigWindow().getFrame(),
+				Logger.error(this, "Error while unloading '"+pluginName+"'");
+				JOptionPane.showMessageDialog(core.getConfigWindow().getFrame(),
 							      "Unable to unload plugin '"+pluginName+"'",
 							      "Unable to unload plugin",
 							      JOptionPane.ERROR_MESSAGE);

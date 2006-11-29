@@ -14,6 +14,7 @@ public class Link extends java.util.Observable {
 	private String key = null;
 
 	private Index parent = null;
+	private int parentId;
 
 	private Hsqldb db;
 
@@ -40,6 +41,10 @@ public class Link extends java.util.Observable {
 		this.indexName = Index.getNameFromKey(this.key);
 
 		this.parent = parent;
+		if (parent != null)
+			this.parentId = parent.getId();
+		else
+			this.parentId = resultSet.getInt("indexParent");
 	}
 
 	public Link(Hsqldb hsqldb, Element linkElement, Index parent) {
@@ -52,18 +57,30 @@ public class Link extends java.util.Observable {
 		this.indexName = Index.getNameFromKey(this.key);
 
 		this.parent = parent;
+
+		if (parent != null)
+			parentId = parent.getId();
+		else
+			parentId = -1;
 	}
 
-	public String getKey() {
-		return this.key;
+	public String getPublicKey() {
+		return key;
 	}
 
 	public void setParent(Index index) {
-		this.parent = index;
+		parent = index;
 	}
 
 	public Index getParent() {
-		return this.parent;
+		return parent;
+	}
+
+	public int getParentId() {
+		if (parent != null)
+			return parent.getId();
+
+		return parentId;
 	}
 
 	public String getIndexName() {
@@ -78,10 +95,6 @@ public class Link extends java.util.Observable {
 
 		this.setChanged();
 		this.notifyObservers();
-	}
-
-	public String getIndexKey() {
-		return this.key;
 	}
 
 	public void insert() {
@@ -200,5 +213,12 @@ public class Link extends java.util.Observable {
 		link.setAttribute("key", this.key);
 
 		return link;
+	}
+
+
+	public boolean isModifiable() {
+		if (getParent() == null)
+			return false;
+		return getParent().isModifiable();
 	}
 }

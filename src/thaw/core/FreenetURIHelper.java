@@ -17,7 +17,7 @@ public class FreenetURIHelper {
 		uri = uri.replaceFirst("freenet:", "");
 
 		try {
-				uri = java.net.URLDecoder.decode(uri, "UTF-8");
+			uri = java.net.URLDecoder.decode(uri, "UTF-8");
 		} catch (java.io.UnsupportedEncodingException e) {
 			Logger.warning(new FreenetURIHelper(), "UnsupportedEncodingException (UTF-8): "+e.toString());
 		}
@@ -91,9 +91,13 @@ public class FreenetURIHelper {
 
 
 	public static String abs(String val) {
-		java.math.BigDecimal bd = new java.math.BigDecimal(val);
-
-		return bd.abs().toString();
+		try {
+			java.math.BigDecimal bd = new java.math.BigDecimal(val);
+			return bd.abs().toString();
+		} catch(java.lang.NumberFormatException e) {
+			Logger.warning(new FreenetURIHelper(), "NumberFormatException while parsing '"+val+"'");
+			return "0";
+		}
 	}
 
 

@@ -21,15 +21,15 @@ import thaw.core.Logger;
  *
  * <pre>
  * Window
- * *-------------------*------------------*
- * | Local indexes     | Other indexes    |
- * |  |                |  |               |
- * |  |-- Cat1         |  |-- Cat1        |
- * |  |    |-- Index1  |  |    |-- Index1 |
- * |  |    |-- Index2  |  |    |-- Index2 |
- * |  ...              |  ...             |
- * |                   |                  |
- * *-------------------*------------------*
+ * *--------------------------------------*
+ * | Local indexes                        |
+ * |  |                                   |
+ * |  |-- Cat1                            |
+ * |  |    |-- Index1                     |
+ * |  |    |-- Index2                     |
+ * |  ...                                 |
+ * |                                      |
+ * *--------------------------------------*
  * | Specific index key                   |
  * *-------------------*------------------*
  * | Cancel button     |  Ok button       |
@@ -42,8 +42,7 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 	private JPanel upPanel;
 
 	private JPanel indexPanel;
-	private IndexTree localIndexes;
-	private IndexTree otherIndexes;
+	private IndexTree indexTree;
 
 	private JPanel fieldPanel;
 	private JTextField keyField;
@@ -63,51 +62,49 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 	 * Returned null if canceled. Is blocking !
 	 */
 	public String askForAnIndexURI(Hsqldb db) {
-		this.frame = new JFrame(I18n.getMessage("thaw.plugin.index.selectIndex"));
+		frame = new JFrame(I18n.getMessage("thaw.plugin.index.selectIndex"));
 
-		this.frame.setVisible(false);
+		frame.setVisible(false);
 
-		this.upPanel = new JPanel();
+		upPanel = new JPanel();
 		Logger.info(this, "indexes");
-		this.localIndexes = new IndexTree(I18n.getMessage("thaw.plugin.index.yourIndexes"), true, true, null, db);
-		this.otherIndexes = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, true, null, db);
+		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.yourIndexes"), true, null, db);
 		Logger.info(this, "plus indexes");
 
-		this.fieldPanel = new JPanel();
-		this.keyField = new JTextField("");
+		fieldPanel = new JPanel();
+		keyField = new JTextField("");
 
-		this.downPanel = new JPanel();
-		this.cancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
-		this.okButton = new JButton(I18n.getMessage("thaw.common.ok"));
+		downPanel = new JPanel();
+		cancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
+		okButton = new JButton(I18n.getMessage("thaw.common.ok"));
 
-		this.upPanel.setLayout(new BorderLayout());
-		this.downPanel.setLayout(new GridLayout(1, 2));
-		this.fieldPanel.setLayout(new BorderLayout());
+		upPanel.setLayout(new BorderLayout());
+		downPanel.setLayout(new GridLayout(1, 2));
+		fieldPanel.setLayout(new BorderLayout());
 
-		this.indexPanel = new JPanel();
-		this.indexPanel.setLayout(new GridLayout(1, 2));
-		this.indexPanel.add(new JScrollPane(this.localIndexes.getPanel()));
-		this.indexPanel.add(new JScrollPane(this.otherIndexes.getPanel()));
+		indexPanel = new JPanel();
+		indexPanel.setLayout(new GridLayout(1, 2));
+		indexPanel.add(new JScrollPane(indexTree.getPanel()));
 
-		this.upPanel.add(this.indexPanel, BorderLayout.CENTER);
 
-		this.fieldPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.indexKey")), BorderLayout.WEST);
-		this.fieldPanel.add(this.keyField, BorderLayout.CENTER);
-		this.upPanel.add(this.fieldPanel, BorderLayout.SOUTH);
+		upPanel.add(indexPanel, BorderLayout.CENTER);
 
-		this.downPanel.add(this.okButton);
-		this.downPanel.add(this.cancelButton);
+		fieldPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.indexKey")), BorderLayout.WEST);
+		fieldPanel.add(keyField, BorderLayout.CENTER);
+		upPanel.add(fieldPanel, BorderLayout.SOUTH);
 
-		this.frame.getContentPane().setLayout(new BorderLayout(10, 10));
-		this.frame.getContentPane().add(this.upPanel, BorderLayout.CENTER);
-		this.frame.getContentPane().add(this.downPanel, BorderLayout.SOUTH);
+		downPanel.add(okButton);
+		downPanel.add(cancelButton);
 
-		this.frame.setSize(500, 400);
+		frame.getContentPane().setLayout(new BorderLayout(10, 10));
+		frame.getContentPane().add(upPanel, BorderLayout.CENTER);
+		frame.getContentPane().add(downPanel, BorderLayout.SOUTH);
 
-		this.cancelButton.addActionListener(this);
-		this.okButton.addActionListener(this);
-		this.localIndexes.addObserver(this);
-		this.otherIndexes.addObserver(this);
+		frame.setSize(500, 400);
+
+		cancelButton.addActionListener(this);
+		okButton.addActionListener(this);
+		indexTree.addObserver(this);
 
 		this.frame.setVisible(true);
 
@@ -123,9 +120,8 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 
 		this.frame = null;
 
-		this.upPanel = null;
-		this.localIndexes = null;
-		this.otherIndexes = null;
+		upPanel = null;
+		indexTree = null;
 
 		this.fieldPanel = null;
 		this.keyField = null;
@@ -141,10 +137,10 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 	public void update(java.util.Observable o, Object param) {
 		if (param instanceof Index) {
 			Index index = (Index)param;
-			this.selectedIndexKey = index.getPublicKey();
+			selectedIndexKey = index.getPublicKey();
 
 			Logger.info(this, "Selected index key: "+this.selectedIndexKey);
-			this.keyField.setText(this.selectedIndexKey);
+			keyField.setText(this.selectedIndexKey);
 		}
 	}
 
@@ -162,8 +158,7 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 			this.closeWin = true;
 		}
 
-		this.localIndexes.deleteObserver(this);
-		this.otherIndexes.deleteObserver(this);
+		indexTree.deleteObserver(this);
 	}
 
 }

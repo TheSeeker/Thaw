@@ -408,6 +408,7 @@ public class Core implements Observer {
 			int nmbReconnect = 0;
 
 			JDialog warningDialog = new JDialog();
+			warningDialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 			warningDialog.setTitle("Thaw - reconnection");
 			warningDialog.setModal(false);
 			warningDialog.setSize(500, 40);

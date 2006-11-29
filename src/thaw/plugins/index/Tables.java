@@ -28,8 +28,8 @@ public class Tables {
 		this.panel = new JPanel();
 		this.panel.setLayout(new BorderLayout(10, 10));
 
-		this.fileTable = new FileTable(modifiables, queueManager, tree, config, this);
-		this.linkTable = new LinkTable(modifiables, db, queueManager, tree);
+		this.fileTable = new FileTable(queueManager, tree, config, this);
+		this.linkTable = new LinkTable(db, queueManager, tree, this);
 
 		this.searchBar = new SearchBar(db, tree, queueManager, this);
 

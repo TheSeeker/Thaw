@@ -37,24 +37,22 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 	private JPanel panel;
 	private JTable table;
 
-	private LinkListModel linkListModel;
-	private LinkList      linkList;
+	private LinkListModel linkListModel = null;
+	private LinkList      linkList = null;
 
 	private FCPQueueManager queueManager;
-	private boolean modifiables;
+
+	private IndexTree indexTree;
+	private Hsqldb db;
+	private Tables tables;
 
 	private JPopupMenu rightClickMenu;
-	private JMenuItem removeLinks;
-	private JMenuItem addThisIndex;
-	private JMenuItem copyKey;
-	private IndexTree indexTree;
-
-	private Hsqldb db;
+	private Vector rightClickActions;
+	private JMenuItem gotoItem;
 
 	private int[] selectedRows;
 
-	public LinkTable (boolean modifiables, Hsqldb db, FCPQueueManager queueManager, IndexTree tree) {
-		this.modifiables = modifiables;
+	public LinkTable (Hsqldb db, FCPQueueManager queueManager, IndexTree tree, Tables tables) {
 		this.queueManager = queueManager;
 		this.db = db;
 
@@ -68,31 +66,61 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		this.panel.add(new JLabel(I18n.getMessage("thaw.plugin.index.linkList")), BorderLayout.NORTH);
 		this.panel.add(new JScrollPane(this.table));
 
-		this.rightClickMenu = new JPopupMenu();
-		this.removeLinks = new JMenuItem(I18n.getMessage("thaw.common.remove"));
-		this.addThisIndex = new JMenuItem(I18n.getMessage("thaw.plugin.index.addIndexFromLink"));
-		this.copyKey = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKey"));
-
-		this.removeLinks.addActionListener(this);
-		this.addThisIndex.addActionListener(this);
-		this.copyKey.addActionListener(this);
-
-		if (modifiables) {
-			this.rightClickMenu.add(this.removeLinks);
-		}
-		else {
-			this.rightClickMenu.add(this.addThisIndex);
-		}
-
-		this.rightClickMenu.add(this.copyKey);
-
 		this.table.addMouseListener(this);
 
 		this.indexTree = tree;
+		this.tables = tables;
+
+		rightClickMenu = new JPopupMenu();
+		rightClickActions = new Vector();
+
+		JMenuItem item;
+
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addIndexesFromLink"));
+		rightClickMenu.add(item);
+		rightClickActions.add(new LinkManagementHelper.IndexAdder(item, db, queueManager, tree));
+
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKeys"));
+		rightClickMenu.add(item);
+		rightClickActions.add(new LinkManagementHelper.PublicKeyCopier(item));
+
+		item = new JMenuItem(I18n.getMessage("thaw.common.remove"));
+		rightClickMenu.add(item);
+		rightClickActions.add(new LinkManagementHelper.LinkRemover(item));
+
+		gotoItem = new JMenuItem(I18n.getMessage("thaw.plugin.index.gotoIndex"));
+		rightClickMenu.add(gotoItem);
+		gotoItem.addActionListener(this);
+
+		updateRightClickMenu(null);
 	}
 
 	public JPanel getPanel() {
 		return this.panel;
+	}
+
+	protected void updateRightClickMenu(Vector selectedLinks) {
+		LinkManagementHelper.LinkAction action;
+
+		for (Iterator it = rightClickActions.iterator();
+		     it.hasNext(); ) {
+			action = (LinkManagementHelper.LinkAction)it.next();
+			action.setTarget(selectedLinks);
+		}
+
+		gotoItem.setEnabled(linkList != null && !(linkList instanceof Index));
+	}
+
+	protected Vector getSelectedLinks(int[] selectedRows) {
+		Vector srcList = linkList.getLinkList();
+		Vector links = new Vector();
+
+		for(int i = 0 ; i < selectedRows.length ; i++) {
+			Link link = (Link)srcList.get(selectedRows[i]);
+			links.add(link);
+		}
+
+		return links;
 	}
 
 	public void setLinkList(LinkList linkList) {
@@ -112,9 +140,9 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 	public void mouseClicked(MouseEvent e) {
 		if(e.getButton() == MouseEvent.BUTTON3
 		   && this.linkList != null) {
-			this.removeLinks.setEnabled(this.linkList instanceof Index);
-			this.selectedRows = this.table.getSelectedRows();
-			this.rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
+			selectedRows = table.getSelectedRows();
+			updateRightClickMenu(getSelectedLinks(selectedRows));
+			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
 		}
 	}
 
@@ -136,40 +164,35 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		Vector links;
 		String keyList = "";
 
-		if (this.linkList == null)
+		if (linkList == null) // don't forget that linkList == Index most of the time
 			return;
 
-		links = this.linkList.getLinkList();
+		if (e.getSource() == gotoItem) {
+			if (selectedRows.length <= 0)
+				return;
 
-		for (int i = 0 ; i < this.selectedRows.length;  i++) {
-			if (e.getSource() == this.removeLinks) {
-				Link link = (Link)links.get(this.selectedRows[i]);
-				((Index)this.linkList).removeLink(link);
+			Link link = (Link)linkList.getLinkList().get(selectedRows[0]);
+
+			if (link.getParentId() == -1) {
+				Logger.notice(this, "No parent ? Abnormal !");
+				return;
 			}
 
-			if (e.getSource() == this.addThisIndex) {
-				Link link = (Link)links.get(this.selectedRows[i]);
-				Index index = new Index(this.db, this.queueManager, -2, null, Index.getNameFromKey(link.getKey()),
-							Index.getNameFromKey(link.getKey()), link.getKey(), null,
-							0, null, false);
-				if (this.indexTree.addToRoot(index))
-					index.create();
+			Index parent;
+			if (link.getParent() == null)
+				parent = indexTree.getRoot().getIndex(link.getParentId());
+			else
+				parent = link.getParent();
+
+			if (parent == null) {
+				Logger.notice(this, "Cannot find again the parent ?! Id: "+Integer.toString(link.getParentId()));
+				return;
 			}
 
-			if (e.getSource() == this.copyKey) {
-				Link link = (Link)links.get(this.selectedRows[i]);
-				if (link.getKey() != null)
-					keyList = keyList + link.getKey() + "\n";
-			}
+			tables.setList(parent);
+
+			return;
 		}
-
-		if(e.getSource() == this.copyKey) {
-			Toolkit tk = Toolkit.getDefaultToolkit();
-			StringSelection st = new StringSelection(keyList);
-			Clipboard cp = tk.getSystemClipboard();
-			cp.setContents(st, null);
-		}
-
 	}
 
 
@@ -242,7 +265,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 			switch(column) {
 			case(0): return link.getIndexName();
-			case(1): return link.getKey();
+			case(1): return link.getPublicKey();
 			default: return null;
 			}
 		}
