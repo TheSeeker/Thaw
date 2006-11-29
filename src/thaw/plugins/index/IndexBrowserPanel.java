@@ -58,6 +58,14 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		tables.restoreState();
 	}
 
+	public Tables getTables() {
+		return tables;
+	}
+
+	public IndexTree getIndexTree() {
+		return indexTree;
+	}
+
 	public JSplitPane getPanel() {
 		return this.split;
 	}

@@ -1,10 +1,14 @@
 package thaw.plugins;
 
+import javax.swing.JButton;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+
 import thaw.core.*;
 
 import thaw.plugins.index.*;
 
-public class IndexBrowser implements Plugin {
+public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListener {
 	private Core core;
 	private Hsqldb hsqldb;
 
@@ -27,19 +31,46 @@ public class IndexBrowser implements Plugin {
 			}
 		}
 
-		this.hsqldb = (Hsqldb)core.getPluginManager().getPlugin("thaw.plugins.Hsqldb");
+		hsqldb = (Hsqldb)core.getPluginManager().getPlugin("thaw.plugins.Hsqldb");
 
-		this.hsqldb.registerChild(this);
+		hsqldb.registerChild(this);
 
-		TableCreator.createTables(this.hsqldb);
+		TableCreator.createTables(hsqldb);
 
-		this.browserPanel = new IndexBrowserPanel(this.hsqldb, core.getQueueManager(), core.getConfig());
+		browserPanel = new IndexBrowserPanel(hsqldb, core.getQueueManager(), core.getConfig());
+
+		setMainWindow(core.getMainWindow());
+		core.getMainWindow().getTabbedPane().addChangeListener(this);
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.index.indexes"),
 					    IconBox.minIndexBrowser,
-					    this.browserPanel.getPanel());
+					    browserPanel.getPanel());
 
-		this.browserPanel.restoreState();
+		browserPanel.restoreState();
+
+		JButton button;
+		IndexManagementHelper.IndexAction action;
+
+		button = new JButton(IconBox.refreshAction);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.downloadIndexes"));
+		action = new IndexManagementHelper.IndexDownloader(button);
+		action.setTarget(browserPanel.getIndexTree().getRoot()); /* TODO : Listen to tree to only refresh the selected node */
+		addButtonToTheToolbar(button);
+
+		button = new JButton(IconBox.indexReuse);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addAlreadyExistingIndex"));
+		action = new IndexManagementHelper.IndexReuser(hsqldb, core.getQueueManager(), browserPanel.getIndexTree(), button);
+		action.setTarget(browserPanel.getIndexTree().getRoot());
+		addButtonToTheToolbar(button);
+
+		button = new JButton(IconBox.indexNew);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.createIndex"));
+		action = new IndexManagementHelper.IndexCreator(hsqldb, core.getQueueManager(), browserPanel.getIndexTree(), button);
+		action.setTarget(browserPanel.getIndexTree().getRoot());
+		addButtonToTheToolbar(button);
+
+
+		stateChanged(null);
 
 		return true;
 	}
@@ -59,5 +90,26 @@ public class IndexBrowser implements Plugin {
 		return I18n.getMessage("thaw.plugin.index.browser");
 	}
 
+
+       	/**
+	 * Called when the JTabbedPane changed (ie change in the selected tab, etc)
+	 * @param e can be null.
+	 */
+	public void stateChanged(ChangeEvent e) {
+		int tabId;
+
+		tabId = core.getMainWindow().getTabbedPane().indexOfTab(I18n.getMessage("thaw.plugin.index.indexes"));
+
+		if (tabId < 0) {
+			Logger.warning(this, "Unable to find the tab !");
+			return;
+		}
+
+		if (core.getMainWindow().getTabbedPane().getSelectedIndex() == tabId) {
+			displayButtonsInTheToolbar();
+		} else {
+			hideButtonsInTheToolbar();
+		}
+	}
 
 }

@@ -60,8 +60,10 @@ public class ToolbarModifier {
 
 	public void hideButtonsInTheToolbar() {
 		if (mainWindow != null) {
-			mainWindow.changeButtonsInTheToolbar(this, null);
-			areDisplayed = false;
+			if (areDisplayed) {
+				mainWindow.changeButtonsInTheToolbar(this, null);
+				areDisplayed = false;
+			}
 		} else
 			Logger.error(this, "MainWindow not SET !");
 	}
