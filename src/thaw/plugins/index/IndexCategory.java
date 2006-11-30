@@ -234,6 +234,16 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 		return this.id;
 	}
 
+	public int getChildNumber() {
+		if (children == null)
+			children = loadChildren();
+
+		if (children == null)
+			return 0;
+
+		return children.size();
+	}
+
 	public Vector loadChildren() {
 		Vector children = new Vector();
 

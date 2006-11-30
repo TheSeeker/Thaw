@@ -9,6 +9,8 @@ import thaw.core.*;
 import thaw.plugins.index.*;
 
 public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListener {
+	public static final String DEFAULT_INDEX = "USK@BXd4EqMSOR589aHNHOY-e2QjI9NHwPlJurKxcvo1hBg,HkrDarIUF79uc9fjGu0S3mbp7Qf8YeMHynKf2GQO3r0,AQABAAE/Thaw/2/Thaw.xml";
+
 	private Core core;
 	private Hsqldb hsqldb;
 
@@ -35,7 +37,15 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 
 		hsqldb.registerChild(this);
 
-		TableCreator.createTables(hsqldb);
+		boolean newDb;
+
+		newDb = false;
+
+		if (core.getConfig().getValue("indexDatabaseVersion") == null) {
+			TableCreator.createTables(hsqldb);
+			newDb = true;
+			core.getConfig().setValue("indexDatabaseVersion", "1");
+		}
 
 		browserPanel = new IndexBrowserPanel(hsqldb, core.getQueueManager(), core.getConfig());
 
@@ -69,6 +79,10 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 		action.setTarget(browserPanel.getIndexTree().getRoot());
 		addButtonToTheToolbar(button);
 
+		if (newDb) {
+			IndexManagementHelper.addIndex(hsqldb, core.getQueueManager(), browserPanel.getIndexTree(),
+						       browserPanel.getIndexTree().getRoot(), DEFAULT_INDEX);
+		}
 
 		stateChanged(null);
 
