@@ -49,6 +49,9 @@ import java.util.Iterator;
 public class MainWindow implements java.awt.event.ActionListener, java.awt.event.WindowListener,
 				   java.util.Observer {
 
+	public final static int DEFAULT_SIZE_X = 790;
+	public final static int DEFAULT_SIZE_Y = 550;
+
 	private JFrame mainWindow = null;
 
 	private JMenuBar menuBar = null;
@@ -162,7 +165,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		this.mainWindow.getContentPane().add(this.tabbedPane, BorderLayout.CENTER);
 		this.mainWindow.getContentPane().add(this.statusBar, BorderLayout.SOUTH);
 
-		this.mainWindow.setSize(790, 550);
+		this.mainWindow.setSize(DEFAULT_SIZE_X, DEFAULT_SIZE_Y);
 
 		this.mainWindow.addWindowListener(this);
 

@@ -26,7 +26,7 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 	private DetailPanel detailPanel;
 	private DragAndDropManager dnd;
 
-	private JPanel panel;
+	private JSplitPane split;
 
 	private final static int DIVIDER_LOCATION = 310;
 	private long lastChange = 0;
@@ -48,51 +48,53 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 
 		this.detailPanel = new DetailPanel(core);
 
-		this.queuePanels[0] = new QueuePanel(core, this.detailPanel, false); /* download */
-		this.queuePanels[1] = new QueuePanel(core, this.detailPanel, true); /* upload */
+		queuePanels[0] = new QueuePanel(core, detailPanel, false); /* download */
+		queuePanels[1] = new QueuePanel(core, detailPanel, true); /* upload */
 
-		this.panel = new JPanel();
+		split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+				       queuePanels[0].getPanel(),
+				       queuePanels[1].getPanel());
 
-		GridLayout layout = new GridLayout(2, 1, 10, 10);
-		this.panel.setLayout(layout);
-
-		if(this.queuePanels[0].getPanel() != null)
-			this.panel.add(this.queuePanels[0].getPanel());
-
-		if(this.queuePanels[1].getPanel() != null)
-			this.panel.add(this.queuePanels[1].getPanel());
 
 		this.advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 
-		if(this.advancedMode) {
-			this.mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, this.detailPanel.getPanel(), this.panel);
+		if(advancedMode) {
+			mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, detailPanel.getPanel(), split);
 
 			if(core.getConfig().getValue("detailPanelFolded") == null
 			   || ((new Boolean(core.getConfig().getValue("detailPanelFolded"))).booleanValue()) == true) {
-				this.folded = true;
-				this.detailPanel.getPanel().setVisible(false);
-				this.mainPanel.setDividerLocation(1);
+				folded = true;
+				detailPanel.getPanel().setVisible(false);
+				mainPanel.setDividerLocation(1);
 			} else {
-				this.folded = false;
-				this.detailPanel.getPanel().setVisible(true);
-				this.mainPanel.setDividerLocation(DIVIDER_LOCATION);
+				folded = false;
+				detailPanel.getPanel().setVisible(true);
+				mainPanel.setDividerLocation(DIVIDER_LOCATION);
 			}
 
-			this.mainPanel.addPropertyChangeListener(this);
-			this.mainPanel.setOneTouchExpandable(true);
+			mainPanel.addPropertyChangeListener(this);
+			mainPanel.setOneTouchExpandable(true);
 
-			this.panelAdded = this.mainPanel;
+			panelAdded = mainPanel;
 		} else {
-			this.panelAdded = this.panel;
+			panelAdded = split;
 		}
 
 		setMainWindow(core.getMainWindow());
 		core.getMainWindow().getTabbedPane().addChangeListener(this);
 		core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"),
 					    IconBox.minQueue,
-					    this.panelAdded);
+					    panelAdded);
 
-		this.dnd = new DragAndDropManager(core, this.queuePanels);
+		if (core.getConfig().getValue("queuePanelSplitLocation") == null) {
+			split.setDividerLocation((MainWindow.DEFAULT_SIZE_Y - 150)/2); /* approximation */
+		} else {
+			split.setDividerLocation(Integer.parseInt(core.getConfig().getValue("queuePanelSplitLocation")));
+		}
+
+		split.setResizeWeight(0.5);
+
+		dnd = new DragAndDropManager(core, queuePanels);
 
 		stateChanged(null);
 
@@ -103,8 +105,10 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 	public boolean stop() {
 		Logger.info(this, "Stopping plugin \"QueueWatcher\" ...");
 
-		this.core.getConfig().setValue("detailPanelFolded", ((new Boolean(this.folded)).toString()));
+		core.getConfig().setValue("queuePanelSplitLocation",
+					  Integer.toString(split.getDividerLocation()));
 
+		this.core.getConfig().setValue("detailPanelFolded", ((new Boolean(this.folded)).toString()));
 		this.core.getMainWindow().removeTab(this.panelAdded);
 
 		return true;
