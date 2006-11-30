@@ -65,6 +65,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	private FCPClientPut publicKeyRecalculation = null;
 
+	private boolean updateWhenKeyAreAvailable = false;
 
 	/**
 	 * The bigest constructor of the world ...
@@ -133,12 +134,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	}
 
 	public void generateKeys() {
-		this.publicKey = "N/A";
-		this.privateKey = "N/A";
+		publicKey = null;
+		privateKey = null;
 
-		this.sskGenerator = new FCPGenerateSSK();
-		this.sskGenerator.addObserver(this);
-		this.sskGenerator.start(queueManager);
+		sskGenerator = new FCPGenerateSSK();
+		sskGenerator.addObserver(this);
+		sskGenerator.start(queueManager);
 	}
 
 	public boolean create() {
@@ -247,6 +248,15 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 
 	public void update() {
+		if (publicKey != null && privateKey == null) /* non modifiable */
+			return;
+
+		if (publicKey == null && privateKey == null) {
+			generateKeys();
+			updateWhenKeyAreAvailable = true;
+			return;
+		}
+
 		String tmpdir = System.getProperty("java.io.tmpdir");
 
 		if (tmpdir == null)
@@ -348,7 +358,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	}
 
 	public boolean isUpdating() {
-		return (this.transfer != null && (!this.transfer.isFinished()));
+		return (sskGenerator != null || (transfer != null && (!transfer.isFinished())));
 	}
 
 
@@ -512,13 +522,18 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	public void update(java.util.Observable o, Object p) {
 
 		if(o == this.sskGenerator) {
-			this.sskGenerator.deleteObserver(this);
-			this.publicKey = this.sskGenerator.getPublicKey();
-			this.privateKey = this.sskGenerator.getPrivateKey();
+			sskGenerator.deleteObserver(this);
+			publicKey = sskGenerator.getPublicKey();
+			privateKey = sskGenerator.getPrivateKey();
+			sskGenerator = null;
 
-			Logger.debug(this, "Index public key: " +this.publicKey);
-			Logger.debug(this, "Index private key: "+this.privateKey);
+			Logger.debug(this, "Index public key: " +publicKey);
+			Logger.debug(this, "Index private key: "+privateKey);
 
+			if (updateWhenKeyAreAvailable) {
+				updateWhenKeyAreAvailable = false;
+				update();
+			}
 		}
 
 		if(o == this.transfer) {
