@@ -71,9 +71,8 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 		queueWatcher = (QueueWatcher)core.getPluginManager().getPlugin("thaw.plugins.QueueWatcher");
 
 		queueWatcher.addButtonToTheToolbar(buttonInToolBar);
-
-		/* WARNING: This menu item can't be remove cleanly ... :/ */
 		queueWatcher.addMenuItemToTheDownloadTable(menuItem);
+		queueWatcher.addButtonListener(QueueWatcher.DOWNLOAD_PANEL, this);
 
 		return true;
 	}

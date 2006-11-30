@@ -3,12 +3,14 @@ package thaw.plugins;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import java.awt.GridLayout;
+import java.awt.event.ActionListener;
 import java.util.Vector;
 import java.util.Iterator;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.JButton;
 
 
 import thaw.core.*;
@@ -22,7 +24,10 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 	//private JPanel mainPanel;
 	private JSplitPane mainPanel;
 
+	public final static int DOWNLOAD_PANEL = 0;
+	public final static int INSERTION_PANEL = 1;
 	private QueuePanel[] queuePanels = new QueuePanel[2];
+
 	private DetailPanel detailPanel;
 	private DragAndDropManager dnd;
 
@@ -48,8 +53,8 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 
 		this.detailPanel = new DetailPanel(core);
 
-		queuePanels[0] = new QueuePanel(core, detailPanel, false); /* download */
-		queuePanels[1] = new QueuePanel(core, detailPanel, true); /* upload */
+		queuePanels[DOWNLOAD_PANEL] = new QueuePanel(core, detailPanel, false); /* download */
+		queuePanels[INSERTION_PANEL] = new QueuePanel(core, detailPanel, true); /* upload */
 
 		split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 				       queuePanels[0].getPanel(),
@@ -104,6 +109,13 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 		stateChanged(null);
 
 		return true;
+	}
+
+	/**
+	 * @param panel see DOWNLOAD_PANEL and INSERTION_PANEL
+	 */
+	public void addButtonListener(int panel, ActionListener listener) {
+		queuePanels[panel].getButton().addActionListener(listener);
 	}
 
 

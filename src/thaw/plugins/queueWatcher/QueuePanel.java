@@ -3,11 +3,13 @@ package thaw.plugins.queueWatcher;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JLabel;
+import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.JProgressBar;
 import javax.swing.JFileChooser;
 import javax.swing.SwingConstants;
 
+import java.awt.Dimension;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.util.Vector;
@@ -43,7 +45,7 @@ import thaw.fcp.*;
 public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	private Core core;
 
-	private JLabel label;
+	private JButton button;
 
 	private JTable table = null;
 	private JScrollPane scrollPane = null;
@@ -92,19 +94,26 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		header.setReorderingAllowed(true);
 
 		if(isForInsertionQueue) {
-			this.label = new JLabel(I18n.getMessage("thaw.common.insertions"));
-			this.label.setIcon(IconBox.insertions);
+			button = new JButton(I18n.getMessage("thaw.common.insertions"));
+			button.setIcon(IconBox.insertions);
 		} else {
-			this.label = new JLabel(I18n.getMessage("thaw.common.downloads"));
-			this.label.setIcon(IconBox.downloads);
+			button = new JButton(I18n.getMessage("thaw.common.downloads"));
+			button.setIcon(IconBox.downloads);
 		}
 
-		this.label.setVerticalAlignment(SwingConstants.CENTER);
+		button.setVerticalAlignment(SwingConstants.CENTER);
+		button.setHorizontalAlignment(SwingConstants.LEFT);
+		button.setPreferredSize(new Dimension(190, 40));
+
+		JPanel buttonPanel = new JPanel(new BorderLayout());
+		buttonPanel.add(button, BorderLayout.EAST);
+		buttonPanel.add(new JLabel(""), BorderLayout.CENTER);
 
 		this.panel = new JPanel();
 		this.panel.setLayout(new BorderLayout());
 
-		this.panel.add(this.label, BorderLayout.NORTH);
+		this.panel.add(buttonPanel, BorderLayout.NORTH);
+
 		this.scrollPane = new JScrollPane(this.table);
 		this.panel.add(this.scrollPane, BorderLayout.CENTER);
 
@@ -178,6 +187,10 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 	public void addMenuItem(JMenuItem item) {
 		rightClickMenu.insert(item, 0);
+	}
+
+	public JButton getButton() {
+		return button;
 	}
 
 
