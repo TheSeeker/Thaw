@@ -80,16 +80,21 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 			panelAdded = split;
 		}
 
+		split.setSize(MainWindow.DEFAULT_SIZE_X - 150, MainWindow.DEFAULT_SIZE_Y - 150);
+		split.setResizeWeight(0.5);
+
 		setMainWindow(core.getMainWindow());
 		core.getMainWindow().getTabbedPane().addChangeListener(this);
 		core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"),
 					    IconBox.minQueue,
 					    panelAdded);
 
+		split.setResizeWeight(0.5);
+
 		if (core.getConfig().getValue("queuePanelSplitLocation") == null) {
-			split.setDividerLocation((MainWindow.DEFAULT_SIZE_Y - 150)/2); /* approximation */
+			split.setDividerLocation(((double)0.5));
 		} else {
-			split.setDividerLocation(Integer.parseInt(core.getConfig().getValue("queuePanelSplitLocation")));
+			split.setDividerLocation(Double.parseDouble(core.getConfig().getValue("queuePanelSplitLocation")));
 		}
 
 		split.setResizeWeight(0.5);
@@ -105,8 +110,12 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 	public boolean stop() {
 		Logger.info(this, "Stopping plugin \"QueueWatcher\" ...");
 
+		double splitLocation;
+
+		splitLocation = ((double)split.getDividerLocation() - ((double)split.getMinimumDividerLocation())) / (((double)split.getMaximumDividerLocation()) - ((double)split.getMinimumDividerLocation())); 
+
 		core.getConfig().setValue("queuePanelSplitLocation",
-					  Integer.toString(split.getDividerLocation()));
+					  Double.toString(splitLocation));
 
 		this.core.getConfig().setValue("detailPanelFolded", ((new Boolean(this.folded)).toString()));
 		this.core.getMainWindow().removeTab(this.panelAdded);
