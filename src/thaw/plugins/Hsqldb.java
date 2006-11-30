@@ -54,7 +54,7 @@ public class Hsqldb extends LibraryPlugin {
 		Logger.info(this, "Connecting to the database ...");
 
 		if(this.core.getConfig().getValue("hsqldb.url") == null)
-			this.core.getConfig().setValue("hsqldb.url", "jdbc:hsqldb:file:thaw.db");
+			this.core.getConfig().setValue("hsqldb.url", "jdbc:hsqldb:file:thaw.db;shutdown=true");
 
 		try {
 			this.connect();
