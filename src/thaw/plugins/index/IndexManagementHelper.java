@@ -261,6 +261,12 @@ public class IndexManagementHelper {
 			else
 				keys[1] = null;
 
+			if (keys[0].equals("USK@"))
+				return null;
+
+			if (keys[1].equals("SSK@"))
+				keys[1] = null;
+
 			return keys;
 		}
 
@@ -306,6 +312,9 @@ public class IndexManagementHelper {
 
 		publicKey = FreenetURIHelper.cleanURI(publicKey);
 		privateKey = FreenetURIHelper.cleanURI(privateKey);
+
+		if (publicKey == null)
+			return;
 
 		String name = Index.getNameFromKey(publicKey);
 
