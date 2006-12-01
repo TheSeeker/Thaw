@@ -233,8 +233,9 @@ public class IndexManagementHelper {
 			cancelButton.addActionListener(this);
 			okButton.addActionListener(this);
 
-			subPanelC.add(cancelButton);
 			subPanelC.add(okButton);
+			subPanelC.add(cancelButton);
+
 			frame.getContentPane().add(subPanelC, BorderLayout.SOUTH);
 
 			frame.setSize(700, 100);
