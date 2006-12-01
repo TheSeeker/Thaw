@@ -142,7 +142,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		tree.setCellRenderer(treeRenderer);
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-
+		tree.setExpandsSelectedPaths(true);
 
 		// Menus :
 
@@ -287,7 +287,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 
 	public JTree getTree() {
-		return this.tree;
+		return tree;
 	}
 
 	public IndexCategory getRoot() {

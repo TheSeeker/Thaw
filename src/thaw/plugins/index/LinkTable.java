@@ -18,6 +18,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JLabel;
 
+import javax.swing.tree.TreePath;
+
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -191,6 +193,8 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 				Logger.notice(this, "Cannot find again the parent ?! Id: "+Integer.toString(link.getParentId()));
 				return;
 			}
+
+			indexTree.getTree().setSelectionPath(new TreePath(parent.getTreeNode().getPath()));
 
 			tables.setList(parent);
 

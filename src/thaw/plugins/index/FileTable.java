@@ -23,6 +23,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JProgressBar;
 import javax.swing.JLabel;
 
+import javax.swing.tree.TreePath;
+
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -218,6 +220,8 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 				Logger.notice(this, "Cannot find again the parent ?! Id: "+Integer.toString(file.getParentId()));
 				return;
 			}
+
+			tree.getTree().setSelectionPath(new TreePath(parent.getTreeNode().getPath()));
 
 			tables.setList(parent);
 
