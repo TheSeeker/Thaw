@@ -475,9 +475,13 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				st.setString(4, this.privateKey);
 			else
 				st.setNull(4, Types.VARCHAR);
-			st.setInt(5, this.treeNode.getParent().getIndex(this.treeNode));
 
-			st.setInt(6, this.revision);
+			if (treeNode != null && treeNode.getParent() != null)
+				st.setInt(5, treeNode.getParent().getIndex(treeNode));
+			else
+				st.setInt(5, 0);
+
+			st.setInt(6, revision);
 
 			if( ((IndexTreeNode)this.treeNode.getParent()).getId() < 0)
 				st.setNull(7, Types.INTEGER);
@@ -611,8 +615,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 					save();
 
-					this.setChanged();
-					this.notifyObservers();
+					setChanged();
+					notifyObservers();
 				}
 
 			}

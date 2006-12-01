@@ -175,10 +175,10 @@ public class IndexManagementHelper {
 
 		Index index = new Index(db, queueManager, -2, target, name, name, publicKey, null, 0, null);
 
-		if (tree.addToIndexCategory(target, index))
+		if (tree.addToIndexCategory(target, index)) {
 			index.create();
-
-		index.updateFromFreenet(-1);
+			index.updateFromFreenet(-1);
+		}
 	}
 
 
