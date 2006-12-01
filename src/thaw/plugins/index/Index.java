@@ -300,7 +300,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 				this.revision++;
 
-				clientPut = new FCPClientPut(this.targetFile, 2, this.revision, this.toString(), this.privateKey, 2, true, 0);
+				clientPut = new FCPClientPut(this.targetFile, 2, this.revision, realName, this.privateKey, 2, true, 0);
 				this.transfer = clientPut;
 				clientPut.addObserver(this);
 
