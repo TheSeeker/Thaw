@@ -89,6 +89,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		this.realName = realName.trim();
 		this.displayName = displayName.trim();
 
+		if (realName == null)
+			realName = displayName;
+
+		if (displayName == null)
+			displayName = realName;
+
 		if (privateKey != null)
 			this.privateKey = privateKey.trim();
 		else
@@ -272,7 +278,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		else
 			tmpdir = tmpdir + java.io.File.separator;
 
-		this.targetFile = new java.io.File(tmpdir + this.toString()+".xml");
+		targetFile = new java.io.File(tmpdir + realName +".xml");
 
 		if (this.transfer != null) {
 			Logger.notice(this, "A transfer is already running");
@@ -969,7 +975,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		Element header = xmlDoc.createElement("header");
 
 		Element title = xmlDoc.createElement("title");
-		Text titleText = xmlDoc.createTextNode(this.toString());
+		Text titleText = xmlDoc.createTextNode(displayName);
 		title.appendChild(titleText);
 
 		Element owner = xmlDoc.createElement("owner");
