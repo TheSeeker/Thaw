@@ -70,8 +70,8 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 				this.id = 0;
 			}
 
-			st = c.prepareStatement("INSERT INTO indexCategories (id, name, positionInTree, parent) "+
-								  "VALUES (?, ?,?,?)");
+			st = c.prepareStatement("INSERT INTO indexCategories (id, name, positionInTree, parent, modifiableIndexes) "+
+								  "VALUES (?, ?,?,?, true)");
 
 			st.setInt(1, this.id);
 			st.setString(2, this.name);

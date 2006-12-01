@@ -580,7 +580,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 					else
 						revision = FreenetURIHelper.getUSKRevision(transfer.getFileKey());
 
-					Logger.info(this, "Most up-to-date key found: " + publicKey);
+					Logger.info(this, "Most up-to-date key found: " + getPublicKey());
 
 
 					/* Reminder: These requests are non-peristent */
