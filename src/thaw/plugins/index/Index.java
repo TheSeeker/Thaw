@@ -60,8 +60,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	private String author = null;
 
 	private boolean rewriteKey = true;
-
 	private boolean xmlParserReady = false;
+	private boolean changed = false;
 
 	private FCPClientPut publicKeyRecalculation = null;
 
@@ -312,8 +312,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				Logger.warning(this, "Index not generated !");
 			}
 
-			this.setChanged();
-			this.notifyObservers();
+			setChanged();
+			notifyObservers();
 		} else {
 			this.updateFromFreenet(-1);
 		}
@@ -575,13 +575,17 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				if (this.transfer instanceof FCPClientGet) {
 					((FCPClientGet)this.transfer).deleteObserver(this);
 
+					int oldRevision = revision;
+
 					if (rewriteKey)
 						publicKey = transfer.getFileKey();
-					else
-						revision = FreenetURIHelper.getUSKRevision(transfer.getFileKey());
+
+					revision = FreenetURIHelper.getUSKRevision(transfer.getFileKey());
 
 					Logger.info(this, "Most up-to-date key found: " + getPublicKey());
 
+					if (oldRevision < revision)
+						changed = true;
 
 					/* Reminder: These requests are non-peristent */
 					//if (this.transfer.stop(this.queueManager))
@@ -622,6 +626,16 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			this.setChanged();
 			this.notifyObservers(o);
 		}
+	}
+
+
+	public boolean hasChanged() {
+		return changed;
+	}
+
+
+	public void setChanged(boolean val) {
+		changed = val;
 	}
 
 
@@ -673,8 +687,9 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			Logger.error(this, "Unable to get the file list for index: '"+this.toString()+"' because: "+e.toString());
 		}
 
-		this.setChanged();
-		this.notifyObservers();
+		setChanged(false); /* java.util.Index */
+		setChanged(); /* java.util.Observer */
+		notifyObservers();
 	}
 
 	/**
@@ -868,7 +883,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			Logger.error(this, "Unable to get the link list for index: '"+this.toString()+"' because: "+e.toString());
 		}
 
-		setChanged();
+		setChanged(false); /* Index */
+		setChanged();      /* java.util.Observable */
 		notifyObservers();
 
 	}

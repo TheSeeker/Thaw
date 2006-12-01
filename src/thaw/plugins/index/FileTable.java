@@ -167,6 +167,9 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 
 	public void mouseClicked(MouseEvent e) {
+		if (fileList instanceof Index)
+			((Index)fileList).setChanged(false);
+
 		if(e.getButton() == MouseEvent.BUTTON3
 		   && fileList != null) {
 			selectedRows = table.getSelectedRows();

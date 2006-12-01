@@ -138,6 +138,9 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 	}
 
 	public void mouseClicked(MouseEvent e) {
+		if (linkList instanceof Index)
+			((Index)linkList).setChanged(false);
+
 		if(e.getButton() == MouseEvent.BUTTON3
 		   && this.linkList != null) {
 			selectedRows = table.getSelectedRows();

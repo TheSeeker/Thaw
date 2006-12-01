@@ -62,4 +62,5 @@ public interface IndexTreeNode {
 	public void addObserver(java.util.Observer o);
 
 	public boolean isModifiable();
+	public boolean hasChanged();
 }

@@ -420,8 +420,7 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 	/**
 	 * Returns true only if all its child are modifiable
 	 */
-	public boolean isModifiable()
-	{
+	public boolean isModifiable() {
 		if(children == null)
 			children = loadChildren();
 
@@ -433,6 +432,21 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 		}
 
 		return true;
+	}
+
+
+	public boolean hasChanged() {
+		if(children == null)
+			children = loadChildren();
+
+		for(Iterator it = children.iterator();
+		    it.hasNext();) {
+			IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
+			if (node.hasChanged())
+				return true;
+		}
+
+		return false;
 	}
 
 

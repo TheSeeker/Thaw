@@ -12,6 +12,8 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
+import java.awt.Font;
+
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -394,8 +396,9 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 								       boolean leaf,
 								       int row,
 								       boolean hasFocus) {
-			this.setBackgroundNonSelectionColor(Color.WHITE);
-			this.setBackgroundSelectionColor(SELECTION_COLOR);
+			setBackgroundNonSelectionColor(Color.WHITE);
+			setBackgroundSelectionColor(SELECTION_COLOR);
+			setFont(new Font("Dialog", Font.PLAIN, 12));
 
 			if(value instanceof DefaultMutableTreeNode) {
 				Object o = ((DefaultMutableTreeNode)value).getUserObject();
@@ -403,10 +406,14 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 				if(o instanceof Index) {
 					Index index = (Index)o;
 
-					if(index.isUpdating()) {
-						this.setBackgroundNonSelectionColor(LOADING_COLOR);
-						this.setBackgroundSelectionColor(LOADING_SELECTION_COLOR);
+					if (index.isUpdating()) {
+						setBackgroundNonSelectionColor(LOADING_COLOR);
+						setBackgroundSelectionColor(LOADING_SELECTION_COLOR);
 					}
+				}
+
+				if (((IndexTreeNode)o).hasChanged()) {
+					setFont(new Font("Dialog", Font.BOLD, 12));
 				}
 			}
 
