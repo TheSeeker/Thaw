@@ -117,6 +117,10 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		this.setTransfer();
 	}
 
+	public static boolean isDumbKey(String key) {
+		return (key == null || key.equals("") || key.length() < 20);
+	}
+
 	public void setParent(IndexCategory parent) {
 		this.parent = parent;
 	}
@@ -134,8 +138,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	}
 
 	public void generateKeys() {
-		publicKey = null;
-		privateKey = null;
+		publicKey = "";
+		privateKey = "";
 
 		sskGenerator = new FCPGenerateSSK();
 		sskGenerator.addObserver(this);
@@ -198,23 +202,27 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			Connection c = this.db.getConnection();
 			PreparedStatement st;
 
-			if(privateKey == null) {
+			//if(privateKey == null) {
 				st = c.prepareStatement("UPDATE indexes SET displayName = ? WHERE id = ?");
 				st.setString(1, name);
 				st.setInt(2, this.id);
+			/*
 			} else {
 				st = c.prepareStatement("UPDATE indexes SET displayName = ?, originalName = ? WHERE id = ?");
 				st.setString(1, name);
 				st.setString(2, name);
 				st.setInt(3, this.id);
 			}
+			*/
 
 			st.execute();
 
 			this.displayName = name;
 
+			/*
 			if(privateKey != null)
 				this.realName = name;
+			*/
 
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to rename the index '"+this.displayName+"' in '"+name+"', because: "+e.toString());
@@ -248,10 +256,10 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 
 	public void update() {
-		if (publicKey != null && privateKey == null) /* non modifiable */
+		if (!isDumbKey(publicKey) && isDumbKey(privateKey)) /* non modifiable */
 			return;
 
-		if (publicKey == null && privateKey == null) {
+		if (isDumbKey(publicKey) && isDumbKey(privateKey)) {
 			generateKeys();
 			updateWhenKeyAreAvailable = true;
 			return;
@@ -485,8 +493,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	}
 
 	public String getPublicKey() {
-		if (publicKey == null)
-			return publicKey;
+		if (publicKey == null || isDumbKey(publicKey))
+			return null;
 
 		if (publicKey.startsWith("SSK@")) { /* as it should when privateKey is known */
 			if (publicKey.endsWith("/"))
@@ -498,6 +506,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	}
 
 	public String getPrivateKey() {
+		if (privateKey == null || isDumbKey(privateKey))
+			return null;
 		return privateKey;
 	}
 
