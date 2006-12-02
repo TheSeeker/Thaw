@@ -21,6 +21,7 @@ import java.awt.datatransfer.StringSelection;
 
 import thaw.fcp.*;
 
+
 public class FileManagementHelper {
 	/**
 	 * Class implementing IndexAction will automatically do an addActionListener if necessary
@@ -272,6 +273,8 @@ public class FileManagementHelper {
 
 		public PublicKeyCopier(AbstractButton actionSource) {
 			src = actionSource;
+			if (src != null)
+				src.addActionListener(this);
 		}
 
 		public void setTarget(Vector targets) {
