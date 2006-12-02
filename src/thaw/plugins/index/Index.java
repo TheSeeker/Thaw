@@ -95,28 +95,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		if (displayName == null)
 			displayName = realName;
 
-		if (privateKey != null)
-			this.privateKey = privateKey.trim();
-		else
-			this.privateKey = null;
-
-		if (publicKey != null)
-			this.publicKey = publicKey.trim();
-		else
-			this.publicKey = null;
-
-
-		if (privateKey != null && publicKey != null && publicKey.startsWith("USK@")) {
-			String[] split = FreenetURIHelper.convertUSKtoSSK(publicKey).split("/");
-			publicKey = split[0];
-		}
-
-		if (publicKey != null && publicKey.startsWith("USK@"))
-			this.revision = FreenetURIHelper.getUSKRevision(publicKey);
-		else
-			this.revision = revision;
+		this.revision = revision;
 
 		this.author = author;
+
+		setPrivateKey(privateKey);
+		setPublicKey(publicKey);
 
 		this.treeNode.setUserObject(this);
 
@@ -144,8 +128,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	}
 
 	public void generateKeys() {
-		publicKey = "";
-		privateKey = "";
+		publicKey = null;
+		privateKey = null;
 
 		sskGenerator = new FCPGenerateSSK();
 		sskGenerator.addObserver(this);
@@ -176,8 +160,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			st.setInt(1, this.id);
 			st.setString(2, this.realName);
 			st.setString(3, this.displayName);
-			st.setString(4, this.publicKey);
-			st.setString(5, this.privateKey);
+			st.setString(4, publicKey != null ? publicKey : "");
+			st.setString(5, privateKey);
 			st.setString(6, this.author);
 			st.setInt(7, 0);
 
@@ -208,27 +192,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			Connection c = this.db.getConnection();
 			PreparedStatement st;
 
-			//if(privateKey == null) {
-				st = c.prepareStatement("UPDATE indexes SET displayName = ? WHERE id = ?");
-				st.setString(1, name);
-				st.setInt(2, this.id);
-			/*
-			} else {
-				st = c.prepareStatement("UPDATE indexes SET displayName = ?, originalName = ? WHERE id = ?");
-				st.setString(1, name);
-				st.setString(2, name);
-				st.setInt(3, this.id);
-			}
-			*/
-
+			st = c.prepareStatement("UPDATE indexes SET displayName = ? WHERE id = ?");
+			st.setString(1, name);
+			st.setInt(2, this.id);
 			st.execute();
 
 			this.displayName = name;
-
-			/*
-			if(privateKey != null)
-				this.realName = name;
-			*/
 
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to rename the index '"+this.displayName+"' in '"+name+"', because: "+e.toString());
@@ -328,6 +297,11 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	public void updateFromFreenet(int rev) {
 		FCPClientGet clientGet;
+
+		if (publicKey == null) {
+			Logger.error(this, "No public key !! Can't get the index !");
+			return;
+		}
 
 		Logger.info(this, "Getting lastest version ...");
 
@@ -470,9 +444,9 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 			st.setString(1, this.realName);
 			st.setString(2, this.displayName);
-			st.setString(3, this.publicKey);
+			st.setString(3, publicKey != null ? publicKey : "");
 			if(this.privateKey != null)
-				st.setString(4, this.privateKey);
+				st.setString(4, privateKey);
 			else
 				st.setNull(4, Types.VARCHAR);
 
@@ -515,10 +489,36 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			return publicKey;
 	}
 
+	/**
+	 * Always set the privateKey first
+	 */
+	public void setPublicKey(String key) {
+		if (key != null && !isDumbKey(key))
+			this.publicKey = key.trim();
+		else
+			this.publicKey = null;
+
+
+		if (privateKey != null && publicKey != null && publicKey.startsWith("USK@")) {
+			String[] split = FreenetURIHelper.convertUSKtoSSK(publicKey).split("/");
+			publicKey = split[0];
+		}
+
+		if (publicKey != null && publicKey.startsWith("USK@"))
+			this.revision = FreenetURIHelper.getUSKRevision(publicKey);
+	}
+
 	public String getPrivateKey() {
 		if (privateKey == null || isDumbKey(privateKey))
 			return null;
 		return privateKey;
+	}
+
+	public void setPrivateKey(String key) {
+		if (key != null && !isDumbKey(key))
+			privateKey = key.trim();
+		else
+			privateKey = null;
 	}
 
 	public String toString() {
@@ -550,10 +550,16 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			Logger.debug(this, "Index public key: " +publicKey);
 			Logger.debug(this, "Index private key: "+privateKey);
 
+			revision = 0;
+
 			if (updateWhenKeyAreAvailable) {
 				updateWhenKeyAreAvailable = false;
 				update();
 			}
+
+			setChanged();
+			notifyObservers();
+			return;
 		}
 
 		if(o == this.transfer) {

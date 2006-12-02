@@ -131,8 +131,7 @@ public class IndexManagementHelper {
 		Index index = new Index(db, queueManager, -1, target, name, name, null, null, 0, null);
 
 		index.generateKeys();
-
-		index.create(); /* TODO : To Check: can it be create without publicKey ? */
+		index.create();
 
 		tree.addToIndexCategory(target, index);
 	}
@@ -183,29 +182,41 @@ public class IndexManagementHelper {
 
 
 
-	public static class IndexReuser extends BasicIndexAction implements Runnable {
+	public static class KeyAsker implements ActionListener {
 		private JButton okButton;
 		private JButton cancelButton;
 		private int formState;
 
-		public IndexReuser(Hsqldb db, FCPQueueManager queueManager, IndexTree tree, AbstractButton actionSource) {
-			super(db, queueManager, tree, actionSource);
+		public KeyAsker() {
 		}
 
-		public void setTarget(IndexTreeNode node) {
-			super.setTarget(node);
-			getActionSource().setEnabled(node == null || node instanceof IndexCategory);
+
+		/**
+		 * @return String[0] == publicKey ; String[1] == privateKey ; public or private are null if unchanged
+		 */
+		public static String[] askKeys(boolean askPrivateKey,
+					       String defaultPublicKey,
+					       String defaultPrivateKey) {
+			return ((new KeyAsker()).askKeysBis(askPrivateKey, defaultPublicKey, defaultPrivateKey));
 		}
 
-		protected String[] askKeys(boolean askPrivateKey) {
+		public String[] askKeysBis(boolean askPrivateKey,
+					String defaultPublicKey,
+					String defaultPrivateKey) {
 			formState = 0;
+
+			if (defaultPublicKey == null)
+				defaultPublicKey = "USK@";
+
+			if (defaultPrivateKey == null)
+				defaultPrivateKey = "SSK@";
 
 			JFrame frame = new JFrame(I18n.getMessage("thaw.plugin.index.indexKey"));
 
 			frame.getContentPane().setLayout(new BorderLayout());
 
-			JTextField publicKeyField = new JTextField("USK@");
-			JTextField privateKeyField = new JTextField("SSK@");
+			JTextField publicKeyField = new JTextField(defaultPublicKey);
+			JTextField privateKeyField = new JTextField(defaultPrivateKey);
 
 			JPanel subPanelA = new JPanel(); /* left => labels */
 			JPanel subPanelB = new JPanel(); /* right => textfield */
@@ -262,13 +273,65 @@ public class IndexManagementHelper {
 			else
 				keys[1] = null;
 
-			if (keys[0].equals("USK@"))
+			if (keys[0] == null || keys[0].length() < 20)
 				return null;
 
-			if (keys[1].equals("SSK@"))
+			if (keys[1] == null || keys[1].length() < 20)
 				keys[1] = null;
 
 			return keys;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			if (e.getSource() == okButton) {
+				formState = 1;
+			}
+
+			if (e.getSource() == cancelButton) {
+				formState = 2;
+			}
+		}
+	}
+
+	public static class IndexKeyModifier extends BasicIndexAction implements Runnable {
+		public IndexKeyModifier(AbstractButton actionSource) {
+			super(null, null, null, actionSource);
+		}
+
+		public void setTarget(IndexTreeNode node) {
+			super.setTarget(node);
+			getActionSource().setEnabled(node != null || node instanceof Index);
+		}
+
+		public void run() {
+			Index index = ((Index)getTarget());
+
+			String[] keys = KeyAsker.askKeys(true, index.getPublicKey(), index.getPrivateKey());
+
+			if (keys == null)
+				return;
+
+			index.setPrivateKey(keys[1]);
+			index.setPublicKey(keys[0]);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			if (e.getSource() == getActionSource()) {
+				Thread th = new Thread(this);
+				th.start();
+			}
+		}
+	}
+
+
+	public static class IndexReuser extends BasicIndexAction implements Runnable {
+		public IndexReuser(Hsqldb db, FCPQueueManager queueManager, IndexTree tree, AbstractButton actionSource) {
+			super(db, queueManager, tree, actionSource);
+		}
+
+		public void setTarget(IndexTreeNode node) {
+			super.setTarget(node);
+			getActionSource().setEnabled(node == null || node instanceof IndexCategory);
 		}
 
 		public void run() {
@@ -276,7 +339,7 @@ public class IndexManagementHelper {
 			String publicKey = null;
 			String privateKey = null;
 
-			keys = askKeys(true);
+			keys = KeyAsker.askKeys(true, "USK@", "SSK@");
 
 			if (keys == null)
 				return;
@@ -291,14 +354,6 @@ public class IndexManagementHelper {
 			if (e.getSource() == getActionSource()) {
 				Thread newThread = new Thread(this);
 				newThread.start();
-			}
-
-			if (e.getSource() == okButton) {
-				formState = 1;
-			}
-
-			if (e.getSource() == cancelButton) {
-				formState = 2;
 			}
 		}
 	}

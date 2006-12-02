@@ -159,7 +159,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 	}
 
 	public String getPublicKey() {
-		return this.publicKey;
+		return publicKey;
 	}
 
 	public void setPublicKey(String publicKey) {
@@ -232,7 +232,10 @@ public class File extends java.util.Observable implements java.util.Observer {
 		if (publicKey != null || fileName != null) {
 			FCPTransferQuery trans;
 
-			trans = queueManager.getTransfer(publicKey);
+			if (getPublicKey() == null)
+				trans = queueManager.getTransfer(getFilename());
+			else
+				trans = queueManager.getTransfer(getPublicKey());
 
 			if (trans == null) {
 				trans = queueManager.getTransferByFilename(fileName);
