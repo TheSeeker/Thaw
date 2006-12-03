@@ -178,7 +178,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 					this.lastId = id;
 				}
 			} catch(Exception e) {
-				Logger.notice(this, "Exception while parsing previous Id. Not really a problem");
+				Logger.notice(this, "Exception while parsing previous Id (Not really a problem)");
 			}
 		}
 
@@ -501,8 +501,12 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 
 			try {
 				if(this.queryManager.getConnection().isConnected()
-				   && !this.queryManager.getConnection().isWritingLocked())
+				   && !this.queryManager.getConnection().isWritingLocked()
+				   && queueCompleted) {
+
 					this.schedule();
+
+				}
 			} catch(java.util.ConcurrentModificationException e) {
 				Logger.notice(this, "Ordonnancor: Collision !");
 			} catch(Exception e) {
