@@ -384,9 +384,11 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		    && (param == null) ) {
 			Index index = (Index)o;
 
-			this.treeModel.nodeChanged(index.getTreeNode());
-			if(index.getTreeNode().getParent() != null)
-				this.treeModel.nodeChanged(index.getTreeNode().getParent());
+			if (treeModel != null) {
+				treeModel.nodeChanged(index.getTreeNode());
+				if(index.getTreeNode().getParent() != null)
+					treeModel.nodeChanged(index.getTreeNode().getParent());
+			}
 
 		}
 	}
