@@ -54,7 +54,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 	private int[] selectedRows;
 
-	public LinkTable (Hsqldb db, FCPQueueManager queueManager, IndexTree tree, Tables tables) {
+	public LinkTable (Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uil, IndexTree tree, Tables tables) {
 		this.queueManager = queueManager;
 		this.db = db;
 
@@ -80,7 +80,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addIndexesFromLink"));
 		rightClickMenu.add(item);
-		rightClickActions.add(new LinkManagementHelper.IndexAdder(item, db, queueManager, tree));
+		rightClickActions.add(new LinkManagementHelper.IndexAdder(item, db, queueManager, uil, tree));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKeys"));
 		rightClickMenu.add(item);

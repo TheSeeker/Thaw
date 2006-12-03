@@ -22,14 +22,14 @@ public class Tables {
 	private JSplitPane split;
 	private Config config;
 
-	public Tables(boolean modifiables, Hsqldb db, FCPQueueManager queueManager, IndexTree tree, Config config) {
+	public Tables(boolean modifiables, Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uil, IndexTree tree, Config config) {
 		this.config = config;
 
 		this.panel = new JPanel();
 		this.panel.setLayout(new BorderLayout(10, 10));
 
 		this.fileTable = new FileTable(queueManager, tree, config, this);
-		this.linkTable = new LinkTable(db, queueManager, tree, this);
+		this.linkTable = new LinkTable(db, queueManager, uil, tree, this);
 
 		this.searchBar = new SearchBar(db, tree, queueManager, this);
 

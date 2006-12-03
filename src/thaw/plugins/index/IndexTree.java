@@ -102,9 +102,10 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 	private DefaultTreeModel treeModel;
 
+	private UnknownIndexList uIndexList;
+
 	private Hsqldb db;
 	private FCPQueueManager queueManager;
-
 
 	/**
 	 * @param queueManager Not used if selectionOnly is set to true
@@ -112,7 +113,9 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	public IndexTree(String rootName,
 			 boolean selectionOnly,
 			 FCPQueueManager queueManager,
+			 UnknownIndexList uIndexList,
 			 Hsqldb db) {
+		this.uIndexList = uIndexList;
 		this.queueManager = queueManager;
 
 		this.db = db;
@@ -122,7 +125,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		panel.setLayout(new BorderLayout(10, 10));
 
 
-		root = new IndexCategory(db, queueManager, -1, null, rootName);
+		root = new IndexCategory(db, queueManager, uIndexList, -1, null, rootName);
 		root.loadChildren();
 
 		root.addObserver(this);
@@ -167,15 +170,15 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addAlreadyExistingIndex"));
 		indexCategoryMenu.add(item);
-		indexCategoryActions.add(new IndexManagementHelper.IndexReuser(db, queueManager, this, item));
+		indexCategoryActions.add(new IndexManagementHelper.IndexReuser(db, queueManager, uIndexList, this, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addCategory"));
 		indexCategoryMenu.add(item);
-		indexCategoryActions.add(new IndexManagementHelper.IndexCategoryAdder(db, queueManager, this, item));
+		indexCategoryActions.add(new IndexManagementHelper.IndexCategoryAdder(db, queueManager, uIndexList, this, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.createIndex"));
 		indexCategoryMenu.add(item);
-		indexCategoryActions.add(new IndexManagementHelper.IndexCreator(db, queueManager, this, item));
+		indexCategoryActions.add(new IndexManagementHelper.IndexCreator(db, queueManager, uIndexList, this, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.rename"));
 		indexCategoryMenu.add(item);
@@ -338,10 +341,14 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		if(path == null)
 			return;
 
-		this.selectedNode = (IndexTreeNode)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
+		selectedNode = (IndexTreeNode)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
 
-		this.setChanged();
-		this.notifyObservers(this.selectedNode);
+		if (uIndexList != null && selectedNode instanceof Index) {
+			uIndexList.addLinks(((Index)selectedNode));
+		}
+
+		setChanged();
+		notifyObservers(this.selectedNode);
 	}
 
 	public IndexTreeNode getSelectedNode() {

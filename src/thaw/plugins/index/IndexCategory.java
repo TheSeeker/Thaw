@@ -24,12 +24,14 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 
 	private Hsqldb db;
 	private FCPQueueManager queueManager;
+	private UnknownIndexList uIndexList;
 
-	public IndexCategory(Hsqldb db, FCPQueueManager queueManager,
+	public IndexCategory(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uil,
 			     int id, IndexCategory parent,
 			     String name) {
 		super(name, true);
 
+		this.uIndexList = uil;
 		this.id = id;
 		this.name = name;
 		this.parent = parent;
@@ -302,7 +304,8 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 
 				String author = result.getString("author");
 
-				Index index = new Index(db, queueManager, id, this,
+				Index index = new Index(db, queueManager, uIndexList,
+							id, this,
 							realName, displayName,
 							publicKey, privateKey,
 							revision,
@@ -344,7 +347,7 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 				int position = result.getInt("positionInTree");
 				String name = result.getString("name");
 
-				IndexCategory cat = new IndexCategory(this.db, this.queueManager, id, this, name);
+				IndexCategory cat = new IndexCategory(this.db, this.queueManager, uIndexList, id, this, name);
 				cat.loadChildren();
 				this.set(children, position, cat);
 			}

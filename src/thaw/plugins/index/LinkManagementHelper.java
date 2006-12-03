@@ -85,18 +85,22 @@ public class LinkManagementHelper {
 		private Hsqldb db;
 		private FCPQueueManager queueManager;
 		private IndexTree tree;
+		private UnknownIndexList uil;
 
 		private AbstractButton src;
 		private Vector t;
 
 		public IndexAdder(AbstractButton actionSource,
-				  Hsqldb db, FCPQueueManager queueManager, IndexTree tree) {
+				  Hsqldb db, FCPQueueManager queueManager,
+				  UnknownIndexList uil,
+				  IndexTree tree) {
 			src = actionSource;
 			if (actionSource != null)
 				actionSource.addActionListener(this);
 			this.db = db;
 			this.queueManager = queueManager;
 			this.tree = tree;
+			this.uil = uil;
 		}
 
 		public void setTarget(Vector targets) {
@@ -108,7 +112,7 @@ public class LinkManagementHelper {
 			for (Iterator it = t.iterator();
 			     it.hasNext(); ) {
 				Link link = (Link)it.next();
-				IndexManagementHelper.addIndex(db, queueManager, tree, null,
+				IndexManagementHelper.addIndex(db, queueManager, uil, tree, null,
 							       link.getPublicKey());
 			}
 		}

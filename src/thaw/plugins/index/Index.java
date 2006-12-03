@@ -53,6 +53,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	private FCPGenerateSSK sskGenerator;
 
 	private FCPQueueManager queueManager;
+	private UnknownIndexList uIndexList;
 
 	private FCPTransferQuery transfer = null;
 	private java.io.File targetFile = null;
@@ -71,12 +72,13 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	 * The bigest constructor of the world ...
 	 * @param revision Ignored if the index is not modifiable (=> deduced from the publicKey)
 	 */
-	public Index(Hsqldb db, FCPQueueManager queueManager,
+	public Index(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList indexList,
 		     int id, IndexCategory parent,
 		     String realName, String displayName,
 		     String publicKey, String privateKey,
 		     int revision,
 		     String author) {
+		this.uIndexList = indexList;
 		this.queueManager = queueManager;
 
 		this.treeNode = new DefaultMutableTreeNode(displayName, false);
@@ -620,6 +622,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 					this.transfer = null;
 
 					save();
+
+					uIndexList.addLinks(this);
 
 					setChanged();
 					notifyObservers();

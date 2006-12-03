@@ -68,6 +68,28 @@ public class Link extends java.util.Observable {
 		return key;
 	}
 
+	public boolean compare(Link l) {
+		if (l == null
+		    || getPublicKey() == null
+		    || l.getPublicKey() == null
+		    || getPublicKey().length() < 40
+		    || l.getPublicKey().length() < 40)
+			return false;
+
+		return (l.getPublicKey().substring(0, 40).equals(getPublicKey().substring(0, 40)));
+	}
+
+	public boolean compare(Index l) {
+		if (l == null
+		    || getPublicKey() == null
+		    || l.getPublicKey() == null
+		    || getPublicKey().length() < 40
+		    || l.getPublicKey().length() < 40)
+			return false;
+
+		return (l.getPublicKey().substring(0, 40).equals(getPublicKey().substring(0, 40)));
+	}
+
 	public void setParent(Index index) {
 		parent = index;
 	}
@@ -84,7 +106,11 @@ public class Link extends java.util.Observable {
 	}
 
 	public String getIndexName() {
-		return this.indexName;
+		return indexName;
+	}
+
+	public String toString() {
+		return getIndexName();
 	}
 
 	public void setIndexKey(String key) {
@@ -140,6 +166,32 @@ public class Link extends java.util.Observable {
 
 	}
 
+	public boolean isIndexAlreadyKnown() {
+		if (key.length() < 40) {
+			Logger.error(this, "Invalid key: "+key);
+			return false;
+		}
+
+		try {
+			PreparedStatement st;
+
+			st = db.getConnection().prepareStatement("SELECT publicKey from indexes WHERE publicKey LIKE ?");
+
+			st.setString(1, key.substring(0, 40)+"%");
+
+			if(st.execute()) {
+				ResultSet result = st.getResultSet();
+				if (result != null && result.next()) {
+					return true;
+				}
+			}
+
+		} catch(SQLException e) {
+			Logger.error(this, "Unable to check if link '"+key+"' point to a know index because: "+e.toString());
+		}
+
+		return false;
+	}
 
 	public boolean isInTheDatabase() {
 		if (this.parent == null) {

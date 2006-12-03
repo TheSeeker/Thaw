@@ -61,15 +61,17 @@ public class IndexManagementHelper {
 		private Hsqldb db;
 		private IndexTree tree;
 		private FCPQueueManager queueManager;
+		private UnknownIndexList uIndexList;
 		private AbstractButton actionSource;
 		private IndexTreeNode target;
 
-		public BasicIndexAction(Hsqldb db, FCPQueueManager queueManager, IndexTree tree, AbstractButton actionSource) {
+		public BasicIndexAction(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uIndexList, IndexTree tree, AbstractButton actionSource) {
 			this.db = db;
 			this.tree = tree;
 			this.actionSource = actionSource;
 			this.target = null;
 			this.queueManager = queueManager;
+			this.uIndexList = uIndexList;
 			actionSource.addActionListener(this);
 		}
 
@@ -90,6 +92,10 @@ public class IndexManagementHelper {
 			return queueManager;
 		}
 
+		public UnknownIndexList getUnknownIndexList() {
+			return uIndexList;
+		}
+
 		public IndexTreeNode getTarget() {
 			return target;
 		}
@@ -104,8 +110,8 @@ public class IndexManagementHelper {
 
 
 	public static class IndexCreator extends BasicIndexAction {
-		public IndexCreator(Hsqldb db, FCPQueueManager queueManager, IndexTree tree, AbstractButton actionSource) {
-			super(db, queueManager, tree, actionSource);
+		public IndexCreator(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uIndexList, IndexTree tree, AbstractButton actionSource) {
+			super(db, queueManager, uIndexList, tree, actionSource);
 		}
 
 		public void setTarget(IndexTreeNode node) {
@@ -120,15 +126,15 @@ public class IndexManagementHelper {
 			if (name == null)
 				return;
 
-			createIndex(getDb(), getQueueManager(), getTree(), (IndexCategory)getTarget(), name);
+			createIndex(getDb(), getQueueManager(), getUnknownIndexList(), getTree(), (IndexCategory)getTarget(), name);
 		}
 	}
 
-	public static void createIndex(Hsqldb db, FCPQueueManager queueManager, IndexTree tree, IndexCategory target, String name) {
+	public static void createIndex(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uIndexList, IndexTree tree, IndexCategory target, String name) {
 		if (target == null)
 			target = tree.getRoot();
 
-		Index index = new Index(db, queueManager, -1, target, name, name, null, null, 0, null);
+		Index index = new Index(db, queueManager, uIndexList, -1, target, name, name, null, null, 0, null);
 
 		index.generateKeys();
 		index.create();
@@ -138,8 +144,8 @@ public class IndexManagementHelper {
 
 
 	public static class IndexAdder extends BasicIndexAction {
-		public IndexAdder(Hsqldb db, FCPQueueManager queueManager, IndexTree tree, AbstractButton actionSource) {
-			super(db, queueManager, tree, actionSource);
+		public IndexAdder(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList indexList, IndexTree tree, AbstractButton actionSource) {
+			super(db, queueManager, indexList, tree, actionSource);
 		}
 
 		public void setTarget(IndexTreeNode node) {
@@ -150,7 +156,7 @@ public class IndexManagementHelper {
 		public void actionPerformed(ActionEvent e) {
 			String key = askAName(I18n.getMessage("thaw.plugin.index.indexKey"), "USK@");
 
-			addIndex(getDb(), getQueueManager(), getTree(), (IndexCategory)getTarget(), key);
+			addIndex(getDb(), getQueueManager(), getUnknownIndexList(), getTree(), (IndexCategory)getTarget(), key);
 		}
 	}
 
@@ -158,7 +164,7 @@ public class IndexManagementHelper {
 	/**
 	 * Can be use directly
 	 */
-	public static void addIndex(Hsqldb db, FCPQueueManager queueManager, IndexTree tree, IndexCategory target, String publicKey) {
+	public static void addIndex(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList indexList, IndexTree tree, IndexCategory target, String publicKey) {
 		publicKey = FreenetURIHelper.cleanURI(publicKey);
 
 		if (publicKey == null)
@@ -172,12 +178,14 @@ public class IndexManagementHelper {
 		if (target == null)
 			target = tree.getRoot();
 
-		Index index = new Index(db, queueManager, -2, target, name, name, publicKey, null, 0, null);
+		Index index = new Index(db, queueManager, indexList, -2, target, name, name, publicKey, null, 0, null);
 
 		if (tree.addToIndexCategory(target, index)) {
 			index.create();
 			index.updateFromFreenet(-1);
 		}
+
+		indexList.removeLink(index);
 	}
 
 
@@ -295,7 +303,7 @@ public class IndexManagementHelper {
 
 	public static class IndexKeyModifier extends BasicIndexAction implements Runnable {
 		public IndexKeyModifier(AbstractButton actionSource) {
-			super(null, null, null, actionSource);
+			super(null, null, null, null, actionSource);
 		}
 
 		public void setTarget(IndexTreeNode node) {
@@ -325,8 +333,8 @@ public class IndexManagementHelper {
 
 
 	public static class IndexReuser extends BasicIndexAction implements Runnable {
-		public IndexReuser(Hsqldb db, FCPQueueManager queueManager, IndexTree tree, AbstractButton actionSource) {
-			super(db, queueManager, tree, actionSource);
+		public IndexReuser(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uIndexList, IndexTree tree, AbstractButton actionSource) {
+			super(db, queueManager, uIndexList, tree, actionSource);
 		}
 
 		public void setTarget(IndexTreeNode node) {
@@ -347,7 +355,7 @@ public class IndexManagementHelper {
 			publicKey = keys[0];
 			privateKey = keys[1];
 
-			reuseIndex(getDb(), getQueueManager(), getTree(), (IndexCategory)getTarget(), publicKey, privateKey);
+			reuseIndex(getDb(), getQueueManager(), getUnknownIndexList(), getTree(), (IndexCategory)getTarget(), publicKey, privateKey);
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -363,7 +371,7 @@ public class IndexManagementHelper {
 	 * Can be use directly
 	 * @param privateKey Can be null
 	 */
-	public static void reuseIndex(Hsqldb db, FCPQueueManager queueManager, IndexTree tree, IndexCategory target,
+	public static void reuseIndex(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uIndexList, IndexTree tree, IndexCategory target,
 				      String publicKey, String privateKey) {
 
 		publicKey = FreenetURIHelper.cleanURI(publicKey);
@@ -381,7 +389,7 @@ public class IndexManagementHelper {
 		else
 			parent = tree.getRoot();
 
-		Index index = new Index(db, queueManager, -2, parent, name, name, publicKey, privateKey, 0, null);
+		Index index = new Index(db, queueManager, uIndexList, -2, parent, name, name, publicKey, privateKey, 0, null);
 
 		index.create();
 
@@ -390,14 +398,16 @@ public class IndexManagementHelper {
 		parent.insert(index.getTreeNode(), 0);
 
 		tree.reloadModel(parent);
+
+		uIndexList.removeLink(index);
 	}
 
 
 
 
 	public static class IndexCategoryAdder extends BasicIndexAction {
-		public IndexCategoryAdder(Hsqldb db, FCPQueueManager queueManager, IndexTree tree, AbstractButton actionSource) {
-			super(db, queueManager, tree, actionSource);
+		public IndexCategoryAdder(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uil, IndexTree tree, AbstractButton actionSource) {
+			super(db, queueManager, uil, tree, actionSource);
 		}
 
 		public void setTarget(IndexTreeNode node) {
@@ -409,15 +419,15 @@ public class IndexManagementHelper {
 			String name = askAName(I18n.getMessage("thaw.plugin.index.categoryName"),
 					       I18n.getMessage("thaw.plugin.index.newCategory"));
 
-			addIndexCategory(getDb(), getQueueManager(), getTree(), (IndexCategory)getTarget(), name);
+			addIndexCategory(getDb(), getQueueManager(), getUnknownIndexList(), getTree(), (IndexCategory)getTarget(), name);
 		}
 	}
 
-	public static void addIndexCategory(Hsqldb db, FCPQueueManager queueManager, IndexTree tree, IndexCategory target, String name) {
+	public static void addIndexCategory(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uIndexList, IndexTree tree, IndexCategory target, String name) {
 		if (target == null)
 			target = tree.getRoot();
 
-		IndexCategory newCat = new IndexCategory(db, queueManager, -2, target, name);
+		IndexCategory newCat = new IndexCategory(db, queueManager, uIndexList, -2, target, name);
 
 		newCat.create();
 
@@ -427,7 +437,7 @@ public class IndexManagementHelper {
 
 	public static class IndexDownloader extends BasicIndexAction implements Runnable {
 		public IndexDownloader(AbstractButton actionSource) {
-			super(null, null, null, actionSource);
+			super(null, null, null, null, actionSource);
 		}
 
 		public void setTarget(IndexTreeNode node) {
@@ -449,7 +459,7 @@ public class IndexManagementHelper {
 
 	public static class IndexUploader extends BasicIndexAction implements Runnable {
 		public IndexUploader(AbstractButton actionSource) {
-			super(null, null, null, actionSource);
+			super(null, null, null, null, actionSource);
 		}
 
 		public void setTarget(IndexTreeNode node) {
@@ -471,7 +481,7 @@ public class IndexManagementHelper {
 
 	public static class PublicKeyCopier extends BasicIndexAction {
 		public PublicKeyCopier(AbstractButton actionSource) {
-			super(null, null, null, actionSource);
+			super(null, null, null, null, actionSource);
 		}
 
 		public void setTarget(IndexTreeNode node) {
@@ -498,7 +508,7 @@ public class IndexManagementHelper {
 
 	public static class PrivateKeyCopier extends BasicIndexAction {
 		public PrivateKeyCopier(AbstractButton actionSource) {
-			super(null, null, null, actionSource);
+			super(null, null, null, null, actionSource);
 		}
 
 		public void setTarget(IndexTreeNode node) {
@@ -527,7 +537,7 @@ public class IndexManagementHelper {
 	 */
 	public static class IndexRenamer extends BasicIndexAction {
 		public IndexRenamer(IndexTree tree, AbstractButton actionSource) {
-			super(null, null, tree, actionSource);
+			super(null, null, null, tree, actionSource);
 		}
 
 		public void setTarget(IndexTreeNode node) {
@@ -570,7 +580,7 @@ public class IndexManagementHelper {
 	 */
 	public static class IndexDeleter extends BasicIndexAction {
 		public IndexDeleter(IndexTree tree, AbstractButton actionSource) {
-			super(null, null, tree, actionSource);
+			super(null, null, null, tree, actionSource);
 		}
 
 		public void setTarget(IndexTreeNode node) {
@@ -605,7 +615,7 @@ public class IndexManagementHelper {
 
 	public static class FileInserterAndAdder extends BasicIndexAction {
 		public FileInserterAndAdder(Hsqldb db, FCPQueueManager queueManager, AbstractButton actionSource) {
-			super(db, queueManager, null, actionSource);
+			super(db, queueManager, null, null, actionSource);
 		}
 
 		public void setTarget(IndexTreeNode node) {
@@ -634,7 +644,7 @@ public class IndexManagementHelper {
 
 	public static class FileAdder extends BasicIndexAction {
 		public FileAdder(Hsqldb db, FCPQueueManager queueManager, AbstractButton actionSource) {
-			super(db, queueManager, null, actionSource);
+			super(db, queueManager, null, null, actionSource);
 		}
 
 		public void setTarget(IndexTreeNode node) {
@@ -707,7 +717,7 @@ public class IndexManagementHelper {
 		private JFrame frame = null;
 
 		public KeyAdder(Hsqldb db, AbstractButton actionSource) {
-			super(db, null, null, actionSource);
+			super(db, null, null, null, actionSource);
 		}
 
 		public void setTarget(IndexTreeNode node) {
@@ -804,7 +814,7 @@ public class IndexManagementHelper {
 		private JFrame frame = null;
 
 		public LinkAdder(Hsqldb db, AbstractButton actionSource) {
-			super(db, null, null, actionSource);
+			super(db, null, null, null, actionSource);
 		}
 
 		public void setTarget(IndexTreeNode node) {

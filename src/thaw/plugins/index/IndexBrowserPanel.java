@@ -17,6 +17,8 @@ import thaw.plugins.Hsqldb;
 
 public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListener, ActionListener {
 	private IndexTree indexTree;
+	private JSplitPane leftSplit;
+	private UnknownIndexList unknownList;
 
 	private JSplitPane split;
 
@@ -28,25 +30,32 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	private FCPQueueManager queueManager;
 	private Config config;
 
+
+
 	public IndexBrowserPanel(Hsqldb db, FCPQueueManager queueManager, Config config) {
 		this.db = db;
 		this.queueManager = queueManager;
 		this.config = config;
 
-		this.indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, queueManager, db);
+		unknownList = new UnknownIndexList(db, queueManager);
+		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, queueManager, unknownList, db);
+		unknownList.setIndexTree(indexTree); /* TODO: dirty => find a better way */
+
+		leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+					   indexTree.getPanel(),
+					   unknownList.getPanel());
 
 		this.listAndDetails = new JPanel();
 		this.listAndDetails.setLayout(new BorderLayout(10, 10));
 
-		this.tables = new Tables(false, db, queueManager, this.indexTree, config);
+		this.tables = new Tables(false, db, queueManager, unknownList, this.indexTree, config);
 		this.fileDetails = new FileDetailsEditor(false);
 
 		this.listAndDetails.add(this.tables.getPanel(), BorderLayout.CENTER);
 		this.listAndDetails.add(this.fileDetails.getPanel(), BorderLayout.SOUTH);
 
 		this.split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-				       this.indexTree.getPanel(),
-				       this.listAndDetails);
+					    leftSplit, listAndDetails);
 
 		this.indexTree.addTreeSelectionListener(this);
 	}
@@ -54,6 +63,17 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	public void restoreState() {
 		if (config.getValue("indexBrowserPanelSplitPosition") != null)
 			split.setDividerLocation(Integer.parseInt(this.config.getValue("indexBrowserPanelSplitPosition")));
+
+		leftSplit.setSize(150, MainWindow.DEFAULT_SIZE_Y - 150);
+		leftSplit.setResizeWeight(0.5);
+
+		if (config.getValue("indexTreeUnknownListSplitLocation") == null) {
+			leftSplit.setDividerLocation(((double)0.5));
+		} else {
+			leftSplit.setDividerLocation(Double.parseDouble(config.getValue("indexTreeUnknownListSplitLocation")));
+		}
+
+		leftSplit.setResizeWeight(0.5);
 
 		tables.restoreState();
 	}
@@ -66,6 +86,10 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		return indexTree;
 	}
 
+	public UnknownIndexList getUnknownIndexList() {
+		return unknownList;
+	}
+
 	public JSplitPane getPanel() {
 		return this.split;
 	}
@@ -73,6 +97,13 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	public void saveState() {
 		this.indexTree.save();
 		this.config.setValue("indexBrowserPanelSplitPosition", Integer.toString(this.split.getDividerLocation()));
+		double splitLocation;
+
+		splitLocation = ((double)leftSplit.getDividerLocation() - ((double)leftSplit.getMinimumDividerLocation())) / (((double)leftSplit.getMaximumDividerLocation()) - ((double)leftSplit.getMinimumDividerLocation()));
+
+		config.setValue("indexTreeUnknownListSplitLocation",
+				Double.toString(splitLocation));
+
 		this.tables.saveState();
 	}
 
