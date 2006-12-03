@@ -284,11 +284,17 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	 */
 	public FCPTransferQuery getTransfer(String key) {
 		boolean interrupted=true;
-
+		boolean isAKey = true;
 		Iterator it;
 
 		if (key == null)
 			return null;
+
+		if (key.startsWith("SSK@") || key.startsWith("USK@")
+		    || key.startsWith("KSK@") || key.startsWith("CHK@"))
+			isAKey = true;
+		else
+			isAKey = false;
 
 		while(interrupted) {
 			interrupted = false;
@@ -298,9 +304,15 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 				    it.hasNext(); )
 					{
 						FCPTransferQuery plop = (FCPTransferQuery)it.next();
-						if (plop.getFileKey() == key
-						    || key.equals(plop.getFileKey()))
-							return plop;
+						if (isAKey) {
+							if (plop.getFileKey() == key
+							    || key.equals(plop.getFileKey()))
+								return plop;
+						} else {
+							if (plop.getFilename() == key
+							    || key.equals(plop.getFilename()))
+								return plop;
+						}
 					}
 
 				for(int i = 0 ; i <= PRIORITY_MIN ; i++) {
@@ -308,9 +320,15 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 					    it.hasNext(); )
 						{
 							FCPTransferQuery plop = (FCPTransferQuery)it.next();
-							if (plop.getFileKey() == key
-							    || key.equals(plop.getFileKey()))
-								return plop;
+							if (isAKey) {
+								if (plop.getFileKey() == key
+								    || key.equals(plop.getFileKey()))
+									return plop;
+							} else {
+								if (plop.getFilename() == key
+								    || key.equals(plop.getFilename()))
+									return plop;
+							}
 						}
 
 				}
