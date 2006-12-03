@@ -76,7 +76,7 @@ public class Link extends java.util.Observable {
 		    || l.getPublicKey().length() < 40)
 			return false;
 
-		return (l.getPublicKey().substring(0, 40).equals(getPublicKey().substring(0, 40)));
+		return (l.getPublicKey().substring(4, 40).equals(getPublicKey().substring(4, 40)));
 	}
 
 	public boolean compare(Index l) {
@@ -87,7 +87,7 @@ public class Link extends java.util.Observable {
 		    || l.getPublicKey().length() < 40)
 			return false;
 
-		return (l.getPublicKey().substring(0, 40).equals(getPublicKey().substring(0, 40)));
+		return (l.getPublicKey().substring(4, 40).equals(getPublicKey().substring(4, 40)));
 	}
 
 	public void setParent(Index index) {
@@ -177,7 +177,7 @@ public class Link extends java.util.Observable {
 
 			st = db.getConnection().prepareStatement("SELECT publicKey from indexes WHERE publicKey LIKE ?");
 
-			st.setString(1, key.substring(0, 40)+"%");
+			st.setString(1, "%"+key.substring(3, 40)+"%");
 
 			if(st.execute()) {
 				ResultSet result = st.getResultSet();

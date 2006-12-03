@@ -78,6 +78,9 @@ public class UnknownIndexList implements MouseListener {
 			return false;
 
 		for (int i = 0 ; i < linkList.length ; i++) {
+			if (linkList[i] == null)
+				continue;
+
 			if (l.compare(linkList[i]))
 				return true;
 		}
