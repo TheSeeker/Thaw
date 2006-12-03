@@ -34,6 +34,7 @@ import thaw.core.FreenetURIHelper;
 import thaw.plugins.Hsqldb;
 
 import thaw.fcp.*;
+import thaw.core.Logger;
 
 /**
  * Index.java, IndexCategory.java and IndexTree.java must NEVER use this helper (to avoid loops).
@@ -133,6 +134,11 @@ public class IndexManagementHelper {
 	public static void createIndex(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uIndexList, IndexTree tree, IndexCategory target, String name) {
 		if (target == null)
 			target = tree.getRoot();
+
+		if (name == null || name.indexOf("/") >= 0) {
+			Logger.error(new IndexManagementHelper(), "invalid name");
+			return;
+		}
 
 		Index index = new Index(db, queueManager, uIndexList, -1, target, name, name, null, null, 0, null);
 
