@@ -188,6 +188,9 @@ public class File extends java.util.Observable implements java.util.Observer {
 				((FCPClientGet)this.transfer).addObserver(this);
 		}
 
+		if (transfer != null)
+			update(((java.util.Observable)transfer), null);
+
 		this.setChanged();
 		this.notifyObservers(query);
 	}
