@@ -20,7 +20,7 @@ public class Logger {
 	 *
 	 * 2 or more is recommanded.
 	 */
-	public final static int LOG_LEVEL = 3;
+	public final static int LOG_LEVEL = 2;
 
 	private static Vector logListeners = null;
 

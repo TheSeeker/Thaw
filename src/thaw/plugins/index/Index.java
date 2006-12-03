@@ -1097,6 +1097,9 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	public void loadHeader(Element rootEl) {
 		Element header = (Element)rootEl.getElementsByTagName("header").item(0);
 
+		if (header == null)
+			return;
+
 		this.realName = this.getHeaderElement(header, "title");
 		this.author = this.getHeaderElement(header, "owner");
 
@@ -1135,6 +1138,10 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		this.purgeLinkList();
 
 		Element links = (Element)rootEl.getElementsByTagName("indexes").item(0);
+
+		if (links == null)
+			return;
+
 		NodeList list = links.getChildNodes();
 
 		for(int i = 0; i < list.getLength() ; i++) {
@@ -1154,6 +1161,10 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		this.purgeFileList();
 
 		Element filesEl = (Element)rootEl.getElementsByTagName("files").item(0);
+
+		if (filesEl == null)
+			return;
+
 		NodeList list = filesEl.getChildNodes();
 
 		for(int i = 0; i < list.getLength() ; i++) {
