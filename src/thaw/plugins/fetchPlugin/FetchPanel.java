@@ -17,6 +17,12 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
+
+import java.awt.event.MouseListener;
+import java.awt.event.MouseEvent;
+
 import java.io.File;
 import java.util.Vector;
 import java.util.Iterator;
@@ -24,7 +30,7 @@ import java.util.Iterator;
 import thaw.core.*;
 import thaw.plugins.FetchPlugin;
 
-public class FetchPanel implements java.awt.event.ActionListener {
+public class FetchPanel implements java.awt.event.ActionListener, MouseListener {
 
 	private JPanel mainPanel = null;
 	private JPanel centeredPart = null; /* (below is the validation button) */
@@ -52,6 +58,8 @@ public class FetchPanel implements java.awt.event.ActionListener {
 	private JLabel queueLabel = null;
 	private String[] queues = null;
 	private JComboBox queueSelecter = null;
+
+	private JPopupMenu rightClickMenu;
 
 	private Core core;
 	private FetchPlugin fetchPlugin;
@@ -88,7 +96,9 @@ public class FetchPanel implements java.awt.event.ActionListener {
 		this.loadListButton.addActionListener(this);
 
 		this.pasteButton = new JButton(I18n.getMessage("thaw.plugin.fetch.pasteFromClipboard"));
-		this.pasteButton.addActionListener(this);
+
+		new GUIHelper.PasteHelper(pasteButton, fileList);
+		fileList.addMouseListener(this);
 
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new GridLayout(1,2));
@@ -159,6 +169,12 @@ public class FetchPanel implements java.awt.event.ActionListener {
 		this.destinationButton = new JButton(I18n.getMessage("thaw.plugin.fetch.chooseDestination"));
 		this.destinationButton.addActionListener(this);
 
+		rightClickMenu = new JPopupMenu();
+		JMenuItem item = new JMenuItem(I18n.getMessage("thaw.common.paste"));
+		new GUIHelper.PasteHelper(item, fileList);
+		rightClickMenu.add(item);
+
+		/*** Putting things together ***/
 		this.dstChoosePanel.add(this.destinationLabel);
 		this.dstChoosePanel.add(this.destinationField);
 		this.dstChoosePanel.add(this.destinationButton);
@@ -243,28 +259,6 @@ public class FetchPanel implements java.awt.event.ActionListener {
 
 		}
 
-		if(e.getSource() == this.pasteButton) {
-			Toolkit tk = Toolkit.getDefaultToolkit();
-			Clipboard cp = tk.getSystemClipboard();
-
-			try {
-				String result;
-				Transferable contents = cp.getContents(null);
-
-				boolean hasTransferableText = ((contents != null) &&
-							       contents.isDataFlavorSupported(DataFlavor.stringFlavor));
-
-				if ( hasTransferableText ) {
-					result = (String)contents.getTransferData(DataFlavor.stringFlavor);
-					this.fileList.setText(this.fileList.getText() + "\n" + result);
-				} else {
-					Logger.info(this, "Nothing to get from clipboard");
-				}
-			} catch(Exception exception) {
-				Logger.notice(this, "Exception while pasting: "+exception.toString());
-			}
-		}
-
 		if(e.getSource() == this.loadListButton) {
 			FileChooser fileChooser = new FileChooser();
 			File toParse = null;
@@ -299,5 +293,25 @@ public class FetchPanel implements java.awt.event.ActionListener {
 			this.fileList.setText(result);
 		}
 	}
+
+
+
+	public void mouseClicked(MouseEvent e) { }
+	public void mouseEntered(MouseEvent e) { }
+	public void mouseExited(MouseEvent e) { }
+	public void mousePressed(MouseEvent e) {
+		this.showPopupMenu(e);
+	}
+
+	public void mouseReleased(MouseEvent e) {
+		this.showPopupMenu(e);
+	}
+
+	protected void showPopupMenu(MouseEvent e) {
+		if(e.isPopupTrigger()) {
+			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
+		}
+	}
+
 }
 

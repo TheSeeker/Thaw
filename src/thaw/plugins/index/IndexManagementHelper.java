@@ -19,6 +19,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JTextArea;
 import javax.swing.JLabel;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
 
 import java.util.Vector;
 import java.util.Iterator;
@@ -26,6 +28,9 @@ import java.util.Iterator;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+
+import java.awt.event.MouseListener;
+import java.awt.event.MouseEvent;
 
 import thaw.core.FileChooser;
 import thaw.core.Config;
@@ -149,57 +154,17 @@ public class IndexManagementHelper {
 	}
 
 
-	public static class IndexAdder extends BasicIndexAction {
-		public IndexAdder(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList indexList, IndexTree tree, AbstractButton actionSource) {
-			super(db, queueManager, indexList, tree, actionSource);
-		}
 
-		public void setTarget(IndexTreeNode node) {
-			super.setTarget(node);
-			getActionSource().setEnabled(node == null || node instanceof IndexCategory);
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			String key = askAName(I18n.getMessage("thaw.plugin.index.indexKey"), "USK@");
-
-			addIndex(getDb(), getQueueManager(), getUnknownIndexList(), getTree(), (IndexCategory)getTarget(), key);
-		}
-	}
-
-
-	/**
-	 * Can be use directly
-	 */
-	public static void addIndex(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList indexList, IndexTree tree, IndexCategory target, String publicKey) {
-		publicKey = FreenetURIHelper.cleanURI(publicKey);
-
-		if (publicKey == null)
-			return;
-
-		String name = Index.getNameFromKey(publicKey);
-
-		if (name == null)
-			return;
-
-		if (target == null)
-			target = tree.getRoot();
-
-		Index index = new Index(db, queueManager, indexList, -2, target, name, name, publicKey, null, 0, null);
-
-		if (tree.addToIndexCategory(target, index)) {
-			index.create();
-			index.updateFromFreenet(-1);
-		}
-
-		indexList.removeLink(index);
-	}
-
-
-
-	public static class KeyAsker implements ActionListener {
+	public static class KeyAsker implements ActionListener, MouseListener {
 		private JButton okButton;
 		private JButton cancelButton;
 		private int formState;
+
+		private JTextField publicKeyField = null;
+		private JTextField privateKeyField = null;
+
+		private JPopupMenu popupMenuA;
+		private JPopupMenu popupMenuB;
 
 		public KeyAsker() {
 		}
@@ -215,8 +180,8 @@ public class IndexManagementHelper {
 		}
 
 		public String[] askKeysBis(boolean askPrivateKey,
-					String defaultPublicKey,
-					String defaultPrivateKey) {
+					   String defaultPublicKey,
+					   String defaultPrivateKey) {
 			formState = 0;
 
 			if (defaultPublicKey == null)
@@ -229,8 +194,8 @@ public class IndexManagementHelper {
 
 			frame.getContentPane().setLayout(new BorderLayout());
 
-			JTextField publicKeyField = new JTextField(defaultPublicKey);
-			JTextField privateKeyField = new JTextField(defaultPrivateKey);
+			publicKeyField = new JTextField(defaultPublicKey);
+			privateKeyField = new JTextField(defaultPrivateKey);
 
 			JPanel subPanelA = new JPanel(); /* left => labels */
 			JPanel subPanelB = new JPanel(); /* right => textfield */
@@ -241,9 +206,20 @@ public class IndexManagementHelper {
 			subPanelA.add(new JLabel(I18n.getMessage("thaw.plugin.index.indexKey")+ " "), BorderLayout.WEST);
 			subPanelB.add(publicKeyField, BorderLayout.CENTER);
 
+			popupMenuA = new JPopupMenu();
+			JMenuItem item = new JMenuItem(I18n.getMessage("thaw.common.paste"));
+			popupMenuA.add(item);
+			new thaw.core.GUIHelper.PasteHelper(item, publicKeyField);
+			publicKeyField.addMouseListener(this);
+
 			if (askPrivateKey) {
 				subPanelA.add(new JLabel(I18n.getMessage("thaw.plugin.index.indexPrivateKey")+" "), BorderLayout.WEST);
 				subPanelB.add(privateKeyField, BorderLayout.CENTER);
+				popupMenuB = new JPopupMenu();
+				item = new JMenuItem(I18n.getMessage("thaw.common.paste"));
+				popupMenuB.add(item);
+				new thaw.core.GUIHelper.PasteHelper(item, privateKeyField);
+				privateKeyField.addMouseListener(this);
 			}
 
 			frame.getContentPane().add(subPanelA, BorderLayout.WEST);
@@ -265,6 +241,9 @@ public class IndexManagementHelper {
 
 			frame.setSize(700, 100);
 			frame.setVisible(true);
+
+			/* TODO: DO IT BETTER YOU ù^{"(*µ */
+			/*       VVVVVVVVVVV              */
 
 			while(formState == 0) {
 				try {
@@ -305,6 +284,28 @@ public class IndexManagementHelper {
 				formState = 2;
 			}
 		}
+
+		public void mouseClicked(MouseEvent e) { }
+		public void mouseEntered(MouseEvent e) { }
+		public void mouseExited(MouseEvent e) { }
+
+		public void mousePressed(MouseEvent e) {
+			this.showPopupMenu(e);
+		}
+
+		public void mouseReleased(MouseEvent e) {
+			this.showPopupMenu(e);
+		}
+
+		protected void showPopupMenu(MouseEvent e) {
+			if(e.isPopupTrigger()) {
+				if (e.getComponent() == publicKeyField)
+					popupMenuA.show(e.getComponent(), e.getX(), e.getY());
+				if (e.getComponent() == privateKeyField)
+					popupMenuB.show(e.getComponent(), e.getX(), e.getY());
+			}
+		}
+
 	}
 
 	public static class IndexKeyModifier extends BasicIndexAction implements Runnable {
@@ -370,6 +371,11 @@ public class IndexManagementHelper {
 				newThread.start();
 			}
 		}
+	}
+
+
+	public static void addIndex(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uIndexList, IndexTree tree, IndexCategory target, String publicKey) {
+		reuseIndex(db, queueManager, uIndexList, tree, target, publicKey, null);
 	}
 
 
@@ -716,11 +722,13 @@ public class IndexManagementHelper {
 
 
 
-	public static class KeyAdder extends BasicIndexAction implements Runnable {
+	public static class KeyAdder extends BasicIndexAction implements Runnable, MouseListener {
 		private JButton cancelButton = null;
 		private JButton okButton = null;
 		private JTextArea textArea = null;
 		private JFrame frame = null;
+
+		private JPopupMenu popupMenu = null;
 
 		public KeyAdder(Hsqldb db, AbstractButton actionSource) {
 			super(db, null, null, null, actionSource);
@@ -743,6 +751,12 @@ public class IndexManagementHelper {
 			buttonPanel = new JPanel();
 			cancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
 			okButton = new JButton(I18n.getMessage("thaw.common.ok"));
+
+			popupMenu = new JPopupMenu();
+			JMenuItem item = new JMenuItem(I18n.getMessage("thaw.common.paste"));
+			popupMenu.add(item);
+			textArea.addMouseListener(this);
+			new thaw.core.GUIHelper.PasteHelper(item, textArea);
 
 			cancelButton.addActionListener(this);
 			okButton.addActionListener(this);
@@ -792,6 +806,25 @@ public class IndexManagementHelper {
 				frame.setVisible(false);
 			}
 		}
+
+		public void mouseClicked(MouseEvent e) { }
+		public void mouseEntered(MouseEvent e) { }
+		public void mouseExited(MouseEvent e) { }
+
+		public void mousePressed(MouseEvent e) {
+			this.showPopupMenu(e);
+		}
+
+		public void mouseReleased(MouseEvent e) {
+			this.showPopupMenu(e);
+		}
+
+		protected void showPopupMenu(MouseEvent e) {
+			if(e.isPopupTrigger()) {
+				popupMenu.show(e.getComponent(), e.getX(), e.getY());
+			}
+		}
+
 	}
 
 	/**

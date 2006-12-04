@@ -85,7 +85,7 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 			panelAdded = split;
 		}
 
-		split.setSize(MainWindow.DEFAULT_SIZE_X - 150, MainWindow.DEFAULT_SIZE_Y - 150); /* needed to avoid size = 0at the begining */
+		split.setSize(MainWindow.DEFAULT_SIZE_X - 150, MainWindow.DEFAULT_SIZE_Y - 175); /* needed to avoid size = 0at the begining */
 		split.setResizeWeight(0.5);
 
 		setMainWindow(core.getMainWindow());
