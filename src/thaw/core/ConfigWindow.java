@@ -1,6 +1,7 @@
 package thaw.core;
 
 import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import java.awt.BorderLayout;
@@ -22,7 +23,7 @@ import javax.swing.JOptionPane;
  *  window is set visible (arg == null).
  */
 public class ConfigWindow extends Observable implements ActionListener, java.awt.event.WindowListener {
-	private JFrame configWin;
+	private JDialog configWin;
 	private JTabbedPane tabs;
 
 	private JPanel buttons;
@@ -45,7 +46,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 		this.advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 
-		this.configWin = new JFrame(I18n.getMessage("thaw.config.windowName"));
+		this.configWin = new JDialog(core.getMainWindow().getMainFrame(), I18n.getMessage("thaw.config.windowName"));
 
 		this.tabs = new JTabbedPane();
 
@@ -126,7 +127,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	/**
 	 * Get a ref to the JFrame.
 	 */
-	public JFrame getFrame() {
+	public JDialog getFrame() {
 		return this.configWin;
 	}
 

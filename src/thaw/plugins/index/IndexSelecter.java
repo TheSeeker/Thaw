@@ -68,7 +68,7 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 
 		upPanel = new JPanel();
 		Logger.info(this, "indexes");
-		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.yourIndexes"), true, null, null, db);
+		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.yourIndexes"), true, null, null, null, db);
 		Logger.info(this, "plus indexes");
 
 		fieldPanel = new JPanel();

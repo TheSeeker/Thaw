@@ -92,9 +92,10 @@ public class SplashScreen {
 
 
 	public void hide() {
-		this.splashScreen.setVisible(false);
-		this.splashScreen = null;
-		this.progressBar = null;
+		splashScreen.setVisible(false);
+		splashScreen.dispose();
+		splashScreen = null;
+		progressBar = null;
 	}
 
 }

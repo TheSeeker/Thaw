@@ -32,13 +32,13 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 
 
 
-	public IndexBrowserPanel(Hsqldb db, FCPQueueManager queueManager, Config config) {
+	public IndexBrowserPanel(Hsqldb db, FCPQueueManager queueManager, Config config, MainWindow mainWindow) {
 		this.db = db;
 		this.queueManager = queueManager;
 		this.config = config;
 
 		unknownList = new UnknownIndexList(db, queueManager);
-		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, queueManager, unknownList, db);
+		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, queueManager, unknownList, mainWindow, db);
 		unknownList.setIndexTree(indexTree); /* TODO: dirty => find a better way */
 
 		leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,

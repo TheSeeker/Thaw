@@ -11,9 +11,9 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.JDialog;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -40,6 +40,7 @@ import thaw.plugins.Hsqldb;
 
 import thaw.fcp.*;
 import thaw.core.Logger;
+import thaw.core.MainWindow;
 
 /**
  * Index.java, IndexCategory.java and IndexTree.java must NEVER use this helper (to avoid loops).
@@ -175,13 +176,15 @@ public class IndexManagementHelper {
 		 */
 		public static String[] askKeys(boolean askPrivateKey,
 					       String defaultPublicKey,
-					       String defaultPrivateKey) {
-			return ((new KeyAsker()).askKeysBis(askPrivateKey, defaultPublicKey, defaultPrivateKey));
+					       String defaultPrivateKey,
+					       MainWindow mainWindow) {
+			return ((new KeyAsker()).askKeysBis(askPrivateKey, defaultPublicKey, defaultPrivateKey, mainWindow));
 		}
 
 		public String[] askKeysBis(boolean askPrivateKey,
 					   String defaultPublicKey,
-					   String defaultPrivateKey) {
+					   String defaultPrivateKey,
+					   MainWindow mainWindow) {
 			formState = 0;
 
 			if (defaultPublicKey == null)
@@ -190,7 +193,7 @@ public class IndexManagementHelper {
 			if (defaultPrivateKey == null)
 				defaultPrivateKey = "SSK@";
 
-			JFrame frame = new JFrame(I18n.getMessage("thaw.plugin.index.indexKey"));
+			JDialog frame = new JDialog(mainWindow.getMainFrame(), I18n.getMessage("thaw.plugin.index.indexKey"));
 
 			frame.getContentPane().setLayout(new BorderLayout());
 
@@ -309,8 +312,11 @@ public class IndexManagementHelper {
 	}
 
 	public static class IndexKeyModifier extends BasicIndexAction implements Runnable {
-		public IndexKeyModifier(AbstractButton actionSource) {
+		private MainWindow mainWindow;
+
+		public IndexKeyModifier(MainWindow mainWindow, AbstractButton actionSource) {
 			super(null, null, null, null, actionSource);
+			this.mainWindow = mainWindow;
 		}
 
 		public void setTarget(IndexTreeNode node) {
@@ -321,7 +327,7 @@ public class IndexManagementHelper {
 		public void run() {
 			Index index = ((Index)getTarget());
 
-			String[] keys = KeyAsker.askKeys(true, index.getPublicKey(), index.getPrivateKey());
+			String[] keys = KeyAsker.askKeys(true, index.getPublicKey(), index.getPrivateKey(), mainWindow);
 
 			if (keys == null)
 				return;
@@ -340,8 +346,11 @@ public class IndexManagementHelper {
 
 
 	public static class IndexReuser extends BasicIndexAction implements Runnable {
-		public IndexReuser(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uIndexList, IndexTree tree, AbstractButton actionSource) {
+		private MainWindow mainWindow;
+
+		public IndexReuser(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uIndexList, IndexTree tree, MainWindow mainWindow, AbstractButton actionSource) {
 			super(db, queueManager, uIndexList, tree, actionSource);
+			this.mainWindow = mainWindow;
 		}
 
 		public void setTarget(IndexTreeNode node) {
@@ -354,7 +363,7 @@ public class IndexManagementHelper {
 			String publicKey = null;
 			String privateKey = null;
 
-			keys = KeyAsker.askKeys(true, "USK@", "SSK@");
+			keys = KeyAsker.askKeys(true, "USK@", "SSK@", mainWindow);
 
 			if (keys == null)
 				return;
@@ -726,12 +735,14 @@ public class IndexManagementHelper {
 		private JButton cancelButton = null;
 		private JButton okButton = null;
 		private JTextArea textArea = null;
-		private JFrame frame = null;
+		private JDialog frame = null;
 
 		private JPopupMenu popupMenu = null;
+		private MainWindow mainWindow;
 
-		public KeyAdder(Hsqldb db, AbstractButton actionSource) {
+		public KeyAdder(Hsqldb db, MainWindow win, AbstractButton actionSource) {
 			super(db, null, null, null, actionSource);
+			this.mainWindow = win;
 		}
 
 		public void setTarget(IndexTreeNode node) {
@@ -743,7 +754,7 @@ public class IndexManagementHelper {
 			JLabel header = null;
 			JPanel buttonPanel = null;
 
-			frame = new JFrame(I18n.getMessage("thaw.plugins.index.addKeys"));
+			frame = new JDialog(mainWindow.getMainFrame(), I18n.getMessage("thaw.plugins.index.addKeys"));
 			frame.setVisible(false);
 
 			header = new JLabel(I18n.getMessage("thaw.plugin.fetch.keyList"));

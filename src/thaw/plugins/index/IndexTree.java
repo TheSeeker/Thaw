@@ -114,6 +114,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			 boolean selectionOnly,
 			 FCPQueueManager queueManager,
 			 UnknownIndexList uIndexList,
+			 MainWindow mainWindow,
 			 Hsqldb db) {
 		this.uIndexList = uIndexList;
 		this.queueManager = queueManager;
@@ -170,7 +171,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addAlreadyExistingIndex"));
 		indexCategoryMenu.add(item);
-		indexCategoryActions.add(new IndexManagementHelper.IndexReuser(db, queueManager, uIndexList, this, item));
+		indexCategoryActions.add(new IndexManagementHelper.IndexReuser(db, queueManager, uIndexList, this, mainWindow, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addCategory"));
 		indexCategoryMenu.add(item);
@@ -212,7 +213,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.changeIndexKeys"));
 		indexMenu.add(item);
-		indexAndFileActions.add(new IndexManagementHelper.IndexKeyModifier(item));
+		indexAndFileActions.add(new IndexManagementHelper.IndexKeyModifier(mainWindow, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyPrivateKey"));
 		indexMenu.add(item);
@@ -235,7 +236,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addKeys"));
 		fileMenu.add(item);
-		indexAndFileActions.add(new IndexManagementHelper.KeyAdder(db, item));
+		indexAndFileActions.add(new IndexManagementHelper.KeyAdder(db, mainWindow, item));
 
 		// Link menu
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addLink"));
