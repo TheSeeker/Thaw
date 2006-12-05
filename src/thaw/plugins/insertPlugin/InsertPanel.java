@@ -39,7 +39,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 	private JPanel subPanel; /* because we won't use the whole space */
 
 	private JLabel browseLabel;
-	private JTextField selectedFiles; /* TODO: it was planned to support directory insertion */
+	private JTextField selectedFiles;
 	private JButton browseButton;
 
 	private JLabel selectKeyLabel;

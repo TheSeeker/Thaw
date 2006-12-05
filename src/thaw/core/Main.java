@@ -12,16 +12,15 @@ import java.util.Locale;
  */
 public class Main {
 
-	public final static String VERSION;
-	final char
+	public final static char
 		_major = 0,
 		_minor = 6;
-	final String
+	public final static String
 		_svnBuildNumber = "@custom@";
 
-	static{
+	public final static String
 		VERSION = _major + '.' + _minor + " WIP r"+_svnBuildNumber;
-	}
+
 
 	/**
 	 * Look &amp; feel use by GUI front end
