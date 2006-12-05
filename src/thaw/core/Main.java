@@ -14,12 +14,12 @@ public class Main {
 
 	public final static int
 		_major = 0,
-		_minor = 7;
+		_minor = 6;
 	public final static String
 		_svnBuildNumber = "@custom@";
 
 	public final static String
-		VERSION = _major + "." + _minor + " WIP r"+_svnBuildNumber;
+		VERSION = _major + "." + _minor + " Beta r"+_svnBuildNumber;
 
 
 	/**
