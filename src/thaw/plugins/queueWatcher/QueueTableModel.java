@@ -202,7 +202,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 	public synchronized void addQuery(FCPTransferQuery query) {
 		if(this.queries.contains(query)) {
-			Logger.notice(this, "addQuery() : Already known");
+			Logger.debug(this, "addQuery() : Already known");
 			return;
 		}
 

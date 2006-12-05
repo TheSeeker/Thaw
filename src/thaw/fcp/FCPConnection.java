@@ -23,7 +23,7 @@ public class FCPConnection extends Observable {
 	/** If == true, then will print on stdout
 	 * all fcp input / output.
 	 */
-	private final static boolean DEBUG_MODE = true;
+	private final static boolean DEBUG_MODE = false;
 	private final static int MAX_RECV = 1024;
 
 	private byte[] recvBytes = new byte[MAX_RECV]; /* global to avoid each time free() / malloc() */
