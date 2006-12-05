@@ -184,7 +184,7 @@ public class IndexManagementHelper {
 			return ((new KeyAsker()).askKeysBis(askPrivateKey, defaultPublicKey, defaultPrivateKey, mainWindow));
 		}
 
-		public String[] askKeysBis(boolean askPrivateKey,
+		public synchronized String[] askKeysBis(boolean askPrivateKey,
 					   String defaultPublicKey,
 					   String defaultPrivateKey,
 					   MainWindow mainWindow) {
@@ -250,14 +250,19 @@ public class IndexManagementHelper {
 
 			/* TODO: DO IT BETTER YOU ù^{"(*µ */
 			/*       VVVVVVVVVVV              */
-
+			try {
+				wait();
+			} catch(java.lang.InterruptedException e) {
+				/* \_o< */
+			}
+			/*
 			while(formState == 0) {
 				try {
 					Thread.sleep(500);
 				} catch(InterruptedException e) {
-					/* \_o< */
+
 				}
-			}
+			}*/
 
 			frame.setVisible(false);
 
@@ -272,16 +277,19 @@ public class IndexManagementHelper {
 			else
 				keys[1] = null;
 
+			frame.dispose();
+
 			if (keys[0] == null || keys[0].length() < 20)
 				return null;
 
 			if (keys[1] == null || keys[1].length() < 20)
 				keys[1] = null;
 
+
 			return keys;
 		}
 
-		public void actionPerformed(ActionEvent e) {
+		public synchronized void actionPerformed(ActionEvent e) {
 			if (e.getSource() == okButton) {
 				formState = 1;
 			}
@@ -289,6 +297,8 @@ public class IndexManagementHelper {
 			if (e.getSource() == cancelButton) {
 				formState = 2;
 			}
+
+			notify();
 		}
 
 		public void mouseClicked(MouseEvent e) { }

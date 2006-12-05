@@ -408,7 +408,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			Logger.info(this, "File received");
 
-			duplicatedQueryManager.getConnection().removeFromWriterQueue();
+			if (duplicatedQueryManager != null)
+				duplicatedQueryManager.getConnection().removeFromWriterQueue();
 
 			this.isLockOwner= false;
 

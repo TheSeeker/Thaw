@@ -718,7 +718,10 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	public Vector getFileList() {
 		Vector newList = new Vector();
 
-		for(Iterator it = this.fileList.iterator();
+		if (fileList == null)
+			return newList;
+
+		for(Iterator it = fileList.iterator();
 		    it.hasNext();) {
 			newList.add(it.next());
 		}
@@ -914,7 +917,10 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	{
 		Vector newList = new Vector();
 
-		for(Iterator it = this.linkList.iterator();
+		if (linkList == null)
+			return;
+
+		for(Iterator it = linkList.iterator();
 		    it.hasNext();) {
 			newList.add(it.next());
 		}
