@@ -12,14 +12,14 @@ import java.util.Locale;
  */
 public class Main {
 
-	public final static char
+	public final static int
 		_major = 0,
-		_minor = 6;
+		_minor = 7;
 	public final static String
 		_svnBuildNumber = "@custom@";
 
 	public final static String
-		VERSION = _major + '.' + _minor + " Beta r"+_svnBuildNumber;
+		VERSION = _major + "." + _minor + " WIP r"+_svnBuildNumber;
 
 
 	/**
