@@ -13,11 +13,13 @@ import java.util.Locale;
 public class Main {
 
 	public final static String VERSION;
+	final char
+		_major = 0,
+		_minor = 6;
+	final String
+		_svnBuildNumber = "@custom@";
 
 	static{
-		char	_major = 0,
-			_minor = 6;
-		String	_svnBuildNumber = "@custom@";
 		VERSION = _major + '.' + _minor + " WIP r"+_svnBuildNumber;
 	}
 
