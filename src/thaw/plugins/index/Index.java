@@ -918,7 +918,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		Vector newList = new Vector();
 
 		if (linkList == null)
-			return;
+			return newList;
 
 		for(Iterator it = linkList.iterator();
 		    it.hasNext();) {
