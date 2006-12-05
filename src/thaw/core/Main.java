@@ -12,11 +12,17 @@ import java.util.Locale;
  */
 public class Main {
 
-	public final static String VERSION="0.6 WIP r@custom@";
-	//public final static String VERSION="0.5.9b Beta";
+	public final static String VERSION;
+
+	static{
+		char	_major = 0,
+			_minor = 6;
+		String	_svnBuildNumber = "@custom@";
+		VERSION = _major + '.' + _minor + " WIP r"+_svnBuildNumber;
+	}
 
 	/**
-	 * Look & feel use by GUI front end
+	 * Look &amp; feel use by GUI front end
 	 */
 	private static String lookAndFeel = null;
 
