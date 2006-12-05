@@ -12,7 +12,6 @@ import thaw.core.Logger;
 
 /**
  * Allow to insert a simple file.
- * TODO: Use streams instead of reading directly the file.
  */
 public class FCPClientPut extends Observable implements FCPTransferQuery, Observer {
 	public final static int DEFAULT_INSERTION_PRIORITY = 4;
@@ -291,23 +290,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		}
 
 		public void run() {
-			while(true) {
-				if(!this.connection.isWritingLocked())
-					break;
-
-				try {
-					Thread.sleep(200);
-				} catch(java.lang.InterruptedException e) {
-
-				}
-
-			}
-
-			if(!this.connection.lockWriting()) {
-				/* Ah ben oué mais non ... */
-				this.run();
-				return;
-			}
+			connection.addToWriterQueue();
 
 			FCPClientPut.this.lockOwner = true;
 
@@ -409,7 +392,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		boolean ret = this.sendFile();
 		Logger.info(this, "File sent (or not :p)");
 
-		connection.unlockWriting();
+		connection.removeFromWriterQueue();
 		this.lockOwner = false;
 		this.sending = false;
 
@@ -656,7 +639,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 				if(this.lockOwner) {
 					this.lockOwner = false;
-					this.queueManager.getQueryManager().getConnection().unlockWriting();
+					this.queueManager.getQueryManager().getConnection().removeFromWriterQueue();
 				}
 
 				this.status = "Protocol error ("+msg.getValue("CodeDescription")+")";

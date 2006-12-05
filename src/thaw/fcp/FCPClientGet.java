@@ -291,8 +291,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			}
 
 			if(this.isLockOwner) {
-				this.queueManager.getQueryManager().getConnection().unlockReading();
-				this.queueManager.getQueryManager().getConnection().unlockWriting();
+				if (duplicatedQueryManager != null)
+					duplicatedQueryManager.getConnection().removeFromWriterQueue();
 				this.isLockOwner= false;
 			}
 
@@ -408,9 +408,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			Logger.info(this, "File received");
 
-			queryManager.getConnection().unlockReading();
-			queryManager.getConnection().unlockWriting();
-
+			duplicatedQueryManager.getConnection().removeFromWriterQueue();
 
 			this.isLockOwner= false;
 
@@ -453,44 +451,10 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		}
 
 		public void run() {
-			if(this.dir == null) {
-				Logger.warning(this, "UnlockWaiter.run() : Wtf ?");
-			}
-
-			try {
-				Thread.sleep((new java.util.Random()).nextInt(1500));
-			} catch(java.lang.InterruptedException e) {
-
-			}
-
-			while(true) {
-				if(!this.connection.isReadingLocked()
-				   && (!this.connection.isWritingLocked()))
-					break;
-
-				try {
-					Thread.sleep(500);
-				} catch(java.lang.InterruptedException e) {
-
-				}
-			}
-
-			if(!this.connection.lockReading()) {
-				/* Ah ben oué mais non */
-				this.run(); /* TODO: It's dirty => To change ! */
-				return;
-			}
-
-			if(!this.connection.lockWriting()) {
-				/* Ah ben oué mais non */
-				this.connection.unlockReading();
-				this.run(); /* TODO: It's dirty => To change ! */
-				return;
-			}
-
+			connection.addToWriterQueue();
 			FCPClientGet.this.isLockOwner = true;
 
-			Logger.debug(this, "I take the reading lock !");
+			Logger.debug(this, "I take the lock !");
 
 			if(this.dir == null) {
 				Logger.warning(this, "UnlockWaiter.run() : Wtf ?");
@@ -530,8 +494,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		Logger.info(this, "Duplicating socket ...");
 
-		this.duplicatedQueryManager = this.queueManager.getQueryManager().duplicate(this.identifier);
-		this.duplicatedQueryManager.addObserver(this);
+		duplicatedQueryManager = this.queueManager.getQueryManager().duplicate(this.identifier);
+		duplicatedQueryManager.addObserver(this);
 
 		Logger.info(this, "Waiting for socket  ...");
 		this.status = "Waiting for socket availability ...";
@@ -542,7 +506,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		this.notifyObservers();
 
 
-		Thread fork = new Thread(new UnlockWaiter(this, this.duplicatedQueryManager.getConnection(), dir));
+		Thread fork = new Thread(new UnlockWaiter(this, duplicatedQueryManager.getConnection(), dir));
 		fork.start();
 
 		return true;

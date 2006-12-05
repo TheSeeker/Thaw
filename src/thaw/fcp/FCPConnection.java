@@ -42,9 +42,8 @@ public class FCPConnection extends Observable {
 
 	private long rawBytesWaiting = 0;
 
-
-	private boolean lockWriting = false;
-	private boolean lockReading = false;
+	private int writersWaiting;
+	private Object monitor;
 
 	private long lastWrite = 0; /* real writes ; System.currentTimeMillis() */
 
@@ -65,6 +64,8 @@ public class FCPConnection extends Observable {
 			Logger.notice(this, "DEBUG_MODE ACTIVATED");
 		}
 
+		monitor = new Object();
+
 		maxUploadSpeed = -1;
 
 		this.setNodeAddress(nodeAddress);
@@ -72,8 +73,7 @@ public class FCPConnection extends Observable {
 		this.setMaxUploadSpeed(maxUploadSpeed);
 		this.setDuplicationAllowed(duplicationAllowed);
 
-		this.lockWriting = false;
-		this.lockReading = false;
+		writersWaiting = 0;
 	}
 
 
@@ -165,8 +165,7 @@ public class FCPConnection extends Observable {
 		this.bufferedOut.startSender();
 
 		this.rawBytesWaiting = 0;
-		this.lockWriting = false;
-		this.lockReading = false;
+		writersWaiting = 0;
 		this.lastWrite = 0;
 
 		Logger.info(this, "Connected");
@@ -189,57 +188,6 @@ public class FCPConnection extends Observable {
 	}
 
 
-	public synchronized boolean lockWriting() {
-		if(this.lockWriting) {
-			Logger.notice(this, "Writing already locked! You can't lock it !");
-			return false;
-		}
-
-		Logger.debug(this, "Lock writing ...");
-		this.lockWriting = true;
-
-		return true;
-	}
-
-	public synchronized boolean lockReading() {
-		if(this.lockReading) {
-			Logger.notice(this, "Reading already locked! You can't lock it !");
-			return false;
-		}
-
-		Logger.debug(this, "Lock reading");
-		this.lockReading = true;
-
-		return true;
-	}
-
-	public synchronized void unlockWriting() {
-		if(!this.lockWriting) {
-			Logger.notice(this, "Writing already unlocked !");
-			return;
-		}
-
-		Logger.debug(this, "Unlock writting");
-		this.lockWriting = false;
-	}
-
-	public synchronized void unlockReading() {
-		if(!this.lockReading) {
-			Logger.notice(this, "Reading already unlocked !");
-			return;
-		}
-
-		Logger.debug(this, "Unlock reading");
-		this.lockReading = false;
-	}
-
-	public boolean isWritingLocked() {
-		return this.lockWriting;
-	}
-
-	public boolean isReadingLocked() {
-		return this.lockReading;
-	}
 
 	/**
 	 * Doesn't check the lock state ! You have to manage it yourself.
@@ -277,12 +225,41 @@ public class FCPConnection extends Observable {
 		return true;
 	}
 
+	/**
+	 * @return true if it must wait on this FCPConnection object
+	 */
+	public void addToWriterQueue() {
+		synchronized(monitor) {
+			writersWaiting++;
+
+			if (writersWaiting > 1) {
+				try {
+					monitor.wait();
+				} catch(java.lang.InterruptedException e) {
+					Logger.warning(this, "Interrupted while waiting ?!");
+				}
+			}
+
+			return;
+		}
+	}
+
+	public void removeFromWriterQueue() {
+		synchronized(monitor) {
+			writersWaiting--;
+			if (writersWaiting < 0) {
+				Logger.warning(this, "Negative number of writers ?!");
+				writersWaiting = 0;
+			}
+			monitor.notify();
+		}
+	}
 
 	public boolean isWriting() {
 		if( !this.isConnected() )
 			return false;
 
-		return ( this.isWritingLocked() || ((System.currentTimeMillis() - this.lastWrite) < 300) );
+		return ( writersWaiting > 0 || ((System.currentTimeMillis() - this.lastWrite) < 300) );
 	}
 
 	public boolean write(String toWrite) {
@@ -291,16 +268,8 @@ public class FCPConnection extends Observable {
 
 	public boolean write(String toWrite, boolean checkLock) {
 
-		if(checkLock && this.isWritingLocked()) {
-			Logger.verbose(this, "Writting lock, unable to write.");
-		}
-
-		while(checkLock && this.isWritingLocked()) {
-			try {
-				Thread.sleep(200);
-			} catch(java.lang.InterruptedException e) {
-				/* On s'en fout, mais alors d'une force ... */
-			}
+		if (checkLock) {
+			addToWriterQueue();
 		}
 
 		Logger.asIt(this, "Thaw >>> Node :");
@@ -309,15 +278,20 @@ public class FCPConnection extends Observable {
 
 		if(this.out != null && this.socket != null && this.socket.isConnected()) {
 			try {
-				this.bufferedOut.write(toWrite.getBytes("UTF-8"));
+				bufferedOut.write(toWrite.getBytes("UTF-8"));
 			} catch(java.io.UnsupportedEncodingException e) {
 				Logger.error(this, "UNSUPPORTED ENCODING EXCEPTION : UTF-8");
-				this.bufferedOut.write(toWrite.getBytes());
+				bufferedOut.write(toWrite.getBytes());
 			}
 		} else {
 			Logger.warning(this, "Cannot write if disconnected !\n");
+			if (checkLock)
+				removeFromWriterQueue();
 			return false;
 		}
+
+		if (checkLock)
+			removeFromWriterQueue();
 		return true;
 	}
 
@@ -333,14 +307,14 @@ public class FCPConnection extends Observable {
 	 * @see #read(int, byte[])
 	 */
 	public int read(byte[] buf) {
-		return this.read(buf.length, buf);
+		return read(buf.length, buf);
 	}
 
 	/**
 	 * @param lng Obsolete.
 	 * @return -1 Disconnection.
 	 */
-	public synchronized int read(int lng, byte[] buf) {
+	public int read(int lng, byte[] buf) {
 		int rdBytes = 0;
 		try {
 			rdBytes = this.reader.read(buf);

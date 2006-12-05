@@ -518,8 +518,8 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 				return;
 
 			try {
-				if(this.queryManager.getConnection().isConnected()
-				   && !this.queryManager.getConnection().isWritingLocked()
+				if(queryManager.getConnection().isConnected()
+				   && !queryManager.getConnection().isWriting()
 				   && queueCompleted) {
 
 					this.schedule();
