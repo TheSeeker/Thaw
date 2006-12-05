@@ -411,6 +411,7 @@ public class IndexManagementHelper {
 			parent = tree.getRoot();
 
 		Index index = new Index(db, queueManager, uIndexList, -2, parent, name, name, publicKey, privateKey, 0, null);
+		uIndexList.removeLink(index);
 
 		index.create();
 
@@ -419,8 +420,6 @@ public class IndexManagementHelper {
 		parent.insert(index.getTreeNode(), 0);
 
 		tree.reloadModel(parent);
-
-		uIndexList.removeLink(index);
 	}
 
 

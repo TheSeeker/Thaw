@@ -36,18 +36,20 @@ public class Hsqldb extends LibraryPlugin {
 
 
 	public synchronized void lockWriting() {
+		/*
 		while(writeLock > 0) {
 			try {
 				Thread.sleep(100);
 			} catch(java.lang.InterruptedException e) {
-				/* \_o< */
+
 			}
 		}
 		writeLock++;
+		*/
 	}
 
 	public synchronized void unlockWriting() {
-		writeLock = 0;
+		//writeLock = 0;
 	}
 
 	public void realStart() {
