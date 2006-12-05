@@ -24,6 +24,7 @@ public class FileChooser {
 		this.fileChooser.setDialogTitle(title);
 	}
 
+
 	public void setDirectoryOnly(boolean v) {
 		if(v)
 			this.fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);

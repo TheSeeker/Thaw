@@ -207,6 +207,14 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		indexMenu.add(item);
 		indexAndFileActions.add(new IndexManagementHelper.IndexRenamer(this, item));
 
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.exportIndex"));
+		indexMenu.add(item);
+		indexAndFileActions.add(new IndexManagementHelper.IndexExporter(item));
+
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.importIndex"));
+		indexMenu.add(item);
+		indexAndFileActions.add(new IndexManagementHelper.IndexImporter(item));
+
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.delete"));
 		indexMenu.add(item);
 		indexAndFileActions.add(new IndexManagementHelper.IndexDeleter(this, item));

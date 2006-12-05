@@ -21,6 +21,9 @@ import javax.swing.JTextArea;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JFileChooser;
+
+import java.io.FileOutputStream;
 
 import java.util.Vector;
 import java.util.Iterator;
@@ -32,7 +35,6 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 
-import thaw.core.FileChooser;
 import thaw.core.Config;
 import thaw.core.I18n;
 import thaw.core.FreenetURIHelper;
@@ -41,6 +43,7 @@ import thaw.plugins.Hsqldb;
 import thaw.fcp.*;
 import thaw.core.Logger;
 import thaw.core.MainWindow;
+import thaw.core.FileChooser;
 
 /**
  * Index.java, IndexCategory.java and IndexTree.java must NEVER use this helper (to avoid loops).
@@ -591,6 +594,70 @@ public class IndexManagementHelper {
 		node.rename(newName);
 
 		tree.reloadModel(node.getTreeNode());
+	}
+
+
+
+	public static class IndexExporter extends BasicIndexAction {
+		public IndexExporter(AbstractButton actionSource) {
+			super(null, null, null, null, actionSource);
+		}
+
+		public void setTarget(IndexTreeNode node) {
+			super.setTarget(node);
+			getActionSource().setEnabled(node != null && node instanceof Index);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			java.io.File newFile;
+
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle(I18n.getMessage("thaw.plugin.index.exportIndex"));
+			fileChooser.setDirectoryOnly(false);
+			fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
+			newFile = fileChooser.askOneFile();
+
+			if (newFile == null)
+				return;
+
+			FileOutputStream out;
+
+			try {
+				out = new FileOutputStream(newFile);
+			} catch(java.io.FileNotFoundException excep) {
+				Logger.warning(this, "Unable to create file '"+newFile.toString()+"' ! not generated  because : "+excep.toString());
+				return;
+			}
+
+			((Index)getTarget()).generateXML(out);
+		}
+	}
+
+
+	public static class IndexImporter extends BasicIndexAction {
+		public IndexImporter(AbstractButton actionSource) {
+			super(null, null, null, null, actionSource);
+		}
+
+		public void setTarget(IndexTreeNode node) {
+			super.setTarget(node);
+			getActionSource().setEnabled(node != null && node instanceof Index);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			java.io.File newFile;
+
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle(I18n.getMessage("thaw.plugin.index.importIndex"));
+			fileChooser.setDirectoryOnly(false);
+			fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
+			newFile = fileChooser.askOneFile();
+
+			if (newFile == null)
+				return;
+
+			((Index)getTarget()).loadXML(newFile.getPath());
+		}
 	}
 
 
