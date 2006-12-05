@@ -36,14 +36,16 @@ public class SearchBar implements ActionListener {
 		this.queueManager = queueManager;
 
 		this.panel = new JPanel();
-		this.panel.setLayout(new BorderLayout(10, 10));
+		this.panel.setLayout(new BorderLayout(0, 0));
 
 		this.userText = new JTextField("");
 		this.validationButton = new JButton("  "+I18n.getMessage("thaw.common.search")+"  ");
 
-		this.panel.add(new JLabel(I18n.getMessage("thaw.plugin.index.search.label")), BorderLayout.WEST);
-		this.panel.add(this.userText, BorderLayout.CENTER);
-		this.panel.add(this.validationButton, BorderLayout.EAST);
+		JLabel label = new JLabel(I18n.getMessage("thaw.plugin.index.search.label"));
+
+		panel.add(label, BorderLayout.NORTH);
+		panel.add(userText, BorderLayout.CENTER);
+		panel.add(validationButton, BorderLayout.EAST);
 
 		this.userText.addActionListener(this);
 		this.validationButton.addActionListener(this);
