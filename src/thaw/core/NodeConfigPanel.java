@@ -1,13 +1,13 @@
 package thaw.core;
 
-import javax.swing.JPanel;
 import java.awt.GridLayout;
-import javax.swing.JTextField;
-import javax.swing.JLabel;
-import javax.swing.JCheckBox;
-
-import java.util.Observer;
 import java.util.Observable;
+import java.util.Observer;
+
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 /**
  * NodeConfigPanel. Creates and manages the panel containing all the things to configure
@@ -39,98 +39,98 @@ public class NodeConfigPanel implements Observer {
 	private final static String[] currentValues = new String[6];
 
 
-	private JLabel[] paramLabels = new JLabel[paramNames.length];
-	private JTextField[] paramFields = new JTextField[configNames.length];
+	private final JLabel[] paramLabels = new JLabel[NodeConfigPanel.paramNames.length];
+	private final JTextField[] paramFields = new JTextField[NodeConfigPanel.configNames.length];
 
 	private JCheckBox multipleSockets = null;
 	private ConfigWindow configWindow = null;
 
 
-	public NodeConfigPanel(ConfigWindow configWindow, Core core) {
+	public NodeConfigPanel(final ConfigWindow configWindow, final Core core) {
 		this.core = core;
 		this.configWindow = configWindow;
 
-		this.nodeConfigPanel = new JPanel();
-		this.nodeConfigPanel.setLayout(new GridLayout(15, 1));
+		nodeConfigPanel = new JPanel();
+		nodeConfigPanel.setLayout(new GridLayout(15, 1));
 
-		for(int i=0; i < paramNames.length ; i++) {
+		for(int i=0; i < NodeConfigPanel.paramNames.length ; i++) {
 			String value;
 
-			if( (value = core.getConfig().getValue(configNames[i])) == null)
+			if( (value = core.getConfig().getValue(NodeConfigPanel.configNames[i])) == null)
 				value = "";
 
-			this.paramLabels[i] = new JLabel(paramNames[i]);
-			this.paramFields[i] = new JTextField(value);
-			currentValues[i] = value;
+			paramLabels[i] = new JLabel(NodeConfigPanel.paramNames[i]);
+			paramFields[i] = new JTextField(value);
+			NodeConfigPanel.currentValues[i] = value;
 
-			this.nodeConfigPanel.add(this.paramLabels[i]);
-			this.nodeConfigPanel.add(this.paramFields[i]);
+			nodeConfigPanel.add(paramLabels[i]);
+			nodeConfigPanel.add(paramFields[i]);
 		}
 
-		this.multipleSockets = new JCheckBox(I18n.getMessage("thaw.config.multipleSockets"),
+		multipleSockets = new JCheckBox(I18n.getMessage("thaw.config.multipleSockets"),
 						Boolean.valueOf(core.getConfig().getValue("multipleSockets")).booleanValue());
-		this.nodeConfigPanel.add(new JLabel(" "));
-		this.nodeConfigPanel.add(this.multipleSockets);
+		nodeConfigPanel.add(new JLabel(" "));
+		nodeConfigPanel.add(multipleSockets);
 
-		this.setVisibility(Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
+		setVisibility(Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
 
 		configWindow.addObserver(this);
 	}
 
 	public JPanel getPanel() {
-		return this.nodeConfigPanel;
+		return nodeConfigPanel;
 	}
 
-	private void setVisibility(boolean advancedMode) {
-		for(int i= 2; i < paramNames.length;i++) {
-			this.paramLabels[i].setVisible(advancedMode);
-			this.paramFields[i].setVisible(advancedMode);
+	private void setVisibility(final boolean advancedMode) {
+		for(int i= 2; i < NodeConfigPanel.paramNames.length;i++) {
+			paramLabels[i].setVisible(advancedMode);
+			paramFields[i].setVisible(advancedMode);
 		}
 
-		this.multipleSockets.setVisible(advancedMode);
+		multipleSockets.setVisible(advancedMode);
 	}
 
 
 	public boolean hasAValueChanged() {
-		for(int i=0; i < paramNames.length ; i++) {
-			if (!this.paramFields[i].getText().equals(currentValues[i]))
+		for(int i=0; i < NodeConfigPanel.paramNames.length ; i++) {
+			if (!paramFields[i].getText().equals(NodeConfigPanel.currentValues[i]))
 				return true;
 		}
 
-		if (this.core.getConfig().getValue("multipleSockets") == null
-		    || !this.core.getConfig().getValue("multipleSockets").equals(Boolean.toString(this.multipleSockets.isSelected())))
+		if ((core.getConfig().getValue("multipleSockets") == null)
+		    || !core.getConfig().getValue("multipleSockets").equals(Boolean.toString(multipleSockets.isSelected())))
 			return true;
 
 		return false;
 	}
 
 
-	public void update(Observable o, Object arg) {
-		if(arg == this.core.getConfigWindow().getOkButton()) {
-			if (this.hasAValueChanged())
-				this.configWindow.willNeedConnectionReset();
+	public void update(final Observable o, final Object arg) {
+		if(arg == core.getConfigWindow().getOkButton()) {
+			if (hasAValueChanged())
+				configWindow.willNeedConnectionReset();
 
-			for(int i=0;i < paramNames.length;i++) {
-				this.core.getConfig().setValue(configNames[i], this.paramFields[i].getText());
+			for(int i=0;i < NodeConfigPanel.paramNames.length;i++) {
+				core.getConfig().setValue(NodeConfigPanel.configNames[i], paramFields[i].getText());
 			}
 
-			this.core.getConfig().setValue("multipleSockets", Boolean.toString(this.multipleSockets.isSelected()));
+			core.getConfig().setValue("multipleSockets", Boolean.toString(multipleSockets.isSelected()));
 
-			this.setVisibility(Boolean.valueOf(this.core.getConfig().getValue("advancedMode")).booleanValue());
+			setVisibility(Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
 		}
 
 
-		if(arg == this.core.getConfigWindow().getCancelButton()) {
-			for(int i=0;i < paramNames.length;i++) {
+		if(arg == core.getConfigWindow().getCancelButton()) {
+			for(int i=0;i < NodeConfigPanel.paramNames.length;i++) {
 				String value;
 
-				if( (value = this.core.getConfig().getValue(configNames[i])) == null)
+				if( (value = core.getConfig().getValue(NodeConfigPanel.configNames[i])) == null)
 					value = "";
 
-				this.paramFields[i].setText(value);
+				paramFields[i].setText(value);
 			}
 
-			this.multipleSockets.setSelected(Boolean.valueOf(this.core.getConfig().getValue("multipleSockets")).booleanValue());
+			multipleSockets.setSelected(Boolean.valueOf(core.getConfig().getValue("multipleSockets")).booleanValue());
 		}
 	}
 

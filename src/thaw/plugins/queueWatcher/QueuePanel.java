@@ -1,46 +1,45 @@
 package thaw.plugins.queueWatcher;
 
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.JLabel;
-import javax.swing.JButton;
-import javax.swing.JScrollPane;
-import javax.swing.JProgressBar;
-import javax.swing.JFileChooser;
-import javax.swing.SwingConstants;
-
-import java.awt.Dimension;
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.util.Vector;
-import java.util.Iterator;
-
-import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.Color;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.KeyEvent;
-
-import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JMenu;
-import javax.swing.JRadioButtonMenuItem;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.ButtonGroup;
-import javax.swing.table.JTableHeader;
-
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
-
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
+import java.util.Iterator;
+import java.util.Vector;
 
-import thaw.core.*;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JProgressBar;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
 
-import thaw.fcp.*;
+import thaw.core.Core;
+import thaw.core.FileChooser;
+import thaw.core.I18n;
+import thaw.core.IconBox;
+import thaw.core.Logger;
+import thaw.fcp.FCPTransferQuery;
 
 public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	private Core core;
@@ -74,23 +73,23 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 	private boolean insertionQueue = false;
 
-	public QueuePanel(Core core, DetailPanel detailPanel,
+	public QueuePanel(final Core core, final DetailPanel detailPanel,
 			  boolean isForInsertionQueue) {
 
-		this.insertionQueue = isForInsertionQueue;
+		insertionQueue = isForInsertionQueue;
 
 		this.core = core;
 		this.detailPanel = detailPanel;
 
-		this.tableModel = new QueueTableModel(isForInsertionQueue, core.getQueueManager());
+		tableModel = new QueueTableModel(isForInsertionQueue, core.getQueueManager());
 
-		this.table = new JTable(this.tableModel);
+		table = new JTable(tableModel);
 
-		this.table.setShowGrid(true);
+		table.setShowGrid(true);
 
-		JTableHeader header = this.table.getTableHeader();
+		final JTableHeader header = table.getTableHeader();
 		header.setUpdateTableInRealTime(true);
-		header.addMouseListener(this.tableModel.new ColumnListener(this.table));
+		header.addMouseListener(tableModel.new ColumnListener(table));
 		header.setReorderingAllowed(true);
 
 		if(isForInsertionQueue) {
@@ -105,87 +104,87 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		button.setHorizontalAlignment(SwingConstants.LEFT);
 		button.setPreferredSize(new Dimension(190, 40));
 
-		JPanel buttonPanel = new JPanel(new BorderLayout());
+		final JPanel buttonPanel = new JPanel(new BorderLayout());
 		buttonPanel.add(button, BorderLayout.EAST);
 		buttonPanel.add(new JLabel(""), BorderLayout.CENTER);
 
-		this.panel = new JPanel();
-		this.panel.setLayout(new BorderLayout());
+		panel = new JPanel();
+		panel.setLayout(new BorderLayout());
 
-		this.panel.add(buttonPanel, BorderLayout.NORTH);
+		panel.add(buttonPanel, BorderLayout.NORTH);
 
-		this.scrollPane = new JScrollPane(this.table);
-		this.panel.add(this.scrollPane, BorderLayout.CENTER);
+		scrollPane = new JScrollPane(table);
+		panel.add(scrollPane, BorderLayout.CENTER);
 
-		this.table.setDefaultRenderer( this.table.getColumnClass(0), new ProgressRenderer(this.table, this.tableModel, isForInsertionQueue) );
+		table.setDefaultRenderer( table.getColumnClass(0), new ProgressRenderer(table, tableModel, isForInsertionQueue) );
 
-		this.tableModel.addTableModelListener(this.table);
+		tableModel.addTableModelListener(table);
 
-		this.rightClickMenu = new JPopupMenu();
-		this.clearFinishedItem = new JMenuItem(I18n.getMessage("thaw.common.clearFinished"));
-		this.removeItem = new JMenuItem(I18n.getMessage("thaw.common.removeFromTheList"));
-		this.cancelItem = new JMenuItem(I18n.getMessage("thaw.common.cancel"));
-		this.delayItem = new JMenuItem(I18n.getMessage("thaw.common.delay"));
-		this.downloadItem = new JMenuItem(I18n.getMessage("thaw.common.downloadLocally"));
-		this.forceRestartItem = new JMenuItem(I18n.getMessage("thaw.common.forceRestart"));
-		this.copyKeysItem = new JMenuItem(I18n.getMessage("thaw.common.copyKeysToClipboard"));
-		JMenu priorityMenu = new JMenu(I18n.getMessage("thaw.common.priority"));
+		rightClickMenu = new JPopupMenu();
+		clearFinishedItem = new JMenuItem(I18n.getMessage("thaw.common.clearFinished"));
+		removeItem = new JMenuItem(I18n.getMessage("thaw.common.removeFromTheList"));
+		cancelItem = new JMenuItem(I18n.getMessage("thaw.common.cancel"));
+		delayItem = new JMenuItem(I18n.getMessage("thaw.common.delay"));
+		downloadItem = new JMenuItem(I18n.getMessage("thaw.common.downloadLocally"));
+		forceRestartItem = new JMenuItem(I18n.getMessage("thaw.common.forceRestart"));
+		copyKeysItem = new JMenuItem(I18n.getMessage("thaw.common.copyKeysToClipboard"));
+		final JMenu priorityMenu = new JMenu(I18n.getMessage("thaw.common.priority"));
 
-		this.priorityGroup = new ButtonGroup();
-		this.priorityRadioButton = new JRadioButtonMenuItem[this.MIN_PRIORITY+1];
-		for(int i =0 ; i <= this.MIN_PRIORITY ; i++) {
-			this.priorityRadioButton[i] = new JRadioButtonMenuItem(I18n.getMessage("thaw.plugin.priority.p"+Integer.toString(i)));
-			this.priorityRadioButton[i].addActionListener(this);
-			priorityMenu.add(this.priorityRadioButton[i]);
-			this.priorityGroup.add(this.priorityRadioButton[i]);
+		priorityGroup = new ButtonGroup();
+		priorityRadioButton = new JRadioButtonMenuItem[MIN_PRIORITY+1];
+		for(int i =0 ; i <= MIN_PRIORITY ; i++) {
+			priorityRadioButton[i] = new JRadioButtonMenuItem(I18n.getMessage("thaw.plugin.priority.p"+Integer.toString(i)));
+			priorityRadioButton[i].addActionListener(this);
+			priorityMenu.add(priorityRadioButton[i]);
+			priorityGroup.add(priorityRadioButton[i]);
 		}
-		this.unknowPriority = new JRadioButtonMenuItem("Coin");
-		this.priorityGroup.add(this.unknowPriority);
+		unknowPriority = new JRadioButtonMenuItem("Coin");
+		priorityGroup.add(unknowPriority);
 
-		this.rightClickMenu.add(this.clearFinishedItem);
-		this.rightClickMenu.add(this.removeItem);
+		rightClickMenu.add(clearFinishedItem);
+		rightClickMenu.add(removeItem);
 
-		if( Integer.parseInt(core.getConfig().getValue("maxSimultaneousDownloads")) >= 0
-		   || Integer.parseInt(core.getConfig().getValue("maxSimultaneousInsertions")) >= 0)
-			this.rightClickMenu.add(this.cancelItem);
+		if( (Integer.parseInt(core.getConfig().getValue("maxSimultaneousDownloads")) >= 0)
+		   || (Integer.parseInt(core.getConfig().getValue("maxSimultaneousInsertions")) >= 0))
+			rightClickMenu.add(cancelItem);
 
-		if( Integer.parseInt(core.getConfig().getValue("maxSimultaneousDownloads")) >= 0
-		   || Integer.parseInt(core.getConfig().getValue("maxSimultaneousInsertions")) >= 0)
-			this.rightClickMenu.add(this.delayItem);
+		if( (Integer.parseInt(core.getConfig().getValue("maxSimultaneousDownloads")) >= 0)
+		   || (Integer.parseInt(core.getConfig().getValue("maxSimultaneousInsertions")) >= 0))
+			rightClickMenu.add(delayItem);
 
 		if(!isForInsertionQueue)
-			this.rightClickMenu.add(this.downloadItem);
+			rightClickMenu.add(downloadItem);
 
-		this.rightClickMenu.add(this.forceRestartItem);
-		this.rightClickMenu.add(this.copyKeysItem);
+		rightClickMenu.add(forceRestartItem);
+		rightClickMenu.add(copyKeysItem);
 
 		if( Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue() == true) {
-			this.rightClickMenu.add(priorityMenu);
+			rightClickMenu.add(priorityMenu);
 		}
 
-		this.clearFinishedItem.addActionListener(this);
-		this.removeItem.addActionListener(this);
-		this.cancelItem.addActionListener(this);
-		this.copyKeysItem.addActionListener(this);
-		this.forceRestartItem.addActionListener(this);
-		this.delayItem.addActionListener(this);
-		this.downloadItem.addActionListener(this);
+		clearFinishedItem.addActionListener(this);
+		removeItem.addActionListener(this);
+		cancelItem.addActionListener(this);
+		copyKeysItem.addActionListener(this);
+		forceRestartItem.addActionListener(this);
+		delayItem.addActionListener(this);
+		downloadItem.addActionListener(this);
 
-		this.table.addMouseListener(this);
-		this.table.addKeyListener(this);
+		table.addMouseListener(this);
+		table.addKeyListener(this);
 
 		/* If a queue is already existing, we need to add it */
 		if(core.getQueueManager() != null) {
 			this.addToTable(core.getQueueManager().getRunningQueue());
 
-			Vector[] pendingQueues = core.getQueueManager().getPendingQueues();
+			final Vector[] pendingQueues = core.getQueueManager().getPendingQueues();
 			for(int i = 0 ; i < pendingQueues.length ; i++) {
 				this.addToTable(pendingQueues[i]);
 			}
 		}
 	}
 
-	public void addMenuItem(JMenuItem item) {
+	public void addMenuItem(final JMenuItem item) {
 		rightClickMenu.insert(item, 0);
 	}
 
@@ -206,25 +205,25 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		private JTable tabl = null;
 		private boolean insertionQueue;
 
-		public ProgressRenderer(JTable table, QueueTableModel model, boolean isForInsertion) {
+		public ProgressRenderer(final JTable table, final QueueTableModel model, final boolean isForInsertion) {
 			this.model = model;
-			this.tabl = table;
-			this.insertionQueue = isForInsertion;
+			tabl = table;
+			insertionQueue = isForInsertion;
 		}
 
-		public Component getTableCellRendererComponent(JTable table, Object value,
-							       boolean isSelected, boolean hasFocus,
-							       int row, int column) {
+		public Component getTableCellRendererComponent(final JTable table, final Object value,
+							       boolean isSelected, final boolean hasFocus,
+							       final int row, final int column) {
 
 			if(value == null)
 				return null;
 
-			FCPTransferQuery query = this.model.getQuery(row);
+			final FCPTransferQuery query = model.getQuery(row);
 
 			if(value instanceof Integer) {
 
-				Integer progress = (Integer)value;
-				JProgressBar bar = new JProgressBar(0, 100);
+				final Integer progress = (Integer)value;
+				final JProgressBar bar = new JProgressBar(0, 100);
 
 				bar.setStringPainted(true);
 				bar.setBorderPainted(false);
@@ -248,7 +247,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 			}
 
 
-			Component cell = super.getTableCellRendererComponent(table, value,
+			final Component cell = super.getTableCellRendererComponent(table, value,
 									     isSelected, hasFocus,
 									     row, column);
 
@@ -258,13 +257,13 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 					return null;
 
 				if(!query.isRunning() && !query.isFinished())
-					cell.setBackground(this.PENDING);
+					cell.setBackground(PENDING);
 				if(query.isFinished() && query.isSuccessful())
-					cell.setBackground(this.SUCCESS);
+					cell.setBackground(SUCCESS);
 				if(query.isFinished() && !query.isSuccessful())
-					cell.setBackground(this.FAILURE);
+					cell.setBackground(FAILURE);
 				if(query.isRunning() && !query.isFinished())
-					cell.setBackground(this.RUNNING);
+					cell.setBackground(RUNNING);
 			}
 
 
@@ -275,17 +274,17 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 
 	public void reloadSelections() {
-		this.selectedRows = this.table.getSelectedRows();
+		selectedRows = table.getSelectedRows();
 
-		if(this.selectedRows.length > 1 || this.selectedRows.length < 1) {
-			this.resetPriorityRadioButtons();
+		if((selectedRows.length > 1) || (selectedRows.length < 1)) {
+			resetPriorityRadioButtons();
 		} else {
-			FCPTransferQuery query = this.tableModel.getQuery(this.selectedRows[0]);
+			final FCPTransferQuery query = tableModel.getQuery(selectedRows[0]);
 
 			if (query == null)
 				return;
 
-			this.priorityRadioButton[query.getFCPPriority()].setSelected(true);
+			priorityRadioButton[query.getFCPPriority()].setSelected(true);
 		}
 	}
 
@@ -294,15 +293,15 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	 * Doesn't refresh the selection !
 	 */
 	public Vector getSelectedQueries() {
-		Vector queries = new Vector();
-		Vector initialQueries = this.tableModel.getQueries();
+		final Vector queries = new Vector();
+		final Vector initialQueries = tableModel.getQueries();
 
-		if(this.selectedRows == null)
+		if(selectedRows == null)
 			return queries;
 
 		/* Create a separate vector to avoid collisions */
-		for(int i = 0 ; i < this.selectedRows.length; i++) {
-			queries.add(initialQueries.get(this.selectedRows[i]));
+		for(int i = 0 ; i < selectedRows.length; i++) {
+			queries.add(initialQueries.get(selectedRows[i]));
 		}
 
 		return queries;
@@ -310,57 +309,57 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 
 	public void resetTable() {
-		this.tableModel.resetTable();
+		tableModel.resetTable();
 	}
 
 
-	public void addToTable(FCPTransferQuery query) {
-		if( (this.insertionQueue && query.getQueryType() == 2)
-		    || (!this.insertionQueue && query.getQueryType() == 1)) {
-			this.tableModel.addQuery(query);
+	public void addToTable(final FCPTransferQuery query) {
+		if( (insertionQueue && (query.getQueryType() == 2))
+		    || (!insertionQueue && (query.getQueryType() == 1))) {
+			tableModel.addQuery(query);
 		}
 	}
 
 	/**
 	 * @param queries Vector of FCPTransferQuery only
 	 */
-	public synchronized void addToTable(Vector queries) {
+	public synchronized void addToTable(final Vector queries) {
 		try {
-			for(Iterator queryIt = queries.iterator();
+			for(final Iterator queryIt = queries.iterator();
 			    queryIt.hasNext();) {
 
-				FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
+				final FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
 
 				this.addToTable(query);
 			}
 
-		} catch(java.util.ConcurrentModificationException e) {
+		} catch(final java.util.ConcurrentModificationException e) {
 			Logger.notice(this, "Collision.");
 		}
 	}
 
 
 	public void refreshDetailPanel() {
-		int selected = this.table.getSelectedRow();
+		final int selected = table.getSelectedRow();
 
 
 		if(selected != -1) {
-			FCPTransferQuery query = this.tableModel.getQuery(selected);
-			this.detailPanel.setQuery(query);
+			final FCPTransferQuery query = tableModel.getQuery(selected);
+			detailPanel.setQuery(query);
 		}
 	}
 
 	private void resetPriorityRadioButtons() {
-		this.unknowPriority.setSelected(true);
+		unknowPriority.setSelected(true);
 	}
 
 	public JPanel getPanel() {
-		return this.panel;
+		return panel;
 	}
 
 
 	public JTable getTable() {
-		return this.table;
+		return table;
 	}
 
 
@@ -368,23 +367,23 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		ActionEvent e;
 		Vector queries;
 
-		public ActionReplier(ActionEvent e, Vector queries) {
+		public ActionReplier(final ActionEvent e, final Vector queries) {
 			this.e = e;
 			this.queries = queries;
 		}
 
 		public void run() {
-			Toolkit tk = Toolkit.getDefaultToolkit();
+			final Toolkit tk = Toolkit.getDefaultToolkit();
 			String keys = "";
 			File dir = null;
 
-			if(this.e.getSource() == QueuePanel.this.clearFinishedItem) {
-				QueuePanel.this.removeAllFinishedTransfers();
+			if(e.getSource() == clearFinishedItem) {
+				removeAllFinishedTransfers();
 				return;
 			}
 
-			if(this.e.getSource() == QueuePanel.this.downloadItem) {
-				FileChooser fileChooser = new FileChooser();
+			if(e.getSource() == downloadItem) {
+				final FileChooser fileChooser = new FileChooser();
 				fileChooser.setTitle(I18n.getMessage("thaw.common.downloadLocally"));
 				fileChooser.setDirectoryOnly(true);
 				fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
@@ -397,18 +396,18 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 			int prioritySelected = 0;
 
 			for(prioritySelected = 0;
-			    prioritySelected <= QueuePanel.this.MIN_PRIORITY;
+			    prioritySelected <= MIN_PRIORITY;
 			    prioritySelected++) {
-				if(QueuePanel.this.priorityRadioButton[prioritySelected] == this.e.getSource()) {
+				if(priorityRadioButton[prioritySelected] == e.getSource()) {
 					break;
 				}
 			}
 
-			if(prioritySelected > QueuePanel.this.MIN_PRIORITY)
+			if(prioritySelected > MIN_PRIORITY)
 				prioritySelected = -1;
 
-			for(Iterator queryIt = this.queries.iterator() ; queryIt.hasNext() ;) {
-				FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
+			for(final Iterator queryIt = queries.iterator() ; queryIt.hasNext() ;) {
+				final FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
 
 				if(query == null)
 					continue;
@@ -420,45 +419,45 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 					}
 				}
 
-				if(this.e.getSource() == QueuePanel.this.removeItem) {
+				if(e.getSource() == removeItem) {
 
-					if(query.stop(QueuePanel.this.core.getQueueManager())) {
-						QueuePanel.this.core.getQueueManager().remove(query);
+					if(query.stop(core.getQueueManager())) {
+						core.getQueueManager().remove(query);
 					}
 				}
 
-				if(this.e.getSource() == QueuePanel.this.cancelItem) {
-					query.stop(QueuePanel.this.core.getQueueManager());
+				if(e.getSource() == cancelItem) {
+					query.stop(core.getQueueManager());
 				}
 
-				if(this.e.getSource() == QueuePanel.this.delayItem) {
+				if(e.getSource() == delayItem) {
 					if(query.isRunning() && !query.isFinished()) {
-						query.pause(QueuePanel.this.core.getQueueManager());
-						QueuePanel.this.core.getQueueManager().moveFromRunningToPendingQueue(query);
+						query.pause(core.getQueueManager());
+						core.getQueueManager().moveFromRunningToPendingQueue(query);
 					}
 				}
 
-				if(this.e.getSource() == QueuePanel.this.forceRestartItem) {
-					query.stop(QueuePanel.this.core.getQueueManager());
+				if(e.getSource() == forceRestartItem) {
+					query.stop(core.getQueueManager());
 
 					if(query.getMaxAttempt() >= 0)
 						query.setAttempt(0);
 
-					query.start(QueuePanel.this.core.getQueueManager());
+					query.start(core.getQueueManager());
 				}
 
-				if(this.e.getSource() == QueuePanel.this.copyKeysItem) {
-					if(query.getFileKey() != null
+				if(e.getSource() == copyKeysItem) {
+					if((query.getFileKey() != null)
 					   && !"".equals( query.getFileKey() ))
 						keys = keys + query.getFileKey() + "\n";
 				}
 
-				if(this.e.getSource() == QueuePanel.this.downloadItem
-				   && dir != null) {
+				if((e.getSource() == downloadItem)
+				   && (dir != null)) {
 					if(query.isPersistent()) {
 
 						query.saveFileTo(dir.getPath());
-						if(query.getIdentifier().startsWith(QueuePanel.this.core.getConfig().getValue("thawId")))
+						if(query.getIdentifier().startsWith(core.getConfig().getValue("thawId")))
 							query.updatePersistentRequest(true);
 					}
 				}
@@ -466,29 +465,29 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 			} /* for i in selectedRows */
 
 
-			if(this.e.getSource() == QueuePanel.this.copyKeysItem) {
-				StringSelection st = new StringSelection(keys);
-				Clipboard cp = tk.getSystemClipboard();
+			if(e.getSource() == copyKeysItem) {
+				final StringSelection st = new StringSelection(keys);
+				final Clipboard cp = tk.getSystemClipboard();
 				cp.setContents(st, this);
 			}
 
 		}
 
-		public void lostOwnership(Clipboard clipboard, java.awt.datatransfer.Transferable contents) {
+		public void lostOwnership(final Clipboard clipboard, final java.awt.datatransfer.Transferable contents) {
 			/* we dont care */
 		}
 
 	}
 
 	public void removeAllFinishedTransfers() {
-		Vector queries = this.tableModel.getQueries();
+		final Vector queries = tableModel.getQueries();
 
-		for(Iterator it = queries.iterator();
+		for(final Iterator it = queries.iterator();
 		    it.hasNext(); ) {
-			FCPTransferQuery query = (FCPTransferQuery)it.next();
+			final FCPTransferQuery query = (FCPTransferQuery)it.next();
 			if(query.isFinished()) {
-				if(query.stop(this.core.getQueueManager())) {
-					this.core.getQueueManager().remove(query);
+				if(query.stop(core.getQueueManager())) {
+					core.getQueueManager().remove(query);
 				}
 			}
 		}
@@ -497,36 +496,36 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	/**
 	 * Manage it on a different thread to avoid UI freeze.
 	 */
-	public void actionPerformed(ActionEvent e) {
-		Thread action = new Thread(new ActionReplier(e, this.getSelectedQueries()));
+	public void actionPerformed(final ActionEvent e) {
+		final Thread action = new Thread(new ActionReplier(e, getSelectedQueries()));
 
 		action.start();
 	}
 
-	public void mouseClicked(MouseEvent e) {
+	public void mouseClicked(final MouseEvent e) {
 		if(e.getButton() == MouseEvent.BUTTON3) {
-			this.reloadSelections();
-			this.queries = this.tableModel.getQueries();
-			this.rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
+			reloadSelections();
+			queries = tableModel.getQueries();
+			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
 		}
 
 		if(e.getButton() == MouseEvent.BUTTON1) {
-			this.refreshDetailPanel();
+			refreshDetailPanel();
 		}
 	}
 
-	public void mouseEntered(MouseEvent e) { }
+	public void mouseEntered(final MouseEvent e) { }
 
-	public void mouseExited(MouseEvent e) { }
+	public void mouseExited(final MouseEvent e) { }
 
-	public void mousePressed(MouseEvent e) { }
+	public void mousePressed(final MouseEvent e) { }
 
-	public void mouseReleased(MouseEvent e) { }
+	public void mouseReleased(final MouseEvent e) { }
 
-	public void keyPressed(KeyEvent e) { }
+	public void keyPressed(final KeyEvent e) { }
 
-	public void keyReleased(KeyEvent e) { this.refreshDetailPanel(); }
+	public void keyReleased(final KeyEvent e) { refreshDetailPanel(); }
 
-	public void keyTyped(KeyEvent e) { }
+	public void keyTyped(final KeyEvent e) { }
 }
 

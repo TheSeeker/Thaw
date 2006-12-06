@@ -1,19 +1,19 @@
 package thaw.plugins.index;
 
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
+
 import javax.swing.JButton;
-
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 
-import thaw.plugins.Hsqldb;
 import thaw.core.I18n;
 import thaw.core.Logger;
+import thaw.plugins.Hsqldb;
 
 /**
  * Class helping to display a dialog allowing the user to choose an index. (For example, it's used when you want
@@ -61,7 +61,7 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 	/**
 	 * Returned null if canceled. Is blocking !
 	 */
-	public String askForAnIndexURI(Hsqldb db) {
+	public String askForAnIndexURI(final Hsqldb db) {
 		frame = new JFrame(I18n.getMessage("thaw.plugin.index.selectIndex"));
 
 		frame.setVisible(false);
@@ -106,56 +106,56 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 		okButton.addActionListener(this);
 		indexTree.addObserver(this);
 
-		this.frame.setVisible(true);
+		frame.setVisible(true);
 
-		for (this.closeWin = false ; !this.closeWin ; ) {
+		for (closeWin = false ; !closeWin ; ) {
 			try {
 				Thread.sleep(500);
-			} catch(java.lang.InterruptedException e) {
+			} catch(final java.lang.InterruptedException e) {
 				/* \_o< \_o< \_o< */
 			}
 		}
 
-		this.frame.setVisible(false);
+		frame.setVisible(false);
 
-		this.frame = null;
+		frame = null;
 
 		upPanel = null;
 		indexTree = null;
 
-		this.fieldPanel = null;
-		this.keyField = null;
+		fieldPanel = null;
+		keyField = null;
 
-		this.downPanel = null;
-		this.cancelButton = null;
-		this.okButton = null;
+		downPanel = null;
+		cancelButton = null;
+		okButton = null;
 
-		return this.selectedIndexKey;
+		return selectedIndexKey;
 	}
 
 
-	public void update(java.util.Observable o, Object param) {
+	public void update(final java.util.Observable o, final Object param) {
 		if (param instanceof Index) {
-			Index index = (Index)param;
+			final Index index = (Index)param;
 			selectedIndexKey = index.getPublicKey();
 
-			Logger.info(this, "Selected index key: "+this.selectedIndexKey);
-			keyField.setText(this.selectedIndexKey);
+			Logger.info(this, "Selected index key: "+selectedIndexKey);
+			keyField.setText(selectedIndexKey);
 		}
 	}
 
-	public void actionPerformed(java.awt.event.ActionEvent e) {
-		if (e.getSource() == this.okButton) {
-			if (this.keyField.getText() == null || "".equals( this.keyField.getText() ))
-				this.selectedIndexKey = null;
+	public void actionPerformed(final java.awt.event.ActionEvent e) {
+		if (e.getSource() == okButton) {
+			if ((keyField.getText() == null) || "".equals( keyField.getText() ))
+				selectedIndexKey = null;
 			else
-				this.selectedIndexKey = this.keyField.getText();
-			this.closeWin = true;
+				selectedIndexKey = keyField.getText();
+			closeWin = true;
 		}
 
-		if (e.getSource() == this.cancelButton) {
-			this.selectedIndexKey = null;
-			this.closeWin = true;
+		if (e.getSource() == cancelButton) {
+			selectedIndexKey = null;
+			closeWin = true;
 		}
 
 		indexTree.deleteObserver(this);

@@ -1,22 +1,22 @@
 package thaw.core;
 
-import java.util.HashMap;
-import java.util.Vector;
 import java.io.File;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.Vector;
 
-/* XML */
-import org.w3c.dom.Document;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
-import org.w3c.dom.DOMImplementation;
-import javax.xml.transform.stream.StreamResult;
-import org.w3c.dom.Element;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.Transformer;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -39,22 +39,22 @@ public class Config {
 		this(null);
 	}
 
-	public Config(String filename) {
+	public Config(final String filename) {
 		if(filename != null)
-			this.configFile = new File(filename);
+			configFile = new File(filename);
 
-		this.parameters = new HashMap();
-		this.pluginNames = new Vector();
+		parameters = new HashMap();
+		pluginNames = new Vector();
 	}
 
 	/**
 	 * Returns the corresponding value
 	 * @return null if the value doesn't exit in the config.
 	 */
-	public String getValue(String key) {
+	public String getValue(final String key) {
 		try {
-			return ((String)this.parameters.get(key));
-		} catch(Exception e) { /* I should see for the correct exception */
+			return ((String)parameters.get(key));
+		} catch(final Exception e) { /* I should see for the correct exception */
 			Logger.notice(this, "Unknow key in configuration: '"+key+"'");
 			return null;
 		}
@@ -63,44 +63,44 @@ public class Config {
 	/**
 	 * Set the value in the config.
 	 */
-	public void setValue(String key, String value) {
+	public void setValue(final String key, final String value) {
 		if(value != null)
 			Logger.info(this, "Setting value '"+key+"' to '"+value+"'");
 		else
 			Logger.info(this, "Setting value '"+key+"' to null");
-		this.parameters.put(key, value);
+		parameters.put(key, value);
 	}
 
 	/**
 	 * Add the plugin at the end of the plugin list.
 	 */
-	public void addPlugin(String name) {
-		this.pluginNames.add(name);
+	public void addPlugin(final String name) {
+		pluginNames.add(name);
 	}
 
 	/**
 	 * Add the plugin at the end of the given position (shifting already existing).
 	 */
-	public void addPlugin(String name, int position) {
-		this.pluginNames.add(position, name);
+	public void addPlugin(final String name, final int position) {
+		pluginNames.add(position, name);
 	}
 
 	/**
 	 * Give a vector containing the whole list of plugins.
 	 */
 	public Vector getPluginNames() {
-		return this.pluginNames;
+		return pluginNames;
 	}
 
 	/**
 	 * Remove the given plugin.
 	 */
-	public void removePlugin(String name) {
-		for(int i = 0; i < this.pluginNames.size() ; i++) {
-			String currentPlugin = (String)this.pluginNames.get(i);
+	public void removePlugin(final String name) {
+		for(int i = 0; i < pluginNames.size() ; i++) {
+			final String currentPlugin = (String)pluginNames.get(i);
 
 			if(currentPlugin.equals(name))
-				this.pluginNames.remove(i);
+				pluginNames.remove(i);
 		}
 	}
 
@@ -110,13 +110,13 @@ public class Config {
 	 * @return true if success, else false.
 	 */
 	public boolean loadConfig() {
-		if(this.configFile == null) {
+		if(configFile == null) {
 			Logger.error(this, "loadConfig(): No file specified !");
 			return false;
 		}
 
-		if(!this.configFile.exists() || !this.configFile.canRead()) {
-			Logger.notice(this, "Unable to read config file '"+this.configFile.getPath()+"'");
+		if(!configFile.exists() || !configFile.canRead()) {
+			Logger.notice(this, "Unable to read config file '"+configFile.getPath()+"'");
 			return false;
 		}
 
@@ -131,17 +131,17 @@ public class Config {
 
 		try {
 			xmlBuilder = xmlFactory.newDocumentBuilder();
-		} catch(javax.xml.parsers.ParserConfigurationException e) {
+		} catch(final javax.xml.parsers.ParserConfigurationException e) {
 			Logger.warning(this, "Unable to load config because: "+e);
 			return false;
 		}
 
 		try {
-			xmlDoc = xmlBuilder.parse(this.configFile);
-		} catch(org.xml.sax.SAXException e) {
+			xmlDoc = xmlBuilder.parse(configFile);
+		} catch(final org.xml.sax.SAXException e) {
 			Logger.warning(this, "Unable to load config because: "+e);
 			return false;
-		} catch(java.io.IOException e) {
+		} catch(final java.io.IOException e) {
 			Logger.warning(this, "Unable to load config because: "+e);
 			return false;
 		}
@@ -149,28 +149,28 @@ public class Config {
 		rootEl = xmlDoc.getDocumentElement();
 
 
-		NodeList params = rootEl.getElementsByTagName("param");
+		final NodeList params = rootEl.getElementsByTagName("param");
 
 		for(int i = 0;i < params.getLength(); i++) {
 			Element paramEl;
-			Node paramNode = params.item(i);
+			final Node paramNode = params.item(i);
 
-			if(paramNode != null && paramNode.getNodeType() == Node.ELEMENT_NODE) {
+			if((paramNode != null) && (paramNode.getNodeType() == Node.ELEMENT_NODE)) {
 				paramEl = (Element)paramNode;
-				this.parameters.put(paramEl.getAttribute("name"), paramEl.getAttribute("value"));
+				parameters.put(paramEl.getAttribute("name"), paramEl.getAttribute("value"));
 			}
 		}
 
-		NodeList plugins = rootEl.getElementsByTagName("plugin");
+		final NodeList plugins = rootEl.getElementsByTagName("plugin");
 
 		for(int i = 0;i < plugins.getLength(); i++) {
 
 			Element pluginEl;
-			Node pluginNode = plugins.item(i);
+			final Node pluginNode = plugins.item(i);
 
-			if(pluginNode != null && pluginNode.getNodeType() == Node.ELEMENT_NODE) {
+			if((pluginNode != null) && (pluginNode.getNodeType() == Node.ELEMENT_NODE)) {
 				pluginEl = (Element)pluginNode;
-				this.pluginNames.add(pluginEl.getAttribute("name"));
+				pluginNames.add(pluginEl.getAttribute("name"));
 			}
 		}
 
@@ -186,24 +186,24 @@ public class Config {
 	public boolean saveConfig() {
 		StreamResult configOut;
 
-		if(this.configFile == null) {
+		if(configFile == null) {
 			Logger.error(this, "saveConfig(): No file specified !");
 			return false;
 		}
 
 		try {
-			if( (!this.configFile.exists() && !this.configFile.createNewFile())
-			    || !this.configFile.canWrite()) {
-				Logger.warning(this, "Unable to write config file '"+this.configFile.getPath()+"' (can't write)");
+			if( (!configFile.exists() && !configFile.createNewFile())
+			    || !configFile.canWrite()) {
+				Logger.warning(this, "Unable to write config file '"+configFile.getPath()+"' (can't write)");
 				return false;
 			}
-		} catch(java.io.IOException e) {
+		} catch(final java.io.IOException e) {
 			Logger.warning(this, "Error while checking perms to save config: "+e);
 		}
 
 
 
-		configOut = new StreamResult(this.configFile);
+		configOut = new StreamResult(configFile);
 
 		Document xmlDoc = null;
 		DocumentBuilderFactory xmlFactory = null;
@@ -216,7 +216,7 @@ public class Config {
 
 		try {
 			xmlBuilder = xmlFactory.newDocumentBuilder();
-		} catch(javax.xml.parsers.ParserConfigurationException e) {
+		} catch(final javax.xml.parsers.ParserConfigurationException e) {
 			Logger.error(this, "Unable to save configuration because: "+e.toString());
 			return false;
 		}
@@ -229,24 +229,24 @@ public class Config {
 		rootEl = xmlDoc.getDocumentElement();
 
 
-		Iterator entries = this.parameters.keySet().iterator();
+		final Iterator entries = parameters.keySet().iterator();
 
 		while(entries.hasNext()) {
-			String entry = (String)entries.next();
-			String value = (String)this.parameters.get(entry);
+			final String entry = (String)entries.next();
+			final String value = (String)parameters.get(entry);
 
-			Element paramEl = xmlDoc.createElement("param");
+			final Element paramEl = xmlDoc.createElement("param");
 			paramEl.setAttribute("name", entry);
 			paramEl.setAttribute("value", value);
 
 			rootEl.appendChild(paramEl);
 		}
 
-		Iterator plugins = this.pluginNames.iterator();
+		final Iterator plugins = pluginNames.iterator();
 
 		while(plugins.hasNext()) {
-			String pluginName = (String)plugins.next();
-			Element pluginEl = xmlDoc.createElement("plugin");
+			final String pluginName = (String)plugins.next();
+			final Element pluginEl = xmlDoc.createElement("plugin");
 
 			pluginEl.setAttribute("name", pluginName);
 
@@ -255,14 +255,14 @@ public class Config {
 
 
 		/* Serialization */
-		DOMSource domSource = new DOMSource(xmlDoc);
-		TransformerFactory transformFactory = TransformerFactory.newInstance();
+		final DOMSource domSource = new DOMSource(xmlDoc);
+		final TransformerFactory transformFactory = TransformerFactory.newInstance();
 
 		Transformer serializer;
 
 		try {
 			serializer = transformFactory.newTransformer();
-		} catch(javax.xml.transform.TransformerConfigurationException e) {
+		} catch(final javax.xml.transform.TransformerConfigurationException e) {
 			Logger.error(this, "Unable to save configuration because: "+e.toString());
 			return false;
 		}
@@ -273,7 +273,7 @@ public class Config {
 		/* final step */
 		try {
 			serializer.transform(domSource, configOut);
-		} catch(javax.xml.transform.TransformerException e) {
+		} catch(final javax.xml.transform.TransformerException e) {
 			Logger.error(this, "Unable to save configuration because: "+e.toString());
 			return false;
 		}
@@ -284,7 +284,7 @@ public class Config {
 
 
 	public boolean isEmpty() {
-		if(this.parameters.keySet().size() == 0)
+		if(parameters.keySet().size() == 0)
 			return true;
 		return false;
 	}
@@ -292,21 +292,21 @@ public class Config {
 	/**
 	 * Set the value only if it doesn't exits.
 	 */
-	public void setDefaultValue(String name, String val) {
-		if (this.getValue(name) == null)
-			this.setValue(name, val);
+	public void setDefaultValue(final String name, final String val) {
+		if (getValue(name) == null)
+			setValue(name, val);
 	}
 
 	public void setDefaultValues() {
-		this.setDefaultValue("nodeAddress", "127.0.0.1");
-		this.setDefaultValue("nodePort", "9481");
-		this.setDefaultValue("maxSimultaneousDownloads", "-1");
-		this.setDefaultValue("maxSimultaneousInsertions", "-1");
-		this.setDefaultValue("maxUploadSpeed", "-1");
-		this.setDefaultValue("thawId", "thaw_"+Integer.toString((new Random()).nextInt(1000)));
-		this.setDefaultValue("advancedMode", "false");
-		this.setDefaultValue("userNickname", "Another anonymous");
-		this.setDefaultValue("multipleSockets", "true");
+		setDefaultValue("nodeAddress", "127.0.0.1");
+		setDefaultValue("nodePort", "9481");
+		setDefaultValue("maxSimultaneousDownloads", "-1");
+		setDefaultValue("maxSimultaneousInsertions", "-1");
+		setDefaultValue("maxUploadSpeed", "-1");
+		setDefaultValue("thawId", "thaw_"+Integer.toString((new Random()).nextInt(1000)));
+		setDefaultValue("advancedMode", "false");
+		setDefaultValue("userNickname", "Another anonymous");
+		setDefaultValue("multipleSockets", "true");
 	}
 
 }

@@ -1,8 +1,9 @@
 package thaw.core;
 
+import java.util.Locale;
+
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-import java.util.Locale;
 
 
 /**
@@ -19,7 +20,7 @@ public class Main {
 		_svnBuildNumber = "@custom@";
 
 	public final static String
-		VERSION = _major + "." + _minor + " Beta r"+_svnBuildNumber;
+		VERSION = Main._major + "." + Main._minor + " Beta r"+Main._svnBuildNumber;
 
 
 	/**
@@ -39,16 +40,16 @@ public class Main {
 	 *
  	 * @param args "-?", "-help", "--help", "/?", "/help", "-lf lookandfeel"
 	 */
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		Core core;
 
-		parseCommandLine(args);
+		Main.parseCommandLine(args);
 
-		if(locale != null)
-			I18n.setLocale(new Locale(locale));
+		if(Main.locale != null)
+			I18n.setLocale(new Locale(Main.locale));
 
 		core = new Core();
-		Core.setLookAndFeel(lookAndFeel);
+		Core.setLookAndFeel(Main.lookAndFeel);
 		core.initAll();
 	}
 
@@ -60,7 +61,7 @@ public class Main {
 	 *
 	 * @param args the arguments
 	 */
-	private static void parseCommandLine(String[] args) {
+	private static void parseCommandLine(final String[] args) {
 
 		int count = 0;
 
@@ -70,20 +71,20 @@ public class Main {
 						|| "--help".equals( args[count] )
 						|| "/?".equals( args[count] )
 						|| "/help".equals( args[count] )) {
-					showHelp();
+					Main.showHelp();
 					count++;
 				} else if ("-lf".equals( args[count] )) {
-					lookAndFeel = args[count + 1];
+					Main.lookAndFeel = args[count + 1];
 					count = count + 2;
 				} else if ("-lc".equals( args[count] )) {
-					locale = args[count + 1];
+					Main.locale = args[count + 1];
 					count = count + 2;
 				} else {
-					showHelp();
+					Main.showHelp();
 				}
 			}
-		} catch (ArrayIndexOutOfBoundsException exception) {
-			showHelp();
+		} catch (final ArrayIndexOutOfBoundsException exception) {
+			Main.showHelp();
 		}
 
 	}
@@ -98,7 +99,7 @@ public class Main {
 		System.out.println("-lf     Sets the 'Look and Feel' will use.");
 		System.out.println("        (overriden by the skins preferences)\n");
 		System.out.println("        These ones are currently available:");
-		LookAndFeelInfo[] feels = UIManager.getInstalledLookAndFeels();
+		final LookAndFeelInfo[] feels = UIManager.getInstalledLookAndFeels();
 		for (int i = 0; i < feels.length; i++) {
 			System.out.println("           " + feels[i].getClassName());
 		}

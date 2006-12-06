@@ -1,19 +1,16 @@
 package thaw.plugins.index;
 
-import javax.swing.JTextField;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-
 import java.awt.BorderLayout;
-
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import thaw.core.I18n;
-
 import thaw.fcp.FCPQueueManager;
-
 import thaw.plugins.Hsqldb;
 
 public class SearchBar implements ActionListener {
@@ -29,41 +26,41 @@ public class SearchBar implements ActionListener {
 
 	private FCPQueueManager queueManager;
 
-	public SearchBar(Hsqldb db, IndexTree indexTree, FCPQueueManager queueManager, Tables tables) {
+	public SearchBar(final Hsqldb db, final IndexTree indexTree, final FCPQueueManager queueManager, final Tables tables) {
 		this.db = db;
-		this.tree = indexTree;
+		tree = indexTree;
 		this.tables = tables;
 		this.queueManager = queueManager;
 
-		this.panel = new JPanel();
-		this.panel.setLayout(new BorderLayout(0, 0));
+		panel = new JPanel();
+		panel.setLayout(new BorderLayout(0, 0));
 
-		this.userText = new JTextField("");
-		this.validationButton = new JButton("  "+I18n.getMessage("thaw.common.search")+"  ");
+		userText = new JTextField("");
+		validationButton = new JButton("  "+I18n.getMessage("thaw.common.search")+"  ");
 
-		JLabel label = new JLabel(I18n.getMessage("thaw.plugin.index.search.label"));
+		final JLabel label = new JLabel(I18n.getMessage("thaw.plugin.index.search.label"));
 
 		panel.add(label, BorderLayout.NORTH);
 		panel.add(userText, BorderLayout.CENTER);
 		panel.add(validationButton, BorderLayout.EAST);
 
-		this.userText.addActionListener(this);
-		this.validationButton.addActionListener(this);
+		userText.addActionListener(this);
+		validationButton.addActionListener(this);
 	}
 
 	public JPanel getPanel() {
-		return this.panel;
+		return panel;
 	}
 
-	public void actionPerformed(ActionEvent e) {
-		if (this.userText.getText() == null)
+	public void actionPerformed(final ActionEvent e) {
+		if (userText.getText() == null)
 			return;
 
-		this.userText.setSelectionStart(0);
-		this.userText.setSelectionEnd(this.userText.getText().length());
+		userText.setSelectionStart(0);
+		userText.setSelectionEnd(userText.getText().length());
 
-		SearchResult sr = new SearchResult(this.db, this.userText.getText(), this.tree.getSelectedNode(), this.queueManager);
-		this.tables.setList(sr);
+		final SearchResult sr = new SearchResult(db, userText.getText(), tree.getSelectedNode(), queueManager);
+		tables.setList(sr);
 	}
 
 }

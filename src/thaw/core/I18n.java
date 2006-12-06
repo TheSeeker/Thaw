@@ -42,28 +42,28 @@ public class I18n {
 	}
 
 	public static Locale getLocale() {
-		if (currentLocale == null)
-			currentLocale = Locale.getDefault();
-		return currentLocale;
+		if (I18n.currentLocale == null)
+			I18n.currentLocale = Locale.getDefault();
+		return I18n.currentLocale;
 	}
 
-	public static void setLocale(Locale locale) {
-		currentLocale = locale;
+	public static void setLocale(final Locale locale) {
+		I18n.currentLocale = locale;
 		Locale.setDefault(locale);
 	}
 
 	public static ResourceBundle getResourceBundle() {
-		return getResourceBundle(getLocale());
+		return I18n.getResourceBundle(I18n.getLocale());
 	}
 
-	public static ResourceBundle getResourceBundle(Locale locale) {
-		return ResourceBundle.getBundle("thaw.i18n.thaw", getLocale());
+	public static ResourceBundle getResourceBundle(final Locale locale) {
+		return ResourceBundle.getBundle("thaw.i18n.thaw", I18n.getLocale());
 	}
 
-	public static String getMessage(String key) {
+	public static String getMessage(final String key) {
 		try {
-			return getResourceBundle().getString(key);
-		} catch(Exception e) {
+			return I18n.getResourceBundle().getString(key);
+		} catch(final Exception e) {
 			Logger.warning(new I18n(),/* we need a ref -> random ref -> this is *bad* */
 				       "Unable to find translation for '"+key+"'");
 			return key;

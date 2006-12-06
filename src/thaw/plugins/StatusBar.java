@@ -1,10 +1,14 @@
 package thaw.plugins;
 
-import java.util.Vector;
 import java.util.Iterator;
+import java.util.Vector;
 
-import thaw.core.*;
-import thaw.fcp.*;
+import thaw.core.Core;
+import thaw.core.I18n;
+import thaw.core.Logger;
+import thaw.core.Main;
+import thaw.core.Plugin;
+import thaw.fcp.FCPTransferQuery;
 
 public class StatusBar implements Runnable, Plugin {
 	public final static int INTERVAL = 3000; /* in ms */
@@ -16,29 +20,29 @@ public class StatusBar implements Runnable, Plugin {
 
 	private boolean advancedMode = false;
 
-	public boolean run(Core core) {
+	public boolean run(final Core core) {
 		this.core = core;
 
-		this.advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
+		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 
-		this.running = true;
-		this.refresher = new Thread(this);
+		running = true;
+		refresher = new Thread(this);
 
-		this.refresher.start();
+		refresher.start();
 
 		return true;
 	}
 
 	public void run() {
-		while(this.running) {
+		while(running) {
 
 			try {
-				Thread.sleep(INTERVAL);
-			} catch(java.lang.InterruptedException e) {
+				Thread.sleep(StatusBar.INTERVAL);
+			} catch(final java.lang.InterruptedException e) {
 				// pfff :P
 			}
 
-			this.updateStatusBar();
+			updateStatusBar();
 
 		}
 
@@ -55,11 +59,11 @@ public class StatusBar implements Runnable, Plugin {
 		int total = 0;
 
 		try {
-			Vector runningQueue = this.core.getQueueManager().getRunningQueue();
+			final Vector runningQueue = core.getQueueManager().getRunningQueue();
 
-			for(Iterator it = runningQueue.iterator();
+			for(final Iterator it = runningQueue.iterator();
 			    it.hasNext(); ) {
-				FCPTransferQuery query = (FCPTransferQuery)it.next();
+				final FCPTransferQuery query = (FCPTransferQuery)it.next();
 
 				if(query.isRunning() && !query.isFinished()) {
 					running++;
@@ -78,7 +82,7 @@ public class StatusBar implements Runnable, Plugin {
 				}
 			}
 
-			Vector[] pendingQueues = this.core.getQueueManager().getPendingQueues();
+			final Vector[] pendingQueues = core.getQueueManager().getPendingQueues();
 
 			for(int i =0 ; i < pendingQueues.length; i++) {
 
@@ -87,9 +91,9 @@ public class StatusBar implements Runnable, Plugin {
 
 			}
 
-		} catch(java.util.ConcurrentModificationException e) {
+		} catch(final java.util.ConcurrentModificationException e) {
 			Logger.notice(this, "Collision !");
-			this.core.getMainWindow().setStatus(this.core.getMainWindow().getStatus()+"*");
+			core.getMainWindow().setStatus(core.getMainWindow().getStatus()+"*");
 			return;
 		}
 
@@ -97,31 +101,31 @@ public class StatusBar implements Runnable, Plugin {
 
 		String status = "Thaw "+Main.VERSION;
 
-		if(this.advancedMode) {
+		if(advancedMode) {
 			status = status
-				+ SEPARATOR + I18n.getMessage("thaw.plugin.statistics.globalProgression") + " "
+				+ StatusBar.SEPARATOR + I18n.getMessage("thaw.plugin.statistics.globalProgression") + " "
 				+ Integer.toString(progressDone) + "/" + Integer.toString(progressTotal);
 		}
 
 		status = status
-			+ SEPARATOR + I18n.getMessage("thaw.plugin.statistics.finished")+ " "
+			+ StatusBar.SEPARATOR + I18n.getMessage("thaw.plugin.statistics.finished")+ " "
 			+ Integer.toString(finished) + "/" + Integer.toString(total)
-			+ SEPARATOR + I18n.getMessage("thaw.plugin.statistics.failed") + " "
+			+ StatusBar.SEPARATOR + I18n.getMessage("thaw.plugin.statistics.failed") + " "
 			+ Integer.toString(failed) + "/" + Integer.toString(total)
-			+ SEPARATOR + I18n.getMessage("thaw.plugin.statistics.running") + " "
+			+ StatusBar.SEPARATOR + I18n.getMessage("thaw.plugin.statistics.running") + " "
 			+ Integer.toString(running) + "/" + Integer.toString(total)
-			+ SEPARATOR + I18n.getMessage("thaw.plugin.statistics.pending") + " "
+			+ StatusBar.SEPARATOR + I18n.getMessage("thaw.plugin.statistics.pending") + " "
 			+ Integer.toString(pending) + "/" + Integer.toString(total);
 
-		this.core.getMainWindow().setStatus(status);
+		core.getMainWindow().setStatus(status);
 
 	}
 
 
 	public boolean stop() {
-		this.running = false;
+		running = false;
 
-		this.core.getMainWindow().setStatus("Thaw "+Main.VERSION);
+		core.getMainWindow().setStatus("Thaw "+Main.VERSION);
 
 		return true;
 	}

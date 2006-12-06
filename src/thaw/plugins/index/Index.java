@@ -1,39 +1,45 @@
 package thaw.plugins.index;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import java.sql.*;
-
-import java.util.Vector;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Iterator;
+import java.util.Vector;
 
-import org.w3c.dom.Document;
-import javax.xml.parsers.DocumentBuilderFactory;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.xml.parsers.DocumentBuilder;
-import org.w3c.dom.DOMImplementation;
-import javax.xml.transform.stream.StreamResult;
-import org.w3c.dom.Element;
-import org.w3c.dom.Text;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.Transformer;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
-import java.io.OutputStream;
-import java.io.InputStream;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-
-import thaw.fcp.*;
+import thaw.core.FreenetURIHelper;
+import thaw.core.Logger;
+import thaw.fcp.FCPClientGet;
+import thaw.fcp.FCPClientPut;
+import thaw.fcp.FCPGenerateSSK;
+import thaw.fcp.FCPQueueManager;
+import thaw.fcp.FCPTransferQuery;
 import thaw.plugins.Hsqldb;
-import thaw.core.*;
 
 public class Index extends java.util.Observable implements FileAndLinkList, IndexTreeNode, java.util.Observer {
 
-	private Hsqldb db;
-	private IndexTree tree;
+	private final Hsqldb db;
 
 	private int id;
 	private IndexCategory parent;
@@ -52,19 +58,16 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	private FCPGenerateSSK sskGenerator;
 
-	private FCPQueueManager queueManager;
+	private final FCPQueueManager queueManager;
 	private UnknownIndexList uIndexList;
 
 	private FCPTransferQuery transfer = null;
-	private java.io.File targetFile = null;
+	private File targetFile = null;
 
-	private String author = null;
+	private String author;
 
 	private boolean rewriteKey = true;
-	private boolean xmlParserReady = false;
 	private boolean changed = false;
-
-	private FCPClientPut publicKeyRecalculation = null;
 
 	private boolean updateWhenKeyAreAvailable = false;
 
@@ -72,20 +75,16 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	 * The bigest constructor of the world ...
 	 * @param revision Ignored if the index is not modifiable (=> deduced from the publicKey)
 	 */
-	public Index(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList indexList,
-		     int id, IndexCategory parent,
+	public Index(final Hsqldb db, final FCPQueueManager queueManager, final UnknownIndexList indexList,
+		     final int id, final IndexCategory parent,
 		     String realName, String displayName,
-		     String publicKey, String privateKey,
-		     int revision,
-		     String author) {
-		this.uIndexList = indexList;
+		     final String publicKey, final String privateKey,
+		     final int revision,
+		     final String author) {
+		uIndexList = indexList;
 		this.queueManager = queueManager;
-
-		this.treeNode = new DefaultMutableTreeNode(displayName, false);
-
+		treeNode = new DefaultMutableTreeNode(displayName, false);
 		this.db = db;
-		this.tree = this.tree;
-
 		this.id = id;
 		this.parent = parent;
 		this.realName = realName.trim();
@@ -104,28 +103,28 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		setPrivateKey(privateKey);
 		setPublicKey(publicKey);
 
-		this.treeNode.setUserObject(this);
+		treeNode.setUserObject(this);
 
 		this.setTransfer();
 	}
 
-	public static boolean isDumbKey(String key) {
-		return (key == null || key.equals("") || key.length() < 20);
+	public static boolean isDumbKey(final String key) {
+		return ((key == null) || key.equals("") || (key.length() < 20));
 	}
 
-	public void setParent(IndexCategory parent) {
+	public void setParent(final IndexCategory parent) {
 		this.parent = parent;
 	}
 
 	public IndexCategory getParent() {
-		return this.parent;
+		return parent;
 	}
 
 	public DefaultMutableTreeNode getTreeNode() {
-		return this.treeNode;
+		return treeNode;
 	}
 
-	public Index getIndex(int id) {
+	public Index getIndex(final int id) {
 		return (id == getId()) ? this : null;
 	}
 
@@ -141,102 +140,97 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	public boolean create() {
 		try {
 			/* Rahh ! Hsqldb doesn't support getGeneratedKeys() ! 8/ */
-			db.lockWriting();
+			synchronized (db.dbLock) {
+				final Connection c = db.getConnection();
+				PreparedStatement st;
 
-			Connection c = this.db.getConnection();
-			PreparedStatement st;
+				st = c.prepareStatement("SELECT id FROM indexes ORDER BY id DESC LIMIT 1");
 
-			st = c.prepareStatement("SELECT id FROM indexes ORDER BY id DESC LIMIT 1");
+				st.execute();
 
-			st.execute();
+				try {
+					final ResultSet key = st.getResultSet();
+					key.next();
+					id = key.getInt(1) + 1;
+				} catch(final SQLException e) {
+					id = 1;
+				}
 
-			try {
-				ResultSet key = st.getResultSet();
-				key.next();
-				this.id = key.getInt(1) + 1;
-			} catch(SQLException e) {
-				this.id = 1;
+				st = c.prepareStatement("INSERT INTO indexes (id, originalName, displayName, publicKey, privateKey, author, positionInTree, revision, parent) VALUES (?, ?,?,?,?,?, ?,?, ?)");
+				st.setInt(1, id);
+				st.setString(2, realName);
+				st.setString(3, displayName);
+				st.setString(4, publicKey != null ? publicKey : "");
+				st.setString(5, privateKey);
+				st.setString(6, author);
+				st.setInt(7, 0);
+
+				st.setInt(8, revision);
+
+				if((parent != null) && (parent.getId() >= 0))
+					st.setInt(9, parent.getId());
+				else
+					st.setNull(9, Types.INTEGER);
+
+				st.execute();
 			}
 
-			st = c.prepareStatement("INSERT INTO indexes (id, originalName, displayName, publicKey, privateKey, author, positionInTree, revision, parent) VALUES (?, ?,?,?,?,?, ?,?, ?)");
-			st.setInt(1, this.id);
-			st.setString(2, this.realName);
-			st.setString(3, this.displayName);
-			st.setString(4, publicKey != null ? publicKey : "");
-			st.setString(5, privateKey);
-			st.setString(6, this.author);
-			st.setInt(7, 0);
-
-			st.setInt(8, this.revision);
-
-			if(this.parent != null && this.parent.getId() >= 0)
-				st.setInt(9, this.parent.getId());
-			else
-				st.setNull(9, Types.INTEGER);
-
-			st.execute();
-
-			db.unlockWriting();
-
 			return true;
-		} catch(SQLException e) {
+		} catch(final SQLException e) {
 			Logger.error(this, "Unable to insert the new index in the db, because: "+e.toString());
-
-			db.unlockWriting();
-
 			return false;
 		}
 
 	}
 
-	public void rename(String name) {
+	public void rename(final String name) {
 		try {
-			Connection c = this.db.getConnection();
+			final Connection c = db.getConnection();
 			PreparedStatement st;
 
 			st = c.prepareStatement("UPDATE indexes SET displayName = ? WHERE id = ?");
 			st.setString(1, name);
-			st.setInt(2, this.id);
+			st.setInt(2, id);
 			st.execute();
 
-			this.displayName = name;
+			displayName = name;
 
-		} catch(SQLException e) {
-			Logger.error(this, "Unable to rename the index '"+this.displayName+"' in '"+name+"', because: "+e.toString());
+		} catch(final SQLException e) {
+			Logger.error(this, "Unable to rename the index '"+displayName+"' in '"+name+"', because: "+e.toString());
 		}
 
 	}
 
 	public void delete() {
 		try {
-			this.loadFiles(null, true);
+			loadFiles(null, true);
 			this.loadLinks(null, true);
 
-			for(Iterator fileIt = this.fileList.iterator(); fileIt.hasNext(); ) {
-				thaw.plugins.index.File file = (thaw.plugins.index.File)fileIt.next();
+			for(final Iterator fileIt = fileList.iterator(); fileIt.hasNext(); ) {
+				final thaw.plugins.index.File file = (thaw.plugins.index.File)fileIt.next();
 				file.delete();
 			}
 
-			for (Iterator linkIt = this.linkList.iterator(); linkIt.hasNext() ;) {
-				Link link = (Link)linkIt.next();
+			for (final Iterator linkIt = linkList.iterator(); linkIt.hasNext() ;) {
+				final Link link = (Link)linkIt.next();
 				link.delete();
 			}
 
-			Connection c = this.db.getConnection();
-			PreparedStatement st = c.prepareStatement("DELETE FROM indexes WHERE id = ?");
-			st.setInt(1, this.id);
+			final Connection c = db.getConnection();
+			final PreparedStatement st = c.prepareStatement("DELETE FROM indexes WHERE id = ?");
+			st.setInt(1, id);
 			st.execute();
-		} catch(SQLException e) {
-			Logger.error(this, "Unable to delete the index '"+this.displayName+"', because: "+e.toString());
+		} catch(final SQLException e) {
+			Logger.error(this, "Unable to delete the index '"+displayName+"', because: "+e.toString());
 		}
 	}
 
 
 	public void update() {
-		if (!isDumbKey(publicKey) && isDumbKey(privateKey)) /* non modifiable */
+		if (!Index.isDumbKey(publicKey) && Index.isDumbKey(privateKey)) /* non modifiable */
 			return;
 
-		if (isDumbKey(publicKey) && isDumbKey(privateKey)) {
+		if (Index.isDumbKey(publicKey) && Index.isDumbKey(privateKey)) {
 			generateKeys();
 			updateWhenKeyAreAvailable = true;
 			return;
@@ -251,7 +245,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 		targetFile = new java.io.File(tmpdir + realName +".xml");
 
-		if (this.transfer != null) {
+		if (transfer != null) {
 			Logger.notice(this, "A transfer is already running");
 			return;
 		}
@@ -265,25 +259,25 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 			try {
 				outputStream = new FileOutputStream(targetFile);
-			} catch(java.io.FileNotFoundException e) {
+			} catch(final java.io.FileNotFoundException e) {
 				Logger.warning(this, "Unable to create file '"+targetFile.toString()+"' ! not generated !");
 				return;
 			}
 
-			this.generateXML(outputStream);
+			generateXML(outputStream);
 
-			if(this.targetFile.exists()) {
+			if(targetFile.exists()) {
 				Logger.info(this, "Inserting new version");
 
-				this.revision++;
+				revision++;
 
-				clientPut = new FCPClientPut(this.targetFile, 2, this.revision, realName, this.privateKey, 2, true, 0);
-				this.transfer = clientPut;
+				clientPut = new FCPClientPut(targetFile, 2, revision, realName, privateKey, 2, true, 0);
+				transfer = clientPut;
 				clientPut.addObserver(this);
 
-				this.queueManager.addQueryToThePendingQueue(clientPut);
+				queueManager.addQueryToThePendingQueue(clientPut);
 
-				this.save();
+				save();
 
 			} else {
 				Logger.warning(this, "Index not generated !");
@@ -292,12 +286,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			setChanged();
 			notifyObservers();
 		} else {
-			this.updateFromFreenet(-1);
+			updateFromFreenet(-1);
 		}
 
 	}
 
-	public void updateFromFreenet(int rev) {
+	public void updateFromFreenet(final int rev) {
 		FCPClientGet clientGet;
 
 		if (publicKey == null) {
@@ -331,7 +325,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 
 		clientGet = new FCPClientGet(key, 2, 2, false, -1, null);
-		this.transfer = clientGet;
+		transfer = clientGet;
 
 		clientGet.addObserver(this);
 
@@ -348,29 +342,29 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	}
 
 	public boolean isUpdating() {
-		return (sskGenerator != null || (transfer != null && (!transfer.isFinished())));
+		return ((sskGenerator != null) || ((transfer != null) && (!transfer.isFinished())));
 	}
 
 
-	protected void setTransfer(FCPTransferQuery query) {
-		this.transfer = query;
+	protected void setTransfer(final FCPTransferQuery query) {
+		transfer = query;
 
-		if (this.transfer != null) {
-			if (this.transfer instanceof FCPClientGet)
-				((FCPClientGet)this.transfer).addObserver(this);
-			if (this.transfer instanceof FCPClientPut)
-				((FCPClientPut)this.transfer).addObserver(this);
-			this.update(((java.util.Observable)this.transfer), null);
+		if (transfer != null) {
+			if (transfer instanceof FCPClientGet)
+				((FCPClientGet)transfer).addObserver(this);
+			if (transfer instanceof FCPClientPut)
+				((FCPClientPut)transfer).addObserver(this);
+			this.update(((java.util.Observable)transfer), null);
 		}
 	}
 
 	protected void setTransfer() {
-		if (this.queueManager == null)
+		if (queueManager == null)
 			return;
 
-		if (this.getPublicKey() != null) {
-			if(!this.queueManager.isQueueCompletlyLoaded()) {
-				Thread th = new Thread(new WaitCompleteQueue());
+		if (getPublicKey() != null) {
+			if(!queueManager.isQueueCompletlyLoaded()) {
+				final Thread th = new Thread(new WaitCompleteQueue());
 				th.start();
 				return;
 			}
@@ -378,11 +372,11 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			String key;
 
 			if (privateKey != null)
-				key = FreenetURIHelper.getPublicInsertionSSK(this.getPublicKey());
+				key = FreenetURIHelper.getPublicInsertionSSK(getPublicKey());
 			else
-				key = this.getPublicKey();
+				key = getPublicKey();
 
-			this.setTransfer(this.queueManager.getTransfer(key));
+			this.setTransfer(queueManager.getTransfer(key));
 		}
 
 		this.setChanged();
@@ -395,10 +389,10 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		public void run() {
 			int tryNumber = 0;
 
-			while(!Index.this.queueManager.isQueueCompletlyLoaded() && tryNumber < 120 /* 1min */) {
+			while(!queueManager.isQueueCompletlyLoaded() && (tryNumber < 120 /* 1min */)) {
 				try {
 					Thread.sleep(500);
-				} catch(java.lang.InterruptedException e) {
+				} catch(final java.lang.InterruptedException e) {
 					/* \_o< */
 				}
 
@@ -416,12 +410,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	public void purgeLinkList() {
 		unloadLinks();
 		try {
-			Connection c = this.db.getConnection();
-			PreparedStatement st = c.prepareStatement("DELETE FROM links WHERE indexParent = ?");
-			st.setInt(1, this.getId());
+			final Connection c = db.getConnection();
+			final PreparedStatement st = c.prepareStatement("DELETE FROM links WHERE indexParent = ?");
+			st.setInt(1, getId());
 			st.execute();
-			this.linkList = new Vector();
-		} catch(SQLException e) {
+			linkList = new Vector();
+		} catch(final SQLException e) {
 			Logger.error(this, "Unable to purge da list ! Exception: "+e.toString());
 		}
 	}
@@ -429,57 +423,57 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	public void purgeFileList() {
 		unloadFiles();
 		try {
-			Connection c = this.db.getConnection();
-			PreparedStatement st = c.prepareStatement("DELETE FROM files WHERE indexParent = ?");
-			st.setInt(1, this.getId());
+			final Connection c = db.getConnection();
+			final PreparedStatement st = c.prepareStatement("DELETE FROM files WHERE indexParent = ?");
+			st.setInt(1, getId());
 			st.execute();
-			this.fileList = new Vector();
-		} catch(SQLException e) {
+			fileList = new Vector();
+		} catch(final SQLException e) {
 			Logger.error(this, "Unable to purge da list ! Exception: "+e.toString());
 		}
 	}
 
 	public synchronized void save() {
 		try {
-			Connection c = this.db.getConnection();
-			PreparedStatement st = c.prepareStatement("UPDATE indexes SET originalName = ?, displayName = ?, publicKey = ?, privateKey = ?, positionInTree = ?, revision = ?, parent = ? , author = ? WHERE id = ?");
+			final Connection c = db.getConnection();
+			final PreparedStatement st = c.prepareStatement("UPDATE indexes SET originalName = ?, displayName = ?, publicKey = ?, privateKey = ?, positionInTree = ?, revision = ?, parent = ? , author = ? WHERE id = ?");
 
-			st.setString(1, this.realName);
-			st.setString(2, this.displayName);
+			st.setString(1, realName);
+			st.setString(2, displayName);
 			st.setString(3, publicKey != null ? publicKey : "");
-			if(this.privateKey != null)
+			if(privateKey != null)
 				st.setString(4, privateKey);
 			else
 				st.setNull(4, Types.VARCHAR);
 
-			if (treeNode != null && treeNode.getParent() != null)
+			if ((treeNode != null) && (treeNode.getParent() != null))
 				st.setInt(5, treeNode.getParent().getIndex(treeNode));
 			else
 				st.setInt(5, 0);
 
 			st.setInt(6, revision);
 
-			if( ((IndexTreeNode)this.treeNode.getParent()).getId() < 0)
+			if( ((IndexTreeNode)treeNode.getParent()).getId() < 0)
 				st.setNull(7, Types.INTEGER);
 			else
-				st.setInt(7, ((IndexTreeNode)this.treeNode.getParent()).getId());
+				st.setInt(7, ((IndexTreeNode)treeNode.getParent()).getId());
 
-			st.setString(8, this.author);
+			st.setString(8, author);
 
-			st.setInt(9, this.getId());
+			st.setInt(9, getId());
 
 			st.execute();
-		} catch(SQLException e) {
+		} catch(final SQLException e) {
 			Logger.error(this, "Unable to save index state '"+toString()+"' because : "+e.toString());
 		}
 	}
 
 	public int getId() {
-		return this.id;
+		return id;
 	}
 
 	public String getPublicKey() {
-		if (publicKey == null || isDumbKey(publicKey))
+		if ((publicKey == null) || Index.isDumbKey(publicKey))
 			return null;
 
 		if (publicKey.startsWith("SSK@")) { /* as it should when privateKey is known */
@@ -494,30 +488,30 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	/**
 	 * Always set the privateKey first
 	 */
-	public void setPublicKey(String key) {
-		if (key != null && !isDumbKey(key))
-			this.publicKey = key.trim();
+	public void setPublicKey(final String key) {
+		if ((key != null) && !Index.isDumbKey(key))
+			publicKey = key.trim();
 		else
-			this.publicKey = null;
+			publicKey = null;
 
 
-		if (privateKey != null && publicKey != null && publicKey.startsWith("USK@")) {
-			String[] split = FreenetURIHelper.convertUSKtoSSK(publicKey).split("/");
+		if ((privateKey != null) && (publicKey != null) && publicKey.startsWith("USK@")) {
+			final String[] split = FreenetURIHelper.convertUSKtoSSK(publicKey).split("/");
 			publicKey = split[0];
 		}
 
-		if (publicKey != null && publicKey.startsWith("USK@"))
-			this.revision = FreenetURIHelper.getUSKRevision(publicKey);
+		if ((publicKey != null) && publicKey.startsWith("USK@"))
+			revision = FreenetURIHelper.getUSKRevision(publicKey);
 	}
 
 	public String getPrivateKey() {
-		if (privateKey == null || isDumbKey(privateKey))
+		if ((privateKey == null) || Index.isDumbKey(privateKey))
 			return null;
 		return privateKey;
 	}
 
-	public void setPrivateKey(String key) {
-		if (key != null && !isDumbKey(key))
+	public void setPrivateKey(final String key) {
+		if ((key != null) && !Index.isDumbKey(key))
 			privateKey = key.trim();
 		else
 			privateKey = null;
@@ -541,9 +535,9 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	}
 
 
-	public void update(java.util.Observable o, Object p) {
+	public void update(final java.util.Observable o, final Object p) {
 
-		if(o == this.sskGenerator) {
+		if(o == sskGenerator) {
 			sskGenerator.deleteObserver(this);
 			publicKey = sskGenerator.getPublicKey();
 			privateKey = sskGenerator.getPrivateKey();
@@ -564,25 +558,25 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			return;
 		}
 
-		if(o == this.transfer) {
-			if(this.transfer.isFinished() && this.transfer.isSuccessful()) {
-				if(this.transfer instanceof FCPClientPut) {
-					if (this.targetFile != null)
-						this.targetFile.delete();
+		if(o == transfer) {
+			if(transfer.isFinished() && transfer.isSuccessful()) {
+				if(transfer instanceof FCPClientPut) {
+					if (targetFile != null)
+						targetFile.delete();
 					else {
-						String path = ((FCPClientPut)this.transfer).getPath();
+						final String path = ((FCPClientPut)transfer).getPath();
 						if (path != null) {
-							java.io.File fl = new java.io.File(path);
+							final java.io.File fl = new java.io.File(path);
 							fl.delete();
 						}
 					}
 
-					((FCPClientPut)this.transfer).deleteObserver(this);
+					((FCPClientPut)transfer).deleteObserver(this);
 
-					if (this.transfer.stop(this.queueManager))
-						this.queueManager.remove(this.transfer);
+					if (transfer.stop(queueManager))
+						queueManager.remove(transfer);
 
-					this.transfer = null;
+					transfer = null;
 
 					this.setChanged();
 					this.notifyObservers();
@@ -590,10 +584,10 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 					return;
 				}
 
-				if (this.transfer instanceof FCPClientGet) {
-					((FCPClientGet)this.transfer).deleteObserver(this);
+				if (transfer instanceof FCPClientGet) {
+					((FCPClientGet)transfer).deleteObserver(this);
 
-					int oldRevision = revision;
+					final int oldRevision = revision;
 
 					if (rewriteKey)
 						publicKey = transfer.getFileKey();
@@ -609,7 +603,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 					//if (this.transfer.stop(this.queueManager))
 					//	this.queueManager.remove(this.transfer);
 
-					this.queueManager.remove(this.transfer);
+					queueManager.remove(transfer);
 
 					if (transfer.getPath() == null) {
 						Logger.error(this, "No path ?!");
@@ -619,7 +613,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 					loadXML(transfer.getPath());
 					(new java.io.File(transfer.getPath())).delete();
 
-					this.transfer = null;
+					transfer = null;
 
 					save();
 
@@ -631,9 +625,9 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 			}
 
-			if (this.transfer != null && this.transfer.isFinished() && !this.transfer.isSuccessful()) {
+			if ((transfer != null) && transfer.isFinished() && !transfer.isSuccessful()) {
 				Logger.info(this, "Unable to get new version of the index");
-				this.transfer = null;
+				transfer = null;
 				this.setChanged();
 				this.notifyObservers();
 				return;
@@ -641,8 +635,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 		}
 
-		if (o instanceof thaw.plugins.index.File
-		    || o instanceof Link) {
+		if ((o instanceof thaw.plugins.index.File)
+		    || (o instanceof Link)) {
 			this.setChanged();
 			this.notifyObservers(o);
 		}
@@ -654,18 +648,18 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	}
 
 
-	public void setChanged(boolean val) {
+	public void setChanged(final boolean val) {
 		changed = val;
 	}
 
 
 	public boolean isEmpty() {
-		if (this.fileList == null)
-			this.loadFiles(null, true);
-		if (this.linkList == null)
+		if (fileList == null)
+			loadFiles(null, true);
+		if (linkList == null)
 			this.loadLinks(null, true);
 
-		if (this.fileList.size() == 0 && this.linkList.size() == 0)
+		if ((fileList.size() == 0) && (linkList.size() == 0))
 			return true;
 
 		return false;
@@ -674,9 +668,9 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	////// FILE LIST ////////
 
-	public void loadFiles(String columnToSort, boolean asc) {
+	public void loadFiles(final String columnToSort, boolean asc) {
 
-		this.fileList = new Vector();
+		fileList = new Vector();
 
 		try {
 			String query = "SELECT id, filename, publicKey, mime, size, localPath, category, indexParent FROM files WHERE indexParent = ?";
@@ -688,23 +682,23 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 					query = query + " DESC";
 			}
 
-			PreparedStatement st = this.db.getConnection().prepareStatement(query);
+			final PreparedStatement st = db.getConnection().prepareStatement(query);
 
-			st.setInt(1, this.getId());
+			st.setInt(1, getId());
 
 			if(st.execute()) {
-				ResultSet results = st.getResultSet();
+				final ResultSet results = st.getResultSet();
 
 				while(results.next()) {
-					thaw.plugins.index.File file = new thaw.plugins.index.File(this.db, results, this);
-					file.setTransfer(this.queueManager);
-					this.addFileToList(file);
+					final thaw.plugins.index.File file = new thaw.plugins.index.File(db, results, this);
+					file.setTransfer(queueManager);
+					addFileToList(file);
 				}
 			}
 
 
-		} catch(java.sql.SQLException e) {
-			Logger.error(this, "Unable to get the file list for index: '"+this.toString()+"' because: "+e.toString());
+		} catch(final java.sql.SQLException e) {
+			Logger.error(this, "Unable to get the file list for index: '"+toString()+"' because: "+e.toString());
 		}
 
 		setChanged(false); /* java.util.Index */
@@ -716,12 +710,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	 * Returns a *copy* of da vector.
 	 */
 	public Vector getFileList() {
-		Vector newList = new Vector();
+		final Vector newList = new Vector();
 
 		if (fileList == null)
 			return newList;
 
-		for(Iterator it = fileList.iterator();
+		for(final Iterator it = fileList.iterator();
 		    it.hasNext();) {
 			newList.add(it.next());
 		}
@@ -729,12 +723,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		return newList;
 	}
 
-	public thaw.plugins.index.File getFile(int index) {
-		return (thaw.plugins.index.File)this.fileList.get(index);
+	public thaw.plugins.index.File getFile(final int index) {
+		return (thaw.plugins.index.File)fileList.get(index);
 	}
 
-	public int getFilePosition(thaw.plugins.index.File fileA) {
-		int pos = this.fileList.indexOf(fileA);
+	public int getFilePosition(final thaw.plugins.index.File fileA) {
+		int pos = fileList.indexOf(fileA);
 
 		if (fileA.getPublicKey() == null)
 			return -1;
@@ -742,11 +736,11 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		if (pos < 0) {
 			/* Manual research */
 			pos = 0;
-			for(Iterator it = this.fileList.iterator();
+			for(final Iterator it = fileList.iterator();
 			    it.hasNext();) {
-				thaw.plugins.index.File fileB = (thaw.plugins.index.File)it.next();
+				final thaw.plugins.index.File fileB = (thaw.plugins.index.File)it.next();
 
-				if (fileB.getPublicKey() != null
+				if ((fileB.getPublicKey() != null)
 				    && fileB.getPublicKey().equals(fileA.getPublicKey()))
 					return pos;
 				pos++;
@@ -759,29 +753,29 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 
 	public void unloadFiles() {
-		if (this.fileList != null) {
-			for (Iterator it  = this.fileList.iterator();
+		if (fileList != null) {
+			for (final Iterator it  = fileList.iterator();
 			     it.hasNext();)
 				{
-					thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+					final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 					file.deleteObserver(this);
 				}
 		}
 
-		this.fileList = null;
+		fileList = null;
 	}
 
 
 	/**
 	 * Note for myself: For external use only ! (file will be inserted in the database etc)
 	 */
-	public void addFile(thaw.plugins.index.File file) {
+	public void addFile(final thaw.plugins.index.File file) {
 		file.setParent(this);
 
 		if (!file.isInTheDatabase()) {
 			file.insert();
 
-			this.addFileToList(file);
+			addFileToList(file);
 
 			this.setChanged();
 			this.notifyObservers(file);
@@ -794,19 +788,19 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	/**
 	 * Won't notify
 	 */
-	protected void addFileToList(thaw.plugins.index.File file) {
-		if (this.fileList == null)
-			this.loadFiles(null, true);
+	protected void addFileToList(final thaw.plugins.index.File file) {
+		if (fileList == null)
+			loadFiles(null, true);
 		file.addObserver(this);
-		this.fileList.add(file);
+		fileList.add(file);
 	}
 
 
-	public void removeFile(thaw.plugins.index.File file) {
+	public void removeFile(final thaw.plugins.index.File file) {
 		file.delete();
 
-		if(this.fileList != null) {
-			this.fileList.remove(file);
+		if(fileList != null) {
+			fileList.remove(file);
 
 			this.setChanged();
 			this.notifyObservers(file);
@@ -817,8 +811,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	 * Do the update all the files in the database.
 	 */
 	public void updateFileList() {
-		for(Iterator it = this.fileList.iterator(); it.hasNext();) {
-			thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+		for(final Iterator it = fileList.iterator(); it.hasNext();) {
+			final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 			file.update();
 		}
 	}
@@ -826,13 +820,13 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	//// LINKS ////
 
-	public void addLink(Link link) {
+	public void addLink(final Link link) {
 		link.setParent(this);
 
 		if (!link.isInTheDatabase()) {
 			link.insert();
 
-			this.addLinkToList(link);
+			addLinkToList(link);
 
 			setChanged();
 			notifyObservers(link);
@@ -842,18 +836,18 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 	}
 
-	protected void addLinkToList(Link link) {
-		if (this.linkList == null)
+	protected void addLinkToList(final Link link) {
+		if (linkList == null)
 			this.loadLinks(null, true);
 
-		this.linkList.add(link);
+		linkList.add(link);
 	}
 
-	public void removeLink(Link link) {
+	public void removeLink(final Link link) {
 		link.delete();
 
-		if (this.linkList != null) {
-			this.linkList.remove(link);
+		if (linkList != null) {
+			linkList.remove(link);
 			this.setChanged();
 			this.notifyObservers(link);
 		}
@@ -864,15 +858,15 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	 * Update all the links in the database.
 	 */
 	public void updateLinkList() {
-		for(Iterator it = this.linkList.iterator(); it.hasNext();) {
-			Link link = (Link)it.next();
+		for(final Iterator it = linkList.iterator(); it.hasNext();) {
+			final Link link = (Link)it.next();
 			link.update();
 		}
 	}
 
-	public void loadLinks(String columnToSort, boolean asc)
+	public void loadLinks(final String columnToSort, boolean asc)
 	{
-		this.linkList = new Vector();
+		linkList = new Vector();
 
 		try {
 			String query = "SELECT id, publicKey, mark, comment, indexTarget FROM links WHERE indexParent = ?";
@@ -884,26 +878,26 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 					query = query + " DESC";
 			}
 
-			PreparedStatement st = this.db.getConnection().prepareStatement(query);
+			final PreparedStatement st = db.getConnection().prepareStatement(query);
 
-			st.setInt(1, this.getId());
+			st.setInt(1, getId());
 
 			if(st.execute()) {
-				ResultSet results = st.getResultSet();
+				final ResultSet results = st.getResultSet();
 
 				while(results.next()) {
 					try {
-						Link link = new Link(this.db, results, this);
-						this.addLinkToList(link);
-					} catch(Exception e) {
-						Logger.warning(this, "Unable to add index '"+this.publicKey+"' to the list because: "+e.toString());
+						final Link link = new Link(db, results, this);
+						addLinkToList(link);
+					} catch(final Exception e) {
+						Logger.warning(this, "Unable to add index '"+publicKey+"' to the list because: "+e.toString());
 					}
 				}
 			}
 
 
-		} catch(java.sql.SQLException e) {
-			Logger.error(this, "Unable to get the link list for index: '"+this.toString()+"' because: "+e.toString());
+		} catch(final java.sql.SQLException e) {
+			Logger.error(this, "Unable to get the link list for index: '"+toString()+"' because: "+e.toString());
 		}
 
 		setChanged(false); /* Index */
@@ -915,12 +909,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	/* Returns a copy ! */
 	public Vector getLinkList()
 	{
-		Vector newList = new Vector();
+		final Vector newList = new Vector();
 
 		if (linkList == null)
 			return newList;
 
-		for(Iterator it = linkList.iterator();
+		for(final Iterator it = linkList.iterator();
 		    it.hasNext();) {
 			newList.add(it.next());
 		}
@@ -928,53 +922,53 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		return newList;
 	}
 
-	public Link getLink(int index)
+	public Link getLink(final int index)
 	{
-		return (Link)this.linkList.get(index);
+		return (Link)linkList.get(index);
 	}
 
 	public void unloadLinks()
 	{
-		this.linkList = null;
+		linkList = null;
 	}
 
 
 	//// XML ////
 
-	public void generateXML(OutputStream out) {
-		StreamResult streamResult = new StreamResult(out);
+	public void generateXML(final OutputStream out) {
+		final StreamResult streamResult = new StreamResult(out);
 
 		Document xmlDoc;
 
-		DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
+		final DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder xmlBuilder;
 
 		try {
 			xmlBuilder = xmlFactory.newDocumentBuilder();
-		} catch(javax.xml.parsers.ParserConfigurationException e) {
+		} catch(final javax.xml.parsers.ParserConfigurationException e) {
 			Logger.error(this, "Unable to generate the index because : "+e.toString());
 			return;
 		}
 
-		DOMImplementation impl = xmlBuilder.getDOMImplementation();
+		final DOMImplementation impl = xmlBuilder.getDOMImplementation();
 
 		xmlDoc = impl.createDocument(null, "index", null);
 
-		Element rootEl = xmlDoc.getDocumentElement();
+		final Element rootEl = xmlDoc.getDocumentElement();
 
-		rootEl.appendChild(this.getXMLHeader(xmlDoc));
-		rootEl.appendChild(this.getXMLLinks(xmlDoc));
-		rootEl.appendChild(this.getXMLFileList(xmlDoc));
+		rootEl.appendChild(getXMLHeader(xmlDoc));
+		rootEl.appendChild(getXMLLinks(xmlDoc));
+		rootEl.appendChild(getXMLFileList(xmlDoc));
 
 		/* Serialization */
-		DOMSource domSource = new DOMSource(xmlDoc);
-		TransformerFactory transformFactory = TransformerFactory.newInstance();
+		final DOMSource domSource = new DOMSource(xmlDoc);
+		final TransformerFactory transformFactory = TransformerFactory.newInstance();
 
 		Transformer serializer;
 
 		try {
 			serializer = transformFactory.newTransformer();
-		} catch(javax.xml.transform.TransformerConfigurationException e) {
+		} catch(final javax.xml.transform.TransformerConfigurationException e) {
 			Logger.error(this, "Unable to save index because: "+e.toString());
 			return;
 		}
@@ -985,26 +979,26 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		/* final step */
 		try {
 			serializer.transform(domSource, streamResult);
-		} catch(javax.xml.transform.TransformerException e) {
+		} catch(final javax.xml.transform.TransformerException e) {
 			Logger.error(this, "Unable to save index because: "+e.toString());
 			return;
 		}
 	}
 
-	public Element getXMLHeader(Document xmlDoc) {
-		Element header = xmlDoc.createElement("header");
+	public Element getXMLHeader(final Document xmlDoc) {
+		final Element header = xmlDoc.createElement("header");
 
-		Element title = xmlDoc.createElement("title");
-		Text titleText = xmlDoc.createTextNode(displayName);
+		final Element title = xmlDoc.createElement("title");
+		final Text titleText = xmlDoc.createTextNode(displayName);
 		title.appendChild(titleText);
 
-		Element owner = xmlDoc.createElement("owner");
+		final Element owner = xmlDoc.createElement("owner");
 		Text ownerText;
 
-		if (this.author == null)
+		if (author == null)
 			ownerText = xmlDoc.createTextNode("Another anonymous");
 		else
-			ownerText = xmlDoc.createTextNode(this.author);
+			ownerText = xmlDoc.createTextNode(author);
 
 		owner.appendChild(ownerText);
 
@@ -1014,18 +1008,18 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		return header;
 	}
 
-	public Element getXMLLinks(Document xmlDoc) {
-		Element links = xmlDoc.createElement("indexes");
+	public Element getXMLLinks(final Document xmlDoc) {
+		final Element links = xmlDoc.createElement("indexes");
 
-		if (this.linkList == null) {
+		if (linkList == null) {
 			this.loadLinks(null, true);
 		}
 
-		for (Iterator it = this.getLinkList().iterator();
+		for (final Iterator it = getLinkList().iterator();
 		     it.hasNext();) {
-			Link link = (Link)it.next();
+			final Link link = (Link)it.next();
 
-			Element xmlLink = link.getXML(xmlDoc);
+			final Element xmlLink = link.getXML(xmlDoc);
 
 			if (xmlLink != null)
 				links.appendChild(xmlLink);
@@ -1036,18 +1030,18 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		return links;
 	}
 
-	public Element getXMLFileList(Document xmlDoc) {
-		Element files = xmlDoc.createElement("files");
+	public Element getXMLFileList(final Document xmlDoc) {
+		final Element files = xmlDoc.createElement("files");
 
-		if(this.fileList == null) {
-			this.loadFiles(null, true);
+		if(fileList == null) {
+			loadFiles(null, true);
 		}
 
-		for(Iterator it = this.getFileList().iterator();
+		for(final Iterator it = getFileList().iterator();
 		    it.hasNext();) {
-			thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+			final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 
-			Element xmlFile = file.getXML(xmlDoc);
+			final Element xmlFile = file.getXML(xmlDoc);
 
 			if(xmlFile != null)
 				files.appendChild(xmlFile);
@@ -1058,21 +1052,21 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		return files;
 	}
 
-	public void loadXML(String filePath) {
+	public void loadXML(final String filePath) {
 		try {
 			loadXML(new FileInputStream(filePath));
-		} catch(java.io.FileNotFoundException e) {
+		} catch(final java.io.FileNotFoundException e) {
 			Logger.error(this, "Unable to load XML: FileNotFoundException ('"+filePath+"') ! : "+e.toString());
 		}
 	}
 
-	public synchronized void loadXML(java.io.InputStream input) {
-		DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
+	public synchronized void loadXML(final java.io.InputStream input) {
+		final DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder xmlBuilder;
 
 		try {
 			xmlBuilder = xmlFactory.newDocumentBuilder();
-		} catch(javax.xml.parsers.ParserConfigurationException e) {
+		} catch(final javax.xml.parsers.ParserConfigurationException e) {
 			Logger.error(this, "Unable to load index because: "+e.toString());
 			return;
 		}
@@ -1081,81 +1075,80 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 		try {
 			Logger.info(this, "XML parser ready");
-			xmlParserReady = true;
 			xmlDoc = xmlBuilder.parse(input);
 			Logger.info(this, "Index parsed");
-		} catch(org.xml.sax.SAXException e) {
+		} catch(final org.xml.sax.SAXException e) {
 			Logger.error(this, "Unable to load index because: "+e.toString());
 			return;
-		} catch(java.io.IOException e) {
+		} catch(final java.io.IOException e) {
 			Logger.error(this, "Unable to load index because: "+e.toString());
 			return;
 		}
 
-		Element rootEl = xmlDoc.getDocumentElement();
+		final Element rootEl = xmlDoc.getDocumentElement();
 
-		this.loadHeader(rootEl);
+		loadHeader(rootEl);
 		this.loadLinks(rootEl);
-		this.loadFileList(rootEl);
+		loadFileList(rootEl);
 	}
 
 
-	public void loadHeader(Element rootEl) {
-		Element header = (Element)rootEl.getElementsByTagName("header").item(0);
+	public void loadHeader(final Element rootEl) {
+		final Element header = (Element)rootEl.getElementsByTagName("header").item(0);
 
 		if (header == null)
 			return;
 
-		this.realName = this.getHeaderElement(header, "title");
-		this.author = this.getHeaderElement(header, "owner");
+		realName = getHeaderElement(header, "title");
+		author = getHeaderElement(header, "owner");
 
-		if (this.author == null)
-			this.author = "Another anonymous";
+		if (author == null)
+			author = "Another anonymous";
 	}
 
-	public String getHeaderElement(Element header, String name) {
+	public String getHeaderElement(final Element header, final String name) {
 		try {
 			if (header == null)
 				return null;
 
-			NodeList nl = header.getElementsByTagName(name);
+			final NodeList nl = header.getElementsByTagName(name);
 
 			if (nl == null)
 				return null;
 
-			Element sub = (Element)nl.item(0);
+			final Element sub = (Element)nl.item(0);
 
 			if (sub == null)
 				return null;
 
-			Text txt = (Text)sub.getFirstChild();
+			final Text txt = (Text)sub.getFirstChild();
 
 			if (txt == null)
 				return null;
 
 			return txt.getData();
-		} catch(Exception e) {
+		} catch(final Exception e) {
 			Logger.notice(this, "Unable to get header element '"+name+"', because: "+e.toString());
 			return null;
 		}
 	}
 
-	public void loadLinks(Element rootEl) {
-		this.purgeLinkList();
+	public void loadLinks(final Element rootEl) {
+		purgeLinkList();
 
-		Element links = (Element)rootEl.getElementsByTagName("indexes").item(0);
+		final Element links = (Element)rootEl.getElementsByTagName("indexes").item(0);
 
 		if (links == null)
 			return;
 
-		NodeList list = links.getChildNodes();
+		final NodeList list = links.getChildNodes();
 
 		for(int i = 0; i < list.getLength() ; i++) {
 			if(list.item(i).getNodeType() == Node.ELEMENT_NODE) {
-				Element e = (Element)list.item(i);
+				final Element e = (Element)list.item(i);
 
-				Link link = new Link(this.db, e, this);
-				this.addLink(link);
+				final Link link = new Link(db, e, this);
+				addLink(link);
 			}
 		}
 
@@ -1163,22 +1156,22 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		notifyObservers();
 	}
 
-	public void loadFileList(Element rootEl) {
-		this.purgeFileList();
+	public void loadFileList(final Element rootEl) {
+		purgeFileList();
 
-		Element filesEl = (Element)rootEl.getElementsByTagName("files").item(0);
+		final Element filesEl = (Element)rootEl.getElementsByTagName("files").item(0);
 
 		if (filesEl == null)
 			return;
 
-		NodeList list = filesEl.getChildNodes();
+		final NodeList list = filesEl.getChildNodes();
 
 		for(int i = 0; i < list.getLength() ; i++) {
 			if(list.item(i).getNodeType() == Node.ELEMENT_NODE) {
-				Element e = (Element)list.item(i);
+				final Element e = (Element)list.item(i);
 
-				thaw.plugins.index.File file = new thaw.plugins.index.File(this.db, e, this);
-				this.addFile(file);
+				final thaw.plugins.index.File file = new thaw.plugins.index.File(db, e, this);
+				addFile(file);
 
 			}
 		}
@@ -1188,7 +1181,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	}
 
 
-	static String getNameFromKey(String key) {
+	static String getNameFromKey(final String key) {
 		String name = null;
 
 		name = FreenetURIHelper.getFilenameFromKey(key);
@@ -1203,8 +1196,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 
 	public Vector getIndexIds() {
-		Vector ids = new Vector();
-		ids.add(new Integer(this.getId()));
+		final Vector ids = new Vector();
+		ids.add(new Integer(getId()));
 		return ids;
 	}
 
@@ -1212,10 +1205,10 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		return (privateKey != null);
 	}
 
-	public boolean isInIndex(thaw.plugins.index.File file) {
-		if (this.fileList == null)
-			this.loadFiles(null, true);
-		return this.fileList.contains(file);
+	public boolean isInIndex(final thaw.plugins.index.File file) {
+		if (fileList == null)
+			loadFiles(null, true);
+		return fileList.contains(file);
 	}
 
 }

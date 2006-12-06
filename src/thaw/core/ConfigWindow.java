@@ -1,17 +1,17 @@
 package thaw.core;
 
-import javax.swing.JFrame;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.util.Observable;
+
+import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.ActionListener;
-import javax.swing.JButton;
-import java.util.Observable;
-import java.awt.GridLayout;
-import javax.swing.JOptionPane;
 
 
 
@@ -40,50 +40,50 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 	private boolean needConnectionReset = false;
 
-	public ConfigWindow(Core core) {
+	public ConfigWindow(final Core core) {
 		this.core = core;
-		this.needConnectionReset = false;
+		needConnectionReset = false;
 
-		this.advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
+		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 
-		this.configWin = new JDialog(core.getMainWindow().getMainFrame(), I18n.getMessage("thaw.config.windowName"));
+		configWin = new JDialog(core.getMainWindow().getMainFrame(), I18n.getMessage("thaw.config.windowName"));
 
-		this.tabs = new JTabbedPane();
+		tabs = new JTabbedPane();
 
-		this.buttons = new JPanel();
-		this.buttons.setLayout(new GridLayout(1, 2));
+		buttons = new JPanel();
+		buttons.setLayout(new GridLayout(1, 2));
 
-		this.okButton = new JButton(I18n.getMessage("thaw.config.okButton"));
-		this.cancelButton = new JButton(I18n.getMessage("thaw.config.cancelButton"));
+		okButton = new JButton(I18n.getMessage("thaw.config.okButton"));
+		cancelButton = new JButton(I18n.getMessage("thaw.config.cancelButton"));
 
-		this.buttons.add(this.okButton);
-		this.buttons.add(this.cancelButton);
+		buttons.add(okButton);
+		buttons.add(cancelButton);
 
-		this.nodeConfigPanel = new NodeConfigPanel(this, core);
-		this.pluginConfigPanel = new PluginConfigPanel(this, core);
-		this.thawConfigPanel = new ThawConfigPanel(this, core);
+		nodeConfigPanel = new NodeConfigPanel(this, core);
+		pluginConfigPanel = new PluginConfigPanel(this, core);
+		thawConfigPanel = new ThawConfigPanel(this, core);
 
-		this.addTabs();
+		addTabs();
 
-		BorderLayout borderLayout = new BorderLayout();
+		final BorderLayout borderLayout = new BorderLayout();
 		borderLayout.setVgap(20);
 		borderLayout.setVgap(20);
 
-		this.configWin.getContentPane().setLayout(borderLayout);
+		configWin.getContentPane().setLayout(borderLayout);
 
-		this.configWin.getContentPane().add(this.tabs, BorderLayout.CENTER);
-		this.configWin.getContentPane().add(this.buttons, BorderLayout.SOUTH);
+		configWin.getContentPane().add(tabs, BorderLayout.CENTER);
+		configWin.getContentPane().add(buttons, BorderLayout.SOUTH);
 
-		this.tabs.setSize(600, 350);
-		this.okButton.setSize(100, 50);
+		tabs.setSize(600, 350);
+		okButton.setSize(100, 50);
 
-		this.configWin.setSize(600, 400);
-		this.configWin.setResizable(false);
+		configWin.setSize(600, 400);
+		configWin.setResizable(false);
 
-		this.okButton.addActionListener(this);
-		this.cancelButton.addActionListener(this);
+		okButton.addActionListener(this);
+		cancelButton.addActionListener(this);
 
-		this.configWin.addWindowListener(this);
+		configWin.addWindowListener(this);
 	}
 
 
@@ -91,36 +91,36 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	 * Remove them and re-add them.
 	 */
 	private void addTabs() {
-		this.tabs.remove( this.thawConfigPanel.getPanel() );
-		this.tabs.remove( this.nodeConfigPanel.getPanel() );
-		this.tabs.remove( this.pluginConfigPanel.getPanel() );
+		tabs.remove( thawConfigPanel.getPanel() );
+		tabs.remove( nodeConfigPanel.getPanel() );
+		tabs.remove( pluginConfigPanel.getPanel() );
 
-		this.tabs.add("Thaw", this.thawConfigPanel.getPanel());
-		this.tabs.add(I18n.getMessage("thaw.common.node"), this.nodeConfigPanel.getPanel());
-		if(this.advancedMode)
-			this.tabs.add(I18n.getMessage("thaw.common.plugins"), this.pluginConfigPanel.getPanel());
+		tabs.add("Thaw", thawConfigPanel.getPanel());
+		tabs.add(I18n.getMessage("thaw.common.node"), nodeConfigPanel.getPanel());
+		if(advancedMode)
+			tabs.add(I18n.getMessage("thaw.common.plugins"), pluginConfigPanel.getPanel());
 	}
 
 
 	/**
 	 * Make [dis]appear the config window.
 	 */
-	public void setVisible(boolean v) {
+	public void setVisible(final boolean v) {
 		if(v == true) {
-			this.setChanged();
+			setChanged();
 			this.notifyObservers(null);
 		}
 
-		this.configWin.setVisible(v);
+		configWin.setVisible(v);
 	}
 
-	public boolean addTab(String name, java.awt.Component panel) {
-		this.tabs.add(name, panel);
+	public boolean addTab(final String name, final java.awt.Component panel) {
+		tabs.add(name, panel);
 		return true;
 	}
 
-	public boolean removeTab(java.awt.Component panel) {
-		this.tabs.remove(panel);
+	public boolean removeTab(final java.awt.Component panel) {
+		tabs.remove(panel);
 		return true;
 	}
 
@@ -128,14 +128,14 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	 * Get a ref to the JFrame.
 	 */
 	public JDialog getFrame() {
-		return this.configWin;
+		return configWin;
 	}
 
 	/**
 	 * Get a ref to validation button.
 	 */
 	public JButton getOkButton() {
-		return this.okButton;
+		return okButton;
 	}
 
 
@@ -143,19 +143,19 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	 * Get a ref to cancel button.
 	 */
 	public JButton getCancelButton() {
-		return this.cancelButton;
+		return cancelButton;
 	}
 
 	public void willNeedConnectionReset() {
-		this.needConnectionReset = true;
+		needConnectionReset = true;
 	}
 
 	/**
 	 * Called when apply button is pressed.
 	 */
-	public void actionPerformed(ActionEvent e) {
-		if(e.getSource() == this.okButton && !this.core.canDisconnect()) {
-			int ret = JOptionPane.showOptionDialog((java.awt.Component)null,
+	public void actionPerformed(final ActionEvent e) {
+		if((e.getSource() == okButton) && !core.canDisconnect()) {
+			final int ret = JOptionPane.showOptionDialog((java.awt.Component)null,
 								       I18n.getMessage("thaw.warning.isWritingSoApplyLater"),
 								       I18n.getMessage("thaw.warning.title"),
 								       JOptionPane.YES_NO_OPTION,
@@ -163,67 +163,67 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 								       (javax.swing.Icon)null,
 								       (java.lang.Object[])null,
 								       (java.lang.Object)null);
-			if(ret == JOptionPane.CLOSED_OPTION || ret > 0)
+			if((ret == JOptionPane.CLOSED_OPTION) || (ret > 0))
 				return;
 		}
 
-		if(e.getSource() == this.okButton
-		   || e.getSource() == this.cancelButton) {
+		if((e.getSource() == okButton)
+		   || (e.getSource() == cancelButton)) {
 
-			this.setChanged();
+			setChanged();
 			this.notifyObservers(e.getSource());
 
-			this.setVisible(false);
+			setVisible(false);
 		}
 
-		if(e.getSource() == this.okButton) {
-			this.advancedMode = Boolean.valueOf(this.core.getConfig().getValue("advancedMode")).booleanValue();
+		if(e.getSource() == okButton) {
+			advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 
 			/* should reinit the whole connection correctly */
-			this.core.getPluginManager().stopPlugins();
+			core.getPluginManager().stopPlugins();
 
-			if(this.needConnectionReset && !this.core.initNodeConnection()) {
-				new WarningWindow(this.core, I18n.getMessage("thaw.warning.unableToConnectTo")+ " "+this.core.getConfig().getValue("nodeAddress")+":"+ this.core.getConfig().getValue("nodePort"));
+			if(needConnectionReset && !core.initNodeConnection()) {
+				new WarningWindow(core, I18n.getMessage("thaw.warning.unableToConnectTo")+ " "+core.getConfig().getValue("nodeAddress")+":"+ core.getConfig().getValue("nodePort"));
 			}
 
-			this.needConnectionReset = false;
+			needConnectionReset = false;
 
-			this.core.getPluginManager().loadPlugins();
-			this.core.getPluginManager().runPlugins();
+			core.getPluginManager().loadPlugins();
+			core.getPluginManager().runPlugins();
 
 			/* reinit config win */
-			this.addTabs();
+			addTabs();
 		}
 	}
 
 
 
-	public void windowActivated(WindowEvent e) {
+	public void windowActivated(final WindowEvent e) {
 
 	}
 
-	public void windowClosing(WindowEvent e) {
-		this.setChanged();
-		this.notifyObservers(this.cancelButton); /* Equivalent to a click on the cancel button */
+	public void windowClosing(final WindowEvent e) {
+		setChanged();
+		this.notifyObservers(cancelButton); /* Equivalent to a click on the cancel button */
 	}
 
-	public void windowClosed(WindowEvent e) {
+	public void windowClosed(final WindowEvent e) {
 		// add potential warnings here
 	}
 
-	public void windowDeactivated(WindowEvent e) {
+	public void windowDeactivated(final WindowEvent e) {
 		// C'est pas comme si on en avait quelque chose a foutre :p
 	}
 
-	public void windowDeiconified(WindowEvent e) {
+	public void windowDeiconified(final WindowEvent e) {
 		// idem
 	}
 
-	public void windowIconified(WindowEvent e) {
+	public void windowIconified(final WindowEvent e) {
 		// idem
 	}
 
-	public void windowOpened(WindowEvent e) {
+	public void windowOpened(final WindowEvent e) {
 		// idem
 	}
 

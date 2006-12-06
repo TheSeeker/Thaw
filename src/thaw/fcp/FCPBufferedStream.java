@@ -26,14 +26,14 @@ public class FCPBufferedStream implements Runnable {
 
 
 
-	public FCPBufferedStream(FCPConnection connection,
-				 int maxUploadSpeed) {
+	public FCPBufferedStream(final FCPConnection connection,
+				 final int maxUploadSpeed) {
 		this.connection = connection;
 		this.maxUploadSpeed = maxUploadSpeed;
 
 		if(maxUploadSpeed >= 0) {
-			this.outputBuffer = new byte[OUTPUT_BUFFER_SIZE];
-			this.packetSize = (maxUploadSpeed * 1024) / (1000/INTERVAL);
+			outputBuffer = new byte[FCPBufferedStream.OUTPUT_BUFFER_SIZE];
+			packetSize = (maxUploadSpeed * 1024) / (1000/FCPBufferedStream.INTERVAL);
 		}
 	}
 
@@ -41,24 +41,23 @@ public class FCPBufferedStream implements Runnable {
 	 * Add to the buffer. Can block if buffer is full !
 	 * Never send more than OUTPUT_BUFFER_SIZE.
 	 */
-	public synchronized boolean write(byte[] data) {
-		if(this.maxUploadSpeed == -1) {
-			return this.connection.realRawWrite(data);
+	public synchronized boolean write(final byte[] data) {
+		if(maxUploadSpeed == -1)
+			return connection.realRawWrite(data);
+
+		while(waiting + data.length > FCPBufferedStream.OUTPUT_BUFFER_SIZE) {
+			sleep(FCPBufferedStream.INTERVAL);
 		}
 
-		while(this.waiting + data.length > OUTPUT_BUFFER_SIZE) {
-			this.sleep(INTERVAL);
-		}
-
-		this.waiting += data.length;
+		waiting += data.length;
 
 		for(int i = 0 ; i < data.length ; i++) {
-			this.outputBuffer[this.writeCursor] = data[i];
+			outputBuffer[writeCursor] = data[i];
 
-			this.writeCursor++;
+			writeCursor++;
 
-			if(this.writeCursor >= OUTPUT_BUFFER_SIZE)
-				this.writeCursor = 0;
+			if(writeCursor >= FCPBufferedStream.OUTPUT_BUFFER_SIZE)
+				writeCursor = 0;
 		}
 
 		return true;
@@ -67,10 +66,10 @@ public class FCPBufferedStream implements Runnable {
 	/**
 	 * @see #write(byte[])
 	 */
-	public boolean write(String data) {
+	public boolean write(final String data) {
 		try {
 			return this.write(data.getBytes("UTF-8"));
-		} catch(java.io.UnsupportedEncodingException e) {
+		} catch(final java.io.UnsupportedEncodingException e) {
 			Logger.error(this, "UNSUPPORTED ENCODING EXCEPTION : UTF-8");
 			return this.write(data.getBytes());
 		}
@@ -79,17 +78,17 @@ public class FCPBufferedStream implements Runnable {
 	/**
 	 * extract from the buffer
 	 */
-	private boolean readOutputBuffer(byte[] data) {
+	private boolean readOutputBuffer(final byte[] data) {
 		for(int i = 0; i < data.length ; i++) {
-			data[i] = this.outputBuffer[this.readCursor];
+			data[i] = outputBuffer[readCursor];
 
-			this.readCursor++;
+			readCursor++;
 
-			if(this.readCursor >= OUTPUT_BUFFER_SIZE)
-				this.readCursor = 0;
+			if(readCursor >= FCPBufferedStream.OUTPUT_BUFFER_SIZE)
+				readCursor = 0;
 		}
 
-		this.waiting -= data.length;
+		waiting -= data.length;
 
 		return true;
 	}
@@ -98,8 +97,8 @@ public class FCPBufferedStream implements Runnable {
 	 * wait for the buffer being empty.
 	 */
 	public void flush() {
-		while(this.waiting > 0) {
-			this.sleep(INTERVAL);
+		while(waiting > 0) {
+			sleep(FCPBufferedStream.INTERVAL);
 		}
 	}
 
@@ -107,21 +106,21 @@ public class FCPBufferedStream implements Runnable {
 	public void run() {
 		byte[] data;
 
-		while(this.running) { /* Wild and freeeeeee */
-			if(this.waiting > 0) {
-				int to_read = this.packetSize;
+		while(running) { /* Wild and freeeeeee */
+			if(waiting > 0) {
+				int to_read = packetSize;
 
-				if(this.waiting < to_read)
-					to_read = this.waiting;
+				if(waiting < to_read)
+					to_read = waiting;
 
 				data = new byte[to_read];
 
-				this.readOutputBuffer(data);
+				readOutputBuffer(data);
 
-				this.connection.realRawWrite(data);
+				connection.realRawWrite(data);
 			}
 
-			this.sleep(INTERVAL);
+			sleep(FCPBufferedStream.INTERVAL);
 		}
 	}
 
@@ -129,16 +128,16 @@ public class FCPBufferedStream implements Runnable {
 	 * Start the thread sending data from the buffer to the OutputStream (socket).
 	 */
 	public boolean startSender() {
-		this.running = true;
+		running = true;
 
-		if(this.maxUploadSpeed < 0) {
+		if(maxUploadSpeed < 0) {
 			Logger.notice(this, "startSender(): No upload limit. Not needed");
 			return false;
 		}
 
-		if(this.tractopelle == null) {
-			this.tractopelle = new Thread(this);
-			this.tractopelle.start();
+		if(tractopelle == null) {
+			tractopelle = new Thread(this);
+			tractopelle.start();
 			return true;
 		} else {
 			Logger.notice(this, "startSender(): Already started");
@@ -148,26 +147,26 @@ public class FCPBufferedStream implements Runnable {
 
 
 	public boolean stopSender() {
-		this.running = false;
-		this.tractopelle = null;
+		running = false;
+		tractopelle = null;
 		return true;
 	}
 
 	public boolean isOutputBufferEmpty() {
-		return (this.waiting == 0);
+		return (waiting == 0);
 	}
 
 	public boolean isOutputBufferFull() {
-		return (this.maxUploadSpeed < 0 || this.waiting >= (OUTPUT_BUFFER_SIZE-1));
+		return ((maxUploadSpeed < 0) || (waiting >= (FCPBufferedStream.OUTPUT_BUFFER_SIZE-1)));
 	}
 
 	/**
 	 * Just ignore the InterruptedException.
 	 */
-	private void sleep(int ms) {
+	private void sleep(final int ms) {
 		try {
 			Thread.sleep(ms);
-		} catch(java.lang.InterruptedException e) {
+		} catch(final java.lang.InterruptedException e) {
 			/* just iggnnnnnooored */
 		}
 	}

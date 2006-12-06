@@ -11,10 +11,10 @@ import javax.swing.JOptionPane;
 public class WarningWindow {
 
 
-	public WarningWindow(Core core,
-			     String warning)
+	public WarningWindow(final Core core,
+			     final String warning)
 	{
-		if(core != null && core.getMainWindow() != null) {
+		if((core != null) && (core.getMainWindow() != null)) {
 			JOptionPane.showMessageDialog(core.getMainWindow().getMainFrame(),
 						      warning,
 						      "Thaw - "+I18n.getMessage("thaw.warning.title"),

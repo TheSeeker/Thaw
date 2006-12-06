@@ -4,16 +4,16 @@ public class FCPWatchGlobal implements FCPQuery {
 	private boolean watch;
 
 
-	public FCPWatchGlobal(boolean v) {
-		this.watch = v;
+	public FCPWatchGlobal(final boolean v) {
+		watch = v;
 	}
 
-	public boolean start(FCPQueueManager queueManager) {
-		FCPMessage message = new FCPMessage();
+	public boolean start(final FCPQueueManager queueManager) {
+		final FCPMessage message = new FCPMessage();
 
 		message.setMessageName("WatchGlobal");
 
-		if(this.watch)
+		if(watch)
 			message.setValue("Enabled", "true");
 		else
 			message.setValue("Enabled", "false");
@@ -25,7 +25,7 @@ public class FCPWatchGlobal implements FCPQuery {
 		return true;
 	}
 
-	public boolean stop(FCPQueueManager queueManager) {
+	public boolean stop(final FCPQueueManager queueManager) {
 		return true;
 	}
 

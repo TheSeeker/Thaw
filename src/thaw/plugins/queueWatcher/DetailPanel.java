@@ -2,17 +2,18 @@ package thaw.plugins.queueWatcher;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.JProgressBar;
-import javax.swing.JComponent;
-
-import java.util.Observer;
 import java.util.Observable;
+import java.util.Observer;
 
-import thaw.core.*;
-import thaw.fcp.*;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JTextField;
+
+import thaw.core.I18n;
+import thaw.core.Logger;
+import thaw.fcp.FCPTransferQuery;
 
 
 /**
@@ -20,21 +21,19 @@ import thaw.fcp.*;
  */
 public class DetailPanel implements Observer {
 
-	private Core core;
-
 	private JPanel subPanel;
 	private JPanel panel;
 
-	private JTextField file       = new JTextField();
-	private JTextField size       = new JTextField();
-	private JProgressBar progress = new JProgressBar(0, 100);
-	private JProgressBar withTheNodeProgress = new JProgressBar(0, 100);
-	private JTextField status     = new JTextField();
-	private JTextField key        = new JTextField();
-	private JTextField path       = new JTextField();
-	private JTextField priority   = new JTextField();
-	private JTextField identifier = new JTextField();
-	private JTextField globalQueue= new JTextField();
+	private final JTextField file       = new JTextField();
+	private final JTextField size       = new JTextField();
+	private final JProgressBar progress = new JProgressBar(0, 100);
+	private final JProgressBar withTheNodeProgress = new JProgressBar(0, 100);
+	private final JTextField status     = new JTextField();
+	private final JTextField key        = new JTextField();
+	private final JTextField path       = new JTextField();
+	private final JTextField priority   = new JTextField();
+	private final JTextField identifier = new JTextField();
+	private final JTextField globalQueue= new JTextField();
 
 	private FCPTransferQuery query = null;
 
@@ -42,13 +41,11 @@ public class DetailPanel implements Observer {
 	private final static Dimension dim = new Dimension(300, 400);
 
 
-	public DetailPanel(Core core) {
-		this.core = core;
+	public DetailPanel() {
+		panel = new JPanel();
+		subPanel = new JPanel();
 
-		this.panel = new JPanel();
-		this.subPanel = new JPanel();
-
-		String[] fieldNames = { I18n.getMessage("thaw.common.file"),
+		final String[] fieldNames = { I18n.getMessage("thaw.common.file"),
 					I18n.getMessage("thaw.common.size"),
 					I18n.getMessage("thaw.common.progress"),
 					I18n.getMessage("thaw.common.withTheNodeProgress"),
@@ -60,56 +57,56 @@ public class DetailPanel implements Observer {
 					I18n.getMessage("thaw.common.globalQueue")
 		};
 
-		this.subPanel.setLayout(new GridLayout(fieldNames.length*2, 1));
+		subPanel.setLayout(new GridLayout(fieldNames.length*2, 1));
 
 		for(int i=0; i < (fieldNames.length * 2) ; i++) {
 
 			if(i%2 == 0) {
-				JLabel newLabel = new JLabel(fieldNames[i/2]);
-				this.subPanel.add(newLabel);
+				final JLabel newLabel = new JLabel(fieldNames[i/2]);
+				subPanel.add(newLabel);
 			} else {
 				JComponent field = null;
 
 				switch((i/2)) {
-				case(0): field = this.file; this.file.setEditable(false); break;
-				case(1): field = this.size; this.size.setEditable(false); break;
+				case(0): field = file; file.setEditable(false); break;
+				case(1): field = size; size.setEditable(false); break;
 				case(2):
-					field = this.progress;
-					this.progress.setString("");
-					this.progress.setStringPainted(true);
+					field = progress;
+					progress.setString("");
+					progress.setStringPainted(true);
 					break;
 				case(3):
-					field = this.withTheNodeProgress;
-					this.withTheNodeProgress.setString("");
-					this.withTheNodeProgress.setStringPainted(true);
+					field = withTheNodeProgress;
+					withTheNodeProgress.setString("");
+					withTheNodeProgress.setStringPainted(true);
 					break;
-				case(4): field = this.status; this.status.setEditable(false); break;
-				case(5): field = this.key; this.key.setEditable(false);break;
-				case(6): field = this.path; this.path.setEditable(false); break;
-				case(7): field = this.priority; this.priority.setEditable(false); break;
-				case(8): field = this.identifier; this.identifier.setEditable(false); break;
-				case(9): field = this.globalQueue; this.globalQueue.setEditable(false); break;
+				case(4): field = status; status.setEditable(false); break;
+				case(5): field = key; key.setEditable(false);break;
+				case(6): field = path; path.setEditable(false); break;
+				case(7): field = priority; priority.setEditable(false); break;
+				case(8): field = identifier; identifier.setEditable(false); break;
+				case(9): field = globalQueue; globalQueue.setEditable(false); break;
 				default: Logger.error(this, "Gouli goula ? ... is going to crash :p"); break;
 				}
 
-				this.subPanel.add(field);
+				subPanel.add(field);
 			}
 
 		} /* for (i < fieldNames.length) */
 
-		this.subPanel.setPreferredSize(dim);
+		subPanel.setPreferredSize(DetailPanel.dim);
 
-		this.panel.add(this.subPanel);
+		panel.add(subPanel);
 
 	}
 
 
 	public JPanel getPanel() {
-		return this.panel;
+		return panel;
 	}
 
 
-	public void setQuery(FCPTransferQuery query) {
+	public void setQuery(final FCPTransferQuery query) {
 		if(this.query != null)
 			((Observable)this.query).deleteObserver(this);
 
@@ -118,86 +115,86 @@ public class DetailPanel implements Observer {
 		if(this.query != null)
 			((Observable)this.query).addObserver(this);
 
-		this.refreshAll();
+		refreshAll();
 	}
 
-	public void update(Observable o, Object arg) {
-		this.refresh();
+	public void update(final Observable o, final Object arg) {
+		refresh();
 	}
 
 
 	public void refresh() {
-		if(this.query != null) {
-			this.withTheNodeProgress.setValue(this.query.getTransferWithTheNodeProgression());
-			this.withTheNodeProgress.setString(Integer.toString(this.query.getTransferWithTheNodeProgression()) + "%");
+		if(query != null) {
+			withTheNodeProgress.setValue(query.getTransferWithTheNodeProgression());
+			withTheNodeProgress.setString(Integer.toString(query.getTransferWithTheNodeProgression()) + "%");
 
-			this.progress.setValue(this.query.getProgression());
-			if(!this.query.isFinished() || this.query.isSuccessful()) {
-				String progression = Integer.toString(this.query.getProgression()) + "%";
+			progress.setValue(query.getProgression());
+			if(!query.isFinished() || query.isSuccessful()) {
+				String progression = Integer.toString(query.getProgression()) + "%";
 
-				if(!this.query.isProgressionReliable())
+				if(!query.isProgressionReliable())
 					progression = progression + " ("+I18n.getMessage("thaw.common.estimation")+")";
 
-				this.progress.setString(progression);
+				progress.setString(progression);
 			} else
-				this.progress.setString(I18n.getMessage("thaw.common.failed"));
+				progress.setString(I18n.getMessage("thaw.common.failed"));
 
-			if(this.query.getFileKey() != null)
-				this.key.setText(this.query.getFileKey());
+			if(query.getFileKey() != null)
+				key.setText(query.getFileKey());
 			else
-				this.key.setText(I18n.getMessage("thaw.common.unknown"));
+				key.setText(I18n.getMessage("thaw.common.unknown"));
 
-			if(this.query.getFileSize() == 0)
-				this.size.setText(I18n.getMessage("thaw.common.unknown"));
+			if(query.getFileSize() == 0)
+				size.setText(I18n.getMessage("thaw.common.unknown"));
 			else
-				this.size.setText((new Long(this.query.getFileSize())).toString()+" B");
+				size.setText((new Long(query.getFileSize())).toString()+" B");
 
-			this.status.setText(this.query.getStatus());
-			if(this.query.getIdentifier() != null)
-				this.identifier.setText(this.query.getIdentifier());
+			status.setText(query.getStatus());
+			if(query.getIdentifier() != null)
+				identifier.setText(query.getIdentifier());
 			else
-				this.identifier.setText("N/A");
+				identifier.setText("N/A");
 
-			if(this.query.getThawPriority() != -1)
-				this.priority.setText(I18n.getMessage("thaw.plugin.priority.p"+Integer.toString(this.query.getThawPriority())));
+			if(query.getThawPriority() != -1)
+				priority.setText(I18n.getMessage("thaw.plugin.priority.p"+Integer.toString(query.getThawPriority())));
 			else
-				this.priority.setText(I18n.getMessage("thaw.common.unknown"));
+				priority.setText(I18n.getMessage("thaw.common.unknown"));
 
 		} else {
-			this.withTheNodeProgress.setValue(0);
-			this.withTheNodeProgress.setString("");
-			this.progress.setValue(0);
-			this.progress.setString("");
-			this.status.setText("");
-			this.identifier.setText("");
-			this.size.setText("");
-			this.priority.setText("");
-			this.key.setText("");
+			withTheNodeProgress.setValue(0);
+			withTheNodeProgress.setString("");
+			progress.setValue(0);
+			progress.setString("");
+			status.setText("");
+			identifier.setText("");
+			size.setText("");
+			priority.setText("");
+			key.setText("");
 		}
 	}
 
 	public void refreshAll() {
-		this.refresh();
+		refresh();
 
-		if(this.query != null) {
+		if(query != null) {
 
-			this.file.setText(this.query.getFilename());
+			file.setText(query.getFilename());
 
-			if(this.query.getPath() != null)
-				this.path.setText(this.query.getPath());
+			if(query.getPath() != null)
+				path.setText(query.getPath());
 			else
-				this.path.setText(I18n.getMessage("thaw.common.unspecified"));
+				path.setText(I18n.getMessage("thaw.common.unspecified"));
 
-			if(this.query.isGlobal())
-				this.globalQueue.setText(I18n.getMessage("thaw.common.yes"));
+			if(query.isGlobal())
+				globalQueue.setText(I18n.getMessage("thaw.common.yes"));
 			else
-				this.globalQueue.setText(I18n.getMessage("thaw.common.no"));
+				globalQueue.setText(I18n.getMessage("thaw.common.no"));
 
 		} else {
-			this.file.setText("");
-			this.key.setText("");
-			this.path.setText("");
-			this.globalQueue.setText("");
+			file.setText("");
+			key.setText("");
+			path.setText("");
+			globalQueue.setText("");
 		}
 
 	}

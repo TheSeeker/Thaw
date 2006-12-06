@@ -6,8 +6,8 @@ public class FCPListPersistentRequests implements FCPQuery {
 	public FCPListPersistentRequests() { }
 
 
-	public boolean start(FCPQueueManager queueManager) {
-		FCPMessage newMessage = new FCPMessage();
+	public boolean start(final FCPQueueManager queueManager) {
+		final FCPMessage newMessage = new FCPMessage();
 
 		newMessage.setMessageName("ListPersistentRequests");
 
@@ -16,7 +16,7 @@ public class FCPListPersistentRequests implements FCPQuery {
 		return true;
 	}
 
-	public boolean stop(FCPQueueManager queueManager) {
+	public boolean stop(final FCPQueueManager queueManager) {
 		return true;
 	}
 

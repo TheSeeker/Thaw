@@ -1,15 +1,21 @@
 package thaw.plugins;
 
-import javax.swing.JButton;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
-
-import java.util.Vector;
 import java.util.Iterator;
+import java.util.Vector;
 
-import thaw.core.*;
+import javax.swing.JButton;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-import thaw.plugins.index.*;
+import thaw.core.Core;
+import thaw.core.I18n;
+import thaw.core.IconBox;
+import thaw.core.Logger;
+import thaw.core.Plugin;
+import thaw.plugins.index.IndexBrowserPanel;
+import thaw.plugins.index.IndexManagementHelper;
+import thaw.plugins.index.IndexTreeNode;
+import thaw.plugins.index.TableCreator;
 
 public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListener, java.util.Observer {
 
@@ -25,7 +31,7 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 
 	}
 
-	public boolean run(Core core) {
+	public boolean run(final Core core) {
 		this.core = core;
 
 		if(core.getPluginManager().getPlugin("thaw.plugins.Hsqldb") == null) {
@@ -91,7 +97,7 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 
 		if (newDb) {
 			IndexManagementHelper.addIndex(hsqldb, core.getQueueManager(), browserPanel.getUnknownIndexList(), browserPanel.getIndexTree(),
-						       browserPanel.getIndexTree().getRoot(), DEFAULT_INDEX);
+						       browserPanel.getIndexTree().getRoot(), IndexBrowser.DEFAULT_INDEX);
 		}
 
 		stateChanged(null);
@@ -119,7 +125,7 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 	 * Called when the JTabbedPane changed (ie change in the selected tab, etc)
 	 * @param e can be null.
 	 */
-	public void stateChanged(ChangeEvent e) {
+	public void stateChanged(final ChangeEvent e) {
 		int tabId;
 
 		tabId = core.getMainWindow().getTabbedPane().indexOfTab(I18n.getMessage("thaw.plugin.index.indexes"));
@@ -136,13 +142,13 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 		}
 	}
 
-	public void update (java.util.Observable o, Object arg) {
-		if (o == browserPanel.getIndexTree()
-		    && arg instanceof IndexTreeNode) {
+	public void update (final java.util.Observable o, final Object arg) {
+		if ((o == browserPanel.getIndexTree())
+		    && (arg instanceof IndexTreeNode)) {
 
-			for (Iterator it = toolbarActions.iterator();
+			for (final Iterator it = toolbarActions.iterator();
 			     it.hasNext(); ) {
-				IndexManagementHelper.IndexAction action = (IndexManagementHelper.IndexAction)it.next();
+				final IndexManagementHelper.IndexAction action = (IndexManagementHelper.IndexAction)it.next();
 				action.setTarget((IndexTreeNode)arg);
 			}
 

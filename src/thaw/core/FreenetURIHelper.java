@@ -1,6 +1,5 @@
 package thaw.core;
 
-import thaw.core.Logger;
 
 public class FreenetURIHelper {
 
@@ -18,14 +17,14 @@ public class FreenetURIHelper {
 
 		try {
 			uri = java.net.URLDecoder.decode(uri, "UTF-8");
-		} catch (java.io.UnsupportedEncodingException e) {
+		} catch (final java.io.UnsupportedEncodingException e) {
 			Logger.warning(new FreenetURIHelper(), "UnsupportedEncodingException (UTF-8): "+e.toString());
 		}
 
-		if (uri.indexOf("CHK@") < 0
-		    && uri.indexOf("USK@") < 0
-		    && uri.indexOf("KSK@") < 0
-		    && uri.indexOf("SSK@") < 0) {
+		if ((uri.indexOf("CHK@") < 0)
+		    && (uri.indexOf("USK@") < 0)
+		    && (uri.indexOf("KSK@") < 0)
+		    && (uri.indexOf("SSK@") < 0)) {
 			Logger.notice(new FreenetURIHelper(), "Not a valid key: "+uri);
 			return null;
 		}
@@ -34,9 +33,9 @@ public class FreenetURIHelper {
 	}
 
 
-	public static String getFilenameFromKey(String key) {
+	public static String getFilenameFromKey(final String key) {
 		String filename;
-		String cutcut[] = key.split("/");
+		final String cutcut[] = key.split("/");
 
 		if (key == null)
 			return null;
@@ -52,12 +51,12 @@ public class FreenetURIHelper {
 
 
 	public static String convertSSKtoUSK(String SSK) {
-		if (SSK == null || SSK.startsWith("USK@"))
+		if ((SSK == null) || SSK.startsWith("USK@"))
 			return SSK;
 
 		SSK.replaceFirst("SSK@", "USK@");
 
-		String[] split = SSK.split("/");
+		final String[] split = SSK.split("/");
 
 		SSK = "";
 
@@ -67,7 +66,7 @@ public class FreenetURIHelper {
 				SSK = split[i];
 				break;
 			case(1):
-				String subsplit[] = split[i].split("-");
+				final String subsplit[] = split[i].split("-");
 
 				SSK = SSK + "/";
 
@@ -90,11 +89,11 @@ public class FreenetURIHelper {
 	}
 
 
-	public static String abs(String val) {
+	public static String abs(final String val) {
 		try {
-			java.math.BigDecimal bd = new java.math.BigDecimal(val);
+			final java.math.BigDecimal bd = new java.math.BigDecimal(val);
 			return bd.abs().toString();
-		} catch(java.lang.NumberFormatException e) {
+		} catch(final java.lang.NumberFormatException e) {
 			Logger.warning(new FreenetURIHelper(), "NumberFormatException while parsing '"+val+"'");
 			return "0";
 		}
@@ -102,12 +101,12 @@ public class FreenetURIHelper {
 
 
 	public static String convertUSKtoSSK(String USK) {
-		if (USK == null || USK.startsWith("SSK@"))
+		if ((USK == null) || USK.startsWith("SSK@"))
 			return USK;
 
 		USK = USK.replaceFirst("USK@", "SSK@");
 
-		String[] split = USK.split("/");
+		final String[] split = USK.split("/");
 
 		USK = "";
 
@@ -117,7 +116,7 @@ public class FreenetURIHelper {
 				USK = split[i];
 				break;
 			case(2):
-				USK = USK + "-" + abs(split[i]);
+				USK = USK + "-" + FreenetURIHelper.abs(split[i]);
 				break;
 			default:
 				USK = USK + "/" + split[i];
@@ -130,9 +129,9 @@ public class FreenetURIHelper {
 
 
 	public static String getPublicInsertionSSK(String key) {
-		key = convertUSKtoSSK(key);
+		key = FreenetURIHelper.convertUSKtoSSK(key);
 
-		String split[] = key.split("/");
+		final String split[] = key.split("/");
 
 		key = "";
 
@@ -147,7 +146,7 @@ public class FreenetURIHelper {
 	}
 
 
-	protected static String changeRev(String revStr, int rev, int offset) {
+	protected static String changeRev(final String revStr, final int rev, final int offset) {
 		if (rev >= 0)
 			return Integer.toString(rev);
 
@@ -157,12 +156,12 @@ public class FreenetURIHelper {
 	/**
 	 * @param rev if < 0, then rev is changed according to the given offset
 	 */
-	public static String changeSSKRevision(String key, int rev, int offset) {
+	public static String changeSSKRevision(String key, final int rev, final int offset) {
 
 		if (key == null)
 			return null;
 
-		String[] split = key.split("/");
+		final String[] split = key.split("/");
 
 		key = "";
 
@@ -172,7 +171,7 @@ public class FreenetURIHelper {
 				key = key + split[i];
 				break;
 			case(1):
-				String[] subsplit = split[i].split("-");
+				final String[] subsplit = split[i].split("-");
 
 				for (int j = 0 ; j < subsplit.length-1 ; j++) {
 					if (j == 0)
@@ -181,7 +180,7 @@ public class FreenetURIHelper {
 						key = key + "-" + subsplit[j];
 				}
 
-				key = key + "-" + changeRev(subsplit[subsplit.length-1], rev, offset);
+				key = key + "-" + FreenetURIHelper.changeRev(subsplit[subsplit.length-1], rev, offset);
 				break;
 			default:
 				key = key + "/" + split[i];
@@ -192,7 +191,7 @@ public class FreenetURIHelper {
 	}
 
 
-	public static int getUSKRevision(String key) {
+	public static int getUSKRevision(final String key) {
 		String[] split;
 
 		if (key == null)

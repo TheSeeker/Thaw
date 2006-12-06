@@ -2,29 +2,26 @@ package thaw.plugins;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import thaw.core.*;
+import thaw.core.Core;
+import thaw.core.I18n;
+import thaw.core.LibraryPlugin;
+import thaw.core.Logger;
 
 public class Hsqldb extends LibraryPlugin {
 	private Core core;
 
+	public volatile String dbLock;
 	private Connection connection;
 
-	private int writeLock;
-
-	public Hsqldb() {
-		writeLock = 0;
-	}
-
-	public boolean run(Core core) {
+	public boolean run(final Core core) {
 		this.core = core;
 
 		try {
 			Class.forName("org.hsqldb.jdbcDriver");
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			Logger.error(this, "ERROR: failed to load HSQLDB JDBC driver.");
 			e.printStackTrace();
 			System.exit(1);
@@ -35,47 +32,39 @@ public class Hsqldb extends LibraryPlugin {
 	}
 
 
-	public synchronized void lockWriting() {
-
-	}
-
-	public synchronized void unlockWriting() {
-
-	}
 
 	public void realStart() {
 		Logger.info(this, "Connecting to the database ...");
 
-		if(this.core.getConfig().getValue("hsqldb.url") == null)
-			this.core.getConfig().setValue("hsqldb.url", "jdbc:hsqldb:file:thaw.db;shutdown=true");
+		if(core.getConfig().getValue("hsqldb.url") == null)
+			core.getConfig().setValue("hsqldb.url", "jdbc:hsqldb:file:thaw.db;shutdown=true");
 
 		try {
-			this.connect();
-		} catch (java.sql.SQLException e) {
-			Logger.error(this, "SQLException while connecting to the database '"+this.core.getConfig().getValue("hsqldb.url")+"'");
+			connect();
+		} catch (final java.sql.SQLException e) {
+			Logger.error(this, "SQLException while connecting to the database '"+core.getConfig().getValue("hsqldb.url")+"'");
 			e.printStackTrace();
 		}
 	}
 
 
 	public void connect() throws java.sql.SQLException {
-		if(this.core.getConfig().getValue("hsqldb.url") == null)
-			this.core.getConfig().setValue("hsqldb.url", "jdbc:hsqldb:file:thaw.db");
+		if(core.getConfig().getValue("hsqldb.url") == null)
+			core.getConfig().setValue("hsqldb.url", "jdbc:hsqldb:file:thaw.db");
 
-		if(this.connection != null)
-			this.disconnect();
+		if(connection != null)
+			disconnect();
 
-		this.connection = DriverManager.getConnection(this.core.getConfig().getValue("hsqldb.url"),
+		connection = DriverManager.getConnection(core.getConfig().getValue("hsqldb.url"),
 							 "sa", "");
 	}
 
 	public void disconnect() throws java.sql.SQLException {
-		this.connection.close();
+		connection.close();
 	}
 
 
 	public boolean stop() {
-
 		return true;
 	}
 
@@ -83,11 +72,11 @@ public class Hsqldb extends LibraryPlugin {
 		Logger.info(this, "Disconnecting from the database ...");
 
 		try {
-			this.connection.commit();
-			this.executeQuery("SHUTDOWN");
+			connection.commit();
+			executeQuery("SHUTDOWN");
 
-			this.connection.close();
-		} catch(java.sql.SQLException e) {
+			connection.close();
+		} catch(final java.sql.SQLException e) {
 			Logger.error(this, "SQLException while closing connection !");
 			e.printStackTrace();
 		}
@@ -100,14 +89,14 @@ public class Hsqldb extends LibraryPlugin {
 
 
 	public Connection getConnection() {
-		return this.connection;
+		return connection;
 	}
 
 
-	public ResultSet executeQuery(String query) throws java.sql.SQLException {
+	public ResultSet executeQuery(final String query) throws java.sql.SQLException {
 		ResultSet results;
 
-		Statement stmt = this.connection.createStatement();
+		final Statement stmt = connection.createStatement();
 
 		results = stmt.executeQuery(query);
 

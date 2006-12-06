@@ -1,20 +1,22 @@
 package thaw.plugins;
 
-import javax.swing.JScrollPane;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 
-import javax.swing.JFrame;
 import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JMenuItem;
+import javax.swing.JScrollPane;
 import javax.swing.WindowConstants;
 
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-
-import javax.swing.JMenuItem;
-
-import thaw.core.*;
-import thaw.plugins.insertPlugin.*;
-import thaw.fcp.*;
+import thaw.core.Core;
+import thaw.core.I18n;
+import thaw.core.IconBox;
+import thaw.core.Logger;
+import thaw.core.WarningWindow;
+import thaw.fcp.FCPClientPut;
+import thaw.plugins.insertPlugin.InsertPanel;
 
 public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 	private Core core;
@@ -35,15 +37,15 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 	}
 
 
-	public boolean run(Core core) {
+	public boolean run(final Core core) {
 		this.core = core;
 
 		Logger.info(this, "Starting plugin \"InsertPlugin\" ...");
 
-		this.insertPanel = new InsertPanel(this,
+		insertPanel = new InsertPanel(this,
 					      Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
 
-		this.scrollPane = new JScrollPane(this.insertPanel.getPanel());
+		scrollPane = new JScrollPane(insertPanel.getPanel());
 
 		//core.getMainWindow().addTab(I18n.getMessage("thaw.common.insertion"),
 		//			    IconBox.minInsertions,
@@ -54,7 +56,7 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 		insertionFrame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		insertionFrame.setContentPane(scrollPane);
 
-		if (core.getConfig().getValue("advancedMode") == null
+		if ((core.getConfig().getValue("advancedMode") == null)
 		    || Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue()) {
 			insertionFrame.setSize(750, 450);
 		} else {
@@ -105,7 +107,7 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 	}
 
 
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(final ActionEvent e) {
 		insertionFrame.setVisible(true);
 	}
 
@@ -120,23 +122,23 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 	 * @param persistence 0 = Forever ; 1 = Until node reboot ; 2 = Until the app disconnect
 	 * @param mimeType null = autodetect
 	 */
-	public boolean insertFile(String fileList, int keyType,
-				  int rev, String name,
-				  String privateKey,
-				  int priority, boolean global,
-				  int persistence, String mimeType) {
+	public boolean insertFile(final String fileList, final int keyType,
+				  final int rev, final String name,
+				  final String privateKey,
+				  final int priority, final boolean global,
+				  final int persistence, final String mimeType) {
 
 		FCPClientPut clientPut = null;
-		String[] files = fileList.split(";");
+		final String[] files = fileList.split(";");
 
-		if(keyType > 0 && files.length > 1) {
-			new WarningWindow(this.core, "Can't insert multiple SSH@ / KSK@ files at the same time. Use jSite.");
+		if((keyType > 0) && (files.length > 1)) {
+			new WarningWindow(core, "Can't insert multiple SSH@ / KSK@ files at the same time. Use jSite.");
 			return false;
 		}
 
 		for(int i = 0 ; i < files.length ; i++) {
 
-			if(privateKey != null && !"".equals( privateKey )) {
+			if((privateKey != null) && !"".equals( privateKey )) {
 				clientPut = new FCPClientPut(new File(files[i]), keyType, rev, name,
 							     "USK@"+privateKey+"/", priority,
 							     global, persistence);
@@ -151,10 +153,10 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 				clientPut.setMetadata("ContentType", mimeType);
 			}
 
-			this.insertPanel.setLastInserted(clientPut);
-			clientPut.addObserver(this.insertPanel);
+			insertPanel.setLastInserted(clientPut);
+			clientPut.addObserver(insertPanel);
 
-			this.core.getQueueManager().addQueryToThePendingQueue(clientPut);
+			core.getQueueManager().addQueryToThePendingQueue(clientPut);
 
 		}
 

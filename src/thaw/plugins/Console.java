@@ -1,22 +1,26 @@
 package thaw.plugins;
 
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import javax.swing.JFileChooser;
-
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileOutputStream;
 
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
-import thaw.core.*;
+import thaw.core.Core;
+import thaw.core.FileChooser;
+import thaw.core.I18n;
+import thaw.core.LogListener;
+import thaw.core.Logger;
+import thaw.core.Plugin;
 
 
 /**
@@ -39,44 +43,44 @@ public class Console implements Plugin, LogListener, ActionListener {
 
 	}
 
-	public boolean run(Core core) {
+	public boolean run(final Core core) {
 		this.core = core;
 
-		this.consolePanel = new JPanel();
-		this.consolePanel.setLayout(new BorderLayout());
+		consolePanel = new JPanel();
+		consolePanel.setLayout(new BorderLayout());
 
-		this.logArea = new JTextArea();
-		this.logArea.setEditable(false);
-		this.saveToFile = new JButton(I18n.getMessage("thaw.plugin.console.saveToFile"));
+		logArea = new JTextArea();
+		logArea.setEditable(false);
+		saveToFile = new JButton(I18n.getMessage("thaw.plugin.console.saveToFile"));
 
-		this.saveToFile.addActionListener(this);
+		saveToFile.addActionListener(this);
 
-		this.consolePanel.add(new JScrollPane(this.logArea), BorderLayout.CENTER);
-		this.consolePanel.add(this.saveToFile, BorderLayout.SOUTH);
+		consolePanel.add(new JScrollPane(logArea), BorderLayout.CENTER);
+		consolePanel.add(saveToFile, BorderLayout.SOUTH);
 
-		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.console.console"), this.consolePanel);
+		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.console.console"), consolePanel);
 
 		if(core.getConfig().getValue("consoleMaxLogSize") == null)
-			core.getConfig().setValue("consoleMaxLogSize", ((new Long(this.maxLogSize)).toString()) );
+			core.getConfig().setValue("consoleMaxLogSize", ((new Long(maxLogSize)).toString()) );
 		else {
 			try {
-				this.maxLogSize = (new Long(core.getConfig().getValue("consoleMaxLogSize"))).longValue();
-			} catch(Exception e) {
+				maxLogSize = (new Long(core.getConfig().getValue("consoleMaxLogSize"))).longValue();
+			} catch(final Exception e) {
 				Logger.notice(this, "Invalide size given in configuration ! Using default one.");
-				core.getConfig().setValue("consoleMaxLogSize", (new Long(this.maxLogSize)).toString());
+				core.getConfig().setValue("consoleMaxLogSize", (new Long(maxLogSize)).toString());
 			}
 		}
 
-		this.configPanel = new JPanel();
-		this.configPanel.setLayout(new GridLayout(15, 1));
+		configPanel = new JPanel();
+		configPanel.setLayout(new GridLayout(15, 1));
 
-		this.sizeLabel = new JLabel(I18n.getMessage("thaw.plugin.console.maxSize"));
-		this.sizeField = new JTextField(core.getConfig().getValue("consoleMaxLogSize"));
+		sizeLabel = new JLabel(I18n.getMessage("thaw.plugin.console.maxSize"));
+		sizeField = new JTextField(core.getConfig().getValue("consoleMaxLogSize"));
 
-		this.configPanel.add(this.sizeLabel);
-		this.configPanel.add(this.sizeField);
+		configPanel.add(sizeLabel);
+		configPanel.add(sizeField);
 
-		core.getConfigWindow().addTab(I18n.getMessage("thaw.plugin.console.console"), this.configPanel);
+		core.getConfigWindow().addTab(I18n.getMessage("thaw.plugin.console.console"), configPanel);
 
 		Logger.addLogListener(this);
 
@@ -86,30 +90,30 @@ public class Console implements Plugin, LogListener, ActionListener {
 
 
 	public boolean stop() {
-		this.core.getConfig().setValue("consoleMaxLogSize", this.sizeField.getText() );
+		core.getConfig().setValue("consoleMaxLogSize", sizeField.getText() );
 
 		Logger.removeLogListener(this);
 
-		this.core.getConfigWindow().removeTab(this.configPanel);
-		this.core.getMainWindow().removeTab(this.consolePanel);
+		core.getConfigWindow().removeTab(configPanel);
+		core.getMainWindow().removeTab(consolePanel);
 
 		return true;
 	}
 
 
-	public void actionPerformed(ActionEvent e) {
-		if(e.getSource() == this.saveToFile) {
-			FileChooser fileChooser = new FileChooser();
+	public void actionPerformed(final ActionEvent e) {
+		if(e.getSource() == saveToFile) {
+			final FileChooser fileChooser = new FileChooser();
 
 			fileChooser.setTitle(I18n.getMessage("thaw.plugin.console.console"));
 			fileChooser.setDirectoryOnly(false);
 			fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
 
-			File file = fileChooser.askOneFile();
+			final File file = fileChooser.askOneFile();
 
 			if(file != null) {
 				Logger.info(this, "Saving logs ...");
-				this.writeLogsToFile(file);
+				writeLogsToFile(file);
 				Logger.info(this, "Saving done.");
 			}
 
@@ -117,41 +121,41 @@ public class Console implements Plugin, LogListener, ActionListener {
 
 	}
 
-	public void writeLogsToFile(File file) {
+	public void writeLogsToFile(final File file) {
 		/* A la bourrin */
 
 		FileOutputStream output;
 
 		try {
 			output = new FileOutputStream(file);
-		} catch(java.io.FileNotFoundException e) {
+		} catch(final java.io.FileNotFoundException e) {
 			Logger.error(this, "FileNotFoundException ? wtf ?");
 			return;
 		}
 
 		try {
-			output.write(this.logArea.getText().getBytes("UTF-8"));
-		} catch(java.io.IOException e) {
+			output.write(logArea.getText().getBytes("UTF-8"));
+		} catch(final java.io.IOException e) {
 			Logger.error(this, "IOException while writing logs ... out of space ?");
 			return;
 		}
 
 		try {
 			output.close();
-		} catch(java.io.IOException e) {
+		} catch(final java.io.IOException e) {
 			Logger.error(this, "IOException while closing log file ?!");
 			return;
 		}
 	}
 
-	public void newLogLine(String line) {
-		String text = this.logArea.getText() + "\n" + line;
+	public void newLogLine(final String line) {
+		String text = logArea.getText() + "\n" + line;
 
-		if(text.length() > this.maxLogSize) {
-			text = text.substring((int)(text.length() - this.maxLogSize));
+		if(text.length() > maxLogSize) {
+			text = text.substring((int)(text.length() - maxLogSize));
 		}
 
-		this.logArea.setText(text);
+		logArea.setText(text);
 	}
 
 

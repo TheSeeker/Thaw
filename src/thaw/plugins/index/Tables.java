@@ -1,12 +1,12 @@
 package thaw.plugins.index;
 
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
 import java.awt.BorderLayout;
 
-import thaw.fcp.FCPQueueManager;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 
 import thaw.core.Config;
+import thaw.fcp.FCPQueueManager;
 import thaw.plugins.Hsqldb;
 
 /**
@@ -22,59 +22,59 @@ public class Tables {
 	private JSplitPane split;
 	private Config config;
 
-	public Tables(boolean modifiables, Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uil, IndexTree tree, Config config) {
+	public Tables(final boolean modifiables, final Hsqldb db, final FCPQueueManager queueManager, final UnknownIndexList uil, final IndexTree tree, final Config config) {
 		this.config = config;
 
-		this.panel = new JPanel();
-		this.panel.setLayout(new BorderLayout(10, 10));
+		panel = new JPanel();
+		panel.setLayout(new BorderLayout(10, 10));
 
-		this.fileTable = new FileTable(queueManager, tree, config, this);
-		this.linkTable = new LinkTable(db, queueManager, uil, tree, this);
+		fileTable = new FileTable(queueManager, tree, config, this);
+		linkTable = new LinkTable(db, queueManager, uil, tree, this);
 
-		this.searchBar = new SearchBar(db, tree, queueManager, this);
+		searchBar = new SearchBar(db, tree, queueManager, this);
 
-		this.split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-				       this.linkTable.getPanel(),
-				       this.fileTable.getPanel());
+		split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+				       linkTable.getPanel(),
+				       fileTable.getPanel());
 
-		this.panel.add(this.searchBar.getPanel(), BorderLayout.NORTH);
-		this.panel.add(this.split, BorderLayout.CENTER);
+		panel.add(searchBar.getPanel(), BorderLayout.NORTH);
+		panel.add(split, BorderLayout.CENTER);
 	}
 
 	public JPanel getPanel() {
-		return this.panel;
+		return panel;
 	}
 
 	public void restoreState() {
 		if (config.getValue("indexFileLinkSplit") != null)
-			split.setDividerLocation(Integer.parseInt(this.config.getValue("indexFileLinkSplit")));
+			split.setDividerLocation(Integer.parseInt(config.getValue("indexFileLinkSplit")));
 		else
 			split.setDividerLocation(100);
 	}
 
 	public void saveState() {
-		this.config.setValue("indexFileLinkSplit", Integer.toString(this.split.getDividerLocation()));
+		config.setValue("indexFileLinkSplit", Integer.toString(split.getDividerLocation()));
 	}
 
 	protected FileTable getFileTable() {
-		return this.fileTable;
+		return fileTable;
 	}
 
 	protected LinkTable getLinkTable() {
-		return this.linkTable;
+		return linkTable;
 	}
 
-	public void setLinkList(LinkList linkList) {
-		this.getLinkTable().setLinkList(linkList);
+	public void setLinkList(final LinkList linkList) {
+		getLinkTable().setLinkList(linkList);
 	}
 
-	public void setFileList(FileList fileList) {
-		this.getFileTable().setFileList(fileList);
+	public void setFileList(final FileList fileList) {
+		getFileTable().setFileList(fileList);
 	}
 
-	public void setList(FileAndLinkList l) {
-		this.setFileList(l);
-		this.setLinkList(l);
+	public void setList(final FileAndLinkList l) {
+		setFileList(l);
+		setLinkList(l);
 	}
 
 }

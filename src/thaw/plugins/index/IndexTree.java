@@ -1,56 +1,37 @@
 package thaw.plugins.index;
 
-import javax.swing.JPanel;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import javax.swing.JTree;
-import javax.swing.JMenu;
-import javax.swing.tree.TreeSelectionModel;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.DefaultTreeCellRenderer;
-
-import java.awt.Font;
-
-import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-
-import javax.swing.JScrollPane;
-
-import java.awt.event.MouseListener;
-import java.awt.event.MouseEvent;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
-
 import java.awt.Color;
-
-import javax.swing.JFrame;
-
-import javax.swing.JToolBar;
-import javax.swing.JButton;
-
-import javax.swing.JTextField;
-import javax.swing.JLabel;
-
-import java.util.Vector;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Iterator;
+import java.util.Vector;
 
-import java.sql.*;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
-
-import thaw.plugins.Hsqldb;
-import thaw.core.*;
-import thaw.fcp.*;
-
+import thaw.core.I18n;
+import thaw.core.IconBox;
+import thaw.core.Logger;
+import thaw.core.MainWindow;
+import thaw.fcp.FCPQueueManager;
 import thaw.gui.JDragTree;
+import thaw.plugins.Hsqldb;
 
 /**
  * Manages the index tree and its menu (right-click).
@@ -110,12 +91,12 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	/**
 	 * @param queueManager Not used if selectionOnly is set to true
 	 */
-	public IndexTree(String rootName,
+	public IndexTree(final String rootName,
 			 boolean selectionOnly,
-			 FCPQueueManager queueManager,
-			 UnknownIndexList uIndexList,
-			 MainWindow mainWindow,
-			 Hsqldb db) {
+			 final FCPQueueManager queueManager,
+			 final UnknownIndexList uIndexList,
+			 final MainWindow mainWindow,
+			 final Hsqldb db) {
 		this.uIndexList = uIndexList;
 		this.queueManager = queueManager;
 
@@ -141,7 +122,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			//tree.addMouseListener(this);
 		}
 
-		IndexTreeRenderer treeRenderer = new IndexTreeRenderer();
+		final IndexTreeRenderer treeRenderer = new IndexTreeRenderer();
 		treeRenderer.setLeafIcon(IconBox.minIndex);
 
 		tree.setCellRenderer(treeRenderer);
@@ -265,15 +246,15 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 
 	public javax.swing.JComponent getPanel() {
-		return this.panel;
+		return panel;
 	}
 
-	public void addTreeSelectionListener(javax.swing.event.TreeSelectionListener tsl) {
+	public void addTreeSelectionListener(final javax.swing.event.TreeSelectionListener tsl) {
 		tree.addTreeSelectionListener(tsl);
 	}
 
-	public void valueChanged(javax.swing.event.TreeSelectionEvent e) {
-		TreePath path = e.getPath();
+	public void valueChanged(final javax.swing.event.TreeSelectionEvent e) {
+		final TreePath path = e.getPath();
 
 		if(path == null)
 			return;
@@ -285,16 +266,16 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	}
 
 
-	public void updateMenuState(IndexTreeNode node) {
+	public void updateMenuState(final IndexTreeNode node) {
 		IndexManagementHelper.IndexAction action;
 
-		for(Iterator it = indexCategoryActions.iterator();
+		for(final Iterator it = indexCategoryActions.iterator();
 		    it.hasNext();) {
 			action = (IndexManagementHelper.IndexAction)it.next();
 			action.setTarget(node);
 		}
 
-		for(Iterator it = indexAndFileActions.iterator();
+		for(final Iterator it = indexAndFileActions.iterator();
 		    it.hasNext();) {
 			action = (IndexManagementHelper.IndexAction)it.next();
 			action.setTarget(node);
@@ -307,27 +288,27 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	}
 
 	public IndexCategory getRoot() {
-		return this.root;
+		return root;
 	}
 
-	public void mouseClicked(MouseEvent e) {
-		this.notifySelection(e);
+	public void mouseClicked(final MouseEvent e) {
+		notifySelection(e);
 	}
 
-	public void mouseEntered(MouseEvent e) { }
-	public void mouseExited(MouseEvent e) { }
+	public void mouseEntered(final MouseEvent e) { }
+	public void mouseExited(final MouseEvent e) { }
 
-	public void mousePressed(MouseEvent e) {
-		if (!this.selectionOnly)
-			this.showPopupMenu(e);
+	public void mousePressed(final MouseEvent e) {
+		if (!selectionOnly)
+			showPopupMenu(e);
 	}
 
-	public void mouseReleased(MouseEvent e) {
-		if (!this.selectionOnly)
-			this.showPopupMenu(e);
+	public void mouseReleased(final MouseEvent e) {
+		if (!selectionOnly)
+			showPopupMenu(e);
 	}
 
-	protected void showPopupMenu(MouseEvent e) {
+	protected void showPopupMenu(final MouseEvent e) {
 		if(e.isPopupTrigger()) {
 			if(selectedNode == null)
 				return;
@@ -344,24 +325,24 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		}
 	}
 
-	public void notifySelection(MouseEvent e) {
-		TreePath path = this.tree.getPathForLocation(e.getX(), e.getY());
+	public void notifySelection(final MouseEvent e) {
+		final TreePath path = tree.getPathForLocation(e.getX(), e.getY());
 
 		if(path == null)
 			return;
 
 		selectedNode = (IndexTreeNode)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
 
-		if (uIndexList != null && selectedNode instanceof Index) {
+		if ((uIndexList != null) && (selectedNode instanceof Index)) {
 			uIndexList.addLinks(((Index)selectedNode));
 		}
 
 		setChanged();
-		notifyObservers(this.selectedNode);
+		notifyObservers(selectedNode);
 	}
 
 	public IndexTreeNode getSelectedNode() {
-		Object obj = this.tree.getLastSelectedPathComponent();
+		final Object obj = tree.getLastSelectedPathComponent();
 
 		if (obj == null)
 			return null;
@@ -378,7 +359,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	}
 
 
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(final ActionEvent e) {
 		if(selectedNode == null)
 			selectedNode = root;
 	}
@@ -388,10 +369,10 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	}
 
 
-	public void update(java.util.Observable o, Object param) {
+	public void update(final java.util.Observable o, final Object param) {
 		if( (o instanceof Index)
 		    && (param == null) ) {
-			Index index = (Index)o;
+			final Index index = (Index)o;
 
 			if (treeModel != null) {
 				treeModel.nodeChanged(index.getTreeNode());
@@ -411,26 +392,26 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			super();
 		}
 
-		public java.awt.Component getTreeCellRendererComponent(JTree tree,
-								       Object value,
-								       boolean selected,
-								       boolean expanded,
-								       boolean leaf,
-								       int row,
-								       boolean hasFocus) {
+		public java.awt.Component getTreeCellRendererComponent(final JTree tree,
+								       final Object value,
+								       final boolean selected,
+								       final boolean expanded,
+								       final boolean leaf,
+								       final int row,
+								       final boolean hasFocus) {
 			setBackgroundNonSelectionColor(Color.WHITE);
-			setBackgroundSelectionColor(SELECTION_COLOR);
+			setBackgroundSelectionColor(IndexTree.SELECTION_COLOR);
 			setFont(new Font("Dialog", Font.PLAIN, 12));
 
 			if(value instanceof DefaultMutableTreeNode) {
-				Object o = ((DefaultMutableTreeNode)value).getUserObject();
+				final Object o = ((DefaultMutableTreeNode)value).getUserObject();
 
 				if(o instanceof Index) {
-					Index index = (Index)o;
+					final Index index = (Index)o;
 
 					if (index.isUpdating()) {
-						setBackgroundNonSelectionColor(LOADING_COLOR);
-						setBackgroundSelectionColor(LOADING_SELECTION_COLOR);
+						setBackgroundNonSelectionColor(IndexTree.LOADING_COLOR);
+						setBackgroundSelectionColor(IndexTree.LOADING_SELECTION_COLOR);
 					}
 				}
 
@@ -451,11 +432,11 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	}
 
 
-	public boolean addToRoot(IndexTreeNode node) {
+	public boolean addToRoot(final IndexTreeNode node) {
 		return addToIndexCategory(root, node);
 	}
 
-	public boolean addToIndexCategory(IndexCategory target, IndexTreeNode node) {
+	public boolean addToIndexCategory(final IndexCategory target, final IndexTreeNode node) {
 		if ((node instanceof Index) && alreadyExistingIndex(node.getPublicKey())) {
 			Logger.notice(this, "Index already added");
 			return false;
@@ -469,10 +450,10 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	}
 
 
-	public boolean alreadyExistingIndex(String key) {
+	public boolean alreadyExistingIndex(final String key) {
 		int maxLength = 0;
 
-		if (key == null || key.length() <= 10)
+		if ((key == null) || (key.length() <= 10))
 			return false;
 
 		if (key.length() <= 60)
@@ -480,10 +461,10 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		else
 			maxLength = 60;
 
-		String realKey = key.substring(0, maxLength).toLowerCase();
+		final String realKey = key.substring(0, maxLength).toLowerCase();
 
 		try {
-			Connection c = this.db.getConnection();
+			final Connection c = db.getConnection();
 			PreparedStatement st;
 
 			String query;
@@ -498,15 +479,14 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			st.setString(1, realKey+"%");
 
 			if (st.execute()) {
-				ResultSet results = st.getResultSet();
+				final ResultSet results = st.getResultSet();
 
-				if (results.next()) {
+				if (results.next())
 					return true;
-				}
 			}
 
 
-		} catch(java.sql.SQLException e) {
+		} catch(final java.sql.SQLException e) {
 			Logger.warning(this, "Exception while trying to check if '"+key+"' is already know: '"+e.toString()+"'");
 		}
 
@@ -518,12 +498,12 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	/**
 	 * @param node can be null
 	 */
-	public void reloadModel(DefaultMutableTreeNode node) {
-		this.treeModel.reload(node);
+	public void reloadModel(final DefaultMutableTreeNode node) {
+		treeModel.reload(node);
 	}
 
 	public void reloadModel() {
-		this.treeModel.reload();
+		treeModel.reload();
 	}
 
 }

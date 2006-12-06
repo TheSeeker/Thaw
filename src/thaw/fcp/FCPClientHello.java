@@ -1,7 +1,8 @@
 package thaw.fcp;
 
-import java.util.Observer;
 import java.util.Observable;
+import java.util.Observer;
+
 import thaw.core.Logger;
 
 /**
@@ -13,82 +14,79 @@ import thaw.core.Logger;
 public class FCPClientHello implements FCPQuery, Observer {
 
 	private final static String FCP_EXPECTED_VERSION = "2.0";
-	private String id = null;
+	private String id;
 
-	private String nodeFCPVersion = null;
-	private String nodeVersion = null;
+	private String nodeFCPVersion;
+	private String nodeVersion;
 	private String nodeName = null;
 	private boolean testnet = false; /* Hmm, in fact, we shouldn't have to bother about this one */
 	private int nmbCompressionCodecs = -1;
 
 	private boolean receiveAnswer = false;
-	private boolean successful = false;
 
-	private FCPQueryManager queryManager = null;
-
+	private final FCPQueryManager queryManager;
 
 	/**
 	 * Need to know the id of the application (see FCP specs).
 	 */
-	public FCPClientHello(FCPQueryManager queryManager, String id) {
-		this.setID(id);
+	public FCPClientHello(final FCPQueryManager queryManager, final String id) {
+		this.id = id;
 		this.queryManager = queryManager;
 	}
-
-
-	public void setID(String id) {
+	
+	public void setID(final String id) {
 		this.id = id;
 	}
 
 	public String getNodeFCPVersion() {
-		return this.nodeFCPVersion;
+		return nodeFCPVersion;
 	}
 
 	public String getNodeVersion() {
-		return this.nodeVersion;
+		return nodeVersion;
 	}
 
 	public String getNodeName() {
-		return this.nodeName;
+		return nodeName;
 	}
 
 	public boolean isOnTestnet() {
-		return this.testnet;
+		return testnet;
 	}
 
 	public int getNmbCompressionCodecs() {
-		return this.nmbCompressionCodecs;
+		return nmbCompressionCodecs;
 	}
 
 
 	/**
 	 * Warning: This query is blocking (only this one) !
 	 */
-	public boolean start(FCPQueueManager queueManager) {
+	public boolean start(final FCPQueueManager queueManager) {
 
-		FCPMessage message = new FCPMessage();
+		final FCPMessage message = new FCPMessage();
 
 		message.setMessageName("ClientHello");
-		message.setValue("Name", this.id);
-		message.setValue("ExpectedVersion", FCP_EXPECTED_VERSION);
+		message.setValue("Name", id);
+		message.setValue("ExpectedVersion", FCPClientHello.FCP_EXPECTED_VERSION);
 
-		this.queryManager.addObserver(this);
+		queryManager.addObserver(this);
 
-		if(!this.queryManager.writeMessage(message)) {
+		if(!queryManager.writeMessage(message)) {
 			Logger.warning(this, "Unable to say hello ... ;(");
 			return false;
 		}
 
-		while(!this.receiveAnswer) {
+		while(!receiveAnswer) {
 			try {
 				Thread.sleep(500);
-			} catch(java.lang.InterruptedException e) {
+			} catch(final java.lang.InterruptedException e) {
 				/* Dodo j'ai dis ! */
 			}
 		}
 
-		if(this.nodeName != null) {
-			Logger.info(this, "Hello "+this.nodeName+", I'm Thaw :)");
+		if(nodeName != null) {
+			Logger.info(this, "Hello "+nodeName+", I'm Thaw :)");
 		} else {
 			Logger.warning(this, "Unable to connect, ID is probably already taken");
 			return false;
@@ -98,39 +96,38 @@ public class FCPClientHello implements FCPQuery, Observer {
 	}
 
 
-	public void update(Observable o, Object arg) {
+	public void update(final Observable o, final Object arg) {
 		if(arg == null)
 			return;
 
-		FCPMessage answer = (FCPMessage)arg;
+		final FCPMessage answer = (FCPMessage)arg;
 
-		if(o == this.queryManager) {
+		if(o == queryManager) {
 
 			if("NodeHello".equals( answer.getMessageName() )) {
-				this.successful = true;
 				Logger.info(this, "Received a nodeHello");
 
-				this.nodeFCPVersion = answer.getValue("FCPVersion");
-				this.nodeVersion = answer.getValue("Version");
-				this.nodeName = answer.getValue("Node");
-				this.testnet = Boolean.valueOf(answer.getValue("Testnet")).booleanValue();
-				this.nmbCompressionCodecs = Integer.parseInt(answer.getValue("CompressionCodecs"));
+				nodeFCPVersion = answer.getValue("FCPVersion");
+				nodeVersion = answer.getValue("Version");
+				nodeName = answer.getValue("Node");
+				testnet = Boolean.valueOf(answer.getValue("Testnet")).booleanValue();
+				nmbCompressionCodecs = Integer.parseInt(answer.getValue("CompressionCodecs"));
 
-				this.queryManager.deleteObserver(this);
+				queryManager.deleteObserver(this);
 
-				this.receiveAnswer = true;
+				receiveAnswer = true;
 			}
 
 			if("CloseConnectionDuplicateClientName".equals( answer.getMessageName() )) {
 				/* Damn ... ! */
 				Logger.warning(this, "According to the node, Thaw ID is already used. Please change it in the configuration");
-				this.queryManager.deleteObserver(this);
-				this.queryManager.getConnection().disconnect();
-				this.receiveAnswer = true;
+				queryManager.deleteObserver(this);
+				queryManager.getConnection().disconnect();
+				receiveAnswer = true;
 			}
 		}
 
-		if(!this.receiveAnswer) {
+		if(!receiveAnswer) {
 			Logger.warning(this, "This message wasn't for us ?! : "+answer.getMessageName());
 		}
 	}
@@ -138,7 +135,7 @@ public class FCPClientHello implements FCPQuery, Observer {
 	/**
 	 * Not used.
 	 */
-	public boolean stop(FCPQueueManager queueManager) {
+	public boolean stop(final FCPQueueManager queueManager) {
 		return true;
 	}
 

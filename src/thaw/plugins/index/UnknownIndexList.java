@@ -1,23 +1,21 @@
 package thaw.plugins.index;
 
-import javax.swing.JPanel;
-import javax.swing.JList;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
 import java.awt.BorderLayout;
-
-import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
-
-import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
-
-import java.util.Vector;
+import java.awt.event.MouseListener;
 import java.util.Iterator;
+import java.util.Vector;
 
-import thaw.core.*;
-import thaw.plugins.Hsqldb;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+
+import thaw.core.I18n;
 import thaw.fcp.FCPQueueManager;
+import thaw.plugins.Hsqldb;
 
 public class UnknownIndexList implements MouseListener {
 	public final static int MAX_INDEXES = 50;
@@ -40,14 +38,14 @@ public class UnknownIndexList implements MouseListener {
 	private FCPQueueManager queueManager;
 	private IndexTree indexTree;
 
-	public UnknownIndexList(Hsqldb db, FCPQueueManager queueManager) {
+	public UnknownIndexList(final Hsqldb db, final FCPQueueManager queueManager) {
 		this.db = db;
 		this.queueManager = queueManager;
 
 		offset = 0;
 		full = false;
 		vList = new Vector();
-		linkList = new Link[MAX_INDEXES];
+		linkList = new Link[UnknownIndexList.MAX_INDEXES];
 
 		for(int i = 0 ; i < linkList.length ; i++)
 			linkList[i] = null;
@@ -65,15 +63,15 @@ public class UnknownIndexList implements MouseListener {
 		list.addMouseListener(this);
 	}
 
-	public void setIndexTree(IndexTree tree) {
-		this.indexTree = tree;
+	public void setIndexTree(final IndexTree tree) {
+		indexTree = tree;
 	}
 
 	public JPanel getPanel() {
 		return panel;
 	}
 
-	public boolean isInList(Link l) {
+	public boolean isInList(final Link l) {
 		if (l == null)
 			return false;
 
@@ -88,11 +86,11 @@ public class UnknownIndexList implements MouseListener {
 		return false;
 	}
 
-	public boolean removeLink(Index index) {
+	public boolean removeLink(final Index index) {
 		boolean ret = false;
 
 		for (int i = 0 ; i < linkList.length ; i++) {
-			if (linkList[i] != null && linkList[i].compare(index)) {
+			if ((linkList[i] != null) && linkList[i].compare(index)) {
 				if (!full)
 					vList.remove(linkList[i]);
 				linkList[i] = null;
@@ -106,8 +104,8 @@ public class UnknownIndexList implements MouseListener {
 	/**
 	 * will check that the link link to an unknown index before adding
 	 */
-	public boolean addLink(Link link) {
-		if (link == null || link.isIndexAlreadyKnown() || isInList(link))
+	public boolean addLink(final Link link) {
+		if ((link == null) || link.isIndexAlreadyKnown() || isInList(link))
 			return false;
 
 		linkList[linkList.length - 1 - offset] = link;
@@ -121,7 +119,7 @@ public class UnknownIndexList implements MouseListener {
 
 		offset++;
 
-		if (offset >= MAX_INDEXES) {
+		if (offset >= UnknownIndexList.MAX_INDEXES) {
 			offset = 0;
 			full = true;
 		}
@@ -132,15 +130,15 @@ public class UnknownIndexList implements MouseListener {
 	/**
 	 * will add the link from that index (if links link to unknown indexes)
 	 */
-	public boolean addLinks(Index index) {
+	public boolean addLinks(final Index index) {
 		boolean ret = false;
 
-		Vector ll = index.getLinkList();
+		final Vector ll = index.getLinkList();
 
-		if (ll == null || ll.size() == 0)
+		if ((ll == null) || (ll.size() == 0))
 			return false;
 
-		for (Iterator it = ll.iterator();
+		for (final Iterator it = ll.iterator();
 		     it.hasNext();) {
 			if (addLink(((Link)it.next())))
 				ret = true;
@@ -165,15 +163,15 @@ public class UnknownIndexList implements MouseListener {
 			rightClickActions.add(new LinkManagementHelper.PublicKeyCopier(item));
 		}
 
-		Object[] sLink = list.getSelectedValues();
-		Vector vLink = new Vector();
+		final Object[] sLink = list.getSelectedValues();
+		final Vector vLink = new Vector();
 
 		for (int i = 0; i < sLink.length ; i++)
 			vLink.add(sLink[i]);
 
 		LinkManagementHelper.LinkAction action;
 
-		for(Iterator it = rightClickActions.iterator();
+		for(final Iterator it = rightClickActions.iterator();
 		     it.hasNext(); ) {
 			action = (LinkManagementHelper.LinkAction)it.next();
 			action.setTarget(vLink);
@@ -181,19 +179,19 @@ public class UnknownIndexList implements MouseListener {
 	}
 
 
-	public void mouseClicked(MouseEvent e) {
-		if(e.getButton() == MouseEvent.BUTTON3
-		   && this.linkList != null) {
+	public void mouseClicked(final MouseEvent e) {
+		if((e.getButton() == MouseEvent.BUTTON3)
+		   && (linkList != null)) {
 			updateRightClickMenu();
 			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
 		}
 	}
 
-	public void mouseEntered(MouseEvent e) { }
+	public void mouseEntered(final MouseEvent e) { }
 
-	public void mouseExited(MouseEvent e) { }
+	public void mouseExited(final MouseEvent e) { }
 
-	public void mousePressed(MouseEvent e) { }
+	public void mousePressed(final MouseEvent e) { }
 
-	public void mouseReleased(MouseEvent e) { }
+	public void mouseReleased(final MouseEvent e) { }
 }

@@ -1,13 +1,14 @@
 package thaw.core;
 
-import javax.swing.JDialog;
-import javax.swing.JProgressBar;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Toolkit;
 import java.awt.Font;
+import java.awt.Toolkit;
+
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 
 
 public class SplashScreen {
@@ -24,70 +25,70 @@ public class SplashScreen {
 	}
 
 	public void display() {
-		JPanel panel = new JPanel();
-		this.splashScreen = new JDialog();
+		final JPanel panel = new JPanel();
+		splashScreen = new JDialog();
 
-		this.splashScreen.setUndecorated(true);
-		this.splashScreen.setResizable(false);
+		splashScreen.setUndecorated(true);
+		splashScreen.setResizable(false);
 
 		panel.setLayout(new BorderLayout(10, 10));
 
 
-		JLabel thawLabel = new JLabel("   Thaw");
+		final JLabel thawLabel = new JLabel("   Thaw");
 
 		thawLabel.setFont(new Font("Dialog", Font.BOLD, 30));
 
 		panel.add(thawLabel, BorderLayout.CENTER);
 
-		this.progressBar = new JProgressBar(0, 100);
-		this.progressBar.setStringPainted(true);
-		this.progressBar.setString("Wake up Neo ...");
+		progressBar = new JProgressBar(0, 100);
+		progressBar.setStringPainted(true);
+		progressBar.setString("Wake up Neo ...");
 
-		panel.add(this.progressBar, BorderLayout.SOUTH);
+		panel.add(progressBar, BorderLayout.SOUTH);
 
-		this.splashScreen.getContentPane().add(panel);
+		splashScreen.getContentPane().add(panel);
 
-		this.splashScreen.setSize(SIZE_X, SIZE_Y);
+		splashScreen.setSize(SplashScreen.SIZE_X, SplashScreen.SIZE_Y);
 
 
-		Dimension screenSize =
+		final Dimension screenSize =
 			Toolkit.getDefaultToolkit().getScreenSize();
 
-		Dimension splashSize = this.splashScreen.getSize();
-		this.splashScreen.setLocation(screenSize.width/2 - (splashSize.width/2),
+		final Dimension splashSize = splashScreen.getSize();
+		splashScreen.setLocation(screenSize.width/2 - (splashSize.width/2),
 					 screenSize.height/2 - (splashSize.height/2));
 
 
-		this.splashScreen.setVisible(true);
+		splashScreen.setVisible(true);
 
-		this.splashScreen.setSize(SIZE_X, SIZE_Y);
+		splashScreen.setSize(SplashScreen.SIZE_X, SplashScreen.SIZE_Y);
 
 	}
 
 	/**
 	 * @param progress In pourcent
 	 */
-	public void setProgression(int progress) {
-		if(this.progressBar != null)
-			this.progressBar.setValue(progress);
+	public void setProgression(final int progress) {
+		if(progressBar != null)
+			progressBar.setValue(progress);
 	}
 
 	public int getProgression() {
-		if(this.progressBar != null)
-			return this.progressBar.getValue();
+		if(progressBar != null)
+			return progressBar.getValue();
 		else
 			return -1;
 	}
 
 
-	public void setStatus(String status) {
-		if(this.progressBar != null)
-			this.progressBar.setString(status);
+	public void setStatus(final String status) {
+		if(progressBar != null)
+			progressBar.setString(status);
 	}
 
-	public void setProgressionAndStatus(int progress, String status) {
-		this.setProgression(progress);
-		this.setStatus(status);
+	public void setProgressionAndStatus(final int progress, final String status) {
+		setProgression(progress);
+		setStatus(status);
 	}
 
 

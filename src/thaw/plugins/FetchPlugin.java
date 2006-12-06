@@ -1,18 +1,20 @@
 package thaw.plugins;
 
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import javax.swing.JFrame;
 import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JMenuItem;
 import javax.swing.WindowConstants;
 
-import javax.swing.JMenuItem;
-
-import thaw.core.*;
-import thaw.plugins.fetchPlugin.*;
-
-import thaw.fcp.*;
+import thaw.core.Core;
+import thaw.core.FreenetURIHelper;
+import thaw.core.I18n;
+import thaw.core.IconBox;
+import thaw.core.Logger;
+import thaw.fcp.FCPClientGet;
+import thaw.plugins.fetchPlugin.FetchPanel;
 
 public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 	private Core core;
@@ -30,12 +32,12 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 	}
 
 
-	public boolean run(Core core) {
+	public boolean run(final Core core) {
 		this.core = core;
 
 		Logger.info(this, "Starting plugin \"FetchPlugin\" ...");
 
-		this.fetchPanel = new FetchPanel(core, this);
+		fetchPanel = new FetchPanel(core, this);
 
 		//core.getMainWindow().addTab(I18n.getMessage("thaw.common.download"),
 		//			    IconBox.minDownloads,
@@ -93,24 +95,24 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 		return I18n.getMessage("thaw.common.download");
 	}
 
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(final ActionEvent e) {
 		fetchFrame.setVisible(true);
 	}
 
-	public void fetchFiles(String[] keys, int priority,
-			       int persistence, boolean globalQueue,
-			       String destination) {
+	public void fetchFiles(final String[] keys, final int priority,
+			       final int persistence, final boolean globalQueue,
+			       final String destination) {
 
 		for(int i = 0 ; i < keys.length ; i++) {
 			if(keys[i].length() < 10)
 				continue;
 
-			String[] subKey = keys[i].split("\\?"); /* Because of VolodyA :p */
+			final String[] subKey = keys[i].split("\\?"); /* Because of VolodyA :p */
 
-			String key = FreenetURIHelper.cleanURI(subKey[0]);
+			final String key = FreenetURIHelper.cleanURI(subKey[0]);
 
 			if (key != null)
-				this.core.getQueueManager().addQueryToThePendingQueue(new FCPClientGet(key,
+				core.getQueueManager().addQueryToThePendingQueue(new FCPClientGet(key,
 												       priority,
 												       persistence,
 												       globalQueue, -1,

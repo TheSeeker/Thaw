@@ -1,7 +1,7 @@
 package thaw.fcp;
 
-import java.util.Vector;
 import java.util.Iterator;
+import java.util.Vector;
 
 import thaw.core.Logger;
 
@@ -19,7 +19,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 
 	/* offset in the array == priority */
 	/* Vector contains FCPQuery */
-	private Vector[] pendingQueries = new Vector[PRIORITY_MIN+1];
+	private final Vector[] pendingQueries = new Vector[FCPQueueManager.PRIORITY_MIN+1];
 	private Vector runningQueries;
 
 	private Thread scheduler;
@@ -33,53 +33,53 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	/**
 	 * Calls setQueryManager() and then resetQueues().
 	 */
-	public FCPQueueManager(FCPQueryManager queryManager,
-			       String thawId,
-			       int maxDownloads, int maxInsertions) {
-		this.lastId = 0;
-		this.queueCompleted = false;
+	public FCPQueueManager(final FCPQueryManager queryManager,
+			       final String thawId,
+			       final int maxDownloads, final int maxInsertions) {
+		lastId = 0;
+		queueCompleted = false;
 
-		this.setThawId(thawId);
-		this.setMaxDownloads(maxDownloads);
-		this.setMaxInsertions(maxInsertions);
+		setThawId(thawId);
+		setMaxDownloads(maxDownloads);
+		setMaxInsertions(maxInsertions);
 
-		this.setQueryManager(queryManager);
-		this.resetQueues();
+		setQueryManager(queryManager);
+		resetQueues();
 
 		queryManager.getConnection().addObserver(this);
 	}
 
 	public boolean isQueueCompletlyLoaded() {
-		return this.queueCompleted;
+		return queueCompleted;
 	}
 
 	public void setQueueCompleted() {
-		this.queueCompleted = true;
+		queueCompleted = true;
 	}
 
 	/**
 	 * Use it if you want to bypass the queue.
 	 */
 	public FCPQueryManager getQueryManager() {
-		return this.queryManager;
+		return queryManager;
 	}
 
-	public void setThawId(String thawId) {
+	public void setThawId(final String thawId) {
 		this.thawId = thawId;
 	}
 
-	public void setMaxDownloads(int maxDownloads) {
+	public void setMaxDownloads(final int maxDownloads) {
 		this.maxDownloads = maxDownloads;
 	}
 
-	public void setMaxInsertions(int maxInsertions) {
+	public void setMaxInsertions(final int maxInsertions) {
 		this.maxInsertions = maxInsertions;
 	}
 
 	/**
 	 * You should call resetQueues() after calling this function.
 	 */
-	public void setQueryManager(FCPQueryManager queryManager) {
+	public void setQueryManager(final FCPQueryManager queryManager) {
 		this.queryManager = queryManager;
 	}
 
@@ -88,17 +88,17 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	 * Will purge the current known queue.
 	 */
 	public void resetQueues() {
-		this.runningQueries = new Vector();
+		runningQueries = new Vector();
 
-		for(int i = 0; i <= PRIORITY_MIN ; i++)
-			this.pendingQueries[i] = new Vector();
+		for(int i = 0; i <= FCPQueueManager.PRIORITY_MIN ; i++)
+			pendingQueries[i] = new Vector();
 	}
 
 	/**
 	 * Take care: Can change while you're using it.
 	 */
 	public Vector[] getPendingQueues() {
-		return this.pendingQueries;
+		return pendingQueries;
 	}
 
 	/**
@@ -106,41 +106,40 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	 * The running queue contains running request, but also finished/failed ones.
 	 */
 	public Vector getRunningQueue() {
-		return this.runningQueries;
+		return runningQueries;
 	}
 
 	/**
 	 * @return < 0 if no limit
 	 */
 	public int getMaxDownloads() {
-		return this.maxDownloads;
+		return maxDownloads;
 	}
 
 	/**
 	 * @return < 0 if no limite
 	 */
 	public int getMaxInsertions() {
-		return this.maxInsertions;
+		return maxInsertions;
 	}
 
 	/**
 	 * @return false if already added.
 	 */
-	public boolean addQueryToThePendingQueue(FCPTransferQuery query) {
-		if(query.getThawPriority() < 0) {
+	public boolean addQueryToThePendingQueue(final FCPTransferQuery query) {
+		if(query.getThawPriority() < 0)
 			return this.addQueryToTheRunningQueue(query);
-		}
 
-		if(this.isAlreadyPresent(query)) {
+		if(isAlreadyPresent(query)) {
 			Logger.notice(this, "Key was already in one of the queues : "+query.getFilename());
 			return false;
 		}
 
 		Logger.notice(this, "Adding query to the pending queue ...");
 
-		this.pendingQueries[query.getThawPriority()].add(query);
+		pendingQueries[query.getThawPriority()].add(query);
 
-		this.setChanged();
+		setChanged();
 		this.notifyObservers(query);
 
 		Logger.notice(this, "Adding done");
@@ -151,19 +150,19 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	 * will call start() function of the query.
 	 * @return false if already added
 	 */
-	public boolean addQueryToTheRunningQueue(FCPTransferQuery query) {
+	public boolean addQueryToTheRunningQueue(final FCPTransferQuery query) {
 		return this.addQueryToTheRunningQueue(query, true);
 	}
 
-	public boolean addQueryToTheRunningQueue(FCPTransferQuery query, boolean callStart) {
+	public boolean addQueryToTheRunningQueue(final FCPTransferQuery query, boolean callStart) {
 		Logger.debug(this, "Adding query to the running queue ...");
 
-		if(this.isAlreadyPresent(query)) {
+		if(isAlreadyPresent(query)) {
 			Logger.notice(this, "Key was already in one of the queues");
 			return false;
 		}
 
-		if(!callStart && query.getIdentifier().startsWith(this.thawId)) {
+		if(!callStart && query.getIdentifier().startsWith(thawId)) {
 			/* It's a resumed query => We to adapt the next Id
 			 * to avoid collisions.
 			 */
@@ -172,19 +171,19 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 			try {
 				String[] subId = query.getIdentifier().split("-");
 				subId = subId[0].split("_");
-				int id = Integer.parseInt(subId[subId.length-1]);
+				final int id = Integer.parseInt(subId[subId.length-1]);
 
-				if(id > this.lastId) {
-					this.lastId = id;
+				if(id > lastId) {
+					lastId = id;
 				}
-			} catch(Exception e) {
+			} catch(final Exception e) {
 				Logger.notice(this, "Exception while parsing previous Id (Not really a problem)");
 			}
 		}
 
-		this.runningQueries.add(query);
+		runningQueries.add(query);
 
-		this.setChanged();
+		setChanged();
 		this.notifyObservers(query);
 
 		if(callStart)
@@ -200,9 +199,9 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	/**
 	 * *Doesn't* call stop() from the query.
 	 */
-	public void moveFromRunningToPendingQueue(FCPTransferQuery query) {
-		this.remove(query);
-		this.addQueryToThePendingQueue(query);
+	public void moveFromRunningToPendingQueue(final FCPTransferQuery query) {
+		remove(query);
+		addQueryToThePendingQueue(query);
 	}
 
 
@@ -213,9 +212,9 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	public  void restartNonPersistent() {
 		Logger.info(this, "Restarting non persistent query");
 
-		for(Iterator queryIt = this.getRunningQueue().iterator() ;
+		for(final Iterator queryIt = getRunningQueue().iterator() ;
 		    queryIt.hasNext();) {
-			FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
+			final FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
 
 			if(!query.isPersistent() && !query.isFinished())
 				query.start(this);
@@ -224,23 +223,23 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 		Logger.info(this, "Restart done.");
 	}
 
-	public void remove(FCPTransferQuery query) {
-		this.runningQueries.remove(query);
+	public void remove(final FCPTransferQuery query) {
+		runningQueries.remove(query);
 
-		for(int i = 0 ; i <= PRIORITY_MIN ; i++)
-			this.pendingQueries[i].remove(query);
+		for(int i = 0 ; i <= FCPQueueManager.PRIORITY_MIN ; i++)
+			pendingQueries[i].remove(query);
 
-		this.setChanged();
+		setChanged();
 		this.notifyObservers(query);
 	}
 
 
-	private boolean isTheSame(FCPTransferQuery queryA,
-				  FCPTransferQuery queryB) {
+	private boolean isTheSame(final FCPTransferQuery queryA,
+				  final FCPTransferQuery queryB) {
 		if(queryA.getQueryType() != queryB.getQueryType())
 			return false;
 
-		if(queryA.getIdentifier() != null && queryB.getIdentifier() != null) {
+		if((queryA.getIdentifier() != null) && (queryB.getIdentifier() != null)) {
 			if(queryA.getIdentifier().equals(queryB.getIdentifier())) {
 				Logger.debug(this, "isTheSame(): Identifier");
 				return true;
@@ -248,7 +247,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 			return false;
 		}
 
-		if(queryA.getFileKey() != null && queryB.getFileKey() != null) {
+		if((queryA.getFileKey() != null) && (queryB.getFileKey() != null)) {
 			if(queryA.getFileKey().equals(queryB.getFileKey())) {
 				Logger.debug(this, "isTheSame(): FileKey");
 				return true;
@@ -266,12 +265,12 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	/**
 	 * Compare only the refs.
 	 */
-	public boolean isInTheQueues(FCPTransferQuery query) {
-		if(this.runningQueries.contains(query))
+	public boolean isInTheQueues(final FCPTransferQuery query) {
+		if(runningQueries.contains(query))
 			return true;
 
-		for(int i = 0 ; i < this.pendingQueries.length ; i++) {
-			if(this.pendingQueries[i].contains(query))
+		for(int i = 0 ; i < pendingQueries.length ; i++) {
+			if(pendingQueries[i].contains(query))
 				return true;
 		}
 
@@ -282,7 +281,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	/**
 	 * Not very reliable ?
 	 */
-	public FCPTransferQuery getTransfer(String key) {
+	public FCPTransferQuery getTransfer(final String key) {
 		boolean interrupted=true;
 		boolean isAKey = true;
 		Iterator it;
@@ -300,39 +299,39 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 			interrupted = false;
 
 			try {
-				for(it = this.runningQueries.iterator();
+				for(it = runningQueries.iterator();
 				    it.hasNext(); )
 					{
-						FCPTransferQuery plop = (FCPTransferQuery)it.next();
+						final FCPTransferQuery plop = (FCPTransferQuery)it.next();
 						if (isAKey) {
-							if (plop.getFileKey() == key
+							if ((plop.getFileKey() == key)
 							    || key.equals(plop.getFileKey()))
 								return plop;
 						} else {
-							if (plop.getFilename() == key
+							if ((plop.getFilename() == key)
 							    || key.equals(plop.getFilename()))
 								return plop;
 						}
 					}
 
-				for(int i = 0 ; i <= PRIORITY_MIN ; i++) {
-					for(it = this.pendingQueries[i].iterator();
+				for(int i = 0 ; i <= FCPQueueManager.PRIORITY_MIN ; i++) {
+					for(it = pendingQueries[i].iterator();
 					    it.hasNext(); )
 						{
-							FCPTransferQuery plop = (FCPTransferQuery)it.next();
+							final FCPTransferQuery plop = (FCPTransferQuery)it.next();
 							if (isAKey) {
-								if (plop.getFileKey() == key
+								if ((plop.getFileKey() == key)
 								    || key.equals(plop.getFileKey()))
 									return plop;
 							} else {
-								if (plop.getFilename() == key
+								if ((plop.getFilename() == key)
 								    || key.equals(plop.getFilename()))
 									return plop;
 							}
 						}
 
 				}
-			} catch(java.util.ConcurrentModificationException e) {
+			} catch(final java.util.ConcurrentModificationException e) {
 				Logger.notice(this, "getTransfer(): Collission. Reitering");
 				interrupted = true;
 			}
@@ -346,7 +345,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	/**
 	 * Not reliable
 	 */
-	public FCPTransferQuery getTransferByFilename(String name) {
+	public FCPTransferQuery getTransferByFilename(final String name) {
 		boolean interrupted=true;
 
 		Iterator it;
@@ -358,29 +357,29 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 			interrupted = false;
 
 			try {
-				for(it = this.runningQueries.iterator();
+				for(it = runningQueries.iterator();
 				    it.hasNext(); )
 					{
-						FCPTransferQuery plop = (FCPTransferQuery)it.next();
+						final FCPTransferQuery plop = (FCPTransferQuery)it.next();
 
-						if (plop.getFilename() == name
+						if ((plop.getFilename() == name)
 						    || name.equals(plop.getFilename()))
 							return plop;
 					}
 
-				for(int i = 0 ; i <= PRIORITY_MIN ; i++) {
-					for(it = this.pendingQueries[i].iterator();
+				for(int i = 0 ; i <= FCPQueueManager.PRIORITY_MIN ; i++) {
+					for(it = pendingQueries[i].iterator();
 					    it.hasNext(); )
 						{
-							FCPTransferQuery plop = (FCPTransferQuery)it.next();
+							final FCPTransferQuery plop = (FCPTransferQuery)it.next();
 
-							if (plop.getFilename() == name
+							if ((plop.getFilename() == name)
 							    || name.equals(plop.getFilename()))
 								return plop;
 						}
 
 				}
-			} catch(java.util.ConcurrentModificationException e) {
+			} catch(final java.util.ConcurrentModificationException e) {
 				Logger.notice(this, "getTransferByFilename(): Collission. Reitering");
 				interrupted = true;
 			}
@@ -394,7 +393,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	/**
 	 * Compare using the key.
 	 */
-	public boolean isAlreadyPresent(FCPTransferQuery query) {
+	public boolean isAlreadyPresent(final FCPTransferQuery query) {
 		boolean interrupted=true;
 
 		Iterator it;
@@ -403,25 +402,25 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 			interrupted = false;
 
 			try {
-				for(it = this.runningQueries.iterator();
+				for(it = runningQueries.iterator();
 				    it.hasNext(); )
 					{
-						FCPTransferQuery plop = (FCPTransferQuery)it.next();
-						if(this.isTheSame(plop, query))
+						final FCPTransferQuery plop = (FCPTransferQuery)it.next();
+						if(isTheSame(plop, query))
 							return true;
 					}
 
-				for(int i = 0 ; i <= PRIORITY_MIN ; i++) {
-					for(it = this.pendingQueries[i].iterator();
+				for(int i = 0 ; i <= FCPQueueManager.PRIORITY_MIN ; i++) {
+					for(it = pendingQueries[i].iterator();
 					    it.hasNext(); )
 						{
-							FCPTransferQuery plop = (FCPTransferQuery)it.next();
-							if(this.isTheSame(plop, query))
+							final FCPTransferQuery plop = (FCPTransferQuery)it.next();
+							if(isTheSame(plop, query))
 								return true;
 						}
 
 				}
-			} catch(java.util.ConcurrentModificationException e) {
+			} catch(final java.util.ConcurrentModificationException e) {
 				Logger.notice(this, "isAlreadyPresent(): Collission. Reitering");
 				interrupted = true;
 			}
@@ -439,14 +438,14 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 			int runningInsertions = 0;
 			int runningDownloads = 0;
 
-			for(Iterator it = this.runningQueries.iterator(); it.hasNext(); ) {
-				FCPTransferQuery query = (FCPTransferQuery)it.next();
+			for(final Iterator it = runningQueries.iterator(); it.hasNext(); ) {
+				final FCPTransferQuery query = (FCPTransferQuery)it.next();
 
-				if(query.getQueryType() == 1 /* Download */
+				if((query.getQueryType() == 1 /* Download */)
 				   && !query.isFinished())
 					runningDownloads++;
 
-				if(query.getQueryType() == 2 /* Insertion */
+				if((query.getQueryType() == 2 /* Insertion */)
 				   && !query.isFinished())
 					runningInsertions++;
 			}
@@ -454,28 +453,28 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 
 			/* We move queries from the pendingQueue to the runningQueue until we got our quota */
 			for(int priority = 0;
-			    priority <= PRIORITY_MIN
-				    && ( (this.maxInsertions <= -1 || runningInsertions < this.maxInsertions)
-					|| (this.maxDownloads <= -1 || runningDownloads < this.maxDownloads) ) ;
+			    (priority <= FCPQueueManager.PRIORITY_MIN)
+				    && ( ((maxInsertions <= -1) || (runningInsertions < maxInsertions))
+					|| ((maxDownloads <= -1) || (runningDownloads < maxDownloads)) ) ;
 			    priority++)	{
 
 				try {
-					for(Iterator it = this.pendingQueries[priority].iterator();
+					for(Iterator it = pendingQueries[priority].iterator();
 					    it.hasNext()
-						    && ( (this.maxInsertions <= -1 || runningInsertions < this.maxInsertions)
-							|| (this.maxDownloads <= -1 || runningDownloads < this.maxDownloads) ); ) {
+						    && ( ((maxInsertions <= -1) || (runningInsertions < maxInsertions))
+							|| ((maxDownloads <= -1) || (runningDownloads < maxDownloads)) ); ) {
 
-						FCPTransferQuery query = (FCPTransferQuery)it.next();
+						final FCPTransferQuery query = (FCPTransferQuery)it.next();
 
-						if( (query.getQueryType() == 1
-						     && (this.maxDownloads <= -1 || runningDownloads < this.maxDownloads) )
-						    || (query.getQueryType() == 2
-							&& (this.maxInsertions <= -1 || runningInsertions < this.maxInsertions)) ) {
+						if( ((query.getQueryType() == 1)
+						     && ((maxDownloads <= -1) || (runningDownloads < maxDownloads)) )
+						    || ((query.getQueryType() == 2)
+							&& ((maxInsertions <= -1) || (runningInsertions < maxInsertions))) ) {
 
 							Logger.debug(this, "Scheduler : Moving a query from pendingQueue to the runningQueue");
-							this.pendingQueries[priority].remove(query);
+							pendingQueries[priority].remove(query);
 
-							it = this.pendingQueries[priority].iterator(); /* We reset iterator */
+							it = pendingQueries[priority].iterator(); /* We reset iterator */
 
 							this.addQueryToTheRunningQueue(query);
 
@@ -487,10 +486,10 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 
 							try {
 								Thread.sleep(300);
-							} catch(java.lang.InterruptedException e) { }
+							} catch(final java.lang.InterruptedException e) { }
 						}
 					}
-				} catch(java.util.ConcurrentModificationException e) {
+				} catch(final java.util.ConcurrentModificationException e) {
 					Logger.notice(this, "Collision.");
 					priority--;
 				}
@@ -503,18 +502,18 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	public void run() {
 		try {
 			Thread.sleep(5000);
-		} catch(java.lang.InterruptedException e) {
+		} catch(final java.lang.InterruptedException e) {
 			// I'm stupid. I'm stupid. I'm stupid. (r9654)
 		}
 
 		while(true) {
 			try {
 				Thread.sleep(500);
-			} catch(java.lang.InterruptedException e) {
+			} catch(final java.lang.InterruptedException e) {
 				/* We don't care */
 			}
 
-			if(this.stopThread)
+			if(stopThread)
 				return;
 
 			try {
@@ -522,12 +521,12 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 				   && !queryManager.getConnection().isWriting()
 				   && queueCompleted) {
 
-					this.schedule();
+					schedule();
 
 				}
-			} catch(java.util.ConcurrentModificationException e) {
+			} catch(final java.util.ConcurrentModificationException e) {
 				Logger.notice(this, "Ordonnancor: Collision !");
-			} catch(Exception e) {
+			} catch(final Exception e) {
 				Logger.error(this, "EXCEPTION FROM ORDONNANCOR : "+e.toString());
 				Logger.error(this, "ERROR : "+e.getMessage());
 				e.printStackTrace();
@@ -537,36 +536,36 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	}
 
 	public void startScheduler() {
-		this.scheduler = new Thread(this);
-		this.stopThread = false;
-		this.scheduler.start();
+		scheduler = new Thread(this);
+		stopThread = false;
+		scheduler.start();
 	}
 
 	public void stopScheduler() {
-		this.stopThread = true;
+		stopThread = true;
 	}
 
 
 	public String getAnID() {
-		this.lastId++;
+		lastId++;
 
-		if(this.lastId >= 65535) {
-			this.lastId = 0;
+		if(lastId >= 65535) {
+			lastId = 0;
 		}
 
-		return (this.thawId+"_"+ Integer.toString(this.lastId));
+		return (thawId+"_"+ Integer.toString(lastId));
 	}
 
-	public void update(java.util.Observable o, Object arg) {
-		if(o == this.queryManager.getConnection()
-		   && !this.queryManager.getConnection().isConnected()) {
+	public void update(final java.util.Observable o, final Object arg) {
+		if((o == queryManager.getConnection())
+		   && !queryManager.getConnection().isConnected()) {
 
 			/* Only the running queue ...
 			 * pending query are specifics to Thaw
 			 */
-			this.runningQueries = new Vector();
+			runningQueries = new Vector();
 
-			this.setChanged();
+			setChanged();
 			this.notifyObservers();
 		}
 	}

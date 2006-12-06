@@ -1,7 +1,7 @@
 package thaw.fcp;
 
-import java.util.Hashtable;
 import java.util.Enumeration;
+import java.util.Hashtable;
 
 import thaw.core.Logger;
 
@@ -19,31 +19,31 @@ public class FCPMessage {
 
 
 	public FCPMessage() {
-		this.fields = new Hashtable();
+		fields = new Hashtable();
 	}
 
 	/**
 	 * As you can't fetch the value returns by loadFromRawMessage(), this constructor is not recommanded.
 	 */
-	public FCPMessage(String rawMessage) {
+	public FCPMessage(final String rawMessage) {
 		this();
-		this.loadFromRawMessage(rawMessage);
+		loadFromRawMessage(rawMessage);
 	}
 
 
 	/**
 	 * Raw message does not need to finish by "EndMessage" / "Data".
 	 */
-	public boolean loadFromRawMessage(String rawMessage) {
+	public boolean loadFromRawMessage(final String rawMessage) {
 		int i;
 
-		String[] lines = rawMessage.split("\n");
+		final String[] lines = rawMessage.split("\n");
 
 		for(i = 0 ; "".equals( lines[i] );) {
 			i++;
 		}
 
-		this.setMessageName(lines[i]);
+		setMessageName(lines[i]);
 		Logger.info(this, "Message (Node >> Thaw): "+lines[i]);
 
 		for(i++; i < lines.length ; i++) {
@@ -52,18 +52,18 @@ public class FCPMessage {
 			if("".equals( lines[i] ) || !(lines[i].indexOf("=") >= 0))
 				continue;
 
-			String[] affectation = lines[i].split("=");
+			final String[] affectation = lines[i].split("=");
 
 			if(affectation.length < 2) {
 				Logger.warning(this, "Malformed message");
 				continue;
 			}
 
-			this.setValue(affectation[0], affectation[1]);
+			setValue(affectation[0], affectation[1]);
 		}
 
-		if("ProtocolError".equals( this.getMessageName() )) {
-			Logger.notice(this, "PROTOCOL ERROR:"+this.toString());
+		if("ProtocolError".equals( getMessageName() )) {
+			Logger.notice(this, "PROTOCOL ERROR:"+toString());
 		}
 
 		return true;
@@ -71,11 +71,11 @@ public class FCPMessage {
 
 
 	public String getMessageName() {
-		return this.messageName;
+		return messageName;
 	}
 
-	public void setMessageName(String name) {
-		if(name == null || "".equals( name )) {
+	public void setMessageName(final String name) {
+		if((name == null) || "".equals( name )) {
 			Logger.notice(this, "Setting name to empty ? weird");
 		}
 
@@ -83,24 +83,24 @@ public class FCPMessage {
 			Logger.notice(this, "Name shouldn't contain '\n'");
 		}
 
-		this.messageName = name;
+		messageName = name;
 	}
 
-	public String getValue(String field) {
-		return ((String)this.fields.get(field));
+	public String getValue(final String field) {
+		return ((String)fields.get(field));
 	}
 
-	public void setValue(String field, String value) {
+	public void setValue(final String field, final String value) {
 		if("DataLength".equals( field )) {
-			this.setAmountOfDataWaiting((new Long(value)).longValue());
+			setAmountOfDataWaiting((new Long(value)).longValue());
 		}
 
 		if(value == null) {
-			this.fields.remove(field);
+			fields.remove(field);
 			return;
 		}
 
-		this.fields.put(field, value);
+		fields.put(field, value);
 	}
 
 
@@ -109,16 +109,16 @@ public class FCPMessage {
 	 * @return if > 0 : Data are still waiting (except if the message name is "PersistentPut" !), if == 0 : No data waiting, if < 0 : These data are now unavailable.
 	 */
 	public long getAmountOfDataWaiting() {
-		return this.dataWaiting;
+		return dataWaiting;
 	}
 
 
-	public void setAmountOfDataWaiting(long amount) {
+	public void setAmountOfDataWaiting(final long amount) {
 		if(amount == 0) {
 			Logger.warning(this, "Setting amount of data waiting to 0 ?! Abnormal !");
 		}
 
-		this.dataWaiting = amount;
+		dataWaiting = amount;
 	}
 
 
@@ -130,20 +130,20 @@ public class FCPMessage {
 	public String toString() {
 		String result = "";
 
-		Logger.info(this, "Message (Node << Thaw): "+this.getMessageName());
+		Logger.info(this, "Message (Node << Thaw): "+getMessageName());
 
-		result = result + this.getMessageName() + "\n";
+		result = result + getMessageName() + "\n";
 
-		for(Enumeration fieldNames = this.fields.keys() ; fieldNames.hasMoreElements();) {
-			String fieldName = ((String)fieldNames.nextElement());
+		for(final Enumeration fieldNames = fields.keys() ; fieldNames.hasMoreElements();) {
+			final String fieldName = ((String)fieldNames.nextElement());
 
-			result = result + fieldName + "=" + this.getValue(fieldName) + "\n";
+			result = result + fieldName + "=" + getValue(fieldName) + "\n";
 		}
 
-		if(this.getAmountOfDataWaiting() == 0)
+		if(getAmountOfDataWaiting() == 0)
 			result = result + "EndMessage\n";
 		else {
-			result = result + "DataLength="+ (new Long(this.getAmountOfDataWaiting())).toString() + "\n";
+			result = result + "DataLength="+ (new Long(getAmountOfDataWaiting())).toString() + "\n";
 			result = result + "Data\n";
 		}
 

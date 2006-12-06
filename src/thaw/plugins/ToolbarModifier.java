@@ -1,6 +1,7 @@
 package thaw.plugins;
 
 import java.util.Vector;
+
 import javax.swing.JButton;
 
 import thaw.core.Logger;
@@ -21,25 +22,25 @@ public class ToolbarModifier {
 		areDisplayed = false;
 	}
 
-	public ToolbarModifier(MainWindow toolbarTarget) {
+	public ToolbarModifier(final MainWindow toolbarTarget) {
 		this();
 		setMainWindow(toolbarTarget);
 	}
 
 
-	public void setMainWindow(MainWindow target) {
-		this.mainWindow = target;
-		this.mainWindow.resetLastKnowToolBarModifier();
+	public void setMainWindow(final MainWindow target) {
+		mainWindow = target;
+		mainWindow.resetLastKnowToolBarModifier();
 	}
 
-	public void addButtonToTheToolbar(JButton button) {
+	public void addButtonToTheToolbar(final JButton button) {
 		buttons.add(button);
 
 		if (areDisplayed)
 			displayButtonsInTheToolbar();
 	}
 
-	public void removeButtonFromTheToolbar(JButton button) {
+	public void removeButtonFromTheToolbar(final JButton button) {
 		buttons.remove(button);
 
 		if (areDisplayed)

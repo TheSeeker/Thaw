@@ -1,7 +1,7 @@
 package thaw.fcp;
 
-import java.util.Observer;
 import java.util.Observable;
+import java.util.Observer;
 
 import thaw.core.Logger;
 
@@ -18,16 +18,16 @@ public class FCPGenerateSSK extends Observable implements FCPQuery, Observer {
 	}
 
 
-	public boolean start(FCPQueueManager queueManager) {
+	public boolean start(final FCPQueueManager queueManager) {
 		this.queueManager = queueManager;
 
 		queueManager.getQueryManager().addObserver(this);
 
-		this.identifier = queueManager.getAnID();
+		identifier = queueManager.getAnID();
 
-		FCPMessage msg = new FCPMessage();
+		final FCPMessage msg = new FCPMessage();
 		msg.setMessageName("GenerateSSK");
-		msg.setValue("Identifier", this.identifier);
+		msg.setValue("Identifier", identifier);
 
 		queueManager.getQueryManager().writeMessage(msg);
 
@@ -35,26 +35,26 @@ public class FCPGenerateSSK extends Observable implements FCPQuery, Observer {
 	}
 
 
-	public void update (Observable o, Object param) {
-		FCPMessage msg = (FCPMessage)param;
+	public void update (final Observable o, final Object param) {
+		final FCPMessage msg = (FCPMessage)param;
 
-		if(msg.getValue("Identifier") == null
-		   || !msg.getValue("Identifier").equals(this.identifier))
+		if((msg.getValue("Identifier") == null)
+		   || !msg.getValue("Identifier").equals(identifier))
 			return;
 
 		if("SSKKeypair".equals( msg.getMessageName() )) {
 			Logger.debug(this, "SSKKeypair !");
 
-			this.privateKey = msg.getValue("InsertURI");
-			this.publicKey = msg.getValue("RequestURI");
+			privateKey = msg.getValue("InsertURI");
+			publicKey = msg.getValue("RequestURI");
 
-			this.privateKey = this.privateKey.replaceFirst("freenet:", "");
-			this.publicKey = this.publicKey.replaceFirst("freenet:", "");
+			privateKey = privateKey.replaceFirst("freenet:", "");
+			publicKey = publicKey.replaceFirst("freenet:", "");
 
-			this.setChanged();
+			setChanged();
 			this.notifyObservers();
 
-			this.stop(this.queueManager);
+			stop(queueManager);
 
 			return;
 		}
@@ -63,7 +63,7 @@ public class FCPGenerateSSK extends Observable implements FCPQuery, Observer {
 	}
 
 
-	public boolean stop(FCPQueueManager queueManager) {
+	public boolean stop(final FCPQueueManager queueManager) {
 		queueManager.getQueryManager().deleteObserver(this);
 
 		return true;
@@ -78,14 +78,14 @@ public class FCPGenerateSSK extends Observable implements FCPQuery, Observer {
 	 * @return privateKey without the "freenet:" prefix.
 	 */
 	public String getPrivateKey() {
-		return this.privateKey;
+		return privateKey;
 	}
 
 	/**
 	 * @return publicKey without the "freenet:" prefix.
 	 */
 	public String getPublicKey() {
-		return this.publicKey;
+		return publicKey;
 	}
 
 }

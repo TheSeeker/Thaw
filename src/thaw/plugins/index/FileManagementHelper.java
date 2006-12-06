@@ -1,25 +1,21 @@
 package thaw.plugins.index;
 
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.AbstractButton;
-
-import javax.swing.JFileChooser;
-
-import java.util.Vector;
-import java.util.Iterator;
-
-import thaw.core.FileChooser;
-import thaw.core.Config;
-import thaw.core.I18n;
-import thaw.plugins.Hsqldb;
-import thaw.core.Logger;
-
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Iterator;
+import java.util.Vector;
 
-import thaw.fcp.*;
+import javax.swing.AbstractButton;
+import javax.swing.JFileChooser;
+
+import thaw.core.Config;
+import thaw.core.FileChooser;
+import thaw.core.I18n;
+import thaw.core.Logger;
+import thaw.fcp.FCPQueueManager;
 
 
 public class FileManagementHelper {
@@ -44,7 +40,7 @@ public class FileManagementHelper {
 		private Vector target;
 		private Config config;
 
-		public FileDownloader(Config config, FCPQueueManager queueManager, AbstractButton actionSource) {
+		public FileDownloader(final Config config, final FCPQueueManager queueManager, final AbstractButton actionSource) {
 			this.queueManager = queueManager;
 			this.actionSource = actionSource;
 			this.config = config;
@@ -52,15 +48,15 @@ public class FileManagementHelper {
 				actionSource.addActionListener(this);
 		}
 
-		public void setTarget(Vector target) {
+		public void setTarget(final Vector target) {
 			this.target = target;
-			actionSource.setEnabled(target != null && target.size() != 0);
+			actionSource.setEnabled((target != null) && (target.size() != 0));
 		}
 
-		public void actionPerformed(ActionEvent e) {
+		public void actionPerformed(final ActionEvent e) {
 			FileChooser fileChooser;
 
-			if (this.config.getValue("lastDestinationDirectory") == null)
+			if (config.getValue("lastDestinationDirectory") == null)
 				fileChooser = new FileChooser();
 			else
 				fileChooser = new FileChooser(config.getValue("lastDestinationDirectory"));
@@ -69,14 +65,14 @@ public class FileManagementHelper {
 			fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
 			fileChooser.setTitle(I18n.getMessage("thaw.plugin.fetch.destinationDirectory"));
 
-			java.io.File destination = fileChooser.askOneFile();
+			final java.io.File destination = fileChooser.askOneFile();
 
 			if (destination == null)
 				return;
 
 			config.setValue("lastDestinationDirectory", destination.getPath());
 
-			downloadFiles(queueManager, target, destination.getPath());
+			FileManagementHelper.downloadFiles(queueManager, target, destination.getPath());
 		}
 	}
 
@@ -84,11 +80,11 @@ public class FileManagementHelper {
 	/**
 	 * @param files See thaw.plugins.index.File
 	 */
-	public static void downloadFiles(FCPQueueManager queueManager,
-					 Vector files, String destinationPath) {
-		for (Iterator it = files.iterator();
+	public static void downloadFiles(final FCPQueueManager queueManager,
+					 final Vector files, final String destinationPath) {
+		for (final Iterator it = files.iterator();
 		     it.hasNext();) {
-			thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+			final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 			file.download(destinationPath, queueManager);
 		}
 	}
@@ -99,14 +95,14 @@ public class FileManagementHelper {
 		private AbstractButton actionSource;
 		private Vector target;
 
-		public FileInserter(FCPQueueManager queueManager, AbstractButton actionSource) {
+		public FileInserter(final FCPQueueManager queueManager, final AbstractButton actionSource) {
 			this.queueManager = queueManager;
 			this.actionSource = actionSource;
 			if (actionSource != null)
 				actionSource.addActionListener(this);
 		}
 
-		public void setTarget(Vector target) {
+		public void setTarget(final Vector target) {
 			boolean isOk;
 
 			isOk = true;
@@ -114,11 +110,11 @@ public class FileManagementHelper {
 			this.target = target;
 
 			if (target != null) {
-				for (Iterator it = target.iterator();
+				for (final Iterator it = target.iterator();
 				     it.hasNext(); ) {
-					thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+					final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 
-					if (file.getLocalPath() == null
+					if ((file.getLocalPath() == null)
 					    || !file.isModifiable()) {
 						isOk = false;
 						break;
@@ -126,22 +122,22 @@ public class FileManagementHelper {
 				}
 			}
 
-			actionSource.setEnabled(target != null && target.size() != 0 && isOk);
+			actionSource.setEnabled((target != null) && (target.size() != 0) && isOk);
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			insertFiles(queueManager, target);
+		public void actionPerformed(final ActionEvent e) {
+			FileManagementHelper.insertFiles(queueManager, target);
 		}
 	}
 
 	/**
 	 * @param files See thaw.plugins.index.File
 	 */
-	public static void insertFiles(FCPQueueManager queueManager,
-				       Vector files) {
-		for (Iterator it = files.iterator();
+	public static void insertFiles(final FCPQueueManager queueManager,
+				       final Vector files) {
+		for (final Iterator it = files.iterator();
 		     it.hasNext();) {
-			thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+			final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 			file.insertOnFreenet(queueManager);
 		}
 	}
@@ -152,25 +148,25 @@ public class FileManagementHelper {
 		private AbstractButton actionSource;
 		private Vector target;
 
-		public FileKeyComputer(FCPQueueManager queueManager, AbstractButton actionSource) {
+		public FileKeyComputer(final FCPQueueManager queueManager, final AbstractButton actionSource) {
 			this.queueManager = queueManager;
 			this.actionSource = actionSource;
 			if (actionSource != null)
 				actionSource.addActionListener(this);
 		}
 
-		public void setTarget(Vector target) {
+		public void setTarget(final Vector target) {
 			boolean isOk;
 
 			isOk = true;
 			this.target = target;
 
 			if (target != null) {
-				for (Iterator it = target.iterator();
+				for (final Iterator it = target.iterator();
 				     it.hasNext(); ) {
-					thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+					final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 
-					if (file.getLocalPath() == null
+					if ((file.getLocalPath() == null)
 					    || !file.isModifiable()) {
 						isOk = false;
 						break;
@@ -178,23 +174,23 @@ public class FileManagementHelper {
 				}
 			}
 
-			actionSource.setEnabled(target != null && target.size() != 0 && isOk);
+			actionSource.setEnabled((target != null) && (target.size() != 0) && isOk);
 		}
 
-		public void actionPerformed(ActionEvent e) {
+		public void actionPerformed(final ActionEvent e) {
 			Logger.notice(this, "COMPUTING");
-			computeFileKeys(queueManager, target);
+			FileManagementHelper.computeFileKeys(queueManager, target);
 		}
 	}
 
 	/**
 	 * @param files See thaw.plugins.index.File
 	 */
-	public static void computeFileKeys(FCPQueueManager queueManager,
-					   Vector files) {
-		for (Iterator it = files.iterator();
+	public static void computeFileKeys(final FCPQueueManager queueManager,
+					   final Vector files) {
+		for (final Iterator it = files.iterator();
 		     it.hasNext();) {
-			thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+			final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 			file.recalculateCHK(queueManager);
 		}
 	}
@@ -208,14 +204,14 @@ public class FileManagementHelper {
 		/**
 		 * @param queueManager is used to stop transfers if needed
 		 */
-		public FileRemover(FCPQueueManager queueManager, AbstractButton actionSource) {
+		public FileRemover(final FCPQueueManager queueManager, final AbstractButton actionSource) {
 			this.queueManager = queueManager;
 			this.actionSource = actionSource;
 			if (actionSource != null)
 				actionSource.addActionListener(this);
 		}
 
-		public void setTarget(Vector target) {
+		public void setTarget(final Vector target) {
 			boolean isOk;
 
 			isOk = true;
@@ -223,9 +219,9 @@ public class FileManagementHelper {
 			this.target = target;
 
 			if (target != null) {
-				for (Iterator it = target.iterator();
+				for (final Iterator it = target.iterator();
 				     it.hasNext();) {
-					thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+					final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 
 					if (!file.isModifiable()) {
 						isOk = false;
@@ -235,11 +231,11 @@ public class FileManagementHelper {
 			}
 
 
-			actionSource.setEnabled(target != null && target.size() != 0 && isOk);
+			actionSource.setEnabled((target != null) && (target.size() != 0) && isOk);
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			removeFiles(queueManager, target);
+		public void actionPerformed(final ActionEvent e) {
+			FileManagementHelper.removeFiles(queueManager, target);
 		}
 	}
 
@@ -247,12 +243,12 @@ public class FileManagementHelper {
 	 * @param files See thaw.plugins.index.File / files must have their parent correctly set
 	 * @param queueManager Used to stop the transfer if needed
 	 */
-	public static void removeFiles(FCPQueueManager queueManager,
-				       Vector files) {
-		for (Iterator it = files.iterator();
+	public static void removeFiles(final FCPQueueManager queueManager,
+				       final Vector files) {
+		for (final Iterator it = files.iterator();
 		     it.hasNext();) {
-			thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
-			Index parent = file.getParent();
+			final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+			final Index parent = file.getParent();
 
 			if (parent == null) {
 				Logger.warning(new FileManagementHelper(), "File '"+file.getFilename()+"' has no parent ?!");
@@ -271,39 +267,39 @@ public class FileManagementHelper {
 		private AbstractButton src;
 		private Vector t;
 
-		public PublicKeyCopier(AbstractButton actionSource) {
+		public PublicKeyCopier(final AbstractButton actionSource) {
 			src = actionSource;
 			if (src != null)
 				src.addActionListener(this);
 		}
 
-		public void setTarget(Vector targets) {
+		public void setTarget(final Vector targets) {
 			t = targets;
-			src.setEnabled(targets != null && targets.size() > 0);
+			src.setEnabled((targets != null) && (targets.size() > 0));
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			copyPublicKeyFrom(t);
+		public void actionPerformed(final ActionEvent e) {
+			FileManagementHelper.copyPublicKeyFrom(t);
 		}
 	}
 
 
-	public static void copyPublicKeyFrom(Vector targets) {
+	public static void copyPublicKeyFrom(final Vector targets) {
 		String keys = "";
 
 		if (targets == null)
 			return;
 
-		Toolkit tk = Toolkit.getDefaultToolkit();
+		final Toolkit tk = Toolkit.getDefaultToolkit();
 
-		for(Iterator it = targets.iterator();
+		for(final Iterator it = targets.iterator();
 		    it.hasNext();) {
-			thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+			final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 			keys = keys + file.getPublicKey() + "\n";
 		}
 
-		StringSelection st = new StringSelection(keys);
-		Clipboard cp = tk.getSystemClipboard();
+		final StringSelection st = new StringSelection(keys);
+		final Clipboard cp = tk.getSystemClipboard();
 		cp.setContents(st, null);
 	}
 }

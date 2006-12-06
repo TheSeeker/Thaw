@@ -1,22 +1,24 @@
 package thaw.plugins;
 
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-import java.awt.GridLayout;
 import java.awt.event.ActionListener;
-import java.util.Vector;
-import java.util.Iterator;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
-import javax.swing.event.ChangeListener;
+import java.beans.PropertyChangeListener;
+import java.util.Iterator;
+import java.util.Vector;
+
+import javax.swing.JSplitPane;
 import javax.swing.event.ChangeEvent;
-import javax.swing.JButton;
+import javax.swing.event.ChangeListener;
 
-
-import thaw.core.*;
-import thaw.plugins.queueWatcher.*;
-
-import thaw.fcp.*;
+import thaw.core.Core;
+import thaw.core.I18n;
+import thaw.core.IconBox;
+import thaw.core.Logger;
+import thaw.core.MainWindow;
+import thaw.fcp.FCPTransferQuery;
+import thaw.plugins.queueWatcher.DetailPanel;
+import thaw.plugins.queueWatcher.DragAndDropManager;
+import thaw.plugins.queueWatcher.QueuePanel;
 
 public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, PropertyChangeListener, ChangeListener {
 	private Core core;
@@ -26,7 +28,7 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 
 	public final static int DOWNLOAD_PANEL = 0;
 	public final static int INSERTION_PANEL = 1;
-	private QueuePanel[] queuePanels = new QueuePanel[2];
+	private final QueuePanel[] queuePanels = new QueuePanel[2];
 
 	private DetailPanel detailPanel;
 	private DragAndDropManager dnd;
@@ -41,40 +43,35 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 
 	private java.awt.Container panelAdded;
 
-	public QueueWatcher() {
-
-	}
-
-
-	public boolean run(Core core) {
+	public boolean run(final Core core) {
 		this.core = core;
 
 		Logger.info(this, "Starting plugin \"QueueWatcher\" ...");
 
-		this.detailPanel = new DetailPanel(core);
+		detailPanel = new DetailPanel();
 
-		queuePanels[DOWNLOAD_PANEL] = new QueuePanel(core, detailPanel, false); /* download */
-		queuePanels[INSERTION_PANEL] = new QueuePanel(core, detailPanel, true); /* upload */
+		queuePanels[QueueWatcher.DOWNLOAD_PANEL] = new QueuePanel(core, detailPanel, false); /* download */
+		queuePanels[QueueWatcher.INSERTION_PANEL] = new QueuePanel(core, detailPanel, true); /* upload */
 
 		split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 				       queuePanels[0].getPanel(),
 				       queuePanels[1].getPanel());
 
 
-		this.advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
+		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 
 		if(advancedMode) {
 			mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, detailPanel.getPanel(), split);
 
-			if(core.getConfig().getValue("detailPanelFolded") == null
-			   || ((new Boolean(core.getConfig().getValue("detailPanelFolded"))).booleanValue()) == true) {
+			if((core.getConfig().getValue("detailPanelFolded") == null)
+			   || (((new Boolean(core.getConfig().getValue("detailPanelFolded"))).booleanValue()) == true)) {
 				folded = true;
 				detailPanel.getPanel().setVisible(false);
 				mainPanel.setDividerLocation(1);
 			} else {
 				folded = false;
 				detailPanel.getPanel().setVisible(true);
-				mainPanel.setDividerLocation(DIVIDER_LOCATION);
+				mainPanel.setDividerLocation(QueueWatcher.DIVIDER_LOCATION);
 			}
 
 			mainPanel.addPropertyChangeListener(this);
@@ -97,7 +94,7 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 		split.setResizeWeight(0.5);
 
 		if (core.getConfig().getValue("queuePanelSplitLocation") == null) {
-			split.setDividerLocation(((double)0.5));
+			split.setDividerLocation((0.5));
 		} else {
 			split.setDividerLocation(Double.parseDouble(core.getConfig().getValue("queuePanelSplitLocation")));
 		}
@@ -114,7 +111,7 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 	/**
 	 * @param panel see DOWNLOAD_PANEL and INSERTION_PANEL
 	 */
-	public void addButtonListener(int panel, ActionListener listener) {
+	public void addButtonListener(final int panel, final ActionListener listener) {
 		queuePanels[panel].getButton().addActionListener(listener);
 	}
 
@@ -129,18 +126,18 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 		core.getConfig().setValue("queuePanelSplitLocation",
 					  Double.toString(splitLocation));
 
-		this.core.getConfig().setValue("detailPanelFolded", ((new Boolean(this.folded)).toString()));
-		this.core.getMainWindow().removeTab(this.panelAdded);
+		core.getConfig().setValue("detailPanelFolded", ((new Boolean(folded)).toString()));
+		core.getMainWindow().removeTab(panelAdded);
 
 		return true;
 	}
 
 
-	public void addMenuItemToTheDownloadTable(javax.swing.JMenuItem item) {
+	public void addMenuItemToTheDownloadTable(final javax.swing.JMenuItem item) {
 		queuePanels[0].addMenuItem(item);
 	}
 
-	public void addMenuItemToTheInsertionTable(javax.swing.JMenuItem item) {
+	public void addMenuItemToTheInsertionTable(final javax.swing.JMenuItem item) {
 		queuePanels[1].addMenuItem(item);
 	}
 
@@ -149,18 +146,18 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 	}
 
 
-	protected void addToPanels(Vector queries) {
+	protected void addToPanels(final Vector queries) {
 
-		for(Iterator it = queries.iterator();
+		for(final Iterator it = queries.iterator();
 		    it.hasNext();) {
 
-			FCPTransferQuery query = (FCPTransferQuery)it.next();
+			final FCPTransferQuery query = (FCPTransferQuery)it.next();
 
 			if(query.getQueryType() == 1)
-				this.queuePanels[0].addToTable(query);
+				queuePanels[0].addToTable(query);
 
 			if(query.getQueryType() == 2)
-				this.queuePanels[1].addToTable(query);
+				queuePanels[1].addToTable(query);
 
 		}
 
@@ -169,25 +166,25 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 	/**
 	 * Called when the split bar position changes.
 	 */
-	public void propertyChange(PropertyChangeEvent evt) {
+	public void propertyChange(final PropertyChangeEvent evt) {
 
 		if("dividerLocation".equals( evt.getPropertyName() )) {
 
-			if(System.currentTimeMillis() - this.lastChange < 500) {
-				this.lastChange = System.currentTimeMillis();
+			if(System.currentTimeMillis() - lastChange < 500) {
+				lastChange = System.currentTimeMillis();
 				return;
 			}
 
-			this.lastChange = System.currentTimeMillis();
+			lastChange = System.currentTimeMillis();
 
-			this.folded = !this.folded;
+			folded = !folded;
 
-			if(this.folded) {
-				this.detailPanel.getPanel().setVisible(false);
-				this.mainPanel.setDividerLocation(1);
+			if(folded) {
+				detailPanel.getPanel().setVisible(false);
+				mainPanel.setDividerLocation(1);
 			} else {
-				this.detailPanel.getPanel().setVisible(true);
-				this.mainPanel.setDividerLocation(DIVIDER_LOCATION);
+				detailPanel.getPanel().setVisible(true);
+				mainPanel.setDividerLocation(QueueWatcher.DIVIDER_LOCATION);
 			}
 
 		}
@@ -198,7 +195,7 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 	 * Called when the JTabbedPane changed (ie change in the selected tab, etc)
 	 * @param e can be null.
 	 */
-	public void stateChanged(ChangeEvent e) {
+	public void stateChanged(final ChangeEvent e) {
 		int tabId;
 
 		tabId = core.getMainWindow().getTabbedPane().indexOfTab(I18n.getMessage("thaw.common.status"));

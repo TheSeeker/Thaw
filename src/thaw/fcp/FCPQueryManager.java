@@ -16,17 +16,17 @@ public class FCPQueryManager extends Observable implements Runnable {
 	private FCPMessage latestMessage;
 
 
-	public FCPQueryManager(FCPConnection connection) {
-		this.me = null;
-		this.latestMessage = null;
-		this.setConnection(connection);
+	public FCPQueryManager(final FCPConnection connection) {
+		me = null;
+		latestMessage = null;
+		setConnection(connection);
 	}
 
 	/**
 	 * If you call yourself this function, you will probably have to call
 	 * resetQueue() of FCPQueueManager.
 	 */
-	public void setConnection(FCPConnection connection) {
+	public void setConnection(final FCPConnection connection) {
 		this.connection = connection;
 	}
 
@@ -34,15 +34,15 @@ public class FCPQueryManager extends Observable implements Runnable {
 	 * Try to not directly call functions from FCPConnection.
 	 */
 	public FCPConnection getConnection() {
-		return this.connection;
+		return connection;
 	}
 
-	public boolean writeMessage(FCPMessage message) {
-		return this.connection.write(message.toString());
+	public boolean writeMessage(final FCPMessage message) {
+		return connection.write(message.toString());
 	}
 
-	public boolean writeMessage(FCPMessage message, boolean checkLock) {
-		return this.connection.write(message.toString(), checkLock);
+	public boolean writeMessage(final FCPMessage message, final boolean checkLock) {
+		return connection.write(message.toString(), checkLock);
 
 	}
 
@@ -52,7 +52,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 	 */
 	public FCPMessage readMessage() {
 		String whatsUp = new String("");
-		FCPMessage result = new FCPMessage();
+		final FCPMessage result = new FCPMessage();
 		boolean withData;
 
 		withData = false;
@@ -61,7 +61,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 
 			String read = new String("");
 
-			read = this.connection.readLine();
+			read = connection.readLine();
 
 			if(read == null) {
 				Logger.notice(this, "readLine() returned null => disconnected ?");
@@ -85,8 +85,8 @@ public class FCPQueryManager extends Observable implements Runnable {
 		result.loadFromRawMessage(whatsUp);
 
 		if(withData) {
-			long dataWaiting = (new Long(result.getValue("DataLength"))).longValue();
-			this.connection.setRawDataWaiting(dataWaiting);
+			final long dataWaiting = (new Long(result.getValue("DataLength"))).longValue();
+			connection.setRawDataWaiting(dataWaiting);
 			Logger.info(this, "Achtung data: "+(new Long(dataWaiting)).toString());
 		}
 
@@ -100,15 +100,15 @@ public class FCPQueryManager extends Observable implements Runnable {
 	public void run() {
 
 		while(true) {
-			this.latestMessage = this.readMessage();
+			latestMessage = readMessage();
 
 			Logger.verbose(this, "Message received. Notifying observers");
 
-			if(this.latestMessage != null) {
+			if(latestMessage != null) {
 				try {
-					this.setChanged();
-					this.notifyObservers(this.latestMessage);
-				} catch(Exception e) {
+					setChanged();
+					this.notifyObservers(latestMessage);
+				} catch(final Exception e) {
 					/* it's really bad ... because if data are waiting on the socket ... */
 					Logger.error(this, "EXCEPTION FROM ONE OF LISTENER : "+e.toString());
 					Logger.error(this, "ERROR : "+e.getMessage());
@@ -127,9 +127,9 @@ public class FCPQueryManager extends Observable implements Runnable {
 	 * Create the thread listening for incoming message.
 	 */
 	public void startListening() {
-		if(this.connection.isConnected()) {
-			this.me = new Thread(this);
-			this.me.start();
+		if(connection.isConnected()) {
+			me = new Thread(this);
+			me.start();
 		} else {
 			Logger.warning(this, "Not connected, so not listening on the socket");
 		}
@@ -142,20 +142,20 @@ public class FCPQueryManager extends Observable implements Runnable {
 	 * A FCPClientHello is sent with the given id.
 	 * @return This object if it cannot duplicate FCPConnection
 	 */
-	public FCPQueryManager duplicate(String connectionId) {
+	public FCPQueryManager duplicate(final String connectionId) {
 		FCPConnection newConnection;
 		FCPQueryManager queryManager;
 
-		newConnection = this.connection.duplicate();
+		newConnection = connection.duplicate();
 
-		if (newConnection == this.connection)
+		if (newConnection == connection)
 			return this;
 
 		queryManager = new FCPQueryManager(newConnection);
 
 		queryManager.startListening();
 
-		FCPClientHello clientHello = new FCPClientHello(queryManager, connectionId);
+		final FCPClientHello clientHello = new FCPClientHello(queryManager, connectionId);
 
 		if (!clientHello.start(null)) {
 			Logger.warning(this, "ID already used ?! Using initial socket ...");

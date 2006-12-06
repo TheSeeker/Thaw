@@ -1,47 +1,43 @@
 package thaw.plugins.queueWatcher;
 
-import java.awt.dnd.DragSource;
-import java.awt.dnd.DragGestureListener;
-import java.awt.dnd.DragGestureEvent;
-import java.awt.dnd.DnDConstants;
-import java.awt.datatransfer.Transferable;
+import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.dnd.DragSourceListener;
-import java.awt.dnd.DragSourceDragEvent;
-import java.awt.dnd.DragSourceEvent;
-import java.awt.dnd.DragSourceDropEvent;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DragGestureEvent;
+import java.awt.dnd.DragGestureListener;
+import java.awt.dnd.DragSource;
 import java.awt.dnd.DragSourceContext;
+import java.awt.dnd.DragSourceDragEvent;
+import java.awt.dnd.DragSourceDropEvent;
+import java.awt.dnd.DragSourceEvent;
+import java.awt.dnd.DragSourceListener;
+import java.io.File;
+import java.util.Iterator;
+import java.util.Vector;
+
+import javax.swing.JComponent;
 import javax.swing.TransferHandler;
 
-import java.awt.Component;
-import javax.swing.JComponent;
-
-import java.util.Vector;
-import java.util.Iterator;
-import java.io.File;
-
-import thaw.core.*;
-import thaw.fcp.*;
+import thaw.core.Core;
+import thaw.core.Logger;
+import thaw.fcp.FCPTransferQuery;
 
 
 public class DragAndDropManager implements DragGestureListener, DragSourceListener {
-
-	private Core core;
 	private QueuePanel[] queuePanels;
 
 	private DragSource dragSource;
-	private DragGestureListener dgListener;
 
-	private String tmpDir = System.getProperty("java.io.tmpdir");
+	private final String tmpDir = System.getProperty("java.io.tmpdir");
 
-	public DragAndDropManager(Core core, QueuePanel[] queuePanels) {
-		this.core = core;
+	public DragAndDropManager(final Core core, final QueuePanel[] queuePanels) {
 		this.queuePanels = queuePanels;
 
-		this.dragSource = DragSource.getDefaultDragSource();
+		dragSource = DragSource.getDefaultDragSource();
 
 		for(int i = 0 ; i < queuePanels.length ; i++) {
-			this.dragSource.createDefaultDragGestureRecognizer(queuePanels[i].getTable(),
+			dragSource.createDefaultDragGestureRecognizer(queuePanels[i].getTable(),
 									   DnDConstants.ACTION_COPY_OR_MOVE,
 									   this);
 
@@ -52,19 +48,18 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 		}
 	}
 
-
 	private class FileTransferHandler extends TransferHandler {
 		private static final long serialVersionUID = 1L;
 
-		protected  Transferable createTransferable(JComponent c) {
-			if(c == DragAndDropManager.this.queuePanels[0].getTable()) {
-				DragAndDropManager.this.queuePanels[0].reloadSelections();
-				return new DragableFinishedTransfers(DragAndDropManager.this.queuePanels[0].getSelectedQueries(), false);
+		protected  Transferable createTransferable(final JComponent c) {
+			if(c == queuePanels[0].getTable()) {
+				queuePanels[0].reloadSelections();
+				return new DragableFinishedTransfers(queuePanels[0].getSelectedQueries(), false);
 			}
 
-			if(c == DragAndDropManager.this.queuePanels[1].getTable()) {
-				DragAndDropManager.this.queuePanels[1].reloadSelections();
-				return new DragableFinishedTransfers(DragAndDropManager.this.queuePanels[1].getSelectedQueries(), true);
+			if(c == queuePanels[1].getTable()) {
+				queuePanels[1].reloadSelections();
+				return new DragableFinishedTransfers(queuePanels[1].getSelectedQueries(), true);
 			}
 
 			return null;
@@ -72,16 +67,16 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 
 	}
 
-	public void dragGestureRecognized(DragGestureEvent dge) {
+	public void dragGestureRecognized(final DragGestureEvent dge) {
 		try {
 			Transferable transferable;
 
-			transferable = this.getTransferableFor(dge.getComponent());
+			transferable = getTransferableFor(dge.getComponent());
 
 			dge.startDrag(DragSource.DefaultCopyDrop, transferable);
 
 
-		} catch(java.awt.dnd.InvalidDnDOperationException e) {
+		} catch(final java.awt.dnd.InvalidDnDOperationException e) {
 			Logger.warning(this, "InvalideDnDOperation !");
 		}
 	}
@@ -97,8 +92,8 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 		private Vector queries; /* FCPTransferQuery */
 		private boolean insert;
 
-		public DragableFinishedTransfers(Vector queries, boolean insert) {
-			if(queries == null || queries.size() <= 0) {
+		public DragableFinishedTransfers(final Vector queries, final boolean insert) {
+			if((queries == null) || (queries.size() <= 0)) {
 				Logger.warning(this, "Selection null ?!");
 			}
 
@@ -106,26 +101,21 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 			this.insert = insert;
 		}
 
-
-		private Vector getQueries() {
-			return this.queries;
-		}
-
-		public Object getTransferData(DataFlavor flavor) {
-			if(flavor == DataFlavor.javaFileListFlavor
+		public Object getTransferData(final DataFlavor flavor) {
+			if((flavor == DataFlavor.javaFileListFlavor)
 			   || flavor.equals(DataFlavor.javaFileListFlavor) ) {
 
-				Vector fileList = new Vector();
+				final Vector fileList = new Vector();
 
-				for(Iterator queryIt = this.queries.iterator();
+				for(final Iterator queryIt = queries.iterator();
 				    queryIt.hasNext();) {
-					FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
+					final FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
 
 					if(!query.isFinished() || !query.isSuccessful())
 						continue;
 
 					if(query.getPath() == null) // We need a path !
-						query.saveFileTo(DragAndDropManager.this.tmpDir);
+						query.saveFileTo(tmpDir);
 
 					fileList.add(new File(query.getPath()));
 				}
@@ -134,13 +124,13 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 				return fileList;
 			}
 
-			if(flavor == DataFlavor.stringFlavor
+			if((flavor == DataFlavor.stringFlavor)
 			   || flavor.equals(DataFlavor.stringFlavor) ) {
 				String result = "";
 
-				for(Iterator queryIt = this.queries.iterator();
+				for(final Iterator queryIt = queries.iterator();
 				    queryIt.hasNext();) {
-					FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
+					final FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
 
 					if(!query.isFinished() || !query.isSuccessful())
 						continue;
@@ -148,7 +138,7 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 					if(query.getPath() == null) // We need a path !
 						continue;
 
-					if(!this.insert)
+					if(!insert)
 						result = result +query.getPath()+"\n";
 					else
 						result = result + query.getFileKey() + "\n";
@@ -161,12 +151,12 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 		}
 
 		public DataFlavor[] getTransferDataFlavors() {
-			return this.FLAVORS;
+			return FLAVORS;
 		}
 
-		public boolean isDataFlavorSupported(DataFlavor flavor) {
-			for(int i = 0 ; i < this.FLAVORS.length ; i++)
-				if(this.FLAVORS[i] == flavor || this.FLAVORS[i].equals(flavor))
+		public boolean isDataFlavorSupported(final DataFlavor flavor) {
+			for(int i = 0 ; i < FLAVORS.length ; i++)
+				if((FLAVORS[i] == flavor) || FLAVORS[i].equals(flavor))
 					return true;
 
 			return false;
@@ -176,26 +166,26 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 
 
 
-	private Transferable getTransferableFor(Component c) {
+	private Transferable getTransferableFor(final Component c) {
 
-		if(c == this.queuePanels[0].getTable()) {
-			this.queuePanels[0].reloadSelections();
-			return new DragableFinishedTransfers(this.queuePanels[0].getSelectedQueries(), false);
+		if(c == queuePanels[0].getTable()) {
+			queuePanels[0].reloadSelections();
+			return new DragableFinishedTransfers(queuePanels[0].getSelectedQueries(), false);
 		}
 
-		if(c == this.queuePanels[1].getTable()) {
-			this.queuePanels[1].reloadSelections();
-			return new DragableFinishedTransfers(this.queuePanels[1].getSelectedQueries(), true);
+		if(c == queuePanels[1].getTable()) {
+			queuePanels[1].reloadSelections();
+			return new DragableFinishedTransfers(queuePanels[1].getSelectedQueries(), true);
 		}
 
 		return null;
 	}
 
-	public void dragEnter(DragSourceDragEvent e) {
+	public void dragEnter(final DragSourceDragEvent e) {
 
-		DragSourceContext context = e.getDragSourceContext();
+		final DragSourceContext context = e.getDragSourceContext();
 		//intersection of the users selected action, and the source and target actions
-		int myaction = e.getDropAction();
+		final int myaction = e.getDropAction();
 
 		if( (myaction & DnDConstants.ACTION_COPY) != 0) {
 			context.setCursor(DragSource.DefaultCopyDrop);
@@ -206,12 +196,12 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 
 	}
 
-	public void dragOver(DragSourceDragEvent e) { }
-	public void dragExit(DragSourceEvent e) { }
+	public void dragOver(final DragSourceDragEvent e) { }
+	public void dragExit(final DragSourceEvent e) { }
 
-	public void dragDropEnd(DragSourceDropEvent e) {
+	public void dragDropEnd(final DragSourceDropEvent e) {
 	}
 
-	public void dropActionChanged (DragSourceDragEvent e) { }
+	public void dropActionChanged (final DragSourceDragEvent e) { }
 
 }

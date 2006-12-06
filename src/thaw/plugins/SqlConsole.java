@@ -1,21 +1,21 @@
 package thaw.plugins;
 
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JScrollPane;
-import javax.swing.JButton;
-
 import java.awt.BorderLayout;
-
+import java.awt.Font;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 
-import java.awt.Font;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
+import thaw.core.Core;
+import thaw.core.I18n;
+import thaw.core.Logger;
+import thaw.core.Plugin;
 import thaw.plugins.index.TableCreator;
-
-import thaw.core.*;
 
 public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 	public final static int BUFFER_SIZE = 51200;
@@ -33,7 +33,7 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 
 	}
 
-	public boolean run(Core core) {
+	public boolean run(final Core core) {
 		this.core = core;
 
 		if(core.getPluginManager().getPlugin("thaw.plugins.Hsqldb") == null) {
@@ -46,23 +46,23 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 			}
 		}
 
-		this.hsqldb = (Hsqldb)core.getPluginManager().getPlugin("thaw.plugins.Hsqldb");
+		hsqldb = (Hsqldb)core.getPluginManager().getPlugin("thaw.plugins.Hsqldb");
 
-		this.hsqldb.registerChild(this);
+		hsqldb.registerChild(this);
 
-		this.panel = this.getPanel();
+		panel = getPanel();
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.hsqldb.console"),
-					    this.panel);
+					    panel);
 
 		return true;
 	}
 
 
 	public boolean stop() {
-		this.core.getMainWindow().removeTab(this.panel);
+		core.getMainWindow().removeTab(panel);
 
-		this.hsqldb.unregisterChild(this);
+		hsqldb.unregisterChild(this);
 
 		return true;
 	}
@@ -81,40 +81,40 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 		subPanel = new JPanel();
 		subPanel.setLayout(new BorderLayout());
 
-		this.sqlArea = new JTextArea("");
-		this.sqlArea.setEditable(false);
-		this.sqlArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		sqlArea = new JTextArea("");
+		sqlArea.setEditable(false);
+		sqlArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
-		this.commandField = new JTextField("");
-		this.commandField.addActionListener(this);
+		commandField = new JTextField("");
+		commandField.addActionListener(this);
 
-		this.sendButton = new JButton(" Ok ");
-		this.sendButton.addActionListener(this);
+		sendButton = new JButton(" Ok ");
+		sendButton.addActionListener(this);
 		
-		subPanel.add(this.commandField, BorderLayout.CENTER);
-		subPanel.add(this.sendButton, BorderLayout.EAST);
+		subPanel.add(commandField, BorderLayout.CENTER);
+		subPanel.add(sendButton, BorderLayout.EAST);
 
-		panel.add(new JScrollPane(this.sqlArea), BorderLayout.CENTER);
+		panel.add(new JScrollPane(sqlArea), BorderLayout.CENTER);
 		panel.add(subPanel, BorderLayout.SOUTH);
 
 		return panel;
 	}
 
-	public void addToConsole(String txt) {
-		String text = this.sqlArea.getText() + txt;
+	public void addToConsole(final String txt) {
+		String text = sqlArea.getText() + txt;
 
-		if(text.length() > BUFFER_SIZE) {
-			text = text.substring((text.length() - BUFFER_SIZE));
+		if(text.length() > SqlConsole.BUFFER_SIZE) {
+			text = text.substring((text.length() - SqlConsole.BUFFER_SIZE));
 		}
 
-		this.sqlArea.setText(text);
+		sqlArea.setText(text);
 	}
 
-	public void actionPerformed(java.awt.event.ActionEvent e) {
+	public void actionPerformed(final java.awt.event.ActionEvent e) {
 
-		this.sendCommand(this.commandField.getText());
+		sendCommand(commandField.getText());
 
-		this.commandField.setText("");
+		commandField.setText("");
 
 	}
 
@@ -122,7 +122,7 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 		if(txt == null)
 			txt = "(null)";
 
-		int txtLength = txt.length();
+		final int txtLength = txt.length();
 
 		String fTxt = txt;
 
@@ -133,7 +133,7 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 			fTxt = fTxt + " ";
 		}
 
-		this.addToConsole(fTxt);
+		addToConsole(fTxt);
 	}
 
 	public void sendCommand(String cmd) {
@@ -142,17 +142,17 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 		if("list_tables".equals( cmd.toLowerCase() ))
 			cmd = "SELECT * FROM INFORMATION_SCHEMA.SYSTEM_TABLES";
 
-		this.addToConsole("\n> "+cmd+"\n\n");
+		addToConsole("\n> "+cmd+"\n\n");
 
 		try {
 
 			if("reconnect".equals( cmd.toLowerCase() )) {
-				this.hsqldb.connect();
-				this.addToConsole("Ok\n");
+				hsqldb.connect();
+				addToConsole("Ok\n");
 				return;
 			}
 			
-			java.sql.Statement st = this.hsqldb.getConnection().createStatement();
+			final java.sql.Statement st = hsqldb.getConnection().createStatement();
 
 			ResultSet result;
 
@@ -160,60 +160,60 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 				if(st.execute(cmd))
 					result = st.getResultSet();
 				else {
-					this.addToConsole("Ok\n");
+					addToConsole("Ok\n");
 					return;
 				}
 			} else {
-				TableCreator.dropTables(this.hsqldb);
-				this.addToConsole("Ok\n");
+				TableCreator.dropTables(hsqldb);
+				addToConsole("Ok\n");
 				return;
 			}
 				
 			
 			if(result == null) {
-				this.addToConsole("(null)\n");
+				addToConsole("(null)\n");
 				return;
 			}
 			
 			if(result.getFetchSize() == 0) {
-				this.addToConsole("(done)\n");
+				addToConsole("(done)\n");
 				return;
 			}
 
 			java.sql.SQLWarning warning = result.getWarnings();
 
 			while(warning != null) {
-				this.addToConsole("Warning: "+warning.toString());
+				addToConsole("Warning: "+warning.toString());
 				warning = warning.getNextWarning();
 			}
 
 
 
-			ResultSetMetaData metadatas = result.getMetaData();
+			final ResultSetMetaData metadatas = result.getMetaData();
 			
-			int nmbCol = metadatas.getColumnCount();
+			final int nmbCol = metadatas.getColumnCount();
 			
-			this.addToConsole("      ");
+			addToConsole("      ");
 			
 			for(int i = 1; i <= nmbCol ; i++) {
-				this.display(metadatas.getColumnLabel(i), metadatas.getColumnDisplaySize(i));
-				this.addToConsole("  ");
+				display(metadatas.getColumnLabel(i), metadatas.getColumnDisplaySize(i));
+				addToConsole("  ");
 			}
-			this.addToConsole("\n");
+			addToConsole("\n");
 
-			this.addToConsole("      ");
+			addToConsole("      ");
 			for(int i = 1; i <= nmbCol ; i++) {
-			        this.display(metadatas.getColumnTypeName(i), metadatas.getColumnDisplaySize(i));
-				this.addToConsole("  ");
+			        display(metadatas.getColumnTypeName(i), metadatas.getColumnDisplaySize(i));
+				addToConsole("  ");
 			}
-			this.addToConsole("\n");
+			addToConsole("\n");
 
-			this.addToConsole("      ");
+			addToConsole("      ");
 			for(int i = 1; i <= nmbCol ; i++) {
-				this.display("----", metadatas.getColumnDisplaySize(i));
-				this.addToConsole("  ");
+				display("----", metadatas.getColumnDisplaySize(i));
+				addToConsole("  ");
 			}
-			this.addToConsole("\n");
+			addToConsole("\n");
 
 			boolean ret = true;
 
@@ -223,18 +223,18 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 				if(!ret)
 					break;
 
-				this.display(Integer.toString(result.getRow()), 4);
-				this.addToConsole("  ");
+				display(Integer.toString(result.getRow()), 4);
+				addToConsole("  ");
 
 				for(int i =1; i <= nmbCol ; i++) {
-					this.display(result.getString(i), metadatas.getColumnDisplaySize(i));
-					this.addToConsole("  ");
+					display(result.getString(i), metadatas.getColumnDisplaySize(i));
+					addToConsole("  ");
 				}
-				this.addToConsole("\n");
+				addToConsole("\n");
 			}
 
-		} catch(java.sql.SQLException e) {
-			this.addToConsole("SQLException : "+e.toString()+" : "+e.getCause()+"\n");
+		} catch(final java.sql.SQLException e) {
+			addToConsole("SQLException : "+e.toString()+" : "+e.getCause()+"\n");
 		}
 		
 	}

@@ -1,7 +1,8 @@
 package thaw.core;
 
-import javax.swing.ImageIcon;
 import java.net.URL;
+
+import javax.swing.ImageIcon;
 
 /**
  * This class is simply an helper to find and load quickly some common icons.
@@ -69,8 +70,7 @@ public class IconBox {
 
 	}
 
-	protected static ImageIcon loadIcon(String fileName) {
-		ImageIcon imageIcon;
+	protected static ImageIcon loadIcon(final String fileName) {
 		URL url;
 		Class daClass;
 		ClassLoader classLoader;
@@ -100,36 +100,36 @@ public class IconBox {
 	}
 
 	public static void loadIcons() {
-		blueBunny = loadIcon("blueBunny.png");
-		connectAction = loadIcon("go-jump.png");
-		minConnectAction = loadIcon("min-go-jump.png");
-		disconnectAction = loadIcon("process-stop.png");
-		queue = loadIcon("system-search.png");
-		minQueue = loadIcon("min-system-search.png");
-		insertions = loadIcon("go-next.png");
-		minInsertions = loadIcon("min-go-next.png");
-		minIndex = loadIcon("index.png");
-		indexNew = loadIcon("index-new.png");
-		indexReuse = loadIcon("index-existing.png");
-		downloads = loadIcon("go-first.png");
-		minDownloads = loadIcon("min-go-first.png");
-		clearAction = loadIcon("edit-clear.png");
-		settings = loadIcon("preferences-system.png");
-		minSettings = loadIcon("min-preferences-system.png");
-		indexEditor = loadIcon("edit-find-replace.png");
-		minIndexEditor = loadIcon("min-edit-find-replace.png");
-		indexBrowser = loadIcon("edit-find.png");
-		minIndexBrowser = loadIcon("min-edit-find.png");
-		addToIndexAction = loadIcon("folder.png");
-		insertAndAddToIndexAction = loadIcon("folder-new.png");
-		makeALinkAction = loadIcon("application-internet.png");
-		reconnectAction = loadIcon("view-refresh.png");
-		minReconnectAction = loadIcon("min-view-refresh.png");
-		refreshAction = loadIcon("view-refresh.png");
-		quitAction = loadIcon("system-log-out.png");
-		minQuitAction = loadIcon("min-system-log-out.png");
-		search = loadIcon("system-search.png");
-		key = loadIcon("key.png");
+		IconBox.blueBunny = IconBox.loadIcon("blueBunny.png");
+		IconBox.connectAction = IconBox.loadIcon("go-jump.png");
+		IconBox.minConnectAction = IconBox.loadIcon("min-go-jump.png");
+		IconBox.disconnectAction = IconBox.loadIcon("process-stop.png");
+		IconBox.queue = IconBox.loadIcon("system-search.png");
+		IconBox.minQueue = IconBox.loadIcon("min-system-search.png");
+		IconBox.insertions = IconBox.loadIcon("go-next.png");
+		IconBox.minInsertions = IconBox.loadIcon("min-go-next.png");
+		IconBox.minIndex = IconBox.loadIcon("index.png");
+		IconBox.indexNew = IconBox.loadIcon("index-new.png");
+		IconBox.indexReuse = IconBox.loadIcon("index-existing.png");
+		IconBox.downloads = IconBox.loadIcon("go-first.png");
+		IconBox.minDownloads = IconBox.loadIcon("min-go-first.png");
+		IconBox.clearAction = IconBox.loadIcon("edit-clear.png");
+		IconBox.settings = IconBox.loadIcon("preferences-system.png");
+		IconBox.minSettings = IconBox.loadIcon("min-preferences-system.png");
+		IconBox.indexEditor = IconBox.loadIcon("edit-find-replace.png");
+		IconBox.minIndexEditor = IconBox.loadIcon("min-edit-find-replace.png");
+		IconBox.indexBrowser = IconBox.loadIcon("edit-find.png");
+		IconBox.minIndexBrowser = IconBox.loadIcon("min-edit-find.png");
+		IconBox.addToIndexAction = IconBox.loadIcon("folder.png");
+		IconBox.insertAndAddToIndexAction = IconBox.loadIcon("folder-new.png");
+		IconBox.makeALinkAction = IconBox.loadIcon("application-internet.png");
+		IconBox.reconnectAction = IconBox.loadIcon("view-refresh.png");
+		IconBox.minReconnectAction = IconBox.loadIcon("min-view-refresh.png");
+		IconBox.refreshAction = IconBox.loadIcon("view-refresh.png");
+		IconBox.quitAction = IconBox.loadIcon("system-log-out.png");
+		IconBox.minQuitAction = IconBox.loadIcon("min-system-log-out.png");
+		IconBox.search = IconBox.loadIcon("system-search.png");
+		IconBox.key = IconBox.loadIcon("key.png");
 	}
 
 }

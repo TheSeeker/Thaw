@@ -1,8 +1,8 @@
 package thaw.plugins.index;
 
-import java.sql.*;
+import java.sql.SQLException;
 
-import thaw.core.*;
+import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
 
 /**
@@ -32,10 +32,10 @@ public class TableCreator {
 	/**
 	 * Can be safely called, even if the tables already exist.
 	 */
-	public static void createTables(Hsqldb db) {
+	public static void createTables(final Hsqldb db) {
 		//sendQuery(db,
 		//	  "SET IGNORECASE TRUE");
-		sendQuery(db,
+		TableCreator.sendQuery(db,
 			  "CREATE CACHED TABLE indexCategories ("
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "name VARCHAR(255) NOT NULL,"
@@ -45,7 +45,7 @@ public class TableCreator {
 			  + "PRIMARY KEY (id),"
 			  + "FOREIGN KEY (parent) REFERENCES indexCategories (id))");
 
-		sendQuery(db,
+		TableCreator.sendQuery(db,
 			  "CREATE CACHED TABLE indexes ("
 			  + "id INTEGER IDENTITY NOT NULL, "
 			  + "originalName VARCHAR(255) NOT NULL, "
@@ -59,12 +59,12 @@ public class TableCreator {
 			  + "PRIMARY KEY (id), "
 			  + "FOREIGN KEY (parent) REFERENCES indexCategories (id))");
 
-		sendQuery(db,
+		TableCreator.sendQuery(db,
 			  "CREATE CACHED TABLE categories ("
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "name VARCHAR(255) NOT NULL)");
 
-		sendQuery(db,
+		TableCreator.sendQuery(db,
 			  "CREATE CACHED TABLE files ("
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "filename VARCHAR(255) NOT NULL,"
@@ -78,7 +78,7 @@ public class TableCreator {
 			  + "FOREIGN KEY (indexParent) REFERENCES indexes (id),"
 			  + "FOREIGN KEY (category) REFERENCES categories (id))");
 
-		sendQuery(db,
+		TableCreator.sendQuery(db,
 			  "CREATE CACHED TABLE links ("
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "publicKey VARCHAR(350) NOT NULL," // key ~= 100 + filename == 255 max
@@ -90,13 +90,13 @@ public class TableCreator {
 			  + "FOREIGN KEY (indexParent) REFERENCES indexes (id),"
 			  + "FOREIGN KEY (indexTarget) REFERENCES indexes (id))");
 
-		sendQuery(db,
+		TableCreator.sendQuery(db,
 			  "CREATE CACHED TABLE metadataNames ("
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "name VARCHAR(255) NOT NULL,"
 			  + "PRIMARY KEY (id))");
 
-		sendQuery(db,
+		TableCreator.sendQuery(db,
 			  "CREATE CACHED TABLE metadatas ("
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "nameId INTEGER NOT NULL,"
@@ -108,25 +108,25 @@ public class TableCreator {
 
 	}
 
-	public static void dropTables(Hsqldb db) {
-		sendQuery(db, "DROP TABLE metadatas");
-		sendQuery(db, "DROP TABLE metadataNames");
+	public static void dropTables(final Hsqldb db) {
+		TableCreator.sendQuery(db, "DROP TABLE metadatas");
+		TableCreator.sendQuery(db, "DROP TABLE metadataNames");
 
-		sendQuery(db, "DROP TABLE files");
-		sendQuery(db, "DROP TABLE links");
+		TableCreator.sendQuery(db, "DROP TABLE files");
+		TableCreator.sendQuery(db, "DROP TABLE links");
 
-		sendQuery(db, "DROP TABLE indexes");
-		sendQuery(db, "DROP TABLE indexCategories");
+		TableCreator.sendQuery(db, "DROP TABLE indexes");
+		TableCreator.sendQuery(db, "DROP TABLE indexCategories");
 	}
 
 
 	/**
 	 * Returns no error / Throws no exception.
 	 */
-	protected static void sendQuery(Hsqldb db, String query) {
+	protected static void sendQuery(final Hsqldb db, final String query) {
 		try {
 			db.executeQuery(query);
-		} catch(SQLException e) {
+		} catch(final SQLException e) {
 			Logger.notice(new TableCreator(), "While (re)creating sql tables: "+e.toString());
 		}
 	}

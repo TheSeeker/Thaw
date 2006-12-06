@@ -2,55 +2,46 @@ package thaw.plugins.index;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.AbstractButton;
-
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import javax.swing.JFrame;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.JTextArea;
-import javax.swing.JLabel;
-import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JFileChooser;
-
-import java.io.FileOutputStream;
-
-import java.util.Vector;
-import java.util.Iterator;
-
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-
-import java.awt.event.MouseListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.FileOutputStream;
+import java.util.Iterator;
+import java.util.Vector;
 
-import thaw.core.Config;
-import thaw.core.I18n;
+import javax.swing.AbstractButton;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import thaw.core.FileChooser;
 import thaw.core.FreenetURIHelper;
-import thaw.plugins.Hsqldb;
-
-import thaw.fcp.*;
+import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.MainWindow;
-import thaw.core.FileChooser;
+import thaw.fcp.FCPClientPut;
+import thaw.fcp.FCPQueueManager;
+import thaw.fcp.FCPTransferQuery;
+import thaw.plugins.Hsqldb;
 
 /**
  * Index.java, IndexCategory.java and IndexTree.java must NEVER use this helper (to avoid loops).
  */
 public class IndexManagementHelper {
 
-	private static String askAName(String prompt, String defVal) {
+	private static String askAName(final String prompt, final String defVal) {
 		return JOptionPane.showInputDialog(prompt, defVal);
 	}
 
@@ -75,11 +66,11 @@ public class IndexManagementHelper {
 		private AbstractButton actionSource;
 		private IndexTreeNode target;
 
-		public BasicIndexAction(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uIndexList, IndexTree tree, AbstractButton actionSource) {
+		public BasicIndexAction(final Hsqldb db, final FCPQueueManager queueManager, final UnknownIndexList uIndexList, final IndexTree tree, final AbstractButton actionSource) {
 			this.db = db;
 			this.tree = tree;
 			this.actionSource = actionSource;
-			this.target = null;
+			target = null;
 			this.queueManager = queueManager;
 			this.uIndexList = uIndexList;
 			actionSource.addActionListener(this);
@@ -89,7 +80,7 @@ public class IndexManagementHelper {
 			return actionSource;
 		}
 
-		public void setTarget(IndexTreeNode node) {
+		public void setTarget(final IndexTreeNode node) {
 			target = node;
 
 		}
@@ -120,36 +111,36 @@ public class IndexManagementHelper {
 
 
 	public static class IndexCreator extends BasicIndexAction {
-		public IndexCreator(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uIndexList, IndexTree tree, AbstractButton actionSource) {
+		public IndexCreator(final Hsqldb db, final FCPQueueManager queueManager, final UnknownIndexList uIndexList, final IndexTree tree, final AbstractButton actionSource) {
 			super(db, queueManager, uIndexList, tree, actionSource);
 		}
 
-		public void setTarget(IndexTreeNode node) {
+		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled(node == null || node instanceof IndexCategory);
+			getActionSource().setEnabled((node == null) || (node instanceof IndexCategory));
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			String name = askAName(I18n.getMessage("thaw.plugin.index.indexName"),
+		public void actionPerformed(final ActionEvent e) {
+			final String name = IndexManagementHelper.askAName(I18n.getMessage("thaw.plugin.index.indexName"),
 					       I18n.getMessage("thaw.plugin.index.newIndex"));
 
 			if (name == null)
 				return;
 
-			createIndex(getDb(), getQueueManager(), getUnknownIndexList(), getTree(), (IndexCategory)getTarget(), name);
+			IndexManagementHelper.createIndex(getDb(), getQueueManager(), getUnknownIndexList(), getTree(), (IndexCategory)getTarget(), name);
 		}
 	}
 
-	public static void createIndex(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uIndexList, IndexTree tree, IndexCategory target, String name) {
+	public static void createIndex(final Hsqldb db, final FCPQueueManager queueManager, final UnknownIndexList uIndexList, final IndexTree tree, IndexCategory target, final String name) {
 		if (target == null)
 			target = tree.getRoot();
 
-		if (name == null || name.indexOf("/") >= 0) {
+		if ((name == null) || (name.indexOf("/") >= 0)) {
 			Logger.error(new IndexManagementHelper(), "invalid name");
 			return;
 		}
 
-		Index index = new Index(db, queueManager, uIndexList, -1, target, name, name, null, null, 0, null);
+		final Index index = new Index(db, queueManager, uIndexList, -1, target, name, name, null, null, 0, null);
 
 		index.generateKeys();
 		index.create();
@@ -177,17 +168,17 @@ public class IndexManagementHelper {
 		/**
 		 * @return String[0] == publicKey ; String[1] == privateKey ; public or private are null if unchanged
 		 */
-		public static String[] askKeys(boolean askPrivateKey,
-					       String defaultPublicKey,
-					       String defaultPrivateKey,
-					       MainWindow mainWindow) {
+		public static String[] askKeys(final boolean askPrivateKey,
+					       final String defaultPublicKey,
+					       final String defaultPrivateKey,
+					       final MainWindow mainWindow) {
 			return ((new KeyAsker()).askKeysBis(askPrivateKey, defaultPublicKey, defaultPrivateKey, mainWindow));
 		}
 
-		public synchronized String[] askKeysBis(boolean askPrivateKey,
+		public synchronized String[] askKeysBis(final boolean askPrivateKey,
 					   String defaultPublicKey,
 					   String defaultPrivateKey,
-					   MainWindow mainWindow) {
+					   final MainWindow mainWindow) {
 			formState = 0;
 
 			if (defaultPublicKey == null)
@@ -196,15 +187,15 @@ public class IndexManagementHelper {
 			if (defaultPrivateKey == null)
 				defaultPrivateKey = "SSK@";
 
-			JDialog frame = new JDialog(mainWindow.getMainFrame(), I18n.getMessage("thaw.plugin.index.indexKey"));
+			final JDialog frame = new JDialog(mainWindow.getMainFrame(), I18n.getMessage("thaw.plugin.index.indexKey"));
 
 			frame.getContentPane().setLayout(new BorderLayout());
 
 			publicKeyField = new JTextField(defaultPublicKey);
 			privateKeyField = new JTextField(defaultPrivateKey);
 
-			JPanel subPanelA = new JPanel(); /* left => labels */
-			JPanel subPanelB = new JPanel(); /* right => textfield */
+			final JPanel subPanelA = new JPanel(); /* left => labels */
+			final JPanel subPanelB = new JPanel(); /* right => textfield */
 
 			subPanelA.setLayout(new GridLayout(askPrivateKey ? 2 : 1, 1));
 			subPanelB.setLayout(new GridLayout(askPrivateKey ? 2 : 1, 1));
@@ -231,7 +222,7 @@ public class IndexManagementHelper {
 			frame.getContentPane().add(subPanelA, BorderLayout.WEST);
 			frame.getContentPane().add(subPanelB, BorderLayout.CENTER);
 
-			JPanel subPanelC = new JPanel();
+			final JPanel subPanelC = new JPanel();
 			subPanelC.setLayout(new GridLayout(1, 2));
 
 			cancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
@@ -252,7 +243,7 @@ public class IndexManagementHelper {
 			/*       VVVVVVVVVVV              */
 			try {
 				wait();
-			} catch(java.lang.InterruptedException e) {
+			} catch(final java.lang.InterruptedException e) {
 				/* \_o< */
 			}
 			/*
@@ -269,7 +260,7 @@ public class IndexManagementHelper {
 			if (formState == 2)
 				return null;
 
-			String[] keys = new String[2];
+			final String[] keys = new String[2];
 
 			keys[0] = publicKeyField.getText();
 			if (askPrivateKey)
@@ -279,17 +270,17 @@ public class IndexManagementHelper {
 
 			frame.dispose();
 
-			if (keys[0] == null || keys[0].length() < 20)
+			if ((keys[0] == null) || (keys[0].length() < 20))
 				return null;
 
-			if (keys[1] == null || keys[1].length() < 20)
+			if ((keys[1] == null) || (keys[1].length() < 20))
 				keys[1] = null;
 
 
 			return keys;
 		}
 
-		public synchronized void actionPerformed(ActionEvent e) {
+		public synchronized void actionPerformed(final ActionEvent e) {
 			if (e.getSource() == okButton) {
 				formState = 1;
 			}
@@ -301,19 +292,19 @@ public class IndexManagementHelper {
 			notify();
 		}
 
-		public void mouseClicked(MouseEvent e) { }
-		public void mouseEntered(MouseEvent e) { }
-		public void mouseExited(MouseEvent e) { }
+		public void mouseClicked(final MouseEvent e) { }
+		public void mouseEntered(final MouseEvent e) { }
+		public void mouseExited(final MouseEvent e) { }
 
-		public void mousePressed(MouseEvent e) {
-			this.showPopupMenu(e);
+		public void mousePressed(final MouseEvent e) {
+			showPopupMenu(e);
 		}
 
-		public void mouseReleased(MouseEvent e) {
-			this.showPopupMenu(e);
+		public void mouseReleased(final MouseEvent e) {
+			showPopupMenu(e);
 		}
 
-		protected void showPopupMenu(MouseEvent e) {
+		protected void showPopupMenu(final MouseEvent e) {
 			if(e.isPopupTrigger()) {
 				if (e.getComponent() == publicKeyField)
 					popupMenuA.show(e.getComponent(), e.getX(), e.getY());
@@ -327,20 +318,20 @@ public class IndexManagementHelper {
 	public static class IndexKeyModifier extends BasicIndexAction implements Runnable {
 		private MainWindow mainWindow;
 
-		public IndexKeyModifier(MainWindow mainWindow, AbstractButton actionSource) {
+		public IndexKeyModifier(final MainWindow mainWindow, final AbstractButton actionSource) {
 			super(null, null, null, null, actionSource);
 			this.mainWindow = mainWindow;
 		}
 
-		public void setTarget(IndexTreeNode node) {
+		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled(node != null || node instanceof Index);
+			getActionSource().setEnabled((node != null) || (node instanceof Index));
 		}
 
 		public void run() {
-			Index index = ((Index)getTarget());
+			final Index index = ((Index)getTarget());
 
-			String[] keys = KeyAsker.askKeys(true, index.getPublicKey(), index.getPrivateKey(), mainWindow);
+			final String[] keys = KeyAsker.askKeys(true, index.getPublicKey(), index.getPrivateKey(), mainWindow);
 
 			if (keys == null)
 				return;
@@ -349,9 +340,9 @@ public class IndexManagementHelper {
 			index.setPublicKey(keys[0]);
 		}
 
-		public void actionPerformed(ActionEvent e) {
+		public void actionPerformed(final ActionEvent e) {
 			if (e.getSource() == getActionSource()) {
-				Thread th = new Thread(this);
+				final Thread th = new Thread(this);
 				th.start();
 			}
 		}
@@ -361,14 +352,14 @@ public class IndexManagementHelper {
 	public static class IndexReuser extends BasicIndexAction implements Runnable {
 		private MainWindow mainWindow;
 
-		public IndexReuser(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uIndexList, IndexTree tree, MainWindow mainWindow, AbstractButton actionSource) {
+		public IndexReuser(final Hsqldb db, final FCPQueueManager queueManager, final UnknownIndexList uIndexList, final IndexTree tree, final MainWindow mainWindow, final AbstractButton actionSource) {
 			super(db, queueManager, uIndexList, tree, actionSource);
 			this.mainWindow = mainWindow;
 		}
 
-		public void setTarget(IndexTreeNode node) {
+		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled(node == null || node instanceof IndexCategory);
+			getActionSource().setEnabled((node == null) || (node instanceof IndexCategory));
 		}
 
 		public void run() {
@@ -384,20 +375,20 @@ public class IndexManagementHelper {
 			publicKey = keys[0];
 			privateKey = keys[1];
 
-			reuseIndex(getDb(), getQueueManager(), getUnknownIndexList(), getTree(), (IndexCategory)getTarget(), publicKey, privateKey);
+			IndexManagementHelper.reuseIndex(getDb(), getQueueManager(), getUnknownIndexList(), getTree(), (IndexCategory)getTarget(), publicKey, privateKey);
 		}
 
-		public void actionPerformed(ActionEvent e) {
+		public void actionPerformed(final ActionEvent e) {
 			if (e.getSource() == getActionSource()) {
-				Thread newThread = new Thread(this);
+				final Thread newThread = new Thread(this);
 				newThread.start();
 			}
 		}
 	}
 
 
-	public static void addIndex(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uIndexList, IndexTree tree, IndexCategory target, String publicKey) {
-		reuseIndex(db, queueManager, uIndexList, tree, target, publicKey, null);
+	public static void addIndex(final Hsqldb db, final FCPQueueManager queueManager, final UnknownIndexList uIndexList, final IndexTree tree, final IndexCategory target, final String publicKey) {
+		IndexManagementHelper.reuseIndex(db, queueManager, uIndexList, tree, target, publicKey, null);
 	}
 
 
@@ -405,7 +396,7 @@ public class IndexManagementHelper {
 	 * Can be use directly
 	 * @param privateKey Can be null
 	 */
-	public static void reuseIndex(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uIndexList, IndexTree tree, IndexCategory target,
+	public static void reuseIndex(final Hsqldb db, final FCPQueueManager queueManager, final UnknownIndexList uIndexList, final IndexTree tree, final IndexCategory target,
 				      String publicKey, String privateKey) {
 
 		publicKey = FreenetURIHelper.cleanURI(publicKey);
@@ -414,16 +405,16 @@ public class IndexManagementHelper {
 		if (publicKey == null)
 			return;
 
-		String name = Index.getNameFromKey(publicKey);
+		final String name = Index.getNameFromKey(publicKey);
 
 		IndexCategory parent;
 
-		if (target != null && target instanceof IndexCategory)
-			parent = (IndexCategory)target;
+		if ((target != null) && (target instanceof IndexCategory))
+			parent = target;
 		else
 			parent = tree.getRoot();
 
-		Index index = new Index(db, queueManager, uIndexList, -2, parent, name, name, publicKey, privateKey, 0, null);
+		final Index index = new Index(db, queueManager, uIndexList, -2, parent, name, name, publicKey, privateKey, 0, null);
 		uIndexList.removeLink(index);
 
 		index.create();
@@ -439,28 +430,28 @@ public class IndexManagementHelper {
 
 
 	public static class IndexCategoryAdder extends BasicIndexAction {
-		public IndexCategoryAdder(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uil, IndexTree tree, AbstractButton actionSource) {
+		public IndexCategoryAdder(final Hsqldb db, final FCPQueueManager queueManager, final UnknownIndexList uil, final IndexTree tree, final AbstractButton actionSource) {
 			super(db, queueManager, uil, tree, actionSource);
 		}
 
-		public void setTarget(IndexTreeNode node) {
+		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled(node == null || node instanceof IndexCategory);
+			getActionSource().setEnabled((node == null) || (node instanceof IndexCategory));
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			String name = askAName(I18n.getMessage("thaw.plugin.index.categoryName"),
+		public void actionPerformed(final ActionEvent e) {
+			final String name = IndexManagementHelper.askAName(I18n.getMessage("thaw.plugin.index.categoryName"),
 					       I18n.getMessage("thaw.plugin.index.newCategory"));
 
-			addIndexCategory(getDb(), getQueueManager(), getUnknownIndexList(), getTree(), (IndexCategory)getTarget(), name);
+			IndexManagementHelper.addIndexCategory(getDb(), getQueueManager(), getUnknownIndexList(), getTree(), (IndexCategory)getTarget(), name);
 		}
 	}
 
-	public static void addIndexCategory(Hsqldb db, FCPQueueManager queueManager, UnknownIndexList uIndexList, IndexTree tree, IndexCategory target, String name) {
+	public static void addIndexCategory(final Hsqldb db, final FCPQueueManager queueManager, final UnknownIndexList uIndexList, final IndexTree tree, IndexCategory target, final String name) {
 		if (target == null)
 			target = tree.getRoot();
 
-		IndexCategory newCat = new IndexCategory(db, queueManager, uIndexList, -2, target, name);
+		final IndexCategory newCat = new IndexCategory(db, queueManager, uIndexList, -2, target, name);
 
 		newCat.create();
 
@@ -469,16 +460,16 @@ public class IndexManagementHelper {
 
 
 	public static class IndexDownloader extends BasicIndexAction implements Runnable {
-		public IndexDownloader(AbstractButton actionSource) {
+		public IndexDownloader(final AbstractButton actionSource) {
 			super(null, null, null, null, actionSource);
 		}
 
-		public void setTarget(IndexTreeNode node) {
+		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			Thread newTh = new Thread(this);
+		public void actionPerformed(final ActionEvent e) {
+			final Thread newTh = new Thread(this);
 			newTh.run();
 		}
 
@@ -491,17 +482,17 @@ public class IndexManagementHelper {
 	}
 
 	public static class IndexUploader extends BasicIndexAction implements Runnable {
-		public IndexUploader(AbstractButton actionSource) {
+		public IndexUploader(final AbstractButton actionSource) {
 			super(null, null, null, null, actionSource);
 		}
 
-		public void setTarget(IndexTreeNode node) {
+		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled(node != null && node.isModifiable());
+			getActionSource().setEnabled((node != null) && node.isModifiable());
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			Thread newTh = new Thread(this);
+		public void actionPerformed(final ActionEvent e) {
+			final Thread newTh = new Thread(this);
 			newTh.run();
 		}
 
@@ -513,55 +504,55 @@ public class IndexManagementHelper {
 
 
 	public static class PublicKeyCopier extends BasicIndexAction {
-		public PublicKeyCopier(AbstractButton actionSource) {
+		public PublicKeyCopier(final AbstractButton actionSource) {
 			super(null, null, null, null, actionSource);
 		}
 
-		public void setTarget(IndexTreeNode node) {
+		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
 			getActionSource().setEnabled(node != null);
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			copyPublicKeyFrom(getTarget());
+		public void actionPerformed(final ActionEvent e) {
+			IndexManagementHelper.copyPublicKeyFrom(getTarget());
 		}
 	}
 
 
-	public static void copyPublicKeyFrom(IndexTreeNode node) {
+	public static void copyPublicKeyFrom(final IndexTreeNode node) {
 		if (node == null)
 			return;
 
-		Toolkit tk = Toolkit.getDefaultToolkit();
-		StringSelection st = new StringSelection(node.getPublicKey());
-		Clipboard cp = tk.getSystemClipboard();
+		final Toolkit tk = Toolkit.getDefaultToolkit();
+		final StringSelection st = new StringSelection(node.getPublicKey());
+		final Clipboard cp = tk.getSystemClipboard();
 		cp.setContents(st, null);
 	}
 
 
 	public static class PrivateKeyCopier extends BasicIndexAction {
-		public PrivateKeyCopier(AbstractButton actionSource) {
+		public PrivateKeyCopier(final AbstractButton actionSource) {
 			super(null, null, null, null, actionSource);
 		}
 
-		public void setTarget(IndexTreeNode node) {
+		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled(node != null && node instanceof Index && node.isModifiable());
+			getActionSource().setEnabled((node != null) && (node instanceof Index) && node.isModifiable());
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			copyPrivateKeyFrom(getTarget());
+		public void actionPerformed(final ActionEvent e) {
+			IndexManagementHelper.copyPrivateKeyFrom(getTarget());
 		}
 	}
 
 
-	public static void copyPrivateKeyFrom(IndexTreeNode node) {
+	public static void copyPrivateKeyFrom(final IndexTreeNode node) {
 		if (node == null)
 			return;
 
-		Toolkit tk = Toolkit.getDefaultToolkit();
-		StringSelection st = new StringSelection(node.getPrivateKey());
-		Clipboard cp = tk.getSystemClipboard();
+		final Toolkit tk = Toolkit.getDefaultToolkit();
+		final StringSelection st = new StringSelection(node.getPrivateKey());
+		final Clipboard cp = tk.getSystemClipboard();
 		cp.setContents(st, null);
 	}
 
@@ -569,36 +560,36 @@ public class IndexManagementHelper {
 	 * Can rename indexes or index categories.
 	 */
 	public static class IndexRenamer extends BasicIndexAction {
-		public IndexRenamer(IndexTree tree, AbstractButton actionSource) {
+		public IndexRenamer(final IndexTree tree, final AbstractButton actionSource) {
 			super(null, null, null, tree, actionSource);
 		}
 
-		public void setTarget(IndexTreeNode node) {
+		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
 			getActionSource().setEnabled(node != null);
 		}
 
-		public void actionPerformed(ActionEvent e) {
+		public void actionPerformed(final ActionEvent e) {
 			String newName;
 
 			if (getTarget() instanceof Index) {
-				newName = askAName(I18n.getMessage("thaw.plugin.index.indexName"),
+				newName = IndexManagementHelper.askAName(I18n.getMessage("thaw.plugin.index.indexName"),
 						   getTarget().toString());
 			} else {
-				newName = askAName(I18n.getMessage("thaw.plugin.index.categoryName"),
+				newName = IndexManagementHelper.askAName(I18n.getMessage("thaw.plugin.index.categoryName"),
 						   getTarget().toString());
 			}
 
 			if (newName == null)
 				return;
 
-			renameNode(getTree(), getTarget(), newName);
+			IndexManagementHelper.renameNode(getTree(), getTarget(), newName);
 		}
 	}
 
 
-	public static void renameNode(IndexTree tree, IndexTreeNode node, String newName) {
-		if (node == null || newName == null)
+	public static void renameNode(final IndexTree tree, final IndexTreeNode node, final String newName) {
+		if ((node == null) || (newName == null))
 			return;
 
 		node.rename(newName);
@@ -609,19 +600,19 @@ public class IndexManagementHelper {
 
 
 	public static class IndexExporter extends BasicIndexAction {
-		public IndexExporter(AbstractButton actionSource) {
+		public IndexExporter(final AbstractButton actionSource) {
 			super(null, null, null, null, actionSource);
 		}
 
-		public void setTarget(IndexTreeNode node) {
+		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled(node != null && node instanceof Index);
+			getActionSource().setEnabled((node != null) && (node instanceof Index));
 		}
 
-		public void actionPerformed(ActionEvent e) {
+		public void actionPerformed(final ActionEvent e) {
 			java.io.File newFile;
 
-			FileChooser fileChooser = new FileChooser();
+			final FileChooser fileChooser = new FileChooser();
 			fileChooser.setTitle(I18n.getMessage("thaw.plugin.index.exportIndex"));
 			fileChooser.setDirectoryOnly(false);
 			fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
@@ -634,7 +625,7 @@ public class IndexManagementHelper {
 
 			try {
 				out = new FileOutputStream(newFile);
-			} catch(java.io.FileNotFoundException excep) {
+			} catch(final java.io.FileNotFoundException excep) {
 				Logger.warning(this, "Unable to create file '"+newFile.toString()+"' ! not generated  because : "+excep.toString());
 				return;
 			}
@@ -645,19 +636,19 @@ public class IndexManagementHelper {
 
 
 	public static class IndexImporter extends BasicIndexAction {
-		public IndexImporter(AbstractButton actionSource) {
+		public IndexImporter(final AbstractButton actionSource) {
 			super(null, null, null, null, actionSource);
 		}
 
-		public void setTarget(IndexTreeNode node) {
+		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled(node != null && node instanceof Index);
+			getActionSource().setEnabled((node != null) && (node instanceof Index));
 		}
 
-		public void actionPerformed(ActionEvent e) {
+		public void actionPerformed(final ActionEvent e) {
 			java.io.File newFile;
 
-			FileChooser fileChooser = new FileChooser();
+			final FileChooser fileChooser = new FileChooser();
 			fileChooser.setTitle(I18n.getMessage("thaw.plugin.index.importIndex"));
 			fileChooser.setDirectoryOnly(false);
 			fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
@@ -676,26 +667,26 @@ public class IndexManagementHelper {
 	 * Can be used on indexes or index categories.
 	 */
 	public static class IndexDeleter extends BasicIndexAction {
-		public IndexDeleter(IndexTree tree, AbstractButton actionSource) {
+		public IndexDeleter(final IndexTree tree, final AbstractButton actionSource) {
 			super(null, null, null, tree, actionSource);
 		}
 
-		public void setTarget(IndexTreeNode node) {
+		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
 			getActionSource().setEnabled(node != null);
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			deleteNode(getTree(), getTarget());
+		public void actionPerformed(final ActionEvent e) {
+			IndexManagementHelper.deleteNode(getTree(), getTarget());
 		}
 	}
 
 
-	public static void deleteNode(IndexTree tree, IndexTreeNode node) {
+	public static void deleteNode(final IndexTree tree, final IndexTreeNode node) {
 		if (node == null)
 			return;
 
-		DefaultMutableTreeNode parent = (DefaultMutableTreeNode)node.getTreeNode().getParent();
+		final DefaultMutableTreeNode parent = (DefaultMutableTreeNode)node.getTreeNode().getParent();
 
 		if (parent != null)
 			parent.remove(node.getTreeNode());
@@ -711,74 +702,74 @@ public class IndexManagementHelper {
 
 
 	public static class FileInserterAndAdder extends BasicIndexAction {
-		public FileInserterAndAdder(Hsqldb db, FCPQueueManager queueManager, AbstractButton actionSource) {
+		public FileInserterAndAdder(final Hsqldb db, final FCPQueueManager queueManager, final AbstractButton actionSource) {
 			super(db, queueManager, null, null, actionSource);
 		}
 
-		public void setTarget(IndexTreeNode node) {
+		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled(node != null && node instanceof Index && ((Index)node).isModifiable());
+			getActionSource().setEnabled((node != null) && (node instanceof Index) && ((Index)node).isModifiable());
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			FileChooser fileChooser = new FileChooser();
+		public void actionPerformed(final ActionEvent e) {
+			final FileChooser fileChooser = new FileChooser();
 
 			fileChooser.setDirectoryOnly(false);
 			fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
 			fileChooser.setTitle(I18n.getMessage("thaw.plugin.index.addFilesWithInserting"));
 
-			Vector files = fileChooser.askManyFiles();
+			final Vector files = fileChooser.askManyFiles();
 
 			if(files == null)
 				return;
 
-			String category = FileCategory.promptForACategory();
+			final String category = FileCategory.promptForACategory();
 
-			addFiles(getDb(), getQueueManager(), (Index)getTarget(), files, category, true);
+			IndexManagementHelper.addFiles(getDb(), getQueueManager(), (Index)getTarget(), files, category, true);
 		}
 	}
 
 
 	public static class FileAdder extends BasicIndexAction {
-		public FileAdder(Hsqldb db, FCPQueueManager queueManager, AbstractButton actionSource) {
+		public FileAdder(final Hsqldb db, final FCPQueueManager queueManager, final AbstractButton actionSource) {
 			super(db, queueManager, null, null, actionSource);
 		}
 
-		public void setTarget(IndexTreeNode node) {
+		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled(node != null && node instanceof Index && ((Index)node).isModifiable());
+			getActionSource().setEnabled((node != null) && (node instanceof Index) && ((Index)node).isModifiable());
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			FileChooser fileChooser = new FileChooser();
+		public void actionPerformed(final ActionEvent e) {
+			final FileChooser fileChooser = new FileChooser();
 
 			fileChooser.setDirectoryOnly(false);
 			fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
 			fileChooser.setTitle(I18n.getMessage("thaw.plugin.index.addFilesWithoutInserting"));
 
-			Vector files = fileChooser.askManyFiles();
+			final Vector files = fileChooser.askManyFiles();
 
 			if(files == null)
 				return;
 
-			String category = FileCategory.promptForACategory();
+			final String category = FileCategory.promptForACategory();
 
-			addFiles(getDb(), getQueueManager(), (Index)getTarget(), files, category, false);
+			IndexManagementHelper.addFiles(getDb(), getQueueManager(), (Index)getTarget(), files, category, false);
 		}
 	}
 
 	/**
 	 * @param files See thaw.plugins.index.File
 	 */
-	public static void addFiles(Hsqldb db, FCPQueueManager queueManager,
-				    Index target, Vector files, String category, boolean insert) {
-		if (target == null || files == null)
+	public static void addFiles(final Hsqldb db, final FCPQueueManager queueManager,
+				    final Index target, final Vector files, final String category, final boolean insert) {
+		if ((target == null) || (files == null))
 			return;
 
-		for(Iterator it = files.iterator();
+		for(final Iterator it = files.iterator();
 		    it.hasNext();) {
 
-			java.io.File ioFile = (java.io.File)it.next();
+			final java.io.File ioFile = (java.io.File)it.next();
 
 			FCPTransferQuery insertion = null;
 
@@ -794,7 +785,7 @@ public class IndexManagementHelper {
 				insertion.start(queueManager);
 			}
 
-			thaw.plugins.index.File file = new thaw.plugins.index.File(db, ioFile.getPath(),
+			final thaw.plugins.index.File file = new thaw.plugins.index.File(db, ioFile.getPath(),
 										   category, target,
 										   insertion);
 
@@ -816,14 +807,14 @@ public class IndexManagementHelper {
 		private JPopupMenu popupMenu = null;
 		private MainWindow mainWindow;
 
-		public KeyAdder(Hsqldb db, MainWindow win, AbstractButton actionSource) {
+		public KeyAdder(final Hsqldb db, final MainWindow win, final AbstractButton actionSource) {
 			super(db, null, null, null, actionSource);
-			this.mainWindow = win;
+			mainWindow = win;
 		}
 
-		public void setTarget(IndexTreeNode node) {
+		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled(node != null && node instanceof Index && ((Index)node).isModifiable());
+			getActionSource().setEnabled((node != null) && (node instanceof Index) && ((Index)node).isModifiable());
 		}
 
 		public void run() {
@@ -840,7 +831,7 @@ public class IndexManagementHelper {
 			okButton = new JButton(I18n.getMessage("thaw.common.ok"));
 
 			popupMenu = new JPopupMenu();
-			JMenuItem item = new JMenuItem(I18n.getMessage("thaw.common.paste"));
+			final JMenuItem item = new JMenuItem(I18n.getMessage("thaw.common.paste"));
 			popupMenu.add(item);
 			textArea.addMouseListener(this);
 			new thaw.core.GUIHelper.PasteHelper(item, textArea);
@@ -863,30 +854,30 @@ public class IndexManagementHelper {
 			frame.setVisible(true);
 		}
 
-		public void actionPerformed(ActionEvent e) {
+		public void actionPerformed(final ActionEvent e) {
 			if (e.getSource() == getActionSource()) {
-				Thread newThread = new Thread(this);
+				final Thread newThread = new Thread(this);
 				newThread.start();
 			}
 
 			if (e.getSource() == okButton) {
-				Vector keyVec = new Vector();
+				final Vector keyVec = new Vector();
 
 				frame.setVisible(false);
 
-				String category = FileCategory.promptForACategory();
+				final String category = FileCategory.promptForACategory();
 
-				String[] keys = textArea.getText().split("\n");
+				final String[] keys = textArea.getText().split("\n");
 
 				for (int i = 0 ; i < keys.length ; i++) {
-					String key = FreenetURIHelper.cleanURI(keys[i]);
+					final String key = FreenetURIHelper.cleanURI(keys[i]);
 
 					if (key != null) {
 						keyVec.add(key);
 					}
 				}
 
-				addKeys(getDb(), (Index)getTarget(), keyVec, category);
+				IndexManagementHelper.addKeys(getDb(), (Index)getTarget(), keyVec, category);
 			}
 
 			if (e.getSource() == cancelButton) {
@@ -894,19 +885,19 @@ public class IndexManagementHelper {
 			}
 		}
 
-		public void mouseClicked(MouseEvent e) { }
-		public void mouseEntered(MouseEvent e) { }
-		public void mouseExited(MouseEvent e) { }
+		public void mouseClicked(final MouseEvent e) { }
+		public void mouseEntered(final MouseEvent e) { }
+		public void mouseExited(final MouseEvent e) { }
 
-		public void mousePressed(MouseEvent e) {
-			this.showPopupMenu(e);
+		public void mousePressed(final MouseEvent e) {
+			showPopupMenu(e);
 		}
 
-		public void mouseReleased(MouseEvent e) {
-			this.showPopupMenu(e);
+		public void mouseReleased(final MouseEvent e) {
+			showPopupMenu(e);
 		}
 
-		protected void showPopupMenu(MouseEvent e) {
+		protected void showPopupMenu(final MouseEvent e) {
 			if(e.isPopupTrigger()) {
 				popupMenu.show(e.getComponent(), e.getX(), e.getY());
 			}
@@ -917,16 +908,16 @@ public class IndexManagementHelper {
 	/**
 	 * @param keys => String
 	 */
-	public static void addKeys(Hsqldb db, Index target, Vector keys, String category) {
-		if (target == null || keys == null)
+	public static void addKeys(final Hsqldb db, final Index target, final Vector keys, final String category) {
+		if ((target == null) || (keys == null))
 			return;
 
-		for(Iterator it = keys.iterator();
+		for(final Iterator it = keys.iterator();
 		    it.hasNext();) {
 
-			String key = (String)it.next();
+			final String key = (String)it.next();
 
-			thaw.plugins.index.File file = new thaw.plugins.index.File(db, key, target);
+			final thaw.plugins.index.File file = new thaw.plugins.index.File(db, key, target);
 			target.addFile(file);
 		}
 	}
@@ -934,31 +925,26 @@ public class IndexManagementHelper {
 
 
 	public static class LinkAdder extends BasicIndexAction implements Runnable {
-		private JButton cancelButton = null;
-		private JButton okButton = null;
-		private JTextArea textArea = null;
-		private JFrame frame = null;
-
-		public LinkAdder(Hsqldb db, AbstractButton actionSource) {
+		public LinkAdder(final Hsqldb db, final AbstractButton actionSource) {
 			super(db, null, null, null, actionSource);
 		}
 
-		public void setTarget(IndexTreeNode node) {
+		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled(node != null && node instanceof Index && ((Index)node).isModifiable());
+			getActionSource().setEnabled((node != null) && (node instanceof Index) && ((Index)node).isModifiable());
 		}
 
 		public void run() {
-			IndexSelecter indexSelecter = new IndexSelecter();
-			String indexKey = indexSelecter.askForAnIndexURI(getDb());
+			final IndexSelecter indexSelecter = new IndexSelecter();
+			final String indexKey = indexSelecter.askForAnIndexURI(getDb());
 
 			if (indexKey != null) {
-				addLink(getDb(), (Index)getTarget(), indexKey);
+				IndexManagementHelper.addLink(getDb(), (Index)getTarget(), indexKey);
 			}
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			Thread newThread = new Thread(this);
+		public void actionPerformed(final ActionEvent e) {
+			final Thread newThread = new Thread(this);
 			newThread.start();
 		}
 	}
@@ -966,11 +952,11 @@ public class IndexManagementHelper {
 	/**
 	 * @param keys => String
 	 */
-	public static void addLink(Hsqldb db, Index target, String linkKey) {
-		if (target == null || linkKey == null)
+	public static void addLink(final Hsqldb db, final Index target, final String linkKey) {
+		if ((target == null) || (linkKey == null))
 			return;
 
-		Link newLink = new Link(db, linkKey, target);
+		final Link newLink = new Link(db, linkKey, target);
 		target.addLink(newLink);
 	}
 

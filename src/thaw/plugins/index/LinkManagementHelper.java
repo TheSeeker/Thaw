@@ -1,19 +1,16 @@
 package thaw.plugins.index;
 
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.AbstractButton;
-
-import java.util.Vector;
-import java.util.Iterator;
-
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Iterator;
+import java.util.Vector;
 
-import thaw.core.Logger;
-import thaw.fcp.*;
+import javax.swing.AbstractButton;
 
+import thaw.fcp.FCPQueueManager;
 import thaw.plugins.Hsqldb;
 
 public class LinkManagementHelper {
@@ -34,13 +31,13 @@ public class LinkManagementHelper {
 		/**
 		 * @param queueManager is used to stop transfers if needed
 		 */
-		public LinkRemover(AbstractButton actionSource) {
+		public LinkRemover(final AbstractButton actionSource) {
 			this.actionSource = actionSource;
 			if (actionSource != null)
 				actionSource.addActionListener(this);
 		}
 
-		public void setTarget(Vector target) {
+		public void setTarget(final Vector target) {
 			boolean isOk;
 
 			isOk = true;
@@ -48,9 +45,9 @@ public class LinkManagementHelper {
 			this.target = target;
 
 			if (target != null) {
-				for (Iterator it = target.iterator();
+				for (final Iterator it = target.iterator();
 				     it.hasNext();) {
-					Link link = (Link)it.next();
+					final Link link = (Link)it.next();
 
 					if (!link.isModifiable()) {
 						isOk = false;
@@ -60,22 +57,22 @@ public class LinkManagementHelper {
 			}
 
 
-			actionSource.setEnabled(target != null && target.size() != 0 && isOk);
+			actionSource.setEnabled((target != null) && (target.size() != 0) && isOk);
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			removeLinks(target);
+		public void actionPerformed(final ActionEvent e) {
+			LinkManagementHelper.removeLinks(target);
 		}
 	}
 
 
-	public static void removeLinks(Vector links) {
+	public static void removeLinks(final Vector links) {
 		if (links == null)
 			return;
 
-		for (Iterator it = links.iterator();
+		for (final Iterator it = links.iterator();
 		     it.hasNext() ; ) {
-			Link link = (Link)it.next();
+			final Link link = (Link)it.next();
 			link.getParent().removeLink(link);
 		}
 	}
@@ -90,10 +87,10 @@ public class LinkManagementHelper {
 		private AbstractButton src;
 		private Vector t;
 
-		public IndexAdder(AbstractButton actionSource,
-				  Hsqldb db, FCPQueueManager queueManager,
-				  UnknownIndexList uil,
-				  IndexTree tree) {
+		public IndexAdder(final AbstractButton actionSource,
+				  final Hsqldb db, final FCPQueueManager queueManager,
+				  final UnknownIndexList uil,
+				  final IndexTree tree) {
 			src = actionSource;
 			if (actionSource != null)
 				actionSource.addActionListener(this);
@@ -103,15 +100,15 @@ public class LinkManagementHelper {
 			this.uil = uil;
 		}
 
-		public void setTarget(Vector targets) {
+		public void setTarget(final Vector targets) {
 			t = targets;
-			src.setEnabled(targets != null && targets.size() > 0);
+			src.setEnabled((targets != null) && (targets.size() > 0));
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			for (Iterator it = t.iterator();
+		public void actionPerformed(final ActionEvent e) {
+			for (final Iterator it = t.iterator();
 			     it.hasNext(); ) {
-				Link link = (Link)it.next();
+				final Link link = (Link)it.next();
 				IndexManagementHelper.addIndex(db, queueManager, uil, tree, null,
 							       link.getPublicKey());
 			}
@@ -123,39 +120,39 @@ public class LinkManagementHelper {
 		private AbstractButton src;
 		private Vector t;
 
-		public PublicKeyCopier(AbstractButton actionSource) {
+		public PublicKeyCopier(final AbstractButton actionSource) {
 			src = actionSource;
 			if (actionSource != null)
 				actionSource.addActionListener(this);
 		}
 
-		public void setTarget(Vector targets) {
+		public void setTarget(final Vector targets) {
 			t = targets;
-			src.setEnabled(targets != null && targets.size() > 0);
+			src.setEnabled((targets != null) && (targets.size() > 0));
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			copyPublicKeyFrom(t);
+		public void actionPerformed(final ActionEvent e) {
+			LinkManagementHelper.copyPublicKeyFrom(t);
 		}
 	}
 
 
-	public static void copyPublicKeyFrom(Vector targets) {
+	public static void copyPublicKeyFrom(final Vector targets) {
 		String keys = "";
 
 		if (targets == null)
 			return;
 
-		Toolkit tk = Toolkit.getDefaultToolkit();
+		final Toolkit tk = Toolkit.getDefaultToolkit();
 
-		for(Iterator it = targets.iterator();
+		for(final Iterator it = targets.iterator();
 		    it.hasNext();) {
-			Link link = (Link)it.next();
+			final Link link = (Link)it.next();
 			keys = keys + link.getPublicKey() + "\n";
 		}
 
-		StringSelection st = new StringSelection(keys);
-		Clipboard cp = tk.getSystemClipboard();
+		final StringSelection st = new StringSelection(keys);
+		final Clipboard cp = tk.getSystemClipboard();
 		cp.setContents(st, null);
 	}
 
