@@ -39,6 +39,10 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 		this.parent = parent;
 
 		this.db = db;
+
+		if (db == null)
+			Logger.error(this, "No reference to the database ?");
+
 		this.queueManager = queueManager;
 
 		setUserObject(this);
@@ -307,11 +311,11 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 				final String author = result.getString("author");
 
 				final Index index = new Index(db, queueManager, uIndexList,
-							id, this,
-							realName, displayName,
-							publicKey, privateKey,
-							revision,
-							author);
+							      id, this,
+							      realName, displayName,
+							      publicKey, privateKey,
+							      revision,
+							      author);
 
 				set(children, position, index.getTreeNode());
 			}

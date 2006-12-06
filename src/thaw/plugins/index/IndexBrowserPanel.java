@@ -34,6 +34,9 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 
 
 	public IndexBrowserPanel(final Hsqldb db, final FCPQueueManager queueManager, final Config config, final MainWindow mainWindow) {
+		if (db == null)
+			Logger.error(this, "No reference to the database ?!");
+
 		this.db = db;
 		this.queueManager = queueManager;
 		this.config = config;
@@ -71,7 +74,11 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		if (config.getValue("indexTreeUnknownListSplitLocation") == null) {
 			leftSplit.setDividerLocation((0.5));
 		} else {
-			leftSplit.setDividerLocation(Double.parseDouble(config.getValue("indexTreeUnknownListSplitLocation")));
+			try {
+				leftSplit.setDividerLocation(Double.parseDouble(config.getValue("indexTreeUnknownListSplitLocation")));
+			} catch(java.lang.IllegalArgumentException e) { /* TODO: Find why it happens */
+				Logger.error(this, "Exception while setting indexTree split location");
+			}
 		}
 
 		leftSplit.setResizeWeight(0.5);

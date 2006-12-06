@@ -13,11 +13,14 @@ import thaw.core.Logger;
 public class Hsqldb extends LibraryPlugin {
 	private Core core;
 
-	public volatile String dbLock;
+	public volatile Object dbLock;
 	private Connection connection;
+
 
 	public boolean run(final Core core) {
 		this.core = core;
+
+		dbLock = new Object();
 
 		try {
 			Class.forName("org.hsqldb.jdbcDriver");

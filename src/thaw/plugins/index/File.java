@@ -36,12 +36,15 @@ public class File extends java.util.Observable implements java.util.Observer {
 	private Index parent;
 	private int parentId;
 
-	private final Hsqldb db;
+	private Hsqldb db;
 
 	private FCPQueueManager queueManager = null;
 
 
 	public File(final Hsqldb db, final String publicKey, final Index parent) {
+		if (db == null)
+			Logger.error(this, "No ref. to the database ?!");
+
 		this.db = db;
 		id = -1;
 		this.publicKey = publicKey;
@@ -56,6 +59,9 @@ public class File extends java.util.Observable implements java.util.Observer {
 	 */
 	public File(final Hsqldb db, final String path, final String category, final Index parent, final FCPTransferQuery transfer) {
 		this.db = db;
+
+		if (db == null)
+			Logger.error(this, "No ref. to the database ?! (2)");
 
 		id = -1;
 		localPath = path;
@@ -77,6 +83,9 @@ public class File extends java.util.Observable implements java.util.Observer {
 	public File(final Hsqldb db, final ResultSet resultSet, final Index parent) throws SQLException {
 		this.db = db;
 
+		if (db == null)
+			Logger.error(this, "No ref. to the database ?! (3)");
+
 		id = resultSet.getInt("id");
 		fileName = resultSet.getString("filename").trim();
 		publicKey = resultSet.getString("publicKey").trim();
@@ -92,6 +101,9 @@ public class File extends java.util.Observable implements java.util.Observer {
 
 	public File(final Hsqldb db, final Element fileElement, final Index parent) {
 		this.db = db;
+
+		if (db == null)
+			Logger.error(this, "No ref. to the database ?! (4)");
 
 		id = Integer.parseInt(fileElement.getAttribute("id")); /* will be changed when inserted in the database */
 		publicKey = fileElement.getAttribute("key");

@@ -85,6 +85,10 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		this.queueManager = queueManager;
 		treeNode = new DefaultMutableTreeNode(displayName, false);
 		this.db = db;
+
+		if (db == null)
+			Logger.error(this, "No reference to the database ?!");
+
 		this.id = id;
 		this.parent = parent;
 		this.realName = realName.trim();
