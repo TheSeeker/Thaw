@@ -7,9 +7,13 @@
 	<property name="images.dir" value="images" />
 	<property name="lib.dir" value="lib" />
 	<property name="javadoc.dir" value="javadoc" />
-	<property name="hsqldb.location" value="${lib.dir}/hsqldb.jar" />
 	<property name="javac.debug" value="false" />
 	<property name="svn.revision" value="@custom@"/>
+
+	<property name="hsqldb.location" value="${lib.dir}/hsqldb.jar" />
+	<available file="${hsqldb.location}" property="hsqldb_available" />
+	<fail unless="hsqldb_available" status="1"
+	message="You need to download hsqldb.jar from http://sourceforge.net/projects/hsqldb/ and to put it in lib/" />
 
 	<target name="compile">
 		<mkdir dir="${bin.dir}" />
@@ -45,11 +49,6 @@
 
 
 	<target name="jar" depends="compile"	description="Make the Jar" >
-	        <available file="${hsqldb.location}" property="hsqldb_available" />
-
-		<fail unless="hsqldb_available" status="1"
-		       message="You need to download hsqldb.jar from http://sourceforge.net/projects/hsqldb/ and to put it in lib/" />
-
 		<jar jarfile="${lib.dir}/Thaw.jar" basedir="${bin.dir}">
 			<manifest>
 				<attribute name="Main-Class" value="thaw.core.Main"/>
