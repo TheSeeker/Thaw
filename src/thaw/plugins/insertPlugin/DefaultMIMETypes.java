@@ -741,6 +741,9 @@ public class DefaultMIMETypes {
 		DefaultMIMETypes.addMIMEType((short)610, "video/x-sgi-movie", "movie");
 		DefaultMIMETypes.addMIMEType((short)611, "x-conference/x-cooltalk", "ice");
 		DefaultMIMETypes.addMIMEType((short)612, "x-world/x-vrml", "vrm vrml wrl", "vrml");
+		DefaultMIMETypes.addMIMEType((short)613, "application/x-freenet-reference", "fref");
+		DefaultMIMETypes.addMIMEType((short)614, "application/x-freenet-index", "fidx");
+		DefaultMIMETypes.addMIMEType((short)615, "application/x-freenet-blob", "flob");
 	}
 
 	/** Guess a MIME type from a filename */

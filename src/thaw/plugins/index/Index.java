@@ -247,7 +247,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		else
 			tmpdir = tmpdir + java.io.File.separator;
 
-		targetFile = new java.io.File(tmpdir + realName +".xml");
+		targetFile = new java.io.File(tmpdir + realName +".frdx");
 
 		if (transfer != null) {
 			Logger.notice(this, "A transfer is already running");
@@ -276,6 +276,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 				revision++;
 
 				clientPut = new FCPClientPut(targetFile, 2, revision, realName, privateKey, 2, true, 0);
+				clientPut.setMetadata("ContentType", "application/x-freenet-index");
 				transfer = clientPut;
 				clientPut.addObserver(this);
 
@@ -482,9 +483,9 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 		if (publicKey.startsWith("SSK@")) { /* as it should when privateKey is known */
 			if (publicKey.endsWith("/"))
-				return publicKey.replaceFirst("SSK@", "USK@")+realName+"/"+revision+"/"+realName+".xml";
+				return publicKey.replaceFirst("SSK@", "USK@")+realName+"/"+revision+"/"+realName+".frdx";
 			else
-				return publicKey.replaceFirst("SSK@", "USK@")+"/"+realName+"/"+revision+"/"+realName+".xml";
+				return publicKey.replaceFirst("SSK@", "USK@")+"/"+realName+"/"+revision+"/"+realName+".frdx";
 		} else
 			return publicKey;
 	}
@@ -1194,6 +1195,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			return null;
 
 		name = name.replaceAll(".xml", "");
+		name = name.replaceAll(".frdx", "");
 
 		return name;
 	}
