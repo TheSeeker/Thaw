@@ -26,22 +26,19 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 
 	private Hsqldb db;
 	private FCPQueueManager queueManager;
-	private UnknownIndexList uIndexList;
+	private IndexBrowserPanel indexBrowser;
 
-	public IndexCategory(final Hsqldb db, final FCPQueueManager queueManager, final UnknownIndexList uil,
+	public IndexCategory(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser,
 			     final int id, final IndexCategory parent,
 			     final String name) {
 		super(name, true);
 
-		uIndexList = uil;
+		this.indexBrowser = indexBrowser;
 		this.id = id;
 		this.name = name;
 		this.parent = parent;
 
-		this.db = db;
-
-		if (db == null)
-			Logger.error(this, "No reference to the database ?");
+		this.db = indexBrowser.getDb();
 
 		this.queueManager = queueManager;
 
@@ -310,7 +307,7 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 
 				final String author = result.getString("author");
 
-				final Index index = new Index(db, queueManager, uIndexList,
+				final Index index = new Index(queueManager, indexBrowser,
 							      id, this,
 							      realName, displayName,
 							      publicKey, privateKey,
@@ -353,7 +350,7 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 				final int position = result.getInt("positionInTree");
 				final String name = result.getString("name");
 
-				final IndexCategory cat = new IndexCategory(db, queueManager, uIndexList, id, this, name);
+				final IndexCategory cat = new IndexCategory(queueManager, indexBrowser, id, this, name);
 				cat.loadChildren();
 				set(children, position, cat);
 			}

@@ -59,7 +59,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	private FCPGenerateSSK sskGenerator;
 
 	private final FCPQueueManager queueManager;
-	private UnknownIndexList uIndexList;
+	private final IndexBrowserPanel indexBrowser;
 
 	private FCPTransferQuery transfer = null;
 	private File targetFile = null;
@@ -75,19 +75,17 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	 * The bigest constructor of the world ...
 	 * @param revision Ignored if the index is not modifiable (=> deduced from the publicKey)
 	 */
-	public Index(final Hsqldb db, final FCPQueueManager queueManager, final UnknownIndexList indexList,
+	public Index(final FCPQueueManager queueManager,
+		     final IndexBrowserPanel indexBrowser,
 		     final int id, final IndexCategory parent,
 		     String realName, String displayName,
 		     final String publicKey, final String privateKey,
 		     final int revision,
 		     final String author) {
-		uIndexList = indexList;
+		this.indexBrowser = indexBrowser;
 		this.queueManager = queueManager;
 		treeNode = new DefaultMutableTreeNode(displayName, false);
-		this.db = db;
-
-		if (db == null)
-			Logger.error(this, "No reference to the database ?!");
+		this.db = indexBrowser.getDb();
 
 		this.id = id;
 		this.parent = parent;
@@ -277,8 +275,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 				clientPut = new FCPClientPut(targetFile, 2, revision, realName, privateKey, 2, true, 0);
 				clientPut.setMetadata("ContentType", "application/x-freenet-index");
-				transfer = clientPut;
-				clientPut.addObserver(this);
+				setTransfer(clientPut);
 
 				queueManager.addQueryToThePendingQueue(clientPut);
 
@@ -330,9 +327,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 
 		clientGet = new FCPClientGet(key, 2, 2, false, -1, null);
-		transfer = clientGet;
-
-		clientGet.addObserver(this);
+		setTransfer(clientGet);
 
 		/*
 		 * These requests are usually quite fast, and don't consume a lot
@@ -352,6 +347,10 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 
 	protected void setTransfer(final FCPTransferQuery query) {
+		if (transfer != null && indexBrowser != null) {
+			indexBrowser.getIndexProgressBar().removeTransfer(query);
+		}
+
 		transfer = query;
 
 		if (transfer != null) {
@@ -360,11 +359,13 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			if (transfer instanceof FCPClientPut)
 				((FCPClientPut)transfer).addObserver(this);
 			this.update(((java.util.Observable)transfer), null);
+			if (indexBrowser != null)
+				indexBrowser.getIndexProgressBar().addTransfer(query);
 		}
 	}
 
 	protected void setTransfer() {
-		if (queueManager == null)
+		if (queueManager == null || transfer != null)
 			return;
 
 		if (getPublicKey() != null) {
@@ -582,7 +583,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 					if (transfer.stop(queueManager))
 						queueManager.remove(transfer);
 
-					transfer = null;
+					setTransfer(null);
 
 					this.setChanged();
 					this.notifyObservers();
@@ -619,11 +620,11 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 					loadXML(transfer.getPath());
 					(new java.io.File(transfer.getPath())).delete();
 
-					transfer = null;
+					setTransfer(null);
 
 					save();
 
-					uIndexList.addLinks(this);
+					indexBrowser.getUnknownIndexList().addLinks(this);
 
 					setChanged();
 					notifyObservers();
@@ -633,7 +634,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 			if ((transfer != null) && transfer.isFinished() && !transfer.isSuccessful()) {
 				Logger.info(this, "Unable to get new version of the index");
-				transfer = null;
+				setTransfer(null);
 				this.setChanged();
 				this.notifyObservers();
 				return;

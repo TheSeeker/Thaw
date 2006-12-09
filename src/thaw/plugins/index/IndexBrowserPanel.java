@@ -18,19 +18,23 @@ import thaw.plugins.Hsqldb;
 
 public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListener, ActionListener {
 	private IndexTree indexTree;
-	private JSplitPane leftSplit;
+	private Tables tables;
+	private DetailPanel detailPanel;
 	private UnknownIndexList unknownList;
+	private IndexProgressBar indexProgressBar;
 
 	private JSplitPane split;
 
 	private JPanel listAndDetails;
-	private Tables tables;
-	private DetailPanel detailPanel;
+	private JSplitPane leftSplit;
+
+	private JPanel globalPanel;
 
 	private Hsqldb db;
 	private FCPQueueManager queueManager;
 	private Config config;
 	private MainWindow mainWindow;
+
 
 	public IndexBrowserPanel(final Hsqldb db, final FCPQueueManager queueManager, final Config config, final MainWindow mainWindow) {
 		this.db = db;
@@ -59,6 +63,12 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 				       leftSplit, listAndDetails);
 
 		indexTree.addTreeSelectionListener(this);
+
+		indexProgressBar = new IndexProgressBar();
+
+		globalPanel = new JPanel(new BorderLayout());
+		globalPanel.add(split, BorderLayout.CENTER);
+		globalPanel.add(indexProgressBar.getProgressBar(), BorderLayout.SOUTH);
 	}
 
 	public void restoreState() {
@@ -103,13 +113,17 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		return detailPanel;
 	}
 
+	public IndexProgressBar getIndexProgressBar() {
+		return indexProgressBar;
+	}
+
 	public MainWindow getMainWindow() {
 		return mainWindow;
 	}
 
 
-	public JSplitPane getPanel() {
-		return split;
+	public JPanel getPanel() {
+		return globalPanel;
 	}
 
 	public void saveState() {

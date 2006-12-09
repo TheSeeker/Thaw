@@ -79,25 +79,20 @@ public class LinkManagementHelper {
 
 
 	public static class IndexAdder implements LinkAction {
-		private Hsqldb db;
 		private FCPQueueManager queueManager;
-		private IndexTree tree;
-		private UnknownIndexList uil;
+		private IndexBrowserPanel indexBrowser;
 
 		private AbstractButton src;
 		private Vector t;
 
 		public IndexAdder(final AbstractButton actionSource,
-				  final Hsqldb db, final FCPQueueManager queueManager,
-				  final UnknownIndexList uil,
-				  final IndexTree tree) {
+				  final FCPQueueManager queueManager,
+				  final IndexBrowserPanel indexBrowser) {
 			src = actionSource;
 			if (actionSource != null)
 				actionSource.addActionListener(this);
-			this.db = db;
 			this.queueManager = queueManager;
-			this.tree = tree;
-			this.uil = uil;
+			this.indexBrowser = indexBrowser;
 		}
 
 		public void setTarget(final Vector targets) {
@@ -109,7 +104,7 @@ public class LinkManagementHelper {
 			for (final Iterator it = t.iterator();
 			     it.hasNext(); ) {
 				final Link link = (Link)it.next();
-				IndexManagementHelper.addIndex(db, queueManager, uil, tree, null,
+				IndexManagementHelper.addIndex(queueManager, indexBrowser, null,
 							       link.getPublicKey());
 			}
 		}

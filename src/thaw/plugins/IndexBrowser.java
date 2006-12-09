@@ -83,21 +83,20 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 
 		button = new JButton(IconBox.indexReuse);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addAlreadyExistingIndex"));
-		action = new IndexManagementHelper.IndexReuser(hsqldb, core.getQueueManager(), browserPanel.getUnknownIndexList(), browserPanel.getIndexTree(), core.getMainWindow(), button);
+		action = new IndexManagementHelper.IndexReuser(core.getQueueManager(), browserPanel, button);
 		action.setTarget(browserPanel.getIndexTree().getRoot());
 		addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 
 		button = new JButton(IconBox.indexNew);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.createIndex"));
-		action = new IndexManagementHelper.IndexCreator(hsqldb, core.getQueueManager(), browserPanel.getUnknownIndexList(), browserPanel.getIndexTree(), button);
+		action = new IndexManagementHelper.IndexCreator(core.getQueueManager(), browserPanel, button);
 		action.setTarget(browserPanel.getIndexTree().getRoot());
 		addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 
 		if (newDb) {
-			IndexManagementHelper.addIndex(hsqldb, core.getQueueManager(), browserPanel.getUnknownIndexList(), browserPanel.getIndexTree(),
-						       browserPanel.getIndexTree().getRoot(), IndexBrowser.DEFAULT_INDEX);
+			IndexManagementHelper.addIndex(core.getQueueManager(), browserPanel, null, IndexBrowser.DEFAULT_INDEX);
 		}
 
 		stateChanged(null);
