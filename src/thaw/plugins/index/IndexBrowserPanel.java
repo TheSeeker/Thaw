@@ -25,25 +25,22 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 
 	private JPanel listAndDetails;
 	private Tables tables;
-	private FileDetailsEditor fileDetails;
+	private DetailPanel detailPanel;
 
 	private Hsqldb db;
 	private FCPQueueManager queueManager;
 	private Config config;
-
-
+	private MainWindow mainWindow;
 
 	public IndexBrowserPanel(final Hsqldb db, final FCPQueueManager queueManager, final Config config, final MainWindow mainWindow) {
-		if (db == null)
-			Logger.error(this, "No reference to the database ?!");
-
 		this.db = db;
 		this.queueManager = queueManager;
 		this.config = config;
+		this.mainWindow = mainWindow;
 
-		unknownList = new UnknownIndexList(db, queueManager);
-		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, queueManager, unknownList, mainWindow, db);
-		unknownList.setIndexTree(indexTree); /* TODO: dirty => find a better way */
+		unknownList = new UnknownIndexList(queueManager, this);
+
+		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, queueManager, this);
 
 		leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 					   indexTree.getPanel(),
@@ -52,14 +49,14 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		listAndDetails = new JPanel();
 		listAndDetails.setLayout(new BorderLayout(10, 10));
 
-		tables = new Tables(false, db, queueManager, unknownList, indexTree, config);
-		fileDetails = new FileDetailsEditor(false);
+		tables = new Tables(false, queueManager, this, config);
+		detailPanel = new DetailPanel();
 
 		listAndDetails.add(tables.getPanel(), BorderLayout.CENTER);
-		listAndDetails.add(fileDetails.getPanel(), BorderLayout.SOUTH);
+		listAndDetails.add(detailPanel.getPanel(), BorderLayout.SOUTH);
 
 		split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-					    leftSplit, listAndDetails);
+				       leftSplit, listAndDetails);
 
 		indexTree.addTreeSelectionListener(this);
 	}
@@ -86,6 +83,10 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		tables.restoreState();
 	}
 
+	public Hsqldb getDb() {
+		return db;
+	}
+
 	public Tables getTables() {
 		return tables;
 	}
@@ -97,6 +98,15 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	public UnknownIndexList getUnknownIndexList() {
 		return unknownList;
 	}
+
+	public DetailPanel getDetailPanel() {
+		return detailPanel;
+	}
+
+	public MainWindow getMainWindow() {
+		return mainWindow;
+	}
+
 
 	public JSplitPane getPanel() {
 		return split;

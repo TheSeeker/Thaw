@@ -55,12 +55,10 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 	private int[] selectedRows;
 
-	private final Tables tables;
-	private final IndexTree tree;
+	private IndexBrowserPanel indexBrowser;
 
-	public FileTable(final FCPQueueManager queueManager, final IndexTree tree, final Config config, final Tables tables) {
-		this.tables = tables;
-		this.tree = tree;
+	public FileTable(final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, final Config config) {
+		this.indexBrowser = indexBrowser;
 
 		fileListModel = new FileListModel();
 		table = new JTable(fileListModel);
@@ -200,7 +198,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			Index parent;
 
 			if (file.getParent() == null)
-				parent = tree.getRoot().getIndex(file.getParentId());
+				parent = indexBrowser.getIndexTree().getRoot().getIndex(file.getParentId());
 			else
 				parent = file.getParent();
 
@@ -209,9 +207,9 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 				return;
 			}
 
-			tree.getTree().setSelectionPath(new TreePath(parent.getTreeNode().getPath()));
+			indexBrowser.getIndexTree().getTree().setSelectionPath(new TreePath(parent.getTreeNode().getPath()));
 
-			tables.setList(parent);
+			indexBrowser.getTables().setList(parent);
 
 			int row;
 

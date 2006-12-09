@@ -2,11 +2,11 @@ package thaw.plugins.index;
 
 import javax.swing.JPanel;
 
-public class FileDetailsEditor {
+public class DetailPanel {
 
 	private JPanel panel;
 
-	public FileDetailsEditor(final boolean modifiables) {
+	public DetailPanel() {
 		panel = new JPanel();
 	}
 

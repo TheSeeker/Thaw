@@ -34,13 +34,12 @@ public class UnknownIndexList implements MouseListener {
 	private JPopupMenu rightClickMenu = null;
 	private Vector rightClickActions = null;
 
-	private Hsqldb db;
 	private FCPQueueManager queueManager;
-	private IndexTree indexTree;
+	private IndexBrowserPanel indexBrowser;
 
-	public UnknownIndexList(final Hsqldb db, final FCPQueueManager queueManager) {
-		this.db = db;
+	public UnknownIndexList(final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser) {
 		this.queueManager = queueManager;
+		this.indexBrowser = indexBrowser;
 
 		offset = 0;
 		full = false;
@@ -61,10 +60,6 @@ public class UnknownIndexList implements MouseListener {
 		panel.add(scrollPane);
 
 		list.addMouseListener(this);
-	}
-
-	public void setIndexTree(final IndexTree tree) {
-		indexTree = tree;
 	}
 
 	public JPanel getPanel() {
@@ -156,7 +151,7 @@ public class UnknownIndexList implements MouseListener {
 
 			item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addIndexesFromLink"));
 			rightClickMenu.add(item);
-			rightClickActions.add(new LinkManagementHelper.IndexAdder(item, db, queueManager, this, indexTree));
+			rightClickActions.add(new LinkManagementHelper.IndexAdder(item, indexBrowser.getDb(), queueManager, this, indexBrowser.getIndexTree()));
 
 			item = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKeys"));
 			rightClickMenu.add(item);

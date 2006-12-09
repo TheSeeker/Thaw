@@ -22,16 +22,16 @@ public class Tables {
 	private JSplitPane split;
 	private Config config;
 
-	public Tables(final boolean modifiables, final Hsqldb db, final FCPQueueManager queueManager, final UnknownIndexList uil, final IndexTree tree, final Config config) {
+	public Tables(final boolean modifiables, FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, final Config config) {
 		this.config = config;
 
 		panel = new JPanel();
 		panel.setLayout(new BorderLayout(10, 10));
 
-		fileTable = new FileTable(queueManager, tree, config, this);
-		linkTable = new LinkTable(db, queueManager, uil, tree, this);
+		fileTable = new FileTable(queueManager, indexBrowser, config);
+		linkTable = new LinkTable(queueManager, indexBrowser);
 
-		searchBar = new SearchBar(db, tree, queueManager, this);
+		searchBar = new SearchBar(queueManager, indexBrowser);
 
 		split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 				       linkTable.getPanel(),

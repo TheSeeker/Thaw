@@ -19,17 +19,14 @@ public class SearchBar implements ActionListener {
 	private JTextField userText;
 	private JButton validationButton;
 
-	private Hsqldb db;
-	private IndexTree tree;
+	private IndexBrowserPanel indexBrowser;
 
 	private Tables tables;
 
 	private FCPQueueManager queueManager;
 
-	public SearchBar(final Hsqldb db, final IndexTree indexTree, final FCPQueueManager queueManager, final Tables tables) {
-		this.db = db;
-		tree = indexTree;
-		this.tables = tables;
+	public SearchBar(final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser) {
+		this.indexBrowser = indexBrowser;
 		this.queueManager = queueManager;
 
 		panel = new JPanel();
@@ -59,8 +56,8 @@ public class SearchBar implements ActionListener {
 		userText.setSelectionStart(0);
 		userText.setSelectionEnd(userText.getText().length());
 
-		final SearchResult sr = new SearchResult(db, userText.getText(), tree.getSelectedNode(), queueManager);
-		tables.setList(sr);
+		final SearchResult sr = new SearchResult(indexBrowser.getDb(), userText.getText(), indexBrowser.getIndexTree().getSelectedNode(), queueManager);
+		indexBrowser.getTables().setList(sr);
 	}
 
 }

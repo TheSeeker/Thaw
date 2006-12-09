@@ -36,9 +36,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 	private FCPQueueManager queueManager;
 
-	private IndexTree indexTree;
-	private Hsqldb db;
-	private Tables tables;
+	private IndexBrowserPanel indexBrowser;
 
 	private JPopupMenu rightClickMenu;
 	private Vector rightClickActions;
@@ -46,9 +44,8 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 	private int[] selectedRows;
 
-	public LinkTable (final Hsqldb db, final FCPQueueManager queueManager, final UnknownIndexList uil, final IndexTree tree, final Tables tables) {
-		this.queueManager = queueManager;
-		this.db = db;
+	public LinkTable (final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser) {
+		this.indexBrowser = indexBrowser;
 
 		linkListModel = new LinkListModel();
 		table = new JTable(linkListModel);
@@ -62,9 +59,6 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 		table.addMouseListener(this);
 
-		indexTree = tree;
-		this.tables = tables;
-
 		rightClickMenu = new JPopupMenu();
 		rightClickActions = new Vector();
 
@@ -72,7 +66,9 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addIndexesFromLink"));
 		rightClickMenu.add(item);
-		rightClickActions.add(new LinkManagementHelper.IndexAdder(item, db, queueManager, uil, tree));
+		rightClickActions.add(new LinkManagementHelper.IndexAdder(item, indexBrowser.getDb(), queueManager,
+									  indexBrowser.getUnknownIndexList(),
+									  indexBrowser.getIndexTree()));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKeys"));
 		rightClickMenu.add(item);
@@ -177,7 +173,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 			Index parent;
 			if (link.getParent() == null)
-				parent = indexTree.getRoot().getIndex(link.getParentId());
+				parent = indexBrowser.getIndexTree().getRoot().getIndex(link.getParentId());
 			else
 				parent = link.getParent();
 
@@ -186,9 +182,9 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 				return;
 			}
 
-			indexTree.getTree().setSelectionPath(new TreePath(parent.getTreeNode().getPath()));
+			indexBrowser.getIndexTree().getTree().setSelectionPath(new TreePath(parent.getTreeNode().getPath()));
 
-			tables.setList(parent);
+			indexBrowser.getTables().setList(parent);
 
 			return;
 		}
