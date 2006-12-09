@@ -11,6 +11,11 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
+import javax.swing.JButton;
+import java.awt.BorderLayout;
+
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 import thaw.fcp.FCPClientHello;
 import thaw.fcp.FCPConnection;
@@ -23,7 +28,7 @@ import thaw.fcp.FCPWatchGlobal;
  * A "core" contains references to all the main parts of Thaw.
  * The Core has all the functions needed to initialize Thaw / stop Thaw.
  */
-public class Core implements Observer {
+public class Core implements Observer, ActionListener {
 	private SplashScreen splashScreen = null;
 
 	private MainWindow mainWindow = null;
@@ -39,8 +44,10 @@ public class Core implements Observer {
 
 	private static String lookAndFeel = null;
 
+	private JDialog warningDialog = null;
+
 	public final static int MAX_CONNECT_TRIES = 3;
-	public final static int TIME_BETWEEN_EACH_TRY = 3000;
+	public final static int TIME_BETWEEN_EACH_TRY = 5000;
 
 
 	/**
@@ -411,23 +418,26 @@ public class Core implements Observer {
 
 			int nmbReconnect = 0;
 
-			final JDialog warningDialog = new JDialog(getMainWindow().getMainFrame());
+			warningDialog = new JDialog(getMainWindow().getMainFrame());
 			warningDialog.setTitle("Thaw - reconnection");
 			warningDialog.setModal(false);
-			warningDialog.setSize(500, 40);
+			warningDialog.setSize(500, 100);
 			warningDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-			final JPanel warningPanel = new JPanel();
-
+			final JPanel warningPanel = new JPanel(new BorderLayout(10, 10));
 			final JLabel warningLabel = new JLabel(I18n.getMessage("thaw.warning.autoreconnecting"),
-							 SwingConstants.CENTER);
-			warningPanel.add(warningLabel);
+							       SwingConstants.CENTER);
+			final JButton cancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
+			cancelButton.addActionListener(this);
+
+			warningPanel.add(warningLabel, BorderLayout.CENTER);
+			warningPanel.add(cancelButton, BorderLayout.SOUTH);
 			warningDialog.setContentPane(warningPanel);
 
 			warningDialog.setVisible(true);
 
 			for(nmbReconnect = 0;
-			    nmbReconnect < Core.MAX_CONNECT_TRIES ;
+			    nmbReconnect < Core.MAX_CONNECT_TRIES && warningDialog != null ;
 			    nmbReconnect++) {
 
 				try {
@@ -437,12 +447,16 @@ public class Core implements Observer {
 				}
 
 				Logger.notice(this, "Trying to reconnect ... : "+ Integer.toString(nmbReconnect));
-
-				if(initNodeConnection())
-					break;
+				if (warningDialog != null) {
+					if(initNodeConnection())
+						break;
+				}
 			}
 
-			warningDialog.setVisible(false);
+			if (warningDialog != null) {
+				warningDialog.setVisible(false);
+				warningDialog.dispose();
+			}
 
 
 			if(nmbReconnect == Core.MAX_CONNECT_TRIES) {
@@ -467,6 +481,16 @@ public class Core implements Observer {
 			getPluginManager().loadPlugins();
 			getPluginManager().runPlugins();
 		}
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		if (warningDialog == null)
+			return;
+
+		// we assume that the action comes from the button in the reconnection dialog
+		warningDialog.setVisible(false);
+		warningDialog.dispose();
+		warningDialog = null;
 	}
 
 }

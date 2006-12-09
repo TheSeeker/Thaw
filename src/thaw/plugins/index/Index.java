@@ -527,7 +527,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 		if(displayName != null)
 			toDisp = displayName;
-		toDisp = realName;
+		else
+			toDisp = realName;
 
 		if (revision > 0)
 			toDisp += " (r"+Integer.toString(revision)+")";
