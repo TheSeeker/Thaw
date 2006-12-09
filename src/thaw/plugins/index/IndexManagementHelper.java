@@ -925,8 +925,11 @@ public class IndexManagementHelper {
 
 
 	public static class LinkAdder extends BasicIndexAction implements Runnable {
-		public LinkAdder(final Hsqldb db, final AbstractButton actionSource) {
-			super(db, null, null, null, actionSource);
+		private IndexBrowserPanel indexBrowser;
+
+		public LinkAdder(IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+			super(indexBrowser.getDb(), null, null, null, actionSource);
+			this.indexBrowser = indexBrowser;
 		}
 
 		public void setTarget(final IndexTreeNode node) {
@@ -935,7 +938,7 @@ public class IndexManagementHelper {
 		}
 
 		public void run() {
-			final IndexSelecter indexSelecter = new IndexSelecter();
+			final IndexSelecter indexSelecter = new IndexSelecter(indexBrowser);
 			final String indexKey = indexSelecter.askForAnIndexURI(getDb());
 
 			if (indexKey != null) {

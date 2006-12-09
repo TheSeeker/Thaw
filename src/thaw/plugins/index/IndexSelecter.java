@@ -54,8 +54,10 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 	private boolean closeWin;
 	private String selectedIndexKey = null;
 
-	public IndexSelecter() {
+	private IndexBrowserPanel indexBrowser;
 
+	public IndexSelecter(IndexBrowserPanel indexBrowser) {
+		this.indexBrowser = indexBrowser;
 	}
 
 	/**
@@ -68,7 +70,7 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 
 		upPanel = new JPanel();
 		Logger.info(this, "indexes");
-		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.yourIndexes"), true, null, null, null, db);
+		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.yourIndexes"), true, null, indexBrowser);
 		Logger.info(this, "plus indexes");
 
 		fieldPanel = new JPanel();
