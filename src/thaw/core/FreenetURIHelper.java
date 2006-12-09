@@ -7,6 +7,16 @@ public class FreenetURIHelper {
 
 	}
 
+	/**
+	 * Quick test to see if the string could be a key
+	 */
+	public static boolean isAKey(String key) {
+		return (key.startsWith("CHK@")
+			|| key.startsWith("SSK@")
+			|| key.startsWith("USK@")
+			|| key.startsWith("KSK@"));
+	}
+
 	public static String cleanURI(String uri) {
 		if (uri == null)
 			return uri;
