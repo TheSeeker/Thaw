@@ -15,7 +15,7 @@ import thaw.core.Plugin;
 import thaw.plugins.index.IndexBrowserPanel;
 import thaw.plugins.index.IndexManagementHelper;
 import thaw.plugins.index.IndexTreeNode;
-import thaw.plugins.index.TableCreator;
+import thaw.plugins.index.DatabaseManager;
 
 public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListener, java.util.Observer {
 
@@ -53,7 +53,7 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 		newDb = false;
 
 		if (core.getConfig().getValue("indexDatabaseVersion") == null) {
-			TableCreator.createTables(hsqldb);
+			DatabaseManager.createTables(hsqldb);
 			newDb = true;
 			core.getConfig().setValue("indexDatabaseVersion", "1");
 		}

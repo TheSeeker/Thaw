@@ -57,6 +57,11 @@ public interface IndexTreeNode {
 
 	public Vector getIndexIds();
 
+	/**
+	 * All the indexes !
+	 */
+	public Vector getIndexes();
+
 	public Index getIndex(int id);
 
 	public void addObserver(java.util.Observer o);

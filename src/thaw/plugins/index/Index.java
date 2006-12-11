@@ -1094,8 +1094,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 		final Element rootEl = xmlDoc.getDocumentElement();
 
+		loadXMLFromRoot(rootEl);
+	}
+
+	public void loadXMLFromRoot(Element rootEl) {
 		loadHeader(rootEl);
-		this.loadLinks(rootEl);
+		loadLinks(rootEl);
 		loadFileList(rootEl);
 	}
 
@@ -1207,6 +1211,12 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		final Vector ids = new Vector();
 		ids.add(new Integer(getId()));
 		return ids;
+	}
+
+	public Vector getIndexes() {
+		final Vector idx = new Vector();
+		idx.add(this);
+		return idx;
 	}
 
 	public boolean isModifiable() {

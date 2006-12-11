@@ -406,6 +406,41 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 		return result;
 	}
 
+	public Vector getIndexes()
+	{
+		if(children == null)
+			children = loadChildren();
+
+		final Vector result = new Vector();
+
+		for(final Iterator it = children.iterator();
+		    it.hasNext();) {
+			final IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
+			result.addAll(node.getIndexes());
+		}
+
+		return result;
+	}
+
+	public Vector getAllIndexCategories()
+	{
+		if(children == null)
+			children = loadChildren();
+
+		final Vector result = new Vector();
+
+		for(final Iterator it = children.iterator();
+		    it.hasNext();) {
+			final Object node = ((DefaultMutableTreeNode)it.next()).getUserObject();
+			if (node instanceof IndexCategory) {
+				result.add(node);
+				result.addAll(((IndexCategory)node).getAllIndexCategories());
+			}
+		}
+
+		return result;
+	}
+
 
 	public Index getIndex(final int id)
 	{

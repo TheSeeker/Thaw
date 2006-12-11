@@ -23,9 +23,9 @@ import thaw.plugins.Hsqldb;
  *
  * positionInTree == position in its JTree branch.
  */
-public class TableCreator {
+public class DatabaseManager {
 
-	public TableCreator() {
+	public DatabaseManager() {
 
 	}
 
@@ -129,5 +129,14 @@ public class TableCreator {
 		} catch(final SQLException e) {
 			Logger.notice(new TableCreator(), "While (re)creating sql tables: "+e.toString());
 		}
+	}
+
+
+	public static void exportDatabase(IndexTree indexTree) {
+
+	}
+
+	public static void importDatabase(IndexTree indexTree) {
+
 	}
 }

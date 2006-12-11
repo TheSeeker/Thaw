@@ -101,7 +101,7 @@ public class IndexManagementHelper {
 
 	public static class IndexCreator extends BasicIndexAction {
 		public IndexCreator(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
-			super(null, indexBrowser, actionSource);
+			super(queueManager, indexBrowser, actionSource);
 		}
 
 		public void setTarget(final IndexTreeNode node) {

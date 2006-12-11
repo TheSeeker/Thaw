@@ -317,7 +317,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			if (column == 2) {
 				String key = file.getPublicKey();
 
-				if (!thaw.core.FreenetURIHelper.isAKey(key))
+				if (key == null || !thaw.core.FreenetURIHelper.isAKey(key))
 					key = I18n.getMessage("thaw.common.unknown");
 
 				return key;
