@@ -15,7 +15,7 @@ import thaw.core.Core;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.Plugin;
-import thaw.plugins.index.TableCreator;
+import thaw.plugins.index.DatabaseManager;
 
 public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 	public final static int BUFFER_SIZE = 51200;
@@ -164,17 +164,16 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 					return;
 				}
 			} else {
-				TableCreator.dropTables(hsqldb);
+				DatabaseManager.dropTables(hsqldb);
 				addToConsole("Ok\n");
 				return;
 			}
-				
-			
+
 			if(result == null) {
 				addToConsole("(null)\n");
 				return;
 			}
-			
+
 			if(result.getFetchSize() == 0) {
 				addToConsole("(done)\n");
 				return;

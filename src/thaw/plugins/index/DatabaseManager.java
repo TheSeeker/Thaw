@@ -35,7 +35,7 @@ public class DatabaseManager {
 	public static void createTables(final Hsqldb db) {
 		//sendQuery(db,
 		//	  "SET IGNORECASE TRUE");
-		TableCreator.sendQuery(db,
+		DatabaseManager.sendQuery(db,
 			  "CREATE CACHED TABLE indexCategories ("
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "name VARCHAR(255) NOT NULL,"
@@ -45,7 +45,7 @@ public class DatabaseManager {
 			  + "PRIMARY KEY (id),"
 			  + "FOREIGN KEY (parent) REFERENCES indexCategories (id))");
 
-		TableCreator.sendQuery(db,
+		DatabaseManager.sendQuery(db,
 			  "CREATE CACHED TABLE indexes ("
 			  + "id INTEGER IDENTITY NOT NULL, "
 			  + "originalName VARCHAR(255) NOT NULL, "
@@ -59,12 +59,12 @@ public class DatabaseManager {
 			  + "PRIMARY KEY (id), "
 			  + "FOREIGN KEY (parent) REFERENCES indexCategories (id))");
 
-		TableCreator.sendQuery(db,
+		DatabaseManager.sendQuery(db,
 			  "CREATE CACHED TABLE categories ("
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "name VARCHAR(255) NOT NULL)");
 
-		TableCreator.sendQuery(db,
+		DatabaseManager.sendQuery(db,
 			  "CREATE CACHED TABLE files ("
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "filename VARCHAR(255) NOT NULL,"
@@ -78,7 +78,7 @@ public class DatabaseManager {
 			  + "FOREIGN KEY (indexParent) REFERENCES indexes (id),"
 			  + "FOREIGN KEY (category) REFERENCES categories (id))");
 
-		TableCreator.sendQuery(db,
+		DatabaseManager.sendQuery(db,
 			  "CREATE CACHED TABLE links ("
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "publicKey VARCHAR(350) NOT NULL," // key ~= 100 + filename == 255 max
@@ -90,13 +90,13 @@ public class DatabaseManager {
 			  + "FOREIGN KEY (indexParent) REFERENCES indexes (id),"
 			  + "FOREIGN KEY (indexTarget) REFERENCES indexes (id))");
 
-		TableCreator.sendQuery(db,
+		DatabaseManager.sendQuery(db,
 			  "CREATE CACHED TABLE metadataNames ("
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "name VARCHAR(255) NOT NULL,"
 			  + "PRIMARY KEY (id))");
 
-		TableCreator.sendQuery(db,
+		DatabaseManager.sendQuery(db,
 			  "CREATE CACHED TABLE metadatas ("
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "nameId INTEGER NOT NULL,"
@@ -109,14 +109,14 @@ public class DatabaseManager {
 	}
 
 	public static void dropTables(final Hsqldb db) {
-		TableCreator.sendQuery(db, "DROP TABLE metadatas");
-		TableCreator.sendQuery(db, "DROP TABLE metadataNames");
+		DatabaseManager.sendQuery(db, "DROP TABLE metadatas");
+		DatabaseManager.sendQuery(db, "DROP TABLE metadataNames");
 
-		TableCreator.sendQuery(db, "DROP TABLE files");
-		TableCreator.sendQuery(db, "DROP TABLE links");
+		DatabaseManager.sendQuery(db, "DROP TABLE files");
+		DatabaseManager.sendQuery(db, "DROP TABLE links");
 
-		TableCreator.sendQuery(db, "DROP TABLE indexes");
-		TableCreator.sendQuery(db, "DROP TABLE indexCategories");
+		DatabaseManager.sendQuery(db, "DROP TABLE indexes");
+		DatabaseManager.sendQuery(db, "DROP TABLE indexCategories");
 	}
 
 
@@ -127,7 +127,7 @@ public class DatabaseManager {
 		try {
 			db.executeQuery(query);
 		} catch(final SQLException e) {
-			Logger.notice(new TableCreator(), "While (re)creating sql tables: "+e.toString());
+			Logger.notice(new DatabaseManager(), "While (re)creating sql tables: "+e.toString());
 		}
 	}
 
