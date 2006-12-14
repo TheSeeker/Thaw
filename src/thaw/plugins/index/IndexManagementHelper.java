@@ -548,7 +548,7 @@ public class IndexManagementHelper {
 
 			if (getTarget() instanceof Index) {
 				newName = IndexManagementHelper.askAName(I18n.getMessage("thaw.plugin.index.indexName"),
-									 getTarget().toString());
+									 ((Index)getTarget()).toString(false));
 			} else {
 				newName = IndexManagementHelper.askAName(I18n.getMessage("thaw.plugin.index.categoryName"),
 									 getTarget().toString());

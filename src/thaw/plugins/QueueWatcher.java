@@ -96,7 +96,11 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 		if (core.getConfig().getValue("queuePanelSplitLocation") == null) {
 			split.setDividerLocation((0.5));
 		} else {
-			split.setDividerLocation(Double.parseDouble(core.getConfig().getValue("queuePanelSplitLocation")));
+			try {
+				split.setDividerLocation(Double.parseDouble(core.getConfig().getValue("queuePanelSplitLocation")));
+			} catch(java.lang.IllegalArgumentException e) { /* TODO: Shouldn't happen ! */
+				Logger.error(this, "Error while setting split bar position: "+e.toString());
+			}
 		}
 
 		split.setResizeWeight(0.5);

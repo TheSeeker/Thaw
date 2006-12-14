@@ -524,6 +524,10 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	}
 
 	public String toString() {
+		return toString(true);
+	}
+
+	public String toString(boolean withRev) {
 		String toDisp;
 
 		if(displayName != null)
@@ -531,7 +535,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		else
 			toDisp = realName;
 
-		if (revision > 0)
+		if (withRev && revision > 0)
 			toDisp += " (r"+Integer.toString(revision)+")";
 
 		return toDisp;
