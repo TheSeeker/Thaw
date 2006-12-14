@@ -395,7 +395,6 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 								       final boolean hasFocus) {
 			setBackgroundNonSelectionColor(Color.WHITE);
 			setBackgroundSelectionColor(IndexTree.SELECTION_COLOR);
-			setFont(new Font("Dialog", Font.PLAIN, 12));
 
 			if(value instanceof DefaultMutableTreeNode) {
 				final Object o = ((DefaultMutableTreeNode)value).getUserObject();
@@ -407,10 +406,26 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 						setBackgroundNonSelectionColor(IndexTree.LOADING_COLOR);
 						setBackgroundSelectionColor(IndexTree.LOADING_SELECTION_COLOR);
 					}
+
 				}
 
-				if (((IndexTreeNode)o).hasChanged()) {
-					setFont(new Font("Dialog", Font.BOLD, 12));
+				if (o instanceof IndexTreeNode) {
+					/* Remember that for the index category,
+					   this kind of query is recursive */
+					boolean modifiable = ((IndexTreeNode)o).isModifiable();
+					boolean hasChanged = ((IndexTreeNode)o).hasChanged();
+
+					int style = 0;
+
+					if (modifiable)
+						style |= Font.ITALIC;
+					if (hasChanged)
+						style |= Font.BOLD;
+
+					if (style == 0)
+						style = Font.PLAIN;
+
+					setFont(new Font("Dialog", style, 12));
 				}
 			}
 

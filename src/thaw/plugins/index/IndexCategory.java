@@ -465,6 +465,9 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 		if(children == null)
 			children = loadChildren();
 
+		if (children.size() <= 0)
+			return false;
+
 		for(final Iterator it = children.iterator();
 		    it.hasNext();) {
 			final IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
