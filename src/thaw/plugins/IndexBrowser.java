@@ -110,6 +110,8 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 			browserPanel.saveState();
 		}
 
+		purgeButtonList();
+
 		hsqldb.unregisterChild(this);
 
 		return true;

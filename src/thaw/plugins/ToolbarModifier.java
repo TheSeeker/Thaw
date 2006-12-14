@@ -27,7 +27,6 @@ public class ToolbarModifier {
 		setMainWindow(toolbarTarget);
 	}
 
-
 	public void setMainWindow(final MainWindow target) {
 		mainWindow = target;
 		mainWindow.resetLastKnowToolBarModifier();
@@ -67,5 +66,13 @@ public class ToolbarModifier {
 			}
 		} else
 			Logger.error(this, "MainWindow not SET !");
+	}
+
+	/**
+	 * Don't forget to call it when the plugin is stopped !
+	 */
+	public void purgeButtonList() {
+		hideButtonsInTheToolbar();
+		buttons = new Vector();
 	}
 }

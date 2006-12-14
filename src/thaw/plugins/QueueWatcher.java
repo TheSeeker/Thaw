@@ -121,13 +121,15 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 
 		double splitLocation;
 
-		splitLocation = ((double)split.getDividerLocation() - ((double)split.getMinimumDividerLocation())) / (((double)split.getMaximumDividerLocation()) - ((double)split.getMinimumDividerLocation())); 
+		splitLocation = ((double)split.getDividerLocation() - ((double)split.getMinimumDividerLocation())) / (((double)split.getMaximumDividerLocation()) - ((double)split.getMinimumDividerLocation()));
 
 		core.getConfig().setValue("queuePanelSplitLocation",
 					  Double.toString(splitLocation));
 
 		core.getConfig().setValue("detailPanelFolded", ((new Boolean(folded)).toString()));
 		core.getMainWindow().removeTab(panelAdded);
+
+		purgeButtonList();
 
 		return true;
 	}
