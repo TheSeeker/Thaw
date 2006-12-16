@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.Component;
 import java.io.FileOutputStream;
 import java.util.Iterator;
 import java.util.Vector;
@@ -41,8 +42,8 @@ import thaw.plugins.Hsqldb;
  */
 public class IndexManagementHelper {
 
-	private static String askAName(final String prompt, final String defVal) {
-		return JOptionPane.showInputDialog(prompt, defVal);
+	private static String askAName(Component parent, final String prompt, final String defVal) {
+		return JOptionPane.showInputDialog(parent, prompt, defVal);
 	}
 
 	/**
@@ -110,7 +111,8 @@ public class IndexManagementHelper {
 		}
 
 		public void actionPerformed(final ActionEvent e) {
-			final String name = IndexManagementHelper.askAName(I18n.getMessage("thaw.plugin.index.indexName"),
+			final String name = IndexManagementHelper.askAName(getIndexBrowserPanel().getMainWindow().getMainFrame(),
+									   I18n.getMessage("thaw.plugin.index.indexName"),
 									   I18n.getMessage("thaw.plugin.index.newIndex"));
 
 			if (name == null)
@@ -413,7 +415,8 @@ public class IndexManagementHelper {
 		}
 
 		public void actionPerformed(final ActionEvent e) {
-			final String name = IndexManagementHelper.askAName(I18n.getMessage("thaw.plugin.index.categoryName"),
+			final String name = IndexManagementHelper.askAName(getIndexBrowserPanel().getMainWindow().getMainFrame(),
+									   I18n.getMessage("thaw.plugin.index.categoryName"),
 									   I18n.getMessage("thaw.plugin.index.newCategory"));
 
 			IndexManagementHelper.addIndexCategory(getQueueManager(), getIndexBrowserPanel(), (IndexCategory)getTarget(), name);
@@ -547,10 +550,12 @@ public class IndexManagementHelper {
 			String newName;
 
 			if (getTarget() instanceof Index) {
-				newName = IndexManagementHelper.askAName(I18n.getMessage("thaw.plugin.index.indexName"),
+				newName = IndexManagementHelper.askAName(getIndexBrowserPanel().getMainWindow().getMainFrame(),
+									 I18n.getMessage("thaw.plugin.index.indexName"),
 									 ((Index)getTarget()).toString(false));
 			} else {
-				newName = IndexManagementHelper.askAName(I18n.getMessage("thaw.plugin.index.categoryName"),
+				newName = IndexManagementHelper.askAName(getIndexBrowserPanel().getMainWindow().getMainFrame(),
+									 I18n.getMessage("thaw.plugin.index.categoryName"),
 									 getTarget().toString());
 			}
 
