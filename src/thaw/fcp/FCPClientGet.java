@@ -115,7 +115,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	public FCPClientGet(final String key, final int priority,
 			    final int persistence, boolean globalQueue,
 			    final int maxRetries,
-			    final String destinationDir) {
+			    String destinationDir) {
 
 
 		if(globalQueue && (persistence >= 2))
@@ -156,6 +156,15 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		this.queueManager = queueManager;
 
+		if (finalPath == null && destinationDir == null) {
+			if ((destinationDir = System.getProperty("java.io.tmpdir")) == null) {
+				Logger.error(this, "Unable to find temporary directory ! Will create troubles !");
+				destinationDir = "";
+			}
+			else
+				Logger.notice(this, "Using temporary file: "+getPath());
+		}
+
 		status = "Requesting";
 
 		if((identifier == null) || "".equals( identifier ))
@@ -192,6 +201,10 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		else {
 			queryMessage.setValue("ReturnType", "disk");
 			queryMessage.setValue("Filename", getPath());
+
+			if (getPath() == null) {
+				Logger.error(this, "getPath() returned null ! Will create troubles !");
+			}
 		}
 
 		queueManager.getQueryManager().deleteObserver(this);
@@ -226,10 +239,11 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 					fileSize = (new Long(message.getValue("DataLength"))).longValue();
 
-					if(isPersistent()) {
+					if(isPersistent()
+					   || queueManager.getQueryManager().getConnection().isLocalSocket()) {
 						if(destinationDir != null) {
-
-							if(!fileExists(destinationDir)) {
+							if(!fileExists()
+							   && !queueManager.getQueryManager().getConnection().isLocalSocket()) {
 								status = "Requesting file from the node";
 								progress = 99;
 								running = true;
@@ -247,10 +261,10 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 							Logger.info(this, "Don't know where to put file, so file not asked to the node");
 						}
 					}
-
-					setChanged();
-					this.notifyObservers();
 				}
+
+				setChanged();
+				notifyObservers();
 			}
 
 			return;
@@ -548,8 +562,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	}
 
 
-	private boolean fileExists(final String dir) {
-		destinationDir = dir;
+	private boolean fileExists() {
 		final File newFile = new File(getPath());
 		return newFile.exists();
 	}

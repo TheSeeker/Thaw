@@ -296,6 +296,11 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	public void updateFromFreenet(final int rev) {
 		FCPClientGet clientGet;
 
+		if (transfer != null) {
+			Logger.notice(this, "A transfer is already running !");
+			return;
+		}
+
 		if (publicKey == null) {
 			Logger.error(this, "No public key !! Can't get the index !");
 			return;
@@ -572,22 +577,11 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		if(o == transfer) {
 			if(transfer.isFinished() && transfer.isSuccessful()) {
 				if(transfer instanceof FCPClientPut) {
-					if (targetFile != null)
-						targetFile.delete();
-					else {
-						final String path = ((FCPClientPut)transfer).getPath();
-						if (path != null) {
-							final java.io.File fl = new java.io.File(path);
-							fl.delete();
-						}
-					}
 
 					((FCPClientPut)transfer).deleteObserver(this);
 
 					if (transfer.stop(queueManager))
 						queueManager.remove(transfer);
-
-					setTransfer(null);
 
 					this.setChanged();
 					this.notifyObservers();
@@ -622,9 +616,6 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 					}
 
 					loadXML(transfer.getPath());
-					(new java.io.File(transfer.getPath())).delete();
-
-					setTransfer(null);
 
 					save();
 
@@ -638,10 +629,21 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 			if ((transfer != null) && transfer.isFinished() && !transfer.isSuccessful()) {
 				Logger.info(this, "Unable to get new version of the index");
-				setTransfer(null);
+
 				this.setChanged();
 				this.notifyObservers();
-				return;
+			}
+
+			if (transfer != null && transfer.isFinished()) {
+				Logger.notice(this, "Removing file '"+transfer.getPath()+"'");
+				final String path = transfer.getPath();
+				if (path != null) {
+					final java.io.File fl = new java.io.File(path);
+					fl.delete();
+				}
+				else
+					Logger.error(this, "Unable to remove file !");
+				setTransfer(null);
 			}
 
 		}
