@@ -47,6 +47,7 @@ public class FCPConnection extends Observable {
 	private long lastWrite = 0; /* real writes ; System.currentTimeMillis() */
 
 	private boolean duplicationAllowed = true;
+	private boolean localSocket = false;
 
 
 	/**
@@ -57,8 +58,12 @@ public class FCPConnection extends Observable {
 	public FCPConnection(final String nodeAddress,
 			     final int port,
 			     int maxUploadSpeed,
-			     final boolean duplicationAllowed)
+			     boolean duplicationAllowed,
+			     final boolean localSocket)
 	{
+		if (localSocket)
+			duplicationAllowed = false;
+
 		if(FCPConnection.DEBUG_MODE) {
 			Logger.notice(this, "DEBUG_MODE ACTIVATED");
 		}
@@ -71,6 +76,7 @@ public class FCPConnection extends Observable {
 		setNodePort(port);
 		setMaxUploadSpeed(maxUploadSpeed);
 		setDuplicationAllowed(duplicationAllowed);
+		setLocalSocket(localSocket);
 
 		writersWaiting = 0;
 	}
@@ -90,6 +96,14 @@ public class FCPConnection extends Observable {
 
 	public void setDuplicationAllowed(final boolean allowed) {
 		duplicationAllowed = allowed;
+	}
+
+	public void setLocalSocket(final boolean local) {
+		localSocket = local;
+	}
+
+	public boolean isLocalSocket() {
+		return localSocket;
 	}
 
 	public void disconnect() {
@@ -448,7 +462,7 @@ public class FCPConnection extends Observable {
 
 		FCPConnection newConnection;
 
-		newConnection = new FCPConnection(nodeAddress, port, -1, duplicationAllowed); /* upload limit is useless here, since we can't do a global limit on all the connections */
+		newConnection = new FCPConnection(nodeAddress, port, -1, duplicationAllowed, localSocket); /* upload limit is useless here, since we can't do a global limit on all the connections */
 
 		if (!newConnection.connect()) {
 			Logger.warning(this, "Unable to duplicate socket !");

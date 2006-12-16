@@ -187,7 +187,12 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		else
 			queryMessage.setValue("Global", "false");
 
-		queryMessage.setValue("ReturnType", "direct");
+		if (!queueManager.getQueryManager().getConnection().isLocalSocket())
+			queryMessage.setValue("ReturnType", "direct");
+		else {
+			queryMessage.setValue("ReturnType", "disk");
+			queryMessage.setValue("Filename", getPath());
+		}
 
 		queueManager.getQueryManager().deleteObserver(this);
 		queueManager.getQueryManager().addObserver(this);

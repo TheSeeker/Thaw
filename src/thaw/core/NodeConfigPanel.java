@@ -42,16 +42,21 @@ public class NodeConfigPanel implements Observer {
 	private final JLabel[] paramLabels = new JLabel[NodeConfigPanel.paramNames.length];
 	private final JTextField[] paramFields = new JTextField[NodeConfigPanel.configNames.length];
 
-	private JCheckBox multipleSockets = null;
 	private ConfigWindow configWindow = null;
 
+	private JCheckBox multipleSockets = null;
+	private JCheckBox sameComputer = null; /* if thaw and the node are on the same computer */
 
 	public NodeConfigPanel(final ConfigWindow configWindow, final Core core) {
 		this.core = core;
 		this.configWindow = configWindow;
 
+		sameComputer = new JCheckBox(I18n.getMessage("thaw.config.sameComputer"),
+					     Boolean.valueOf(core.getConfig().getValue("sameComputer")).booleanValue());
+		sameComputer.setVisible(true);
+
 		nodeConfigPanel = new JPanel();
-		nodeConfigPanel.setLayout(new GridLayout(15, 1));
+		nodeConfigPanel.setLayout(new GridLayout(16, 1));
 
 		for(int i=0; i < NodeConfigPanel.paramNames.length ; i++) {
 			String value;
@@ -65,10 +70,16 @@ public class NodeConfigPanel implements Observer {
 
 			nodeConfigPanel.add(paramLabels[i]);
 			nodeConfigPanel.add(paramFields[i]);
+
+			if (i == 0) { /* just after the node address */
+				nodeConfigPanel.add(sameComputer);
+				nodeConfigPanel.add(new JLabel(""));
+			}
 		}
 
 		multipleSockets = new JCheckBox(I18n.getMessage("thaw.config.multipleSockets"),
 						Boolean.valueOf(core.getConfig().getValue("multipleSockets")).booleanValue());
+
 		nodeConfigPanel.add(new JLabel(" "));
 		nodeConfigPanel.add(multipleSockets);
 
@@ -99,6 +110,10 @@ public class NodeConfigPanel implements Observer {
 
 		if ((core.getConfig().getValue("multipleSockets") == null)
 		    || !core.getConfig().getValue("multipleSockets").equals(Boolean.toString(multipleSockets.isSelected())))
+			return true;
+
+		if ((core.getConfig().getValue("sameComputer") == null)
+		    || !core.getConfig().getValue("sameComputer").equals(Boolean.toString(sameComputer.isSelected())))
 			return true;
 
 		return false;

@@ -35,7 +35,6 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	private String status;
 
 	private int attempt = 0;
-
 	private String identifier;
 
 	private boolean running = false;
@@ -352,10 +351,8 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 		if(getCHKOnly) {
 			msg.setValue("GetCHKOnly", "true");
-			//msg.setValue("Verbosity", "0");
 		} else {
 			msg.setValue("GetCHKOnly", "false");
-			//msg.setValue("Verbosity", "512");
 		}
 		msg.setValue("Verbosity", "512");
 
@@ -379,17 +376,25 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		else
 			msg.setValue("TargetFilename", name);
 
-		msg.setValue("UploadFrom", "direct");
+		if (!connection.isLocalSocket()) {
+			msg.setValue("UploadFrom", "direct");
+			msg.setAmountOfDataWaiting(fileSize);
+		} else {
+			msg.setValue("UploadFrom", "disk");
+			msg.setValue("Filename", localFile.getPath());
+		}
 
-		msg.setAmountOfDataWaiting(fileSize);
 		Logger.info(this, "Sending "+Long.toString(fileSize)+" bytes on socket ...");
 
 		queueManager.getQueryManager().writeMessage(msg, false);
 
+		boolean ret = true;
 
-		Logger.info(this, "Sending file to the node");
-		final boolean ret = sendFile();
-		Logger.info(this, "File sent (or not :p)");
+		if (!connection.isLocalSocket()) {
+			Logger.info(this, "Sending file to the node");
+			ret = sendFile();
+			Logger.info(this, "File sent (or not :p)");
+		}
 
 		connection.removeFromWriterQueue();
 		lockOwner = false;

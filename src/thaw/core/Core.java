@@ -170,7 +170,8 @@ public class Core implements Observer {
 				connection = new FCPConnection(config.getValue("nodeAddress"),
 							       Integer.parseInt(config.getValue("nodePort")),
 							       Integer.parseInt(config.getValue("maxUploadSpeed")),
-							       Boolean.valueOf(config.getValue("multipleSockets")).booleanValue());
+							       Boolean.valueOf(config.getValue("multipleSockets")).booleanValue(),
+							       Boolean.valueOf(config.getValue("sameComputer")).booleanValue());
 			} else {
 				connection.setNodeAddress(config.getValue("nodeAddress"));
 				connection.setNodePort(Integer.parseInt(config.getValue("nodePort")));
