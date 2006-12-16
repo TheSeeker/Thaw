@@ -152,7 +152,8 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		   || (Integer.parseInt(core.getConfig().getValue("maxSimultaneousInsertions")) >= 0))
 			rightClickMenu.add(delayItem);
 
-		if(!isForInsertionQueue)
+		/* this option can't work with localSocket == true */
+		if(!isForInsertionQueue && !Boolean.valueOf(core.getConfig().getValue("sameComputer")))
 			rightClickMenu.add(downloadItem);
 
 		rightClickMenu.add(forceRestartItem);
