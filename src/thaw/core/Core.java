@@ -28,7 +28,7 @@ import thaw.fcp.FCPWatchGlobal;
  * A "core" contains references to all the main parts of Thaw.
  * The Core has all the functions needed to initialize Thaw / stop Thaw.
  */
-public class Core implements Observer, ActionListener {
+public class Core implements Observer {
 	private SplashScreen splashScreen = null;
 
 	private MainWindow mainWindow = null;
@@ -43,8 +43,6 @@ public class Core implements Observer, ActionListener {
 	private FCPClientHello clientHello = null;
 
 	private static String lookAndFeel = null;
-
-	private JDialog warningDialog = null;
 
 	public final static int MAX_CONNECT_TRIES = 3;
 	public final static int TIME_BETWEEN_EACH_TRY = 5000;
@@ -410,10 +408,11 @@ public class Core implements Observer, ActionListener {
 		return true;
 	}
 
-	public void update(final Observable o, final Object target) {
-		Logger.debug(this, "Move on the connection (?)");
 
-		if((o == connection) && !connection.isConnected()) {
+	protected class UnwantedDisconnectionManager implements Runnable, ActionListener {
+		private JDialog warningDialog = null;
+
+		public void run() {
 			disconnect();
 
 			int nmbReconnect = 0;
@@ -481,16 +480,25 @@ public class Core implements Observer, ActionListener {
 			getPluginManager().loadPlugins();
 			getPluginManager().runPlugins();
 		}
+
+		public void actionPerformed(ActionEvent e) {
+			if (warningDialog == null)
+				return;
+			// we assume that the action comes from the button in the reconnection dialog
+			warningDialog.setVisible(false);
+			warningDialog.dispose();
+			warningDialog = null;
+		}
 	}
 
-	public void actionPerformed(ActionEvent e) {
-		if (warningDialog == null)
-			return;
 
-		// we assume that the action comes from the button in the reconnection dialog
-		warningDialog.setVisible(false);
-		warningDialog.dispose();
-		warningDialog = null;
+	public void update(final Observable o, final Object target) {
+		Logger.debug(this, "Move on the connection (?)");
+
+		if((o == connection) && !connection.isConnected()) {
+			Thread th = new Thread(new UnwantedDisconnectionManager());
+			th.run();
+		}
 	}
 
 }

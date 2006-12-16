@@ -6,7 +6,8 @@ import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
 
 /**
- * Create all the tables used to save the indexes.
+ * Creates all the tables used to save the indexes,
+ * manages structure changes if needed, etc.
  * <br/>
  * "Comprenne qui pourra" :P
  *

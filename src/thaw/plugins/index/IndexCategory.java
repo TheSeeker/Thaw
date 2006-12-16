@@ -220,7 +220,7 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 			final PreparedStatement st = c.prepareStatement("UPDATE indexCategories SET name = ?, positionInTree = ?, parent = ? WHERE id = ?");
 
 			st.setString(1, name);
-			st.setInt(2, getParent().getIndex(this));
+			st.setInt(2, getParent().getIndex(this)); /* Index = position here */
 
 			if( ((IndexTreeNode)getParent()).getId() < 0)
 				st.setNull(3, Types.INTEGER);

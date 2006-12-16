@@ -495,7 +495,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			}
 		} catch(final java.io.IOException e) {
 			/* we will suppose its ok ... */
-			Logger.notice(this, "available() die (hu ?)");
+			Logger.notice(this, "available() IOException (hu ?)");
 		}
 
 		return true;
