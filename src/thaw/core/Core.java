@@ -172,10 +172,12 @@ public class Core implements Observer {
 							       Integer.parseInt(config.getValue("maxUploadSpeed")),
 							       Boolean.valueOf(config.getValue("multipleSockets")).booleanValue(),
 							       Boolean.valueOf(config.getValue("sameComputer")).booleanValue());
-			} else {
+			} else { /* connection is not recreate to avoid troubles with observer etc */
 				connection.setNodeAddress(config.getValue("nodeAddress"));
 				connection.setNodePort(Integer.parseInt(config.getValue("nodePort")));
 				connection.setMaxUploadSpeed(Integer.parseInt(config.getValue("maxUploadSpeed")));
+				connection.setDuplicationAllowed(Boolean.valueOf(config.getValue("multipleSockets")).booleanValue());
+				connection.setLocalSocket(Boolean.valueOf(config.getValue("sameComputer")).booleanValue());
 			}
 
 			if(!connection.connect()) {
@@ -348,6 +350,7 @@ public class Core implements Observer {
 
 		Logger.info(this, "Saving queue state");
 		QueueKeeper.saveQueue(queueManager, "thaw.queue.xml");
+
 	}
 
 	/**

@@ -360,7 +360,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 
 	public void updateToolBar() {
-		if(core.getConnectionManager().isConnected()) {
+		if(core.getConnectionManager() != null && core.getConnectionManager().isConnected()) {
 			connectButton.setEnabled(false);
 			disconnectButton.setEnabled(true);
 		} else {

@@ -130,6 +130,7 @@ public class NodeConfigPanel implements Observer {
 			}
 
 			core.getConfig().setValue("multipleSockets", Boolean.toString(multipleSockets.isSelected()));
+			core.getConfig().setValue("sameComputer", Boolean.toString(sameComputer.isSelected()));
 
 			setVisibility(Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
 		}
