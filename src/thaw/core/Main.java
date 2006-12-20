@@ -15,12 +15,13 @@ public class Main {
 
 	public final static int
 		_major = 0,
-		_minor = 6;
+		_minor = 6,
+	        _update = 1;
 	public final static String
 		_svnBuildNumber = "@custom@";
 
 	public final static String
-		VERSION = Main._major + "." + Main._minor + " Beta r"+Main._svnBuildNumber;
+		VERSION = Main._major + "." + Main._minor + "." + Main._update + " Beta r"+Main._svnBuildNumber;
 
 
 	/**
