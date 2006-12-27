@@ -109,7 +109,7 @@ public class Core implements Observer {
 		splashScreen.setProgressionAndStatus(10, "Connecting ...");
 		if(!initNodeConnection())
 			new WarningWindow(this, I18n.getMessage("thaw.warning.unableToConnectTo")+
-					  " "+config.getValue("nodeAddress")+
+					  " "+ config.getValue("nodeAddress")+
 					  ":"+ config.getValue("nodePort"));
 
 

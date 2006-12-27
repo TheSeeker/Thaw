@@ -3,6 +3,9 @@ package thaw.plugins;
 import java.util.Iterator;
 import java.util.Vector;
 
+import java.awt.BorderLayout;
+import javax.swing.JPanel;
+
 import javax.swing.JButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -77,7 +80,7 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 		button = new JButton(IconBox.refreshAction);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.downloadIndexes"));
 		action = new IndexManagementHelper.IndexDownloader(button);
-		action.setTarget(browserPanel.getIndexTree().getRoot()); /* TODO : Listen to tree to only refresh the selected node */
+		action.setTarget(browserPanel.getIndexTree().getRoot());
 		addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 
@@ -101,16 +104,18 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 
 		stateChanged(null);
 
+
 		return true;
 	}
 
 	public boolean stop() {
+		core.getMainWindow().getTabbedPane().removeChangeListener(this);
+		purgeButtonList();
+
 		if (browserPanel != null) {
 			core.getMainWindow().removeTab(browserPanel.getPanel());
 			browserPanel.saveState();
 		}
-
-		purgeButtonList();
 
 		hsqldb.unregisterChild(this);
 

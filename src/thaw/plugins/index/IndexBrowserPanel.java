@@ -71,6 +71,7 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		globalPanel.add(indexProgressBar.getProgressBar(), BorderLayout.SOUTH);
 	}
 
+
 	public void restoreState() {
 		if (config.getValue("indexBrowserPanelSplitPosition") != null)
 			split.setDividerLocation(Integer.parseInt(config.getValue("indexBrowserPanelSplitPosition")));

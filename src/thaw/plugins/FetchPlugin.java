@@ -61,7 +61,7 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 		menuItem.addActionListener(this);
 
 		if(core.getPluginManager().getPlugin("thaw.plugins.QueueWatcher") == null) {
-			Logger.info(this, "Loading QueueWatcher plugin");
+			Logger.notice(this, "Loading QueueWatcher plugin");
 
 			if(!core.getPluginManager().loadPlugin("thaw.plugins.QueueWatcher")
 			   || !core.getPluginManager().runPlugin("thaw.plugins.QueueWatcher")) {
