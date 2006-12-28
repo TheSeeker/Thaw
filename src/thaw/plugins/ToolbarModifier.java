@@ -35,24 +35,34 @@ public class ToolbarModifier {
 	public void addButtonToTheToolbar(final JButton button) {
 		buttons.add(button);
 
-		if (areDisplayed)
+		if (areDisplayed) {
+			areDisplayed = false;
 			displayButtonsInTheToolbar();
+		}
 	}
 
 	public void removeButtonFromTheToolbar(final JButton button) {
 		buttons.remove(button);
 
-		if (areDisplayed)
+		if (areDisplayed) {
+			areDisplayed = false;
 			displayButtonsInTheToolbar();
+		}
 	}
 
 	public void displayButtonsInTheToolbar() {
 		if (mainWindow != null) {
-			if (buttons.size() == 0) {
-				Logger.notice(this, "No button to display ?");
+			if (areDisplayed && mainWindow.getLastToolbarModifier() == this) {
+				Logger.warning(this, "Already displayed !");
+				return;
 			}
 
-			mainWindow.changeButtonsInTheToolbar(this, buttons);
+			if (buttons == null || buttons.size() == 0) {
+				Logger.notice(this, "No button to display ?");
+				mainWindow.changeButtonsInTheToolbar(this, null);
+			} else
+				mainWindow.changeButtonsInTheToolbar(this, buttons);
+
 			areDisplayed = true;
 		} else
 			Logger.error(this, "MainWindow not SET !");

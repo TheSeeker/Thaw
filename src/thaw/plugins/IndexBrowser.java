@@ -20,7 +20,7 @@ import thaw.plugins.index.IndexManagementHelper;
 import thaw.plugins.index.IndexTreeNode;
 import thaw.plugins.index.DatabaseManager;
 
-public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListener, java.util.Observer {
+public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListener {
 
 	public static final String DEFAULT_INDEX = "USK@G-ofLp2KlhHBNPezx~GDWDKThJ-QUxJK8c2xiF~-jwE,-55vLnqo3U1H5qmKA1LLADoYGQdk-Y3hSLxyKeUyHNc,AQABAAE/Thaw/2/Thaw.xml";
 
@@ -62,8 +62,6 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 		}
 
 		browserPanel = new IndexBrowserPanel(hsqldb, core.getQueueManager(), core.getConfig(), core.getMainWindow());
-		browserPanel.getIndexTree().addObserver(this);
-
 		setMainWindow(core.getMainWindow());
 		core.getMainWindow().getTabbedPane().addChangeListener(this);
 
@@ -73,44 +71,17 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 
 		browserPanel.restoreState();
 
-		JButton button;
-		toolbarActions = new Vector();
-		IndexManagementHelper.IndexAction action;
-
-		button = new JButton(IconBox.refreshAction);
-		button.setToolTipText(I18n.getMessage("thaw.plugin.index.downloadIndexes"));
-		action = new IndexManagementHelper.IndexDownloader(button);
-		action.setTarget(browserPanel.getIndexTree().getRoot());
-		addButtonToTheToolbar(button);
-		toolbarActions.add(action);
-
-		button = new JButton(IconBox.indexReuse);
-		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addAlreadyExistingIndex"));
-		action = new IndexManagementHelper.IndexReuser(core.getQueueManager(), browserPanel, button);
-		action.setTarget(browserPanel.getIndexTree().getRoot());
-		addButtonToTheToolbar(button);
-		toolbarActions.add(action);
-
-		button = new JButton(IconBox.indexNew);
-		button.setToolTipText(I18n.getMessage("thaw.plugin.index.createIndex"));
-		action = new IndexManagementHelper.IndexCreator(core.getQueueManager(), browserPanel, button);
-		action.setTarget(browserPanel.getIndexTree().getRoot());
-		addButtonToTheToolbar(button);
-		toolbarActions.add(action);
-
 		if (newDb) {
 			IndexManagementHelper.addIndex(core.getQueueManager(), browserPanel, null, IndexBrowser.DEFAULT_INDEX);
 		}
 
 		stateChanged(null);
 
-
 		return true;
 	}
 
 	public boolean stop() {
 		core.getMainWindow().getTabbedPane().removeChangeListener(this);
-		purgeButtonList();
 
 		if (browserPanel != null) {
 			core.getMainWindow().removeTab(browserPanel.getPanel());
@@ -141,23 +112,7 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 			return;
 		}
 
-		if (core.getMainWindow().getTabbedPane().getSelectedIndex() == tabId) {
-			displayButtonsInTheToolbar();
-		} else {
-			hideButtonsInTheToolbar();
-		}
+		browserPanel.isVisible(core.getMainWindow().getTabbedPane().getSelectedIndex() == tabId);
 	}
 
-	public void update (final java.util.Observable o, final Object arg) {
-		if ((o == browserPanel.getIndexTree())
-		    && (arg instanceof IndexTreeNode)) {
-
-			for (final Iterator it = toolbarActions.iterator();
-			     it.hasNext(); ) {
-				final IndexManagementHelper.IndexAction action = (IndexManagementHelper.IndexAction)it.next();
-				action.setTarget((IndexTreeNode)arg);
-			}
-
-		}
-	}
 }

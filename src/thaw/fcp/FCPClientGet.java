@@ -9,10 +9,6 @@ import java.util.Observer;
 
 import thaw.core.Logger;
 
-/**
- * notify() only when progress has really changes.
- * TODO: Use streams instead of writing directly the file.
- */
 public class FCPClientGet extends Observable implements Observer, FCPTransferQuery {
 	private int maxRetries = -1;
 	private final static int PACKET_SIZE = 1024;
@@ -41,6 +37,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	private boolean running = false;
 	private boolean successful = true;
+	private boolean writingSuccessful = false;
 	private boolean fatal = true;
 	private boolean isLockOwner = false;
 
@@ -170,7 +167,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		if((identifier == null) || "".equals( identifier ))
 			identifier = queueManager.getAnID() + "-"+filename;;
 
-		Logger.info(this, "Requesting key : "+getFileKey());
+		Logger.debug(this, "Requesting key : "+getFileKey());
 
 		final FCPMessage queryMessage = new FCPMessage();
 
@@ -247,8 +244,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 								status = "Requesting file from the node";
 								progress = 99;
 								running = true;
-								successful = false;
-								this.saveFileTo(destinationDir, false);
+								successful = true;
+								writingSuccessful = false;
+								saveFileTo(destinationDir, false);
 							} else {
 								status = "Available";
 								progress = 100;
@@ -413,13 +411,14 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			setChanged();
 			this.notifyObservers();
 
+			successful = true;
 
 			if(fetchDirectly(queryManager.getConnection(), fileSize, true)) {
-				successful = true;
+				writingSuccessful = false;
 				status = "Available";
 			} else {
 				Logger.warning(this, "Unable to fetch correctly the file. This may create problems on socket");
-				successful = false;
+				writingSuccessful = false;
 				status = "Error while receveing the file";
 			}
 
@@ -484,7 +483,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	}
 
 	public boolean saveFileTo(final String dir) {
-		return this.saveFileTo(dir, true);
+		return saveFileTo(dir, true);
 	}
 
 	public synchronized boolean saveFileTo(final String dir, final boolean checkStatus) {
@@ -605,7 +604,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		final long origSize = size;
 		long startTime = System.currentTimeMillis();
 
-		boolean writingSuccessful = true;
+		writingSuccessful = true;
 
 		while(size > 0) {
 
@@ -623,7 +622,6 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			if(amount <= -1) {
 				Logger.error(this, "Socket closed, damn !");
 				status = "Read error";
-				successful = false;
 				writingSuccessful = false;
 				break;
 			}
@@ -633,9 +631,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 					outputStream.write(read, 0, amount);
 				} catch(final java.io.IOException e) {
 					Logger.error(this, "Unable to write file on disk ... out of space ? : "+e.toString());
-					status = "Write error";
+					status = "Unable to fetch / disk probably full !";
 					writingSuccessful = false;
-					successful = false;
 					return false;
 				}
 			}
@@ -844,6 +841,10 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	public boolean isSuccessful() {
 		return successful;
+	}
+
+	public boolean isWritingSuccessful() {
+		return writingSuccessful;
 	}
 
 	public boolean isFatallyFailed() {

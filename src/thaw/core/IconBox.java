@@ -45,6 +45,11 @@ public class IconBox {
 	public static ImageIcon indexNew;
 	public static ImageIcon indexReuse;
 
+	public static ImageIcon indexDelete;
+
+	public static ImageIcon error;
+	public static ImageIcon ok;
+
 	public static ImageIcon refreshAction;
 
 	public static ImageIcon clearAction;
@@ -130,6 +135,9 @@ public class IconBox {
 		IconBox.minQuitAction = IconBox.loadIcon("min-system-log-out.png");
 		IconBox.search = IconBox.loadIcon("system-search.png");
 		IconBox.key = IconBox.loadIcon("key.png");
+		IconBox.indexDelete = IconBox.loadIcon("x_red.png");
+		IconBox.error = IconBox.loadIcon("min-x_red.png");
+		IconBox.ok = IconBox.loadIcon("min-v_green.png");
 	}
 
 }

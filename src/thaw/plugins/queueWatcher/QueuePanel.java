@@ -40,6 +40,7 @@ import thaw.core.I18n;
 import thaw.core.IconBox;
 import thaw.core.Logger;
 import thaw.fcp.FCPTransferQuery;
+import thaw.fcp.FCPClientGet;
 
 public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	private Core core;
@@ -259,10 +260,15 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 				if(!query.isRunning() && !query.isFinished())
 					cell.setBackground(PENDING);
-				if(query.isFinished() && query.isSuccessful())
+
+				if(query.isFinished() && query.isSuccessful() &&
+				   ( (!(query instanceof FCPClientGet)) || ((FCPClientGet)query).isWritingSuccessful()))
 					cell.setBackground(SUCCESS);
-				if(query.isFinished() && !query.isSuccessful())
+
+				if(query.isFinished() && (!query.isSuccessful() ||
+							  ((query instanceof FCPClientGet) && !((FCPClientGet)query).isWritingSuccessful())))
 					cell.setBackground(FAILURE);
+
 				if(query.isRunning() && !query.isFinished())
 					cell.setBackground(RUNNING);
 			}
@@ -486,9 +492,12 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		for(final Iterator it = queries.iterator();
 		    it.hasNext(); ) {
 			final FCPTransferQuery query = (FCPTransferQuery)it.next();
-			if(query.isFinished()) {
+			if(query.isFinished() &&
+			   (!(query instanceof FCPClientGet) || (!query.isSuccessful() || ((FCPClientGet)query).isWritingSuccessful()))) {
+
 				if(query.stop(core.getQueueManager())) {
 					core.getQueueManager().remove(query);
+
 				}
 			}
 		}

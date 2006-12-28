@@ -16,7 +16,7 @@ import thaw.fcp.FCPQueueManager;
 import thaw.plugins.Hsqldb;
 
 
-public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListener, ActionListener {
+public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListener {
 	private IndexTree indexTree;
 	private Tables tables;
 	private DetailPanel detailPanel;
@@ -183,7 +183,13 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	}
 
 
-	public void actionPerformed(final ActionEvent e) {
-
+	/**
+	 * Called by IndexBrowser when the panel become visible
+	 */
+	public void isVisible(boolean visibility) {
+		if (visibility) {
+			indexTree.getToolbarModifier().displayButtonsInTheToolbar();
+		}
 	}
+
 }

@@ -465,13 +465,13 @@ public class Core implements Observer {
 			if(nmbReconnect == Core.MAX_CONNECT_TRIES) {
 				while(!initNodeConnection()) {
 					final int ret = JOptionPane.showOptionDialog((java.awt.Component)null,
-									       I18n.getMessage("thaw.warning.disconnected"),
-									       "Thaw - "+I18n.getMessage("thaw.warning.title"),
-									       JOptionPane.YES_NO_OPTION,
-									       JOptionPane.WARNING_MESSAGE,
-									       (javax.swing.Icon)null,
-									       (java.lang.Object[])null,
-									       (java.lang.Object)null);
+										     I18n.getMessage("thaw.warning.disconnected"),
+										     "Thaw - "+I18n.getMessage("thaw.warning.title"),
+										     JOptionPane.YES_NO_OPTION,
+										     JOptionPane.WARNING_MESSAGE,
+										     (javax.swing.Icon)null,
+										     (java.lang.Object[])null,
+										     (java.lang.Object)null);
 				if((ret == JOptionPane.CLOSED_OPTION)
 				   || (ret == JOptionPane.CANCEL_OPTION)
 				   || (ret == JOptionPane.NO_OPTION))

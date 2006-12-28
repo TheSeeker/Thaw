@@ -194,19 +194,26 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		return tabbedPane;
 	}
 
+	public Object getLastToolbarModifier() {
+		return lastToolBarModifier;
+	}
+
 	/**
 	 * @param modifier Correspond to the caller object: it's a security to avoid that a modifier wipe out the buttons from another one
 	 */
 	public void changeButtonsInTheToolbar(final Object modifier, final Vector newButtons) {
 		JToolBar newToolBar;
 
-		Logger.debug(this, "changeButtonsInTheToolbar() : Called by "+modifier.getClass().getName());
+		Logger.info(this, "changeButtonsInTheToolbar() : Called by "+modifier.getClass().getName());
 
 		if ((lastToolBarModifier == null) || (newButtons != null) || (lastToolBarModifier == modifier)) {
 			lastToolBarModifier = modifier;
 		} else
 			/* Only the modifer who added the buttons can remove them */
 			return;
+
+		if (newButtons == null)
+			lastToolBarModifier = null;
 
 		newToolBar = new JToolBar(I18n.getMessage("thaw.toolbar.title"));
 

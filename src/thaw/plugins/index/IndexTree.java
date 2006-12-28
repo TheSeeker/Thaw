@@ -33,6 +33,7 @@ import thaw.core.MainWindow;
 import thaw.fcp.FCPQueueManager;
 import thaw.gui.JDragTree;
 import thaw.plugins.Hsqldb;
+import thaw.plugins.ToolbarModifier;
 
 /**
  * Manages the index tree and its menu (right-click).
@@ -87,6 +88,8 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	private FCPQueueManager queueManager;
 	private IndexBrowserPanel indexBrowser;
 
+	private ToolbarModifier toolbarModifier;
+	private Vector toolbarActions;
 
 	/**
 	 * @param queueManager Not used if selectionOnly is set to true
@@ -236,8 +239,57 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		addTreeSelectionListener(this);
 
 		panel.add(new JScrollPane(tree), BorderLayout.CENTER);
+
+
+		// Toolbar
+		JButton button;
+		IndexManagementHelper.IndexAction action;
+		toolbarActions = new Vector();
+
+		toolbarModifier = new ToolbarModifier(indexBrowser.getMainWindow());
+
+		button = new JButton(IconBox.refreshAction);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.downloadIndexes"));
+		action = new IndexManagementHelper.IndexDownloader(button);
+		action.setTarget(getRoot());
+		toolbarModifier.addButtonToTheToolbar(button);
+		toolbarActions.add(action);
+
+		button = new JButton(IconBox.insertAndAddToIndexAction);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addCategory"));
+		action = new IndexManagementHelper.IndexCategoryAdder(queueManager, indexBrowser, button);
+		action.setTarget(getRoot());
+		toolbarModifier.addButtonToTheToolbar(button);
+		toolbarActions.add(action);
+
+		button = new JButton(IconBox.indexReuse);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addAlreadyExistingIndex"));
+		action = new IndexManagementHelper.IndexReuser(queueManager, indexBrowser, button);
+		action.setTarget(getRoot());
+		toolbarModifier.addButtonToTheToolbar(button);
+		toolbarActions.add(action);
+
+		button = new JButton(IconBox.indexNew);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.createIndex"));
+		action = new IndexManagementHelper.IndexCreator(queueManager, indexBrowser, button);
+		action.setTarget(getRoot());
+		toolbarModifier.addButtonToTheToolbar(button);
+		toolbarActions.add(action);
+
+		button = new JButton(IconBox.indexDelete);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.delete"));
+		action = new IndexManagementHelper.IndexDeleter(indexBrowser, button);
+		action.setTarget(getRoot());
+		toolbarModifier.addButtonToTheToolbar(button);
+		toolbarActions.add(action);
 	}
 
+	/**
+	 * Used by IndexBrowserPanel when the visibility changed
+	 */
+	public ToolbarModifier getToolbarModifier() {
+		return toolbarModifier;
+	}
 
 
 	public javax.swing.JComponent getPanel() {
@@ -255,6 +307,18 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			return;
 
 		selectedNode = (IndexTreeNode)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
+
+
+		// Update toolbar
+		for (final Iterator it = toolbarActions.iterator();
+		     it.hasNext(); ) {
+			final IndexManagementHelper.IndexAction action = (IndexManagementHelper.IndexAction)it.next();
+			action.setTarget(selectedNode);
+		}
+
+		toolbarModifier.displayButtonsInTheToolbar();
+
+		// Notify observers
 
 		setChanged();
 		notifyObservers(selectedNode);

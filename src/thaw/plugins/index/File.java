@@ -179,6 +179,13 @@ public class File extends java.util.Observable implements java.util.Observer {
 	public void setPublicKey(final String publicKey) {
 		this.publicKey = publicKey;
 
+		if (publicKey != null && !publicKey.equals(this.publicKey)) {
+			this.publicKey = publicKey;
+			update();
+		}
+		else
+			this.publicKey = publicKey;
+
 		setChanged();
 		this.notifyObservers();
 	}

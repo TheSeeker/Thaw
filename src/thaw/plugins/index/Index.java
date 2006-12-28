@@ -225,6 +225,9 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		} catch(final SQLException e) {
 			Logger.error(this, "Unable to delete the index '"+displayName+"', because: "+e.toString());
 		}
+
+		if (transfer != null)
+			transfer.stop(queueManager);
 	}
 
 
