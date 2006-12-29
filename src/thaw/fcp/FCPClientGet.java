@@ -137,6 +137,12 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		filename = FreenetURIHelper.getFilenameFromKey(key);
 
+		try {
+			filename = java.net.URLDecoder.decode(filename, "UTF-8");
+		} catch (final java.io.UnsupportedEncodingException e) {
+			Logger.warning(new FreenetURIHelper(), "UnsupportedEncodingException (UTF-8): "+e.toString());
+		}
+
 		Logger.debug(this, "Query for getting "+key+" created");
 
 	}
