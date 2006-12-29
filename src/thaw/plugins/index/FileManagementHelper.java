@@ -115,7 +115,8 @@ public class FileManagementHelper {
 					final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 
 					if ((file.getLocalPath() == null)
-					    || !file.isModifiable()) {
+					    || !file.isModifiable()
+					    || file.getTransfer() != null) {
 						isOk = false;
 						break;
 					}

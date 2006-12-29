@@ -30,7 +30,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 	private long size = -1;
 	private String category;
 
-	private String localPath;
+	private String localPath = null;
 	private FCPTransferQuery transfer = null; /* can be null */
 
 	private Index parent;
@@ -234,6 +234,16 @@ public class File extends java.util.Observable implements java.util.Observer {
 	}
 
 	public void download(final String targetPath, final FCPQueueManager queueManager) {
+		if (!FreenetURIHelper.isAKey(getPublicKey())) {
+			Logger.warning(this, "Can't start download: file key is unknown");
+			return;
+		}
+
+		if (getTransfer() != null) {
+			Logger.warning(this, "Can't download: a transfer is already running");
+			return;
+		}
+
 		final FCPClientGet clientGet = new FCPClientGet(getPublicKey(), 4, 0, true, -1, targetPath);
 
 		queueManager.addQueryToThePendingQueue(clientGet);
@@ -243,6 +253,11 @@ public class File extends java.util.Observable implements java.util.Observer {
 
 
 	public void insertOnFreenet(final FCPQueueManager queueManager) {
+		if (getTransfer() != null) {
+			Logger.warning(this, "Another transfer is already running : can't insert");
+			return;
+		}
+
 		final FCPClientPut clientPut = new FCPClientPut(new java.io.File(getLocalPath()),
 							  0, 0, null, null, 4, true, 0);
 		queueManager.addQueryToThePendingQueue(clientPut);

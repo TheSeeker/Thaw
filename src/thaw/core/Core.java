@@ -421,7 +421,10 @@ public class Core implements Observer {
 
 			int nmbReconnect = 0;
 
-			warningDialog = new JDialog(getMainWindow().getMainFrame());
+			if (getMainWindow() != null) /* disconnection can happen when starting */
+				warningDialog = new JDialog(getMainWindow().getMainFrame());
+			else
+				warningDialog = new JDialog();
 			warningDialog.setTitle("Thaw - reconnection");
 			warningDialog.setModal(false);
 			warningDialog.setSize(500, 100);
