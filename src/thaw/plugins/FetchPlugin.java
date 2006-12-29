@@ -39,11 +39,6 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 
 		fetchPanel = new FetchPanel(core, this);
 
-		//core.getMainWindow().addTab(I18n.getMessage("thaw.common.download"),
-		//			    IconBox.minDownloads,
-		//			    this.fetchPanel.getPanel());
-
-
 		// Prepare the frame
 
 		fetchFrame = new JFrame(I18n.getMessage("thaw.common.download"));
@@ -83,8 +78,6 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 	public boolean stop() {
 		Logger.info(this, "Stopping plugin \"FetchPlugin\" ...");
 
-		//this.core.getMainWindow().removeTab(this.fetchPanel.getPanel());
-
 		if (queueWatcher != null)
 			queueWatcher.removeButtonFromTheToolbar(buttonInToolBar);
 
@@ -113,10 +106,10 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 
 			if (key != null)
 				core.getQueueManager().addQueryToThePendingQueue(new FCPClientGet(key,
-												       priority,
-												       persistence,
-												       globalQueue, -1,
-												       destination));
+												  priority,
+												  persistence,
+												  globalQueue, -1,
+												  destination));
 		}
 
 		fetchFrame.setVisible(false);

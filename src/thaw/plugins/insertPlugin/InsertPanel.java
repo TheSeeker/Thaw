@@ -23,13 +23,13 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import thaw.core.Config;
 import thaw.core.FileChooser;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.WarningWindow;
 import thaw.fcp.FCPClientPut;
 import thaw.plugins.InsertPlugin;
-
 
 
 public class InsertPanel implements ActionListener, ItemListener, Observer {
@@ -80,8 +80,11 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 	private boolean advancedMode = false;
 
-	public InsertPanel(final InsertPlugin insertPlugin, final boolean advancedMode) {
+	private Config config; /* keep a ref to the config for the "lastSourceDirectory" option */
+
+	public InsertPanel(final InsertPlugin insertPlugin, final Config config, final boolean advancedMode) {
 		this.insertPlugin = insertPlugin;
+		this.config = config;
 
 		this.advancedMode = advancedMode;
 
@@ -345,8 +348,18 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		}
 
 		if(e.getSource() == browseButton) {
-			final FileChooser fileChooser = new FileChooser();
+			final FileChooser fileChooser;
 			Vector files;
+
+			String lastDir = null;
+
+			if (config.getValue("lastSourceDirectory") != null)
+				lastDir = config.getValue("lastSourceDirectory");
+
+			if (lastDir == null)
+				fileChooser = new FileChooser();
+			else
+				fileChooser = new FileChooser(lastDir);
 
 			fileChooser.setTitle(I18n.getMessage("thaw.common.selectFile"));
 			fileChooser.setDirectoryOnly(false);
@@ -354,6 +367,10 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 			if( (files = fileChooser.askManyFiles()) == null) {
 				Logger.info(this, "Nothing selected");
 				return;
+			}
+
+			if (files.size() > 0) {
+				config.setValue("lastSourceDirectory", fileChooser.getFinalDirectory());
 			}
 
 			String fileList = "";

@@ -42,14 +42,10 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 
 		Logger.info(this, "Starting plugin \"InsertPlugin\" ...");
 
-		insertPanel = new InsertPanel(this,
+		insertPanel = new InsertPanel(this, core.getConfig(),
 					      Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
 
 		scrollPane = new JScrollPane(insertPanel.getPanel());
-
-		//core.getMainWindow().addTab(I18n.getMessage("thaw.common.insertion"),
-		//			    IconBox.minInsertions,
-		//			    this.scrollPane);
 
 		insertionFrame = new JFrame(I18n.getMessage("thaw.common.insertion"));
 		insertionFrame.setVisible(false);
@@ -92,8 +88,6 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 
 	public boolean stop() {
 		Logger.info(this, "Stopping plugin \"InsertPlugin\" ...");
-
-		//this.core.getMainWindow().removeTab(this.scrollPane);
 
 		if (queueWatcher != null)
 			queueWatcher.removeButtonFromTheToolbar(buttonInToolBar);

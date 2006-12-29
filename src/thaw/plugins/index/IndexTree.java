@@ -26,6 +26,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import thaw.core.Config;
 import thaw.core.I18n;
 import thaw.core.IconBox;
 import thaw.core.Logger;
@@ -93,10 +94,12 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 	/**
 	 * @param queueManager Not used if selectionOnly is set to true
+	 * @param config Not used if selectionOnly is set to true (used for lastDestinationDirectory and lastSourceDirectory)
 	 */
 	public IndexTree(final String rootName, boolean selectionOnly,
 			 final FCPQueueManager queueManager,
-			 final IndexBrowserPanel indexBrowser) {
+			 final IndexBrowserPanel indexBrowser,
+			 final Config config) {
 		this.queueManager = queueManager;
 
 		this.selectionOnly = selectionOnly;
@@ -215,11 +218,11 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addFilesWithInserting"));
 		fileMenu.add(item);
-		indexAndFileActions.add(new IndexManagementHelper.FileInserterAndAdder(queueManager, indexBrowser, item));
+		indexAndFileActions.add(new IndexManagementHelper.FileInserterAndAdder(config, queueManager, indexBrowser, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addFilesWithoutInserting"));
 		fileMenu.add(item);
-		indexAndFileActions.add(new IndexManagementHelper.FileAdder(queueManager, indexBrowser, item));
+		indexAndFileActions.add(new IndexManagementHelper.FileAdder(config, queueManager, indexBrowser, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addKeys"));
 		fileMenu.add(item);

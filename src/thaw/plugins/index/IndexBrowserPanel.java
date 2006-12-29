@@ -44,7 +44,7 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 
 		unknownList = new UnknownIndexList(queueManager, this);
 
-		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, queueManager, this);
+		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, queueManager, this, config);
 
 		leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 					   indexTree.getPanel(),

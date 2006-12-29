@@ -12,6 +12,8 @@ import javax.swing.JFileChooser;
 public class FileChooser {
 	private JFileChooser fileChooser = null;
 
+	private String finalDir = null;
+
 	public FileChooser() {
 		fileChooser = new JFileChooser();
 	}
@@ -63,12 +65,20 @@ public class FileChooser {
 	 * @return null if nothing choosed.
 	 */
 	public File askOneFile() {
+		File file;
+
 		fileChooser.setMultiSelectionEnabled(false);
 
 		if(!showDialog())
 			return null;
 
-		return fileChooser.getSelectedFile();
+		file = fileChooser.getSelectedFile();
+
+		if (file != null) {
+			finalDir = file.getParent();
+		}
+
+		return file;
 	}
 
 
@@ -109,12 +119,28 @@ public class FileChooser {
 	 * @return null if nothing choosed.
 	 */
 	public Vector askManyFiles() {
+		File[] files;
+
 		fileChooser.setMultiSelectionEnabled(true);
 
 		if(!showDialog())
 			return null;
 
-		return this.expandRecursivly(fileChooser.getSelectedFiles());
+		files = fileChooser.getSelectedFiles();
+
+		if (files != null && files[0] != null) {
+			finalDir = files[0].getParent();
+		}
+
+		return this.expandRecursivly(files);
+	}
+
+
+	/**
+	 * Return the main directory where the files where selected
+	 */
+	public String getFinalDirectory() {
+		return finalDir;
 	}
 
 }

@@ -32,6 +32,7 @@ import thaw.core.FreenetURIHelper;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.MainWindow;
+import thaw.core.Config;
 import thaw.fcp.FCPClientPut;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
@@ -671,9 +672,11 @@ public class IndexManagementHelper {
 
 
 	public static class FileInserterAndAdder extends BasicIndexAction {
+		private Config config;
 
-		public FileInserterAndAdder(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+		public FileInserterAndAdder(final Config config, final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(queueManager, indexBrowser, actionSource);
+			this.config = config;
 		}
 
 		public void setTarget(final IndexTreeNode node) {
@@ -682,7 +685,17 @@ public class IndexManagementHelper {
 		}
 
 		public void apply() {
-			final FileChooser fileChooser = new FileChooser();
+			final FileChooser fileChooser;
+
+			String lastDir = null;
+
+			if (config.getValue("lastSourceDirectory") != null)
+				lastDir = config.getValue("lastSourceDirectory");
+
+			if (lastDir == null)
+				fileChooser = new FileChooser();
+			else
+				fileChooser = new FileChooser(lastDir);
 
 			fileChooser.setDirectoryOnly(false);
 			fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
@@ -693,6 +706,10 @@ public class IndexManagementHelper {
 			if(files == null)
 				return;
 
+			if (files.size() > 0) {
+				config.setValue("lastSourceDirectory", fileChooser.getFinalDirectory());
+			}
+
 			final String category = FileCategory.promptForACategory();
 
 			IndexManagementHelper.addFiles(getQueueManager(), getIndexBrowserPanel(), (Index)getTarget(), files, category, true);
@@ -701,8 +718,11 @@ public class IndexManagementHelper {
 
 
 	public static class FileAdder extends BasicIndexAction {
-		public FileAdder(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+		private Config config;
+
+		public FileAdder(final Config config, final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(queueManager, indexBrowser, actionSource);
+			this.config = config;
 		}
 
 		public void setTarget(final IndexTreeNode node) {
@@ -711,7 +731,16 @@ public class IndexManagementHelper {
 		}
 
 		public void apply() {
-			final FileChooser fileChooser = new FileChooser();
+			final FileChooser fileChooser;
+			String lastDir = null;
+
+			if (config.getValue("lastSourceDirectory") != null)
+				lastDir = config.getValue("lastSourceDirectory");
+
+			if (lastDir == null)
+				fileChooser = new FileChooser();
+			else
+				fileChooser = new FileChooser(lastDir);
 
 			fileChooser.setDirectoryOnly(false);
 			fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
@@ -721,6 +750,10 @@ public class IndexManagementHelper {
 
 			if(files == null)
 				return;
+
+			if (files.size() > 0) {
+				config.setValue("lastSourceDirectory", fileChooser.getFinalDirectory());
+			}
 
 			final String category = FileCategory.promptForACategory();
 
