@@ -239,7 +239,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 			return;
 		}
 
-		if (getTransfer() != null) {
+		if (getTransfer() != null && getTransfer().isRunning()) {
 			Logger.warning(this, "Can't download: a transfer is already running");
 			return;
 		}
@@ -253,7 +253,7 @@ public class File extends java.util.Observable implements java.util.Observer {
 
 
 	public void insertOnFreenet(final FCPQueueManager queueManager) {
-		if (getTransfer() != null) {
+		if (getTransfer() != null && getTransfer().isRunning()) {
 			Logger.warning(this, "Another transfer is already running : can't insert");
 			return;
 		}

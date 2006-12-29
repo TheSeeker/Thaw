@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
+import thaw.core.FreenetURIHelper;
 import thaw.core.Logger;
 
 public class FCPClientGet extends Observable implements Observer, FCPTransferQuery {
@@ -134,13 +135,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		status = "Waiting";
 
-		final String cutcut[] = key.split("/");
-
-		if(!key.endsWith("/")) {
-			filename = cutcut[cutcut.length-1];
-		} else {
-			filename = "index.html";
-		}
+		filename = FreenetURIHelper.getFilenameFromKey(key);
 
 		Logger.debug(this, "Query for getting "+key+" created");
 

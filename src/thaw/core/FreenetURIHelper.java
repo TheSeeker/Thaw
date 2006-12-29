@@ -55,6 +55,12 @@ public class FreenetURIHelper {
 
 		if(!key.endsWith("/")) {
 			filename = cutcut[cutcut.length-1];
+
+			try {
+				filename = java.net.URLDecoder.decode(filename, "UTF-8");
+			} catch (final java.io.UnsupportedEncodingException e) {
+				Logger.warning(new FreenetURIHelper(), "UnsupportedEncodingException (UTF-8): "+e.toString());
+			}
 		} else {
 			filename = "index.html";
 		}
