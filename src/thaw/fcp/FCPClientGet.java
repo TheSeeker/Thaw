@@ -37,7 +37,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	private boolean running = false;
 	private boolean successful = true;
-	private boolean writingSuccessful = false;
+	private boolean writingSuccessful = true;
 	private boolean fatal = true;
 	private boolean isLockOwner = false;
 
@@ -252,6 +252,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 								progress = 100;
 								running = false;
 								successful = true;
+								writingSuccessful = true;
 								Logger.info(this, "File already existing. Not rewrited");
 							}
 

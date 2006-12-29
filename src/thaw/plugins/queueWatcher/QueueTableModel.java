@@ -433,7 +433,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 					if(q1.isRunning() && !q2.isRunning())
 						return 1;
 
-					if(q1.isRunning() && !q2.isRunning())
+					if(q2.isRunning() && !q1.isRunning())
 						return -1;
 				}
 
