@@ -18,7 +18,12 @@ import thaw.core.Plugin;
 import thaw.plugins.index.DatabaseManager;
 
 public class SqlConsole implements Plugin, java.awt.event.ActionListener {
-	public final static int BUFFER_SIZE = 51200;
+	public final static int MAX_LINE = 512;
+
+	private String[] buffer;
+	private String currentLine; /* line in construction (added to buffer when \n is added) */
+	private int readOffset;
+	private int writeOffset;
 
 	private Core core;
 	private Hsqldb hsqldb;
@@ -26,6 +31,7 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 	private JPanel panel;
 
 	private JTextArea sqlArea;
+	private JScrollPane sqlAreaScrollPane;
 	private JTextField commandField;
 	private JButton sendButton;
 
@@ -34,6 +40,11 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 	}
 
 	public boolean run(final Core core) {
+		buffer = new String[MAX_LINE+1];
+		currentLine = "";
+		readOffset = 0;
+		writeOffset = 0;
+
 		this.core = core;
 
 		if(core.getPluginManager().getPlugin("thaw.plugins.Hsqldb") == null) {
@@ -90,31 +101,78 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 
 		sendButton = new JButton(" Ok ");
 		sendButton.addActionListener(this);
-		
+
 		subPanel.add(commandField, BorderLayout.CENTER);
 		subPanel.add(sendButton, BorderLayout.EAST);
 
-		panel.add(new JScrollPane(sqlArea), BorderLayout.CENTER);
+		sqlAreaScrollPane = new JScrollPane(sqlArea);
+
+		panel.add(sqlAreaScrollPane, BorderLayout.CENTER);
 		panel.add(subPanel, BorderLayout.SOUTH);
 
 		return panel;
 	}
 
 	public void addToConsole(final String txt) {
-		String text = sqlArea.getText() + txt;
+		currentLine += txt;
 
-		if(text.length() > SqlConsole.BUFFER_SIZE) {
-			text = text.substring((text.length() - SqlConsole.BUFFER_SIZE));
+		if (txt.endsWith("\n")) {
+			buffer[writeOffset] = currentLine;
+			currentLine = "";
+
+			writeOffset++;
+
+			if (writeOffset == MAX_LINE)
+				writeOffset = 0;
+
+			if (writeOffset == readOffset) {
+				readOffset++;
+
+				if (readOffset == MAX_LINE)
+					readOffset = 0;
+			}
+		}
+	}
+
+
+	public synchronized void refreshDisplay() {
+		int i;
+		String res = "";
+
+		for (i = readOffset ; ; i++) {
+
+			if (buffer[i] != null)
+				res += buffer[i];
+
+			if ( (readOffset > 0 && i == readOffset-1)
+			     || (readOffset <= 0 && i == MAX_LINE))
+				break;
+
+			if (i == MAX_LINE)
+				i = 0;
 		}
 
-		sqlArea.setText(text);
+		sqlArea.setText(res);
+
+		sqlAreaScrollPane.getVerticalScrollBar().setValue(sqlAreaScrollPane.getVerticalScrollBar().getMaximum());
 	}
+
+	public synchronized void flushBuffer() {
+		int i;
+
+		for (i = 0 ; i < MAX_LINE + 1; i++) {
+			buffer[i] = null;
+		}
+	}
+
 
 	public void actionPerformed(final java.awt.event.ActionEvent e) {
 
 		sendCommand(commandField.getText());
 
 		commandField.setText("");
+
+		refreshDisplay();
 
 	}
 
@@ -136,7 +194,15 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 		addToConsole(fTxt);
 	}
 
-	public void sendCommand(String cmd) {
+	public synchronized void sendCommand(String cmd) {
+
+		if ("clear".equals(cmd.toLowerCase())) {
+			flushBuffer();
+		}
+
+		if ("refresh".equals(cmd.toLowerCase())) {
+			refreshDisplay();
+		}
 
 		/* A simple reminder :) */
 		if("list_tables".equals( cmd.toLowerCase() ))
@@ -151,7 +217,7 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 				addToConsole("Ok\n");
 				return;
 			}
-			
+
 			final java.sql.Statement st = hsqldb.getConnection().createStatement();
 
 			ResultSet result;
@@ -189,11 +255,11 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 
 
 			final ResultSetMetaData metadatas = result.getMetaData();
-			
+
 			final int nmbCol = metadatas.getColumnCount();
-			
+
 			addToConsole("      ");
-			
+
 			for(int i = 1; i <= nmbCol ; i++) {
 				display(metadatas.getColumnLabel(i), metadatas.getColumnDisplaySize(i));
 				addToConsole("  ");
@@ -235,7 +301,7 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 		} catch(final java.sql.SQLException e) {
 			addToConsole("SQLException : "+e.toString()+" : "+e.getCause()+"\n");
 		}
-		
+
 	}
 
 }
