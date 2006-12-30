@@ -1,6 +1,7 @@
 package thaw.plugins;
 
 import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Iterator;
@@ -9,6 +10,7 @@ import java.util.Vector;
 import javax.swing.JSplitPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.JButton;
 
 import thaw.core.Core;
 import thaw.core.I18n;
@@ -20,7 +22,7 @@ import thaw.plugins.queueWatcher.DetailPanel;
 import thaw.plugins.queueWatcher.DragAndDropManager;
 import thaw.plugins.queueWatcher.QueuePanel;
 
-public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, PropertyChangeListener, ChangeListener {
+public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, PropertyChangeListener, ChangeListener, ActionListener {
 	private Core core;
 
 	//private JPanel mainPanel;
@@ -43,6 +45,9 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 
 	private java.awt.Container panelAdded;
 
+	private JButton removeSelectedButton;
+
+
 	public boolean run(final Core core) {
 		this.core = core;
 
@@ -50,8 +55,8 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 
 		detailPanel = new DetailPanel();
 
-		queuePanels[QueueWatcher.DOWNLOAD_PANEL] = new QueuePanel(core, detailPanel, false); /* download */
-		queuePanels[QueueWatcher.INSERTION_PANEL] = new QueuePanel(core, detailPanel, true); /* upload */
+		queuePanels[QueueWatcher.DOWNLOAD_PANEL] = new QueuePanel(core, this, detailPanel, false); /* download */
+		queuePanels[QueueWatcher.INSERTION_PANEL] = new QueuePanel(core, this, detailPanel, true); /* upload */
 
 		split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 				       queuePanels[0].getPanel(),
@@ -109,10 +114,16 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 
 		stateChanged(null);
 
+		removeSelectedButton = new JButton(IconBox.delete);
+		removeSelectedButton.setToolTipText(I18n.getMessage("thaw.common.removeFromTheList"));
+		removeSelectedButton.addActionListener(this);
+		addButtonToTheToolbar(removeSelectedButton);
+
 		return true;
 	}
 
 	/**
+	 * See the button 'download' and 'insertion' on each panel
 	 * @param panel see DOWNLOAD_PANEL and INSERTION_PANEL
 	 */
 	public void addButtonListener(final int panel, final ActionListener listener) {
@@ -147,6 +158,13 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 
 	public void addMenuItemToTheInsertionTable(final javax.swing.JMenuItem item) {
 		queuePanels[1].addMenuItem(item);
+	}
+
+	public void unselectAllExcept(int panel_exception) {
+		if (panel_exception == DOWNLOAD_PANEL)
+			queuePanels[INSERTION_PANEL].unselectAll();
+		else
+			queuePanels[DOWNLOAD_PANEL].unselectAll();
 	}
 
 	public String getNameForUser() {
@@ -217,6 +235,13 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 			displayButtonsInTheToolbar();
 		} else {
 			hideButtonsInTheToolbar();
+		}
+	}
+
+	public void actionPerformed(ActionEvent event) {
+		if (event.getSource() == removeSelectedButton) {
+			queuePanels[INSERTION_PANEL].removeSelectedTransfers();
+			queuePanels[DOWNLOAD_PANEL].removeSelectedTransfers();
 		}
 	}
 }

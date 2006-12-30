@@ -33,7 +33,20 @@ public class ToolbarModifier {
 	}
 
 	public void addButtonToTheToolbar(final JButton button) {
-		buttons.add(button);
+		addButtonToTheToolbar(button, -1);
+	}
+
+	/**
+	 * @param position if == -1, then the button is put at the end
+	 */
+	public void addButtonToTheToolbar(final JButton button, int position) {
+		if (position < 0)
+			buttons.add(button);
+		else {
+			if (position > buttons.size())
+				buttons.setSize(position);
+			buttons.add(position, button);
+		}
 
 		if (areDisplayed) {
 			areDisplayed = false;

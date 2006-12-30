@@ -279,7 +279,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 
-		button = new JButton(IconBox.indexDelete);
+		button = new JButton(IconBox.delete);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.delete"));
 		action = new IndexManagementHelper.IndexDeleter(indexBrowser, button);
 		action.setTarget(getRoot());

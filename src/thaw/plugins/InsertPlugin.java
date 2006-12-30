@@ -78,7 +78,7 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 
 		queueWatcher = (QueueWatcher)core.getPluginManager().getPlugin("thaw.plugins.QueueWatcher");
 
-		queueWatcher.addButtonToTheToolbar(buttonInToolBar);
+		queueWatcher.addButtonToTheToolbar(buttonInToolBar, 1);
 		queueWatcher.addMenuItemToTheInsertionTable(menuItem);
 		queueWatcher.addButtonListener(QueueWatcher.INSERTION_PANEL, this);
 

@@ -41,8 +41,19 @@ import thaw.core.IconBox;
 import thaw.core.Logger;
 import thaw.fcp.FCPTransferQuery;
 import thaw.fcp.FCPClientGet;
+import thaw.plugins.QueueWatcher;
+
 
 public class QueuePanel implements MouseListener, ActionListener, KeyListener {
+	public final static int ACTION_REMOVE_FINISHED          = 0;
+	public final static int ACTION_DOWNLOAD_SELECTED        = 1; /* locally */
+	public final static int ACTION_REMOVE_SELECTED          = 2;
+	public final static int ACTION_CANCEL_SELECTED          = 3;
+	public final static int ACTION_DELAY_SELECTED           = 4;
+	public final static int ACTION_RESTART_SELECTED         = 5;
+	public final static int ACTION_COPY_KEYS_SELECTED       = 6;
+	public final static int ACTION_CHANGE_PRIORITY_SELECTED = 7;
+
 	private Core core;
 
 	private JButton button;
@@ -74,8 +85,13 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 	private boolean insertionQueue = false;
 
-	public QueuePanel(final Core core, final DetailPanel detailPanel,
+	public QueueWatcher queueWatcher;
+
+	public QueuePanel(final Core core, final QueueWatcher queueWatcher,
+			  final DetailPanel detailPanel,
 			  boolean isForInsertionQueue) {
+
+		this.queueWatcher = queueWatcher;
 
 		insertionQueue = isForInsertionQueue;
 
@@ -370,26 +386,52 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	}
 
 
-	private class ActionReplier implements Runnable, ClipboardOwner {
-		ActionEvent e;
-		Vector queries;
+	public void unselectAll() {
+		table.clearSelection();
+		selectedRows = null;
+	}
 
-		public ActionReplier(final ActionEvent e, final Vector queries) {
-			this.e = e;
-			this.queries = queries;
+	public void removeSelected() {
+
+	}
+
+
+	public class ActionReplier implements Runnable, ClipboardOwner {
+		private int action;
+		private int new_priority;
+		private Vector queries;
+
+		public ActionReplier(final int action, final int new_priority) {
+			this.action = action;
+			this.queries = getSelectedQueries();
+
+			this.new_priority = (action == ACTION_CHANGE_PRIORITY_SELECTED) ? new_priority : -1;
 		}
 
 		public void run() {
+
 			final Toolkit tk = Toolkit.getDefaultToolkit();
 			String keys = "";
 			File dir = null;
 
-			if(e.getSource() == clearFinishedItem) {
-				removeAllFinishedTransfers();
+			if(action == ACTION_REMOVE_FINISHED) {
+				final Vector qs = tableModel.getQueries();
+
+				for(final Iterator it = qs.iterator();
+				    it.hasNext(); ) {
+					final FCPTransferQuery query = (FCPTransferQuery)it.next();
+					if(query.isFinished() &&
+					   (!(query instanceof FCPClientGet) || (!query.isSuccessful() || ((FCPClientGet)query).isWritingSuccessful()))) {
+						if(query.stop(core.getQueueManager())) {
+							core.getQueueManager().remove(query);
+						}
+					}
+				}
+
 				return;
 			}
 
-			if(e.getSource() == downloadItem) {
+			if(action == ACTION_DOWNLOAD_SELECTED) {
 				final FileChooser fileChooser = new FileChooser();
 				fileChooser.setTitle(I18n.getMessage("thaw.common.downloadLocally"));
 				fileChooser.setDirectoryOnly(true);
@@ -400,51 +442,38 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 					return;
 			}
 
-			int prioritySelected = 0;
-
-			for(prioritySelected = 0;
-			    prioritySelected <= MIN_PRIORITY;
-			    prioritySelected++) {
-				if(priorityRadioButton[prioritySelected] == e.getSource()) {
-					break;
-				}
-			}
-
-			if(prioritySelected > MIN_PRIORITY)
-				prioritySelected = -1;
-
 			for(final Iterator queryIt = queries.iterator() ; queryIt.hasNext() ;) {
 				final FCPTransferQuery query = (FCPTransferQuery)queryIt.next();
 
 				if(query == null)
 					continue;
 
-				if(prioritySelected >= 0) {
+				if(new_priority >= 0) {
 					if(query.isPersistent()) {
-						query.setFCPPriority(prioritySelected);
+						query.setFCPPriority(new_priority);
 						query.updatePersistentRequest(false);
 					}
 				}
 
-				if(e.getSource() == removeItem) {
+				if(action == ACTION_REMOVE_SELECTED) {
 
 					if(query.stop(core.getQueueManager())) {
 						core.getQueueManager().remove(query);
 					}
 				}
 
-				if(e.getSource() == cancelItem) {
+				if(action == ACTION_CANCEL_SELECTED) {
 					query.stop(core.getQueueManager());
 				}
 
-				if(e.getSource() == delayItem) {
+				if(action == ACTION_DELAY_SELECTED) {
 					if(query.isRunning() && !query.isFinished()) {
 						query.pause(core.getQueueManager());
 						core.getQueueManager().moveFromRunningToPendingQueue(query);
 					}
 				}
 
-				if(e.getSource() == forceRestartItem) {
+				if(action == ACTION_RESTART_SELECTED) {
 					query.stop(core.getQueueManager());
 
 					if(query.getMaxAttempt() >= 0)
@@ -453,13 +482,13 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 					query.start(core.getQueueManager());
 				}
 
-				if(e.getSource() == copyKeysItem) {
+				if (action == ACTION_COPY_KEYS_SELECTED) {
 					if((query.getFileKey() != null)
 					   && !"".equals( query.getFileKey() ))
 						keys = keys + query.getFileKey() + "\n";
 				}
 
-				if((e.getSource() == downloadItem)
+				if (action == ACTION_DOWNLOAD_SELECTED
 				   && (dir != null)) {
 					if(query.isPersistent()) {
 
@@ -472,7 +501,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 			} /* for i in selectedRows */
 
 
-			if(e.getSource() == copyKeysItem) {
+			if (action == ACTION_COPY_KEYS_SELECTED) {
 				final StringSelection st = new StringSelection(keys);
 				final Clipboard cp = tk.getSystemClipboard();
 				cp.setContents(st, this);
@@ -483,33 +512,52 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		public void lostOwnership(final Clipboard clipboard, final java.awt.datatransfer.Transferable contents) {
 			/* we dont care */
 		}
+	}
 
+
+	public void removeSelectedTransfers() {
+		Thread th = new Thread(new ActionReplier(ACTION_REMOVE_SELECTED, -1));
+		th.start();
 	}
 
 	public void removeAllFinishedTransfers() {
-		final Vector queries = tableModel.getQueries();
-
-		for(final Iterator it = queries.iterator();
-		    it.hasNext(); ) {
-			final FCPTransferQuery query = (FCPTransferQuery)it.next();
-			if(query.isFinished() &&
-			   (!(query instanceof FCPClientGet) || (!query.isSuccessful() || ((FCPClientGet)query).isWritingSuccessful()))) {
-
-				if(query.stop(core.getQueueManager())) {
-					core.getQueueManager().remove(query);
-
-				}
-			}
-		}
+		Thread th = new Thread(new ActionReplier(ACTION_REMOVE_FINISHED, -1));
+		th.start();
 	}
 
 	/**
 	 * Manage it on a different thread to avoid UI freeze.
 	 */
 	public void actionPerformed(final ActionEvent e) {
-		final Thread action = new Thread(new ActionReplier(e, getSelectedQueries()));
+		int prioritySelected = 0;
+		int action = ACTION_CHANGE_PRIORITY_SELECTED;
 
-		action.start();
+		for(prioritySelected = 0;
+		    prioritySelected <= MIN_PRIORITY;
+		    prioritySelected++) {
+			if(priorityRadioButton[prioritySelected] == e.getSource()) {
+				break;
+			}
+		}
+
+		if(prioritySelected > MIN_PRIORITY) {
+			prioritySelected = -1;
+
+			if      (e.getSource() == clearFinishedItem) action = ACTION_REMOVE_FINISHED;
+			else if (e.getSource() == removeItem)        action = ACTION_REMOVE_SELECTED;
+			else if (e.getSource() == cancelItem)        action = ACTION_CANCEL_SELECTED;
+			else if (e.getSource() == delayItem)         action = ACTION_DELAY_SELECTED;
+			else if (e.getSource() == downloadItem)      action = ACTION_DOWNLOAD_SELECTED;
+			else if (e.getSource() == forceRestartItem)  action = ACTION_RESTART_SELECTED;
+			else if (e.getSource() == copyKeysItem)      action = ACTION_COPY_KEYS_SELECTED;
+			else {
+				Logger.error(this, "Unknow action ?!");
+				return;
+			}
+		}
+
+		final Thread actionTh = new Thread(new ActionReplier(action, prioritySelected));
+		actionTh.start();
 	}
 
 	public void mouseClicked(final MouseEvent e) {
@@ -520,6 +568,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		}
 
 		if(e.getButton() == MouseEvent.BUTTON1) {
+			queueWatcher.unselectAllExcept(insertionQueue ? QueueWatcher.INSERTION_PANEL : QueueWatcher.DOWNLOAD_PANEL);
 			refreshDetailPanel();
 		}
 	}
