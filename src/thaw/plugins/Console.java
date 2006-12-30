@@ -26,18 +26,26 @@ import thaw.core.Plugin;
 /**
  * Quick and dirty console showing Thaw logs, and allowing to save them.
  */
-public class Console implements Plugin, LogListener, ActionListener {
+public class Console implements Plugin, LogListener, ActionListener, Runnable {
+	public final static int MAX_LINE = 512;
+
 	private Core core;
+
+	private String[] buffer;
+	private int readOffset;
+	private int writeOffset;
 
 	private JPanel consolePanel;
 	private JTextArea logArea;
+	private JScrollPane logAreaScrollPane;
 	private JButton saveToFile;
 
 	private JPanel configPanel;
 	private JLabel sizeLabel;
 	private JTextField sizeField;
 
-	private long maxLogSize = 5120;
+	private boolean threadRunning;
+	private boolean hasChanged;
 
 	public Console() {
 
@@ -45,6 +53,12 @@ public class Console implements Plugin, LogListener, ActionListener {
 
 	public boolean run(final Core core) {
 		this.core = core;
+		threadRunning = true;
+		hasChanged = false;
+
+		buffer = new String[MAX_LINE+1];
+		readOffset = 0;
+		writeOffset = 0;
 
 		consolePanel = new JPanel();
 		consolePanel.setLayout(new BorderLayout());
@@ -55,21 +69,12 @@ public class Console implements Plugin, LogListener, ActionListener {
 
 		saveToFile.addActionListener(this);
 
-		consolePanel.add(new JScrollPane(logArea), BorderLayout.CENTER);
+		logAreaScrollPane = new JScrollPane(logArea);
+
+		consolePanel.add(logAreaScrollPane, BorderLayout.CENTER);
 		consolePanel.add(saveToFile, BorderLayout.SOUTH);
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.console.console"), consolePanel);
-
-		if(core.getConfig().getValue("consoleMaxLogSize") == null)
-			core.getConfig().setValue("consoleMaxLogSize", ((new Long(maxLogSize)).toString()) );
-		else {
-			try {
-				maxLogSize = (new Long(core.getConfig().getValue("consoleMaxLogSize"))).longValue();
-			} catch(final Exception e) {
-				Logger.notice(this, "Invalide size given in configuration ! Using default one.");
-				core.getConfig().setValue("consoleMaxLogSize", (new Long(maxLogSize)).toString());
-			}
-		}
 
 		configPanel = new JPanel();
 		configPanel.setLayout(new GridLayout(15, 1));
@@ -84,12 +89,17 @@ public class Console implements Plugin, LogListener, ActionListener {
 
 		Logger.addLogListener(this);
 
+		Thread dispThread = new Thread(this);
+		dispThread.start();
+
 		return true;
 
 	}
 
 
 	public boolean stop() {
+		threadRunning = false;
+
 		core.getConfig().setValue("consoleMaxLogSize", sizeField.getText() );
 
 		Logger.removeLogListener(this);
@@ -148,14 +158,63 @@ public class Console implements Plugin, LogListener, ActionListener {
 		}
 	}
 
-	public void newLogLine(final String line) {
-		String text = logArea.getText() + "\n" + line;
+	public synchronized void newLogLine(final String line) {
+		addLine(line + "\n");
+	}
 
-		if(text.length() > maxLogSize) {
-			text = text.substring((int)(text.length() - maxLogSize));
+
+	public void addLine(String line) {
+		buffer[writeOffset] = line;
+
+		writeOffset++;
+
+		if (writeOffset == MAX_LINE)
+			writeOffset = 0;
+
+		if (writeOffset == readOffset) {
+			readOffset++;
+
+			if (readOffset == MAX_LINE)
+				readOffset = 0;
 		}
 
-		logArea.setText(text);
+		hasChanged = true;
+	}
+
+	public void refreshDisplay() {
+		String res = "";
+		int i;
+
+		for (i = readOffset ; ; i++) {
+			if (i == MAX_LINE+1)
+				i = 0;
+
+			if (buffer[i] != null)
+				res += buffer[i];
+
+			if ( (readOffset > 0 && i == readOffset-1)
+			     || (readOffset <= 0 && i == MAX_LINE))
+				break;
+		}
+
+		logArea.setText(res);
+		logAreaScrollPane.getVerticalScrollBar().setValue(logAreaScrollPane.getVerticalScrollBar().getMaximum());
+	}
+
+
+	public void run() {
+		while(threadRunning) {
+			try {
+				Thread.sleep(1000);
+			} catch(java.lang.InterruptedException e) {
+				/* \_o< */
+			}
+
+			if (threadRunning && hasChanged) {
+				hasChanged = false;
+				refreshDisplay();
+			}
+		}
 	}
 
 

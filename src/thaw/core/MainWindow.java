@@ -204,7 +204,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	public void changeButtonsInTheToolbar(final Object modifier, final Vector newButtons) {
 		JToolBar newToolBar;
 
-		Logger.info(this, "changeButtonsInTheToolbar() : Called by "+modifier.getClass().getName());
+		Logger.debug(this, "changeButtonsInTheToolbar() : Called by "+modifier.getClass().getName());
 
 		if ((lastToolBarModifier == null) || (newButtons != null) || (lastToolBarModifier == modifier)) {
 			lastToolBarModifier = modifier;
