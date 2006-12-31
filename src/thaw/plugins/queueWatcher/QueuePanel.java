@@ -282,7 +282,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 					cell.setBackground(SUCCESS);
 
 				if(query.isFinished() && (!query.isSuccessful() ||
-							  ((query instanceof FCPClientGet) && !((FCPClientGet)query).isWritingSuccessful())))
+							  ((query instanceof FCPClientGet) && !((FCPClientGet)query).isWritingSuccessful()) ) )
 					cell.setBackground(FAILURE);
 
 				if(query.isRunning() && !query.isFinished())

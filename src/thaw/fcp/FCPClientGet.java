@@ -416,7 +416,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			successful = true;
 
 			if(fetchDirectly(queryManager.getConnection(), fileSize, true)) {
-				writingSuccessful = false;
+				writingSuccessful = true;
 				status = "Available";
 			} else {
 				Logger.warning(this, "Unable to fetch correctly the file. This may create problems on socket");
@@ -443,7 +443,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			}
 
 			setChanged();
-			this.notifyObservers();
+			notifyObservers();
 
 
 			return;
