@@ -648,7 +648,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			}
 
 			if (transfer != null && transfer.isFinished()) {
-				Logger.notice(this, "Removing file '"+transfer.getPath()+"'");
+				Logger.info(this, "Removing file '"+transfer.getPath()+"'");
 				final String path = transfer.getPath();
 				if (path != null) {
 					final java.io.File fl = new java.io.File(path);
@@ -1100,7 +1100,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		Document xmlDoc;
 
 		try {
-			Logger.info(this, "XML parser ready");
+			Logger.debug(this, "XML parser ready");
 			xmlDoc = xmlBuilder.parse(input);
 			Logger.info(this, "Index parsed");
 		} catch(final org.xml.sax.SAXException e) {
