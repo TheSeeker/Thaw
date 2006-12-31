@@ -261,7 +261,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	}
 
 	/**
-	 * @see #addTab(String, java.awt.Component)
+	 * @see #addTab(String, java.awt.Component)
 	 */
 	public boolean addTab(final String tabName, final Icon icon, final java.awt.Component panel) {
 		tabbedPane.addTab(tabName, icon, panel);
@@ -441,7 +441,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	}
 
 	public void windowDeactivated(final WindowEvent e) {
-		// C'est pas comme si on en avait quelque chose à foutre :p
+		// C'est pas comme si on en avait quelque chose a foutre :p
 	}
 
 	public void windowDeiconified(final WindowEvent e) {

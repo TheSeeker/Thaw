@@ -158,7 +158,7 @@ public class Console implements Plugin, LogListener, ActionListener, Runnable {
 		}
 	}
 
-	public synchronized void newLogLine(final String line) {
+	public void newLogLine(final String line) {
 		addLine(line + "\n");
 	}
 
