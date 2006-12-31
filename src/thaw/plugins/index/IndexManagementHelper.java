@@ -379,6 +379,11 @@ public class IndexManagementHelper {
 		if (publicKey == null)
 			return;
 
+		if (Index.isAlreadyKnown(indexBrowser.getDb(), publicKey)) {
+			Logger.notice(new IndexManagementHelper(), "Index already added !");
+			return;
+		}
+
 		final String name = Index.getNameFromKey(publicKey);
 
 		IndexCategory parent;
@@ -389,6 +394,7 @@ public class IndexManagementHelper {
 			parent = indexBrowser.getIndexTree().getRoot();
 
 		final Index index = new Index(queueManager, indexBrowser, -2, parent, name, name, publicKey, privateKey, 0, null);
+
 		indexBrowser.getUnknownIndexList().removeLink(index);
 
 		index.create();
@@ -941,9 +947,6 @@ public class IndexManagementHelper {
 		}
 	}
 
-	/**
-	 * @param keys => String
-	 */
 	public static void addLink(final IndexBrowserPanel indexBrowser, final Index target, final String linkKey) {
 		if ((target == null) || (linkKey == null))
 			return;

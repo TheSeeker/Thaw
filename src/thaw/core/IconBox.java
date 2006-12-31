@@ -125,7 +125,7 @@ public class IconBox {
 		IconBox.minIndexEditor = IconBox.loadIcon("min-edit-find-replace.png");
 		IconBox.indexBrowser = IconBox.loadIcon("edit-find.png");
 		IconBox.minIndexBrowser = IconBox.loadIcon("min-edit-find.png");
-		IconBox.addToIndexAction = IconBox.loadIcon("folder.png");
+		IconBox.addToIndexAction = IconBox.loadIcon("addToIndex.png");
 		IconBox.insertAndAddToIndexAction = IconBox.loadIcon("folder-new.png");
 		IconBox.makeALinkAction = IconBox.loadIcon("application-internet.png");
 		IconBox.reconnectAction = IconBox.loadIcon("view-refresh.png");

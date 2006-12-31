@@ -18,7 +18,7 @@ public class LinkManagementHelper {
 
 		/**
 		 * Can disable the abstract button if required
-		 * @param node can be null
+		 * @param links can be null
 		 */
 		public void setTarget(Vector links);
 	}
@@ -28,9 +28,6 @@ public class LinkManagementHelper {
 		private AbstractButton actionSource;
 		private Vector target;
 
-		/**
-		 * @param queueManager is used to stop transfers if needed
-		 */
 		public LinkRemover(final AbstractButton actionSource) {
 			this.actionSource = actionSource;
 			if (actionSource != null)

@@ -279,6 +279,20 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 
+		button = new JButton(IconBox.addToIndexAction);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addFilesWithoutInserting"));
+		action = new IndexManagementHelper.FileAdder(config, queueManager, indexBrowser, button);
+		action.setTarget(null);
+		toolbarModifier.addButtonToTheToolbar(button);
+		toolbarActions.add(action);
+
+		button = new JButton(IconBox.makeALinkAction);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addLink"));
+		action = new IndexManagementHelper.LinkAdder(indexBrowser, button);
+		action.setTarget(getRoot());
+		toolbarModifier.addButtonToTheToolbar(button);
+		toolbarActions.add(action);
+
 		button = new JButton(IconBox.delete);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.delete"));
 		action = new IndexManagementHelper.IndexDeleter(indexBrowser, button);

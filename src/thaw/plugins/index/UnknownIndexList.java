@@ -12,8 +12,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JButton;
 
 import thaw.core.I18n;
+import thaw.core.IconBox;
+import thaw.plugins.ToolbarModifier;
 import thaw.fcp.FCPQueueManager;
 import thaw.plugins.Hsqldb;
 
@@ -33,6 +36,9 @@ public class UnknownIndexList implements MouseListener {
 
 	private JPopupMenu rightClickMenu = null;
 	private Vector rightClickActions = null;
+
+	private ToolbarModifier toolbarModifier;
+	private Vector toolbarActions;
 
 	private FCPQueueManager queueManager;
 	private IndexBrowserPanel indexBrowser;
@@ -59,7 +65,21 @@ public class UnknownIndexList implements MouseListener {
 		scrollPane = new JScrollPane(list);
 		panel.add(scrollPane);
 
+		JButton button;
+
+		toolbarModifier = new ToolbarModifier(indexBrowser.getMainWindow());
+		toolbarActions = new Vector();
+
+		button = new JButton(IconBox.indexReuse);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addIndexesFromLink"));
+		toolbarActions.add(new LinkManagementHelper.IndexAdder(button, queueManager, indexBrowser));
+		toolbarModifier.addButtonToTheToolbar(button);
+
 		list.addMouseListener(this);
+	}
+
+	public ToolbarModifier getToolbarModifier() {
+		return toolbarModifier;
 	}
 
 	public JPanel getPanel() {
@@ -100,7 +120,7 @@ public class UnknownIndexList implements MouseListener {
 	 * will check that the link link to an unknown index before adding
 	 */
 	public boolean addLink(final Link link) {
-		if ((link == null) || link.isIndexAlreadyKnown() || isInList(link))
+		if ((link == null) || Index.isAlreadyKnown(indexBrowser.getDb(), link.getPublicKey()) || isInList(link))
 			return false;
 
 		linkList[linkList.length - 1 - offset] = link;
@@ -143,7 +163,7 @@ public class UnknownIndexList implements MouseListener {
 	}
 
 
-	protected void updateRightClickMenu() {
+	protected void updateRightClickMenu(Vector links) {
 		if (rightClickMenu == null) {
 			rightClickMenu = new JPopupMenu();
 			rightClickActions = new Vector();
@@ -158,26 +178,53 @@ public class UnknownIndexList implements MouseListener {
 			rightClickActions.add(new LinkManagementHelper.PublicKeyCopier(item));
 		}
 
+		LinkManagementHelper.LinkAction action;
+
+		for(final Iterator it = rightClickActions.iterator();
+		     it.hasNext(); ) {
+			action = (LinkManagementHelper.LinkAction)it.next();
+			action.setTarget(links);
+		}
+	}
+
+	public void updateToolbar(Vector links) {
+		LinkManagementHelper.LinkAction action;
+
+		for(final Iterator it = toolbarActions.iterator();
+		     it.hasNext(); ) {
+			action = (LinkManagementHelper.LinkAction)it.next();
+			action.setTarget(links);
+		}
+	}
+
+	public Vector getSelectedLinks() {
 		final Object[] sLink = list.getSelectedValues();
 		final Vector vLink = new Vector();
 
 		for (int i = 0; i < sLink.length ; i++)
 			vLink.add(sLink[i]);
 
-		LinkManagementHelper.LinkAction action;
-
-		for(final Iterator it = rightClickActions.iterator();
-		     it.hasNext(); ) {
-			action = (LinkManagementHelper.LinkAction)it.next();
-			action.setTarget(vLink);
-		}
+		return vLink;
 	}
 
 
 	public void mouseClicked(final MouseEvent e) {
-		if((e.getButton() == MouseEvent.BUTTON3)
-		   && (linkList != null)) {
-			updateRightClickMenu();
+		Vector selection;
+
+		if (linkList == null) {
+			selection = null;
+			return;
+		}
+
+		selection = getSelectedLinks();
+
+		if (e.getButton() == MouseEvent.BUTTON1) {
+			updateToolbar(selection);
+			toolbarModifier.displayButtonsInTheToolbar();
+		}
+
+		if (e.getButton() == MouseEvent.BUTTON3) {
+			updateRightClickMenu(selection);
 			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
 		}
 	}

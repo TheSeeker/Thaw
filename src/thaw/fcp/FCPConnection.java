@@ -238,9 +238,6 @@ public class FCPConnection extends Observable {
 		return true;
 	}
 
-	/**
-	 * @return true if it must wait on this FCPConnection object
-	 */
 	public void addToWriterQueue() {
 		synchronized(monitor) {
 			writersWaiting++;

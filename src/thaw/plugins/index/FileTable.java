@@ -19,6 +19,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JButton;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
@@ -27,10 +28,13 @@ import javax.swing.tree.TreePath;
 import thaw.core.Config;
 import thaw.core.I18n;
 import thaw.core.Logger;
+import thaw.core.IconBox;
+import thaw.plugins.ToolbarModifier;
 import thaw.fcp.FCPClientGet;
 import thaw.fcp.FCPClientPut;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
+
 
 public class FileTable implements MouseListener, KeyListener, ActionListener {
 
@@ -52,6 +56,9 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 	// Compute keys
 	// Remove
 	// Copy file keys
+
+	private final ToolbarModifier toolbarModifier;
+	private final Vector toolbarActions;
 
 	private int[] selectedRows;
 
@@ -81,21 +88,42 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		rightClickMenu = new JPopupMenu();
 		rightClickActions = new Vector();
 
+
+		toolbarModifier = new ToolbarModifier(indexBrowser.getMainWindow());
+		toolbarActions = new Vector();
+
+		JButton button;
 		JMenuItem item;
 
 		item = new JMenuItem(I18n.getMessage("thaw.common.action.download"));
+		button = new JButton(IconBox.downloads);
+		button.setToolTipText(I18n.getMessage("thaw.common.action.download"));
+		toolbarActions.add(new FileManagementHelper.FileDownloader(config, queueManager, button));
+		toolbarModifier.addButtonToTheToolbar(button);
 		rightClickMenu.add(item);
 		rightClickActions.add(new FileManagementHelper.FileDownloader(config, queueManager, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.insert"));
+		button = new JButton(IconBox.insertions);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.insert"));
+		toolbarActions.add(new FileManagementHelper.FileInserter(queueManager, button));
+		toolbarModifier.addButtonToTheToolbar(button);
 		rightClickMenu.add(item);
 		rightClickActions.add(new FileManagementHelper.FileInserter(queueManager, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.recalculateKeys"));
+		button = new JButton(IconBox.key);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.recalculateKeys"));
+		toolbarActions.add(new FileManagementHelper.FileKeyComputer(queueManager, button));
+		toolbarModifier.addButtonToTheToolbar(button);
 		rightClickMenu.add(item);
 		rightClickActions.add(new FileManagementHelper.FileKeyComputer(queueManager, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.common.remove"));
+		button = new JButton(IconBox.delete);
+		button.setToolTipText(I18n.getMessage("thaw.common.remove"));
+		toolbarActions.add(new FileManagementHelper.FileRemover(queueManager, button));
+		toolbarModifier.addButtonToTheToolbar(button);
 		rightClickMenu.add(item);
 		rightClickActions.add(new FileManagementHelper.FileRemover(queueManager, item));
 
@@ -110,6 +138,9 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		updateRightClickMenu(null);
 	}
 
+	public ToolbarModifier getToolbarModifier() {
+		return toolbarModifier;
+	}
 
 	public JPanel getPanel() {
 		return panel;
@@ -125,6 +156,16 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		}
 
 		gotoItem.setEnabled((fileList != null) && !(fileList instanceof Index));
+	}
+
+	protected void updateToolbar(final Vector selectedFiles) {
+		FileManagementHelper.FileAction action;
+
+		for(final Iterator it = toolbarActions.iterator();
+		    it.hasNext();) {
+			action = (FileManagementHelper.FileAction)it.next();
+			action.setTarget(selectedFiles);
+		}
 	}
 
 	protected Vector getSelectedFiles(final int[] selectedRows) {
@@ -155,13 +196,26 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 
 	public void mouseClicked(final MouseEvent e) {
+		Vector selection;
+
 		if (fileList instanceof Index)
 			((Index)fileList).setChanged(false);
 
-		if((e.getButton() == MouseEvent.BUTTON3)
-		   && (fileList != null)) {
-			selectedRows = table.getSelectedRows();
-			updateRightClickMenu(getSelectedFiles(selectedRows));
+		if (fileList == null) {
+			selectedRows = null;
+			return;
+		}
+
+		selectedRows = table.getSelectedRows();
+		selection = getSelectedFiles(selectedRows);
+
+		if (e.getButton() == MouseEvent.BUTTON1) {
+			updateToolbar(selection);
+			toolbarModifier.displayButtonsInTheToolbar();
+		}
+
+		if (e.getButton() == MouseEvent.BUTTON3) {
+			updateRightClickMenu(selection);
 			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
 		}
 	}

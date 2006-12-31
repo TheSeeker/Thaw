@@ -200,6 +200,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 	/**
 	 * @param modifier Correspond to the caller object: it's a security to avoid that a modifier wipe out the buttons from another one
+	 * @param newButtons JButton vector : if null, then it means to remove the buttons from the toolbar. Only the object having currently its buttons displayed will be able to remove them, other will simply be ignored.
 	 */
 	public void changeButtonsInTheToolbar(final Object modifier, final Vector newButtons) {
 		JToolBar newToolBar;
@@ -238,11 +239,16 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		newToolBar.add(quitButton);
 		newToolBar.setFloatable(false);
 
-		if (toolBar != null)
+		if (toolBar != null) {
 			mainWindow.getContentPane().remove(toolBar);
+			mainWindow.getContentPane().validate();
+		}
+
 		toolBar = newToolBar;
+
 		mainWindow.getContentPane().add(toolBar, BorderLayout.NORTH);
 		updateToolBar();
+		mainWindow.getContentPane().validate();
 	}
 
 	public void resetLastKnowToolBarModifier() {

@@ -476,6 +476,13 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 				if(action == ACTION_RESTART_SELECTED) {
 					query.stop(core.getQueueManager());
 
+					if ((query instanceof FCPClientGet) && query.getPath() != null) {
+						File target = new File(query.getPath());
+
+						if (target.exists())
+							target.delete();
+					}
+
 					if(query.getMaxAttempt() >= 0)
 						query.setAttempt(0);
 

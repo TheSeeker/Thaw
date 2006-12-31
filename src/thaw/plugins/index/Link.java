@@ -167,32 +167,6 @@ public class Link extends java.util.Observable {
 		}
 	}
 
-	public boolean isIndexAlreadyKnown() {
-		if (key.length() < 40) {
-			Logger.error(this, "Invalid key: "+key);
-			return false;
-		}
-
-		try {
-			PreparedStatement st;
-
-			st = db.getConnection().prepareStatement("SELECT publicKey from indexes WHERE publicKey LIKE ?");
-
-			st.setString(1, "%"+key.substring(3, 40)+"%");
-
-			if(st.execute()) {
-				final ResultSet result = st.getResultSet();
-				if ((result != null) && result.next())
-					return true;
-			}
-
-		} catch(final SQLException e) {
-			Logger.error(this, "Unable to check if link '"+key+"' point to a know index because: "+e.toString());
-		}
-
-		return false;
-	}
-
 	public boolean isInTheDatabase() {
 		if (parent == null) {
 			Logger.notice(this, "isInTheDatabase(): No parent !");

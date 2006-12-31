@@ -17,11 +17,14 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JButton;
 import javax.swing.event.TableModelEvent;
 import javax.swing.tree.TreePath;
 
 import thaw.core.I18n;
 import thaw.core.Logger;
+import thaw.core.IconBox;
+import thaw.plugins.ToolbarModifier;
 import thaw.fcp.FCPQueueManager;
 import thaw.plugins.Hsqldb;
 
@@ -41,6 +44,9 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 	private JPopupMenu rightClickMenu;
 	private Vector rightClickActions;
 	private JMenuItem gotoItem;
+
+	private ToolbarModifier toolbarModifier;
+	private Vector toolbarActions;
 
 	private int[] selectedRows;
 
@@ -62,9 +68,19 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		rightClickMenu = new JPopupMenu();
 		rightClickActions = new Vector();
 
+		toolbarModifier = new ToolbarModifier(indexBrowser.getMainWindow());
+		toolbarActions = new Vector();
+
 		JMenuItem item;
+		JButton button;
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addIndexesFromLink"));
+		button = new JButton(IconBox.indexReuse);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addIndexesFromLink"));
+		toolbarActions.add(new LinkManagementHelper.IndexAdder(button, queueManager,
+								       indexBrowser));
+
+		toolbarModifier.addButtonToTheToolbar(button);
 		rightClickMenu.add(item);
 		rightClickActions.add(new LinkManagementHelper.IndexAdder(item, queueManager,
 									  indexBrowser));
@@ -74,6 +90,10 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		rightClickActions.add(new LinkManagementHelper.PublicKeyCopier(item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.common.remove"));
+		button = new JButton(IconBox.delete);
+		button.setToolTipText(I18n.getMessage("thaw.common.remove"));
+		toolbarActions.add(new LinkManagementHelper.LinkRemover(button));
+		toolbarModifier.addButtonToTheToolbar(button);
 		rightClickMenu.add(item);
 		rightClickActions.add(new LinkManagementHelper.LinkRemover(item));
 
@@ -82,6 +102,10 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		gotoItem.addActionListener(this);
 
 		updateRightClickMenu(null);
+	}
+
+	public ToolbarModifier getToolbarModifier() {
+		return toolbarModifier;
 	}
 
 	public JPanel getPanel() {
@@ -98,6 +122,16 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		}
 
 		gotoItem.setEnabled((linkList != null) && !(linkList instanceof Index));
+	}
+
+	protected void updateToolbar(final Vector selectedLinks) {
+		LinkManagementHelper.LinkAction action;
+
+		for (final Iterator it = toolbarActions.iterator();
+		     it.hasNext(); ) {
+			action = (LinkManagementHelper.LinkAction)it.next();
+			action.setTarget(selectedLinks);
+		}
 	}
 
 	protected Vector getSelectedLinks(final int[] selectedRows) {
@@ -127,13 +161,27 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 	}
 
 	public void mouseClicked(final MouseEvent e) {
+		Vector selection;
+
 		if (linkList instanceof Index)
 			((Index)linkList).setChanged(false);
 
-		if((e.getButton() == MouseEvent.BUTTON3)
+		if (linkList == null) {
+			selectedRows = null;
+			return;
+		}
+
+		selectedRows = table.getSelectedRows();
+		selection = getSelectedLinks(selectedRows);
+
+		if ((e.getButton() == MouseEvent.BUTTON1) && linkList != null) {
+			updateToolbar(selection);
+			toolbarModifier.displayButtonsInTheToolbar();
+		}
+
+		if ((e.getButton() == MouseEvent.BUTTON3)
 		   && (linkList != null)) {
-			selectedRows = table.getSelectedRows();
-			updateRightClickMenu(getSelectedLinks(selectedRows));
+			updateRightClickMenu(selection);
 			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
 		}
 	}

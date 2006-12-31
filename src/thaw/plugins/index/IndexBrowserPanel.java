@@ -171,12 +171,12 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		}
 
 		if (node instanceof FileList) {
-			Logger.info(this, "FileList !");
+			Logger.debug(this, "FileList !");
 			setFileList((FileList)node);
 		}
 
 		if (node instanceof LinkList) {
-			Logger.info(this, "LinkList !");
+			Logger.debug(this, "LinkList !");
 			setLinkList((LinkList)node);
 		}
 
@@ -189,6 +189,12 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	public void isVisible(boolean visibility) {
 		if (visibility) {
 			indexTree.getToolbarModifier().displayButtonsInTheToolbar();
+		} else {
+			// one of these foor may be the buttons owner ?
+			indexTree.getToolbarModifier().hideButtonsInTheToolbar();
+			tables.getLinkTable().getToolbarModifier().hideButtonsInTheToolbar();
+			tables.getFileTable().getToolbarModifier().hideButtonsInTheToolbar();
+			unknownList.getToolbarModifier().hideButtonsInTheToolbar();
 		}
 	}
 

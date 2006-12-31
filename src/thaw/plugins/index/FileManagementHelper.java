@@ -26,7 +26,7 @@ public class FileManagementHelper {
 
 		/**
 		 * Can disable the abstract button if required
-		 * @param node can be null
+		 * @param files can be null
 		 */
 		public void setTarget(Vector files);
 	}

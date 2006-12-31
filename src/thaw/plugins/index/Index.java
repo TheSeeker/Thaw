@@ -72,6 +72,16 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	private boolean updateWhenKeyAreAvailable = false;
 
 	/**
+	 * @deprecated Just don't use it !
+	 */
+	public Index() {
+		db = null;
+		queueManager = null;
+		indexBrowser = null;
+	}
+
+
+	/**
 	 * The bigest constructor of the world ...
 	 * @param revision Ignored if the index is not modifiable (=> deduced from the publicKey)
 	 */
@@ -1236,6 +1246,33 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		if (fileList == null)
 			loadFiles(null, true);
 		return fileList.contains(file);
+	}
+
+
+	public static boolean isAlreadyKnown(Hsqldb db, String key) {
+		if (key.length() < 40) {
+			Logger.error(new Index(), "isAlreadyKnown: Invalid key: "+key);
+			return false;
+		}
+
+		try {
+			PreparedStatement st;
+
+			st = db.getConnection().prepareStatement("SELECT publicKey from indexes WHERE publicKey LIKE ?");
+
+			st.setString(1, "%"+key.substring(3, 40)+"%");
+
+			if(st.execute()) {
+				final ResultSet result = st.getResultSet();
+				if ((result != null) && result.next())
+					return true;
+			}
+
+		} catch(final SQLException e) {
+			Logger.error(new Index(), "isAlreadyKnown: Unable to check if link '"+key+"' point to a know index because: "+e.toString());
+		}
+
+		return false;
 	}
 
 }
