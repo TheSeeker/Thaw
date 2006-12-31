@@ -1260,7 +1260,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 			st = db.getConnection().prepareStatement("SELECT publicKey from indexes WHERE publicKey LIKE ?");
 
-			st.setString(1, "%"+key.substring(3, 40)+"%");
+			st.setString(1, "%"+key.substring(3, 40).replaceAll("%","\\%") +"%");
 
 			if(st.execute()) {
 				final ResultSet result = st.getResultSet();

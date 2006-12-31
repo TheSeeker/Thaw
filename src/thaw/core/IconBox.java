@@ -41,6 +41,7 @@ public class IconBox {
 	public static ImageIcon makeALinkAction;
 
 	public static ImageIcon minIndex;
+	public static ImageIcon minIndexReadOnly;
 
 	public static ImageIcon indexNew;
 	public static ImageIcon indexReuse;
@@ -113,7 +114,8 @@ public class IconBox {
 		IconBox.minQueue = IconBox.loadIcon("min-system-search.png");
 		IconBox.insertions = IconBox.loadIcon("go-next.png");
 		IconBox.minInsertions = IconBox.loadIcon("min-go-next.png");
-		IconBox.minIndex = IconBox.loadIcon("index.png");
+		IconBox.minIndex = IconBox.loadIcon("min-edit-find-replace.png");
+		IconBox.minIndexReadOnly = IconBox.loadIcon("min-index.png");
 		IconBox.indexNew = IconBox.loadIcon("index-new.png");
 		IconBox.indexReuse = IconBox.loadIcon("index-existing.png");
 		IconBox.downloads = IconBox.loadIcon("go-first.png");

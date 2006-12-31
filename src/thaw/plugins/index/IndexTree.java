@@ -124,7 +124,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		}
 
 		final IndexTreeRenderer treeRenderer = new IndexTreeRenderer();
-		treeRenderer.setLeafIcon(IconBox.minIndex);
+		treeRenderer.setLeafIcon(IconBox.minIndexReadOnly);
 
 		tree.setCellRenderer(treeRenderer);
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -487,6 +487,12 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 					if (index.isUpdating()) {
 						setBackgroundNonSelectionColor(IndexTree.LOADING_COLOR);
 						setBackgroundSelectionColor(IndexTree.LOADING_SELECTION_COLOR);
+					}
+
+					if (index.isModifiable()) {
+						setLeafIcon(IconBox.minIndex);
+					} else {
+						setLeafIcon(IconBox.minIndexReadOnly);
 					}
 
 				}
