@@ -19,6 +19,9 @@ import thaw.plugins.index.IndexBrowserPanel;
 import thaw.plugins.index.IndexManagementHelper;
 import thaw.plugins.index.IndexTreeNode;
 import thaw.plugins.index.DatabaseManager;
+import thaw.plugins.index.IndexConfigPanel;
+import thaw.plugins.index.AutoRefresh;
+
 
 public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListener {
 
@@ -30,12 +33,17 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 	private IndexBrowserPanel browserPanel;
 	private Vector toolbarActions;
 
+	private IndexConfigPanel configPanel;
+
+	private AutoRefresh autoRefresh = null;
+
 	public IndexBrowser() {
 
 	}
 
 	public boolean run(final Core core) {
 		this.core = core;
+
 
 		if(core.getPluginManager().getPlugin("thaw.plugins.Hsqldb") == null) {
 			Logger.info(this, "Loading Hsqldb plugin");
@@ -48,7 +56,6 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 		}
 
 		hsqldb = (Hsqldb)core.getPluginManager().getPlugin("thaw.plugins.Hsqldb");
-
 		hsqldb.registerChild(this);
 
 		boolean newDb;
@@ -77,10 +84,32 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 
 		stateChanged(null);
 
+
+		configPanel = new IndexConfigPanel(core.getConfigWindow(), core.getConfig());
+		configPanel.addTab();
+
+		autoRefresh = null;
+
+		if (core.getConfig().getValue("indexAutoRefreshActivated") != null) {
+			if (Boolean.valueOf(core.getConfig().getValue("indexAutoRefreshActivated")).booleanValue()) {
+				autoRefresh = new AutoRefresh(hsqldb, browserPanel, core.getQueueManager(), core.getConfig());
+			}
+		} else {
+			if (AutoRefresh.DEFAULT_ACTIVATED) {
+				autoRefresh = new AutoRefresh(hsqldb, browserPanel, core.getQueueManager(), core.getConfig());
+			}
+		}
+
+		if (autoRefresh != null)
+			autoRefresh.start();
+
 		return true;
 	}
 
 	public boolean stop() {
+		if (autoRefresh != null)
+			autoRefresh.stop();
+
 		core.getMainWindow().getTabbedPane().removeChangeListener(this);
 
 		if (browserPanel != null) {
@@ -89,6 +118,8 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 		}
 
 		hsqldb.unregisterChild(this);
+
+		configPanel.removeTab();
 
 		return true;
 	}

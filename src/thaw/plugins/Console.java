@@ -40,10 +40,6 @@ public class Console implements Plugin, LogListener, ActionListener, Runnable {
 	private JScrollPane logAreaScrollPane;
 	private JButton saveToFile;
 
-	private JPanel configPanel;
-	private JLabel sizeLabel;
-	private JTextField sizeField;
-
 	private boolean threadRunning;
 	private boolean hasChanged;
 
@@ -76,17 +72,6 @@ public class Console implements Plugin, LogListener, ActionListener, Runnable {
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.console.console"), consolePanel);
 
-		configPanel = new JPanel();
-		configPanel.setLayout(new GridLayout(15, 1));
-
-		sizeLabel = new JLabel(I18n.getMessage("thaw.plugin.console.maxSize"));
-		sizeField = new JTextField(core.getConfig().getValue("consoleMaxLogSize"));
-
-		configPanel.add(sizeLabel);
-		configPanel.add(sizeField);
-
-		core.getConfigWindow().addTab(I18n.getMessage("thaw.plugin.console.console"), configPanel);
-
 		Logger.addLogListener(this);
 
 		Thread dispThread = new Thread(this);
@@ -100,11 +85,8 @@ public class Console implements Plugin, LogListener, ActionListener, Runnable {
 	public boolean stop() {
 		threadRunning = false;
 
-		core.getConfig().setValue("consoleMaxLogSize", sizeField.getText() );
-
 		Logger.removeLogListener(this);
 
-		core.getConfigWindow().removeTab(configPanel);
 		core.getMainWindow().removeTab(consolePanel);
 
 		return true;

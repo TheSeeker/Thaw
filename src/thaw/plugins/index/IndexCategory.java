@@ -494,6 +494,29 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 	}
 
 
+	public void register() {
+		if(children == null)
+			children = loadChildren();
+
+		for(final Iterator it = children.iterator();
+		    it.hasNext();) {
+			final IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
+			node.register();
+		}
+	}
+
+	public void unregister() {
+		if(children == null)
+			children = loadChildren();
+
+		for(final Iterator it = children.iterator();
+		    it.hasNext();) {
+			final IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
+			node.unregister();
+		}
+	}
+
+
 	public boolean isLeaf() {
 		return false;
 	}

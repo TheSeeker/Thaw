@@ -68,4 +68,7 @@ public interface IndexTreeNode {
 
 	public boolean isModifiable();
 	public boolean hasChanged();
+
+	public void register();
+	public void unregister();
 }

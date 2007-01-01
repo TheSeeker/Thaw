@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.Hashtable;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -31,6 +32,7 @@ import thaw.core.I18n;
 import thaw.core.IconBox;
 import thaw.core.Logger;
 import thaw.core.MainWindow;
+import thaw.core.FreenetURIHelper;
 import thaw.fcp.FCPQueueManager;
 import thaw.gui.JDragTree;
 import thaw.plugins.Hsqldb;
@@ -92,6 +94,9 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	private ToolbarModifier toolbarModifier;
 	private Vector toolbarActions;
 
+
+	private Hashtable registeredIndexes; /* currently, equals to all the indexes, but later, will be == to only the displayed indexes */
+
 	/**
 	 * @param queueManager Not used if selectionOnly is set to true
 	 * @param config Not used if selectionOnly is set to true (used for lastDestinationDirectory and lastSourceDirectory)
@@ -101,12 +106,12 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			 final IndexBrowserPanel indexBrowser,
 			 final Config config) {
 		this.queueManager = queueManager;
-
 		this.selectionOnly = selectionOnly;
 
 		panel = new JPanel();
 		panel.setLayout(new BorderLayout(10, 10));
 
+		registeredIndexes = new Hashtable();
 
 		root = new IndexCategory(queueManager, indexBrowser, -1, null, rootName);
 		root.loadChildren();
@@ -302,6 +307,14 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	}
 
 	/**
+	 * called by the index browser, you shouldn't have to bother about it
+	 */
+	public void makeFlatList() {
+		root.register();
+	}
+
+
+	/**
 	 * Used by IndexBrowserPanel when the visibility changed
 	 */
 	public ToolbarModifier getToolbarModifier() {
@@ -455,7 +468,6 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 				if(index.getTreeNode().getParent() != null)
 					treeModel.nodeChanged(index.getTreeNode().getParent());
 			}
-
 		}
 	}
 
@@ -548,17 +560,10 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 
 	public boolean alreadyExistingIndex(final String key) {
-		int maxLength = 0;
-
 		if ((key == null) || (key.length() <= 10))
 			return false;
 
-		if (key.length() <= 60)
-			maxLength = key.length();
-		else
-			maxLength = 60;
-
-		final String realKey = key.substring(0, maxLength).toLowerCase();
+		String realKey = FreenetURIHelper.getComparablePart(key);
 
 		try {
 			final Connection c = indexBrowser.getDb().getConnection();
@@ -603,4 +608,17 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		treeModel.reload();
 	}
 
+
+	public void registerIndex(Index index) {
+		registeredIndexes.put(FreenetURIHelper.getComparablePart(index.getPublicKey()),
+				      index);
+	}
+
+	public void unregisterIndex(Index index) {
+		registeredIndexes.remove(FreenetURIHelper.getComparablePart(index.getPublicKey()));
+	}
+
+	public Index getRegisteredIndex(String key) {
+		return ((Index)registeredIndexes.get(FreenetURIHelper.getComparablePart(key)));
+	}
 }

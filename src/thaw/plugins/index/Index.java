@@ -120,6 +120,19 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		this.setTransfer();
 	}
 
+
+	/**
+	 * Index registration allows to have a flat view of the loaded / displayed indexes
+	 */
+	public void register() {
+		indexBrowser.getIndexTree().registerIndex(this);
+	}
+
+	public void unregister() {
+		indexBrowser.getIndexTree().unregisterIndex(this);
+	}
+
+
 	public static boolean isDumbKey(final String key) {
 		return ((key == null) || key.equals("") || (key.length() < 20));
 	}
@@ -628,7 +641,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 						return;
 					}
 
-					loadXML(transfer.getPath());
+					if (changed)
+						loadXML(transfer.getPath());
 
 					save();
 
@@ -1113,10 +1127,10 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 		final Element rootEl = xmlDoc.getDocumentElement();
 
-		loadXMLFromRoot(rootEl);
+		loadXML(rootEl);
 	}
 
-	public void loadXMLFromRoot(Element rootEl) {
+	public void loadXML(Element rootEl) {
 		loadHeader(rootEl);
 		loadLinks(rootEl);
 		loadFileList(rootEl);

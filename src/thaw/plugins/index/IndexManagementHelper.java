@@ -139,7 +139,7 @@ public class IndexManagementHelper {
 		if (target == null)
 			target = indexBrowser.getIndexTree().getRoot();
 
-		if ((name == null) || (name.indexOf("/") >= 0)) {
+		if ((name == null) || (name.indexOf("/") >= 0) || name.indexOf("\\") >= 0) {
 			Logger.error(new IndexManagementHelper(), "invalid name");
 			return;
 		}
@@ -385,6 +385,11 @@ public class IndexManagementHelper {
 		}
 
 		final String name = Index.getNameFromKey(publicKey);
+
+		if (name == null || name.indexOf("/") >= 0 || name.indexOf("\\") >= 0) {
+			Logger.error(new IndexManagementHelper(), "Invalid index name !\n");
+			return;
+		}
 
 		IndexCategory parent;
 

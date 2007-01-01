@@ -218,5 +218,19 @@ public class FreenetURIHelper {
 		return Integer.parseInt(split[2]);
 	}
 
+
+	public static String getComparablePart(String key) {
+		if (key.startsWith("KSK@"))
+			return key;
+
+		int maxLength = 0;
+
+		if (key.length() <= 70)
+			maxLength = key.length();
+		else
+			maxLength = 70;
+
+		return key.substring(0, maxLength).toLowerCase();
+	}
 }
 
