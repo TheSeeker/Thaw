@@ -119,7 +119,8 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 		helpMenu = new JMenu(I18n.getMessage("thaw.menu.help"));
 
-		aboutHelpMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.about"));
+		aboutHelpMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.about"),
+						  IconBox.minHelp);
 		aboutHelpMenuItem.addActionListener(this);
 
 		helpMenu.add(aboutHelpMenuItem);
@@ -130,14 +131,18 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		// TOOLBAR
 		connectButton = new JButton(IconBox.connectAction);
 		connectButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.connect"));
+		connectButton.setBorderPainted(false);
 		disconnectButton = new JButton(IconBox.disconnectAction);
 		disconnectButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.disconnect"));
+		disconnectButton.setBorderPainted(false);
 
 		settingsButton = new JButton(IconBox.settings);
 		settingsButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.settings"));
+		settingsButton.setBorderPainted(false);
 
 		quitButton = new JButton(IconBox.quitAction);
 		quitButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.quit"));
+		quitButton.setBorderPainted(false);
 
 		connectButton.addActionListener(this);
 		disconnectButton.addActionListener(this);
@@ -217,7 +222,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 			lastToolBarModifier = null;
 
 		newToolBar = new JToolBar(I18n.getMessage("thaw.toolbar.title"));
-
+		newToolBar.setBorderPainted(false);
 		newToolBar.add(connectButton);
 		newToolBar.add(disconnectButton);
 		newToolBar.addSeparator();
@@ -228,9 +233,10 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 			for (final Iterator it = newButtons.iterator();
 			     it.hasNext();) {
 				final JButton button = (JButton)it.next();
-				if (button != null)
+				if (button != null) {
+					button.setBorderPainted(false);
 					newToolBar.add(button);
-				else
+				} else
 					newToolBar.addSeparator();
 			}
 			newToolBar.addSeparator();

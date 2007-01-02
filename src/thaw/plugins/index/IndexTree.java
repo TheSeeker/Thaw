@@ -263,7 +263,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 
-		button = new JButton(IconBox.insertAndAddToIndexAction);
+		button = new JButton(IconBox.folderNew);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addCategory"));
 		action = new IndexManagementHelper.IndexCategoryAdder(queueManager, indexBrowser, button);
 		action.setTarget(getRoot());
@@ -284,6 +284,23 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 
+		button = new JButton(IconBox.key);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.changeIndexKeys"));
+		action = new IndexManagementHelper.IndexKeyModifier(indexBrowser, button);
+		action.setTarget(getRoot());
+		toolbarModifier.addButtonToTheToolbar(button);
+		toolbarActions.add(action);
+
+		button = new JButton(IconBox.delete);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.delete"));
+		action = new IndexManagementHelper.IndexDeleter(indexBrowser, button);
+		action.setTarget(getRoot());
+		toolbarModifier.addButtonToTheToolbar(button);
+		toolbarActions.add(action);
+
+
+		toolbarModifier.addButtonToTheToolbar(null);
+
 		button = new JButton(IconBox.addToIndexAction);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addFilesWithoutInserting"));
 		action = new IndexManagementHelper.FileAdder(config, queueManager, indexBrowser, button);
@@ -298,12 +315,6 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 
-		button = new JButton(IconBox.delete);
-		button.setToolTipText(I18n.getMessage("thaw.plugin.index.delete"));
-		action = new IndexManagementHelper.IndexDeleter(indexBrowser, button);
-		action.setTarget(getRoot());
-		toolbarModifier.addButtonToTheToolbar(button);
-		toolbarActions.add(action);
 	}
 
 	/**
