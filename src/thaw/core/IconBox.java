@@ -63,6 +63,9 @@ public class IconBox {
 
 	public static ImageIcon folderNew;
 
+	public static ImageIcon mainWindow;
+
+	public static ImageIcon add;
 
 	/**
 	 * Not really used
@@ -120,6 +123,7 @@ public class IconBox {
 		IconBox.indexBrowser = IconBox.loadIcon("indexBrowser.png");
 		IconBox.minIndexBrowser = IconBox.loadIcon("min-indexBrowser.png");
 		IconBox.addToIndexAction = IconBox.loadIcon("add.png");
+		IconBox.add = IconBox.loadIcon("add.png");
 		IconBox.insertAndAddToIndexAction = IconBox.loadIcon("index.png");
 		IconBox.makeALinkAction = IconBox.loadIcon("makeLink.png");
 		IconBox.reconnectAction = IconBox.loadIcon("refresh.png");
@@ -132,6 +136,7 @@ public class IconBox {
 		IconBox.folderNew = IconBox.loadIcon("folder-new.png");
 		IconBox.help = IconBox.loadIcon("help.png");
 		IconBox.minHelp = IconBox.loadIcon("min-help.png");
+		IconBox.mainWindow = IconBox.loadIcon("mainWindow.png");
 	}
 
 }

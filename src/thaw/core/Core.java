@@ -98,15 +98,19 @@ public class Core implements Observer {
 	 * @return true is success, false if not
 	 */
 	public boolean initAll() {
+		IconBox.loadIcons();
+
 		splashScreen = new SplashScreen();
 
 		splashScreen.display();
 
 		splashScreen.setProgressionAndStatus(0, "Loading configuration ...");
+		splashScreen.addIcon(IconBox.settings);
 		if(!initConfig())
 			return false;
 
 		splashScreen.setProgressionAndStatus(10, "Connecting ...");
+		splashScreen.addIcon(IconBox.connectAction);
 		if(!initNodeConnection())
 			new WarningWindow(this, I18n.getMessage("thaw.warning.unableToConnectTo")+
 					  " "+ config.getValue("nodeAddress")+
@@ -114,10 +118,12 @@ public class Core implements Observer {
 
 
 		splashScreen.setProgressionAndStatus(30, "Preparing the main window ...");
+		splashScreen.addIcon(IconBox.mainWindow);
 		if(!initGraphics())
 			return false;
 
 		splashScreen.setProgressionAndStatus(40, "Loading plugins ...");
+		splashScreen.addIcon(IconBox.add);
 		if(!initPluginManager())
 			return false;
 
@@ -306,8 +312,6 @@ public class Core implements Observer {
 	 */
 	public boolean initGraphics() {
 		initializeLookAndFeel();
-
-		IconBox.loadIcons();
 
 		mainWindow = new MainWindow(this);
 
