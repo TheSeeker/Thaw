@@ -610,6 +610,11 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 
 	public void registerIndex(Index index) {
+		if (index.getPublicKey() == null) {
+			Logger.warning(this, "Hu ?! no key for index '"+index.toString()+"' ?");
+			return;
+		}
+
 		registeredIndexes.put(FreenetURIHelper.getComparablePart(index.getPublicKey()),
 				      index);
 	}

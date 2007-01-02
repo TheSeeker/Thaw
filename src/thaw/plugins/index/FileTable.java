@@ -350,6 +350,9 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		}
 
 		public Object getValueAt(final int row, final int column) {
+			if (files == null)
+				return null;
+
 			if (row >= files.size())
 				return null;
 

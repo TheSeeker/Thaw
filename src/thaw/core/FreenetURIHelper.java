@@ -220,6 +220,9 @@ public class FreenetURIHelper {
 
 
 	public static String getComparablePart(String key) {
+		if (key == null)
+			return null;
+
 		if (key.startsWith("KSK@"))
 			return key;
 

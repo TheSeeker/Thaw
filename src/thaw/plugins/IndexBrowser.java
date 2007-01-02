@@ -119,7 +119,8 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 
 		hsqldb.unregisterChild(this);
 
-		configPanel.removeTab();
+		if (configPanel != null)
+			configPanel.removeTab();
 
 		return true;
 	}

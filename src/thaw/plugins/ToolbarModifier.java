@@ -66,7 +66,7 @@ public class ToolbarModifier {
 	public void displayButtonsInTheToolbar() {
 		if (mainWindow != null) {
 			if (areDisplayed && mainWindow.getLastToolbarModifier() == this) {
-				Logger.warning(this, "Already displayed !");
+				Logger.notice(this, "Already displayed !");
 				return;
 			}
 
