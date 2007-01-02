@@ -136,7 +136,7 @@ public class FCPConnection extends Observable {
 	 */
 	public boolean connect() {
 		if((nodeAddress == null) || (port == 0)) {
-			Logger.warning(this, "Address or port not defined ! Unable to connect\n");
+			Logger.warning(this, "Address or port not defined ! Unable to connect");
 			return false;
 		}
 
@@ -161,8 +161,8 @@ public class FCPConnection extends Observable {
 		}
 
 		if(!socket.isConnected()) {
-			Logger.warning(this, "Unable to connect, but no exception ?! WTF ?\n");
-			Logger.warning(this, "Will try to continue ...\n");
+			Logger.warning(this, "Unable to connect, but no exception ?! WTF ?");
+			Logger.warning(this, "Will try to continue ...");
 		}
 
 		try {
@@ -231,7 +231,7 @@ public class FCPConnection extends Observable {
 				return false;
 			}
 		} else {
-			Logger.warning(this, "Cannot write if disconnected !\n");
+			Logger.warning(this, "Cannot write if disconnected !");
 			return false;
 		}
 
@@ -294,7 +294,7 @@ public class FCPConnection extends Observable {
 				bufferedOut.write(toWrite.getBytes());
 			}
 		} else {
-			Logger.warning(this, "Cannot write if disconnected !\n");
+			Logger.warning(this, "Cannot write if disconnected !");
 			if (checkLock)
 				removeFromWriterQueue();
 			return false;
