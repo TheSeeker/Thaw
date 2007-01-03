@@ -27,4 +27,9 @@ public interface Plugin {
 	 */
 	public String getNameForUser();
 
+
+	/**
+	 * Can return null
+	 */
+	public javax.swing.ImageIcon getIcon();
 }

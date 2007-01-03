@@ -244,4 +244,9 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 			queuePanels[DOWNLOAD_PANEL].removeSelectedTransfers();
 		}
 	}
+
+
+	public javax.swing.ImageIcon getIcon() {
+		return thaw.core.IconBox.queueWatcher;
+	}
 }

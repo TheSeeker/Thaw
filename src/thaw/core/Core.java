@@ -123,7 +123,6 @@ public class Core implements Observer {
 			return false;
 
 		splashScreen.setProgressionAndStatus(40, "Loading plugins ...");
-		splashScreen.addIcon(IconBox.add);
 		if(!initPluginManager())
 			return false;
 

@@ -205,4 +205,7 @@ public class Console implements Plugin, LogListener, ActionListener, Runnable {
 	}
 
 
+	public javax.swing.ImageIcon getIcon() {
+		return thaw.core.IconBox.terminal;
+	}
 }

@@ -66,7 +66,13 @@ public class PluginManager {
 			core.getSplashScreen().setProgressionAndStatus(core.getSplashScreen().getProgression()+progressJump,
 								       "Loading plugin '"+pluginName+"' ...");
 
-			loadPlugin(pluginName);
+			Plugin plugin = loadPlugin(pluginName);
+			javax.swing.ImageIcon icon = null;
+
+			if ((icon = plugin.getIcon()) != null)
+				core.getSplashScreen().addIcon(icon);
+			else
+				core.getSplashScreen().addIcon(IconBox.add);
 		}
 
 		return true;
@@ -151,23 +157,27 @@ public class PluginManager {
 	/**
 	 * Load a given plugin (without adding it to the config or running it).
 	 */
-	public boolean loadPlugin(final String className) {
+	public Plugin loadPlugin(final String className) {
+		Plugin plugin = null;
+
 		Logger.info(this, "Loading plugin: '"+className+"'");
 
 		try {
 			if(plugins.get(className) != null) {
 				Logger.warning(this, "loadPlugin(): Plugin '"+className+"' already loaded");
-				return false;
+				return null;
 			}
 
-			plugins.put(className, Class.forName(className).newInstance());
+			plugin = (Plugin)Class.forName(className).newInstance();
+
+			plugins.put(className, plugin);
 
 		} catch(final Exception e) {
 			Logger.warning(this, "loadPlugin('"+className+"'): Exception: "+e);
-			return false;
+			return null;
 		}
 
-		return true;
+		return plugin;
 	}
 
 

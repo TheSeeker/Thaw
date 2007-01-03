@@ -127,7 +127,7 @@ public class PluginConfigPanel implements Observer, ActionListener {
 
 	public void actionPerformed(final ActionEvent e) {
 		if((e.getSource() == addButton) || (e.getSource() == pluginToAdd)) {
-			if(core.getPluginManager().loadPlugin(pluginToAdd.getText())
+			if(core.getPluginManager().loadPlugin(pluginToAdd.getText()) != null
 			   && core.getPluginManager().runPlugin(pluginToAdd.getText())) {
 
 				core.getConfig().addPlugin(pluginToAdd.getText());

@@ -69,7 +69,7 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 		if(core.getPluginManager().getPlugin("thaw.plugins.QueueWatcher") == null) {
 			Logger.notice(this, "Loading QueueWatcher plugin");
 
-			if(!core.getPluginManager().loadPlugin("thaw.plugins.QueueWatcher")
+			if(core.getPluginManager().loadPlugin("thaw.plugins.QueueWatcher") == null
 			   || !core.getPluginManager().runPlugin("thaw.plugins.QueueWatcher")) {
 				Logger.error(this, "Unable to load thaw.plugins.QueueWatcher !");
 				return false;
@@ -159,4 +159,7 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 		return true;
 	}
 
+	public javax.swing.ImageIcon getIcon() {
+		return thaw.core.IconBox.insertions;
+	}
 }

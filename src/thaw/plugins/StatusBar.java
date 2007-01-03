@@ -135,5 +135,7 @@ public class StatusBar implements Runnable, Plugin {
 		return I18n.getMessage("thaw.plugin.statistics.statistics");
 	}
 
-
+	public javax.swing.ImageIcon getIcon() {
+		return thaw.core.IconBox.remove;
+	}
 }

@@ -66,6 +66,10 @@ public class IconBox {
 	public static ImageIcon mainWindow;
 
 	public static ImageIcon add;
+	public static ImageIcon remove;
+
+	public static ImageIcon terminal;
+	public static ImageIcon queueWatcher;
 
 	/**
 	 * Not really used
@@ -120,8 +124,8 @@ public class IconBox {
 		IconBox.minDownloads = IconBox.loadIcon("min-download.png");
 		IconBox.settings = IconBox.loadIcon("settings.png");
 		IconBox.minSettings = IconBox.loadIcon("min-settings.png");
-		IconBox.indexBrowser = IconBox.loadIcon("indexBrowser.png");
-		IconBox.minIndexBrowser = IconBox.loadIcon("min-indexBrowser.png");
+		IconBox.indexBrowser = IconBox.loadIcon("index.png");
+		IconBox.minIndexBrowser = IconBox.loadIcon("min-index.png");
 		IconBox.addToIndexAction = IconBox.loadIcon("add.png");
 		IconBox.add = IconBox.loadIcon("add.png");
 		IconBox.insertAndAddToIndexAction = IconBox.loadIcon("index.png");
@@ -137,6 +141,9 @@ public class IconBox {
 		IconBox.help = IconBox.loadIcon("help.png");
 		IconBox.minHelp = IconBox.loadIcon("min-help.png");
 		IconBox.mainWindow = IconBox.loadIcon("mainWindow.png");
+		IconBox.terminal = IconBox.loadIcon("terminal.png");
+		IconBox.remove = IconBox.loadIcon("remove.png");
+		IconBox.queueWatcher = IconBox.loadIcon("queueWatcher.png");
 	}
 
 }

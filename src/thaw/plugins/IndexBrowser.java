@@ -48,7 +48,7 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 		if(core.getPluginManager().getPlugin("thaw.plugins.Hsqldb") == null) {
 			Logger.info(this, "Loading Hsqldb plugin");
 
-			if(!core.getPluginManager().loadPlugin("thaw.plugins.Hsqldb")
+			if(core.getPluginManager().loadPlugin("thaw.plugins.Hsqldb") == null
 			   || !core.getPluginManager().runPlugin("thaw.plugins.Hsqldb")) {
 				Logger.error(this, "Unable to load thaw.plugins.Hsqldb !");
 				return false;
@@ -147,4 +147,7 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 		browserPanel.isVisible(core.getMainWindow().getTabbedPane().getSelectedIndex() == tabId);
 	}
 
+	public javax.swing.ImageIcon getIcon() {
+		return thaw.core.IconBox.indexBrowser;
+	}
 }

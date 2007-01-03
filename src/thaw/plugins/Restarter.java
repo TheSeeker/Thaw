@@ -222,4 +222,7 @@ public class Restarter implements Observer, Runnable, Plugin {
 		return I18n.getMessage("thaw.plugin.restarter.restarter");
 	}
 
+	public javax.swing.ImageIcon getIcon() {
+		return null;
+	}
 }

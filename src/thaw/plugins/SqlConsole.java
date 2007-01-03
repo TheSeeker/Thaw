@@ -50,7 +50,7 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 		if(core.getPluginManager().getPlugin("thaw.plugins.Hsqldb") == null) {
 			Logger.info(this, "Loading Hsqldb plugin");
 
-			if(!core.getPluginManager().loadPlugin("thaw.plugins.Hsqldb")
+			if(core.getPluginManager().loadPlugin("thaw.plugins.Hsqldb") == null
 			   || !core.getPluginManager().runPlugin("thaw.plugins.Hsqldb")) {
 				Logger.error(this, "Unable to load thaw.plugins.Hsqldb !");
 				return false;
@@ -304,4 +304,7 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 
 	}
 
+	public javax.swing.ImageIcon getIcon() {
+		return thaw.core.IconBox.terminal;
+	}
 }

@@ -17,7 +17,7 @@ public class SplashScreen {
 	public final static int SIZE_X = 500;
 	public final static int SIZE_Y = 150;
 
-	public final static int NMB_ICONS = 4;
+	public final static int NMB_ICONS = 8;
 
 	public JDialog splashScreen;
 	public JProgressBar progressBar;
@@ -109,11 +109,13 @@ public class SplashScreen {
 		lb.setHorizontalAlignment(JLabel.CENTER);
 		lb.setVerticalAlignment(JLabel.CENTER);
 
-		iconPanel.remove((java.awt.Component)emptyLabels.get(0));
+		if (emptyLabels.size() > 0)
+			iconPanel.remove((java.awt.Component)emptyLabels.get(0));
 
 		iconPanel.add(lb, nmbIcon);
 
-		emptyLabels.removeElementAt(0);
+		if (emptyLabels.size() > 0)
+			emptyLabels.removeElementAt(0);
 
 		nmbIcon++;
 
