@@ -460,7 +460,14 @@ public class File extends java.util.Observable implements java.util.Observer {
 
 			if(transfer.isFinished() && (transfer instanceof FCPClientGet)) {
 				((FCPClientGet)transfer).deleteObserver(this);
-				size = (new java.io.File(transfer.getPath())).length();
+
+				if (transfer.getPath() != null) {
+					java.io.File file = new java.io.File(transfer.getPath());
+
+					if (file.exists() && file.isFile())
+						size = file.length();
+				}
+
 			}
 
 			if(transfer.isFinished() && transfer.isSuccessful()) {
