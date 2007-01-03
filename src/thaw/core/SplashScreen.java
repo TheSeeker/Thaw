@@ -54,9 +54,10 @@ public class SplashScreen {
 			iconPanel.add(lb, i);
 		}
 
-		final JLabel thawLabel = new JLabel("   Thaw");
+		final JLabel thawLabel = new JLabel("Thaw");
 
 		thawLabel.setFont(new Font("Dialog", Font.BOLD, 42));
+		thawLabel.setHorizontalAlignment(JLabel.CENTER);
 
 		subPanel.add(thawLabel);
 		subPanel.add(iconPanel);
