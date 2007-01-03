@@ -92,14 +92,17 @@ public class SplashScreen {
 	 * @param progress In pourcent
 	 */
 	public void setProgression(final int progress) {
-		if(progressBar != null)
+		if(progressBar != null && splashScreen != null) {
 			progressBar.setValue(progress);
-
-		splashScreen.getContentPane().validate();
+			splashScreen.getContentPane().validate();
+		}
 	}
 
 
 	public void addIcon(ImageIcon icon) {
+		if (splashScreen == null)
+			return;
+
 		JLabel lb = new JLabel(icon);
 
 		lb.setHorizontalAlignment(JLabel.CENTER);
@@ -125,10 +128,10 @@ public class SplashScreen {
 
 
 	public void setStatus(final String status) {
-		if(progressBar != null)
+		if(progressBar != null && splashScreen != null) {
 			progressBar.setString(status);
-
-		splashScreen.getContentPane().validate();
+			splashScreen.getContentPane().validate();
+		}
 	}
 
 	public void setProgressionAndStatus(final int progress, final String status) {
