@@ -317,7 +317,7 @@ public class IndexManagementHelper {
 
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled((node != null) || (node instanceof Index));
+			getActionSource().setEnabled((node != null) && (node instanceof Index));
 		}
 
 		public void apply() {

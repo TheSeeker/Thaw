@@ -66,13 +66,7 @@ public class PluginManager {
 			core.getSplashScreen().setProgressionAndStatus(core.getSplashScreen().getProgression()+progressJump,
 								       "Loading plugin '"+pluginName+"' ...");
 
-			Plugin plugin = loadPlugin(pluginName);
-			javax.swing.ImageIcon icon = null;
-
-			if ((icon = plugin.getIcon()) != null)
-				core.getSplashScreen().addIcon(icon);
-			else
-				core.getSplashScreen().addIcon(IconBox.add);
+			loadPlugin(pluginName);
 		}
 
 		return true;
@@ -84,7 +78,7 @@ public class PluginManager {
 	public boolean runPlugins() {
 		Iterator pluginIt;
 
-		if (plugins == null) {
+		if (plugins == null || plugins.size() == 0) {
 			Logger.error(this, "No plugin to run ?!");
 			return false;
 		}
@@ -104,8 +98,15 @@ public class PluginManager {
 
 					core.getSplashScreen().setProgressionAndStatus(core.getSplashScreen().getProgression()+progressJump,
 											    "Starting plugin '"+plugin.getClass().getName()+"' ...");
-					plugin.run(core);
 
+					javax.swing.ImageIcon icon = null;
+
+					if ((icon = plugin.getIcon()) != null)
+						core.getSplashScreen().addIcon(icon);
+					else
+						core.getSplashScreen().addIcon(IconBox.add);
+
+					plugin.run(core);
 				}
 				else
 					Logger.notice(this, "Plugin == null ?");

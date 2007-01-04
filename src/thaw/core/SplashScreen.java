@@ -17,7 +17,7 @@ public class SplashScreen {
 	public final static int SIZE_X = 500;
 	public final static int SIZE_Y = 150;
 
-	public final static int NMB_ICONS = 8;
+	public final static int NMB_ICONS = 9;
 
 	public JDialog splashScreen;
 	public JProgressBar progressBar;
@@ -120,6 +120,7 @@ public class SplashScreen {
 		nmbIcon++;
 
 		splashScreen.getContentPane().validate();
+		lb.repaint();
 	}
 
 	public int getProgression() {
