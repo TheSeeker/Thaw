@@ -490,7 +490,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 			st.setInt(6, revision);
 
-			if( ((IndexTreeNode)treeNode.getParent()).getId() < 0)
+			if( treeNode.getParent() == null || ((IndexTreeNode)treeNode.getParent()).getId() < 0)
 				st.setNull(7, Types.INTEGER);
 			else
 				st.setInt(7, ((IndexTreeNode)treeNode.getParent()).getId());
