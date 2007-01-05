@@ -27,6 +27,13 @@ public class IndexRoot extends IndexCategory {
 		if (!areChildrenLoaded())
 			loadChildren();
 
+		/* TODO : Don't use getDirectChild()
+		 *        Use the database :
+		 *            ask '[importedFolderName]%' ORDER BY name DESC LIMIT 1
+		 *        and pray there is no importedFolder n°10 or more,
+		 *        or that the database will return the good one :p
+		 */
+
 		idx = 0;
 		name = I18n.getMessage("thaw.plugin.index.importedFolderName");
 		node = getDirectChild(name);
