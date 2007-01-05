@@ -374,12 +374,17 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 		}
 	}
 
-	public void set(final Vector children, final int position, final TreeNode node) {
+	public void set(final Vector children, int position, final TreeNode node) {
 		if((node == this) || (node == null))
 			return;
 
 		if (children == null)
 			loadChildren();
+
+		if (position < 0) {
+			Logger.warning(this, "set(Vector, int position, TreeNode) : Gave a stupid position: "+position);
+			position = 0;
+		}
 
 		if(children.size() <= position) {
 			children.setSize(position+1);
