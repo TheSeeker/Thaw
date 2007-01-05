@@ -264,15 +264,14 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			return;
 		}
 
-		//String tmpdir = System.getProperty("java.io.tmpdir");
+		String tmpdir = System.getProperty("java.io.tmpdir");
 
-		String tmpdir = "tmp";
+		if (tmpdir == null)
+			tmpdir = "";
+		else
+			tmpdir = tmpdir + java.io.File.separator;
 
-		(new File(tmpdir)).mkdir(); // we don't even care if it it alread existed or not
-
-		tmpdir = tmpdir + java.io.File.separator;
-
-		targetFile = (new java.io.File(tmpdir + realName +".frdx")).getAbsoluteFile();
+		targetFile = new java.io.File(tmpdir + realName +".frdx");
 
 		if (transfer != null) {
 			Logger.notice(this, "A transfer is already running");
@@ -357,10 +356,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 		Logger.info(this, "Key asked: "+key);
 
-		File dir = new File("tmp");
-		dir.mkdir();
 
-		clientGet = new FCPClientGet(key, 2, 2, false, -1, dir.getAbsolutePath());
+		clientGet = new FCPClientGet(key, 2, 2, false, -1, null);
 		setTransfer(clientGet);
 
 		/*
