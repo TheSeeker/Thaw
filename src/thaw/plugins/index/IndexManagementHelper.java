@@ -135,13 +135,13 @@ public class IndexManagementHelper {
 		}
 	}
 
-	public static void createIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, IndexCategory target, final String name) {
+	public static Index createIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, IndexCategory target, final String name) {
 		if (target == null)
 			target = indexBrowser.getIndexTree().getRoot();
 
 		if ((name == null) || (name.indexOf("/") >= 0) || name.indexOf("\\") >= 0) {
 			Logger.error(new IndexManagementHelper(), "invalid name");
-			return;
+			return null;
 		}
 
 		final Index index = new Index(queueManager, indexBrowser, -1, target, name, name, null, null, 0, null);
@@ -150,6 +150,8 @@ public class IndexManagementHelper {
 		index.create();
 
 		indexBrowser.getIndexTree().addToIndexCategory(target, index);
+
+		return index;
 	}
 
 
@@ -362,33 +364,40 @@ public class IndexManagementHelper {
 	}
 
 
-	public static void addIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final IndexCategory target, final String publicKey) {
-		IndexManagementHelper.reuseIndex(queueManager, indexBrowser, target, publicKey, null);
+	public static Index addIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final IndexCategory target, final String publicKey) {
+		return IndexManagementHelper.reuseIndex(queueManager, indexBrowser, target, publicKey, null);
 	}
 
+	public static Index reuseIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final IndexCategory target, String publicKey, String privateKey) {
+		return reuseIndex(queueManager, indexBrowser, target, publicKey, privateKey, true);
+	}
 
 	/**
 	 * Can be use directly
 	 * @param privateKey Can be null
 	 */
-	public static void reuseIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final IndexCategory target, String publicKey, String privateKey) {
+	public static Index reuseIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final IndexCategory target, String publicKey, String privateKey,
+				      boolean load) {
 
 		publicKey = FreenetURIHelper.cleanURI(publicKey);
 		privateKey = FreenetURIHelper.cleanURI(privateKey);
 
 		if (publicKey == null)
-			return;
+			return null;
+
+		if (privateKey != null && privateKey.equals(""))
+			privateKey = null;
 
 		if (Index.isAlreadyKnown(indexBrowser.getDb(), publicKey)) {
 			Logger.notice(new IndexManagementHelper(), "Index already added !");
-			return;
+			return null;
 		}
 
 		final String name = Index.getNameFromKey(publicKey);
 
 		if (name == null || name.indexOf("/") >= 0 || name.indexOf("\\") >= 0) {
 			Logger.error(new IndexManagementHelper(), "Invalid index name !\n");
-			return;
+			return null;
 		}
 
 		IndexCategory parent;
@@ -404,11 +413,14 @@ public class IndexManagementHelper {
 
 		index.create();
 
-		index.updateFromFreenet(-1);
+		if (load)
+			index.updateFromFreenet(-1);
 
 		parent.insert(index.getTreeNode(), 0);
 
 		indexBrowser.getIndexTree().reloadModel(parent);
+
+		return index;
 	}
 
 
@@ -434,7 +446,7 @@ public class IndexManagementHelper {
 	}
 
 
-	public static void addIndexCategory(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, IndexCategory target, final String name) {
+	public static IndexCategory addIndexCategory(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, IndexCategory target, final String name) {
 		if (target == null)
 			target = indexBrowser.getIndexTree().getRoot();
 
@@ -443,6 +455,8 @@ public class IndexManagementHelper {
 		newCat.create();
 
 		indexBrowser.getIndexTree().addToIndexCategory(target, newCat);
+
+		return newCat;
 	}
 
 

@@ -63,10 +63,11 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 		newDb = false;
 
 		if (core.getConfig().getValue("indexDatabaseVersion") == null) {
-			DatabaseManager.createTables(hsqldb);
 			newDb = true;
 			core.getConfig().setValue("indexDatabaseVersion", "1");
 		}
+
+		DatabaseManager.createTables(hsqldb);
 
 		browserPanel = new IndexBrowserPanel(hsqldb, core.getQueueManager(), core.getConfig(), core.getMainWindow());
 		setMainWindow(core.getMainWindow());
@@ -104,6 +105,10 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 			autoRefresh.start();
 
 		return true;
+	}
+
+	public IndexBrowserPanel getIndexBrowserPanel() {
+		return browserPanel;
 	}
 
 	public boolean stop() {

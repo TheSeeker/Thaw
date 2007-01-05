@@ -1289,4 +1289,30 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		return false;
 	}
 
+
+	public Element do_export(Document xmlDoc, boolean withContent) {
+		Element e = xmlDoc.createElement("fullIndex");
+
+		e.setAttribute("displayName", displayName);
+		e.setAttribute("publicKey", getPublicKey());
+		if (getPrivateKey() != null)
+			e.setAttribute("privateKey", getPrivateKey());
+
+		if (withContent) {
+			e.appendChild(getXMLHeader(xmlDoc));
+			e.appendChild(getXMLLinks(xmlDoc));
+			e.appendChild(getXMLFileList(xmlDoc));
+		}
+
+		return e;
+	}
+
+	/**
+	 * will call create() !!
+	 */
+	public void do_import(Element e) {
+		String dn;
+		loadXML(e);
+	}
+
 }

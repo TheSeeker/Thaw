@@ -13,6 +13,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import thaw.core.Logger;
 import thaw.fcp.FCPQueueManager;
 import thaw.plugins.Hsqldb;
@@ -111,7 +116,7 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 			child.delete();
 		}
 
-		children = null;
+		unloadChildren();
 
 		try {
 			final Connection c = db.getConnection();
@@ -124,7 +129,6 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 	}
 
 	public void rename(final String name) {
-
 		try {
 			final Connection c = db.getConnection();
 			final PreparedStatement st = c.prepareStatement("UPDATE indexCategories SET name = ? WHERE id = ?");
@@ -269,6 +273,10 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 		return children;
 	}
 
+	public void unloadChildren() {
+		children = null;
+	}
+
 
 	public void loadChildIndexes(final Vector children) {
 
@@ -369,6 +377,9 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 	public void set(final Vector children, final int position, final TreeNode node) {
 		if((node == this) || (node == null))
 			return;
+
+		if (children == null)
+			loadChildren();
 
 		if(children.size() <= position) {
 			children.setSize(position+1);
@@ -517,8 +528,82 @@ public class IndexCategory extends DefaultMutableTreeNode implements IndexTreeNo
 	}
 
 
+	public Element do_export(Document xmlDoc, boolean withContent) {
+		Element e = xmlDoc.createElement("indexCategory");
+
+		if (id != -1)
+			e.setAttribute("name", name);
+
+		if(children == null)
+			children = loadChildren();
+
+		for(final Iterator it = children.iterator();
+		    it.hasNext();) {
+			final IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
+			e.appendChild(node.do_export(xmlDoc, withContent));
+		}
+
+		unloadChildren();
+
+		return e;
+	}
+
+	/**
+	 * will call create() !
+	 * @param e must be a indexCategory tag
+	 * @see #do_export(Document, boolean)
+	 */
+	public void do_import(Element e) {
+		NodeList list = e.getChildNodes();
+
+		for (int i = 0 ; i < list.getLength(); i++) {
+			Node n = list.item(i);
+
+			if (n.getNodeType() == Node.ELEMENT_NODE) {
+				Element el = (Element)n;
+
+				if (el.getTagName().equals("fullIndex")) {
+					Index index = IndexManagementHelper.reuseIndex(queueManager, indexBrowser,
+										       this, el.getAttribute("publicKey"),
+										       el.getAttribute("privateKey"), false);
+					if (index != null) {
+						index.rename(el.getAttribute("displayName"));
+						index.do_import(el);
+					}
+				}
+
+				if (el.getTagName().equals("indexCategory")) {
+					IndexCategory newCat = IndexManagementHelper.addIndexCategory(queueManager, indexBrowser, this,
+												      el.getAttribute("name"));
+					newCat.do_import(el);
+				}
+			}
+		}
+	}
+
+
 	public boolean isLeaf() {
 		return false;
 	}
 
+	/**
+	 * used to create import directory
+	 */
+	protected IndexTreeNode getDirectChild(String name) {
+		if(children == null)
+			children = loadChildren();
+
+		for(final Iterator it = children.iterator();
+		    it.hasNext();) {
+			final IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)it.next()).getUserObject();
+			if (name.equals(node.toString()))
+				return node;
+		}
+
+		return null;
+	}
+
+	public boolean areChildrenLoaded() {
+		return (children != null);
+	}
 }

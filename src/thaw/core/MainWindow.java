@@ -56,11 +56,14 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	private JMenuBar menuBar = null;
 	private JMenu fileMenu = null;
 
+	private Vector fileMenuList = null;
+
 	private JMenuItem reconnectionFileMenuItem = null;
 	private JMenuItem optionsFileMenuItem = null;
 	private JMenuItem quitFileMenuItem = null;
 
 	private JMenu helpMenu = null;
+	private Vector menuList = null;
 	private JMenuItem aboutHelpMenuItem = null;
 
 	private JToolBar toolBar = null;
@@ -98,7 +101,11 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		// MENUS
 
 		menuBar = new JMenuBar();
+		menuList = new Vector();
+
+
 		fileMenu = new JMenu(I18n.getMessage("thaw.menu.file"));
+		fileMenuList = new Vector();
 
 		reconnectionFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.reconnect"),
 							 IconBox.minReconnectAction);
@@ -106,6 +113,10 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 						    IconBox.minSettings);
 		quitFileMenuItem = new JMenuItem(I18n.getMessage("thaw.menu.item.quit"),
 						 IconBox.minQuitAction);
+
+		fileMenuList.add(reconnectionFileMenuItem);
+		fileMenuList.add(optionsFileMenuItem);
+		fileMenuList.add(quitFileMenuItem);
 
 		reconnectionFileMenuItem.addActionListener(this);
 		optionsFileMenuItem.addActionListener(this);
@@ -116,6 +127,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		fileMenu.add(quitFileMenuItem);
 
 		menuBar.add(fileMenu);
+		menuList.add(fileMenu);
 
 		helpMenu = new JMenu(I18n.getMessage("thaw.menu.help"));
 
@@ -127,6 +139,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 		//menuBar.add(Box.createHorizontalGlue());
 		menuBar.add(helpMenu);
+		menuList.add(helpMenu);
 
 		// TOOLBAR
 		connectButton = new JButton(IconBox.connectAction);
@@ -291,12 +304,69 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	}
 
 	/**
-	 * Used by plugins to add their own menu. Not recommanded for the moment.
-	 * Need to find a more elegant way.
-	 * @return Check it does not return null.
+	 * Used by plugins to add their own menu.
 	 */
-	public JMenuBar getMenuBar() {
-		return menuBar;
+	public void insertMenuAt(JMenu menu, int position) {
+		menuList.add(position, menu);
+		refreshMenuBar();
+	}
+
+	public void removeMenu(JMenu menu) {
+		menuList.remove(menu);
+		refreshMenuBar();
+	}
+
+	protected void refreshMenuBar() {
+		Logger.info(this, "Display "+
+			    Integer.toString(menuList.size())+
+			    " menus in the main window");
+
+		/* rebuilding menubar */
+		JMenuBar bar = new JMenuBar();
+
+		for (Iterator it = menuList.iterator();
+		     it.hasNext();) {
+			JMenu m = (JMenu)it.next();
+			bar.add(m);
+		}
+
+		mainWindow.setJMenuBar(bar);
+		menuBar = bar;
+		mainWindow.validate(); /* no getContentPane() ! else it won't work ! */
+	}
+
+
+	/**
+	 * Used by plugins to add their own menu / menuItem to the menu 'file'.
+	 */
+	public void insertInFileMenuAt(Object newItem, int position) {
+		fileMenuList.add(position, newItem);
+		refreshFileMenu();
+	}
+
+	public void removeFromFileMenu(Object item) {
+		fileMenuList.remove(item);
+		refreshFileMenu();
+	}
+
+	protected void refreshFileMenu() {
+		/* rebuilding menubar */
+		JMenu m = new JMenu(I18n.getMessage("thaw.menu.file"));
+
+		for (Iterator it = fileMenuList.iterator();
+		     it.hasNext();) {
+			Object e = it.next();
+			if (e instanceof JMenuItem)
+				m.add((JMenuItem)e);
+			else
+				m.add((JMenu)e);
+		}
+
+		menuList.remove(fileMenu);
+		fileMenu = m;
+		menuList.add(0, fileMenu);
+
+		refreshMenuBar();
 	}
 
 

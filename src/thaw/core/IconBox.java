@@ -69,7 +69,13 @@ public class IconBox {
 	public static ImageIcon remove;
 
 	public static ImageIcon terminal;
+	public static ImageIcon minTerminal;
 	public static ImageIcon queueWatcher;
+	public static ImageIcon importExport;
+
+	public static ImageIcon minImportAction;
+	public static ImageIcon minExportAction;
+
 
 	/**
 	 * Not really used
@@ -142,8 +148,12 @@ public class IconBox {
 		IconBox.minHelp = IconBox.loadIcon("min-help.png");
 		IconBox.mainWindow = IconBox.loadIcon("mainWindow.png");
 		IconBox.terminal = IconBox.loadIcon("terminal.png");
+		IconBox.minTerminal = IconBox.loadIcon("min-terminal.png");
 		IconBox.remove = IconBox.loadIcon("remove.png");
 		IconBox.queueWatcher = IconBox.loadIcon("queueWatcher.png");
+		IconBox.importExport = IconBox.loadIcon("refresh.png");
+		IconBox.minImportAction = IconBox.loadIcon("min-import.png");
+		IconBox.minExportAction = IconBox.loadIcon("min-export.png");
 	}
 
 }

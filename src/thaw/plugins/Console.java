@@ -70,7 +70,7 @@ public class Console implements Plugin, LogListener, ActionListener, Runnable {
 		consolePanel.add(logAreaScrollPane, BorderLayout.CENTER);
 		consolePanel.add(saveToFile, BorderLayout.SOUTH);
 
-		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.console.console"), consolePanel);
+		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.console.console"), thaw.core.IconBox.minTerminal, consolePanel);
 
 		Logger.addLogListener(this);
 

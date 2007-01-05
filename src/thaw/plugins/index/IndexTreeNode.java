@@ -3,6 +3,8 @@ package thaw.plugins.index;
 import java.util.Vector;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import org.w3c.dom.Element;
+import org.w3c.dom.Document;
 
 
 public interface IndexTreeNode {
@@ -71,4 +73,10 @@ public interface IndexTreeNode {
 
 	public void register();
 	public void unregister();
+
+	/**
+	 * Will export private keys too !
+	 */
+	public Element do_export(Document xmlDoc, boolean withContent);
+	public void do_import(Element e);
 }

@@ -1,9 +1,28 @@
 package thaw.plugins.index;
 
-import java.sql.SQLException;
+import java.sql.*;
+
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+
 
 import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
+import thaw.fcp.FCPQueueManager;
 
 /**
  * Creates all the tables used to save the indexes,
@@ -133,11 +152,143 @@ public class DatabaseManager {
 	}
 
 
-	public static void exportDatabase(IndexTree indexTree) {
+	public static int getNmbIndexes(Hsqldb db) {
+		int nmb;
 
+		try {
+			final Connection c = db.getConnection();
+			PreparedStatement st;
+
+			st = c.prepareStatement("SELECT count(id) FROM indexes");
+			st.execute();
+
+			try {
+				final ResultSet answer = st.getResultSet();
+				answer.next();
+				nmb = answer.getInt(1);
+			} catch(final SQLException e) {
+				nmb = 0;
+			}
+
+		} catch(final SQLException e) {
+			Logger.error(new DatabaseManager(), "Unable to insert the new index category in the db, because: "+e.toString());
+
+			return 0;
+		}
+
+		return nmb;
 	}
 
-	public static void importDatabase(IndexTree indexTree) {
+
+	public static void exportDatabase(java.io.File dest, Hsqldb db, IndexTree indexTree, boolean withContent) {
+		int nmbIndexes = getNmbIndexes(db);
+
+
+		Logger.info(new DatabaseManager(), "Generating export ...");
+
+		FileOutputStream outputStream;
+
+		try {
+			outputStream = new FileOutputStream(dest);
+		} catch(final java.io.FileNotFoundException e) {
+			Logger.warning(new DatabaseManager(), "Unable to create file '"+dest.toString()+"' ! not generated !");
+			return;
+		}
+
+		final StreamResult streamResult = new StreamResult(outputStream);
+		Document xmlDoc;
+
+		final DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder xmlBuilder;
+
+		try {
+			xmlBuilder = xmlFactory.newDocumentBuilder();
+		} catch(final javax.xml.parsers.ParserConfigurationException e) {
+			Logger.error(new DatabaseManager(), "Unable to generate the index because : "+e.toString());
+			return;
+		}
+
+		final DOMImplementation impl = xmlBuilder.getDOMImplementation();
+
+		xmlDoc = impl.createDocument(null, "indexDatabase", null);
+
+		final Element rootEl = xmlDoc.getDocumentElement();
+
+
+		rootEl.appendChild(indexTree.getRoot().do_export(xmlDoc, withContent));
+
+
+		/* Serialization */
+		final DOMSource domSource = new DOMSource(xmlDoc);
+		final TransformerFactory transformFactory = TransformerFactory.newInstance();
+
+		Transformer serializer;
+
+		try {
+			serializer = transformFactory.newTransformer();
+		} catch(final javax.xml.transform.TransformerConfigurationException e) {
+			Logger.error(new DatabaseManager(), "Unable to save index because: "+e.toString());
+			return;
+		}
+
+		serializer.setOutputProperty(OutputKeys.ENCODING,"UTF-8");
+		serializer.setOutputProperty(OutputKeys.INDENT,"yes");
+
+		/* final step */
+		try {
+			serializer.transform(domSource, streamResult);
+		} catch(final javax.xml.transform.TransformerException e) {
+			Logger.error(new DatabaseManager(), "Unable to save index because: "+e.toString());
+			return;
+		}
+
+		Logger.info(new DatabaseManager(), "Export done");
+	}
+
+
+	public static void importDatabase(java.io.File source, IndexBrowserPanel indexBrowser, FCPQueueManager queueManager) {
+		java.io.InputStream input;
+
+		Logger.info(new DatabaseManager(), "Importing ...");
+
+		try {
+			input = new FileInputStream(source);
+		} catch(final java.io.FileNotFoundException e) {
+			Logger.error(new DatabaseManager(), "Unable to load XML: FileNotFoundException ('"+source.getPath()+"') ! : "+e.toString());
+			return;
+		}
+
+		final DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder xmlBuilder;
+
+		try {
+			xmlBuilder = xmlFactory.newDocumentBuilder();
+		} catch(final javax.xml.parsers.ParserConfigurationException e) {
+			Logger.error(new DatabaseManager(), "Unable to load index because: "+e.toString());
+			return;
+		}
+
+		Document xmlDoc;
+
+		try {
+			xmlDoc = xmlBuilder.parse(input);
+		} catch(final org.xml.sax.SAXException e) {
+			Logger.error(new DatabaseManager(), "Unable to load XML file because: "+e.toString());
+			return;
+		} catch(final java.io.IOException e) {
+			Logger.error(new DatabaseManager(), "Unable to load index because: "+e.toString());
+			return;
+		}
+
+		final Element rootEl = xmlDoc.getDocumentElement();
+
+		Element e = (Element)rootEl.getElementsByTagName("indexCategory").item(0);
+
+		IndexCategory importCategory = indexBrowser.getIndexTree().getRoot().getNewImportFolder();
+
+		importCategory.do_import(e);
+
+		Logger.info(new DatabaseManager(), "Import done");
 
 	}
 }

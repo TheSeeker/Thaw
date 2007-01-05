@@ -50,7 +50,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	private JPanel panel;
 
 	private JTree tree;
-	private IndexCategory root;
+	private IndexRoot root;
 
 	private JPopupMenu indexCategoryMenu;
 	private Vector indexCategoryActions; /* IndexManagementHelper.MenuAction */
@@ -113,7 +113,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		registeredIndexes = new Hashtable();
 
-		root = new IndexCategory(queueManager, indexBrowser, -1, null, rootName);
+		root = new IndexRoot(queueManager, indexBrowser, rootName);
 		root.loadChildren();
 
 		root.addObserver(this);
@@ -387,7 +387,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		return tree;
 	}
 
-	public IndexCategory getRoot() {
+	public IndexRoot getRoot() {
 		return root;
 	}
 
