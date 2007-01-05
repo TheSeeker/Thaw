@@ -26,7 +26,7 @@ import thaw.core.Plugin;
 /**
  * Quick and dirty console showing Thaw logs, and allowing to save them.
  */
-public class Console implements Plugin, LogListener, ActionListener, Runnable {
+public class LogConsole implements Plugin, LogListener, ActionListener, Runnable {
 	public final static int MAX_LINE = 512;
 
 	private Core core;
@@ -43,7 +43,7 @@ public class Console implements Plugin, LogListener, ActionListener, Runnable {
 	private boolean threadRunning;
 	private boolean hasChanged;
 
-	public Console() {
+	public LogConsole() {
 
 	}
 
