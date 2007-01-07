@@ -229,9 +229,12 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		fileMenu.add(item);
 		indexAndFileActions.add(new IndexManagementHelper.FileAdder(config, queueManager, indexBrowser, item));
 
+
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addKeys"));
 		fileMenu.add(item);
-		indexAndFileActions.add(new IndexManagementHelper.KeyAdder(indexBrowser, item));
+		IndexManagementHelper.IndexAction ac = new IndexManagementHelper.KeyAdder(indexBrowser, item);
+		indexAndFileActions.add(ac);
+
 
 		// Link menu
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addLink"));

@@ -67,7 +67,9 @@ public class IndexManagementHelper {
 
 		private IndexBrowserPanel indexBrowser;
 
-		public BasicIndexAction(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+		public BasicIndexAction(final FCPQueueManager queueManager,
+					final IndexBrowserPanel indexBrowser,
+					final AbstractButton actionSource) {
 			this.indexBrowser = indexBrowser;
 			this.actionSource = actionSource;
 			target = null;
@@ -882,6 +884,8 @@ public class IndexManagementHelper {
 		}
 
 		public void actionPerformed(final ActionEvent e) {
+			super.actionPerformed(e);
+
 			if (e.getSource() == okButton) {
 				final Vector keyVec = new Vector();
 
