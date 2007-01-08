@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
+import java.util.LinkedHashMap;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -15,7 +16,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-
+import javax.swing.JCheckBox;
 
 /**
  * PluginConfigPanel. Creates and manages the panel containing all the things to configure
@@ -25,58 +26,15 @@ public class PluginConfigPanel implements Observer, ActionListener {
 	private Core core;
 	private JPanel pluginConfigPanel;
 
-	private JLabel pluginsLoaded;
-	private JList pluginList;
-
-	private JPanel buttonPanel;
-	private JButton removeButton;
-
-	private JPanel subButtonPanel;
-	private JTextField pluginToAdd;
-	private JButton addButton;
+	private Vector pluginCheckBoxes = null;
 
 	public PluginConfigPanel(final ConfigWindow configWindow, final Core core) {
 		this.core = core;
 
 		pluginConfigPanel = new JPanel();
-
-		pluginConfigPanel.setLayout(new BorderLayout());
-
-		pluginsLoaded = new JLabel(I18n.getMessage("thaw.config.pluginsLoaded"));
-
-		pluginList = new JList();
-		// List is leave empty until windows is displayed (see update())
-
-		pluginToAdd = new JTextField("", 30);
-		pluginToAdd.addActionListener(this);
-
-		buttonPanel = new JPanel();
-
-		final GridLayout layout = new GridLayout(2, 1);
-		layout.setVgap(10);
-		buttonPanel.setLayout(layout);
-
-		subButtonPanel = new JPanel();
-
-		subButtonPanel.setLayout(new GridLayout(1, 2));
-
-		addButton = new JButton(I18n.getMessage("thaw.common.add"));
-		removeButton = new JButton(I18n.getMessage("thaw.common.remove"));
-
-		addButton.addActionListener(this);
-		removeButton.addActionListener(this);
-
-		buttonPanel.add(removeButton);
-
-		subButtonPanel.add(pluginToAdd);
-		subButtonPanel.add(addButton);
-		buttonPanel.add(subButtonPanel);
-
-		pluginConfigPanel.add(pluginsLoaded, BorderLayout.NORTH);
-		pluginConfigPanel.add(pluginList, BorderLayout.CENTER);
-		pluginConfigPanel.add(buttonPanel, BorderLayout.SOUTH);
-
+		pluginConfigPanel.setLayout(new GridLayout(16,1));
 		configWindow.addObserver(this);
+		//refreshList();
 	}
 
 
@@ -93,76 +51,84 @@ public class PluginConfigPanel implements Observer, ActionListener {
 			refreshList();
 	}
 
+
+	/**
+	 * We regenerate each time all the checkboxes<br/>
+	 * Okay, it's dirty, but it should work
+	 */
 	public void refreshList() {
-		//pluginList.setListData(core.getConfig().getPluginNames());
-
-		final Iterator pluginNames = core.getConfig().getPluginNames().iterator();
-
-		final Vector toPutInTheList = new Vector();
-
-		while(pluginNames.hasNext()) {
-			final String name = (String)pluginNames.next();
-			final Plugin plugin = core.getPluginManager().getPlugin(name);
-
-			if (plugin != null) {
-				toPutInTheList.add(name +
-						   " ("+plugin.getNameForUser()+")");
-			} else {
-				toPutInTheList.add(name +
-						   " (Plugin missing)");
+		if (pluginCheckBoxes != null) {
+			for(Iterator it = pluginCheckBoxes.iterator();
+			    it.hasNext();) {
+				pluginConfigPanel.remove((JCheckBox)it.next());
 			}
 		}
 
-		pluginList.setListData(toPutInTheList);
+		PluginManager pluginManager = core.getPluginManager();
+
+		pluginCheckBoxes = new Vector();
+
+		String[] knownPlugins = pluginManager.getKnownPlugins();
+
+		for (int i = 0 ; i < knownPlugins.length ; i++) {
+			JCheckBox c = new JCheckBox(knownPlugins[i]);
+			c.addActionListener(this);
+			c.setSelected(false);
+			pluginCheckBoxes.add(c);
+			pluginConfigPanel.add(c);
+		}
+
+		LinkedHashMap loadedPlugins = pluginManager.getPlugins();
+		Iterator it = (new Vector(loadedPlugins.values())).iterator();
+
+		while(it.hasNext()) {
+			Plugin plugin = (Plugin)it.next();
+
+			Iterator checkBoxIt = pluginCheckBoxes.iterator();
+
+			while(checkBoxIt.hasNext()) {
+				JCheckBox c = (JCheckBox)checkBoxIt.next();
+
+				if (c.getText().equals(plugin.getClass().getName())) {
+					c.setSelected(true);
+					c.setText(c.getText()+" ("+plugin.getNameForUser()+")");
+				}
+			}
+		}
 	}
 
 
 	/**
 	 * Return the class name contained in an option name from the list.
 	 */
-	public String getClassName(final String optionName) {
-		final String[] part = optionName.split(" ");
+	protected String getClassName(final JCheckBox checkBox) {
+		final String[] part = checkBox.getText().split(" ");
 		return part[0];
 	}
 
 	public void actionPerformed(final ActionEvent e) {
-		if((e.getSource() == addButton) || (e.getSource() == pluginToAdd)) {
-			if(core.getPluginManager().loadPlugin(pluginToAdd.getText()) != null
-			   && core.getPluginManager().runPlugin(pluginToAdd.getText())) {
 
-				core.getConfig().addPlugin(pluginToAdd.getText());
-				refreshList();
+		if (e.getSource() instanceof JCheckBox) {
+			boolean load;
+			JCheckBox c = (JCheckBox)e.getSource();
 
-			} else {
-				Logger.error(this, "Unable to load '"+pluginToAdd.getText()+"'");
-				JOptionPane.showMessageDialog(core.getConfigWindow().getFrame(),
-							      "Unable to load plugin '"+pluginToAdd.getText()+"'",
-							      "Unable to load plugin",
-							      JOptionPane.ERROR_MESSAGE);
-			}
-		}
+			load = c.isSelected();
 
-
-		if(e.getSource() == removeButton) {
-			final String pluginName = getClassName((String)pluginList.getSelectedValue());
-
-			if (((String)pluginList.getSelectedValue()).indexOf("Plugin missing") > 0) {
-				core.getConfig().removePlugin(pluginName);
-				refreshList();
-				return;
+			if (load) {
+				if (core.getPluginManager().loadPlugin(getClassName(c)) == null
+				    || !core.getPluginManager().runPlugin(getClassName(c)))
+					load = false;
+				else
+					core.getConfig().addPlugin(getClassName(c));
 			}
 
-			if(core.getPluginManager().stopPlugin(pluginName)
-			   && core.getPluginManager().unloadPlugin(pluginName)) {
-				core.getConfig().removePlugin(pluginName);
-				refreshList();
-			} else {
-				Logger.error(this, "Error while unloading '"+pluginName+"'");
-				JOptionPane.showMessageDialog(core.getConfigWindow().getFrame(),
-							      "Unable to unload plugin '"+pluginName+"'",
-							      "Unable to unload plugin",
-							      JOptionPane.ERROR_MESSAGE);
+			if (!load) {
+				core.getPluginManager().stopPlugin(getClassName(c));
+				core.getPluginManager().unloadPlugin(getClassName(c));
+				core.getConfig().removePlugin(getClassName(c));
 			}
+
+			refreshList();
 		}
 	}
 }

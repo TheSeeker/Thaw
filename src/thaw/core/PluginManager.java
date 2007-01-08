@@ -17,6 +17,18 @@ public class PluginManager {
 		"thaw.plugins.IndexExporter"
 	};
 
+	private final static String[] knownPlugins = {
+		"thaw.plugins.QueueWatcher",
+		"thaw.plugins.FetchPlugin",
+		"thaw.plugins.InsertPlugin",
+		"thaw.plugins.StatusBar",
+		"thaw.plugins.Hsqldb",
+		"thaw.plugins.IndexBrowser",
+		"thaw.plugins.IndexExporter",
+		"thaw.plugins.SqlConsole",
+		"thaw.plugins.LogConsole"
+	};
+
 	private Core core = null;
 
 	// LinkedHashMap because I want to keep a predictible plugin order.
@@ -33,10 +45,15 @@ public class PluginManager {
 
 
 	/**
-	 * Returns the whole plugin list.
+	 * Returns the whole loaded plugin list.
 	 */
 	public LinkedHashMap getPlugins() {
 		return plugins;
+	}
+
+
+	public String[] getKnownPlugins() {
+		return knownPlugins;
 	}
 
 
