@@ -642,8 +642,8 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 						return;
 					}
 
-					if (changed)
-						loadXML(transfer.getPath());
+					//if (changed)
+					loadXML(transfer.getPath());
 
 					save();
 
