@@ -324,7 +324,8 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 		/* Create a separate vector to avoid collisions */
 		for(int i = 0 ; i < selectedRows.length; i++) {
-			queries.add(initialQueries.get(selectedRows[i]));
+			if (initialQueries.size() > selectedRows[i])
+				queries.add(initialQueries.get(selectedRows[i]));
 		}
 
 		return queries;
@@ -403,7 +404,11 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 		public ActionReplier(final int action, final int new_priority) {
 			this.action = action;
-			this.queries = getSelectedQueries();
+
+			if (selectedRows != null)
+				this.queries = getSelectedQueries();
+			else
+				this.queries = new Vector();
 
 			this.new_priority = (action == ACTION_CHANGE_PRIORITY_SELECTED) ? new_priority : -1;
 		}
