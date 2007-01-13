@@ -136,7 +136,7 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		splitLocation = leftSplit.getDividerLocation();
 
 		config.setValue("indexTreeUnknownListSplitLocation",
-				Double.toString(splitLocation));
+				Integer.toString(splitLocation));
 
 		tables.saveState();
 	}
