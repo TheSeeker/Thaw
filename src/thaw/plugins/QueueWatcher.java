@@ -37,7 +37,7 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 
 	private JSplitPane split;
 
-	private final static int DIVIDER_LOCATION = 310;
+	private final static int DIVIDER_LOCATION = 310; /* about the details panel */
 	private long lastChange = 0;
 	private boolean folded = false;
 
@@ -102,7 +102,7 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 			split.setDividerLocation((0.5));
 		} else {
 			try {
-				split.setDividerLocation(Double.parseDouble(core.getConfig().getValue("queuePanelSplitLocation")));
+				split.setDividerLocation(Integer.parseInt(core.getConfig().getValue("queuePanelSplitLocation")));
 			} catch(java.lang.IllegalArgumentException e) { /* TODO: Shouldn't happen ! */
 				Logger.error(this, "Error while setting split bar position: "+e.toString());
 			}
@@ -134,14 +134,15 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 	public boolean stop() {
 		Logger.info(this, "Stopping plugin \"QueueWatcher\" ...");
 
-		double splitLocation;
+		int splitLocation;
 
 		core.getMainWindow().getTabbedPane().removeChangeListener(this);
 
-		splitLocation = ((double)split.getDividerLocation() - ((double)split.getMinimumDividerLocation())) / (((double)split.getMaximumDividerLocation()) - ((double)split.getMinimumDividerLocation()));
+
+		splitLocation = split.getDividerLocation();
 
 		core.getConfig().setValue("queuePanelSplitLocation",
-					  Double.toString(splitLocation));
+					  Integer.toString(splitLocation));
 
 		core.getConfig().setValue("detailPanelFolded", ((new Boolean(folded)).toString()));
 		core.getMainWindow().removeTab(panelAdded);

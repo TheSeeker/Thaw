@@ -84,7 +84,7 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 			leftSplit.setDividerLocation((0.5));
 		} else {
 			try {
-				leftSplit.setDividerLocation(Double.parseDouble(config.getValue("indexTreeUnknownListSplitLocation")));
+				leftSplit.setDividerLocation(Integer.parseInt(config.getValue("indexTreeUnknownListSplitLocation")));
 			} catch(java.lang.IllegalArgumentException e) { /* TODO: Find why it happens */
 				Logger.error(this, "Exception while setting indexTree split location");
 			}
@@ -131,9 +131,9 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	public void saveState() {
 		indexTree.save();
 		config.setValue("indexBrowserPanelSplitPosition", Integer.toString(split.getDividerLocation()));
-		double splitLocation;
+		int splitLocation;
 
-		splitLocation = ((double)leftSplit.getDividerLocation() - ((double)leftSplit.getMinimumDividerLocation())) / (((double)leftSplit.getMaximumDividerLocation()) - ((double)leftSplit.getMinimumDividerLocation()));
+		splitLocation = leftSplit.getDividerLocation();
 
 		config.setValue("indexTreeUnknownListSplitLocation",
 				Double.toString(splitLocation));

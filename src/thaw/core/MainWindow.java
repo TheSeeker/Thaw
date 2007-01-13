@@ -187,6 +187,17 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		mainWindow.addWindowListener(this);
 
 		core.getConnectionManager().addObserver(this);
+
+		if (core.getConfig().getValue("mainWindowSizeX") != null
+		    && core.getConfig().getValue("mainWindowSizeY") != null) {
+			try {
+				mainWindow.setSize(Integer.parseInt(core.getConfig().getValue("mainWindowSizeX")),
+						   Integer.parseInt(core.getConfig().getValue("mainWindowSizeY")));
+			} catch(NumberFormatException e) {
+				Logger.warning(this, "Exception while setting the main window size");
+			}
+		}
+
 	}
 
 
@@ -401,7 +412,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		}
 
 		if(e.getSource() == quitButton) {
-			core.exit();
+			endOfTheWorld();
 		}
 
 		if(e.getSource() == reconnectionFileMenuItem) {
@@ -462,6 +473,15 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 * Called when window is closed or 'quit' is choosed is the menu.
 	 */
 	public void endOfTheWorld() {
+		if (mainWindow != null) {
+			java.awt.Dimension size = mainWindow.getSize();
+
+			core.getConfig().setValue("mainWindowSizeX",
+						  Integer.toString((new Double(size.getWidth())).intValue()));
+			core.getConfig().setValue("mainWindowSizeY",
+						  Integer.toString((new Double(size.getHeight())).intValue()));
+		}
+
 		if(core == null) {
 			Logger.error(this, "Warning, no ref to core, exiting brutaly");
 			System.exit(0);
