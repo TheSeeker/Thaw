@@ -9,6 +9,8 @@ public class FreenetURIHelper {
 
 	/**
 	 * Quick test to see if the string could be a key
+	 * only check the head, not the content (this property is used in FetchPlugin,
+	 * please keep it)
 	 */
 	public static boolean isAKey(String key) {
 		if (key == null)

@@ -17,6 +17,8 @@ import thaw.fcp.FCPClientGet;
 import thaw.plugins.fetchPlugin.FetchPanel;
 
 public class FetchPlugin implements thaw.core.Plugin, ActionListener {
+	public final static int MIN_SLASH_POSITION=80;
+
 	private Core core;
 
 	private FetchPanel fetchPanel = null;
@@ -96,6 +98,8 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 			       final int persistence, final boolean globalQueue,
 			       final String destination) {
 
+		boolean trollDetected = false; /* because of trolls coming from 0.5 */
+
 		for(int i = 0 ; i < keys.length ; i++) {
 			if(keys[i].length() < 10)
 				continue;
@@ -104,15 +108,40 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 
 			final String key = FreenetURIHelper.cleanURI(subKey[0]);
 
-			if (key != null)
-				core.getQueueManager().addQueryToThePendingQueue(new FCPClientGet(key,
-												  priority,
-												  persistence,
-												  globalQueue, -1,
-												  destination));
+			if (key == null || !FreenetURIHelper.isAKey(key))
+				continue;
+
+			int slash_pos = key.indexOf("/");
+
+			if (slash_pos < 0)
+				continue;
+
+			if (slash_pos < MIN_SLASH_POSITION) {
+				trollDetected = true;
+				/* We'll let Thaw continue to show how
+				 * useful these keys are
+				 */
+			}
+
+			core.getQueueManager().addQueryToThePendingQueue(new FCPClientGet(key,
+											  priority,
+											  persistence,
+											  globalQueue, -1,
+											  destination));
 		}
 
 		fetchFrame.setVisible(false);
+
+		if (trollDetected) {
+			new thaw.core.WarningWindow(core,
+						    I18n.getMessage("thaw.plugin.fetch.freenet0.5.l1")+"\n"
+						    + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l2")+"\n"
+						    + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l3")+"\n"
+						    + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l4")+"\n"
+						    + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l5")+"\n"
+						    + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l6"));
+
+		}
 	}
 
 
