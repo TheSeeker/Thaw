@@ -392,10 +392,6 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		selectedRows = null;
 	}
 
-	public void removeSelected() {
-
-	}
-
 
 	public class ActionReplier implements Runnable, ClipboardOwner {
 		private int action;
@@ -528,11 +524,13 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 
 	public void removeSelectedTransfers() {
+		reloadSelections();
 		Thread th = new Thread(new ActionReplier(ACTION_REMOVE_SELECTED, -1));
 		th.start();
 	}
 
 	public void removeAllFinishedTransfers() {
+		reloadSelections();
 		Thread th = new Thread(new ActionReplier(ACTION_REMOVE_FINISHED, -1));
 		th.start();
 	}
