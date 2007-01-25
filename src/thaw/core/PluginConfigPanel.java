@@ -71,7 +71,7 @@ public class PluginConfigPanel implements Observer, ActionListener {
 		String[] knownPlugins = pluginManager.getKnownPlugins();
 
 		for (int i = 0 ; i < knownPlugins.length ; i++) {
-			JCheckBox c = new JCheckBox(knownPlugins[i]);
+			JCheckBox c = new JCheckBox(knownPlugins[i].replaceFirst("thaw.plugins.", ""));
 			c.addActionListener(this);
 			c.setSelected(false);
 			pluginCheckBoxes.add(c);
@@ -89,7 +89,7 @@ public class PluginConfigPanel implements Observer, ActionListener {
 			while(checkBoxIt.hasNext()) {
 				JCheckBox c = (JCheckBox)checkBoxIt.next();
 
-				if (c.getText().equals(plugin.getClass().getName())) {
+				if (c.getText().equals(plugin.getClass().getName().replaceFirst("thaw.plugins.", ""))) {
 					c.setSelected(true);
 					c.setText(c.getText()+" ("+plugin.getNameForUser()+")");
 				}
@@ -103,7 +103,7 @@ public class PluginConfigPanel implements Observer, ActionListener {
 	 */
 	protected String getClassName(final JCheckBox checkBox) {
 		final String[] part = checkBox.getText().split(" ");
-		return part[0];
+		return "thaw.plugins."+part[0];
 	}
 
 	public void actionPerformed(final ActionEvent e) {
