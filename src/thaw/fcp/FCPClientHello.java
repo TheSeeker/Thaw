@@ -94,7 +94,7 @@ public class FCPClientHello implements FCPQuery, Observer {
 			Logger.info(this, "Hello "+nodeName+", I'm Thaw :)");
 		} else {
 			Logger.warning(this, "Unable to connect, ID is probably already taken or there was a timeout");
-			queueManager.getQueryManager().getConnection().disconnect();
+			queryManager.getConnection().disconnect();
 			return false;
 		}
 
@@ -132,7 +132,6 @@ public class FCPClientHello implements FCPQuery, Observer {
 				/* Damn ... ! */
 				Logger.warning(this, "According to the node, Thaw ID is already used. Please change it in the configuration (in advanced mode)");
 				queryManager.deleteObserver(this);
-				queryManager.getConnection().disconnect();
 				receiveAnswer = true;
 				synchronized(this) {
 					notify();

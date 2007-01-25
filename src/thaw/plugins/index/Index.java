@@ -1348,7 +1348,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 
 	public void forceHasChangedReload() {
-		/* Do nothing here */
+		loadData();
 	}
 
 

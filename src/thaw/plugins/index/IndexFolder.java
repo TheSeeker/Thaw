@@ -1054,7 +1054,18 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 	private boolean hasLastHasChangedValueBeenSet = false;
 
 	public void forceHasChangedReload() {
+		if (children != null) {
+			synchronized(children) {
+				for (Iterator it = children.iterator();
+				     it.hasNext();) {
+					IndexTreeNode child = (IndexTreeNode)it.next();
+					child.forceHasChangedReload();
+				}
+			}
+		}
+
 		hasLastHasChangedValueBeenSet = false;
+		hasChanged();
 	}
 
 	public boolean hasChanged() {
