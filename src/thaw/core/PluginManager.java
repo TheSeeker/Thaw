@@ -160,6 +160,8 @@ public class PluginManager {
 			final Plugin plugin = (Plugin)pluginIt.next();
 
 			try {
+				Logger.info(this, "Stopping plugin '"+plugin.getClass().getName()+"'");
+
 				if (plugin != null)
 					plugin.stop();
 				else
@@ -189,6 +191,8 @@ public class PluginManager {
 				Logger.warning(this, "loadPlugin(): Plugin '"+className+"' already loaded");
 				return null;
 			}
+
+			Logger.info(this, "Loading plugin '"+className+"'");
 
 			plugin = (Plugin)Class.forName(className).newInstance();
 

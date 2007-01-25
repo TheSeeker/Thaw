@@ -182,20 +182,43 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 			/* should reinit the whole connection correctly */
 			core.getPluginManager().stopPlugins();
 
-			if (needConnectionReset && !core.initNodeConnection()) {
+			Reloader reloader = new Reloader(needConnectionReset);
+			Thread reload = new Thread(reloader);
+			reload.start();
+
+			needConnectionReset = false;
+		}
+	}
+
+
+	/**
+	 * We reload the change in another thread to avoid UI freeze
+	 */
+	public class Reloader implements Runnable {
+		private boolean resetConnection;
+
+		public Reloader(boolean resetConnection) {
+			this.resetConnection = resetConnection;
+		}
+
+		public void run() {
+
+/* should reinit the whole connection correctly */
+			core.getPluginManager().stopPlugins();
+
+			if (resetConnection && !core.initNodeConnection()) {
 				new WarningWindow(core, I18n.getMessage("thaw.warning.unableToConnectTo")+ " "+core.getConfig().getValue("nodeAddress")+":"+ core.getConfig().getValue("nodePort"));
 			}
 
 			needConnectionReset = false;
 
+			/* put back the config tab */
+			addTabs();
+
 			core.getPluginManager().loadPlugins();
 			core.getPluginManager().runPlugins();
-
-			/* reinit config win */
-			addTabs();
 		}
 	}
-
 
 
 	public void windowActivated(final WindowEvent e) {

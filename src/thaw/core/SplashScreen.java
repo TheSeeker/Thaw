@@ -26,6 +26,7 @@ public class SplashScreen {
 	public int nmbIcon = 0;
 
 	public Vector emptyLabels;
+	public Vector iconLabels;
 
 	public SplashScreen() {
 
@@ -46,6 +47,7 @@ public class SplashScreen {
 		iconPanel.setLayout(new GridLayout(1, NMB_ICONS));
 
 		emptyLabels = new Vector();
+		iconLabels = new Vector();
 
 		/* it's a dirty method to keep the NMB_ICONS parts of the panel at the same size */
 		for (int i = 0 ; i < NMB_ICONS ; i++) {
@@ -122,6 +124,10 @@ public class SplashScreen {
 		splashScreen.getContentPane().validate();
 		lb.repaint();
 	}
+
+
+	/* TODO : removeIcon() */
+
 
 	public int getProgression() {
 		if(progressBar != null)
