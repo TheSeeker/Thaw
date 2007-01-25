@@ -13,176 +13,115 @@ import thaw.core.Logger;
 import thaw.fcp.FCPQueueManager;
 import thaw.plugins.Hsqldb;
 
-public class SearchResult extends Observable implements Observer, FileAndLinkList {
+public class SearchResult implements FileAndLinkList {
 
-	private Vector fileList = null;
-	private Vector linkList = null;
-
-	private String[] search      = null;
-	private Vector indexIds = null;
+	private String[] search = null;
 
 	private Hsqldb db;
-	private FCPQueueManager queueManager;
+	private IndexTreeNode node;
 
-	public SearchResult(final Hsqldb hsqldb, final String search, final IndexTreeNode node, final FCPQueueManager queueManager) {
-		this.queueManager = queueManager;
+	public SearchResult(final Hsqldb hsqldb, final String search, final IndexTreeNode node) {
 		this.search = search.split(" ");
-		if (node == null)
-			indexIds = null;
-		else
-			indexIds = node.getIndexIds();
+		this.node = node;
 		db = hsqldb;
 	}
 
-	protected PreparedStatement makeSearchQuery(final String fields, final String searchField, final String table, final Vector indexIds, final String[] searchPatterns,
-					 final String columnToSort, boolean asc) throws SQLException {
-		String query = "";
-		PreparedStatement st;
 
-		query = "SELECT "+fields+" FROM "+table +" WHERE ";
+	public String getWhereClause(boolean hasFilename) {
+		String where = null;
+		String column = hasFilename ? "filename" : "publicKey";
 
-		if (indexIds != null) {
-			query = query +"(FALSE";
-
-			for (final Iterator it = indexIds.iterator();
-			     it.hasNext();) {
-				it.next();
-				query = query + " OR indexParent = ?";
-			}
-
-			query = query + ") AND ";
-		}
-
-		query = query + "(TRUE";
-
-		for (int i = 0 ; i < searchPatterns.length; i++) {
-			query = query + " AND LOWER("+searchField+") LIKE ?";
-		}
-
-		query = query +")";
-
-		if(columnToSort != null) {
-			query = query + "ORDER BY " + columnToSort;
-
-			if(!asc)
-				query = query + " DESC";
-		}
-
-		final Connection c = db.getConnection();
-		st = c.prepareStatement(query);
-
-		int i;
-
-		i = 1;
-
-		if (indexIds != null) {
-			for (final Iterator it = indexIds.iterator();
-			     it.hasNext(); i++) {
-				st.setInt(i, ((Integer)it.next()).intValue());
+		if (node instanceof IndexFolder) {
+			if (node.getId() >= 0) {
+				where = "indexParent IN "+
+					"(SELECT indexParents.indexId FROM indexParents WHERE indexParents.folderId = ?)";
 			}
 		}
 
-		for (int j = 0 ; j < searchPatterns.length; j++) {
-			st.setString(i+j, "%"+(searchPatterns[j]).toLowerCase()+"%");
+		if (node instanceof Index) {
+			where = "indexParent = ? ";
 		}
 
-		return st;
+		for (int i = 0 ; i < search.length ; i++) {
+			if (where == null) {
+				where = " LOWER("+column+") LIKE ?";
+			} else {
+				where = " AND LOWER("+column+") LIKE ?";
+			}
+		}
+
+		return where;
 	}
 
-	public void loadFiles(final String columnToSort, final boolean asc) {
-		if (fileList != null) {
-			Logger.notice(this, "Files already loaded, won't reload them");
-			return;
+	public void fillInStatement(PreparedStatement st) throws SQLException {
+		if (!(node instanceof IndexFolder) || node.getId() >= 0)
+			st.setInt(1, node.getId());
+
+		for (int i = 0 ; i < search.length ; i++) {
+			st.setString(i+2, "%" + search[i] + "%");
 		}
+	}
 
-		fileList = new Vector();
+	public Vector getFileList(String col, boolean asc) {
 
-		try {
-			final PreparedStatement st = makeSearchQuery("id, filename, publicKey, localPath, mime, size, category, indexParent", "filename",
-							       "files", indexIds, search, columnToSort, asc);
-			if (st.execute()) {
-				final ResultSet results = st.getResultSet();
+		Vector v = new Vector();
 
-				while(results.next()) {
-					final thaw.plugins.index.File file = new thaw.plugins.index.File(db, results, null);
-					file.setTransfer(queueManager);
-					file.addObserver(this);
-					fileList.add(file);
+		synchronized(db.dbLock) {
+			try {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT id, filename, publicKey, localPath, mime, size, indexParent "+
+									 "FROM files "+
+									 "WHERE "+getWhereClause(true)+" ORDER by filename");
+				fillInStatement(st);
+
+				ResultSet set = st.executeQuery();
+
+				while(set.next()) {
+					v.add(new thaw.plugins.index.File(db,
+									  set.getInt("id"),
+									  set.getString("filename"),
+									  set.getString("publicKey"),
+									  new java.io.File(set.getString("localPath")),
+									  set.getString("mime"),
+									  set.getLong("size"),
+									  set.getInt("indexParent")));
 				}
+
+			} catch(SQLException e) {
+				Logger.error(this, "Error while searching: "+e.toString());
 			}
-		} catch(final SQLException e) {
-			Logger.error(this, "Exception while searching: "+e.toString());
 		}
 
-		setChanged();
-		this.notifyObservers();
+		return v;
 	}
 
-	public void loadLinks(final String columnToSort, final boolean asc) {
-		if (linkList != null) {
-			Logger.notice(this, "Links already loaded, won't reload them");
-			return;
-		}
-		linkList = new Vector();
+	public Vector getLinkList(String col, boolean asc) {
+				Vector v = new Vector();
 
-		try {
-			final PreparedStatement st = makeSearchQuery("id, publicKey, mark, comment, indexTarget, indexParent", "publicKey",
-							       "links", indexIds, search, columnToSort, asc);
-			if (st.execute()) {
-				final ResultSet results = st.getResultSet();
+		synchronized(db.dbLock) {
+			try {
+				PreparedStatement st;
 
-				while(results.next()) {
-					final Link link = new Link(db, results, null);
-					linkList.add(link);
+				st = db.getConnection().prepareStatement("SELECT id, publicKey, indexParent "+
+									 "FROM links "+
+									 "WHERE "+getWhereClause(false));
+				fillInStatement(st);
+				ResultSet set = st.executeQuery();
+
+				while(set.next()) {
+					v.add(new Link(db,
+						       set.getInt("id"),
+						       set.getString("publicKey"),
+						       set.getInt("indexParent")));
 				}
+
+			} catch(SQLException e) {
+				Logger.error(this, "Error while searching: "+e.toString());
 			}
-		} catch(final SQLException e) {
-			Logger.error(this, "Exception while searching: "+e.toString());
 		}
 
-		setChanged();
-		this.notifyObservers();
-	}
-
-
-	public void update(final Observable o, final Object param) {
-		setChanged();
-		this.notifyObservers(o);
-	}
-
-
-	public Vector getFileList() {
-		return fileList;
-	}
-
-	public Vector getLinkList() {
-		return linkList;
-	}
-
-
-
-	public thaw.plugins.index.File getFile(final int index) {
-		return (thaw.plugins.index.File)fileList.get(index);
-	}
-
-	public Link getLink(final int index) {
-		return (Link)linkList.get(index);
-	}
-
-
-
-	public void unloadFiles() {
-		for (final Iterator it = fileList.iterator();
-		     it.hasNext();) {
-			final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
-			file.deleteObserver(this);
-		}
-
-		fileList = null;
-	}
-
-	public void unloadLinks() {
-		fileList = null;
+		return v;
 	}
 
 }

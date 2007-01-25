@@ -748,6 +748,11 @@ public class DefaultMIMETypes {
 
 	/** Guess a MIME type from a filename */
 	public synchronized static String guessMIMEType(final String arg) {
+		if (arg == null) {
+			Logger.error(new DefaultMIMETypes(), "Unable to guess mime type for file 'null' ");
+			return null;
+		}
+
 		final int x = arg.lastIndexOf('.');
 		if((x == -1) || (x == arg.length()-1))
 			return DefaultMIMETypes.DEFAULT_MIME_TYPE;

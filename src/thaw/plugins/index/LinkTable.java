@@ -10,6 +10,8 @@ import java.awt.event.MouseListener;
 import java.util.Iterator;
 import java.util.Observable;
 import java.util.Vector;
+import java.awt.Color;
+import java.awt.Component;
 
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -19,6 +21,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JButton;
 import javax.swing.event.TableModelEvent;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.tree.TreePath;
 
 import thaw.core.I18n;
@@ -55,7 +58,8 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 		linkListModel = new LinkListModel();
 		table = new JTable(linkListModel);
-		table.setShowGrid(true);
+		table.setShowGrid(false);
+		table.setDefaultRenderer(table.getColumnClass(0), new LinkRenderer());
 
 		panel = new JPanel();
 		panel.setLayout(new BorderLayout());
@@ -92,10 +96,10 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		item = new JMenuItem(I18n.getMessage("thaw.common.remove"));
 		button = new JButton(IconBox.delete);
 		button.setToolTipText(I18n.getMessage("thaw.common.remove"));
-		toolbarActions.add(new LinkManagementHelper.LinkRemover(button));
+		toolbarActions.add(new LinkManagementHelper.LinkRemover(indexBrowser, button));
 		toolbarModifier.addButtonToTheToolbar(button);
 		rightClickMenu.add(item);
-		rightClickActions.add(new LinkManagementHelper.LinkRemover(item));
+		rightClickActions.add(new LinkManagementHelper.LinkRemover(indexBrowser, item));
 
 		gotoItem = new JMenuItem(I18n.getMessage("thaw.plugin.index.gotoIndex"));
 		rightClickMenu.add(gotoItem);
@@ -135,7 +139,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 	}
 
 	protected Vector getSelectedLinks(final int[] selectedRows) {
-		final Vector srcList = linkList.getLinkList();
+		final Vector srcList = linkList.getLinkList(null, false);
 		final Vector links = new Vector();
 
 		for(int i = 0 ; i < selectedRows.length ; i++) {
@@ -147,24 +151,19 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 	}
 
 	public void setLinkList(final LinkList linkList) {
-		if(this.linkList != null) {
-			this.linkList.unloadLinks();
-		}
-
-		if(linkList != null) {
-			linkList.loadLinks(null, true);
-		}
-
 		this.linkList = linkList;
-
 		linkListModel.reloadLinkList(linkList);
+
+		if (linkList != null)
+			indexBrowser.getUnknownIndexList().addLinks(linkList);
+	}
+
+	public LinkList getLinkList() {
+		return linkList;
 	}
 
 	public void mouseClicked(final MouseEvent e) {
 		Vector selection;
-
-		if (linkList instanceof Index)
-			((Index)linkList).setChanged(false);
 
 		if (linkList == null) {
 			selectedRows = null;
@@ -211,32 +210,15 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 			if (selectedRows.length <= 0)
 				return;
 
-			final Link link = (Link)linkList.getLinkList().get(selectedRows[0]);
-
-			if (link.getParentId() == -1) {
-				Logger.notice(this, "No parent ? Abnormal !");
-				return;
-			}
-
-			Index parent;
-			if (link.getParent() == null)
-				parent = indexBrowser.getIndexTree().getRoot().getIndex(link.getParentId());
-			else
-				parent = link.getParent();
-
-			if (parent == null) {
-				Logger.notice(this, "Cannot find again the parent ?! Id: "+Integer.toString(link.getParentId()));
-				return;
-			}
-
-			indexBrowser.getIndexTree().getTree().setSelectionPath(new TreePath(parent.getTreeNode().getPath()));
-
-			indexBrowser.getTables().setList(parent);
+			/* TODO */
 
 			return;
 		}
 	}
 
+	public void refresh() {
+		linkListModel.refresh();
+	}
 
 
 	public class LinkListModel extends javax.swing.table.AbstractTableModel implements java.util.Observer {
@@ -254,34 +236,13 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 			columnNames = new Vector();
 
 			columnNames.add(I18n.getMessage("thaw.plugin.index.index"));
-			columnNames.add(I18n.getMessage("thaw.common.key"));
+			//columnNames.add(I18n.getMessage("thaw.common.key"));
 		}
 
 		public void reloadLinkList(final LinkList newLinkList) {
-			if ((linkList != null) && (linkList instanceof Observable)) {
-				((Observable)linkList).deleteObserver(this);
-			}
-
-			if ((newLinkList != null) && (newLinkList instanceof Observable)) {
-				((Observable)newLinkList).addObserver(this);
-			}
 
 			linkList = newLinkList;
-
-
-			if(links != null) {
-				for(final Iterator it = links.iterator();
-				    it.hasNext(); ) {
-					final thaw.plugins.index.Link link = (thaw.plugins.index.Link)it.next();
-					link.deleteObserver(this);
-				}
-			}
-
 			links = null;
-
-			if(linkList != null) {
-				links = linkList.getLinkList();
-			}
 
 			this.refresh();
 
@@ -307,15 +268,16 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 			switch(column) {
 			case(0): return link.getIndexName();
-			case(1): return link.getPublicKey();
+				//case(1): return link.getPublicKey();
 			default: return null;
 			}
 		}
 
 		public void refresh() {
 			if(linkList != null) {
-				links = linkList.getLinkList();
-			}
+				links = linkList.getLinkList(null, false);
+			} else
+				links = null;
 
 			final TableModelEvent event = new TableModelEvent(this);
 			this.refresh(event);
@@ -339,6 +301,45 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 			this.refresh(); /* TODO : Do it more nicely ... :) */
 		}
+	}
+
+
+	private class LinkRenderer extends DefaultTableCellRenderer {
+		private final static long serialVersionUID = 20060821;
+
+		private Color softGray;
+
+		public LinkRenderer() {
+			softGray = new Color(240,240,240);
+		}
+
+		public Component getTableCellRendererComponent(final JTable table, final Object value,
+							       final boolean isSelected, final boolean hasFocus,
+							       final int row, final int column) {
+
+			if(value == null)
+				return super.getTableCellRendererComponent(table, "",
+									   isSelected, hasFocus, row, column);
+
+			Component cell;
+
+			if(value instanceof Long)
+				cell = super.getTableCellRendererComponent(table,
+									   thaw.plugins.queueWatcher.QueueTableModel.getPrintableSize(((Long)value).longValue()),
+									   isSelected, hasFocus, row, column);
+			else
+				cell = super.getTableCellRendererComponent(table, value,
+									   isSelected, hasFocus,
+									   row, column);
+			if (!isSelected) {
+				if (row % 2 == 0)
+					cell.setBackground(Color.WHITE);
+				else
+					cell.setBackground(softGray);
+			}
+			return cell;
+		}
+
 	}
 
 }

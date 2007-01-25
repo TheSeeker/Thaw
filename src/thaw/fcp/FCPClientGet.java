@@ -106,6 +106,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 
 	/**
+	 * Entry point:
 	 * Only for initial queries : To resume queries, use FCPClientGet(FCPQueueManager, Hashmap).
 	 * @param destinationDir if null => temporary file
 	 * @param persistence 0 = Forever ; 1 = Until node reboot ; 2 = Until the app disconnect
@@ -298,9 +299,6 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			successful = false;
 			fatal = true;
 
-			setChanged();
-			this.notifyObservers();
-
 			if((message.getValue("Fatal") != null) &&
 			   message.getValue("Fatal").equals("false")) {
 				fatal = false;
@@ -312,6 +310,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 					duplicatedQueryManager.getConnection().removeFromWriterQueue();
 				isLockOwner= false;
 			}
+
+			setChanged();
+			notifyObservers();
 
 			queueManager.getQueryManager().deleteObserver(this);
 
@@ -391,10 +392,10 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 				successful = true;
 				running = true;
-
-				setChanged();
-				this.notifyObservers();
 			}
+
+			setChanged();
+			this.notifyObservers();
 
 			return;
 		}
@@ -451,6 +452,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		if(message.getMessageName().equals("PersistentGet")) {
 			Logger.debug(this, "PersistentGet !");
+			setChanged();
+			notifyObservers();
 			return;
 		}
 

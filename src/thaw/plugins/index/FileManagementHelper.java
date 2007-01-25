@@ -37,13 +37,15 @@ public class FileManagementHelper {
 	public static class FileDownloader implements FileAction {
 		private FCPQueueManager queueManager;
 		private AbstractButton actionSource;
+		private IndexBrowserPanel indexBrowser;
 		private Vector target;
 		private Config config;
 
-		public FileDownloader(final Config config, final FCPQueueManager queueManager, final AbstractButton actionSource) {
+		public FileDownloader(final Config config, final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			this.queueManager = queueManager;
 			this.actionSource = actionSource;
 			this.config = config;
+			this.indexBrowser = indexBrowser;
 			if (actionSource != null)
 				actionSource.addActionListener(this);
 		}
@@ -72,32 +74,38 @@ public class FileManagementHelper {
 
 			config.setValue("lastDestinationDirectory", destination.getPath());
 
-			FileManagementHelper.downloadFiles(queueManager, target, destination.getPath());
+			FileManagementHelper.downloadFiles(queueManager, indexBrowser, target, destination.getPath());
 		}
 	}
 
 
 	/**
 	 * @param files See thaw.plugins.index.File
+	 * @param indexBrowser can be null
 	 */
-	public static void downloadFiles(final FCPQueueManager queueManager,
+	public static void downloadFiles(final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser,
 					 final Vector files, final String destinationPath) {
 		for (final Iterator it = files.iterator();
 		     it.hasNext();) {
 			final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 			file.download(destinationPath, queueManager);
 		}
+
+		if (indexBrowser != null)
+			indexBrowser.getTables().getFileTable().refresh();
 	}
 
 
 	public static class FileInserter implements FileAction {
 		private FCPQueueManager queueManager;
 		private AbstractButton actionSource;
+		private IndexBrowserPanel indexBrowser;
 		private Vector target;
 
-		public FileInserter(final FCPQueueManager queueManager, final AbstractButton actionSource) {
+		public FileInserter(final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			this.queueManager = queueManager;
 			this.actionSource = actionSource;
+			this.indexBrowser = indexBrowser;
 			if (actionSource != null)
 				actionSource.addActionListener(this);
 		}
@@ -114,9 +122,7 @@ public class FileManagementHelper {
 				     it.hasNext(); ) {
 					final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 
-					if ((file.getLocalPath() == null)
-					    || !file.isModifiable()
-					    || file.getTransfer() != null) {
+					if (file.getLocalPath() == null) {
 						isOk = false;
 						break;
 					}
@@ -127,31 +133,38 @@ public class FileManagementHelper {
 		}
 
 		public void actionPerformed(final ActionEvent e) {
-			FileManagementHelper.insertFiles(queueManager, target);
+			FileManagementHelper.insertFiles(queueManager, indexBrowser, target);
 		}
 	}
 
 	/**
 	 * @param files See thaw.plugins.index.File
+	 * @param indexBrowser can be null
 	 */
 	public static void insertFiles(final FCPQueueManager queueManager,
+				       IndexBrowserPanel indexBrowser,
 				       final Vector files) {
 		for (final Iterator it = files.iterator();
 		     it.hasNext();) {
 			final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 			file.insertOnFreenet(queueManager);
 		}
+
+		if (indexBrowser != null)
+			indexBrowser.getTables().getFileTable().refresh();
 	}
 
 
 	public static class FileKeyComputer implements FileAction {
 		private FCPQueueManager queueManager;
+		private IndexBrowserPanel indexBrowser;
 		private AbstractButton actionSource;
 		private Vector target;
 
-		public FileKeyComputer(final FCPQueueManager queueManager, final AbstractButton actionSource) {
+		public FileKeyComputer(final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			this.queueManager = queueManager;
 			this.actionSource = actionSource;
+			this.indexBrowser = indexBrowser;
 			if (actionSource != null)
 				actionSource.addActionListener(this);
 		}
@@ -167,9 +180,7 @@ public class FileManagementHelper {
 				     it.hasNext(); ) {
 					final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 
-					if ((file.getLocalPath() == null)
-					    || !file.isModifiable()
-					    || file.getTransfer() != null) {
+					if (file.getLocalPath() == null) {
 						isOk = false;
 						break;
 					}
@@ -181,33 +192,39 @@ public class FileManagementHelper {
 
 		public void actionPerformed(final ActionEvent e) {
 			Logger.notice(this, "COMPUTING");
-			FileManagementHelper.computeFileKeys(queueManager, target);
+			FileManagementHelper.computeFileKeys(queueManager, indexBrowser, target);
 		}
 	}
 
 	/**
 	 * @param files See thaw.plugins.index.File
+	 * @param indexBrowser can be null
 	 */
 	public static void computeFileKeys(final FCPQueueManager queueManager,
+					   IndexBrowserPanel indexBrowser,
 					   final Vector files) {
 		for (final Iterator it = files.iterator();
 		     it.hasNext();) {
 			final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 			file.recalculateCHK(queueManager);
 		}
+
+		if (indexBrowser != null) {
+			indexBrowser.getTables().getFileTable().refresh();
+		}
 	}
 
 
 	public static class FileRemover implements FileAction {
-		private FCPQueueManager queueManager;
+		private IndexBrowserPanel indexBrowser;
 		private AbstractButton actionSource;
 		private Vector target;
 
 		/**
 		 * @param queueManager is used to stop transfers if needed
 		 */
-		public FileRemover(final FCPQueueManager queueManager, final AbstractButton actionSource) {
-			this.queueManager = queueManager;
+		public FileRemover(final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+			this.indexBrowser = indexBrowser;
 			this.actionSource = actionSource;
 			if (actionSource != null)
 				actionSource.addActionListener(this);
@@ -220,16 +237,14 @@ public class FileManagementHelper {
 
 			this.target = target;
 
-			if (target != null) {
-				for (final Iterator it = target.iterator();
-				     it.hasNext();) {
-					final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+			if (target != null && target.size() > 0) {
+				/* check just the first file */
 
-					if (!file.isModifiable()) {
-						isOk = false;
-						break;
-					}
-				}
+				thaw.plugins.index.File file = (thaw.plugins.index.File)target.get(0);
+
+				if (!file.isModifiable())
+					isOk = false;
+
 			}
 
 
@@ -237,31 +252,23 @@ public class FileManagementHelper {
 		}
 
 		public void actionPerformed(final ActionEvent e) {
-			FileManagementHelper.removeFiles(queueManager, target);
+			FileManagementHelper.removeFiles(indexBrowser, target);
 		}
 	}
 
 	/**
 	 * @param files See thaw.plugins.index.File / files must have their parent correctly set
-	 * @param queueManager Used to stop the transfer if needed
 	 */
-	public static void removeFiles(final FCPQueueManager queueManager,
+	public static void removeFiles(final IndexBrowserPanel browserPanel,
 				       final Vector files) {
 		for (final Iterator it = files.iterator();
 		     it.hasNext();) {
 			final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
-			final Index parent = file.getParent();
 
-			if (parent == null) {
-				Logger.warning(new FileManagementHelper(), "File '"+file.getFilename()+"' has no parent ?!");
-				continue;
-			}
-
-			if (file.getTransfer() != null)
-				file.getTransfer().stop(queueManager);
-
-			parent.removeFile(file);
+			file.delete();
 		}
+
+		browserPanel.getTables().getFileTable().refresh();
 	}
 
 

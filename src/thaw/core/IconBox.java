@@ -76,6 +76,7 @@ public class IconBox {
 	public static ImageIcon minImportAction;
 	public static ImageIcon minExportAction;
 
+	public static ImageIcon database;
 
 	/**
 	 * Not really used
@@ -154,6 +155,7 @@ public class IconBox {
 		IconBox.importExport = IconBox.loadIcon("refresh.png");
 		IconBox.minImportAction = IconBox.loadIcon("min-import.png");
 		IconBox.minExportAction = IconBox.loadIcon("min-export.png");
+		IconBox.database = IconBox.loadIcon("database.png");
 	}
 
 }

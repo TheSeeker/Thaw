@@ -27,7 +27,7 @@ public class UnknownIndexList implements MouseListener {
 
 	private Link[] linkList;
 	private boolean full;
-	private Vector vList; /* only when < 50 */
+	private Vector vList; /* only when < MAX_INDEXES */
 
 	private JPanel panel;
 	private JList list;
@@ -50,7 +50,7 @@ public class UnknownIndexList implements MouseListener {
 		offset = 0;
 		full = false;
 		vList = new Vector();
-		linkList = new Link[UnknownIndexList.MAX_INDEXES];
+		linkList = new Link[UnknownIndexList.MAX_INDEXES+1];
 
 		for(int i = 0 ; i < linkList.length ; i++)
 			linkList[i] = null;
@@ -101,6 +101,13 @@ public class UnknownIndexList implements MouseListener {
 		return false;
 	}
 
+	public void erase(int i) {
+		linkList[linkList.length-1] = null;
+		for (int j = i ; j < linkList.length-1; j++) {
+			linkList[j] = linkList[j+1];
+		}
+	}
+
 	public boolean removeLink(final Index index) {
 		boolean ret = false;
 
@@ -108,12 +115,22 @@ public class UnknownIndexList implements MouseListener {
 			if ((linkList[i] != null) && linkList[i].compare(index)) {
 				if (!full)
 					vList.remove(linkList[i]);
-				linkList[i] = null;
+				erase(i);
 				ret = true;
 			}
 		}
 
+		refresh();
+
 		return ret;
+	}
+
+	public void makePlace(int i) {
+		int j;
+		for (j = linkList.length - 1; j > i ; j--) {
+			linkList[j] = linkList[j-1];
+		}
+		linkList[j] = null;
 	}
 
 	/**
@@ -123,7 +140,8 @@ public class UnknownIndexList implements MouseListener {
 		if ((link == null) || Index.isAlreadyKnown(indexBrowser.getDb(), link.getPublicKey()) || isInList(link))
 			return false;
 
-		linkList[linkList.length - 1 - offset] = link;
+		makePlace(0);
+		linkList[0] = link;
 
 		if (!full) {
 			vList.add(0, link);
@@ -139,16 +157,21 @@ public class UnknownIndexList implements MouseListener {
 			full = true;
 		}
 
+		refresh();
+
 		return true;
 	}
 
 	/**
 	 * will add the link from that index (if links link to unknown indexes)
 	 */
-	public boolean addLinks(final Index index) {
+	public boolean addLinks(final LinkList index) {
 		boolean ret = false;
 
-		final Vector ll = index.getLinkList();
+		if (index == null)
+			return false;
+
+		final Vector ll = index.getLinkList(null, false);
 
 		if ((ll == null) || (ll.size() == 0))
 			return false;
@@ -198,15 +221,28 @@ public class UnknownIndexList implements MouseListener {
 	}
 
 	public Vector getSelectedLinks() {
-		final Object[] sLink = list.getSelectedValues();
+		final Object[] sLink;
+
+		try {
+			sLink = list.getSelectedValues();
+		} catch(ArrayIndexOutOfBoundsException e) {
+			return null;
+		}
+
 		final Vector vLink = new Vector();
 
-		for (int i = 0; i < sLink.length ; i++)
+		for (int i = 0; i < sLink.length ; i++) {
 			vLink.add(sLink[i]);
+		}
 
 		return vLink;
 	}
 
+
+	public void refresh() {
+		list.revalidate();
+		list.repaint();
+	}
 
 	public void mouseClicked(final MouseEvent e) {
 		Vector selection;
@@ -217,6 +253,9 @@ public class UnknownIndexList implements MouseListener {
 		}
 
 		selection = getSelectedLinks();
+
+		if (selection == null)
+			return;
 
 		if (e.getButton() == MouseEvent.BUTTON1) {
 			updateToolbar(selection);

@@ -19,7 +19,7 @@ public class NodeConfigPanel implements Observer {
 
 
 	private final static String[] paramNames = {
-		I18n.getMessage("thaw.config.nodeAddress"),
+		I18n.getMessage("thaw.config.nodeAddress"), /* a check is done on this one, be warned */
 		I18n.getMessage("thaw.config.nodePort"),
 		I18n.getMessage("thaw.config.maxSimultaneousDownloads"),
 		I18n.getMessage("thaw.config.maxSimultaneousInsertions"),
@@ -36,6 +36,9 @@ public class NodeConfigPanel implements Observer {
 		"thawId"
 	};
 
+	/**
+	 * a check is done on the first value, be warned
+	 */
 	private final static String[] currentValues = new String[6];
 
 
@@ -122,8 +125,20 @@ public class NodeConfigPanel implements Observer {
 
 	public void update(final Observable o, final Object arg) {
 		if(arg == core.getConfigWindow().getOkButton()) {
-			if (hasAValueChanged())
+			if (hasAValueChanged()) {
 				configWindow.willNeedConnectionReset();
+
+				if (sameComputer.isSelected() &&
+				    !paramFields[0].getText().equals(currentValues[0]) &&
+				    !"127.0.0.1".equals(paramFields[0].getText())) {
+
+					new WarningWindow(core,
+							  I18n.getMessage("thaw.config.sameComputerButNotLocalhost.l0")+"\n"+
+							  I18n.getMessage("thaw.config.sameComputerButNotLocalhost.l1")+"\n"+
+							  I18n.getMessage("thaw.config.sameComputerButNotLocalhost.l2")+"\n\n"+
+							  I18n.getMessage("thaw.config.sameComputerButNotLocalhost.l4"));
+				}
+			}
 
 			for(int i=0;i < NodeConfigPanel.paramNames.length;i++) {
 				core.getConfig().setValue(NodeConfigPanel.configNames[i], paramFields[i].getText());

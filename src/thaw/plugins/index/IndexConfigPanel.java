@@ -54,7 +54,7 @@ public class IndexConfigPanel implements ActionListener {
 
 
 	public void addTab() {
-		configWindow.addTab(I18n.getMessage("thaw.plugin.index.browser"), panel);
+		configWindow.addTab(I18n.getMessage("thaw.plugin.index.indexes"), panel);
 	}
 
 

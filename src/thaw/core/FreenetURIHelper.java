@@ -1,6 +1,8 @@
 package thaw.core;
 
-
+/**
+ * would be better called "FreenetKeyHelper" ... but too late :p
+ */
 public class FreenetURIHelper {
 
 	public FreenetURIHelper() {
@@ -217,10 +219,18 @@ public class FreenetURIHelper {
 		if (split.length < 3)
 			return -1;
 
-		return Integer.parseInt(split[2]);
+		try {
+			return Integer.parseInt(split[2]);
+		} catch(NumberFormatException e) {
+			Logger.error(new FreenetURIHelper(), "Unable to parse '"+key +"'");
+			return -1;
+		}
 	}
 
 
+	/**
+	 * will lower the case !
+	 */
 	public static String getComparablePart(String key) {
 		if (key == null)
 			return null;
@@ -231,7 +241,7 @@ public class FreenetURIHelper {
 		int maxLength = 0;
 
 		if (key.length() <= 70)
-			maxLength = key.length();
+			return key.toLowerCase();
 		else
 			maxLength = 70;
 

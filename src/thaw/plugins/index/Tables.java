@@ -31,7 +31,7 @@ public class Tables {
 		fileTable = new FileTable(queueManager, indexBrowser, config);
 		linkTable = new LinkTable(queueManager, indexBrowser);
 
-		searchBar = new SearchBar(queueManager, indexBrowser);
+		searchBar = new SearchBar(indexBrowser);
 
 		split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 				       linkTable.getPanel(),
@@ -54,6 +54,10 @@ public class Tables {
 
 	public void saveState() {
 		config.setValue("indexFileLinkSplit", Integer.toString(split.getDividerLocation()));
+	}
+
+	public void stopRefresh() {
+		fileTable.stopRefresher();
 	}
 
 	protected FileTable getFileTable() {

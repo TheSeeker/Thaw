@@ -83,6 +83,8 @@ public class Hsqldb extends LibraryPlugin {
 			Logger.error(this, "SQLException while closing connection !");
 			e.printStackTrace();
 		}
+
+		Logger.info(this, "Done.");
 	}
 
 	public String getNameForUser() {
@@ -107,6 +109,6 @@ public class Hsqldb extends LibraryPlugin {
 	}
 
 	public javax.swing.ImageIcon getIcon() {
-		return null;
+		return thaw.core.IconBox.database;
 	}
 }

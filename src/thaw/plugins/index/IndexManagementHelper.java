@@ -14,6 +14,9 @@ import java.io.FileOutputStream;
 import java.util.Iterator;
 import java.util.Vector;
 
+import java.util.Observer;
+import java.util.Observable;
+
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -24,8 +27,13 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextArea;
+import javax.swing.JCheckBox;
 import javax.swing.JTextField;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.DefaultMutableTreeNode;
+
+import java.sql.*;
 
 import thaw.core.FileChooser;
 import thaw.core.FreenetURIHelper;
@@ -36,10 +44,11 @@ import thaw.core.Config;
 import thaw.fcp.FCPClientPut;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
+import thaw.fcp.FCPGenerateSSK;
 import thaw.plugins.Hsqldb;
 
 /**
- * Index.java, IndexCategory.java and IndexTree.java must NEVER use this helper (to avoid loops).
+ * Index.java, IndexFolder.java and IndexTree.java must NEVER use this helper (to avoid loops).
  */
 public class IndexManagementHelper {
 
@@ -74,7 +83,9 @@ public class IndexManagementHelper {
 			this.actionSource = actionSource;
 			target = null;
 			this.queueManager = queueManager;
-			actionSource.addActionListener(this);
+
+			if (actionSource != null)
+				actionSource.addActionListener(this);
 		}
 
 		public AbstractButton getActionSource() {
@@ -115,14 +126,16 @@ public class IndexManagementHelper {
 
 
 
-	public static class IndexCreator extends BasicIndexAction {
+	public static class IndexCreator extends BasicIndexAction implements Observer {
 		public IndexCreator(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(queueManager, indexBrowser, actionSource);
 		}
 
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled((node == null) || (node instanceof IndexCategory));
+
+			if (getActionSource() != null)
+				getActionSource().setEnabled((node == null) || (node instanceof IndexFolder));
 		}
 
 		public void apply() {
@@ -133,27 +146,96 @@ public class IndexManagementHelper {
 			if (name == null)
 				return;
 
-			IndexManagementHelper.createIndex(getQueueManager(), getIndexBrowserPanel(), (IndexCategory)getTarget(), name);
+			/* will create a dedicated IndexCreator */
+			IndexManagementHelper.createIndex(getQueueManager(), getIndexBrowserPanel(), (IndexFolder)getTarget(), name);
+		}
+
+
+		private String name;
+
+		/**
+		 * Don't use directly
+		 */
+		public void createIndex(String name) {
+			if (getTarget() == null)
+				setTarget(getIndexBrowserPanel().getIndexTree().getRoot());
+
+			if ((name == null) || (name.indexOf("/") >= 0) || name.indexOf("\\") >= 0) {
+				Logger.error(new IndexManagementHelper(), "invalid name");
+				return;
+			}
+
+			this.name = name;
+
+			FCPGenerateSSK sskGenerator;
+
+			sskGenerator = new FCPGenerateSSK();
+			sskGenerator.addObserver(this);
+			sskGenerator.start(getQueueManager());
+		}
+
+
+		public void update(Observable o, Object param) {
+			FCPGenerateSSK sskGenerator = (FCPGenerateSSK)o;
+			Hsqldb db = getIndexBrowserPanel().getDb();
+
+			synchronized(db.dbLock) {
+				try {
+					PreparedStatement st;
+
+					int id = DatabaseManager.getNextId(db, "indexes");
+
+					if (id == -1)
+						return;
+
+					st = db.getConnection().prepareStatement("INSERT INTO indexes "+
+										 "(id, originalName, displayName, "+
+										 " publicKey, privateKey, author, "+
+										 " positionInTree, revision, "+
+										 " newRev, parent) "+
+										 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+					/* TODO : Author */
+
+					st.setInt(1, id);
+					st.setString(2, name);
+					st.setString(3, name);
+					st.setString(4, sskGenerator.getPublicKey());
+					st.setString(5, sskGenerator.getPrivateKey());
+					st.setNull(6, Types.VARCHAR);
+					st.setInt(7, 0 /* positionInTree */);
+					st.setInt(8, 0 /* revision */);
+					st.setBoolean(9, false);
+
+					if (getTarget().getId() >= 0)
+						st.setInt(10, getTarget().getId());
+					else
+						st.setNull(10, Types.INTEGER);
+
+					st.execute();
+
+					Index index = new Index(db, id, (TreeNode)getTarget(),
+								sskGenerator.getPublicKey(), 0, sskGenerator.getPrivateKey(),
+								name, false);
+
+					((MutableTreeNode)getTarget()).insert(((MutableTreeNode)index), 0);
+
+
+					getIndexBrowserPanel().getIndexTree().refresh(getTarget());
+				} catch(SQLException e) {
+					Logger.error(new IndexManagementHelper(), "Error while creating index: "+e.toString());
+				}
+			}
 		}
 	}
 
-	public static Index createIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, IndexCategory target, final String name) {
-		if (target == null)
-			target = indexBrowser.getIndexTree().getRoot();
 
-		if ((name == null) || (name.indexOf("/") >= 0) || name.indexOf("\\") >= 0) {
-			Logger.error(new IndexManagementHelper(), "invalid name");
-			return null;
-		}
+	public static void createIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, IndexFolder target, final String name) {
 
-		final Index index = new Index(queueManager, indexBrowser, -1, target, name, name, null, null, 0, null);
+		IndexCreator creator = new IndexCreator(queueManager, indexBrowser, null);
+		creator.setTarget(target);
+		creator.createIndex(name);
 
-		index.generateKeys();
-		index.create();
-
-		indexBrowser.getIndexTree().addToIndexCategory(target, index);
-
-		return index;
 	}
 
 
@@ -165,28 +247,56 @@ public class IndexManagementHelper {
 
 		private JTextField publicKeyField = null;
 		private JTextField privateKeyField = null;
+		private JCheckBox  publishPrivateKeyBox = null;
 
 		private JPopupMenu popupMenuA;
 		private JPopupMenu popupMenuB;
 
 		public KeyAsker() {
+
 		}
 
 
-		/**
-		 * @return String[0] == publicKey ; String[1] == privateKey ; public or private are null if unchanged
-		 */
-		public static String[] askKeys(final boolean askPrivateKey,
+		public static KeyAsker askKeys(final boolean askPrivateKey,
 					       final String defaultPublicKey,
 					       final String defaultPrivateKey,
+					       final boolean defaultPublishPrivateKey,
+					       final boolean enablePublishPrivateKeyChoice,
 					       final IndexBrowserPanel indexBrowser) {
-			return ((new KeyAsker()).askKeysBis(askPrivateKey, defaultPublicKey, defaultPrivateKey, indexBrowser));
+			KeyAsker asker = new KeyAsker();
+			asker.askKeysBis(askPrivateKey, defaultPublicKey,
+					 defaultPrivateKey, defaultPublishPrivateKey,
+					 enablePublishPrivateKeyChoice, indexBrowser);
+			if (asker.getPublicKey() != null)
+				return asker;
+			else
+				return null;
 		}
 
-		public synchronized String[] askKeysBis(final boolean askPrivateKey,
-							String defaultPublicKey,
-							String defaultPrivateKey,
-							final IndexBrowserPanel indexBrowser) {
+
+		private String publicKeyResult = null;
+		private String privateKeyResult = null;
+		private boolean publishPrivateKey = false;
+
+
+		public String getPublicKey() {
+			return publicKeyResult;
+		}
+
+		public String getPrivateKey() {
+			return privateKeyResult;
+		}
+
+		public boolean getPublishPrivateKey() {
+			return publishPrivateKey;
+		}
+
+		public synchronized void askKeysBis(final boolean askPrivateKey,
+						    String defaultPublicKey,
+						    String defaultPrivateKey,
+						    boolean defaultPublishPrivateKey,
+						    final boolean enablePublishPrivateKeyChoice,
+						    final IndexBrowserPanel indexBrowser) {
 			formState = 0;
 
 			if (defaultPublicKey == null)
@@ -201,7 +311,9 @@ public class IndexManagementHelper {
 
 			publicKeyField = new JTextField(defaultPublicKey);
 			privateKeyField = new JTextField(defaultPrivateKey);
-
+			publishPrivateKeyBox = new JCheckBox(I18n.getMessage("thaw.plugin.index.publishPrivateKey"),
+							     defaultPublishPrivateKey);
+			publishPrivateKeyBox.setEnabled(enablePublishPrivateKeyChoice);
 			final JPanel subPanelA = new JPanel(); /* left => labels */
 			final JPanel subPanelB = new JPanel(); /* right => textfield */
 
@@ -220,6 +332,7 @@ public class IndexManagementHelper {
 			if (askPrivateKey) {
 				subPanelA.add(new JLabel(I18n.getMessage("thaw.plugin.index.indexPrivateKey")+" "), BorderLayout.WEST);
 				subPanelB.add(privateKeyField, BorderLayout.CENTER);
+
 				popupMenuB = new JPopupMenu();
 				item = new JMenuItem(I18n.getMessage("thaw.common.paste"));
 				popupMenuB.add(item);
@@ -231,7 +344,10 @@ public class IndexManagementHelper {
 			frame.getContentPane().add(subPanelB, BorderLayout.CENTER);
 
 			final JPanel subPanelC = new JPanel();
-			subPanelC.setLayout(new GridLayout(1, 2));
+			subPanelC.setLayout(new GridLayout(2, 1));
+
+			final JPanel subSubPanelC = new JPanel();
+			subSubPanelC.setLayout(new GridLayout(1, 2));
 
 			cancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
 			okButton = new JButton(I18n.getMessage("thaw.common.ok"));
@@ -239,12 +355,15 @@ public class IndexManagementHelper {
 			cancelButton.addActionListener(this);
 			okButton.addActionListener(this);
 
-			subPanelC.add(okButton);
-			subPanelC.add(cancelButton);
+			subSubPanelC.add(okButton);
+			subSubPanelC.add(cancelButton);
+
+			subPanelC.add(publishPrivateKeyBox);
+			subPanelC.add(subSubPanelC);
 
 			frame.getContentPane().add(subPanelC, BorderLayout.SOUTH);
 
-			frame.setSize(700, 100);
+			frame.setSize(700, 120);
 			frame.setVisible(true);
 
 			try {
@@ -256,26 +375,28 @@ public class IndexManagementHelper {
 			frame.setVisible(false);
 
 			if (formState == 2)
-				return null;
+				return;
 
-			final String[] keys = new String[2];
+			publicKeyResult = publicKeyField.getText();
 
-			keys[0] = publicKeyField.getText();
 			if (askPrivateKey)
-				keys[1] = privateKeyField.getText();
-			else
-				keys[1] = null;
+				privateKeyResult = privateKeyField.getText();
 
 			frame.dispose();
 
-			if ((keys[0] == null) || (keys[0].length() < 20))
-				return null;
+			if ((publicKeyResult == null) || (publicKeyResult.length() < 20))
+				{
+					publicKeyResult = null;
+					privateKeyResult = null;
+				}
 
-			if ((keys[1] == null) || (keys[1].length() < 20))
-				keys[1] = null;
+			if ((privateKeyResult == null) || (privateKeyResult.length() < 20))
+				privateKeyResult = null;
+			else
+				publishPrivateKey = publishPrivateKeyBox.isSelected();
 
+			Logger.info(this, "public : "+publicKeyResult + " ; Private : "+privateKeyResult);
 
-			return keys;
 		}
 
 		public synchronized void actionPerformed(final ActionEvent e) {
@@ -313,6 +434,7 @@ public class IndexManagementHelper {
 
 	}
 
+
 	public static class IndexKeyModifier extends BasicIndexAction implements Runnable {
 
 		public IndexKeyModifier(final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
@@ -321,19 +443,25 @@ public class IndexManagementHelper {
 
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled((node != null) && (node instanceof Index));
+
+			if (getActionSource() != null)
+				getActionSource().setEnabled((node != null) && (node instanceof Index));
 		}
 
 		public void apply() {
 			final Index index = ((Index)getTarget());
 
-			final String[] keys = KeyAsker.askKeys(true, index.getPublicKey(), index.getPrivateKey(), getIndexBrowserPanel());
+			final KeyAsker asker = KeyAsker.askKeys(true, index.getPublicKey(), index.getPrivateKey(), index.getPublishPrivateKey(), true, getIndexBrowserPanel());
 
-			if (keys == null)
+			if (asker == null)
 				return;
 
-			index.setPrivateKey(keys[1]);
-			index.setPublicKey(keys[0]);
+			/* Could be done in one shot ... but this way is so easier .... :) */
+			index.setPrivateKey(asker.getPrivateKey());
+			index.setPublishPrivateKey(asker.getPublishPrivateKey());
+			index.setPublicKey(asker.getPublicKey());
+
+			getIndexBrowserPanel().getIndexTree().refresh(index);
 		}
 	}
 
@@ -345,41 +473,48 @@ public class IndexManagementHelper {
 
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled((node == null) || (node instanceof IndexCategory));
+
+			if (getActionSource() != null)
+				getActionSource().setEnabled((node == null) || (node instanceof IndexFolder));
 		}
 
 		public void apply() {
-			String keys[];
+			KeyAsker asker;
 			String publicKey = null;
 			String privateKey = null;
+			boolean publishPrivate = false;
 
-			keys = KeyAsker.askKeys(true, "USK@", "SSK@", getIndexBrowserPanel());
+			asker = KeyAsker.askKeys(true, "USK@", "SSK@", false, false, getIndexBrowserPanel());
 
-			if (keys == null)
+			if (asker == null)
 				return;
 
-			publicKey = keys[0];
-			privateKey = keys[1];
+			publicKey = asker.getPublicKey();
+			privateKey = asker.getPrivateKey();
+			//publishPrivate = asker.getPublishPrivateKey(); /* useless ; will be reset when downloading */
 
-			IndexManagementHelper.reuseIndex(getQueueManager(), getIndexBrowserPanel(), (IndexCategory)getTarget(), publicKey, privateKey);
+			IndexManagementHelper.reuseIndex(getQueueManager(), getIndexBrowserPanel(), (IndexFolder)getTarget(), publicKey, privateKey);
 		}
 	}
 
 
-	public static Index addIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final IndexCategory target, final String publicKey) {
+	public static Index addIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final IndexFolder target, final String publicKey) {
 		return IndexManagementHelper.reuseIndex(queueManager, indexBrowser, target, publicKey, null);
 	}
 
-	public static Index reuseIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final IndexCategory target, String publicKey, String privateKey) {
+	public static Index reuseIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final IndexFolder target, String publicKey, String privateKey) {
 		return reuseIndex(queueManager, indexBrowser, target, publicKey, privateKey, true);
 	}
 
 	/**
-	 * Can be use directly
 	 * @param privateKey Can be null
+	 * @param queueManager only needed if load == true
 	 */
-	public static Index reuseIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final IndexCategory target, String publicKey, String privateKey,
-				      boolean load) {
+	public static Index reuseIndex(final FCPQueueManager queueManager,
+				       final IndexBrowserPanel indexBrowser,
+				       final IndexFolder target,
+				       String publicKey, String privateKey,
+				       boolean load) {
 
 		publicKey = FreenetURIHelper.cleanURI(publicKey);
 		privateKey = FreenetURIHelper.cleanURI(privateKey);
@@ -402,25 +537,76 @@ public class IndexManagementHelper {
 			return null;
 		}
 
-		IndexCategory parent;
+		IndexFolder parent;
 
-		if ((target != null) && (target instanceof IndexCategory))
+		if (target != null)
 			parent = target;
 		else
 			parent = indexBrowser.getIndexTree().getRoot();
 
-		final Index index = new Index(queueManager, indexBrowser, -2, parent, name, name, publicKey, privateKey, 0, null);
+		int revision = FreenetURIHelper.getUSKRevision(publicKey);
 
-		indexBrowser.getUnknownIndexList().removeLink(index);
+		if (revision < 0)
+			return null;
 
-		index.create();
+		Hsqldb db = indexBrowser.getDb();
+
+		Index index = null;
+
+		synchronized(db.dbLock) {
+			try {
+				PreparedStatement st;
+
+				int id = DatabaseManager.getNextId(db, "indexes");
+
+				if (id == -1)
+					return null;
+
+				st = db.getConnection().prepareStatement("INSERT INTO indexes "+
+									 "(id, originalName, displayName, "+
+									 " publicKey, privateKey, author, "+
+									 " positionInTree, revision, "+
+									 " newRev, parent) "+
+									 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+				/* TODO : Author */
+
+				st.setInt(1, id);
+				st.setString(2, name);
+				st.setString(3, name);
+				st.setString(4, publicKey);
+				st.setString(5, privateKey);
+				st.setNull(6, Types.VARCHAR);
+				st.setInt(7, 0 /* positionInTree */);
+				st.setInt(8, revision);
+				st.setBoolean(9, false);
+
+				if (parent.getId() > 0)
+					st.setInt(10, parent.getId());
+				else
+					st.setNull(10, Types.INTEGER);
+
+				st.execute();
+
+				index = new Index(db, id, (TreeNode)parent,
+						  publicKey, revision, privateKey,
+						  name, false);
+
+			} catch(SQLException e) {
+				Logger.error(new IndexManagementHelper(), "Error while adding index: "+e.toString());
+				return null;
+			}
+
+		}
 
 		if (load)
-			index.updateFromFreenet(-1);
+			download(queueManager, indexBrowser, index);
 
-		parent.insert(index.getTreeNode(), 0);
+		((MutableTreeNode)parent).insert(((MutableTreeNode)index), 0);
 
-		indexBrowser.getIndexTree().reloadModel(parent);
+		indexBrowser.getIndexTree().refresh(parent);
+
+		indexBrowser.getUnknownIndexList().removeLink(index);
 
 		return index;
 	}
@@ -428,14 +614,16 @@ public class IndexManagementHelper {
 
 
 
-	public static class IndexCategoryAdder extends BasicIndexAction {
-		public IndexCategoryAdder(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
-			super(queueManager, indexBrowser, actionSource);
+	public static class IndexFolderAdder extends BasicIndexAction {
+		public IndexFolderAdder(final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+			super(null, indexBrowser, actionSource);
 		}
 
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled((node == null) || (node instanceof IndexCategory));
+
+			if (getActionSource() != null)
+				getActionSource().setEnabled((node == null) || (node instanceof IndexFolder));
 		}
 
 		public void apply() {
@@ -443,28 +631,62 @@ public class IndexManagementHelper {
 									   I18n.getMessage("thaw.plugin.index.categoryName"),
 									   I18n.getMessage("thaw.plugin.index.newCategory"));
 
-			IndexManagementHelper.addIndexCategory(getQueueManager(), getIndexBrowserPanel(), (IndexCategory)getTarget(), name);
+			IndexManagementHelper.addIndexFolder(getIndexBrowserPanel(), (IndexFolder)getTarget(), name);
 		}
 	}
 
 
-	public static IndexCategory addIndexCategory(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, IndexCategory target, final String name) {
+	public static IndexFolder addIndexFolder(final IndexBrowserPanel indexBrowser, IndexFolder target, final String name) {
 		if (target == null)
 			target = indexBrowser.getIndexTree().getRoot();
 
-		final IndexCategory newCat = new IndexCategory(queueManager, indexBrowser, -2, target, name);
+		IndexFolder folder = null;
 
-		newCat.create();
+		synchronized(indexBrowser.getDb().dbLock) {
 
-		indexBrowser.getIndexTree().addToIndexCategory(target, newCat);
+			try {
+				PreparedStatement st;
 
-		return newCat;
+				int nextId = DatabaseManager.getNextId(indexBrowser.getDb(), "indexFolders");
+
+				if (nextId < -1)
+					return null;
+
+				st = indexBrowser.getDb().getConnection().prepareStatement("INSERT INTO indexFolders "+
+											   "(id, name, positionInTree, modifiableIndexes, parent) "+
+											   "VALUES (?, ?, ?, ?, ?)");
+
+				st.setInt(1, nextId);
+				st.setString(2, name);
+				st.setInt(3, 0 /* position */);
+				st.setBoolean(4, true /* modifiable : obsolete */);
+
+				if (target.getId() > 0)
+					st.setInt(5, target.getId());
+				else
+					st.setNull(5, Types.INTEGER);
+
+				st.execute();
+
+				folder = new IndexFolder(indexBrowser.getDb(), nextId, target, name);
+
+			} catch(SQLException e) {
+				Logger.error(new IndexManagementHelper(), "Error while creating folder: "+e.toString());
+
+				return null;
+			}
+		}
+
+		((MutableTreeNode)target).insert(((MutableTreeNode)folder), 0);
+		indexBrowser.getIndexTree().refresh(target);
+
+		return folder;
 	}
 
 
-	public static class IndexDownloader extends BasicIndexAction implements Runnable {
-		public IndexDownloader(final AbstractButton actionSource) {
-			super(null, null, actionSource);
+	public static class IndexHasChangedFlagReseter extends BasicIndexAction implements Runnable {
+		public IndexHasChangedFlagReseter(IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+			super(null, indexBrowser, actionSource);
 		}
 
 		public void setTarget(final IndexTreeNode node) {
@@ -472,27 +694,133 @@ public class IndexManagementHelper {
 		}
 
 		public void apply() {
-			if (getTarget() != null)
-				getTarget().updateFromFreenet(-1);
+			getTarget().setHasChangedFlag(false);
+			getIndexBrowserPanel().getIndexTree().redraw(getTarget());
+		}
+	}
+
+
+	public static class IndexDownloader extends BasicIndexAction implements Runnable, Observer {
+		public boolean allStarted;
+		public int toRemove;
+
+		public IndexDownloader(FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+			super(queueManager, indexBrowser, actionSource);
+		}
+
+		public void setTarget(final IndexTreeNode node) {
+			super.setTarget(node);
+		}
+
+		public void apply() {
+			int i;
+
+			toRemove = 0;
+			allStarted = false;
+
+			i = getTarget().downloadFromFreenet(this, getIndexBrowserPanel().getIndexTree(), getQueueManager());
+
+			getIndexBrowserPanel().getIndexTree().redraw(getTarget());
+
+			if (i > 0)
+				getIndexBrowserPanel().getIndexProgressBar().addTransfer(i);
 			else
-				getIndexBrowserPanel().getIndexTree().getRoot().updateFromFreenet(-1);
+				Logger.notice(this, "No download started ?!");
+
+			allStarted = true;
+		}
+
+		public void update(Observable o, Object param) {
+			getIndexBrowserPanel().getIndexTree().redraw(((Index)o), true);
+
+
+			if (o.equals(getIndexBrowserPanel().getTables().getFileTable().getFileList())) {
+				getIndexBrowserPanel().getTables().getFileTable().refresh();
+			}
+
+			if (o.equals(getIndexBrowserPanel().getTables().getLinkTable().getLinkList())) {
+				getIndexBrowserPanel().getTables().getLinkTable().refresh();
+			}
+
+			getIndexBrowserPanel().getUnknownIndexList().addLinks((LinkList)o);
+
+			toRemove++;
+
+			if (allStarted) {
+				getIndexBrowserPanel().getIndexProgressBar().removeTransfer(toRemove);
+				toRemove = 0;
+			}
 		}
 	}
 
-	public static class IndexUploader extends BasicIndexAction implements Runnable {
-		public IndexUploader(final AbstractButton actionSource) {
-			super(null, null, actionSource);
+
+
+	public static boolean download(FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, IndexTreeNode target) {
+		IndexDownloader downloader = new IndexDownloader(queueManager, indexBrowser, null);
+		downloader.setTarget(target);
+
+		Thread th = new Thread(downloader);
+		th.start();
+
+		return true;
+	}
+
+
+	public static class IndexUploader extends BasicIndexAction implements Runnable, Observer {
+		private boolean allStarted = false;
+		private int toRemove = 0;
+
+		public IndexUploader(FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+			super(queueManager, indexBrowser, actionSource);
 		}
 
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled((node != null) && node.isModifiable());
+
+			if (getActionSource() != null)
+				getActionSource().setEnabled((node != null) && node.isModifiable());
 		}
 
 		public void apply() {
-			if (getTarget() != null)
-				getTarget().update();
+			int i;
+
+			toRemove = 0;
+			allStarted = false;
+
+			i = getTarget().insertOnFreenet(this, getIndexBrowserPanel().getIndexTree(), getQueueManager());
+
+			getIndexBrowserPanel().getIndexTree().redraw(getTarget());
+
+			if (i > 0)
+				getIndexBrowserPanel().getIndexProgressBar().addTransfer(i);
+			else
+				Logger.notice(this, "No insertion started ?!");
+
+			allStarted = true;
 		}
+
+		public void update(Observable o, Object param) {
+			getIndexBrowserPanel().getIndexTree().redraw(((Index)o));
+
+			toRemove++;
+
+			if (allStarted) {
+				getIndexBrowserPanel().getIndexProgressBar().removeTransfer(toRemove);
+				toRemove = 0;
+			}
+		}
+
+	}
+
+
+	public static boolean insert(FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, IndexTreeNode target) {
+		IndexUploader uploader = new IndexUploader(queueManager, indexBrowser, null);
+		uploader.setTarget(target);
+
+		Thread th = new Thread(uploader);
+		th.start();
+
+		return true;
 	}
 
 
@@ -503,7 +831,9 @@ public class IndexManagementHelper {
 
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled(node != null);
+
+			if (getActionSource() != null)
+				getActionSource().setEnabled(node != null);
 		}
 
 		public void apply() {
@@ -530,7 +860,9 @@ public class IndexManagementHelper {
 
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled((node != null) && (node instanceof Index) && node.isModifiable());
+
+			if (getActionSource() != null)
+				getActionSource().setEnabled((node != null) && (node instanceof Index) && node.isModifiable());
 		}
 
 		public void apply() {
@@ -559,7 +891,9 @@ public class IndexManagementHelper {
 
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled(node != null);
+
+			if (getActionSource() != null)
+				getActionSource().setEnabled(node != null);
 		}
 
 		public void apply() {
@@ -589,7 +923,7 @@ public class IndexManagementHelper {
 
 		node.rename(newName);
 
-		indexBrowser.getIndexTree().reloadModel(node.getTreeNode());
+		indexBrowser.getIndexTree().refresh(node);
 	}
 
 
@@ -601,7 +935,9 @@ public class IndexManagementHelper {
 
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled((node != null) && (node instanceof Index));
+
+			if (getActionSource() != null)
+				getActionSource().setEnabled((node != null) && (node instanceof Index));
 		}
 
 		public void apply() {
@@ -637,7 +973,9 @@ public class IndexManagementHelper {
 
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled((node != null) && (node instanceof Index));
+
+			if (getActionSource() != null)
+				getActionSource().setEnabled((node != null) && (node instanceof Index));
 		}
 
 		public void apply() {
@@ -668,9 +1006,11 @@ public class IndexManagementHelper {
 
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled(node != null
-						     && (getIndexBrowserPanel().getIndexTree() != null
-							 && node != getIndexBrowserPanel().getIndexTree().getRoot()));
+
+			if (getActionSource() != null)
+				getActionSource().setEnabled(node != null
+							     && (getIndexBrowserPanel().getIndexTree() != null
+								 && node != getIndexBrowserPanel().getIndexTree().getRoot()));
 		}
 
 		public void apply() {
@@ -683,17 +1023,14 @@ public class IndexManagementHelper {
 		if (node == null)
 			return;
 
-		final DefaultMutableTreeNode parent = (DefaultMutableTreeNode)node.getTreeNode().getParent();
-
-		if (parent != null)
-			parent.remove(node.getTreeNode());
-
+		IndexFolder folder = (IndexFolder)(node.getTreeNode().getParent());
 		node.delete();
 
-		if (parent != null)
-			indexBrowser.getIndexTree().reloadModel(parent);
-		else
-			indexBrowser.getIndexTree().reloadModel();
+		if (folder != null) {
+			indexBrowser.getIndexTree().refresh(folder);
+		} else {
+			indexBrowser.getIndexTree().refresh();
+		}
 	}
 
 
@@ -708,7 +1045,9 @@ public class IndexManagementHelper {
 
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled((node != null) && (node instanceof Index) && ((Index)node).isModifiable());
+
+			if (getActionSource() != null)
+				getActionSource().setEnabled((node != null) && (node instanceof Index) && ((Index)node).isModifiable());
 		}
 
 		public void apply() {
@@ -754,7 +1093,9 @@ public class IndexManagementHelper {
 
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled((node != null) && (node instanceof Index) && ((Index)node).isModifiable());
+
+			if (getActionSource() != null)
+				getActionSource().setEnabled((node != null) && (node instanceof Index) && ((Index)node).isModifiable());
 		}
 
 		public void apply() {
@@ -789,43 +1130,92 @@ public class IndexManagementHelper {
 	}
 
 	/**
-	 * @param files See thaw.plugins.index.File
+	 * @param files See java.io.File
 	 */
 	public static void addFiles(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser,
 				    final Index target, final Vector files, final String category, final boolean insert) {
 		if ((target == null) || (files == null))
 			return;
 
-		for(final Iterator it = files.iterator();
-		    it.hasNext();) {
+		Hsqldb db;
+		PreparedStatement selectSt;
+		PreparedStatement st;
+		int nextId;
 
-			final java.io.File ioFile = (java.io.File)it.next();
+		db = indexBrowser.getDb();
 
-			FCPTransferQuery insertion = null;
+		synchronized(db.dbLock) {
+			try {
+				selectSt = db.getConnection().prepareStatement("SELECT id from files WHERE indexParent = ? AND LOWER(filename) LIKE ? LIMIT 1");
+				st = db.getConnection().prepareStatement("INSERT INTO files "+
+									 "(id, filename, publicKey, localPath, mime, size, category, indexParent) "+
+									 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+				nextId = DatabaseManager.getNextId(db, "files");
 
-			if(insert) {
-				insertion = new FCPClientPut(ioFile, 0, 0, null,
-							     null, FCPClientPut.DEFAULT_INSERTION_PRIORITY,
-							     true, 0, false);
-				queueManager.addQueryToThePendingQueue(insertion);
-			} else {
-				insertion = new FCPClientPut(ioFile, 0, 0, null,
-							     null, FCPClientPut.DEFAULT_INSERTION_PRIORITY,
-							     true, 2, true); /* getCHKOnly */
-				insertion.start(queueManager);
+				if (nextId < 0)
+					return;
+			} catch(SQLException e) {
+				Logger.error(new IndexManagementHelper(), "Exception while trying to add file: "+e.toString());
+				return;
 			}
 
-			final thaw.plugins.index.File file = new thaw.plugins.index.File(indexBrowser.getDb(),
-											 ioFile.getPath(),
-											 category, target,
-											 insertion);
 
-			((FCPClientPut)insertion).addObserver(file);
+			for(final Iterator it = files.iterator();
+			    it.hasNext();) {
 
-			target.addFile(file);
+				final java.io.File ioFile = (java.io.File)it.next();
 
+				try {
+					selectSt.setInt(1, target.getId());
+					selectSt.setString(2, ioFile.getName());
+
+					ResultSet set = selectSt.executeQuery();
+
+					if (set.next()) {
+						/* this file is already in the index */
+						continue;
+					}
+
+
+					FCPTransferQuery insertion = null;
+
+					if(insert) {
+						insertion = new FCPClientPut(ioFile, 0, 0, null,
+								     null, FCPClientPut.DEFAULT_INSERTION_PRIORITY,
+									     true, 0, false);
+						queueManager.addQueryToThePendingQueue(insertion);
+					} else {
+						insertion = new FCPClientPut(ioFile, 0, 0, null,
+									     null, FCPClientPut.DEFAULT_INSERTION_PRIORITY,
+									     true, 2, true); /* getCHKOnly */
+						queueManager.addQueryToTheRunningQueue(insertion);
+					}
+
+
+					st.setInt(1, nextId);
+					st.setString(2, ioFile.getName());
+					st.setString(3, ioFile.getName() /* stand as public key for the moment */);
+					st.setString(4, ioFile.getAbsolutePath());
+					st.setString(5, thaw.plugins.insertPlugin.DefaultMIMETypes.guessMIMEType(ioFile.getName()));
+					st.setLong(6, ioFile.length());
+					st.setNull(7 /* category */, Types.INTEGER /* not used at the moment */);
+					st.setInt(8, target.getId());
+
+					st.execute();
+
+					File file = new File(db, nextId);
+
+					((Observable)insertion).addObserver(file);
+
+					nextId++;
+				} catch(SQLException e) {
+					Logger.error(new IndexManagementHelper(), "Error while adding file: "+e.toString());
+				}
+			}
 		}
-	}
+
+		indexBrowser.getTables().getFileTable().refresh();
+	} /* addFiles() */
 
 
 
@@ -843,7 +1233,9 @@ public class IndexManagementHelper {
 
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled((node != null) && (node instanceof Index) && ((Index)node).isModifiable());
+
+			if (getActionSource() != null)
+				getActionSource().setEnabled((node != null) && (node instanceof Index) && ((Index)node).isModifiable());
 		}
 
 		public void apply() {
@@ -938,14 +1330,51 @@ public class IndexManagementHelper {
 		if ((target == null) || (keys == null))
 			return;
 
-		for(final Iterator it = keys.iterator();
-		    it.hasNext();) {
+		Hsqldb db;
+		PreparedStatement st;
+		int nextId;
 
-			final String key = (String)it.next();
+		db = indexBrowser.getDb();
 
-			final thaw.plugins.index.File file = new thaw.plugins.index.File(indexBrowser.getDb(), key, target);
-			target.addFile(file);
+		synchronized(db.dbLock) {
+			try {
+				st = db.getConnection().prepareStatement("INSERT INTO files "+
+									 "(id, filename, publicKey, localPath, mime, size, category, indexParent) "+
+									 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+				nextId = DatabaseManager.getNextId(db, "files");
+
+				if (nextId < 0)
+					return;
+			} catch(SQLException e) {
+				Logger.error(new IndexManagementHelper(), "Exception while trying to add file: "+e.toString());
+				return;
+			}
+
+			for(final Iterator it = keys.iterator();
+			    it.hasNext();) {
+
+				final String key = (String)it.next();
+
+				try {
+					st.setInt(1, nextId);
+					st.setString(2, FreenetURIHelper.getFilenameFromKey(key));
+					st.setString(3, key);
+					st.setNull(4, Types.VARCHAR /* localPath */);
+					st.setString(5, thaw.plugins.insertPlugin.DefaultMIMETypes.guessMIMEType(FreenetURIHelper.getFilenameFromKey(key)));
+					st.setLong(6, 0L);
+					st.setNull(7 /* category */, Types.INTEGER /* not used at the moment */);
+					st.setInt(8, target.getId());
+
+					st.execute();
+
+					nextId++;
+				} catch(SQLException e) {
+					Logger.error(new IndexManagementHelper(), "Error while adding file: "+e.toString());
+				}
+			}
 		}
+
+		indexBrowser.getTables().getFileTable().refresh();
 	}
 
 
@@ -957,7 +1386,9 @@ public class IndexManagementHelper {
 
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled((node != null) && (node instanceof Index) && ((Index)node).isModifiable());
+
+			if (getActionSource() != null)
+				getActionSource().setEnabled((node != null) && (node instanceof Index) && ((Index)node).isModifiable());
 		}
 
 		public void apply() {
@@ -974,8 +1405,32 @@ public class IndexManagementHelper {
 		if ((target == null) || (linkKey == null))
 			return;
 
-		final Link newLink = new Link(indexBrowser.getDb(), linkKey, target);
-		target.addLink(newLink);
+		Hsqldb db = indexBrowser.getDb();
+
+		synchronized(db.dbLock) {
+			try {
+				PreparedStatement st;
+
+				int nextId = DatabaseManager.getNextId(db, "links");
+
+				st = db.getConnection().prepareStatement("INSERT INTO links (id, publicKey, mark, comment, indexParent, indexTarget) "+
+									 "VALUES (?, ?, ?, ?, ?, ?)");
+
+				st.setInt(1, nextId);
+				st.setString(2, linkKey);
+				st.setInt(3, 0 /* mark : not used at the moment */);
+				st.setString(4, "" /* comment : not used at the moment */);
+				st.setInt(5, target.getId());
+				st.setNull(6, Types.INTEGER /* indexTarget : not used at the moment */);
+
+				st.execute();
+			} catch(SQLException e) {
+				Logger.error(new IndexManagementHelper(), "Error while adding link: "+e.toString());
+			}
+		}
+
+		indexBrowser.getTables().getLinkTable().refresh();
 	}
+
 
 }

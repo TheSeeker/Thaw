@@ -25,11 +25,13 @@ public class LinkManagementHelper {
 
 
 	public static class LinkRemover implements LinkAction {
+		private IndexBrowserPanel indexBrowser;
 		private AbstractButton actionSource;
 		private Vector target;
 
-		public LinkRemover(final AbstractButton actionSource) {
+		public LinkRemover(IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			this.actionSource = actionSource;
+			this.indexBrowser = indexBrowser;
 			if (actionSource != null)
 				actionSource.addActionListener(this);
 		}
@@ -41,41 +43,35 @@ public class LinkManagementHelper {
 
 			this.target = target;
 
-			if (target != null) {
-				for (final Iterator it = target.iterator();
-				     it.hasNext();) {
-					final Link link = (Link)it.next();
-
-					if (!link.isModifiable()) {
-						isOk = false;
-						break;
-					}
-				}
+			if (target != null && target.size() > 0) {
+				Link link = (Link)target.get(0);
+				if (!link.isModifiable())
+					isOk = false;
 			}
 
-
-			actionSource.setEnabled((target != null) && (target.size() != 0) && isOk);
+			actionSource.setEnabled((target != null) && (target.size() > 0) && isOk);
 		}
 
 		public void actionPerformed(final ActionEvent e) {
-			LinkManagementHelper.removeLinks(target);
+			LinkManagementHelper.removeLinks(indexBrowser, target);
 		}
 	}
 
-
-	public static void removeLinks(final Vector links) {
+	public static void removeLinks(IndexBrowserPanel indexBrowser, final Vector links) {
 		if (links == null)
 			return;
 
 		for (final Iterator it = links.iterator();
 		     it.hasNext() ; ) {
 			final Link link = (Link)it.next();
-			link.getParent().removeLink(link);
+			link.delete();
 		}
+
+		indexBrowser.getTables().getLinkTable().refresh();
 	}
 
 
-	public static class IndexAdder implements LinkAction {
+	public static class IndexAdder implements LinkAction, Runnable {
 		private FCPQueueManager queueManager;
 		private IndexBrowserPanel indexBrowser;
 
@@ -98,11 +94,19 @@ public class LinkManagementHelper {
 		}
 
 		public void actionPerformed(final ActionEvent e) {
+			Thread adder = new Thread(this);
+			adder.start();
+		}
+
+
+		public void run() {
 			for (final Iterator it = t.iterator();
 			     it.hasNext(); ) {
 				final Link link = (Link)it.next();
-				IndexManagementHelper.addIndex(queueManager, indexBrowser, null,
-							       link.getPublicKey());
+				if (link != null) {
+					IndexManagementHelper.addIndex(queueManager, indexBrowser, null,
+								       link.getPublicKey());
+				}
 			}
 		}
 	}

@@ -13,6 +13,7 @@ public class PluginManager {
 		"thaw.plugins.FetchPlugin",
 		"thaw.plugins.InsertPlugin",
 		"thaw.plugins.StatusBar",
+		"thaw.plugins.Hsqldb",
 		"thaw.plugins.IndexBrowser",
 		"thaw.plugins.IndexExporter"
 	};
@@ -61,7 +62,7 @@ public class PluginManager {
 	 * Load plugin from config or from default list.
 	 * Reload if already loaded.
 	 */
-	public boolean loadPlugins() {
+	public synchronized boolean loadPlugins() {
 		plugins = new LinkedHashMap();
 
 		Vector pluginNames;
@@ -95,7 +96,7 @@ public class PluginManager {
 	/**
 	 * Start plugins.
 	 */
-	public boolean runPlugins() {
+	public synchronized boolean runPlugins() {
 		Iterator pluginIt;
 
 		if (plugins == null || plugins.size() == 0) {
@@ -144,7 +145,7 @@ public class PluginManager {
 	/**
 	 * Stop all plugins.
 	 */
-	public boolean stopPlugins() {
+	public synchronized boolean stopPlugins() {
 		Iterator pluginIt;
 
 		if (plugins == null) {
@@ -178,7 +179,7 @@ public class PluginManager {
 	/**
 	 * Load a given plugin (without adding it to the config or running it).
 	 */
-	public Plugin loadPlugin(final String className) {
+	public synchronized Plugin loadPlugin(final String className) {
 		Plugin plugin = null;
 
 		Logger.info(this, "Loading plugin: '"+className+"'");
@@ -205,7 +206,7 @@ public class PluginManager {
 	/**
 	 * Run a given plugin.
 	 */
-	public boolean runPlugin(final String className) {
+	public synchronized boolean runPlugin(final String className) {
 		Logger.info(this, "Starting plugin: '"+className+"'");
 
 		try {
@@ -223,7 +224,7 @@ public class PluginManager {
 	/**
 	 * Stop a given plugin.
 	 */
-	public boolean stopPlugin(final String className) {
+	public synchronized boolean stopPlugin(final String className) {
 		Logger.info(this, "Stopping plugin: '"+className+"'");
 
 		try {
@@ -241,7 +242,7 @@ public class PluginManager {
 	/**
 	 * Unload a given plugin (without adding it to the config or running it).
 	 */
-	public boolean unloadPlugin(final String className) {
+	public synchronized boolean unloadPlugin(final String className) {
 		try {
 			if(plugins.get(className) == null) {
 				Logger.warning(this, "unloadPlugin(): Plugin '"+className+"' already unloaded");

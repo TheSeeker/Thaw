@@ -16,11 +16,11 @@ public class Logger {
 	 * 3 = Errors + warnings + notices + infos
 	 * 4 = Errors + warnings + notices + infos + debug
 	 * 5 = [...] + horrible things that only God could understand easily.
-	 *             (or maybe someone having the FCPv2 doc :)
+	 *             (or maybe someone having the FCPv2 specs :)
 	 *
 	 * 2 or more is recommanded.
 	 */
-	public final static int LOG_LEVEL = 3;
+	public final static int LOG_LEVEL = 2;
 
 	private static Vector logListeners = null;
 

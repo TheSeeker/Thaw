@@ -8,7 +8,7 @@ import thaw.plugins.Hsqldb;
 
 import thaw.fcp.FCPQueueManager;
 
-public class AutoRefresh implements Runnable {
+public class AutoRefresh implements Runnable, java.util.Observer {
 
 	public final static boolean DEFAULT_ACTIVATED = true;
 	public final static int DEFAULT_INTERVAL = 300;
@@ -87,48 +87,33 @@ public class AutoRefresh implements Runnable {
 			ResultSet results;
 			int ret;
 
-			st = c.prepareStatement("SELECT id, originalName, displayName, publicKey, privateKey, author, positionInTree, revision "+
-						"FROM indexes WHERE id > ? ORDER by id LIMIT 1");
-
 			if (lastIdx != -1) {
+				st = c.prepareStatement("SELECT id, originalName, displayName, publicKey, privateKey, author, positionInTree, revision "+
+							"FROM indexes WHERE id > ? ORDER by id LIMIT 1");
+
 				st.setInt(1, lastIdx);
-				if (st.execute())
-					results = st.getResultSet();
-				else
-					return -1;
+
+				results = st.executeQuery();
 			} else {
 				results = db.executeQuery("SELECT id, originalName, displayName, publicKey, privateKey, author, positionInTree, revision "+
 							  "FROM indexes ORDER by Id LIMIT 1");
-
-				if (results == null)
-					return -1;
 			}
 
-			if (!results.next())
+			if (results == null || !results.next())
 				return -1;
 
 			ret = results.getInt("id");
 
 			Index index;
 
-			index = browserPanel.getIndexTree().getRegisteredIndex(results.getString("publicKey"));
+			index = new Index(browserPanel.getDb(),
+					  results.getInt("id"));
 
-			if (index == null)
-				index = new Index(queueManager, browserPanel,
-						  results.getInt("id"), null,
-						  results.getString("originalName"),
-						  results.getString("displayName"),
-						  results.getString("publicKey"),
-						  results.getString("privateKey"),
-						  results.getInt("revision"),
-						  results.getString("author"));
+			index.downloadFromFreenet(this, browserPanel.getIndexTree(), queueManager);
 
-			if (index.getPrivateKey() != null) {
-				Logger.debug(this, "Private key found ! index ignored");
-				return ret;
-			}
+			browserPanel.getIndexTree().redraw();
 
-			index.updateFromFreenet(-1);
+			browserPanel.getIndexProgressBar().addTransfer(1);
 
 			return ret;
 
@@ -136,6 +121,25 @@ public class AutoRefresh implements Runnable {
 			Logger.error(this, "SQLEXCEPTION while autorefreshing: "+e.toString());
 			return -2;
 		}
+	}
+
+
+	public void update(java.util.Observable o, Object param) {
+
+		if (((Index)o).hasChanged())
+			browserPanel.getIndexTree().refresh();
+		else
+			browserPanel.getIndexTree().redraw();
+
+		if (o.equals(browserPanel.getTables().getFileTable().getFileList())) {
+			browserPanel.getTables().getFileTable().refresh();
+		}
+
+		if (o.equals(browserPanel.getTables().getLinkTable().getLinkList())) {
+			browserPanel.getTables().getLinkTable().refresh();
+		}
+		browserPanel.getUnknownIndexList().addLinks((LinkList)o);
+		browserPanel.getIndexProgressBar().removeTransfer(1);
 	}
 
 
@@ -164,5 +168,6 @@ public class AutoRefresh implements Runnable {
 		if (threadRunning)
 			threadRunning = false;
 	}
+
 
 }

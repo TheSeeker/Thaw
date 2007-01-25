@@ -44,8 +44,8 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 
 		unknownList = new UnknownIndexList(queueManager, this);
 
-		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"), false, queueManager, this, config);
-		indexTree.makeFlatList();
+		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"),
+					  false, queueManager, this, config);
 
 		leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 					   indexTree.getPanel(),
@@ -128,8 +128,11 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		return globalPanel;
 	}
 
+	public void stopAllThreads() {
+		tables.stopRefresh();
+	}
+
 	public void saveState() {
-		indexTree.save();
 		config.setValue("indexBrowserPanelSplitPosition", Integer.toString(split.getDividerLocation()));
 		int splitLocation;
 
@@ -164,7 +167,7 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 			return;
 		}
 
-		final IndexTreeNode node = (IndexTreeNode)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
+		final IndexTreeNode node = (IndexTreeNode)(path.getLastPathComponent());
 
 		if(node == null) {
 			Logger.notice(this, "Node null ?");
@@ -198,5 +201,6 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 			unknownList.getToolbarModifier().hideButtonsInTheToolbar();
 		}
 	}
+
 
 }

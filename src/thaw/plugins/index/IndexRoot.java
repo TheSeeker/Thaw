@@ -5,48 +5,56 @@ import thaw.core.I18n;
 import thaw.fcp.FCPQueueManager;
 import thaw.plugins.Hsqldb;
 
+import java.sql.*;
 
-public class IndexRoot extends IndexCategory {
+public class IndexRoot extends IndexFolder implements IndexTreeNode {
 
 	private FCPQueueManager queueManager;
 	private IndexBrowserPanel indexBrowser;
 
 	public IndexRoot(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final String name) {
-		super(queueManager, indexBrowser, -1, null, name);
+		super(indexBrowser.getDb(), -1);
 		this.queueManager = queueManager;
 		this.indexBrowser = indexBrowser;
 	}
 
 
-	public IndexCategory getNewImportFolder() {
-		int idx;
-		String name;
-		IndexTreeNode node;
-		IndexCategory importFolder;
+	public IndexFolder getNewImportFolder(Hsqldb db) {
+		String fname = null;
 
-		if (!areChildrenLoaded())
-			loadChildren();
-
-		/* TODO : Don't use getDirectChild()
+		/* TODO : Don't do like this
 		 *        Use the database :
 		 *            ask '[importedFolderName]%' ORDER BY name DESC LIMIT 1
 		 *        and pray there is no importedFolder n°10 or more,
 		 *        or that the database will return the good one :p
 		 */
 
-		idx = 0;
-		name = I18n.getMessage("thaw.plugin.index.importedFolderName");
-		node = getDirectChild(name);
+		synchronized(db.dbLock) {
+			try {
+				int i;
+				PreparedStatement select;
 
-		while (node != null) {
-			idx++;
-			name = I18n.getMessage("thaw.plugin.index.importedFolderName") + " - "+Integer.toString(idx);
-			node = getDirectChild(name);
+				select = db.getConnection().prepareStatement("SELECT id from indexfolders where parent is null and name = ? LIMIT 1");
+
+				for (i = 0 ; i < 100 ; i++) {
+					fname = I18n.getMessage("thaw.plugin.index.importedFolderName")+" - "+Integer.toString(i);
+					select.setString(1, fname);
+
+					ResultSet set = select.executeQuery();
+
+					if (!set.next())
+						break;
+				}
+			} catch(SQLException e) {
+				Logger.error(this, "Unable to find a name for the import folder !");
+				return null;
+			}
 		}
 
-		importFolder = IndexManagementHelper.addIndexCategory(queueManager, indexBrowser, this, name);
+		if (fname == null)
+			return null;
 
-		return importFolder;
+		return IndexManagementHelper.addIndexFolder(indexBrowser, this, fname);
 	}
 
 }

@@ -1,8 +1,10 @@
 package thaw.fcp;
 
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
 
+import thaw.core.FreenetURIHelper;
 import thaw.core.Logger;
 
 /**
@@ -21,6 +23,9 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	/* Vector contains FCPQuery */
 	private final Vector[] pendingQueries = new Vector[FCPQueueManager.PRIORITY_MIN+1];
 	private Vector runningQueries;
+
+	private Hashtable keyTable;
+	private Hashtable filenameTable;
 
 	private Thread scheduler;
 	private boolean stopThread = false;
@@ -92,6 +97,9 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 
 		for(int i = 0; i <= FCPQueueManager.PRIORITY_MIN ; i++)
 			pendingQueries[i] = new Vector();
+
+		keyTable = new Hashtable();
+		filenameTable = new Hashtable();
 	}
 
 	/**
@@ -117,7 +125,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	}
 
 	/**
-	 * @return < 0 if no limite
+	 * @return < 0 if no limit
 	 */
 	public int getMaxInsertions() {
 		return maxInsertions;
@@ -138,6 +146,14 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 		Logger.notice(this, "Adding query to the pending queue ...");
 
 		pendingQueries[query.getThawPriority()].add(query);
+
+		String fileKey = query.getFileKey();
+		String filename = query.getFilename();
+
+		if (FreenetURIHelper.isAKey(fileKey))
+			keyTable.put(FreenetURIHelper.getComparablePart(fileKey), query);
+
+		filenameTable.put(filename, query);
 
 		setChanged();
 		this.notifyObservers(query);
@@ -182,6 +198,15 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 		}
 
 		runningQueries.add(query);
+
+		String fileKey = query.getFileKey();
+		String filename = query.getFilename();
+
+		if (FreenetURIHelper.isAKey(fileKey))
+			keyTable.put(FreenetURIHelper.getComparablePart(fileKey), query);
+
+		filenameTable.put(filename, query);
+
 
 		setChanged();
 		this.notifyObservers(query);
@@ -228,6 +253,14 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 
 		for(int i = 0 ; i <= FCPQueueManager.PRIORITY_MIN ; i++)
 			pendingQueries[i].remove(query);
+
+		String fileKey = query.getFileKey();
+		String filename = query.getFilename();
+
+		if (FreenetURIHelper.isAKey(fileKey))
+			keyTable.remove(FreenetURIHelper.getComparablePart(fileKey));
+
+		filenameTable.remove(filename);
 
 		setChanged();
 		this.notifyObservers(query);
@@ -279,114 +312,21 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 
 
 	/**
-	 * Not very reliable ?
+	 * @param key file key or file name if key is unknown
 	 */
 	public FCPTransferQuery getTransfer(final String key) {
-		boolean interrupted=true;
-		boolean isAKey = true;
-		Iterator it;
+		FCPTransferQuery q;
 
-		if (key == null)
-			return null;
+		if (FreenetURIHelper.isAKey(key)) {
+			q = (FCPTransferQuery)keyTable.get(FreenetURIHelper.getComparablePart(key));
 
-		if (key.startsWith("SSK@") || key.startsWith("USK@")
-		    || key.startsWith("KSK@") || key.startsWith("CHK@"))
-			isAKey = true;
-		else
-			isAKey = false;
+			if (q != null)
+				return q;
 
-		while(interrupted) {
-			interrupted = false;
-
-			try {
-				for(it = runningQueries.iterator();
-				    it.hasNext(); )
-					{
-						final FCPTransferQuery plop = (FCPTransferQuery)it.next();
-						if (isAKey) {
-							if ((plop.getFileKey() == key)
-							    || key.equals(plop.getFileKey()))
-								return plop;
-						} else {
-							if ((plop.getFilename() == key)
-							    || key.equals(plop.getFilename()))
-								return plop;
-						}
-					}
-
-				for(int i = 0 ; i <= FCPQueueManager.PRIORITY_MIN ; i++) {
-					for(it = pendingQueries[i].iterator();
-					    it.hasNext(); )
-						{
-							final FCPTransferQuery plop = (FCPTransferQuery)it.next();
-							if (isAKey) {
-								if ((plop.getFileKey() == key)
-								    || key.equals(plop.getFileKey()))
-									return plop;
-							} else {
-								if ((plop.getFilename() == key)
-								    || key.equals(plop.getFilename()))
-									return plop;
-							}
-						}
-
-				}
-			} catch(final java.util.ConcurrentModificationException e) {
-				Logger.notice(this, "getTransfer(): Collission. Reitering");
-				interrupted = true;
-			}
-
+			return (FCPTransferQuery)filenameTable.get(FreenetURIHelper.getFilenameFromKey(key));
 		}
 
-		return null;
-	}
-
-
-	/**
-	 * Not reliable
-	 */
-	public FCPTransferQuery getTransferByFilename(final String name) {
-		boolean interrupted=true;
-
-		Iterator it;
-
-		if (name == null)
-			return null;
-
-		while(interrupted) {
-			interrupted = false;
-
-			try {
-				for(it = runningQueries.iterator();
-				    it.hasNext(); )
-					{
-						final FCPTransferQuery plop = (FCPTransferQuery)it.next();
-
-						if ((plop.getFilename() == name)
-						    || name.equals(plop.getFilename()))
-							return plop;
-					}
-
-				for(int i = 0 ; i <= FCPQueueManager.PRIORITY_MIN ; i++) {
-					for(it = pendingQueries[i].iterator();
-					    it.hasNext(); )
-						{
-							final FCPTransferQuery plop = (FCPTransferQuery)it.next();
-
-							if ((plop.getFilename() == name)
-							    || name.equals(plop.getFilename()))
-								return plop;
-						}
-
-				}
-			} catch(final java.util.ConcurrentModificationException e) {
-				Logger.notice(this, "getTransferByFilename(): Collission. Reitering");
-				interrupted = true;
-			}
-
-		}
-
-		return null;
+		return (FCPTransferQuery)filenameTable.get(key);
 	}
 
 

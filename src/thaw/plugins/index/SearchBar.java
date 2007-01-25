@@ -23,11 +23,8 @@ public class SearchBar implements ActionListener {
 
 	private Tables tables;
 
-	private FCPQueueManager queueManager;
-
-	public SearchBar(final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser) {
+	public SearchBar(IndexBrowserPanel indexBrowser) {
 		this.indexBrowser = indexBrowser;
-		this.queueManager = queueManager;
 
 		panel = new JPanel();
 		panel.setLayout(new BorderLayout(0, 0));
@@ -56,7 +53,9 @@ public class SearchBar implements ActionListener {
 		userText.setSelectionStart(0);
 		userText.setSelectionEnd(userText.getText().length());
 
-		final SearchResult sr = new SearchResult(indexBrowser.getDb(), userText.getText(), indexBrowser.getIndexTree().getSelectedNode(), queueManager);
+		final SearchResult sr = new SearchResult(indexBrowser.getDb(),
+							 userText.getText().trim(),
+							 indexBrowser.getIndexTree().getSelectedNode());
 		indexBrowser.getTables().setList(sr);
 	}
 

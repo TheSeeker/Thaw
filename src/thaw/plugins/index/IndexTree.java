@@ -21,6 +21,7 @@ import javax.swing.JButton;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
@@ -41,7 +42,7 @@ import thaw.plugins.ToolbarModifier;
 /**
  * Manages the index tree and its menu (right-click).
  */
-public class IndexTree extends java.util.Observable implements MouseListener, ActionListener, java.util.Observer, javax.swing.event.TreeSelectionListener {
+public class IndexTree extends java.util.Observable implements MouseListener, ActionListener, javax.swing.event.TreeSelectionListener {
 
 	public final static Color SELECTION_COLOR = new Color(190, 190, 190);
 	public final static Color LOADING_COLOR = new Color(230, 230, 230);
@@ -95,7 +96,8 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	private Vector toolbarActions;
 
 
-	private Hashtable registeredIndexes; /* currently, equals to all the indexes, but later, will be == to only the displayed indexes */
+	private Vector updatingIndexes;
+
 
 	/**
 	 * @param queueManager Not used if selectionOnly is set to true
@@ -105,18 +107,15 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			 final FCPQueueManager queueManager,
 			 final IndexBrowserPanel indexBrowser,
 			 final Config config) {
+		updatingIndexes = new Vector();
+
 		this.queueManager = queueManager;
 		this.selectionOnly = selectionOnly;
 
 		panel = new JPanel();
 		panel.setLayout(new BorderLayout(10, 10));
 
-		registeredIndexes = new Hashtable();
-
 		root = new IndexRoot(queueManager, indexBrowser, rootName);
-		root.loadChildren();
-
-		root.addObserver(this);
 
 		treeModel = new DefaultTreeModel(root);
 
@@ -154,7 +153,11 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.downloadIndexes"));
 		indexCategoryMenu.add(item);
-		indexCategoryActions.add(new IndexManagementHelper.IndexDownloader(item));
+		indexCategoryActions.add(new IndexManagementHelper.IndexDownloader(queueManager, indexBrowser, item));
+
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.markAllAsSeen"));
+		indexCategoryMenu.add(item);
+		indexCategoryActions.add(new IndexManagementHelper.IndexHasChangedFlagReseter(indexBrowser, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addAlreadyExistingIndex"));
 		indexCategoryMenu.add(item);
@@ -162,7 +165,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addCategory"));
 		indexCategoryMenu.add(item);
-		indexCategoryActions.add(new IndexManagementHelper.IndexCategoryAdder(queueManager, indexBrowser, item));
+		indexCategoryActions.add(new IndexManagementHelper.IndexFolderAdder(indexBrowser, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.createIndex"));
 		indexCategoryMenu.add(item);
@@ -184,11 +187,11 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		// Index menu
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.downloadIndex"));
 		indexMenu.add(item);
-		indexAndFileActions.add(new IndexManagementHelper.IndexDownloader(item));
+		indexAndFileActions.add(new IndexManagementHelper.IndexDownloader(queueManager, indexBrowser, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.insertIndex"));
 		indexMenu.add(item);
-		indexAndFileActions.add(new IndexManagementHelper.IndexUploader(item));
+		indexAndFileActions.add(new IndexManagementHelper.IndexUploader(queueManager, indexBrowser, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.rename"));
 		indexMenu.add(item);
@@ -261,14 +264,14 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		button = new JButton(IconBox.refreshAction);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.downloadIndexes"));
-		action = new IndexManagementHelper.IndexDownloader(button);
+		action = new IndexManagementHelper.IndexDownloader(queueManager, indexBrowser, button);
 		action.setTarget(getRoot());
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 
 		button = new JButton(IconBox.folderNew);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addCategory"));
-		action = new IndexManagementHelper.IndexCategoryAdder(queueManager, indexBrowser, button);
+		action = new IndexManagementHelper.IndexFolderAdder(indexBrowser, button);
 		action.setTarget(getRoot());
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
@@ -317,15 +320,8 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		action.setTarget(getRoot());
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
-
 	}
 
-	/**
-	 * called by the index browser, you shouldn't have to bother about it
-	 */
-	public void makeFlatList() {
-		root.register();
-	}
 
 
 	/**
@@ -350,7 +346,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		if(path == null)
 			return;
 
-		selectedNode = (IndexTreeNode)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
+		selectedNode = (IndexTreeNode)(path.getLastPathComponent());
 
 
 		// Update toolbar
@@ -416,7 +412,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			if(selectedNode == null)
 				return;
 
-			if(selectedNode instanceof IndexCategory) {
+			if(selectedNode instanceof IndexFolder) {
 				updateMenuState(selectedNode);
 				indexCategoryMenu.show(e.getComponent(), e.getX(), e.getY());
 			}
@@ -434,10 +430,20 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		if(path == null)
 			return;
 
-		selectedNode = (IndexTreeNode)((DefaultMutableTreeNode)path.getLastPathComponent()).getUserObject();
+		selectedNode = (IndexTreeNode)(path.getLastPathComponent());
 
-		if ((indexBrowser != null) && (selectedNode instanceof Index)) {
-			indexBrowser.getUnknownIndexList().addLinks(((Index)selectedNode));
+		if (selectedNode != null) {
+			if ((indexBrowser != null) && (selectedNode instanceof Index)) {
+				indexBrowser.getUnknownIndexList().addLinks(((Index)selectedNode));
+			}
+
+			if (selectedNode instanceof Index) {
+				if (((Index)selectedNode).hasChanged()) {
+					((Index)selectedNode).setHasChangedFlag(false);
+					redraw(path);
+				}
+			}
+
 		}
 
 		setChanged();
@@ -467,24 +473,67 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			selectedNode = root;
 	}
 
-	public void save() {
-		root.save();
+
+	private boolean forceHasChangedFlagReload = false;
+
+
+	public void refresh() {
+		refresh(((IndexTreeNode)null));
 	}
 
 
-	public void update(final java.util.Observable o, final Object param) {
-		if( (o instanceof Index)
-		    && (param == null) ) {
-			final Index index = (Index)o;
+	public void refresh(IndexTreeNode node) {
+		forceHasChangedFlagReload = true;
+		if (treeModel != null) {
+			if (node != null && node.isInTree())
+				treeModel.reload(node.getTreeNode());
+			else
+				treeModel.reload(getRoot().getTreeNode());
+		}
+		forceHasChangedFlagReload = false;
+	}
 
-			if (treeModel != null) {
-				treeModel.nodeChanged(index.getTreeNode());
-				if(index.getTreeNode().getParent() != null)
-					treeModel.nodeChanged(index.getTreeNode().getParent());
+
+	public void refresh(TreePath path) {
+		refresh();
+	}
+
+
+	public void redraw() {
+		redraw((IndexTreeNode)null);
+	}
+
+	public void redraw(IndexTreeNode node, boolean parents) {
+		if (!parents)
+			redraw(node);
+		else {
+			while (node != null) {
+				redraw(node);
+				node = ((IndexTreeNode)(((MutableTreeNode)node).getParent()));
 			}
 		}
 	}
 
+	public void redraw(IndexTreeNode node) {
+		//refresh(node);
+		forceHasChangedFlagReload = true;
+		if (treeModel != null) {
+			if (node != null && node.isInTree())
+				treeModel.nodeChanged(node.getTreeNode());
+			else
+				treeModel.nodeChanged(getRoot().getTreeNode());
+		}
+		forceHasChangedFlagReload = false;
+	}
+
+	public void redraw(TreePath path) {
+		Object[] nodes = (Object[])(path.getPath());
+
+		for (int i = 0 ; i < nodes.length ; i++) {
+			IndexTreeNode node = (IndexTreeNode)nodes[i];
+			redraw(node);
+		}
+	}
 
 	public class IndexTreeRenderer extends DefaultTreeCellRenderer {
 
@@ -504,13 +553,18 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			setBackgroundNonSelectionColor(Color.WHITE);
 			setBackgroundSelectionColor(IndexTree.SELECTION_COLOR);
 
-			if(value instanceof DefaultMutableTreeNode) {
-				final Object o = ((DefaultMutableTreeNode)value).getUserObject();
+			if(value instanceof DefaultMutableTreeNode || value instanceof IndexTreeNode) {
+				Object o;
+
+				if (value instanceof DefaultMutableTreeNode)
+					o = ((DefaultMutableTreeNode)value).getUserObject();
+				else
+					o = value;
 
 				if(o instanceof Index) {
 					final Index index = (Index)o;
 
-					if (index.isUpdating()) {
+					if (isIndexUpdating(index)) {
 						setBackgroundNonSelectionColor(IndexTree.LOADING_COLOR);
 						setBackgroundSelectionColor(IndexTree.LOADING_SELECTION_COLOR);
 					}
@@ -527,6 +581,10 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 					/* Remember that for the index category,
 					   this kind of query is recursive */
 					boolean modifiable = ((IndexTreeNode)o).isModifiable();
+
+					if (forceHasChangedFlagReload)
+						((IndexTreeNode)o).forceHasChangedReload();
+
 					boolean hasChanged = ((IndexTreeNode)o).hasChanged();
 
 					int style = 0;
@@ -556,16 +614,16 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 
 	public boolean addToRoot(final IndexTreeNode node) {
-		return addToIndexCategory(root, node);
+		return addToIndexFolder(root, node);
 	}
 
-	public boolean addToIndexCategory(final IndexCategory target, final IndexTreeNode node) {
+	public boolean addToIndexFolder(final IndexFolder target, final IndexTreeNode node) {
 		if ((node instanceof Index) && alreadyExistingIndex(node.getPublicKey())) {
 			Logger.notice(this, "Index already added");
 			return false;
 		}
 
-		node.setParent(target);
+		node.setParent(target.getId());
 		target.getTreeNode().insert(node.getTreeNode(), target.getTreeNode().getChildCount());
 		treeModel.reload(target);
 
@@ -614,30 +672,28 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	/**
 	 * @param node can be null
 	 */
-	public void reloadModel(final DefaultMutableTreeNode node) {
+	public void reloadModel(final MutableTreeNode node) {
 		treeModel.reload(node);
 	}
+
 
 	public void reloadModel() {
 		treeModel.reload();
 	}
 
 
-	public void registerIndex(Index index) {
-		if (index.getPublicKey() == null) {
-			Logger.warning(this, "Hu ?! no key for index '"+index.toString()+"' ?");
-			return;
-		}
+	/* TODO : Improve this ; quite ugly */
 
-		registeredIndexes.put(FreenetURIHelper.getComparablePart(index.getPublicKey()),
-				      index);
+
+	public void addUpdatingIndex(Index index) {
+		updatingIndexes.add(new Integer(index.getId()));
 	}
 
-	public void unregisterIndex(Index index) {
-		registeredIndexes.remove(FreenetURIHelper.getComparablePart(index.getPublicKey()));
+	public void removeUpdatingIndex(Index index) {
+		updatingIndexes.remove(new Integer(index.getId()));
 	}
 
-	public Index getRegisteredIndex(String key) {
-		return ((Index)registeredIndexes.get(FreenetURIHelper.getComparablePart(key)));
+	public boolean isIndexUpdating(Index index) {
+		return (updatingIndexes.indexOf(new Integer(index.getId())) >= 0);
 	}
 }

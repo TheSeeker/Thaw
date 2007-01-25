@@ -57,6 +57,7 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
@@ -226,11 +227,11 @@ public class JDragTree extends JTree implements DragGestureListener, DragSourceL
 							 return;
 						 }
 
-						 final DefaultMutableTreeNode sourceNode = (DefaultMutableTreeNode)pathSource.getLastPathComponent();
-						 final DefaultMutableTreeNode oldParent = (DefaultMutableTreeNode)sourceNode.getParent();
+						 final MutableTreeNode sourceNode = (MutableTreeNode)pathSource.getLastPathComponent();
+						 final MutableTreeNode oldParent = (MutableTreeNode)sourceNode.getParent();
 
-						 final DefaultMutableTreeNode targetNode = (DefaultMutableTreeNode)pathTarget.getLastPathComponent();
-						 final DefaultMutableTreeNode newParent = (DefaultMutableTreeNode)targetNode.getParent();
+						 final MutableTreeNode targetNode = (MutableTreeNode)pathTarget.getLastPathComponent();
+						 final MutableTreeNode newParent = (MutableTreeNode)targetNode.getParent();
 
 						 if( !sourceNode.isLeaf() && (targetNode.getParent() == sourceNode) )
 						 {
@@ -266,7 +267,8 @@ public class JDragTree extends JTree implements DragGestureListener, DragSourceL
 								 // ... and insert into newParent
 								 if( idx >= newParent.getChildCount() )
 								 {
-									 newParent.add( sourceNode );
+									 //newParent.add( sourceNode );
+									 newParent.insert(sourceNode, newParent.getChildCount());
 									 final int insertedIndex[] = { newParent.getChildCount()-1 };
 									 model.nodesWereInserted( newParent, insertedIndex );
 								 }

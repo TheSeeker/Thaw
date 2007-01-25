@@ -12,6 +12,7 @@ import thaw.core.Logger;
  *       and start() returns false.
  */
 public class FCPClientHello implements FCPQuery, Observer {
+	public final static int NODEHELLO_TIMEOUT = 20; /* in seconds */
 
 	private final static String FCP_EXPECTED_VERSION = "2.0";
 	private String id;
@@ -33,7 +34,7 @@ public class FCPClientHello implements FCPQuery, Observer {
 		this.id = id;
 		this.queryManager = queryManager;
 	}
-	
+
 	public void setID(final String id) {
 		this.id = id;
 	}
@@ -77,20 +78,26 @@ public class FCPClientHello implements FCPQuery, Observer {
 			return false;
 		}
 
-		while(!receiveAnswer) {
+
+		int count = 0;
+
+		while(!receiveAnswer && count < (NODEHELLO_TIMEOUT*2)) {
 			try {
 				Thread.sleep(500);
 			} catch(final java.lang.InterruptedException e) {
-				/* Dodo j'ai dis ! */
+				/* \_o< */
 			}
+			count++;
 		}
 
 		if(nodeName != null) {
 			Logger.info(this, "Hello "+nodeName+", I'm Thaw :)");
 		} else {
-			Logger.warning(this, "Unable to connect, ID is probably already taken");
+			Logger.warning(this, "Unable to connect, ID is probably already taken or there was a timeout");
+			queueManager.getQueryManager().getConnection().disconnect();
 			return false;
 		}
+
 
 		return true;
 	}
@@ -116,14 +123,20 @@ public class FCPClientHello implements FCPQuery, Observer {
 				queryManager.deleteObserver(this);
 
 				receiveAnswer = true;
+				synchronized(this) {
+					notify();
+				}
 			}
 
 			if("CloseConnectionDuplicateClientName".equals( answer.getMessageName() )) {
 				/* Damn ... ! */
-				Logger.warning(this, "According to the node, Thaw ID is already used. Please change it in the configuration");
+				Logger.warning(this, "According to the node, Thaw ID is already used. Please change it in the configuration (in advanced mode)");
 				queryManager.deleteObserver(this);
 				queryManager.getConnection().disconnect();
 				receiveAnswer = true;
+				synchronized(this) {
+					notify();
+				}
 			}
 		}
 

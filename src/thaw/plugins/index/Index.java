@@ -12,8 +12,13 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.Enumeration;
+import java.util.Observer;
+import java.util.Observable;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreeNode;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -31,6 +36,7 @@ import org.w3c.dom.Text;
 
 import thaw.core.FreenetURIHelper;
 import thaw.core.Logger;
+import thaw.core.I18n;
 import thaw.fcp.FCPClientGet;
 import thaw.fcp.FCPClientPut;
 import thaw.fcp.FCPGenerateSSK;
@@ -38,231 +44,504 @@ import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
 import thaw.plugins.Hsqldb;
 
-public class Index extends java.util.Observable implements FileAndLinkList, IndexTreeNode, java.util.Observer {
+import thaw.plugins.insertPlugin.DefaultMIMETypes;
+
+
+
+public class Index extends Observable implements MutableTreeNode, FileAndLinkList, IndexTreeNode, Observer {
 
 	private final Hsqldb db;
-
 	private int id;
-	private IndexCategory parent;
-	private String realName;
-	private String displayName;
+	private TreeNode parentNode;
 
-	private String publicKey; /* without the filename ! */
-	private String privateKey;
 
-	private int revision = 0;
+	private String publicKey = null;
+	/* needed for display: */
+	private String privateKey = null;
+	private int rev = -1;
+	private String displayName = null;
+	private boolean hasChanged = false;
 
-	private Vector fileList;
-	private Vector linkList;
 
-	private DefaultMutableTreeNode treeNode;
+	/* loaded only if asked explictly */
+	private String realName = null;
 
-	private FCPGenerateSSK sskGenerator;
-
-	private final FCPQueueManager queueManager;
-	private final IndexBrowserPanel indexBrowser;
-
-	private FCPTransferQuery transfer = null;
-	private File targetFile = null;
-
-	private String author;
-
-	private boolean rewriteKey = true;
-	private boolean changed = false;
-
-	private boolean updateWhenKeyAreAvailable = false;
 
 	/**
 	 * @deprecated Just don't use it !
 	 */
 	public Index() {
 		db = null;
-		queueManager = null;
-		indexBrowser = null;
 	}
 
-
-	/**
-	 * The bigest constructor of the world ...
-	 * @param revision Ignored if the index is not modifiable (=> deduced from the publicKey)
-	 */
-	public Index(final FCPQueueManager queueManager,
-		     final IndexBrowserPanel indexBrowser,
-		     final int id, final IndexCategory parent,
-		     String realName, String displayName,
-		     final String publicKey, final String privateKey,
-		     final int revision,
-		     final String author) {
-		this.indexBrowser = indexBrowser;
-		this.queueManager = queueManager;
-		treeNode = new DefaultMutableTreeNode(displayName, false);
-		this.db = indexBrowser.getDb();
-
+	public Index(Hsqldb db, int id) {
+		this.db = db;
 		this.id = id;
-		this.parent = parent;
-		this.realName = realName.trim();
-		this.displayName = displayName.trim();
+	}
 
-		if (realName == null)
-			realName = displayName;
-
-		if (displayName == null)
-			displayName = realName;
-
-		this.revision = revision;
-
-		this.author = author;
-
-		setPrivateKey(privateKey);
-		setPublicKey(publicKey);
-
-		treeNode.setUserObject(this);
-
-		this.setTransfer();
+	/**
+	 * Use it when you can have these infos easily ; else let the index do the job
+	 */
+	public Index(Hsqldb db, int id, TreeNode parentNode, String publicKey, int rev, String privateKey, String displayName, boolean hasChanged) {
+		this(db, id);
+		this.parentNode = parentNode;
+		this.privateKey = privateKey;
+		this.publicKey = publicKey;
+		this.rev = rev;
+		this.displayName = displayName;
+		this.hasChanged = hasChanged;
 	}
 
 
 	/**
-	 * Index registration allows to have a flat view of the loaded / displayed indexes
+	 * Won't apply in the database !
 	 */
-	public void register() {
-		indexBrowser.getIndexTree().registerIndex(this);
-	}
-
-	public void unregister() {
-		indexBrowser.getIndexTree().unregisterIndex(this);
+	public void setId(int id) {
+		this.id = id;
 	}
 
 
-	public static boolean isDumbKey(final String key) {
-		return ((key == null) || key.equals("") || (key.length() < 20));
+	/**
+	 * Is this node coming from the tree ?
+	 */
+	public boolean isInTree() {
+		return (getParent() != null);
 	}
 
-	public void setParent(final IndexCategory parent) {
-		this.parent = parent;
+	public TreeNode getParent() {
+		return parentNode;
 	}
 
-	public IndexCategory getParent() {
-		return parent;
+	public Enumeration children() {
+		return null;
 	}
 
-	public DefaultMutableTreeNode getTreeNode() {
-		return treeNode;
+	public boolean getAllowsChildren() {
+		return false;
 	}
 
-	public Index getIndex(final int id) {
-		return (id == getId()) ? this : null;
+	public TreeNode getChildAt(int childIndex) {
+		return null;
 	}
 
-	public void generateKeys() {
-		publicKey = null;
-		privateKey = null;
-
-		sskGenerator = new FCPGenerateSSK();
-		sskGenerator.addObserver(this);
-		sskGenerator.start(queueManager);
+	public int getChildCount() {
+		return 0;
 	}
 
-	public boolean create() {
-		try {
-			/* Rahh ! Hsqldb doesn't support getGeneratedKeys() ! 8/ */
-			synchronized (db.dbLock) {
+	/**
+	 * relative to tree, not indexes :p
+	 */
+	public int getIndex(TreeNode node) {
+		return -1;
+	}
+
+	public void setParent(MutableTreeNode newParent) {
+		parentNode = newParent;
+		setParent(((IndexTreeNode)newParent).getId());
+	}
+
+	public void setParent(final int parentId) {
+		synchronized(db.dbLock) {
+
+			Logger.info(this, "setParent("+Integer.toString(parentId)+")");
+			try {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("UPDATE indexes "+
+									 "SET parent = ? "+
+									 "WHERE id = ?");
+				if (parentId >= 0)
+					st.setInt(1, parentId);
+				else
+					st.setNull(1, Types.INTEGER);
+
+				st.setInt(2, id);
+
+				st.execute();
+
+
+				if (parentId >= 0) {
+					st = db.getConnection().prepareStatement("INSERT INTO indexParents (indexId, folderId) "+
+										 " SELECT ?, parentId FROM folderParents "+
+										 "   WHERE folderId = ?");
+					st.setInt(1, id);
+					st.setInt(2, parentId);
+
+					st.execute();
+				} /* else this parent has no parent ... :) */
+
+				st = db.getConnection().prepareStatement("INSERT INTO indexParents (indexId, folderId) "+
+									 "VALUES (?, ?)");
+
+				st.setInt(1, id);
+				if (parentId >= 0)
+					st.setInt(2, parentId);
+				else
+					st.setNull(2, Types.INTEGER);
+
+				st.execute();
+			} catch(SQLException e) {
+				Logger.error(this, "Error while changing parent : "+e.toString());
+			}
+
+		}
+	}
+
+	/**
+	 * entry point
+	 */
+	public void removeFromParent() {
+		Logger.info(this, "removeFromParent()");
+
+		((IndexFolder)parentNode).remove(this);
+
+		synchronized(db.dbLock) {
+
+			PreparedStatement st;
+
+			try {
+				st = db.getConnection().prepareStatement("DELETE FROM indexParents "+
+									 "WHERE indexId = ?");
+				st.setInt(1, id);
+				st.execute();
+
+			} catch(SQLException e) {
+				Logger.error(this, "Error while removing the index: "+e.toString());
+			}
+		}
+	}
+
+	public void remove(int index) {
+		/* nothing to do */
+	}
+
+	public void remove(MutableTreeNode node) {
+		/* nothing to do */
+	}
+
+	public void insert(MutableTreeNode child, int index) {
+		/* nothing to do */
+	}
+
+	public boolean isLeaf() {
+		return true;
+	}
+
+
+	public void setUserObject(Object o) {
+		rename(o.toString());
+	}
+
+	public MutableTreeNode getTreeNode() {
+		return this;
+	}
+
+
+	public void rename(final String name) {
+		synchronized(db.dbLock) {
+
+			try {
 				final Connection c = db.getConnection();
 				PreparedStatement st;
 
-				st = c.prepareStatement("SELECT id FROM indexes ORDER BY id DESC LIMIT 1");
-
+				st = c.prepareStatement("UPDATE indexes SET displayName = ? WHERE id = ?");
+				st.setString(1, name);
+				st.setInt(2, id);
 				st.execute();
 
-				try {
-					final ResultSet key = st.getResultSet();
-					key.next();
-					id = key.getInt(1) + 1;
-				} catch(final SQLException e) {
-					id = 1;
-				}
-
-				st = c.prepareStatement("INSERT INTO indexes (id, originalName, displayName, publicKey, privateKey, author, positionInTree, revision, parent) VALUES (?, ?,?,?,?,?, ?,?, ?)");
-				st.setInt(1, id);
-				st.setString(2, realName);
-				st.setString(3, displayName);
-				st.setString(4, publicKey != null ? publicKey : "");
-				st.setString(5, privateKey);
-				st.setString(6, author);
-				st.setInt(7, 0);
-
-				st.setInt(8, revision);
-
-				if((parent != null) && (parent.getId() >= 0))
-					st.setInt(9, parent.getId());
-				else
-					st.setNull(9, Types.INTEGER);
-
-				st.execute();
+			} catch(final SQLException e) {
+				Logger.error(this, "Unable to rename the index in '"+name+"', because: "+e.toString());
 			}
-
-			return true;
-		} catch(final SQLException e) {
-			Logger.error(this, "Unable to insert the new index in the db, because: "+e.toString());
-			return false;
 		}
 
 	}
 
-	public void rename(final String name) {
-		try {
-			final Connection c = db.getConnection();
-			PreparedStatement st;
 
-			st = c.prepareStatement("UPDATE indexes SET displayName = ? WHERE id = ?");
-			st.setString(1, name);
+	public void delete() {
+		removeFromParent();
+
+		synchronized(db.dbLock) {
+
+			try {
+
+				PreparedStatement st;
+
+				purgeFileList();
+				purgeLinkList();
+
+				st = db.getConnection().prepareStatement("DELETE FROM indexParents "+
+									 "WHERE indexId = ?");
+				st.setInt(1, id);
+				st.execute();
+
+				Logger.notice(this, "DELETING AN INDEX");
+
+				st = db.getConnection().prepareStatement("DELETE FROM indexes WHERE id = ?");
+				st.setInt(1, id);
+				st.execute();
+			} catch(SQLException e) {
+				Logger.error(this, "Unable to delete the index because : "+e.toString());
+			}
+		}
+	}
+
+
+	public void purgeLinkList() {
+		synchronized(db.dbLock) {
+
+			try {
+				final Connection c = db.getConnection();
+				final PreparedStatement st = c.prepareStatement("DELETE FROM links WHERE indexParent = ?");
+				st.setInt(1, getId());
+				st.execute();
+			} catch(final SQLException e) {
+				Logger.error(this, "Unable to purge da list ! Exception: "+e.toString());
+			}
+		}
+	}
+
+	public void purgeFileList() {
+		synchronized(db.dbLock) {
+			try {
+				final Connection c = db.getConnection();
+				final PreparedStatement st = c.prepareStatement("DELETE FROM files WHERE indexParent = ?");
+				st.setInt(1, getId());
+				st.execute();
+			} catch(final SQLException e) {
+				Logger.error(this, "Unable to purge da list ! Exception: "+e.toString());
+			}
+		}
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public boolean loadData() {
+		Logger.info(this, "loadData()");
+		synchronized(db.dbLock) {
+			try {
+				PreparedStatement st =
+					db.getConnection().prepareStatement("SELECT publicKey, revision, privateKey, displayName FROM indexes WHERE id = ? LIMIT 1");
+
+				st.setInt(1, id);
+
+				ResultSet set = st.executeQuery();
+
+				if (set.next()) {
+					publicKey = set.getString("publicKey");
+					privateKey = set.getString("privateKey");
+					rev = set.getInt("revision");
+					displayName = set.getString("displayName");
+					return true;
+				} else {
+					Logger.error(this, "Unable to find index "+Integer.toString(id)+" in the database ?!");
+					return false;
+				}
+			} catch (final SQLException e) {
+				Logger.error(this, "Unable to get public key because: "+e.toString());
+			}
+		}
+		return false;
+	}
+
+
+	public String getPublicKey() {
+		if (publicKey == null) {
+			loadData();
+		}
+
+		return publicKey;
+	}
+
+	public int getRevision() {
+		if (rev < 0) {
+			loadData();
+		}
+
+		return rev;
+	}
+
+	public String getPrivateKey() {
+		if (publicKey == null) { /* we rely on the publicKey because the privateKey is not often availabe */
+			loadData();
+		}
+
+		return privateKey;
+	}
+
+
+	public boolean getPublishPrivateKey() {
+		try {
+
+			PreparedStatement st
+				= db.getConnection().prepareStatement("SELECT publishPrivateKey FROM indexes WHERE id = ? LIMIT 1");
+
+			st.setInt(1, id);
+
+			ResultSet set = st.executeQuery();
+
+			if (!set.next()) {
+				Logger.error(this, "Unable to get publishPrivateKey value => not found !");
+			}
+
+			return set.getBoolean("publishPrivateKey");
+
+
+		} catch(SQLException e){
+			Logger.error(this, "Unable to get publishPrivateKey value because: "+e.toString());
+		}
+
+		return false;
+	}
+
+	public void setPublishPrivateKey(boolean val) {
+		try {
+			PreparedStatement st =
+				db.getConnection().prepareStatement("UPDATE indexes "+
+								    "SET publishPrivateKey = ? "+
+								    "WHERE id = ?");
+			st.setBoolean(1, val);
 			st.setInt(2, id);
 			st.execute();
 
-			displayName = name;
-
-		} catch(final SQLException e) {
-			Logger.error(this, "Unable to rename the index '"+displayName+"' in '"+name+"', because: "+e.toString());
+		} catch(SQLException e){
+			Logger.error(this, "Unable to set publishPrivateKey value because: "+e.toString());
 		}
-
-	}
-
-	public void delete() {
-		try {
-			loadFiles(null, true);
-			this.loadLinks(null, true);
-
-			for(final Iterator fileIt = fileList.iterator(); fileIt.hasNext(); ) {
-				final thaw.plugins.index.File file = (thaw.plugins.index.File)fileIt.next();
-				file.delete();
-			}
-
-			for (final Iterator linkIt = linkList.iterator(); linkIt.hasNext() ;) {
-				final Link link = (Link)linkIt.next();
-				link.delete();
-			}
-
-			final Connection c = db.getConnection();
-			final PreparedStatement st = c.prepareStatement("DELETE FROM indexes WHERE id = ?");
-			st.setInt(1, id);
-			st.execute();
-		} catch(final SQLException e) {
-			Logger.error(this, "Unable to delete the index '"+displayName+"', because: "+e.toString());
-		}
-
-		if (transfer != null)
-			transfer.stop(queueManager);
 	}
 
 
-	public void update() {
-		if (!Index.isDumbKey(publicKey) && Index.isDumbKey(privateKey)) /* non modifiable */
-			return;
+	public void setPublicKey(String publicKey) {
+		int rev = FreenetURIHelper.getUSKRevision(publicKey);
 
-		if (Index.isDumbKey(publicKey) && Index.isDumbKey(privateKey)) {
-			generateKeys();
-			updateWhenKeyAreAvailable = true;
-			return;
+		setPublicKey(publicKey, rev);
+	}
+
+
+	/**
+	 * Use directly this function only if you're sure that the rev is the same in the key
+	 * @param publicKey must be an USK
+	 */
+	public void setPublicKey(String publicKey, int rev) {
+		this.publicKey = publicKey;
+		this.rev = rev;
+
+		synchronized(db.dbLock) {
+
+			try {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("UPDATE indexes "+
+									 "SET publicKey = ?, revision = ? "+
+									 "WHERE id = ?");
+				st.setString(1, publicKey);
+				st.setInt(2, rev);
+				st.setInt(3, id);
+
+				st.execute();
+			} catch(SQLException e) {
+				Logger.error(this, "Unable to set public Key because: "+e.toString());
+			}
+		}
+	}
+
+
+	public void setPrivateKey(String privateKey) {
+		if (privateKey != null && !FreenetURIHelper.isAKey(privateKey))
+			privateKey = null;
+
+		this.privateKey = privateKey;
+
+		synchronized(db.dbLock) {
+			try {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("UPDATE indexes "+
+									 "SET privateKey = ? "+
+									 "WHERE id = ?");
+				if (privateKey != null)
+					st.setString(1, privateKey);
+				else
+					st.setNull(1, Types.VARCHAR);
+				st.setInt(2, id);
+
+				st.execute();
+			} catch(SQLException e) {
+				Logger.error(this, "Unable to set private Key because: "+e.toString());
+			}
+		}
+	}
+
+
+	public String getRealName() {
+		if (realName != null)
+			return realName;
+
+
+		synchronized(db.dbLock) {
+			try {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT originalName FROM indexes WHERE id = ?");
+
+				st.setInt(1, id);
+				ResultSet set = st.executeQuery();
+
+				if (set.next()) {
+					realName = set.getString("originalName");
+					return realName;
+				} else {
+					Logger.error(this, "Unable to get index real name: not found");
+					return null;
+				}
+			} catch(SQLException e) {
+				Logger.error(this, "Unable to get real index name: "+e.toString());
+			}
+		}
+
+		return null;
+	}
+
+
+	public String toString() {
+		return toString(true);
+	}
+
+	public String toString(boolean withRev) {
+		if (displayName == null || rev < 0) {
+			loadData();
+		}
+
+		if (withRev) {
+			if (rev > 0 || privateKey == null)
+				return displayName + " (r"+Integer.toString(rev)+")";
+			else {
+				if (rev > 0)
+					return displayName+" ["+I18n.getMessage("thaw.plugin.index.nonInserted")+"]";
+				else
+					return displayName;
+			}
+		} else
+			return displayName;
+
+	}
+
+
+
+	public int insertOnFreenet(Observer o, IndexTree tree, FCPQueueManager queueManager) {
+		String privateKey = getPrivateKey();
+		String publicKey = getPublicKey();
+		int rev = getRevision();
+
+		if (tree != null && tree.isIndexUpdating(this)) {
+			Logger.notice(this, "A transfer is already running !");
+			return 0;
+		}
+
+		if (!FreenetURIHelper.isAKey(publicKey)
+		    || !FreenetURIHelper.isAKey(privateKey)) { /* non modifiable */
+			Logger.notice(this, "Tried to insert an index for which we don't have the private key ...");
+			return 0;
 		}
 
 		String tmpdir = System.getProperty("java.io.tmpdir");
@@ -272,65 +551,80 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		else
 			tmpdir = tmpdir + java.io.File.separator;
 
-		targetFile = new java.io.File(tmpdir + realName +".frdx");
+		File targetFile = new java.io.File(tmpdir + getRealName() +".frdx");
 
-		if (transfer != null) {
-			Logger.notice(this, "A transfer is already running");
-			return;
-		}
 
-		if(privateKey != null) {
-			FCPClientPut clientPut;
+		Logger.info(this, "Generating index ...");
 
-			Logger.info(this, "Generating index ...");
+		if (!generateXML(targetFile.getAbsolutePath()))
+			return 0;
 
-			FileOutputStream outputStream;
+		FCPClientPut put;
 
-			try {
-				outputStream = new FileOutputStream(targetFile);
-			} catch(final java.io.FileNotFoundException e) {
-				Logger.warning(this, "Unable to create file '"+targetFile.toString()+"' ! not generated !");
-				return;
-			}
+		if(targetFile.exists()) {
+			Logger.info(this, "Inserting new version");
 
-			generateXML(outputStream);
+			String publicSSK = FreenetURIHelper.convertUSKtoSSK(publicKey);
+			publicSSK = FreenetURIHelper.changeSSKRevision(publicSSK, rev, 1);
+			publicKey = FreenetURIHelper.convertSSKtoUSK(publicSSK);
 
-			if(targetFile.exists()) {
-				Logger.info(this, "Inserting new version");
+			rev++;
 
-				revision++;
+			put = new FCPClientPut(targetFile, 2, rev, realName, privateKey, 2, true, 0);
+			put.setMetadata("ContentType", "application/x-freenet-index");
 
-				clientPut = new FCPClientPut(targetFile, 2, revision, realName, privateKey, 2, true, 0);
-				clientPut.setMetadata("ContentType", "application/x-freenet-index");
-				setTransfer(clientPut);
+			if (tree != null)
+				tree.addUpdatingIndex(this);
 
-				queueManager.addQueryToThePendingQueue(clientPut);
+			queueManager.addQueryToThePendingQueue(put);
 
-				save();
+			put.addObserver(this);
+			this.addObserver(o);
 
-			} else {
-				Logger.warning(this, "Index not generated !");
-			}
+			setPublicKey(publicKey, rev);
 
-			setChanged();
-			notifyObservers();
 		} else {
-			updateFromFreenet(-1);
+			Logger.warning(this, "Index not generated !");
+			return 0;
 		}
 
+
+		return 1;
 	}
 
-	public void updateFromFreenet(final int rev) {
-		FCPClientGet clientGet;
+	public int downloadFromFreenet(Observer o, IndexTree tree, FCPQueueManager queueManager) {
+		return downloadFromFreenet(o, tree, queueManager, -1);
+	}
 
-		if (transfer != null) {
+
+	/**
+	 * if true, when the transfer will finish, the index public key will be updated
+	 */
+	private boolean rewriteKey = true;
+
+	private IndexTree indexTree = null;
+
+
+	public int downloadFromFreenet(Observer o, IndexTree tree, FCPQueueManager queueManager, int specificRev) {
+		FCPClientGet clientGet;
+		String publicKey;
+
+		int rev = getRevision();
+
+		indexTree = tree;
+
+		rewriteKey = true;
+
+		publicKey = getPublicKey();
+
+		if (tree != null && tree.isIndexUpdating(this)) {
 			Logger.notice(this, "A transfer is already running !");
-			return;
+			return 0;
 		}
 
 		if (publicKey == null) {
 			Logger.error(this, "No public key !! Can't get the index !");
-			return;
+			return 0;
 		}
 
 		Logger.info(this, "Getting lastest version ...");
@@ -341,643 +635,187 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		   execept if a rev is specified */
 
 
-		if (rev >= 0) {
+		if (specificRev >= 0) {
 			key = FreenetURIHelper.convertUSKtoSSK(publicKey);
-			key = FreenetURIHelper.changeSSKRevision(key, rev, 0);
+			key = FreenetURIHelper.changeSSKRevision(key, specificRev, 0);
 			rewriteKey = false;
 		} else {
-			if (privateKey == null) {
-				key = publicKey;
-				rewriteKey = true;
-			} else {
-				key = getPublicKey();
-				rewriteKey = false;
-			}
+			key = publicKey;
+			rewriteKey = true;
 		}
 
-		Logger.info(this, "Key asked: "+key);
+		Logger.info(this, "Updating index ...");
+		Logger.debug(this, "Key asked: "+key);
 
 
-		clientGet = new FCPClientGet(key, 2, 2, false, -1, null);
-		setTransfer(clientGet);
+		clientGet = new FCPClientGet(key, 2, 2, false, -1,
+					     System.getProperty("java.io.tmpdir"));
 
 		/*
-		 * These requests are usually quite fast, and don't consume a lot
+		 * These requests are usually quite fast, and don't consume too much
 		 * of bandwith / CPU. So we can skip the queue and start immediatly
 		 * (and like this, they won't appear in the queue)
 		 */
-		//this.queueManager.addQueryToThePendingQueue(clientGet);
 		clientGet.start(queueManager);
 
-		this.setChanged();
-		this.notifyObservers();
+		if (tree != null)
+			tree.addUpdatingIndex(this);
+
+		clientGet.addObserver(this);
+
+		this.addObserver(o);
+
+		return 1;
 	}
 
-	public boolean isUpdating() {
-		return ((sskGenerator != null) || ((transfer != null) && (!transfer.isFinished())));
-	}
 
 
-	protected void setTransfer(final FCPTransferQuery query) {
-		if (transfer != null && indexBrowser != null) {
-			indexBrowser.getIndexProgressBar().removeTransfer(query);
-		}
+	public void update(Observable o, Object param) {
+		if (o instanceof FCPClientGet) {
+			FCPClientGet get = (FCPClientGet)o;
 
-		transfer = query;
+			String key = get.getFileKey();
 
-		if (transfer != null) {
-			if (transfer instanceof FCPClientGet)
-				((FCPClientGet)transfer).addObserver(this);
-			if (transfer instanceof FCPClientPut)
-				((FCPClientPut)transfer).addObserver(this);
-			this.update(((java.util.Observable)transfer), null);
-			if (indexBrowser != null)
-				indexBrowser.getIndexProgressBar().addTransfer(query);
-		}
-	}
+			int oldRev = rev;
+			int newRev = FreenetURIHelper.getUSKRevision(key);
 
-	protected void setTransfer() {
-		if (queueManager == null || transfer != null)
-			return;
-
-		if (getPublicKey() != null) {
-			if(!queueManager.isQueueCompletlyLoaded()) {
-				final Thread th = new Thread(new WaitCompleteQueue());
-				th.start();
-				return;
+			if (rewriteKey) {
+				setPublicKey(key, newRev);
 			}
 
-			String key;
+			if (oldRev < newRev)
+				setHasChangedFlag(true);
 
-			if (privateKey != null)
-				key = FreenetURIHelper.getPublicInsertionSSK(getPublicKey());
-			else
-				key = getPublicKey();
+			if (get.isFinished() && get.isSuccessful()) {
+				String path = get.getPath();
 
-			this.setTransfer(queueManager.getTransfer(key));
-		}
-
-		this.setChanged();
-		this.notifyObservers();
-	}
-
-	private class WaitCompleteQueue implements Runnable {
-		public WaitCompleteQueue() { }
-
-		public void run() {
-			int tryNumber = 0;
-
-			while(!queueManager.isQueueCompletlyLoaded() && (tryNumber < 120 /* 1min */)) {
-				try {
-					Thread.sleep(500);
-				} catch(final java.lang.InterruptedException e) {
-					/* \_o< */
-				}
-
-				tryNumber++;
-			}
-
-			if (tryNumber == 120)
-				return;
-
-			Index.this.setTransfer();
-		}
-	}
-
-
-	public void purgeLinkList() {
-		unloadLinks();
-		try {
-			final Connection c = db.getConnection();
-			final PreparedStatement st = c.prepareStatement("DELETE FROM links WHERE indexParent = ?");
-			st.setInt(1, getId());
-			st.execute();
-			linkList = new Vector();
-		} catch(final SQLException e) {
-			Logger.error(this, "Unable to purge da list ! Exception: "+e.toString());
-		}
-	}
-
-	public void purgeFileList() {
-		unloadFiles();
-		try {
-			final Connection c = db.getConnection();
-			final PreparedStatement st = c.prepareStatement("DELETE FROM files WHERE indexParent = ?");
-			st.setInt(1, getId());
-			st.execute();
-			fileList = new Vector();
-		} catch(final SQLException e) {
-			Logger.error(this, "Unable to purge da list ! Exception: "+e.toString());
-		}
-	}
-
-	public synchronized void save() {
-		try {
-			final Connection c = db.getConnection();
-			final PreparedStatement st = c.prepareStatement("UPDATE indexes SET originalName = ?, displayName = ?, publicKey = ?, privateKey = ?, positionInTree = ?, revision = ?, parent = ? , author = ? WHERE id = ?");
-
-			st.setString(1, realName);
-			st.setString(2, displayName);
-			st.setString(3, publicKey != null ? publicKey : "");
-			if(privateKey != null)
-				st.setString(4, privateKey);
-			else
-				st.setNull(4, Types.VARCHAR);
-
-			if ((treeNode != null) && (treeNode.getParent() != null))
-				st.setInt(5, treeNode.getParent().getIndex(treeNode));
-			else
-				st.setInt(5, 0);
-
-			st.setInt(6, revision);
-
-			if( treeNode.getParent() == null || ((IndexTreeNode)treeNode.getParent()).getId() < 0)
-				st.setNull(7, Types.INTEGER);
-			else
-				st.setInt(7, ((IndexTreeNode)treeNode.getParent()).getId());
-
-			st.setString(8, author);
-
-			st.setInt(9, getId());
-
-			st.execute();
-		} catch(final SQLException e) {
-			Logger.error(this, "Unable to save index state '"+toString()+"' because : "+e.toString());
-		}
-	}
-
-	public int getId() {
-		return id;
-	}
-
-	public String getPublicKey() {
-		if ((publicKey == null) || Index.isDumbKey(publicKey))
-			return null;
-
-		if (publicKey.startsWith("SSK@")) { /* as it should when privateKey is known */
-			if (publicKey.endsWith("/"))
-				return publicKey.replaceFirst("SSK@", "USK@")+realName+"/"+revision+"/"+realName+".frdx";
-			else
-				return publicKey.replaceFirst("SSK@", "USK@")+"/"+realName+"/"+revision+"/"+realName+".frdx";
-		} else
-			return publicKey;
-	}
-
-	/**
-	 * Always set the privateKey first
-	 */
-	public void setPublicKey(final String key) {
-		if ((key != null) && !Index.isDumbKey(key))
-			publicKey = key.trim();
-		else
-			publicKey = null;
-
-
-		if ((privateKey != null) && (publicKey != null) && publicKey.startsWith("USK@")) {
-			final String[] split = FreenetURIHelper.convertUSKtoSSK(publicKey).split("/");
-			publicKey = split[0];
-		}
-
-		if ((publicKey != null) && publicKey.startsWith("USK@"))
-			revision = FreenetURIHelper.getUSKRevision(publicKey);
-	}
-
-	public String getPrivateKey() {
-		if ((privateKey == null) || Index.isDumbKey(privateKey))
-			return null;
-		return privateKey;
-	}
-
-	public void setPrivateKey(final String key) {
-		if ((key != null) && !Index.isDumbKey(key))
-			privateKey = key.trim();
-		else
-			privateKey = null;
-	}
-
-	public String toString() {
-		return toString(true);
-	}
-
-	public String toString(boolean withRev) {
-		String toDisp;
-
-		if(displayName != null)
-			toDisp = displayName;
-		else
-			toDisp = realName;
-
-		if (withRev && revision > 0)
-			toDisp += " (r"+Integer.toString(revision)+")";
-
-		return toDisp;
-	}
-
-	public boolean isLeaf() {
-		return true;
-	}
-
-
-	public void update(final java.util.Observable o, final Object p) {
-
-		if(o == sskGenerator) {
-			sskGenerator.deleteObserver(this);
-			publicKey = sskGenerator.getPublicKey();
-			privateKey = sskGenerator.getPrivateKey();
-			sskGenerator = null;
-
-			Logger.debug(this, "Index public key: " +publicKey);
-			Logger.debug(this, "Index private key: "+privateKey);
-
-			revision = 0;
-
-			if (updateWhenKeyAreAvailable) {
-				updateWhenKeyAreAvailable = false;
-				update();
-			}
-
-			setChanged();
-			notifyObservers();
-			return;
-		}
-
-		if(o == transfer) {
-			if(transfer.isFinished() && transfer.isSuccessful()) {
-				if(transfer instanceof FCPClientPut) {
-
-					((FCPClientPut)transfer).deleteObserver(this);
-
-					if (transfer.stop(queueManager))
-						queueManager.remove(transfer);
-
-					this.setChanged();
-					this.notifyObservers();
-
-					return;
-				}
-
-				if (transfer instanceof FCPClientGet) {
-					((FCPClientGet)transfer).deleteObserver(this);
-
-					final int oldRevision = revision;
-
-					if (rewriteKey)
-						publicKey = transfer.getFileKey();
-
-					revision = FreenetURIHelper.getUSKRevision(transfer.getFileKey());
-
-					Logger.info(this, "Most up-to-date key found: " + getPublicKey());
-
-					if (oldRevision < revision)
-						changed = true;
-
-					/* Reminder: These requests are non-peristent */
-					//if (this.transfer.stop(this.queueManager))
-					//	this.queueManager.remove(this.transfer);
-
-					queueManager.remove(transfer);
-
-					if (transfer.getPath() == null) {
-						Logger.error(this, "No path ?!");
-						return;
-					}
-
-					//if (changed)
-					loadXML(transfer.getPath());
-
-					save();
-
-					indexBrowser.getUnknownIndexList().addLinks(this);
-
-					setChanged();
-					notifyObservers();
-				}
-
-			}
-
-			if ((transfer != null) && transfer.isFinished() && !transfer.isSuccessful()) {
-				Logger.info(this, "Unable to get new version of the index");
-
-				this.setChanged();
-				this.notifyObservers();
-			}
-
-			if (transfer != null && transfer.isFinished()) {
-				Logger.info(this, "Removing file '"+transfer.getPath()+"'");
-				final String path = transfer.getPath();
 				if (path != null) {
-					final java.io.File fl = new java.io.File(path);
-					fl.delete();
-				}
-				else
-					Logger.error(this, "Unable to remove file !");
-				setTransfer(null);
+					loadXML(path);
+				} else
+					Logger.error(this, "No path specified in transfer ?!");
 			}
-
 		}
 
-		if ((o instanceof thaw.plugins.index.File)
-		    || (o instanceof Link)) {
-			this.setChanged();
-			this.notifyObservers(o);
+
+		/* nothing special to do if it is an insert */
+		/* TODO : check if it's successful, else merge if it's due to a collision */
+
+
+		if (o instanceof FCPTransferQuery) {
+			FCPTransferQuery transfer = (FCPTransferQuery)o;
+
+			if (transfer.isFinished()) {
+				String path = transfer.getPath();
+
+				final java.io.File fl = new java.io.File(path);
+				fl.delete();
+
+				((Observable)transfer).deleteObserver(this);
+				if (indexTree != null)
+					indexTree.removeUpdatingIndex(this);
+
+				setChanged();
+				notifyObservers();
+			}
 		}
-	}
 
-
-	public boolean hasChanged() {
-		return changed;
-	}
-
-
-	public void setChanged(final boolean val) {
-		changed = val;
-	}
-
-
-	public boolean isEmpty() {
-		if (fileList == null)
-			loadFiles(null, true);
-		if (linkList == null)
-			this.loadLinks(null, true);
-
-		if ((fileList.size() == 0) && (linkList.size() == 0))
-			return true;
-
-		return false;
 	}
 
 
 	////// FILE LIST ////////
 
-	public void loadFiles(final String columnToSort, boolean asc) {
+	public Vector getFileList(String columnToSort, boolean asc) {
+		synchronized(db.dbLock) {
 
-		fileList = new Vector();
+			try {
+				Vector files = new Vector();
 
-		try {
-			String query = "SELECT id, filename, publicKey, mime, size, localPath, category, indexParent FROM files WHERE indexParent = ?";
+				PreparedStatement st;
 
-			if(columnToSort != null) {
-				query = query + "ORDER BY " + columnToSort;
-
-				if(!asc)
-					query = query + " DESC";
-			}
-
-			final PreparedStatement st = db.getConnection().prepareStatement(query);
-
-			st.setInt(1, getId());
-
-			if(st.execute()) {
-				final ResultSet results = st.getResultSet();
-
-				while(results.next()) {
-					final thaw.plugins.index.File file = new thaw.plugins.index.File(db, results, this);
-					file.setTransfer(queueManager);
-					addFileToList(file);
+				if (columnToSort == null) {
+					st = db.getConnection().prepareStatement("SELECT id, filename, publicKey, localPath, mime, size "+
+										 "FROM files WHERE indexParent = ?");
+				} else {
+					st = db.getConnection().prepareStatement("SELECT id, filename, publicKey, localPath, mime, size "+
+										 "FROM files WHERE indexParent = ? ORDER by "+
+										 columnToSort + (asc == true ? "" : " DESC"));
 				}
-			}
 
+				st.setInt(1, id);
 
-		} catch(final java.sql.SQLException e) {
-			Logger.error(this, "Unable to get the file list for index: '"+toString()+"' because: "+e.toString());
-		}
+				ResultSet rs = st.executeQuery();
 
-		setChanged(false); /* java.util.Index */
-		setChanged(); /* java.util.Observer */
-		notifyObservers();
-	}
+				while(rs.next()) {
+					int file_id = rs.getInt("id");
+					String filename = rs.getString("filename");
+					String file_publicKey = rs.getString("publicKey");
+					String lp = rs.getString("localPath");
+					java.io.File localPath = (lp == null ? null : new java.io.File(lp));
+					String mime = rs.getString("mime");
+					long size = rs.getLong("size");
 
-	/**
-	 * Returns a *copy* of da vector.
-	 */
-	public Vector getFileList() {
-		final Vector newList = new Vector();
-
-		if (fileList == null)
-			return newList;
-
-		for(final Iterator it = fileList.iterator();
-		    it.hasNext();) {
-			newList.add(it.next());
-		}
-
-		return newList;
-	}
-
-	public thaw.plugins.index.File getFile(final int index) {
-		return (thaw.plugins.index.File)fileList.get(index);
-	}
-
-	public int getFilePosition(final thaw.plugins.index.File fileA) {
-		int pos = fileList.indexOf(fileA);
-
-		if (fileA.getPublicKey() == null)
-			return -1;
-
-		if (pos < 0) {
-			/* Manual research */
-			pos = 0;
-			for(final Iterator it = fileList.iterator();
-			    it.hasNext();) {
-				final thaw.plugins.index.File fileB = (thaw.plugins.index.File)it.next();
-
-				if ((fileB.getPublicKey() != null)
-				    && fileB.getPublicKey().equals(fileA.getPublicKey()))
-					return pos;
-				pos++;
-
-			}
-		}
-
-		return -1;
-	}
-
-
-	public void unloadFiles() {
-		if (fileList != null) {
-			for (final Iterator it  = fileList.iterator();
-			     it.hasNext();)
-				{
-					final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
-					file.deleteObserver(this);
+					thaw.plugins.index.File file =
+						new thaw.plugins.index.File(db, file_id, filename, file_publicKey,
+									    localPath, mime, size, id);
+					files.add(file);
 				}
+
+				return files;
+
+			} catch(SQLException e) {
+				Logger.error(this, "SQLException while getting file list: "+e.toString());
+			}
 		}
-
-		fileList = null;
-	}
-
-
-	/**
-	 * Note for myself: For external use only ! (file will be inserted in the database etc)
-	 */
-	public void addFile(final thaw.plugins.index.File file) {
-		file.setParent(this);
-
-		if (!file.isInTheDatabase()) {
-			file.insert();
-
-			addFileToList(file);
-
-			this.setChanged();
-			this.notifyObservers(file);
-		}
-		else
-			Logger.notice(this, "File already in the database for this index");
-	}
-
-
-	/**
-	 * Won't notify
-	 */
-	protected void addFileToList(final thaw.plugins.index.File file) {
-		if (fileList == null)
-			loadFiles(null, true);
-		file.addObserver(this);
-		fileList.add(file);
-	}
-
-
-	public void removeFile(final thaw.plugins.index.File file) {
-		file.delete();
-
-		if(fileList != null) {
-			fileList.remove(file);
-
-			this.setChanged();
-			this.notifyObservers(file);
-		}
-	}
-
-	/**
-	 * Do the update all the files in the database.
-	 */
-	public void updateFileList() {
-		for(final Iterator it = fileList.iterator(); it.hasNext();) {
-			final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
-			file.update();
-		}
+		return null;
 	}
 
 
 	//// LINKS ////
 
-	public void addLink(final Link link) {
-		link.setParent(this);
+	public Vector getLinkList(String columnToSort, boolean asc) {
+		synchronized(db.dbLock) {
 
-		if (!link.isInTheDatabase()) {
-			link.insert();
+			try {
+				Vector links = new Vector();
 
-			addLinkToList(link);
+				PreparedStatement st;
 
-			setChanged();
-			notifyObservers(link);
-		}
-		else
-			Logger.notice(this, "Link already in the database for this index");
+				st = db.getConnection().prepareStatement("SELECT id, publicKey FROM links WHERE indexParent = ?");
 
-	}
+				st.setInt(1, id);
 
-	protected void addLinkToList(final Link link) {
-		if (linkList == null)
-			this.loadLinks(null, true);
+				ResultSet res = st.executeQuery();
 
-		linkList.add(link);
-	}
-
-	public void removeLink(final Link link) {
-		link.delete();
-
-		if (linkList != null) {
-			linkList.remove(link);
-			this.setChanged();
-			this.notifyObservers(link);
-		}
-
-	}
-
-	/**
-	 * Update all the links in the database.
-	 */
-	public void updateLinkList() {
-		for(final Iterator it = linkList.iterator(); it.hasNext();) {
-			final Link link = (Link)it.next();
-			link.update();
-		}
-	}
-
-	public void loadLinks(final String columnToSort, boolean asc)
-	{
-		linkList = new Vector();
-
-		try {
-			String query = "SELECT id, publicKey, mark, comment, indexTarget FROM links WHERE indexParent = ?";
-
-			if(columnToSort != null) {
-				query = query + "ORDER BY " + columnToSort;
-
-				if(!asc)
-					query = query + " DESC";
-			}
-
-			final PreparedStatement st = db.getConnection().prepareStatement(query);
-
-			st.setInt(1, getId());
-
-			if(st.execute()) {
-				final ResultSet results = st.getResultSet();
-
-				while(results.next()) {
-					try {
-						final Link link = new Link(db, results, this);
-						addLinkToList(link);
-					} catch(final Exception e) {
-						Logger.warning(this, "Unable to add index '"+publicKey+"' to the list because: "+e.toString());
-					}
+				while(res.next()) {
+					Link l = new Link(db, res.getInt("id"), res.getString("publicKey"), id);
+					links.add(l);
 				}
+
+				return links;
+
+			} catch(SQLException e) {
+				Logger.error(this, "SQLException while getting link list: "+e.toString());
 			}
-
-
-		} catch(final java.sql.SQLException e) {
-			Logger.error(this, "Unable to get the link list for index: '"+toString()+"' because: "+e.toString());
 		}
 
-		setChanged(false); /* Index */
-		setChanged();      /* java.util.Observable */
-		notifyObservers();
-
+		return null;
 	}
-
-	/* Returns a copy ! */
-	public Vector getLinkList()
-	{
-		final Vector newList = new Vector();
-
-		if (linkList == null)
-			return newList;
-
-		for(final Iterator it = linkList.iterator();
-		    it.hasNext();) {
-			newList.add(it.next());
-		}
-
-		return newList;
-	}
-
-	public Link getLink(final int index)
-	{
-		return (Link)linkList.get(index);
-	}
-
-	public void unloadLinks()
-	{
-		linkList = null;
-	}
-
 
 	//// XML ////
+	public boolean generateXML(String path) {
+		try {
+			generateXML(new FileOutputStream(new File(path)));
+			return true;
+		} catch(java.io.FileNotFoundException e) {
+			Logger.error(this, "File not found exception ?!");
+		}
+		return false;
+	}
 
 	public void generateXML(final OutputStream out) {
-		final StreamResult streamResult = new StreamResult(out);
+		StreamResult streamResult;
+
+		streamResult = new StreamResult(out);
 
 		Document xmlDoc;
 
@@ -997,9 +835,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 		final Element rootEl = xmlDoc.getDocumentElement();
 
-		rootEl.appendChild(getXMLHeader(xmlDoc));
-		rootEl.appendChild(getXMLLinks(xmlDoc));
-		rootEl.appendChild(getXMLFileList(xmlDoc));
+		fillInRootElement(rootEl, xmlDoc);
 
 		/* Serialization */
 		final DOMSource domSource = new DOMSource(xmlDoc);
@@ -1026,46 +862,62 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		}
 	}
 
+	public boolean fillInRootElement(Element rootEl, Document xmlDoc) {
+		rootEl.appendChild(getXMLHeader(xmlDoc));
+		rootEl.appendChild(getXMLLinks(xmlDoc));
+		rootEl.appendChild(getXMLFileList(xmlDoc));
+
+		return true;
+	}
+
 	public Element getXMLHeader(final Document xmlDoc) {
 		final Element header = xmlDoc.createElement("header");
 
 		final Element title = xmlDoc.createElement("title");
-		final Text titleText = xmlDoc.createTextNode(displayName);
+		final Text titleText = xmlDoc.createTextNode(toString(false));
 		title.appendChild(titleText);
 
-		final Element owner = xmlDoc.createElement("owner");
-		Text ownerText;
-
-		if (author == null)
-			ownerText = xmlDoc.createTextNode("Another anonymous");
-		else
-			ownerText = xmlDoc.createTextNode(author);
-
-		owner.appendChild(ownerText);
-
 		header.appendChild(title);
-		header.appendChild(owner);
+
+		if (getPublishPrivateKey() && getPrivateKey() != null) {
+			final Element privateKeyEl = xmlDoc.createElement("privateKey");
+			final Text privateKeyText = xmlDoc.createTextNode(getPrivateKey());
+			privateKeyEl.appendChild(privateKeyText);
+
+			header.appendChild(privateKeyEl);
+		}
+
+
+		/* TODO : Author */
 
 		return header;
 	}
 
 	public Element getXMLLinks(final Document xmlDoc) {
 		final Element links = xmlDoc.createElement("indexes");
+		synchronized(db.dbLock) {
+			try {
+				PreparedStatement st;
 
-		if (linkList == null) {
-			this.loadLinks(null, true);
-		}
+				st = db.getConnection().prepareStatement("SELECT publicKey FROM links WHERE indexParent = ?");
+				st.setInt(1, id);
 
-		for (final Iterator it = getLinkList().iterator();
-		     it.hasNext();) {
-			final Link link = (Link)it.next();
+				ResultSet set = st.executeQuery();
 
-			final Element xmlLink = link.getXML(xmlDoc);
+				while (set.next()) {
+					final Element xmlLink = xmlDoc.createElement("index");
 
-			if (xmlLink != null)
-				links.appendChild(xmlLink);
-			else
-				Logger.warning(this, "Unable to get XML for the link '"+link.getIndexName()+"' => Gruick da link");
+					xmlLink.setAttribute("key", set.getString("publicKey"));
+
+					if (xmlLink != null)
+						links.appendChild(xmlLink);
+					else
+						Logger.warning(this, "Unable to get XML for a link => Gruick da link");
+
+				}
+			} catch(SQLException e) {
+				Logger.error(this, "Error while getting link list for XML : "+e.toString());
+			}
 		}
 
 		return links;
@@ -1074,34 +926,74 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	public Element getXMLFileList(final Document xmlDoc) {
 		final Element files = xmlDoc.createElement("files");
 
-		if(fileList == null) {
-			loadFiles(null, true);
-		}
+		synchronized(db.dbLock) {
+			try {
+				PreparedStatement st;
 
-		for(final Iterator it = getFileList().iterator();
-		    it.hasNext();) {
-			final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+				st = db.getConnection().prepareStatement("SELECT id, filename, publicKey, size, mime "+
+									 "FROM files "+
+									 "WHERE indexParent = ?");
 
-			final Element xmlFile = file.getXML(xmlDoc);
+				st.setInt(1, id);
 
-			if(xmlFile != null)
-				files.appendChild(xmlFile);
-			else
-				Logger.warning(this, "Public key wasn't generated ! Not added to the index !");
+				ResultSet set = st.executeQuery();
+
+				while(set.next()) {
+					String pubKey = set.getString("publicKey");
+
+					if (pubKey == null)
+						continue;
+
+					pubKey = pubKey.trim();
+
+					if (!FreenetURIHelper.isAKey(pubKey)) {
+						Logger.notice(this, "One of the file key wasn't generated => not added");
+						continue;
+					}
+
+					final Element xmlFile = xmlDoc.createElement("file");
+
+					xmlFile.setAttribute("id", set.getString("id"));
+					xmlFile.setAttribute("key", pubKey);
+					xmlFile.setAttribute("size", set.getString("size"));
+					if (set.getString("mime") == null)
+						xmlFile.setAttribute("mime", DefaultMIMETypes.guessMIMEType(set.getString("filename")));
+					else
+						xmlFile.setAttribute("mime", set.getString("mime"));
+
+					if(xmlFile != null)
+						files.appendChild(xmlFile);
+					else
+						Logger.warning(this, "Public key wasn't generated ! Not added to the index !");
+				}
+
+			} catch(SQLException e) {
+				Logger.error(this, "Error while getting file list for XML : "+e.toString());
+			}
 		}
 
 		return files;
 	}
 
+
+
 	public void loadXML(final String filePath) {
+		loadXML(filePath, true);
+	}
+
+
+	/**
+	 * @param clean if set to false, will do a merge
+	 */
+	public void loadXML(final String filePath, boolean clean) {
 		try {
-			loadXML(new FileInputStream(filePath));
+			loadXML(new FileInputStream(filePath), clean);
 		} catch(final java.io.FileNotFoundException e) {
 			Logger.error(this, "Unable to load XML: FileNotFoundException ('"+filePath+"') ! : "+e.toString());
 		}
 	}
 
-	public synchronized void loadXML(final java.io.InputStream input) {
+	public synchronized void loadXML(final java.io.InputStream input, boolean clean) {
 		final DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder xmlBuilder;
 
@@ -1128,30 +1020,39 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 
 		final Element rootEl = xmlDoc.getDocumentElement();
 
-		loadXML(rootEl);
+		Logger.info(this, "Extracting informations from index ...");
+		loadXML(rootEl, clean);
+		Logger.info(this, "Extraction done");
 	}
 
-	public void loadXML(Element rootEl) {
+	public void loadXML(Element rootEl, boolean clean) {
 		loadHeader(rootEl);
-		loadLinks(rootEl);
-		loadFileList(rootEl);
+		loadLinks(rootEl, clean);
+		loadFileList(rootEl, clean);
 	}
 
 
 	public void loadHeader(final Element rootEl) {
 		final Element header = (Element)rootEl.getElementsByTagName("header").item(0);
 
-		if (header == null)
-			return;
+		if (publicKey == null)
+			loadData();
 
-		realName = getHeaderElement(header, "title");
-		author = getHeaderElement(header, "owner");
+		String pKey = getHeaderElement(header, "privateKey");
+		if (pKey != null) {
+			if (privateKey == null || privateKey.trim().equals(pKey.trim())) {
+				/* the public key was published, we will have to do the same later */
+				setPublishPrivateKey(true);
+			}
+			else
+				setPublishPrivateKey(false);
 
-		if (author == null)
-			author = "Another anonymous";
+			if (privateKey == null)
+				setPrivateKey(pKey.trim());
+		}
 	}
 
-	public String getHeaderElement(final Element header, final String name) {
+	protected String getHeaderElement(final Element header, final String name) {
 		try {
 			if (header == null)
 				return null;
@@ -1178,52 +1079,219 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		}
 	}
 
-	public void loadLinks(final Element rootEl) {
-		purgeLinkList();
-
+	public void loadLinks(final Element rootEl, boolean clean) {
 		final Element links = (Element)rootEl.getElementsByTagName("indexes").item(0);
 
-		if (links == null)
+		if (links == null) {
+			Logger.notice(this, "No links in index !");
 			return;
+		}
 
 		final NodeList list = links.getChildNodes();
 
-		for(int i = 0; i < list.getLength() ; i++) {
-			if(list.item(i).getNodeType() == Node.ELEMENT_NODE) {
-				final Element e = (Element)list.item(i);
+		PreparedStatement updateSt = null;
+		PreparedStatement insertSt = null;
+		int nextId;
 
-				final Link link = new Link(db, e, this);
-				addLink(link);
+		synchronized(db.dbLock) {
+			try {
+				updateSt =
+					db.getConnection().prepareStatement("UPDATE links "+
+									    "SET publicKey = ?, "+
+									    "toDelete = FALSE "+
+									    "WHERE indexParent = ? "+
+									    "AND LOWER(publicKey) LIKE ?");
+				insertSt =
+					db.getConnection().prepareStatement("INSERT INTO links "
+									    + "(id, publicKey, mark, comment, indexParent, indexTarget) "
+									    + "VALUES (?, ?, 0, ?, ?, NULL)");
+				if ((nextId = DatabaseManager.getNextId(db, "links")) < 0)
+					return;
+
+				PreparedStatement st =
+					db.getConnection().prepareStatement("UPDATE links "+
+									    "SET toDelete = TRUE "+
+									    "WHERE indexParent = ?");
+				st.setInt(1, id);
+				st.execute();
+			} catch(SQLException exc) {
+				Logger.error(this, "Unable to prepare statement because: "+exc.toString());
+				return;
+			}
+
+			if (list.getLength() < 0) {
+				Logger.notice (this, "No link ?!");
+			}
+
+			for(int i = 0; i < list.getLength() ; i++) {
+				if(list.item(i).getNodeType() == Node.ELEMENT_NODE) {
+					final Element e = (Element)list.item(i);
+
+					String key = e.getAttribute("key");
+
+					if (key == null) {
+						Logger.notice(this, "No key in this link ?!");
+						continue;
+					}
+
+					key = key.trim();
+
+					try {
+						updateSt.setString(1, key);
+						updateSt.setInt(2, id);
+						updateSt.setString(3, key);
+
+						if (updateSt.executeUpdate() <= 0) {
+
+							insertSt.setInt(1, nextId);
+							insertSt.setString(2, key);
+							insertSt.setString(3, "No comment"); /* comment not used at the moment */
+							insertSt.setInt(4, id);
+
+							insertSt.execute();
+							nextId++;
+						}
+
+					} catch(SQLException exc) {
+						Logger.error(this, "Unable to add link because: "+exc.toString());
+					}
+				}
+			} /* for() */
+
+			if (clean) {
+				try {
+					PreparedStatement st;
+
+					st = db.getConnection().prepareStatement("DELETE FROM links "+
+											 "WHERE toDelete = TRUE "+
+											 "AND indexParent = ?");
+					st.setInt(1, id);
+					st.execute();
+				} catch(SQLException exc) {
+					Logger.error(this, "error while clean index (links) : "+exc.toString());
+				}
+
 			}
 		}
 
-		setChanged();
-		notifyObservers();
 	}
 
-	public void loadFileList(final Element rootEl) {
-		purgeFileList();
-
+	public void loadFileList(final Element rootEl, boolean clean) {
 		final Element filesEl = (Element)rootEl.getElementsByTagName("files").item(0);
 
-		if (filesEl == null)
+		if (filesEl == null) {
+			Logger.notice(this, "No file in the index !");
 			return;
+		}
 
-		final NodeList list = filesEl.getChildNodes();
+		PreparedStatement updateSt = null;
+		PreparedStatement insertSt = null;
+		int nextId;
 
-		for(int i = 0; i < list.getLength() ; i++) {
-			if(list.item(i).getNodeType() == Node.ELEMENT_NODE) {
-				final Element e = (Element)list.item(i);
+		synchronized(db.dbLock) {
+			try {
+				updateSt =
+					db.getConnection().prepareStatement("UPDATE files "+
+									    "SET filename = ?, "+
+									    "publicKey = ?, " +
+									    "mime = ?, "+
+									    "size = ?, "+
+									    "toDelete = FALSE "+
+									    "WHERE indexParent = ? "+
+									    "AND LOWER(publicKey) LIKE ?");
+				insertSt =
+					db.getConnection().prepareStatement("INSERT INTO files "
+									    + "(id, filename, publicKey, localPath, mime, size, category, indexParent) "
+									    + "VALUES (?, ?, ?, NULL, ?, ?, NULL, ?)");
+				if ((nextId = DatabaseManager.getNextId(db, "files")) < 0)
+					return;
 
-				final thaw.plugins.index.File file = new thaw.plugins.index.File(db, e, this);
-				addFile(file);
+				PreparedStatement st;
 
+				st = db.getConnection().prepareStatement("UPDATE files "+
+									 "SET toDelete = TRUE "+
+									 "WHERE indexParent = ?");
+				st.setInt(1, id);
+				st.execute();
+			} catch(SQLException exc) {
+				Logger.error(this, "Unable to prepare statement because: "+exc.toString());
+				return;
+			}
+
+			final NodeList list = filesEl.getChildNodes();
+
+			if (list.getLength() < 0) {
+				Logger.notice(this, "No files?!");
+			}
+
+			for(int i = 0; i < list.getLength() ; i++) {
+				if(list.item(i).getNodeType() == Node.ELEMENT_NODE) {
+
+					final Element e = (Element)list.item(i);
+
+					String key = e.getAttribute("key");
+
+					if (key == null)
+						continue;
+
+					key = key.trim();
+
+					long size = 0;
+
+					if (e.getAttribute("size") != null)
+						size = Long.parseLong(e.getAttribute("size"));
+					String mime = e.getAttribute("mime");
+					String filename = FreenetURIHelper.getFilenameFromKey(key);
+
+					try {
+						updateSt.setString(1, filename);
+						updateSt.setString(2, key);
+						updateSt.setString(3, mime);
+						updateSt.setLong(4, size);
+						updateSt.setInt(5, id);
+						updateSt.setString(6, FreenetURIHelper.getComparablePart(key)+"%");
+
+						int rs = updateSt.executeUpdate();
+
+						if (rs <= 0) {
+							insertSt.setInt(1, nextId);
+							insertSt.setString(2, filename);
+							insertSt.setString(3, key);
+							insertSt.setString(4, mime);
+							insertSt.setLong(5, size);
+							insertSt.setInt(6, id);
+
+							nextId++;
+
+							insertSt.execute();
+						}
+					} catch(SQLException exc) {
+						Logger.error(this, "error while adding file: "+exc.toString());
+						Logger.error(this, "Next id : "+Integer.toString(nextId));
+						exc.printStackTrace();
+						return;
+					}
+
+				}
+			} /* for each file in the XML */
+
+
+			if (clean) {
+				try {
+					PreparedStatement st;
+
+					st = db.getConnection().prepareStatement("DELETE FROM files "+
+										 "WHERE toDelete = TRUE "+
+										 "AND indexParent = ?");
+					st.setInt(1, id);
+					st.execute();
+				} catch(SQLException exc) {
+					Logger.error(this, "error while clean index (files) : "+exc.toString());
+				}
 			}
 		}
 
-		this.setChanged();
-		this.notifyObservers();
-	}
+	} /* loadFileList() */
 
 
 	static String getNameFromKey(final String key) {
@@ -1234,6 +1302,7 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 		if (name == null)
 			return null;
 
+		/* quick and dirty */
 		name = name.replaceAll(".xml", "");
 		name = name.replaceAll(".frdx", "");
 
@@ -1241,26 +1310,11 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	}
 
 
-	public Vector getIndexIds() {
-		final Vector ids = new Vector();
-		ids.add(new Integer(getId()));
-		return ids;
-	}
-
-	public Vector getIndexes() {
-		final Vector idx = new Vector();
-		idx.add(this);
-		return idx;
-	}
-
 	public boolean isModifiable() {
-		return (privateKey != null);
-	}
+		if (getPrivateKey() != null)
+			return true;
 
-	public boolean isInIndex(final thaw.plugins.index.File file) {
-		if (fileList == null)
-			loadFiles(null, true);
-		return fileList.contains(file);
+		return false;
 	}
 
 
@@ -1270,21 +1324,70 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 			return false;
 		}
 
-		try {
-			PreparedStatement st;
+		synchronized(db.dbLock) {
+			try {
+				PreparedStatement st;
 
-			st = db.getConnection().prepareStatement("SELECT publicKey from indexes WHERE publicKey LIKE ?");
+				st = db.getConnection().prepareStatement("SELECT publicKey from indexes WHERE LOWER(publicKey) LIKE ? LIMIT 1");
 
-			st.setString(1, "%"+key.substring(3, 40).replaceAll("%","\\%") +"%");
+				st.setString(1, FreenetURIHelper.getComparablePart(key) +"%");
 
-			if(st.execute()) {
-				final ResultSet result = st.getResultSet();
-				if ((result != null) && result.next())
+				ResultSet res = st.executeQuery();
+
+				if (res.next()) {
 					return true;
-			}
+				}
 
-		} catch(final SQLException e) {
-			Logger.error(new Index(), "isAlreadyKnown: Unable to check if link '"+key+"' point to a know index because: "+e.toString());
+			} catch(final SQLException e) {
+				Logger.error(new Index(), "isAlreadyKnown: Unable to check if link '"+key+"' point to a know index because: "+e.toString());
+			}
+		}
+
+		return false;
+	}
+
+
+	public void forceHasChangedReload() {
+		/* Do nothing here */
+	}
+
+
+	public boolean hasChanged() {
+		if (publicKey == null) {
+			loadData();
+		}
+
+		return hasChanged;
+	}
+
+
+	public boolean setHasChangedFlagInMem(boolean flag) {
+		hasChanged = flag;
+		return true;
+	}
+
+
+	/**
+	 * @return true if a change was done
+	 */
+	public boolean setHasChangedFlag(boolean flag) {
+		setHasChangedFlagInMem(flag);
+
+		synchronized(db.dbLock) {
+			try {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("UPDATE indexes SET newRev = ? "+
+									 "WHERE id = ?");
+
+				st.setBoolean(1, flag);
+				st.setInt(2, id);
+				if (st.executeUpdate() > 0)
+					return true;
+				return false;
+			} catch(SQLException e) {
+				Logger.error(this, "Unable to change 'hasChanged' flag because: "+e.toString());
+			}
 		}
 
 		return false;
@@ -1294,26 +1397,30 @@ public class Index extends java.util.Observable implements FileAndLinkList, Inde
 	public Element do_export(Document xmlDoc, boolean withContent) {
 		Element e = xmlDoc.createElement("fullIndex");
 
-		e.setAttribute("displayName", displayName);
+		e.setAttribute("displayName", toString(false));
 		e.setAttribute("publicKey", getPublicKey());
 		if (getPrivateKey() != null)
 			e.setAttribute("privateKey", getPrivateKey());
 
 		if (withContent) {
-			e.appendChild(getXMLHeader(xmlDoc));
-			e.appendChild(getXMLLinks(xmlDoc));
-			e.appendChild(getXMLFileList(xmlDoc));
+			fillInRootElement(e, xmlDoc);
 		}
 
 		return e;
 	}
 
-	/**
-	 * will call create() !!
-	 */
-	public void do_import(Element e) {
-		String dn;
-		loadXML(e);
+
+	public void do_import(IndexBrowserPanel indexBrowser, Element e) {
+		loadXML(e, true);
 	}
 
+
+	public boolean equals(Object o) {
+		if (o == null || !(o instanceof Index))
+			return false;
+
+		if (((Index)o).getId() == getId())
+			return true;
+		return false;
+	}
 }

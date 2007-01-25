@@ -2,26 +2,33 @@ package thaw.plugins.index;
 
 import java.util.Vector;
 
+import java.util.Observable;
+import java.util.Observer;
+
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.MutableTreeNode;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 
 
+import thaw.fcp.FCPQueueManager;
+
 public interface IndexTreeNode {
 
-	public DefaultMutableTreeNode getTreeNode();
+	public MutableTreeNode getTreeNode();
 
-	public void setParent(IndexCategory parent);
+	public void setParent(int id);
+
+	/**
+	 * Allow to know if it's a dumb node or a real one in the tree
+	 */
+	public boolean isInTree();
 
 	/**
 	 * get Id of this node in the database.
 	 */
 	public int getId();
 
-	/**
-	 * Insert the node in the database.
-	 */
-	public boolean create();
 
 	/**
 	 * Change the name of the node.
@@ -34,49 +41,34 @@ public interface IndexTreeNode {
 	public void delete();
 
 	/**
-	 * Update from freenet / Update the freenet version, depending of the index kind (recursive)
-	 */
-	public void update();
-
-	/**
-	 * Update from freenet using the given revision
-	 * @param rev -1 means the lastest
-	 */
-	public void updateFromFreenet(int rev);
-
-	public boolean isUpdating();
-
-	/**
-	 * Save the state in the database (recursive).
-	 */
-	public void save();
-
-	/**
 	 * Get key(s)
 	 */
 	public String getPublicKey();
 	public String getPrivateKey();
 
-	public Vector getIndexIds();
-
-	/**
-	 * All the indexes !
-	 */
-	public Vector getIndexes();
-
-	public Index getIndex(int id);
-
-	public void addObserver(java.util.Observer o);
-
 	public boolean isModifiable();
 	public boolean hasChanged();
+	public boolean setHasChangedFlag(boolean flag);
 
-	public void register();
-	public void unregister();
+	/**
+	 * for internal use only !
+	 */
+	public boolean setHasChangedFlagInMem(boolean flag);
 
 	/**
 	 * Will export private keys too !
 	 */
 	public Element do_export(Document xmlDoc, boolean withContent);
-	public void do_import(Element e);
+	public void do_import(IndexBrowserPanel indexBrowser, Element e);
+
+
+	/**
+	 * @return the number of transfer started
+	 */
+	public int insertOnFreenet(Observer o, IndexTree indexTree, FCPQueueManager queueManager);
+	public int downloadFromFreenet(Observer o, IndexTree indexTree, FCPQueueManager queueManager);
+	public int downloadFromFreenet(Observer o, IndexTree indexTree, FCPQueueManager queueManager, int rev);
+
+
+	public void forceHasChangedReload();
 }

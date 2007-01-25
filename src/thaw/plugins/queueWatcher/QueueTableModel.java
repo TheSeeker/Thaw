@@ -280,6 +280,10 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	public synchronized void update(final Observable o, final Object arg) {
 		int i;
 
+		if (queries != null && (i = queries.indexOf(o)) >= 0) {
+			this.notifyObservers(i);
+		}
+
 		sortTable();
 
 		if( (i = queries.indexOf(o)) >= 0) {
