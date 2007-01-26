@@ -71,7 +71,7 @@ public class FreenetURIHelper {
 		if ((SSK == null) || SSK.startsWith("USK@"))
 			return SSK;
 
-		SSK.replaceFirst("SSK@", "USK@");
+		SSK = SSK.replaceFirst("SSK@", "USK@");
 
 		final String[] split = SSK.split("/");
 

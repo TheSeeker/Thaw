@@ -197,10 +197,16 @@ public class IndexManagementHelper {
 
 					/* TODO : Author */
 
+					String publicKey;
+
+					publicKey =
+						FreenetURIHelper.convertSSKtoUSK(sskGenerator.getPublicKey())
+						+"/"+name+"/0/"+name+".frdx";
+
 					st.setInt(1, id);
 					st.setString(2, name);
 					st.setString(3, name);
-					st.setString(4, sskGenerator.getPublicKey());
+					st.setString(4, publicKey);
 					st.setString(5, sskGenerator.getPrivateKey());
 					st.setNull(6, Types.VARCHAR);
 					st.setInt(7, 0 /* positionInTree */);
@@ -499,7 +505,7 @@ public class IndexManagementHelper {
 
 
 	public static Index addIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final IndexFolder target, final String publicKey) {
-		return IndexManagementHelper.reuseIndex(queueManager, indexBrowser, target, publicKey, null);
+		return IndexManagementHelper.reuseIndex(queueManager, indexBrowser, target, publicKey, null, false);
 	}
 
 	public static Index reuseIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final IndexFolder target, String publicKey, String privateKey) {
