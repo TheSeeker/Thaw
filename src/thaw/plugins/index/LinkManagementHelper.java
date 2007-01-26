@@ -78,14 +78,18 @@ public class LinkManagementHelper {
 		private AbstractButton src;
 		private Vector t;
 
+		private boolean addToParent; /* (== add to the same parent folder) */
+
 		public IndexAdder(final AbstractButton actionSource,
 				  final FCPQueueManager queueManager,
-				  final IndexBrowserPanel indexBrowser) {
+				  final IndexBrowserPanel indexBrowser,
+				  boolean addToParent) {
 			src = actionSource;
 			if (actionSource != null)
 				actionSource.addActionListener(this);
 			this.queueManager = queueManager;
 			this.indexBrowser = indexBrowser;
+			this.addToParent = addToParent;
 		}
 
 		public void setTarget(final Vector targets) {
@@ -104,8 +108,10 @@ public class LinkManagementHelper {
 			     it.hasNext(); ) {
 				final Link link = (Link)it.next();
 				if (link != null) {
-					IndexManagementHelper.addIndex(queueManager, indexBrowser, null,
-								       link.getPublicKey());
+					if (addToParent && link.getTreeParent() != null)
+						IndexManagementHelper.addIndex(queueManager, indexBrowser, ((IndexFolder)link.getTreeParent().getParent()), link.getPublicKey());
+					else
+						IndexManagementHelper.addIndex(queueManager, indexBrowser, null, link.getPublicKey());
 				}
 			}
 		}

@@ -54,11 +54,19 @@ public class SearchResult implements FileAndLinkList {
 	}
 
 	public void fillInStatement(PreparedStatement st) throws SQLException {
-		if (!(node instanceof IndexFolder) || node.getId() >= 0)
-			st.setInt(1, node.getId());
+		int i, j;
 
-		for (int i = 0 ; i < search.length ; i++) {
-			st.setString(i+2, "%" + search[i] + "%");
+		i = 1;
+
+		if ( (node instanceof Index)
+		     || node.getId() >= 0 ) {
+			st.setInt(i, node.getId());
+			i++;
+		}
+
+		for (j = 0 ; j < search.length ; j++) {
+			st.setString(i, "%" + search[j] + "%");
+			i++;
 		}
 	}
 
@@ -78,14 +86,14 @@ public class SearchResult implements FileAndLinkList {
 				ResultSet set = st.executeQuery();
 
 				while(set.next()) {
-					v.add(new thaw.plugins.index.File(db,
-									  set.getInt("id"),
-									  set.getString("filename"),
-									  set.getString("publicKey"),
-									  new java.io.File(set.getString("localPath")),
-									  set.getString("mime"),
-									  set.getLong("size"),
-									  set.getInt("indexParent")));
+					v.add(new File(db,
+						       set.getInt("id"),
+						       set.getString("filename"),
+						       set.getString("publicKey"),
+						       (set.getString("localPath") != null ? new java.io.File(set.getString("localPath")) : null),
+						       set.getString("mime"),
+						       set.getLong("size"),
+						       set.getInt("indexParent")));
 				}
 
 			} catch(SQLException e) {

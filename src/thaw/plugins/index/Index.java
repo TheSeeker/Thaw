@@ -785,7 +785,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 				ResultSet res = st.executeQuery();
 
 				while(res.next()) {
-					Link l = new Link(db, res.getInt("id"), res.getString("publicKey"), id);
+					Link l = new Link(db, res.getInt("id"), res.getString("publicKey"), this);
 					links.add(l);
 				}
 

@@ -82,12 +82,12 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		button = new JButton(IconBox.indexReuse);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addIndexesFromLink"));
 		toolbarActions.add(new LinkManagementHelper.IndexAdder(button, queueManager,
-								       indexBrowser));
+								       indexBrowser, true));
 
 		toolbarModifier.addButtonToTheToolbar(button);
 		rightClickMenu.add(item);
 		rightClickActions.add(new LinkManagementHelper.IndexAdder(item, queueManager,
-									  indexBrowser));
+									  indexBrowser, true));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKeys"));
 		rightClickMenu.add(item);

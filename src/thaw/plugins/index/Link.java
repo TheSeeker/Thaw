@@ -19,6 +19,7 @@ public class Link extends java.util.Observable {
 	private String publicKey;
 
 	private int parentId;
+	private Index parent = null;
 
 	public Link(final Hsqldb hsqldb, final int id) {
 		this.id = id;
@@ -27,12 +28,23 @@ public class Link extends java.util.Observable {
 		reloadDataFromDb(id);
 	}
 
+
 	public Link(final Hsqldb hsqldb, final int id, String publicKey,
 		    int parentId) {
 		this.id = id;
 		this.db = hsqldb;
 		this.publicKey = publicKey;
 		this.parentId = parentId;
+	}
+
+
+	public Link(final Hsqldb hsqldb, final int id, String publicKey,
+		    Index parent) {
+		this.id = id;
+		this.db = hsqldb;
+		this.publicKey = publicKey;
+		this.parentId = parent.getId();
+		this.parent = parent;
 	}
 
 	public void reloadDataFromDb(int id) {
@@ -121,7 +133,23 @@ public class Link extends java.util.Observable {
 		}
 	}
 
+	/**
+	 * @return the parent index in the tree if known, else null
+	 */
+	public Index getTreeParent() {
+		if (parent != null)
+			return parent;
+
+		return null;
+	}
+
+	/**
+	 * @return the parent index ; build a new one with its id if needed
+	 */
 	public Index getParent() {
+		if (parent != null)
+			return parent;
+
 		int parentId;
 
 		parentId = getParentId();
