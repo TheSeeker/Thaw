@@ -30,6 +30,7 @@ import thaw.core.Config;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.IconBox;
+import thaw.core.FreenetURIHelper;
 import thaw.plugins.ToolbarModifier;
 import thaw.fcp.FCPClientGet;
 import thaw.fcp.FCPClientPut;
@@ -68,7 +69,9 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 	private TransferRefresher refresher;
 
-	public FileTable(final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, final Config config) {
+	public FileTable(final FCPQueueManager queueManager,
+			 IndexBrowserPanel indexBrowser,
+			 final Config config) {
 		this.indexBrowser = indexBrowser;
 		this.queueManager = queueManager;
 
@@ -123,6 +126,10 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		toolbarModifier.addButtonToTheToolbar(button);
 		rightClickMenu.add(item);
 		rightClickActions.add(new FileManagementHelper.FileKeyComputer(queueManager, indexBrowser, item));
+
+		item = new JMenuItem(I18n.getMessage("thaw.common.removeFromTheList"));
+		rightClickMenu.add(item);
+		rightClickActions.add(new FileManagementHelper.TransferCanceller(queueManager, indexBrowser, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.common.remove"));
 		button = new JButton(IconBox.delete);
@@ -456,7 +463,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 			while(running) {
 				try {
-					Thread.sleep(5000);
+					Thread.sleep(500);
 				} catch(InterruptedException e) {
 					/* \_o< */
 				}
@@ -469,11 +476,33 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 				i = 0;
 
-				for (Iterator it = fileListModel.getFiles().iterator() ;
-				     it.hasNext(); i++) {
-					thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
-					if (file.getTransfer(queueManager) != null)
+				try {
+					for (Iterator it = fileListModel.getFiles().iterator() ;
+					     it.hasNext(); i++) {
+						thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+
+						if (file.getPublicKey() == null
+						    || !FreenetURIHelper.isAKey(file.getPublicKey())) {
+							FCPTransferQuery transfer;
+							transfer = file.getTransfer(queueManager);
+
+							if (transfer != null) {
+								if (transfer.isSuccessful())
+									file.forceReload();
+							}
+						}
+
+						/* won't query the database */
 						fileListModel.refresh(i);
+
+						try {
+							Thread.sleep(100);
+						} catch(InterruptedException e) {
+							/* \_o< */
+						}
+					}
+				} catch(final java.util.ConcurrentModificationException e) {
+					Logger.debug(this, "Collision : Restarting refresh from the beginnin");
 				}
 			}
 		}

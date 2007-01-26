@@ -16,6 +16,7 @@ import thaw.core.FileChooser;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.fcp.FCPQueueManager;
+import thaw.fcp.FCPTransferQuery;
 
 
 public class FileManagementHelper {
@@ -310,5 +311,66 @@ public class FileManagementHelper {
 		final StringSelection st = new StringSelection(keys);
 		final Clipboard cp = tk.getSystemClipboard();
 		cp.setContents(st, null);
+	}
+
+
+
+	public static class TransferCanceller implements FileAction {
+		private AbstractButton src;
+		private FCPQueueManager queueManager;
+		private IndexBrowserPanel indexBrowser;
+		private Vector t;
+
+		public TransferCanceller(FCPQueueManager queueManager,
+					 IndexBrowserPanel indexBrowser,
+					 final AbstractButton actionSource) {
+			src = actionSource;
+			this.queueManager = queueManager;
+			this.indexBrowser = indexBrowser;
+			if (src != null)
+				src.addActionListener(this);
+		}
+
+		public void setTarget(final Vector targets) {
+			boolean enable = false;
+
+			t = targets;
+
+			if (targets != null) {
+				for (Iterator it = targets.iterator();
+				     it.hasNext();) {
+					File file = (File)it.next();
+					if (file.getTransfer(queueManager) != null) {
+						enable = true;
+						break;
+					}
+				}
+			}
+
+			src.setEnabled(enable);
+		}
+
+		public void actionPerformed(final ActionEvent e) {
+			FileManagementHelper.cancelTransfers(queueManager, indexBrowser, t);
+		}
+	}
+
+
+	static void cancelTransfers(FCPQueueManager queueManager,
+				    IndexBrowserPanel indexBrowser,
+				    Vector files) {
+		FCPTransferQuery transfer;
+
+		for (Iterator it = files.iterator();
+		     it.hasNext();) {
+			File file = (File)it.next();
+			if ((transfer = file.getTransfer(queueManager)) != null) {
+				if(transfer.stop(queueManager)) {
+					queueManager.remove(transfer);
+				}
+			}
+		}
+
+		indexBrowser.getTables().getFileTable().refresh();
 	}
 }

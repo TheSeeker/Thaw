@@ -105,6 +105,10 @@ public class File implements Observer {
 		}
 	}
 
+	public void forceReload() {
+		reloadDataFromDb(id);
+	}
+
 	public void setParent(int parent_id) {
 		try {
 			PreparedStatement st;
@@ -152,9 +156,6 @@ public class File implements Observer {
 		FCPTransferQuery tr;
 
 		tr = q.getTransfer(getPublicKey());
-
-		if (tr == null || (tr.isFinished() && tr.isSuccessful()))
-			return null;
 
 		return tr;
 	}
