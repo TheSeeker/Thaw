@@ -271,7 +271,6 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 		if (toolBar != null) {
 			mainWindow.getContentPane().remove(toolBar);
-			mainWindow.getContentPane().validate();
 		}
 
 		toolBar = newToolBar;
