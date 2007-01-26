@@ -564,9 +564,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		if(targetFile.exists()) {
 			Logger.info(this, "Inserting new version");
 
-			String publicSSK = FreenetURIHelper.convertUSKtoSSK(publicKey);
-			publicSSK = FreenetURIHelper.changeSSKRevision(publicSSK, rev, 1);
-			publicKey = FreenetURIHelper.convertSSKtoUSK(publicSSK);
+			String key = FreenetURIHelper.changeUSKRevision(publicKey, rev, 1);
 
 			rev++;
 
@@ -581,7 +579,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 			put.addObserver(this);
 			this.addObserver(o);
 
-			setPublicKey(publicKey, rev);
+			setPublicKey(key, rev);
 
 		} else {
 			Logger.warning(this, "Index not generated !");

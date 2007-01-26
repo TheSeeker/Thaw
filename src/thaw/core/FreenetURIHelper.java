@@ -164,14 +164,14 @@ public class FreenetURIHelper {
 
 
 	protected static String changeRev(final String revStr, final int rev, final int offset) {
-		if (rev >= 0)
+		if (offset == 0)
 			return Integer.toString(rev);
 
 		return Integer.toString(Integer.parseInt(revStr) + offset);
 	}
 
 	/**
-	 * @param rev if < 0, then rev is changed according to the given offset
+	 * @param offset if == 0, then rev is changed according to the given offset
 	 */
 	public static String changeSSKRevision(String key, final int rev, final int offset) {
 
@@ -205,6 +205,32 @@ public class FreenetURIHelper {
 		}
 
 		return key;
+	}
+
+
+	public static String changeUSKRevision(String key, int rev, int offset) {
+		if (key == null)
+			return null;
+
+		final String[] split = key.split("/");
+
+		key = "";
+
+		for (int i = 0 ; i < split.length ; i++) {
+			switch(i) {
+			case(0):
+				key = key + split[i];
+				break;
+			case(2):
+				key = key + "/" + FreenetURIHelper.changeRev(split[2], rev, offset);
+				break;
+			default:
+				key = key + "/" + split[i];
+			}
+		}
+
+		return key;
+
 	}
 
 
