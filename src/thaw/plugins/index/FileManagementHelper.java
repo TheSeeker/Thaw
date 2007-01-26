@@ -114,7 +114,7 @@ public class FileManagementHelper {
 		public void setTarget(final Vector target) {
 			boolean isOk;
 
-			isOk = true;
+			isOk = false;
 
 			this.target = target;
 
@@ -123,8 +123,9 @@ public class FileManagementHelper {
 				     it.hasNext(); ) {
 					final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 
-					if (file.getLocalPath() == null) {
-						isOk = false;
+					if (file.getLocalPath() != null
+					    && file.getTransfer(queueManager) == null) {
+						isOk = true;
 						break;
 					}
 				}
@@ -148,7 +149,8 @@ public class FileManagementHelper {
 		for (final Iterator it = files.iterator();
 		     it.hasNext();) {
 			final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
-			file.insertOnFreenet(queueManager);
+			if (file.getLocalPath() != null)
+				file.insertOnFreenet(queueManager);
 		}
 
 		if (indexBrowser != null)
@@ -173,7 +175,7 @@ public class FileManagementHelper {
 		public void setTarget(final Vector target) {
 			boolean isOk;
 
-			isOk = true;
+			isOk = false;
 			this.target = target;
 
 			if (target != null) {
@@ -181,14 +183,15 @@ public class FileManagementHelper {
 				     it.hasNext(); ) {
 					final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 
-					if (file.getLocalPath() == null) {
-						isOk = false;
+					if (file.getLocalPath() != null
+					    && file.getTransfer(queueManager) == null) {
+						isOk = true;
 						break;
 					}
 				}
 			}
 
-			actionSource.setEnabled((target != null) && (target.size() != 0) && isOk);
+			actionSource.setEnabled((target != null) && isOk);
 		}
 
 		public void actionPerformed(final ActionEvent e) {
@@ -207,7 +210,9 @@ public class FileManagementHelper {
 		for (final Iterator it = files.iterator();
 		     it.hasNext();) {
 			final thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
-			file.recalculateCHK(queueManager);
+
+			if (file.getLocalPath() != null)
+				file.recalculateCHK(queueManager);
 		}
 
 		if (indexBrowser != null) {

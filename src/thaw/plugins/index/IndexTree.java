@@ -356,12 +356,11 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			action.setTarget(selectedNode);
 		}
 
-		toolbarModifier.displayButtonsInTheToolbar();
 
 		// Notify observers
 
 		setChanged();
-		notifyObservers(selectedNode);
+		notifyObservers(selectedNode); /* will make the toolbar visible */
 	}
 
 
@@ -445,6 +444,8 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			}
 
 		}
+
+		toolbarModifier.displayButtonsInTheToolbar();
 
 		setChanged();
 		notifyObservers(selectedNode);
