@@ -1430,4 +1430,26 @@ public class IndexManagementHelper {
 	}
 
 
+
+	public static class IndexFolderReorderer extends BasicIndexAction implements Runnable {
+		public IndexFolderReorderer(IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+			super(null, indexBrowser, actionSource);
+		}
+
+		public void setTarget(final IndexTreeNode node) {
+			super.setTarget(node);
+			getActionSource().setEnabled(node != null && node instanceof IndexFolder);
+		}
+
+		public void apply() {
+			if (getTarget() != null && getTarget() instanceof IndexFolder) {
+				((IndexFolder)getTarget()).reorder();
+				((IndexFolder)getTarget()).forceReload();
+				getIndexBrowserPanel().getIndexTree().refresh(getTarget());
+			}
+			else
+				Logger.notice(this, "No target ?!");
+		}
+	}
+
 }

@@ -903,6 +903,87 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 		return keys;
 	}
 
+
+
+	public void reorder() {
+		int position;
+
+		synchronized(db.dbLock) {
+			try {
+				PreparedStatement selectSt;
+				PreparedStatement updateSt;
+
+				position = 0;
+
+
+				/* We first sort the index folders */
+
+				if (id >= 0) {
+					selectSt =
+						db.getConnection().prepareStatement("SELECT id FROM indexFolders WHERE parent = ? ORDER BY name");
+				} else {
+					selectSt =
+						db.getConnection().prepareStatement("SELECT id FROM indexFolders WHERE parent IS NULL ORDER BY name");
+				}
+
+				updateSt =
+					db.getConnection().prepareStatement("UPDATE indexFolders SET positionInTree = ? WHERE id = ?");
+
+
+				if (id >= 0)
+					selectSt.setInt(1, id);
+
+
+				ResultSet set = selectSt.executeQuery();
+
+
+				while(set.next()) {
+					updateSt.setInt(1, position);
+					updateSt.setInt(2, set.getInt("id"));
+					updateSt.execute();
+					position++;
+				}
+
+
+
+				/* next we sort the indexes */
+
+
+
+				if (id >= 0) {
+					selectSt =
+						db.getConnection().prepareStatement("SELECT id FROM indexes WHERE parent = ? ORDER BY displayName");
+				} else {
+					selectSt =
+						db.getConnection().prepareStatement("SELECT id FROM indexes WHERE parent IS NULL ORDER BY displayName");
+				}
+
+				updateSt =
+					db.getConnection().prepareStatement("UPDATE indexes SET positionInTree = ? WHERE id = ?");
+
+
+				if (id >= 0)
+					selectSt.setInt(1, id);
+
+
+				set = selectSt.executeQuery();
+
+
+				while(set.next()) {
+					updateSt.setInt(1, position);
+					updateSt.setInt(2, set.getInt("id"));
+					updateSt.execute();
+					position++;
+				}
+
+
+			} catch(SQLException e) {
+				Logger.error(this, "Error while reordering: "+e.toString());
+			}
+		}
+	}
+
+
 	public String toString() {
 		if (id < 0)
 			return thaw.core.I18n.getMessage("thaw.plugin.index.yourIndexes");
