@@ -302,7 +302,8 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		{
 			"filename",
 			"size",
-			"key"
+			"key",
+			null
 		};
 
 
@@ -572,6 +573,11 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 			if (modelIndex < 0)
 				return;
+
+			if (modelIndex == 2) {
+				Logger.notice("Can't order by transfer state because of performances issues");
+				return;
+			}
 
 			if (columnToSort == modelIndex)
 			        sortAsc = !sortAsc;
