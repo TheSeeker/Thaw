@@ -65,7 +65,7 @@ public interface IndexTreeNode {
 	/**
 	 * @return the number of transfer started
 	 */
-	public int insertOnFreenet(Observer o, IndexTree indexTree, FCPQueueManager queueManager);
+	public int insertOnFreenet(Observer o, IndexBrowserPanel indexBrowser, FCPQueueManager queueManager);
 	public int downloadFromFreenet(Observer o, IndexTree indexTree, FCPQueueManager queueManager);
 	public int downloadFromFreenet(Observer o, IndexTree indexTree, FCPQueueManager queueManager, int rev);
 

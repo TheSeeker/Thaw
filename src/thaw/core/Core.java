@@ -476,8 +476,10 @@ public class Core implements Observer {
 				getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
 			}
 
-			getPluginManager().loadPlugins();
-			getPluginManager().runPlugins();
+			if (running) {
+				getPluginManager().loadPlugins();
+				getPluginManager().runPlugins();
+			}
 
 			reconnectionManager = null;
 

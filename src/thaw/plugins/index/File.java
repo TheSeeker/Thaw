@@ -35,6 +35,10 @@ public class File implements Observer {
 
 	private int parentId;
 
+	/* if not null, the transfer will be removed when finished */
+	private FCPQueueManager queueManager = null;
+
+
 	public File(final Hsqldb db, final int id) {
 		this.db = db;
 		this.id = id;
@@ -64,6 +68,11 @@ public class File implements Observer {
 			if (FreenetURIHelper.isAKey(key)) {
 				setPublicKey(key);
 				o.deleteObserver(this);
+			}
+
+			if (queueManager != null) {
+				queueManager.remove(put);
+				queueManager = null;
 			}
 
 			return;
@@ -210,6 +219,8 @@ public class File implements Observer {
 		final FCPClientPut insertion = new FCPClientPut(localPath, 0, 0, null,
 								null, 4,
 								true, 2, true); /* getCHKOnly */
+
+		this.queueManager = queueManager; /* so the transfer will be removed when finished */
 		queueManager.addQueryToTheRunningQueue(insertion);
 
 		insertion.addObserver(this);

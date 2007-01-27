@@ -16,6 +16,7 @@ import java.util.Enumeration;
 import java.util.Observer;
 import java.util.Observable;
 
+import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
@@ -528,12 +529,51 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 
 
-	public int insertOnFreenet(Observer o, IndexTree tree, FCPQueueManager queueManager) {
+	public int insertOnFreenet(Observer o, IndexBrowserPanel indexBrowser, FCPQueueManager queueManager) {
 		String privateKey = getPrivateKey();
 		String publicKey = getPublicKey();
 		int rev = getRevision();
 
-		if (tree != null && tree.isIndexUpdating(this)) {
+
+		if (indexBrowser != null && indexBrowser.getMainWindow() != null) {
+			synchronized(db.dbLock) {
+				try {
+					PreparedStatement st;
+
+					st = db.getConnection().prepareStatement("SELECT id FROM links where indexParent = ? LIMIT 1");
+					st.setInt(1, id);
+
+					ResultSet set = st.executeQuery();
+
+					if (!set.next()) {
+						/* no link ?! we will warn the user */
+
+						int ret =
+							JOptionPane.showOptionDialog(indexBrowser.getMainWindow().getMainFrame(),
+										     I18n.getMessage("thaw.plugin.index.indexWithNoLink").replaceAll("\\?", toString(false)),
+										     I18n.getMessage("thaw.warning.title"),
+										     JOptionPane.YES_NO_OPTION,
+										     JOptionPane.WARNING_MESSAGE,
+										     null,
+										     null,
+										     null);
+
+						if (ret == JOptionPane.CLOSED_OPTION
+						    || ret == JOptionPane.NO_OPTION) {
+							return 0;
+						}
+					}
+
+				} catch(SQLException e) {
+					Logger.error(this, "Error while checking the link number before insertion : "+e.toString());
+				}
+			}
+		}
+
+
+
+		if (indexBrowser != null && indexBrowser.getIndexTree() != null
+		    && indexBrowser.getIndexTree().isIndexUpdating(this)) {
 			Logger.notice(this, "A transfer is already running !");
 			return 0;
 		}
@@ -571,8 +611,8 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 			put = new FCPClientPut(targetFile, 2, rev, realName, privateKey, 2, true, 0);
 			put.setMetadata("ContentType", "application/x-freenet-index");
 
-			if (tree != null)
-				tree.addUpdatingIndex(this);
+			if (indexBrowser != null && indexBrowser.getIndexTree() != null)
+				indexBrowser.getIndexTree().addUpdatingIndex(this);
 
 			queueManager.addQueryToThePendingQueue(put);
 

@@ -793,7 +793,7 @@ public class IndexManagementHelper {
 			toRemove = 0;
 			allStarted = false;
 
-			i = getTarget().insertOnFreenet(this, getIndexBrowserPanel().getIndexTree(), getQueueManager());
+			i = getTarget().insertOnFreenet(this, getIndexBrowserPanel(), getQueueManager());
 
 			getIndexBrowserPanel().getIndexTree().redraw(getTarget());
 

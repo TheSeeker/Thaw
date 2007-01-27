@@ -431,14 +431,20 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 			Component cell;
 
-			if(value instanceof Long)
+			if(value instanceof Long) {
+
 				cell = super.getTableCellRendererComponent(table,
 									   thaw.plugins.queueWatcher.QueueTableModel.getPrintableSize(((Long)value).longValue()),
 									   isSelected, hasFocus, row, column);
-			else
+
+			} else {
+
 				cell = super.getTableCellRendererComponent(table, value,
-									     isSelected, hasFocus,
-									     row, column);
+									   isSelected, hasFocus,
+									   row, column);
+
+			}
+
 			if (!isSelected) {
 				if (row % 2 == 0)
 					cell.setBackground(Color.WHITE);

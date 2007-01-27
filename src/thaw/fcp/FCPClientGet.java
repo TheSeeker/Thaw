@@ -463,17 +463,17 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	private class UnlockWaiter implements Runnable {
 		FCPClientGet clientGet;
-		FCPConnection connection;
+		FCPConnection c;
 		String dir;
 
-		public UnlockWaiter(final FCPClientGet clientGet, final FCPConnection connection, final String dir) {
+		public UnlockWaiter(final FCPClientGet clientGet, final FCPConnection c, final String dir) {
 			this.clientGet = clientGet;
 			this.dir = dir;
-			this.connection = connection;
+			this.c = c;
 		}
 
 		public void run() {
-			connection.addToWriterQueue();
+			c.addToWriterQueue();
 			isLockOwner = true;
 
 			Logger.debug(this, "I take the lock !");

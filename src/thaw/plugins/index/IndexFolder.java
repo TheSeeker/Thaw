@@ -746,7 +746,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 	/**
 	 * Update from freenet / Update the freenet version, depending of the index kind (recursive)
 	 */
-	public int insertOnFreenet(Observer observer, IndexTree indexTree, FCPQueueManager queueManager) {
+	public int insertOnFreenet(Observer observer, IndexBrowserPanel indexBrowser, FCPQueueManager queueManager) {
 		int i = 0;
 
 		synchronized(db.dbLock) {
@@ -764,7 +764,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 
 				while(set.next()) {
-					(new Index(db, set.getInt("indexId"))).insertOnFreenet(observer, indexTree, queueManager);
+					(new Index(db, set.getInt("indexId"))).insertOnFreenet(observer, indexBrowser, queueManager);
 					i++;
 				}
 
