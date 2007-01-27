@@ -35,6 +35,9 @@ public class File implements Observer {
 
 	private int parentId;
 
+	private Index parent;
+
+
 	/* if not null, the transfer will be removed when finished */
 	private FCPQueueManager queueManager = null;
 
@@ -55,7 +58,21 @@ public class File implements Observer {
 		this.localPath = localPath;
 		this.mime = mime;
 		this.size = size;
+	}
+
+	public File(final Hsqldb db, final int id, final String filename,
+		    String publicKey, java.io.File localPath,
+		    String mime, long size, int parentId, Index parent) {
+		this.db = db;
+		this.id = id;
+		this.filename = filename;
+		this.publicKey = publicKey;
+		this.localPath = localPath;
+		this.mime = mime;
+		this.size = size;
 		this.parentId = parentId;
+
+		this.parent = parent;
 	}
 
 
@@ -342,6 +359,10 @@ public class File implements Observer {
 	 * Note: Do a SQL requests each time
 	 */
 	public boolean isModifiable() {
-		return (new Index(db, parentId)).isModifiable();
+		if (parent != null) {
+			Logger.debug(this, "isModifiable() => new Index().isModifiable()");
+			return (new Index(db, parentId)).isModifiable();
+		}
+		return parent.isModifiable();
 	}
 }

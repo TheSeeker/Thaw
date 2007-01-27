@@ -319,7 +319,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	}
 
 	public boolean loadData() {
-		Logger.info(this, "loadData()");
+		Logger.debug(this, "loadData()");
 		synchronized(db.dbLock) {
 			try {
 				PreparedStatement st =
@@ -349,6 +349,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 	public String getPublicKey() {
 		if (publicKey == null) {
+			Logger.debug(this, "getPublicKey() => loadData()");
 			loadData();
 		}
 
@@ -357,6 +358,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 	public int getRevision() {
 		if (rev < 0) {
+			Logger.debug(this, "getRevision() => loadData()");
 			loadData();
 		}
 
@@ -365,6 +367,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 	public String getPrivateKey() {
 		if (publicKey == null) { /* we rely on the publicKey because the privateKey is not often availabe */
+			Logger.debug(this, "getPrivateKey() => loadData()");
 			loadData();
 		}
 
@@ -510,6 +513,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 	public String toString(boolean withRev) {
 		if (displayName == null || rev < 0) {
+			Logger.debug(this, "toString() => loadData()");
 			loadData();
 		}
 
@@ -794,7 +798,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 					thaw.plugins.index.File file =
 						new thaw.plugins.index.File(db, file_id, filename, file_publicKey,
-									    localPath, mime, size, id);
+									    localPath, mime, size, id, this);
 					files.add(file);
 				}
 
@@ -1045,7 +1049,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		Document xmlDoc;
 
 		try {
-			Logger.debug(this, "XML parser ready");
+			Logger.info(this, "XML parser ready");
 			xmlDoc = xmlBuilder.parse(input);
 			Logger.info(this, "Index parsed");
 		} catch(final org.xml.sax.SAXException e) {
@@ -1073,8 +1077,10 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	public void loadHeader(final Element rootEl) {
 		final Element header = (Element)rootEl.getElementsByTagName("header").item(0);
 
-		if (publicKey == null)
+		if (publicKey == null) {
+			Logger.debug(this, "getPublicKey() => loadData()");
 			loadData();
+		}
 
 		String pKey = getHeaderElement(header, "privateKey");
 		if (pKey != null) {
@@ -1386,12 +1392,14 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 
 	public void forceHasChangedReload() {
+		Logger.debug(this, "forceHasChangedReload() => loadData()");
 		loadData();
 	}
 
 
 	public boolean hasChanged() {
 		if (publicKey == null) {
+			Logger.debug(this, "hasChanged() => loadData()");
 			loadData();
 		}
 

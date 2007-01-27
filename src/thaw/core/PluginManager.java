@@ -68,6 +68,7 @@ public class PluginManager {
 		Vector pluginNames;
 
 		if(core.getConfig().getPluginNames().size() == 0) {
+			Logger.notice(this, "Loading default plugin list");
 			/* Then we load the config with the default plugins */
 			for(int i = 0 ; i < PluginManager.defaultPlugins.length ; i++) {
 				core.getConfig().addPlugin(PluginManager.defaultPlugins[i]);

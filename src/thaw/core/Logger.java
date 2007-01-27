@@ -10,7 +10,8 @@ import java.util.Vector;
 public class Logger {
 
 
-	/* 0 = Errors only
+	/*
+	 * 0 = Errors only
 	 * 1 = Errors + warnings
 	 * 2 = Errors + warnings + notices
 	 * 3 = Errors + warnings + notices + infos
@@ -19,8 +20,9 @@ public class Logger {
 	 *             (or maybe someone having the FCPv2 specs :)
 	 *
 	 * 2 or more is recommanded.
+	 * 4 or more is unhealthy
 	 */
-	public final static int LOG_LEVEL = 2;
+	public final static int LOG_LEVEL = 3;
 
 	private static Vector logListeners = null;
 

@@ -179,8 +179,6 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		if(e.getSource() == okButton) {
 			advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 
-			/* should reinit the whole connection correctly */
-			core.getPluginManager().stopPlugins();
 
 			Reloader reloader = new Reloader(needConnectionReset);
 			Thread reload = new Thread(reloader);
@@ -203,7 +201,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 		public void run() {
 
-/* should reinit the whole connection correctly */
+			/* should reinit the whole connection correctly */
 			core.getPluginManager().stopPlugins();
 
 			if (resetConnection && !core.initConnection()) {
