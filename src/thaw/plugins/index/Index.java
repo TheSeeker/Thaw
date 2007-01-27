@@ -782,8 +782,8 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 										 "FROM files WHERE indexParent = ?");
 				} else {
 					st = db.getConnection().prepareStatement("SELECT id, filename, publicKey, localPath, mime, size "+
-										 "FROM files WHERE indexParent = ? ORDER by LOWER("+
-										 columnToSort + ")"+ (asc == true ? "" : " DESC"));
+										 "FROM files WHERE indexParent = ? ORDER by "+
+										 columnToSort + (asc == true ? "" : " DESC"));
 				}
 
 				st.setInt(1, id);

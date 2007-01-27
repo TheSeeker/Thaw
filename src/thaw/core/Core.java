@@ -259,7 +259,7 @@ public class Core implements Observer {
 			if (ret)
 				getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.ready"));
 			else
-				getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.disconnected"));
+				getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
 		}
 
 		return ret;

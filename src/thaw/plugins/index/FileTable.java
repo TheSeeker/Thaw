@@ -300,9 +300,9 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 		public String[] columnNamesInDb =
 		{
-			"filename",
+			"LOWER(filename)",
 			"size",
-			"key",
+			"LOWER(key)",
 			null
 		};
 
