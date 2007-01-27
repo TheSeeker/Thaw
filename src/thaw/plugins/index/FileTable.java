@@ -575,7 +575,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 				return;
 
 			if (modelIndex == 2) {
-				Logger.notice("Can't order by transfer state because of performances issues");
+				Logger.notice(this, "Can't order by transfer state because of performances issues");
 				return;
 			}
 
