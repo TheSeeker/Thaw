@@ -22,7 +22,7 @@ import thaw.fcp.FCPTransferQuery;
 public class QueueTableModel extends javax.swing.table.AbstractTableModel implements Observer {
 	private static final long serialVersionUID = 20060708;
 
-	private final Vector columnNames = new Vector();
+	private final Vector columnNames;
 
         private Vector queries = null;
 
@@ -40,6 +40,8 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 		this.queueManager = queueManager;
 		this.isForInsertions = isForInsertions;
+
+		columnNames = new Vector();
 
 		columnNames.add(I18n.getMessage("thaw.common.file"));
 		columnNames.add(I18n.getMessage("thaw.common.size"));

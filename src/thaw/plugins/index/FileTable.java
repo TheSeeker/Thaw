@@ -26,6 +26,13 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.tree.TreePath;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
+
+
 import thaw.core.Config;
 import thaw.core.I18n;
 import thaw.core.Logger;
@@ -69,6 +76,12 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 	private TransferRefresher refresher;
 
+
+	private int columnToSort = -1;
+	private boolean sortAsc = false;
+
+
+
 	public FileTable(final FCPQueueManager queueManager,
 			 IndexBrowserPanel indexBrowser,
 			 final Config config) {
@@ -85,6 +98,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		final JTableHeader header = table.getTableHeader();
 		header.setUpdateTableInRealTime(true);
 		header.setReorderingAllowed(true);
+		header.addMouseListener(new ColumnListener(table));
 
 		panel = new JPanel();
 		panel.setLayout(new BorderLayout());
@@ -190,7 +204,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 	}
 
 	protected Vector getSelectedFiles(final int[] selectedRows) {
-		final Vector srcList = fileList.getFileList(null, false);
+		final Vector srcList = fileList.getFileList(fileListModel.getColumnNameInDb(columnToSort), sortAsc);
 		final Vector files = new Vector();
 
 		for(int i = 0 ; i < selectedRows.length ; i++) {
@@ -276,7 +290,21 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 	public class FileListModel extends javax.swing.table.AbstractTableModel {
 		private static final long serialVersionUID = 1L;
 
-		public Vector columnNames;
+		public String[] columnNames =
+		{
+			I18n.getMessage("thaw.common.file"),
+			I18n.getMessage("thaw.common.size"),
+			I18n.getMessage("thaw.common.key"),
+			I18n.getMessage("thaw.common.status")
+		};
+
+		public String[] columnNamesInDb =
+		{
+			"filename",
+			"size",
+			"key"
+		};
+
 
 		public Vector files = null; /* thaw.plugins.index.File Vector */
 
@@ -284,15 +312,6 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 		public FileListModel() {
 			super();
-
-			columnNames = new Vector();
-
-			columnNames.add(I18n.getMessage("thaw.common.file"));
-			columnNames.add(I18n.getMessage("thaw.common.size"));
-
-			//columnNames.add(I18n.getMessage("thaw.plugin.index.category"));
-			columnNames.add(I18n.getMessage("thaw.common.key"));
-			columnNames.add(I18n.getMessage("thaw.common.status"));
 		}
 
 		public void reloadFileList(final FileList newFileList) {
@@ -313,11 +332,27 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		}
 
 		public int getColumnCount() {
-			return columnNames.size();
+			return columnNames.length;
 		}
 
 		public String getColumnName(final int column) {
-			return (String)columnNames.get(column);
+			String result = columnNames[column];
+
+			if(column == columnToSort) {
+				if(sortAsc)
+					result = result + " >>";
+				else
+					result = result + " <<";
+			}
+
+			return result;
+		}
+
+		public String getColumnNameInDb(final int column) {
+			if (column < 0)
+				return null;
+
+			return columnNamesInDb[column];
 		}
 
 		public Object getValueAt(final int row, final int column) {
@@ -361,7 +396,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 		public void refresh() {
 			if(fileList != null) {
-				files = fileList.getFileList(null, false);
+				files = fileList.getFileList(getColumnNameInDb(columnToSort), sortAsc);
 			} else {
 				files = null;
 			}
@@ -518,4 +553,39 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		}
 	}
 
+
+
+
+	protected class ColumnListener extends MouseAdapter {
+		private JTable table;
+
+		public ColumnListener(final JTable t) {
+			table = t;
+		}
+
+		public void mouseClicked(final MouseEvent e) {
+			final TableColumnModel colModel = table.getColumnModel();
+			final int columnModelIndex = colModel.getColumnIndexAtX(e.getX());
+			final int modelIndex = colModel.getColumn(columnModelIndex).getModelIndex();
+
+			final int columnsCount = table.getColumnCount();
+
+			if (modelIndex < 0)
+				return;
+
+			if (columnToSort == modelIndex)
+			        sortAsc = !sortAsc;
+			else
+				columnToSort = modelIndex;
+
+
+			for (int i = 0; i < columnsCount; i++) {
+				final TableColumn column = colModel.getColumn(i);
+				column.setHeaderValue(fileListModel.getColumnName(column.getModelIndex()));
+			}
+
+			refresh();
+		}
+
+	}
 }
