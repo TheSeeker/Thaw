@@ -67,12 +67,20 @@ public class File implements Observer {
 
 			if (FreenetURIHelper.isAKey(key)) {
 				setPublicKey(key);
-				o.deleteObserver(this);
 			}
 
-			if (queueManager != null) {
-				queueManager.remove(put);
-				queueManager = null;
+			if (put.isFinished() && put.isSuccessful()) {
+				o.deleteObserver(this);
+
+
+				if (queueManager != null) {
+					Logger.notice(this, "REMOVING");
+					if(put.stop(queueManager)) {
+						queueManager.remove(put);
+					}
+
+					queueManager = null;
+				}
 			}
 
 			return;

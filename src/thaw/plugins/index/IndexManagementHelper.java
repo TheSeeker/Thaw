@@ -1185,19 +1185,6 @@ public class IndexManagementHelper {
 
 					FCPTransferQuery insertion = null;
 
-					if(insert) {
-						insertion = new FCPClientPut(ioFile, 0, 0, null,
-								     null, FCPClientPut.DEFAULT_INSERTION_PRIORITY,
-									     true, 0, false);
-						queueManager.addQueryToThePendingQueue(insertion);
-					} else {
-						insertion = new FCPClientPut(ioFile, 0, 0, null,
-									     null, FCPClientPut.DEFAULT_INSERTION_PRIORITY,
-									     true, 2, true); /* getCHKOnly */
-						queueManager.addQueryToTheRunningQueue(insertion);
-					}
-
-
 					st.setInt(1, nextId);
 					st.setString(2, ioFile.getName());
 					st.setString(3, ioFile.getName() /* stand as public key for the moment */);
@@ -1211,7 +1198,11 @@ public class IndexManagementHelper {
 
 					File file = new File(db, nextId);
 
-					((Observable)insertion).addObserver(file);
+					if (insert) {
+						file.insertOnFreenet(queueManager);
+					} else {
+						file.recalculateCHK(queueManager);
+					}
 
 					nextId++;
 				} catch(SQLException e) {
