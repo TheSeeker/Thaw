@@ -47,6 +47,8 @@ public class Core implements Observer {
 	public final static int MAX_CONNECT_TRIES = 3;
 	public final static int TIME_BETWEEN_EACH_TRY = 5000;
 
+	private ReconnectionManager reconnectionManager = null;
+
 
 	/**
 	 * Creates a core, but do nothing else (no initialization).
@@ -111,7 +113,7 @@ public class Core implements Observer {
 
 		splashScreen.setProgressionAndStatus(10, "Connecting ...");
 		splashScreen.addIcon(IconBox.connectAction);
-		if(!initNodeConnection())
+		if(!initConnection())
 			new WarningWindow(this, I18n.getMessage("thaw.warning.unableToConnectTo")+
 					  " "+ config.getValue("nodeAddress")+
 					  ":"+ config.getValue("nodePort"));
@@ -159,16 +161,20 @@ public class Core implements Observer {
 	 * if you called canDisconnect() before, then this function can be called safely.
 	 * @see #canDisconnect()
 	 */
-	public boolean initNodeConnection() {
-		if(getMainWindow() != null)
-			getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.connecting"));
+	public boolean initConnection() {
+		boolean ret = true;
+
+		if(getMainWindow() != null) {
+			getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.connecting"), java.awt.Color.RED);
+
+		}
 
 		try {
 			if(queueManager != null)
 				queueManager.stopScheduler();
 
 			if((connection != null) && connection.isConnected()) {
-				disconnect();
+				subDisconnect();
 			}
 
 			if(connection == null) {
@@ -177,7 +183,8 @@ public class Core implements Observer {
 							       Integer.parseInt(config.getValue("maxUploadSpeed")),
 							       Boolean.valueOf(config.getValue("multipleSockets")).booleanValue(),
 							       Boolean.valueOf(config.getValue("sameComputer")).booleanValue());
-			} else { /* connection is not recreate to avoid troubles with observer etc */
+			} else { /* connection is not recreate to avoid troubles with possible observers etc */
+				connection.deleteObserver(this);
 				connection.setNodeAddress(config.getValue("nodeAddress"));
 				connection.setNodePort(Integer.parseInt(config.getValue("nodePort")));
 				connection.setMaxUploadSpeed(Integer.parseInt(config.getValue("maxUploadSpeed")));
@@ -187,6 +194,7 @@ public class Core implements Observer {
 
 			if(!connection.connect()) {
 				Logger.warning(this, "Unable to connect !");
+				ret = false;
 			}
 
 			if(queryManager == null)
@@ -207,7 +215,7 @@ public class Core implements Observer {
 
 
 
-			if(connection.isConnected()) {
+			if(ret && connection.isConnected()) {
 				queryManager.startListening();
 
 				QueueKeeper.loadQueue(queueManager, "thaw.queue.xml");
@@ -217,9 +225,8 @@ public class Core implements Observer {
 
 				if(!clientHello.start(null)) {
 					Logger.warning(this, "Id already used !");
-					connection.disconnect();
-					new WarningWindow(this, "Unable to connect to "+config.getValue("nodeAddress")+":"+config.getValue("nodePort"));
-					return false;
+					subDisconnect();
+					ret = false;
 				} else {
 					Logger.debug(this, "Hello successful");
 					Logger.debug(this, "Node name    : "+clientHello.getNodeName());
@@ -237,9 +244,7 @@ public class Core implements Observer {
 					queueLoader.start(queueManager);
 
 				}
-
-			} else
-				return false;
+			}
 
 		} catch(final Exception e) { /* A little bit not ... "nice" ... */
 			Logger.warning(this, "Exception while connecting : "+e.toString()+" ; "+e.getMessage() + " ; "+e.getCause());
@@ -247,13 +252,17 @@ public class Core implements Observer {
 			return false;
 		}
 
-		if(connection.isConnected())
+		if(ret && connection.isConnected())
 			connection.addObserver(this);
 
-		if(getMainWindow() != null)
-			getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.ready"));
+		if(getMainWindow() != null) {
+			if (ret)
+				getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.ready"));
+			else
+				getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.disconnected"));
+		}
 
-		return true;
+		return ret;
 	}
 
 
@@ -347,13 +356,30 @@ public class Core implements Observer {
 	 * Makes things nicely ... :)
 	 */
 	public void disconnect() {
+		if (reconnectionManager != null) {
+			reconnectionManager.stop();
+			reconnectionManager = null;
+		}
+
+		subDisconnect();
+	}
+
+
+	public void subDisconnect() {
 		Logger.info(this, "Disconnecting");
-		connection.deleteObserver(this);
-		connection.disconnect();
 
-		Logger.info(this, "Saving queue state");
-		QueueKeeper.saveQueue(queueManager, "thaw.queue.xml");
+		if (mainWindow != null) {
+			mainWindow.setStatus(I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
+		}
 
+		if (connection != null) {
+			connection.deleteObserver(this);
+			connection.disconnect();
+			Logger.info(this, "Saving queue state");
+			QueueKeeper.saveQueue(queueManager, "thaw.queue.xml");
+		} else {
+			Logger.warning(this, "No connection ?!");
+		}
 	}
 
 	/**
@@ -365,7 +391,7 @@ public class Core implements Observer {
 
 	/**
 	 * End of the world.
-	 * @param force if true, doesn't check if FCPConnection.isWritting().
+	 * @param force if true, doesn't check if FCPConnection.isWriting().
 	 * @see #exit()
 	 */
 	public void exit(boolean force) {
@@ -416,89 +442,70 @@ public class Core implements Observer {
 	}
 
 
-	protected class UnwantedDisconnectionManager implements Runnable, ActionListener {
-		private JDialog warningDialog = null;
+	protected class ReconnectionManager implements Runnable {
+		private boolean running = true;
+
+		public ReconnectionManager() {
+			running = true;
+		}
 
 		public void run() {
-			disconnect();
+			Logger.notice(this, "Starting reconnection process !");
 
-			int nmbReconnect = 0;
+			getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.connecting"), java.awt.Color.RED);
+			getPluginManager().stopPlugins(); /* don't forget there is the status bar plugin */
+			getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.connecting"), java.awt.Color.RED);
 
-			if (getMainWindow() != null) /* disconnection can happen when starting */
-				warningDialog = new JDialog(getMainWindow().getMainFrame());
-			else
-				warningDialog = new JDialog();
-			warningDialog.setTitle("Thaw - reconnection");
-			warningDialog.setModal(false);
-			warningDialog.setSize(500, 100);
-			warningDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+			subDisconnect();
 
-			final JPanel warningPanel = new JPanel(new BorderLayout(10, 10));
-			final JLabel warningLabel = new JLabel(I18n.getMessage("thaw.warning.autoreconnecting"),
-							       SwingConstants.CENTER);
-			final JButton cancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
-			cancelButton.addActionListener(this);
-
-			warningPanel.add(warningLabel, BorderLayout.CENTER);
-			warningPanel.add(cancelButton, BorderLayout.SOUTH);
-			warningDialog.setContentPane(warningPanel);
-
-			warningDialog.setVisible(true);
-
-			for(nmbReconnect = 0;
-			    nmbReconnect < Core.MAX_CONNECT_TRIES && warningDialog != null ;
-			    nmbReconnect++) {
-
+			while(running) {
 				try {
 					Thread.sleep(Core.TIME_BETWEEN_EACH_TRY);
 				} catch(final java.lang.InterruptedException e) {
 					// brouzouf
 				}
 
-				Logger.notice(this, "Trying to reconnect ... : "+ Integer.toString(nmbReconnect));
-				if (warningDialog != null) {
-					if(initNodeConnection())
-						break;
-				}
-			}
-
-			if (warningDialog != null) {
-				warningDialog.setVisible(false);
-				warningDialog.dispose();
-			}
-
-
-			if(nmbReconnect == Core.MAX_CONNECT_TRIES) {
-				while(!initNodeConnection()) {
-					final int ret = JOptionPane.showOptionDialog((java.awt.Component)null,
-										     I18n.getMessage("thaw.warning.disconnected"),
-										     "Thaw - "+I18n.getMessage("thaw.warning.title"),
-										     JOptionPane.YES_NO_OPTION,
-										     JOptionPane.WARNING_MESSAGE,
-										     (javax.swing.Icon)null,
-										     (java.lang.Object[])null,
-										     (java.lang.Object)null);
-				if((ret == JOptionPane.CLOSED_OPTION)
-				   || (ret == JOptionPane.CANCEL_OPTION)
-				   || (ret == JOptionPane.NO_OPTION))
+				Logger.notice(this, "Trying to reconnect ...");
+				if(initConnection())
 					break;
-				}
-
 			}
 
-			getPluginManager().stopPlugins();
+			if (running) {
+				getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.ready"));
+			} else {
+				getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
+			}
+
 			getPluginManager().loadPlugins();
 			getPluginManager().runPlugins();
+
+			reconnectionManager = null;
+
+			getMainWindow().connectionHasChanged();
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			if (warningDialog == null)
-				return;
-			// we assume that the action comes from the button in the reconnection dialog
-			warningDialog.setVisible(false);
-			warningDialog.dispose();
-			warningDialog = null;
+		public void stop() {
+			Logger.warning(this, "Canceling reconnection ...");
+			running = false;
 		}
+	}
+
+	/**
+	 * use Thread => will also do all the work related to the plugins
+	 */
+	public void reconnect() {
+		if (reconnectionManager == null) {
+			reconnectionManager = new ReconnectionManager();
+			Thread th = new Thread(reconnectionManager);
+			th.start();
+		} else {
+			Logger.warning(this, "Already trying to reconnect !");
+		}
+	}
+
+
+	public boolean isReconnecting() {
+		return (reconnectionManager != null);
 	}
 
 
@@ -506,8 +513,7 @@ public class Core implements Observer {
 		Logger.debug(this, "Move on the connection (?)");
 
 		if((o == connection) && !connection.isConnected()) {
-			Thread th = new Thread(new UnwantedDisconnectionManager());
-			th.run();
+			reconnect();
 		}
 	}
 

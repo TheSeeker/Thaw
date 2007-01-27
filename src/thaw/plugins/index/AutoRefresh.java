@@ -107,7 +107,12 @@ public class AutoRefresh implements Runnable, java.util.Observer {
 			Index index;
 
 			index = new Index(browserPanel.getDb(),
-					  results.getInt("id"));
+					  results.getInt("id"),
+					  null, results.getString("publicKey"),
+					  results.getInt("revision"),
+					  results.getString("privateKey"),
+					  results.getString("displayName"),
+					  false);
 
 			index.downloadFromFreenet(this, browserPanel.getIndexTree(), queueManager);
 

@@ -201,6 +201,12 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	}
 
 
+	public void connectionHasChanged() {
+		core.getConnectionManager().addObserver(this);
+	}
+
+
+
 	/**
 	 * Make the window visible or not.
 	 */
@@ -385,12 +391,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 */
 	public void actionPerformed(final ActionEvent e) {
 		if(e.getSource() == connectButton) {
-			core.getPluginManager().stopPlugins();
-
-			if(!core.initNodeConnection())
-				unableToConnect();
-
-			core.getPluginManager().runPlugins();
+			core.reconnect();
 		}
 
 		if(e.getSource() == disconnectButton) {
@@ -400,9 +401,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 			}
 
 			core.getPluginManager().stopPlugins();
-
 			core.disconnect();
-
 			core.getPluginManager().runPlugins();
 		}
 
@@ -421,14 +420,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 					return;
 			}
 
-			core.getPluginManager().stopPlugins();
-
-			if(!core.initNodeConnection())
-				unableToConnect();
-
-			core.getPluginManager().loadPlugins();
-			core.getPluginManager().runPlugins();
-
+			core.reconnect();
 		}
 
 		if(e.getSource() == optionsFileMenuItem) {
@@ -490,15 +482,22 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	}
 
 
+	public void setStatus(final String status) {
+		setStatus(status, java.awt.Color.BLACK);
+	}
+
+
 	/**
 	 * Change text in the status bar.
 	 * @param status Null is accepted.
 	 */
-	public void setStatus(final String status) {
+	public void setStatus(final String status, java.awt.Color color) {
 		if(status != null)
 			statusBar.setText(status);
 		else
 			statusBar.setText(" ");/* not empty else the status bar disappear */
+
+		statusBar.setForeground(color);
 	}
 
 

@@ -206,7 +206,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 /* should reinit the whole connection correctly */
 			core.getPluginManager().stopPlugins();
 
-			if (resetConnection && !core.initNodeConnection()) {
+			if (resetConnection && !core.initConnection()) {
 				new WarningWindow(core, I18n.getMessage("thaw.warning.unableToConnectTo")+ " "+core.getConfig().getValue("nodeAddress")+":"+ core.getConfig().getValue("nodePort"));
 			}
 

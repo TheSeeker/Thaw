@@ -49,6 +49,17 @@ public class StatusBar implements Runnable, Plugin {
 	}
 
 	public void updateStatusBar() {
+
+		if (core.isReconnecting()) {
+			core.getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.connecting"), java.awt.Color.RED);
+			return;
+		}
+
+		if (!core.getConnectionManager().isConnected()) {
+			core.getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
+			return;
+		}
+
 		int progressDone = 0;
 		int progressTotal = 0;
 

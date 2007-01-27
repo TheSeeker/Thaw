@@ -501,12 +501,12 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 		   && !queryManager.getConnection().isConnected()) {
 
 			/* Only the running queue ...
-			 * pending query are specifics to Thaw
+			 * pending queries are specifics to Thaw
 			 */
 			runningQueries = new Vector();
 
 			setChanged();
-			this.notifyObservers();
+			notifyObservers();
 		}
 	}
 }

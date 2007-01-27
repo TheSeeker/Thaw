@@ -12,7 +12,7 @@ import thaw.core.Logger;
  *       and start() returns false.
  */
 public class FCPClientHello implements FCPQuery, Observer {
-	public final static int NODEHELLO_TIMEOUT = 20; /* in seconds */
+	public final static int NODEHELLO_TIMEOUT = 30; /* in seconds */
 
 	private final static String FCP_EXPECTED_VERSION = "2.0";
 	private String id;
@@ -94,7 +94,6 @@ public class FCPClientHello implements FCPQuery, Observer {
 			Logger.info(this, "Hello "+nodeName+", I'm Thaw :)");
 		} else {
 			Logger.warning(this, "Unable to connect, ID is probably already taken or there was a timeout");
-			queryManager.getConnection().disconnect();
 			return false;
 		}
 
