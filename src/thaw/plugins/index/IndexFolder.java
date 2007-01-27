@@ -920,10 +920,10 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 				if (id >= 0) {
 					selectSt =
-						db.getConnection().prepareStatement("SELECT id FROM indexFolders WHERE parent = ? ORDER BY name");
+						db.getConnection().prepareStatement("SELECT id FROM indexFolders WHERE parent = ? ORDER BY LOWER(name)");
 				} else {
 					selectSt =
-						db.getConnection().prepareStatement("SELECT id FROM indexFolders WHERE parent IS NULL ORDER BY name");
+						db.getConnection().prepareStatement("SELECT id FROM indexFolders WHERE parent IS NULL ORDER BY LOWER(name)");
 				}
 
 				updateSt =
@@ -952,10 +952,10 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 				if (id >= 0) {
 					selectSt =
-						db.getConnection().prepareStatement("SELECT id FROM indexes WHERE parent = ? ORDER BY displayName");
+						db.getConnection().prepareStatement("SELECT id FROM indexes WHERE parent = ? ORDER BY LOWER(displayName)");
 				} else {
 					selectSt =
-						db.getConnection().prepareStatement("SELECT id FROM indexes WHERE parent IS NULL ORDER BY displayName");
+						db.getConnection().prepareStatement("SELECT id FROM indexes WHERE parent IS NULL ORDER BY LOWER(displayName)");
 				}
 
 				updateSt =
