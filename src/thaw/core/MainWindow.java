@@ -451,7 +451,8 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 
 	public void updateToolBar() {
-		if(core.getConnectionManager() != null && core.getConnectionManager().isConnected()) {
+		if( core.getConnectionManager() != null &&
+		   (core.getConnectionManager().isConnected() || core.isReconnecting())) {
 			connectButton.setEnabled(false);
 			disconnectButton.setEnabled(true);
 		} else {
