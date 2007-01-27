@@ -575,8 +575,10 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 			if (columnToSort == modelIndex)
 			        sortAsc = !sortAsc;
-			else
+			else {
 				columnToSort = modelIndex;
+				sortAsc = true;
+			}
 
 
 			for (int i = 0; i < columnsCount; i++) {

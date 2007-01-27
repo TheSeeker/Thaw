@@ -72,6 +72,9 @@ public class SearchResult implements FileAndLinkList {
 
 	public Vector getFileList(String col, boolean asc) {
 
+		if (col == null)
+			col = "filename";
+
 		Vector v = new Vector();
 
 		synchronized(db.dbLock) {
@@ -80,7 +83,8 @@ public class SearchResult implements FileAndLinkList {
 
 				st = db.getConnection().prepareStatement("SELECT id, filename, publicKey, localPath, mime, size, indexParent "+
 									 "FROM files "+
-									 "WHERE "+getWhereClause(true)+" ORDER by filename");
+									 "WHERE "+getWhereClause(true)+" ORDER by "+col+ (asc ? "" : " DESC"));
+
 				fillInStatement(st);
 
 				ResultSet set = st.executeQuery();
@@ -105,7 +109,7 @@ public class SearchResult implements FileAndLinkList {
 	}
 
 	public Vector getLinkList(String col, boolean asc) {
-				Vector v = new Vector();
+		Vector v = new Vector();
 
 		synchronized(db.dbLock) {
 			try {

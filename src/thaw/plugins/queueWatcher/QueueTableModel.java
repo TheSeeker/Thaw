@@ -280,15 +280,18 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 
 	public synchronized void update(final Observable o, final Object arg) {
-		int i;
+		int oldPos = -1;
+		int i = 0;
 
 		if (queries != null && (i = queries.indexOf(o)) >= 0) {
-			this.notifyObservers(i);
+			oldPos = i;
 		}
 
 		sortTable();
 
-		if( (i = queries.indexOf(o)) >= 0) {
+		if( queries != null && (i = queries.indexOf(o)) >= 0) {
+			if (oldPos != i)
+				this.notifyObservers(oldPos);
 			this.notifyObservers(i);
 			return;
 		}
@@ -312,7 +315,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 				return;
 			}
 
-			if(queries.contains(query)) {
+			if(queries.contains(query)) { // then it's a removing
 				removeQuery(query);
 				return;
 			}
