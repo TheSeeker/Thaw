@@ -35,6 +35,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	private int fromTheNodeProgress = 0;
 	private boolean progressReliable = false;
 	private long fileSize;
+	private long maxSize = 0;
 
 	private boolean running = false;
 	private boolean successful = true;
@@ -148,6 +149,21 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	}
 
+
+	/**
+	 * Another entry point allowing to specify a max size
+	 */
+	public FCPClientGet(final String key, final int priority,
+			    final int persistence, boolean globalQueue,
+			    final int maxRetries,
+			    String destinationDir,
+			    long maxSize) {
+		this(key, priority, persistence, globalQueue, maxRetries,
+		     destinationDir);
+		this.maxSize = maxSize;
+	}
+
+
 	public boolean start(final FCPQueueManager queueManager) {
 		attempt++;
 		running = true;
@@ -179,6 +195,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		queryMessage.setValue("Verbosity", "1");
 		queryMessage.setValue("MaxRetries", Integer.toString(maxRetries));
 		queryMessage.setValue("PriorityClass", Integer.toString(priority));
+
+		if (maxSize > 0)
+			queryMessage.setValue("MaxSize", Long.toString(maxSize));
 
 		if(destinationDir != null)
 			queryMessage.setValue("ClientToken", destinationDir);

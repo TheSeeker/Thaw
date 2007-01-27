@@ -50,6 +50,8 @@ import thaw.plugins.insertPlugin.DefaultMIMETypes;
 
 
 public class Index extends Observable implements MutableTreeNode, FileAndLinkList, IndexTreeNode, Observer {
+	private final static long MAX_SIZE = 5242880; /* 5MB */
+
 
 	private final Hsqldb db;
 	private int id;
@@ -691,7 +693,8 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 
 		clientGet = new FCPClientGet(key, 2, 2, false, -1,
-					     System.getProperty("java.io.tmpdir"));
+					     System.getProperty("java.io.tmpdir"),
+					     MAX_SIZE);
 
 		/*
 		 * These requests are usually quite fast, and don't consume too much

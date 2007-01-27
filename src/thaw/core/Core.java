@@ -370,6 +370,9 @@ public class Core implements Observer {
 
 		if (mainWindow != null) {
 			mainWindow.setStatus(I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
+
+			/* not null because we want to force the cleaning */
+			mainWindow.changeButtonsInTheToolbar(this, new java.util.Vector());
 		}
 
 		if (connection != null) {
