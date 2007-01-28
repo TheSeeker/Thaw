@@ -199,6 +199,7 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 
 		if ("clear".equals(cmd.toLowerCase())) {
 			flushBuffer();
+			return;
 		}
 
 		if ("refresh".equals(cmd.toLowerCase())) {

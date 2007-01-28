@@ -73,7 +73,7 @@ public class DatabaseManager {
 
 		if (config.getValue("indexDatabaseVersion") == null) {
 			newDb = true;
-			config.setValue("indexDatabaseVersion", "2");
+			config.setValue("indexDatabaseVersion", "3");
 		} else {
 
 			/* CONVERTIONS */
@@ -86,6 +86,13 @@ public class DatabaseManager {
 				/* else
 				 * TODO : Put a warning here and stop the plugin loading
 				 */
+			}
+
+			if ("2".equals(config.getValue("indexDatabaseVersion"))) {
+				if (splashScreen != null)
+					splashScreen.setStatus("Converting database ...");
+				if (convertDatabase_2_to_3(db))
+					config.setValue("indexDatabaseVersion", "3");
 			}
 
 			/* ... */
@@ -165,6 +172,7 @@ public class DatabaseManager {
 			  + "category INTEGER NULL,"
 			  + "indexParent INTEGER NOT NULL,"
 			  + "toDelete BOOLEAN DEFAULT FALSE NOT NULL,"
+			  + "dontDelete BOOLEAN DEFAULT FALSE NOT NULL,"
 			  + "PRIMARY KEY (id),"
 			  + "FOREIGN KEY (indexParent) REFERENCES indexes (id),"
 			  + "FOREIGN KEY (category) REFERENCES categories (id))");
@@ -178,6 +186,7 @@ public class DatabaseManager {
 			  + "indexParent INTEGER NOT NULL,"
 			  + "indexTarget INTEGER NULL,"
 			  + "toDelete BOOLEAN DEFAULT false NOT NULL,"
+			  + "dontDelete BOOLEAN DEFAULT false NOT NULL,"
 			  + "PRIMARY KEY (id),"
 			  + "FOREIGN KEY (indexParent) REFERENCES indexes (id),"
 			  + "FOREIGN KEY (indexTarget) REFERENCES indexes (id))");
@@ -522,10 +531,12 @@ public class DatabaseManager {
 
 		if (!sendQuery(db, "ALTER TABLE links ADD COLUMN toDelete BOOLEAN DEFAULT false")) {
 			Logger.error(new DatabaseManager(), "Error while converting the database (1 to 2) ! (adding column to link table)");
+			return false;
 		}
 
 		if (!sendQuery(db, "ALTER TABLE files ADD COLUMN toDelete BOOLEAN DEFAULT false")) {
 			Logger.error(new DatabaseManager(), "Error while converting the database (1 to 2) ! (adding column to file table)");
+			return false;
 		}
 
 		/* direct AND indirect parents */
@@ -616,4 +627,17 @@ public class DatabaseManager {
 		return true;
 	}
 
+	public static boolean convertDatabase_2_to_3(Hsqldb db) {
+		if (!sendQuery(db, "ALTER TABLE links ADD COLUMN dontDelete BOOLEAN DEFAULT false")) {
+			Logger.error(new DatabaseManager(), "Error while converting the database (2 to 3) ! (adding column to link table)");
+			return false;
+		}
+
+		if (!sendQuery(db, "ALTER TABLE files ADD COLUMN dontDelete BOOLEAN DEFAULT false")) {
+			Logger.error(new DatabaseManager(), "Error while converting the database (2 to 3) ! (adding column to file table)");
+			return false;
+		}
+
+		return true;
+	}
 }

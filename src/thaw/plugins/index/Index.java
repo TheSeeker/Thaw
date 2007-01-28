@@ -627,6 +627,24 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 			setPublicKey(key, rev);
 
+
+			try {
+				PreparedStatement st;
+
+				String query = "UPDATE # SET dontDelete = FALSE WHERE indexParent = ?";
+
+				st = db.getConnection().prepareStatement(query.replaceFirst("#", "files"));
+				st.setInt(1, id);
+				st.execute();
+
+				st = db.getConnection().prepareStatement(query.replaceFirst("#", "links"));
+				st.setInt(1, id);
+				st.execute();
+
+			} catch(SQLException e) {
+				Logger.error(this, "Error while reseting dontDelete flags: "+e.toString());
+			}
+
 		} else {
 			Logger.warning(this, "Index not generated !");
 			return 0;
@@ -1158,7 +1176,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 				PreparedStatement st =
 					db.getConnection().prepareStatement("UPDATE links "+
 									    "SET toDelete = TRUE "+
-									    "WHERE indexParent = ?");
+									    "WHERE indexParent = ? AND dontDelete = FALSE");
 				st.setInt(1, id);
 				st.execute();
 			} catch(SQLException exc) {
@@ -1257,7 +1275,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 				st = db.getConnection().prepareStatement("UPDATE files "+
 									 "SET toDelete = TRUE "+
-									 "WHERE indexParent = ?");
+									 "WHERE indexParent = ? AND dontDelete = FALSE");
 				st.setInt(1, id);
 				st.execute();
 			} catch(SQLException exc) {

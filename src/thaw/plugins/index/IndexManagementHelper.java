@@ -1154,8 +1154,8 @@ public class IndexManagementHelper {
 			try {
 				selectSt = db.getConnection().prepareStatement("SELECT id from files WHERE indexParent = ? AND LOWER(filename) LIKE ? LIMIT 1");
 				st = db.getConnection().prepareStatement("INSERT INTO files "+
-									 "(id, filename, publicKey, localPath, mime, size, category, indexParent) "+
-									 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+									 "(id, filename, publicKey, localPath, mime, size, category, indexParent, dontDelete) "+
+									 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, TRUE)");
 				nextId = DatabaseManager.getNextId(db, "files");
 
 				if (nextId < 0)
