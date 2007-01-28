@@ -444,7 +444,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 				bar.setBorderPainted(false);
 
 				if ((query instanceof FCPClientPut && (query.getTransferWithTheNodeProgression() < 100))
-				    || ((query instanceof FCPClientGet) && (query.getTransferWithTheNodeProgression() <= 0)))
+				    || ((query instanceof FCPClientGet) && (query.getTransferWithTheNodeProgression() > 0)))
 					progress = query.getTransferWithTheNodeProgression();
 				else
 					progress = query.getProgression();

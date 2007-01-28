@@ -17,7 +17,7 @@ public class Logger {
 	 * 3 = Errors + warnings + notices + infos
 	 * 4 = Errors + warnings + notices + infos + debug
 	 * 5 = [...] + horrible things that only God could understand easily.
-	 *             (or maybe someone having the FCPv2 specs :)
+	 *             (or maybe someone with the FCPv2 specs :)
 	 *
 	 * 2 or more is recommanded.
 	 * 4 or more is unhealthy
