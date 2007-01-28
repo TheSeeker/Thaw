@@ -280,15 +280,15 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 	private class UnlockWaiter implements Runnable {
 		FCPClientPut clientPut;
-		FCPConnection connection;
+		FCPConnection c;
 
-		public UnlockWaiter(final FCPClientPut clientPut, final FCPConnection connection) {
+		public UnlockWaiter(final FCPClientPut clientPut, final FCPConnection c) {
 			this.clientPut = clientPut;
-			this.connection = connection;
+			this.c = c;
 		}
 
 		public void run() {
-			connection.addToWriterQueue();
+			c.addToWriterQueue();
 
 			lockOwner = true;
 
@@ -509,8 +509,11 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	public boolean stop(final FCPQueueManager queueManager) {
 		if(removeRequest()) {
 			status = "Stopped";
+
+			if (!finished)
+				successful = false;
+
 			finished = true;
-			successful = false;
 			fatal= true;
 			running = false;
 

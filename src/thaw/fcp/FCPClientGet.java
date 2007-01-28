@@ -750,9 +750,11 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		if(!removeRequest())
 			return false;
 
+		if (progress < 100)
+			successful = false;
+
 		progress = 100;
 		running = false;
-		successful = false;
 		fatal = true;
 		status = "Stopped";
 		setChanged();

@@ -186,12 +186,16 @@ public class File implements Observer {
 	}
 
 
+	private FCPTransferQuery transfer = null;
+
+
 	public FCPTransferQuery getTransfer(FCPQueueManager q) {
-		FCPTransferQuery tr;
+		if (transfer != null)
+			return transfer;
 
-		tr = q.getTransfer(getPublicKey());
+		transfer = q.getTransfer(getPublicKey());
 
-		return tr;
+		return transfer;
 	}
 
 	public void setPublicKey(final String publicKey) {
