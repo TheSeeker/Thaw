@@ -737,19 +737,20 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		if (o instanceof FCPClientGet) {
 			FCPClientGet get = (FCPClientGet)o;
 
-			String key = get.getFileKey();
-
-			int oldRev = rev;
-			int newRev = FreenetURIHelper.getUSKRevision(key);
-
-			if (rewriteKey) {
-				setPublicKey(key, newRev);
-			}
-
-			if (oldRev < newRev)
-				setHasChangedFlag(true);
-
 			if (get.isFinished() && get.isSuccessful()) {
+
+				String key = get.getFileKey();
+
+				int oldRev = rev;
+				int newRev = FreenetURIHelper.getUSKRevision(key);
+
+				if (rewriteKey) {
+					setPublicKey(key, newRev);
+				}
+
+				if (oldRev < newRev)
+					setHasChangedFlag(true);
+
 				String path = get.getPath();
 
 				if (path != null) {
