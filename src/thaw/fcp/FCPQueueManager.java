@@ -205,7 +205,8 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 		if (FreenetURIHelper.isAKey(fileKey))
 			keyTable.put(FreenetURIHelper.getComparablePart(fileKey), query);
 
-		filenameTable.put(filename, query);
+		if (filename != null)
+			filenameTable.put(filename, query);
 
 
 		setChanged();

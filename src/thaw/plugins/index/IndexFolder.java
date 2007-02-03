@@ -238,7 +238,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 	 * the target child must be in the database
 	 */
 	public void insert(MutableTreeNode child, int index) {
-		Logger.notice(this, "Inserting node at "+Integer.toString(index)+" in node "+Integer.toString(id)+" ("+toString()+")");
+		Logger.info(this, "Inserting node at "+Integer.toString(index)+" in node "+Integer.toString(id)+" ("+toString()+")");
 
 		if (children != null) {
 
@@ -337,7 +337,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 		}
 
 
-		Logger.notice(this, "Removing obj pos "+Integer.toString(pos));
+		Logger.info(this, "Removing obj pos "+Integer.toString(pos));
 
 		synchronized(db.dbLock) {
 			try {

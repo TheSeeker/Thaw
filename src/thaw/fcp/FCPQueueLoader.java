@@ -69,10 +69,10 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 
 
 			final FCPClientGet clientGet = new FCPClientGet(msg.getValue("Identifier"),
-								  msg.getValue("URI"), // key
-								  priority, persistence, global,
-								  destinationDir, "Fetching", 0,
-								  -1, queueManager);
+									msg.getValue("URI"), // key
+									priority, persistence, global,
+									destinationDir, "Fetching", 0,
+									-1, queueManager);
 
 			if(queueManager.addQueryToTheRunningQueue(clientGet, false))
 				queueManager.getQueryManager().addObserver(clientGet);
@@ -109,11 +109,12 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 				filePath = msg.getValue("ClientToken");
 
 			final FCPClientPut clientPut = new FCPClientPut(msg.getValue("Identifier"),
-								  msg.getValue("URI"), // key
-								  priority, persistence, global,
-								  filePath, msg.getValue("TargetFilename"),
-								  "Inserting", 0, fileSize,
-								  queueManager);
+									msg.getValue("URI"), // key
+									priority, persistence, global,
+									filePath,
+									msg.getValue("TargetFilename"),
+									"Inserting", 0, fileSize,
+									queueManager);
 
 
 			if(queueManager.addQueryToTheRunningQueue(clientPut, false))

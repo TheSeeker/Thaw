@@ -152,59 +152,59 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 		this.publicKey = publicKey;
 
-		if((filePath != null) && filePath.startsWith("thaw")) {
-
-			final String[] plop = filePath.split(File.separator.replaceAll("\\\\", "\\\\\\\\"));
-			name = plop[plop.length-1];
-
-			localFile = new File(filePath);
-			if(localFile.length() > 0)
-				this.fileSize = localFile.length();
-
-		} else {
-
-
-			String[] plop = publicKey.split("/");
-			name = plop[plop.length-1];
-
-			if(keyType != 0) {
-				plop = name.split("\\-");
-				if(plop.length >= 2) {
-					name = "";
-					for(int i = 0 ; i < plop.length-1; i++) {
-						name = name + plop[i];
-						if(i < plop.length-2)
-							name = name +"-";
-					}
-				}
-			}
-
-
-			if("null".equals( name ) || "CHK@".equals( name )) {
-				Logger.warning(this, "The node returns \"null\" as filename. Using id !");
-				Logger.warning(this, "( URI="+publicKey +" )");
-				Logger.warning(this, "( Identifier="+identifier+" )");
-
-				plop = this.identifier.split("\\-");
-
-				if(plop.length >= 2) {
-					name = "";
-					for(int i = 1 ; i < plop.length; i++) {
-						if(i != 1)
-							name = name +"-";
-						name = name + plop[i];
-
-					}
-				}
-
-
-			}
-
-		}
-
-		if (fileName != null) { /* We want to force the filename */ /* See PersistentPut.TargetFilename */
+		if (fileName != null)
 			name = fileName;
-		}
+		/*else {
+
+			if((filePath != null) && filePath.startsWith("thaw")) {
+
+				final String[] plop = filePath.split(File.separator.replaceAll("\\\\", "\\\\\\\\"));
+				name = plop[plop.length-1];
+
+				localFile = new File(filePath);
+				if(localFile.length() > 0)
+					this.fileSize = localFile.length();
+
+			} else {
+
+
+				String[] plop = publicKey.split("/");
+				name = plop[plop.length-1];
+
+				if(keyType != 0) {
+					plop = name.split("\\-");
+					if(plop.length >= 2) {
+						name = "";
+						for(int i = 0 ; i < plop.length-1; i++) {
+							name = name + plop[i];
+							if(i < plop.length-2)
+								name = name +"-";
+						}
+					}
+				}
+
+
+				if("null".equals( name ) || "CHK@".equals( name )) {
+					Logger.warning(this, "The node returns \"null\" as filename. Using id !");
+					Logger.warning(this, "( URI="+publicKey +" )");
+					Logger.warning(this, "( Identifier="+identifier+" )");
+
+					plop = this.identifier.split("\\-");
+
+					if(plop.length >= 2) {
+						name = "";
+						for(int i = 1 ; i < plop.length; i++) {
+							if(i != 1)
+								name = name +"-";
+							name = name + plop[i];
+
+						}
+					}
+				}
+
+			}
+
+			}*/
 
 		this.publicKey = null;
 
