@@ -41,7 +41,7 @@ public class SearchResult implements FileAndLinkList {
 			if (where == null) {
 				where = " LOWER("+column+") LIKE ?";
 			} else {
-				where = " AND LOWER("+column+") LIKE ?";
+				where+=" AND LOWER("+column+") LIKE ?";
 			}
 		}
 

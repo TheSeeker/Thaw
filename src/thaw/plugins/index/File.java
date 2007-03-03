@@ -356,7 +356,7 @@ public class File implements Observer {
 	 * Note: Do a SQL requests each time
 	 */
 	public boolean isModifiable() {
-		if (parent != null) {
+		if (parent == null) {
 			Logger.debug(this, "isModifiable() => new Index().isModifiable()");
 			return (new Index(db, parentId)).isModifiable();
 		}
