@@ -3,8 +3,6 @@ package thaw.plugins.index;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

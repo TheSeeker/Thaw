@@ -2,14 +2,7 @@ package thaw.plugins.index;
 
 import javax.swing.JProgressBar;
 
-import java.util.Vector;
-import java.util.Iterator;
-
-import java.util.Observable;
-import java.util.Observer;
-
 import thaw.core.Logger;
-import thaw.fcp.FCPTransferQuery;
 
 public class IndexProgressBar {
 

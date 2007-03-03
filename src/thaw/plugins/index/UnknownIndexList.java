@@ -18,7 +18,6 @@ import thaw.core.I18n;
 import thaw.core.IconBox;
 import thaw.plugins.ToolbarModifier;
 import thaw.fcp.FCPQueueManager;
-import thaw.plugins.Hsqldb;
 
 public class UnknownIndexList implements MouseListener {
 	public final static int MAX_INDEXES = 50;

@@ -1,11 +1,7 @@
 package thaw.plugins.index;
 
-import java.util.Vector;
-
-import java.util.Observable;
 import java.util.Observer;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;

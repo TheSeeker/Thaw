@@ -1,6 +1,5 @@
 package thaw.plugins.index;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,9 +8,6 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Vector;
 import java.util.Observer;
-import java.util.Observable;
-
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 

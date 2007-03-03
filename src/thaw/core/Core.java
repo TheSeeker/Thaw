@@ -5,18 +5,8 @@ import java.util.Observer;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import javax.swing.UIManager;
-import javax.swing.WindowConstants;
-import javax.swing.JButton;
-import java.awt.BorderLayout;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-
 import thaw.fcp.FCPClientHello;
 import thaw.fcp.FCPConnection;
 import thaw.fcp.FCPQueryManager;
@@ -501,7 +491,7 @@ public class Core implements Observer {
 	public void reconnect() {
 		if (reconnectionManager == null) {
 			reconnectionManager = new ReconnectionManager();
-			Thread th = new Thread(reconnectionManager);
+			final Thread th = new Thread(reconnectionManager);
 			th.start();
 		} else {
 			Logger.warning(this, "Already trying to reconnect !");

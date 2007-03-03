@@ -11,7 +11,6 @@ import java.util.Vector;
 import javax.swing.AbstractButton;
 
 import thaw.fcp.FCPQueueManager;
-import thaw.plugins.Hsqldb;
 
 public class LinkManagementHelper {
 	public interface LinkAction extends ActionListener {

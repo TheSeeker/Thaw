@@ -1,7 +1,6 @@
 package thaw.plugins;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -9,12 +8,9 @@ import java.io.FileOutputStream;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
-
 import thaw.core.Core;
 import thaw.core.FileChooser;
 import thaw.core.I18n;

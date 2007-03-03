@@ -10,8 +10,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import thaw.core.I18n;
-import thaw.fcp.FCPQueueManager;
-import thaw.plugins.Hsqldb;
 
 public class SearchBar implements ActionListener {
 	private JPanel panel;

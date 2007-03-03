@@ -7,7 +7,6 @@ import javax.swing.JSplitPane;
 
 import thaw.core.Config;
 import thaw.fcp.FCPQueueManager;
-import thaw.plugins.Hsqldb;
 
 /**
  * Contains a FileTable, a LinkTable, and a SearchBar

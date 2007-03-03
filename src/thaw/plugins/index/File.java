@@ -3,17 +3,11 @@ package thaw.plugins.index;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Iterator;
-import java.util.Vector;
 import java.util.Observer;
 import java.util.Observable;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import thaw.core.FreenetURIHelper;
 import thaw.core.Logger;
 import thaw.fcp.FCPClientGet;
@@ -21,7 +15,6 @@ import thaw.fcp.FCPClientPut;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
 import thaw.plugins.Hsqldb;
-import thaw.plugins.insertPlugin.DefaultMIMETypes;
 
 public class File implements Observer {
 	private Hsqldb db = null;

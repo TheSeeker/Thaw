@@ -12,8 +12,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Iterator;
 import java.util.Vector;
-import java.util.Hashtable;
-
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -32,11 +30,9 @@ import thaw.core.Config;
 import thaw.core.I18n;
 import thaw.core.IconBox;
 import thaw.core.Logger;
-import thaw.core.MainWindow;
 import thaw.core.FreenetURIHelper;
 import thaw.fcp.FCPQueueManager;
 import thaw.gui.JDragTree;
-import thaw.plugins.Hsqldb;
 import thaw.plugins.ToolbarModifier;
 
 /**
@@ -534,7 +530,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	}
 
 	public void redraw(TreePath path) {
-		Object[] nodes = (Object[])(path.getPath());
+		Object[] nodes = (path.getPath());
 
 		for (int i = 0 ; i < nodes.length ; i++) {
 			IndexTreeNode node = (IndexTreeNode)nodes[i];

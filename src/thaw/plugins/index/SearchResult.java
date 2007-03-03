@@ -1,16 +1,11 @@
 package thaw.plugins.index;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Iterator;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Vector;
 
 import thaw.core.Logger;
-import thaw.fcp.FCPQueueManager;
 import thaw.plugins.Hsqldb;
 
 public class SearchResult implements FileAndLinkList {

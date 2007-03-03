@@ -1,12 +1,7 @@
 package thaw.plugins;
 
-import java.util.Iterator;
 import java.util.Vector;
 
-import java.awt.BorderLayout;
-import javax.swing.JPanel;
-
-import javax.swing.JButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -17,7 +12,6 @@ import thaw.core.Logger;
 import thaw.core.Plugin;
 import thaw.plugins.index.IndexBrowserPanel;
 import thaw.plugins.index.IndexManagementHelper;
-import thaw.plugins.index.IndexTreeNode;
 import thaw.plugins.index.DatabaseManager;
 import thaw.plugins.index.IndexConfigPanel;
 import thaw.plugins.index.AutoRefresh;

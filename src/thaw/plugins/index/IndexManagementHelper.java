@@ -31,17 +31,13 @@ import javax.swing.JCheckBox;
 import javax.swing.JTextField;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import java.sql.*;
 
 import thaw.core.FileChooser;
 import thaw.core.FreenetURIHelper;
 import thaw.core.I18n;
 import thaw.core.Logger;
-import thaw.core.MainWindow;
 import thaw.core.Config;
-import thaw.fcp.FCPClientPut;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
 import thaw.fcp.FCPGenerateSSK;
@@ -224,7 +220,7 @@ public class IndexManagementHelper {
 								sskGenerator.getPublicKey(), 0, sskGenerator.getPrivateKey(),
 								name, false);
 
-					((MutableTreeNode)getTarget()).insert(((MutableTreeNode)index), 0);
+					((MutableTreeNode)getTarget()).insert((index), 0);
 
 
 					getIndexBrowserPanel().getIndexTree().refresh(getTarget());
@@ -594,7 +590,7 @@ public class IndexManagementHelper {
 
 				st.execute();
 
-				index = new Index(db, id, (TreeNode)parent,
+				index = new Index(db, id, parent,
 						  publicKey, revision, privateKey,
 						  name, false);
 
@@ -608,7 +604,7 @@ public class IndexManagementHelper {
 		if (load)
 			download(queueManager, indexBrowser, index);
 
-		((MutableTreeNode)parent).insert(((MutableTreeNode)index), 0);
+		((MutableTreeNode)parent).insert((index), 0);
 
 		indexBrowser.getIndexTree().refresh(parent);
 
@@ -683,7 +679,7 @@ public class IndexManagementHelper {
 			}
 		}
 
-		((MutableTreeNode)target).insert(((MutableTreeNode)folder), 0);
+		((MutableTreeNode)target).insert((folder), 0);
 		indexBrowser.getIndexTree().refresh(target);
 
 		return folder;

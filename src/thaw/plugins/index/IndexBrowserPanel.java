@@ -1,13 +1,8 @@
 package thaw.plugins.index;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import thaw.core.Config;
 import thaw.core.I18n;
 import thaw.core.Logger;
