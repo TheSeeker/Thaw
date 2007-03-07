@@ -670,7 +670,7 @@ public class IndexManagementHelper {
 
 				st.execute();
 
-				folder = new IndexFolder(indexBrowser.getDb(), nextId, target, name);
+				folder = new IndexFolder(indexBrowser.getDb(), nextId, target, name, false);
 
 			} catch(SQLException e) {
 				Logger.error(new IndexManagementHelper(), "Error while creating folder: "+e.toString());
