@@ -29,19 +29,14 @@ import org.w3c.dom.NodeList;
  */
 public class Config {
 
-	private File configFile = new File("thaw.conf.xml"); /* Default name */
+	public static String CONFIG_FILE_NAME = "thaw.conf.xml";
+	private final File configFile;
 
-	private HashMap parameters = null; /* String (param) -> String (value) */
-	private Vector pluginNames = null; /* String (plugin names) */
-
-
-	public Config() {
-		this(null);
-	}
+	private final HashMap parameters; /* String (param) -> String (value) */
+	private final Vector pluginNames; /* String (plugin names) */
 
 	public Config(final String filename) {
-		if(filename != null)
-			configFile = new File(filename);
+		configFile = new File(filename);
 
 		parameters = new HashMap();
 		pluginNames = new Vector();
@@ -49,25 +44,18 @@ public class Config {
 
 	/**
 	 * Returns the corresponding value
+	 * 
 	 * @return null if the value doesn't exit in the config.
 	 */
 	public String getValue(final String key) {
-		try {
-			return ((String)parameters.get(key));
-		} catch(final Exception e) { /* I should see for the correct exception */
-			Logger.notice(this, "Unknow key in configuration: '"+key+"'");
-			return null;
-		}
+		return ((String)parameters.get(key));
 	}
 
 	/**
 	 * Set the value in the config.
 	 */
 	public void setValue(final String key, final String value) {
-		if(value != null)
-			Logger.info(this, "Setting value '"+key+"' to '"+value+"'");
-		else
-			Logger.info(this, "Setting value '"+key+"' to null");
+		Logger.info(this, "Setting value '"+key+"' to '"+value+"'");
 		parameters.put(key, value);
 	}
 
@@ -181,6 +169,7 @@ public class Config {
 
 	/**
 	 * Save the configuration.
+	 * 
 	 * @return true if success, else false.
 	 */
 	public boolean saveConfig() {
@@ -200,8 +189,6 @@ public class Config {
 		} catch(final java.io.IOException e) {
 			Logger.warning(this, "Error while checking perms to save config: "+e);
 		}
-
-
 
 		configOut = new StreamResult(configFile);
 
@@ -309,5 +296,4 @@ public class Config {
 		setDefaultValue("multipleSockets", "true");
 		setDefaultValue("sameComputer", "true");
 	}
-
 }

@@ -136,9 +136,10 @@ public class Core implements Observer {
 	 * Init configuration. May re-set I18n.
 	 */
 	public boolean initConfig() {
-		config = new Config();
+		config = new Config(Config.CONFIG_FILE_NAME);
+		
+		// FIXME: awfull hack to set default values if necessary. Maybe the freenet's config framework should be borrowed ;)
 		config.loadConfig();
-
 		config.setDefaultValues();
 
 		return true;
