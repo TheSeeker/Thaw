@@ -111,7 +111,12 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		panel = new JPanel();
 		panel.setLayout(new BorderLayout(10, 10));
 
-		root = new IndexRoot(queueManager, indexBrowser, rootName);
+		boolean loadOnTheFly = false;
+
+		if (config.getValue("loadIndexTreeOnTheFly") != null)
+			loadOnTheFly = Boolean.valueOf(config.getValue("loadIndexTreeOnTheFly")).booleanValue();
+
+		root = new IndexRoot(queueManager, indexBrowser, rootName, loadOnTheFly);
 
 		treeModel = new DefaultTreeModel(root);
 

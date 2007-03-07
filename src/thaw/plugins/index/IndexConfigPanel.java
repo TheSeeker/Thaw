@@ -20,6 +20,8 @@ public class IndexConfigPanel implements ActionListener {
 	private JTextField refreshInterval;
 	private JTextField indexPerRefresh;
 
+	private JCheckBox loadOnTheFly;
+
 
 	public IndexConfigPanel(ConfigWindow configWindow, Config config) {
 		this.configWindow = configWindow;
@@ -36,6 +38,9 @@ public class IndexConfigPanel implements ActionListener {
 		JLabel indexPerRefreshLabel = new JLabel(I18n.getMessage("thaw.plugin.index.nmbIndexPerRefresh"));
 		indexPerRefresh = new JTextField("");
 
+		loadOnTheFly = new JCheckBox(I18n.getMessage("thaw.plugin.index.loadOnTheFly"));
+
+
 		resetValues();
 
 		autorefreshActivated.addActionListener(this);
@@ -47,6 +52,11 @@ public class IndexConfigPanel implements ActionListener {
 		panel.add(refreshInterval);
 		panel.add(indexPerRefreshLabel);
 		panel.add(indexPerRefresh);
+
+		if (Boolean.valueOf(config.getValue("advancedMode")).booleanValue()) {
+			panel.add(new JLabel(" "));
+			panel.add(loadOnTheFly);
+		}
 
 		updateTextFieldState();
 	}
@@ -74,6 +84,7 @@ public class IndexConfigPanel implements ActionListener {
 		boolean activated = AutoRefresh.DEFAULT_ACTIVATED;
 		int refreshIntervalInt = AutoRefresh.DEFAULT_INTERVAL;
 		int nmbIndexInt = AutoRefresh.DEFAULT_INDEX_NUMBER;
+		boolean loadOnTheFlyBoolean = false;
 
 		try {
 			if (config.getValue("indexAutoRefreshActivated") != null) {
@@ -87,6 +98,12 @@ public class IndexConfigPanel implements ActionListener {
 			if (config.getValue("nmbIndexesPerRefreshInterval") != null) {
 				nmbIndexInt = Integer.parseInt(config.getValue("nmbIndexesPerRefreshInterval"));
 			}
+
+
+			if (config.getValue("loadIndexTreeOnTheFly") != null) {
+				loadOnTheFlyBoolean = Boolean.valueOf(config.getValue("loadIndexTreeOnTheFly")).booleanValue();
+			}
+
 		} catch(NumberFormatException e) {
 			Logger.error(this, "Error while parsing config !");
 		}
@@ -95,6 +112,7 @@ public class IndexConfigPanel implements ActionListener {
 		autorefreshActivated.setSelected(activated);
 		refreshInterval.setText(Integer.toString(refreshIntervalInt));
 		indexPerRefresh.setText(Integer.toString(nmbIndexInt));
+		loadOnTheFly.setSelected(loadOnTheFlyBoolean);
 	}
 
 
@@ -105,6 +123,8 @@ public class IndexConfigPanel implements ActionListener {
 				refreshInterval.getText());
 		config.setValue("nmbIndexesPerRefreshInterval",
 				indexPerRefresh.getText());
+		config.setValue("loadIndexTreeOnTheFly",
+				Boolean.toString(loadOnTheFly.isSelected()));
 	}
 
 	public void actionPerformed(ActionEvent e) {

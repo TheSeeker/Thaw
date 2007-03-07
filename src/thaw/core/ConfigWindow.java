@@ -151,6 +151,10 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		return cancelButton;
 	}
 
+	/**
+	 * Call this function if a change made by the user
+	 * need a connection reset with the plugins reset
+	 */
 	public void willNeedConnectionReset() {
 		needConnectionReset = true;
 	}

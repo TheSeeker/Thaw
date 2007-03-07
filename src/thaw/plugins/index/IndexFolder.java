@@ -33,16 +33,22 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 	private Vector children = null;
 
-	public IndexFolder(final Hsqldb db, final int id) {
+	private boolean loadOnTheFly = true;
+
+
+
+	public IndexFolder(final Hsqldb db, final int id, boolean loadOnTheFly) {
 		this.id = id;
 		this.db = db;
+		this.loadOnTheFly = loadOnTheFly;
 	}
 
 	/**
 	 * @param parentNode only required if in a tree
 	 */
-	public IndexFolder(final Hsqldb db, final int id, TreeNode parentNode, String name) {
-		this(db, id);
+	public IndexFolder(final Hsqldb db, final int id, TreeNode parentNode, String name, boolean loadOnTheFly) {
+		this(db, id, loadOnTheFly);
+
 		this.parentNode = parentNode;
 		this.name = name;
 	}
@@ -58,8 +64,11 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 		while(set.next()) {
 			IndexTreeNode n;
 
-			if (folder)
-				n = new IndexFolder(db, set.getInt("id"), this, set.getString("name"));
+			if (folder) {
+				n = new IndexFolder(db, set.getInt("id"), this, set.getString("name"), loadOnTheFly);
+				if (!loadOnTheFly) /* => load immediatly */
+					((IndexFolder)n).loadChildren();
+			}
 			else
 				n = new Index(db, set.getInt("id"), this, set.getString("publicKey"),
 					      set.getInt("revision"), set.getString("privateKey"),
@@ -321,7 +330,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				if (index)
 					node = new Index(db, target_id);
 				else
-					node = new IndexFolder(db, target_id);
+					node = new IndexFolder(db, target_id, false);
 
 				children.remove(node);
 			}

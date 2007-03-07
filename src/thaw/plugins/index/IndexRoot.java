@@ -12,10 +12,17 @@ public class IndexRoot extends IndexFolder implements IndexTreeNode {
 	private FCPQueueManager queueManager;
 	private IndexBrowserPanel indexBrowser;
 
-	public IndexRoot(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final String name) {
-		super(indexBrowser.getDb(), -1);
+	public IndexRoot(final FCPQueueManager queueManager,
+			 final IndexBrowserPanel indexBrowser,
+			 final String name,
+			 final boolean loadOnTheFly) {
+		super(indexBrowser.getDb(), -1, loadOnTheFly);
+
 		this.queueManager = queueManager;
 		this.indexBrowser = indexBrowser;
+
+		if (!loadOnTheFly) /* anyway loading for this folder will be done immediatly ... :p */
+			loadChildren();
 	}
 
 
