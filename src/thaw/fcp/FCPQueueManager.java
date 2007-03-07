@@ -289,7 +289,8 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 			return false;
 		}
 
-		if(queryA.getFilename().equals(queryB.getFilename())) {
+		if(queryA.getFilename() != null
+		   && queryA.getFilename().equals(queryB.getFilename())) {
 			Logger.debug(this, "isTheSame(): Filename");
 			return true;
 		}

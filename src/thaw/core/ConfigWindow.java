@@ -91,14 +91,14 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	 * Remove them and re-add them.
 	 */
 	private void addTabs() {
-		tabs.remove( thawConfigPanel.getPanel() );
-		tabs.remove( nodeConfigPanel.getPanel() );
-		tabs.remove( pluginConfigPanel.getPanel() );
+		removeTab( thawConfigPanel.getPanel() );
+		removeTab( nodeConfigPanel.getPanel() );
+		removeTab( pluginConfigPanel.getPanel() );
 
-		tabs.add("Thaw", thawConfigPanel.getPanel());
-		tabs.add(I18n.getMessage("thaw.common.node"), nodeConfigPanel.getPanel());
+		addTab("Thaw", thawConfigPanel.getPanel());
+		addTab(I18n.getMessage("thaw.common.node"), IconBox.minConnectAction, nodeConfigPanel.getPanel());
 		if(advancedMode)
-			tabs.add(I18n.getMessage("thaw.common.plugins"), pluginConfigPanel.getPanel());
+			addTab(I18n.getMessage("thaw.common.plugins"), IconBox.minSettings, pluginConfigPanel.getPanel());
 	}
 
 
@@ -115,7 +115,12 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	}
 
 	public boolean addTab(final String name, final java.awt.Component panel) {
-		tabs.add(name, panel);
+		tabs.addTab(name, panel);
+		return true;
+	}
+
+	public boolean addTab(final String name, javax.swing.ImageIcon icon, final java.awt.Component panel) {
+		tabs.addTab(name, icon, panel);
 		return true;
 	}
 
