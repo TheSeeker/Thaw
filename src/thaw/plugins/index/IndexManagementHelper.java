@@ -1,6 +1,7 @@
 package thaw.plugins.index;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -9,16 +10,19 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.Component;
 import java.io.FileOutputStream;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Iterator;
-import java.util.Vector;
-
-import java.util.Observer;
 import java.util.Observable;
+import java.util.Observer;
+import java.util.Vector;
 
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -27,20 +31,18 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextArea;
-import javax.swing.JCheckBox;
 import javax.swing.JTextField;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.MutableTreeNode;
-import java.sql.*;
+import javax.swing.tree.TreeNode;
 
+import thaw.core.Config;
 import thaw.core.FileChooser;
 import thaw.core.FreenetURIHelper;
 import thaw.core.I18n;
 import thaw.core.Logger;
-import thaw.core.Config;
+import thaw.fcp.FCPGenerateSSK;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
-import thaw.fcp.FCPGenerateSSK;
 import thaw.plugins.Hsqldb;
 
 /**

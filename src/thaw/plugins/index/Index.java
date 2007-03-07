@@ -10,10 +10,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Vector;
 import java.util.Enumeration;
-import java.util.Observer;
 import java.util.Observable;
+import java.util.Observer;
+import java.util.Vector;
 
 import javax.swing.JOptionPane;
 import javax.swing.tree.MutableTreeNode;
@@ -34,14 +34,13 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 import thaw.core.FreenetURIHelper;
-import thaw.core.Logger;
 import thaw.core.I18n;
+import thaw.core.Logger;
 import thaw.fcp.FCPClientGet;
 import thaw.fcp.FCPClientPut;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
 import thaw.plugins.Hsqldb;
-
 import thaw.plugins.insertPlugin.DefaultMIMETypes;
 
 

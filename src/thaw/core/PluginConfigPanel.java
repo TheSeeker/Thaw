@@ -4,13 +4,13 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
-import java.util.LinkedHashMap;
 
-import javax.swing.JPanel;
 import javax.swing.JCheckBox;
+import javax.swing.JPanel;
 
 /**
  * PluginConfigPanel. Creates and manages the panel containing all the things to configure

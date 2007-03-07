@@ -1,11 +1,13 @@
 package thaw.plugins.index;
 
-import thaw.core.Logger;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import thaw.core.I18n;
+import thaw.core.Logger;
 import thaw.fcp.FCPQueueManager;
 import thaw.plugins.Hsqldb;
-
-import java.sql.*;
 
 public class IndexRoot extends IndexFolder implements IndexTreeNode {
 

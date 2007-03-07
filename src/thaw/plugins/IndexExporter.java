@@ -1,16 +1,19 @@
 package thaw.plugins;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-
-import javax.swing.JFileChooser;
-
-import thaw.core.*;
-import thaw.plugins.IndexBrowser;
-import thaw.plugins.index.*;
+import thaw.core.Core;
+import thaw.core.FileChooser;
+import thaw.core.I18n;
+import thaw.core.IconBox;
+import thaw.core.Logger;
+import thaw.core.Plugin;
+import thaw.plugins.index.DatabaseManager;
 
 public class IndexExporter implements Plugin, ActionListener {
 

@@ -3,9 +3,9 @@ package thaw.plugins.index;
 import java.util.Observer;
 
 import javax.swing.tree.MutableTreeNode;
-import org.w3c.dom.Element;
-import org.w3c.dom.Document;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import thaw.fcp.FCPQueueManager;
 

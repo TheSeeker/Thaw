@@ -39,8 +39,8 @@ import thaw.core.FileChooser;
 import thaw.core.I18n;
 import thaw.core.IconBox;
 import thaw.core.Logger;
-import thaw.fcp.FCPTransferQuery;
 import thaw.fcp.FCPClientGet;
+import thaw.fcp.FCPTransferQuery;
 import thaw.plugins.QueueWatcher;
 
 

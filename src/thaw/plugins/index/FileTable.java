@@ -1,17 +1,19 @@
 package thaw.plugins.index;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Iterator;
 import java.util.Vector;
 
-import java.awt.Color;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -19,25 +21,22 @@ import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JButton;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
-import java.awt.event.MouseAdapter;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
-
 import thaw.core.Config;
-import thaw.core.I18n;
-import thaw.core.Logger;
-import thaw.core.IconBox;
 import thaw.core.FreenetURIHelper;
-import thaw.plugins.ToolbarModifier;
+import thaw.core.I18n;
+import thaw.core.IconBox;
+import thaw.core.Logger;
 import thaw.fcp.FCPClientGet;
 import thaw.fcp.FCPClientPut;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
+import thaw.plugins.ToolbarModifier;
 
 
 public class FileTable implements MouseListener, KeyListener, ActionListener {

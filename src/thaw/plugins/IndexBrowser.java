@@ -10,11 +10,11 @@ import thaw.core.I18n;
 import thaw.core.IconBox;
 import thaw.core.Logger;
 import thaw.core.Plugin;
-import thaw.plugins.index.IndexBrowserPanel;
-import thaw.plugins.index.IndexManagementHelper;
-import thaw.plugins.index.DatabaseManager;
-import thaw.plugins.index.IndexConfigPanel;
 import thaw.plugins.index.AutoRefresh;
+import thaw.plugins.index.DatabaseManager;
+import thaw.plugins.index.IndexBrowserPanel;
+import thaw.plugins.index.IndexConfigPanel;
+import thaw.plugins.index.IndexManagementHelper;
 
 
 public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListener {

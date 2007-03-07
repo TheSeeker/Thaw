@@ -7,6 +7,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+
 import thaw.fcp.FCPClientHello;
 import thaw.fcp.FCPConnection;
 import thaw.fcp.FCPQueryManager;

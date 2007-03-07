@@ -1,17 +1,17 @@
 package thaw.core;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.Toolkit;
+import java.util.Vector;
 
+import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.ImageIcon;
-import java.util.Vector;
 
 public class SplashScreen {
 	public final static int SIZE_X = 500;

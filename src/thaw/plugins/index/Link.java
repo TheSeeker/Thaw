@@ -3,11 +3,12 @@ package thaw.plugins.index;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import thaw.core.Logger;
 import thaw.core.FreenetURIHelper;
+import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
 
 public class Link extends java.util.Observable {

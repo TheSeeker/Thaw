@@ -1,14 +1,18 @@
 package thaw.plugins.index;
 
-import javax.swing.JPanel;
 import java.awt.GridLayout;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.JCheckBox;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import thaw.core.*;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import thaw.core.Config;
+import thaw.core.ConfigWindow;
+import thaw.core.I18n;
+import thaw.core.Logger;
 
 public class IndexConfigPanel implements ActionListener {
 	private ConfigWindow configWindow;

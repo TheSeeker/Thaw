@@ -6,18 +6,18 @@ import java.awt.event.MouseListener;
 import java.util.Iterator;
 import java.util.Vector;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.JButton;
 
 import thaw.core.I18n;
 import thaw.core.IconBox;
-import thaw.plugins.ToolbarModifier;
 import thaw.fcp.FCPQueueManager;
+import thaw.plugins.ToolbarModifier;
 
 public class UnknownIndexList implements MouseListener {
 	public final static int MAX_INDEXES = 50;

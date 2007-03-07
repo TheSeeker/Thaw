@@ -1,9 +1,15 @@
 package thaw.plugins.index;
 
-import java.sql.*;
-
-import java.io.FileOutputStream;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Iterator;
+import java.util.Vector;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -11,18 +17,16 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import java.util.Vector;
-import java.util.Iterator;
 
-
-import thaw.core.Logger;
 import thaw.core.Config;
+import thaw.core.Logger;
 import thaw.core.SplashScreen;
-import thaw.plugins.Hsqldb;
 import thaw.fcp.FCPQueueManager;
+import thaw.plugins.Hsqldb;
 
 /**
  * Creates all the tables used to save the indexes,

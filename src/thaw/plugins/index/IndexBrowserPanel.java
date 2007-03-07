@@ -1,8 +1,10 @@
 package thaw.plugins.index;
 
 import java.awt.BorderLayout;
+
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+
 import thaw.core.Config;
 import thaw.core.I18n;
 import thaw.core.Logger;

@@ -3,11 +3,12 @@ package thaw.plugins.index;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Observer;
 import java.util.Observable;
+import java.util.Observer;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
 import thaw.core.FreenetURIHelper;
 import thaw.core.Logger;
 import thaw.fcp.FCPClientGet;

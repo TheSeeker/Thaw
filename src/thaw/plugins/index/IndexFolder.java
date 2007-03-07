@@ -6,8 +6,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.Vector;
 import java.util.Observer;
+import java.util.Vector;
+
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 
