@@ -14,14 +14,14 @@ import javax.swing.UIManager.LookAndFeelInfo;
 public class Main {
 
 	public final static int
-		_major  = 0,
-		_minor  = 6,
-	        _update = 3;
+	_major  = 0,
+	_minor  = 6,
+	_update = 3;
 	public final static String
-		_svnBuildNumber = "@custom@";
+	_svnBuildNumber = "@custom@";
 
 	public final static String
-		VERSION = Main._major + "." + Main._minor + "." + Main._update + " Beta r"+Main._svnBuildNumber;
+	VERSION = Main._major + "." + Main._minor + "." + Main._update + " Beta r"+Main._svnBuildNumber;
 
 
 	/**
@@ -39,7 +39,7 @@ public class Main {
 	/**
 	 * Used to start the program
 	 *
- 	 * @param args "-?", "-help", "--help", "/?", "/help", "-lf lookandfeel"
+	 * @param args "-?", "-help", "--help", "/?", "/help", "-lf lookandfeel"
 	 */
 	public static void main(final String[] args) {
 		Core core;
@@ -113,7 +113,6 @@ public class Main {
 		System.out.println("        for the complete list");
 
 		System.exit(0);
-
 	}
 
 
