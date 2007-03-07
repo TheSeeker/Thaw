@@ -86,7 +86,7 @@ public class PluginManager {
 			final String pluginName = (String)pluginIt.next();
 
 			core.getSplashScreen().setProgressionAndStatus(core.getSplashScreen().getProgression()+progressJump,
-								       "Loading plugin '"+pluginName+"' ...");
+								       "Loading plugin '"+pluginName.replaceFirst("thaw.plugins.", "")+"' ...");
 
 			loadPlugin(pluginName);
 		}
@@ -119,7 +119,7 @@ public class PluginManager {
 					Logger.info(this, "Running plugin '"+plugin.getClass().getName()+"'");
 
 					core.getSplashScreen().setProgressionAndStatus(core.getSplashScreen().getProgression()+progressJump,
-											    "Starting plugin '"+plugin.getClass().getName()+"' ...");
+											    "Starting plugin '"+plugin.getClass().getName().replaceFirst("thaw.plugins.", "")+"' ...");
 
 					javax.swing.ImageIcon icon = null;
 
