@@ -19,6 +19,7 @@ public class PluginManager {
 	};
 
 	private final static String[] knownPlugins = {
+		"thaw.plugins.PeerMonitor",
 		"thaw.plugins.QueueWatcher",
 		"thaw.plugins.FetchPlugin",
 		"thaw.plugins.InsertPlugin",

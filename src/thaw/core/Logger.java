@@ -22,7 +22,7 @@ public class Logger {
 	 * 2 or more is recommanded.
 	 * 4 or more is unhealthy
 	 */
-	public final static int LOG_LEVEL = 2;
+	public final static int LOG_LEVEL = 5;
 
 	private static Vector logListeners = null;
 

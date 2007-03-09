@@ -73,6 +73,10 @@ public class IconBox {
 	public static ImageIcon queueWatcher;
 	public static ImageIcon importExport;
 
+	public static ImageIcon peerMonitor;
+	public static ImageIcon minPeerMonitor;
+
+
 	public static ImageIcon minImportAction;
 	public static ImageIcon minExportAction;
 
@@ -114,48 +118,51 @@ public class IconBox {
 		return new ImageIcon(url);
 	}
 
+
 	public static void loadIcons() {
-		IconBox.blueBunny = IconBox.loadIcon("blueBunny.png");
-		IconBox.connectAction = IconBox.loadIcon("connect.png");
-		IconBox.minConnectAction = IconBox.loadIcon("min-connect.png");
-		IconBox.disconnectAction = IconBox.loadIcon("disconnect.png");
-		IconBox.queue = IconBox.loadIcon("connect.png");
-		IconBox.minQueue = IconBox.loadIcon("min-connect.png");
-		IconBox.insertions = IconBox.loadIcon("insertion.png");
-		IconBox.minInsertions = IconBox.loadIcon("min-insertion.png");
-		IconBox.minIndex = IconBox.loadIcon("min-index.png");
-		IconBox.minIndexReadOnly = IconBox.loadIcon("min-indexReadOnly.png");
-		IconBox.indexNew = IconBox.loadIcon("index-new.png");
-		IconBox.indexReuse = IconBox.loadIcon("indexReadOnly.png");
-		IconBox.downloads = IconBox.loadIcon("download.png");
-		IconBox.minDownloads = IconBox.loadIcon("min-download.png");
-		IconBox.settings = IconBox.loadIcon("settings.png");
-		IconBox.minSettings = IconBox.loadIcon("min-settings.png");
-		IconBox.indexBrowser = IconBox.loadIcon("index.png");
-		IconBox.minIndexBrowser = IconBox.loadIcon("min-index.png");
-		IconBox.addToIndexAction = IconBox.loadIcon("add.png");
-		IconBox.add = IconBox.loadIcon("add.png");
+		IconBox.blueBunny          = IconBox.loadIcon("blueBunny.png");
+		IconBox.connectAction      = IconBox.loadIcon("connect.png");
+		IconBox.minConnectAction   = IconBox.loadIcon("min-connect.png");
+		IconBox.disconnectAction   = IconBox.loadIcon("disconnect.png");
+		IconBox.queue              = IconBox.loadIcon("connect.png");
+		IconBox.minQueue           = IconBox.loadIcon("min-connect.png");
+		IconBox.insertions         = IconBox.loadIcon("insertion.png");
+		IconBox.minInsertions      = IconBox.loadIcon("min-insertion.png");
+		IconBox.minIndex           = IconBox.loadIcon("min-index.png");
+		IconBox.minIndexReadOnly   = IconBox.loadIcon("min-indexReadOnly.png");
+		IconBox.indexNew           = IconBox.loadIcon("index-new.png");
+		IconBox.indexReuse         = IconBox.loadIcon("indexReadOnly.png");
+		IconBox.downloads          = IconBox.loadIcon("download.png");
+		IconBox.minDownloads       = IconBox.loadIcon("min-download.png");
+		IconBox.settings           = IconBox.loadIcon("settings.png");
+		IconBox.minSettings        = IconBox.loadIcon("min-settings.png");
+		IconBox.indexBrowser       = IconBox.loadIcon("index.png");
+		IconBox.minIndexBrowser    = IconBox.loadIcon("min-index.png");
+		IconBox.addToIndexAction   = IconBox.loadIcon("add.png");
+		IconBox.add                = IconBox.loadIcon("add.png");
 		IconBox.insertAndAddToIndexAction = IconBox.loadIcon("index.png");
-		IconBox.makeALinkAction = IconBox.loadIcon("makeLink.png");
-		IconBox.reconnectAction = IconBox.loadIcon("refresh.png");
+		IconBox.makeALinkAction    = IconBox.loadIcon("makeLink.png");
+		IconBox.reconnectAction    = IconBox.loadIcon("refresh.png");
 		IconBox.minReconnectAction = IconBox.loadIcon("min-refresh.png");
-		IconBox.refreshAction = IconBox.loadIcon("refresh.png");
-		IconBox.quitAction = IconBox.loadIcon("quit.png");
-		IconBox.minQuitAction = IconBox.loadIcon("min-quit.png");
-		IconBox.key = IconBox.loadIcon("key.png");
-		IconBox.delete = IconBox.loadIcon("delete.png");
-		IconBox.folderNew = IconBox.loadIcon("folder-new.png");
-		IconBox.help = IconBox.loadIcon("help.png");
-		IconBox.minHelp = IconBox.loadIcon("min-help.png");
-		IconBox.mainWindow = IconBox.loadIcon("mainWindow.png");
-		IconBox.terminal = IconBox.loadIcon("terminal.png");
-		IconBox.minTerminal = IconBox.loadIcon("min-terminal.png");
-		IconBox.remove = IconBox.loadIcon("remove.png");
-		IconBox.queueWatcher = IconBox.loadIcon("queueWatcher.png");
-		IconBox.importExport = IconBox.loadIcon("refresh.png");
-		IconBox.minImportAction = IconBox.loadIcon("min-import.png");
-		IconBox.minExportAction = IconBox.loadIcon("min-export.png");
-		IconBox.database = IconBox.loadIcon("database.png");
+		IconBox.refreshAction      = IconBox.loadIcon("refresh.png");
+		IconBox.quitAction         = IconBox.loadIcon("quit.png");
+		IconBox.minQuitAction      = IconBox.loadIcon("min-quit.png");
+		IconBox.key                = IconBox.loadIcon("key.png");
+		IconBox.delete             = IconBox.loadIcon("delete.png");
+		IconBox.folderNew          = IconBox.loadIcon("folder-new.png");
+		IconBox.help               = IconBox.loadIcon("help.png");
+		IconBox.minHelp            = IconBox.loadIcon("min-help.png");
+		IconBox.mainWindow         = IconBox.loadIcon("mainWindow.png");
+		IconBox.terminal           = IconBox.loadIcon("terminal.png");
+		IconBox.minTerminal        = IconBox.loadIcon("min-terminal.png");
+		IconBox.remove             = IconBox.loadIcon("remove.png");
+		IconBox.queueWatcher       = IconBox.loadIcon("queueWatcher.png");
+		IconBox.importExport       = IconBox.loadIcon("refresh.png");
+		IconBox.minImportAction    = IconBox.loadIcon("min-import.png");
+		IconBox.minExportAction    = IconBox.loadIcon("min-export.png");
+		IconBox.database           = IconBox.loadIcon("database.png");
+		IconBox.minPeerMonitor     = IconBox.loadIcon("min-peerMonitor.png");
+		IconBox.peerMonitor        = IconBox.loadIcon("peerMonitor.png");
 	}
 
 }

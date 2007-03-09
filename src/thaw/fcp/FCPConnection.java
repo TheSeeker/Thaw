@@ -14,12 +14,12 @@ import thaw.core.Logger;
  * After being instanciated, you should commit it to the FCPQueryManager, and then
  * commit the FCPQueryManager to the FCPQueueManager.
  * Call observer when connected / disconnected.<br/>
- * WARNING: This FCP implement don't guarantee that messages are sent in the same order than initally put
+ * WARNING: This FCP implementation doesn't guarantee that messages are sent in the same order than initally put
  *          if the lock on writting is not set !<br/>
- * TODO: Add functions socketToStream(long size, OutputStream file) / streamToSocket(InputStream file)
  */
 public class FCPConnection extends Observable {
-	/** If == true, then will print on stdout
+	/**
+	 * If == true, then will print on stdout
 	 * all fcp input / output.
 	 */
 	private final static boolean DEBUG_MODE = true;

@@ -255,7 +255,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 		status = "Waiting for socket availability";
 
-		Logger.info(this, "Another file is being uploaded ... waiting ...");
+		Logger.info(this, "Waiting for socket availability ...");
 
 		final Thread fork = new Thread(new UnlockWaiter(this, connection));
 

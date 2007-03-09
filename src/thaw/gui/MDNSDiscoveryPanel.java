@@ -12,7 +12,8 @@ import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
 import javax.swing.DefaultListModel;
-import javax.swing.GroupLayout;
+import java.awt.GridLayout;
+import java.awt.BorderLayout;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -27,17 +28,17 @@ import thaw.fcp.FCPConnection;
 
 /**
  * This panel implements Zeroconf (called Bonjour/RendezVous by apple) discovery for Thaw
- * 
+ *
  * WARNING: for it to work, you must have a running freenet node on the same network subnet, using the MDNSDiscovery panel
- * 
+ *
  * @author Florent Daigni&egrave;re &lt;nextgens@freenetproject.org&gt;
  *
  * @see http://wiki.freenetproject.org/MDNSDiscoverypanel
- *  
+ *
  * @see http://www.dns-sd.org/ServiceTypes.html
  * @see http://www.multicastdns.org/
- * @see http://jmdns.sourceforge.net/ 
- * 
+ * @see http://jmdns.sourceforge.net/
+ *
  * TODO: implement the "Manual" mode
  * TODO: maybe we should have a small progressbar shown in a new popup to introduce a "delay" at startup
  */
@@ -74,7 +75,7 @@ public class MDNSDiscoveryPanel extends JFrame implements ListSelectionListener 
 			throw new RuntimeException("Error loading MDNSDiscoveryPanel : " + e.getMessage());
 		}
 
-		// The UI		
+		// The UI
 		panel = new JScrollPane();
 		progressBar = new JProgressBar(0, 30);
 		list = new JList();
@@ -87,33 +88,14 @@ public class MDNSDiscoveryPanel extends JFrame implements ListSelectionListener 
 		list.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 		list.addListSelectionListener(this);
 
-		panel.setViewportView(list);
-
 		label.setText("Select the freenet node you want to connect to from the list below :");
 
-		panel.add(progressBar);
+		panel.setLayout(new BorderLayout());
+		panel.add(label, BorderLayout.NORTH);
+		panel.add(list, BorderLayout.CENTER);
+		panel.add(progressBar, BorderLayout.SOUTH);
 
-		GroupLayout layout = new GroupLayout(this.getContentPane());
-
-		getContentPane().setLayout(layout);
-		layout.setHorizontalGroup(
-				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-				.addGroup(layout.createSequentialGroup()
-						.addContainerGap()
-						.addComponent(label, GroupLayout.PREFERRED_SIZE, 430, GroupLayout.PREFERRED_SIZE))
-						.addGroup(layout.createSequentialGroup()
-								.addGap(36, 36, 36)
-								.addComponent(panel, GroupLayout.PREFERRED_SIZE, 380, GroupLayout.PREFERRED_SIZE))
-		);
-		layout.setVerticalGroup(
-				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-				.addGroup(layout.createSequentialGroup()
-						.addGap(7, 7, 7)
-						.addComponent(label)
-						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-						.addComponent(panel, GroupLayout.PREFERRED_SIZE, 70, GroupLayout.PREFERRED_SIZE)
-						.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-		);
+		setContentPane(panel);
 
 		pack();
 		super.setAlwaysOnTop(true);
@@ -124,6 +106,7 @@ public class MDNSDiscoveryPanel extends JFrame implements ListSelectionListener 
 
 		Logger.notice(this, "The configuration file doesn't seems to be valid... MDNSDiscovery is starting!");
 	}
+
 
 	private class FCPMDNSListener implements ServiceListener {
 		private final MDNSDiscoveryPanel panel;
@@ -190,7 +173,7 @@ public class MDNSDiscoveryPanel extends JFrame implements ListSelectionListener 
 			while(goon) {
 				try {
 					synchronized (this) {
-						wait(Long.MAX_VALUE);	
+						wait(Long.MAX_VALUE);
 					}
 				} catch (InterruptedException e) {}
 

@@ -228,9 +228,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		queueManager.getQueryManager().deleteObserver(this);
 		queueManager.getQueryManager().addObserver(this);
 
-		queueManager.getQueryManager().writeMessage(queryMessage);
-
-		return true;
+		return queueManager.getQueryManager().writeMessage(queryMessage);
 	}
 
 
