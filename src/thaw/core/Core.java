@@ -14,7 +14,6 @@ import thaw.fcp.FCPQueryManager;
 import thaw.fcp.FCPQueueLoader;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPWatchGlobal;
-import thaw.core.gui.MDNSDiscoveryPanel;
 
 import thaw.gui.IconBox;
 

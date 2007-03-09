@@ -2,7 +2,7 @@
  * Public License, version 2 (or at your option any later version). See
  * http://www.gnu.org/ for further details of the GPL. */
 
-package thaw.core.gui;
+package thaw.core;
 
 import java.io.IOException;
 import java.util.HashMap;
