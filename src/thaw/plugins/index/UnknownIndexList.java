@@ -15,7 +15,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 
 import thaw.core.I18n;
-import thaw.core.IconBox;
+import thaw.gui.IconBox;
 import thaw.fcp.FCPQueueManager;
 import thaw.plugins.ToolbarModifier;
 

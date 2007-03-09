@@ -22,7 +22,7 @@ import javax.swing.JTextField;
 
 import thaw.core.Core;
 import thaw.core.FileChooser;
-import thaw.core.GUIHelper;
+import thaw.gui.GUIHelper;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.WarningWindow;

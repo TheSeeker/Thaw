@@ -127,7 +127,7 @@ public class PluginManager {
 					if ((icon = plugin.getIcon()) != null)
 						core.getSplashScreen().addIcon(icon);
 					else
-						core.getSplashScreen().addIcon(IconBox.add);
+						core.getSplashScreen().addIcon(thaw.gui.IconBox.add);
 
 					plugin.run(core);
 				}

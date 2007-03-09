@@ -7,7 +7,7 @@ import javax.swing.event.ChangeListener;
 
 import thaw.core.Core;
 import thaw.core.I18n;
-import thaw.core.IconBox;
+import thaw.gui.IconBox;
 import thaw.core.Logger;
 import thaw.core.Plugin;
 import thaw.plugins.index.AutoRefresh;
@@ -142,6 +142,6 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 	}
 
 	public javax.swing.ImageIcon getIcon() {
-		return thaw.core.IconBox.indexBrowser;
+		return thaw.gui.IconBox.indexBrowser;
 	}
 }

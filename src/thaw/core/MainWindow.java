@@ -20,6 +20,9 @@ import javax.swing.JToolBar;
 import javax.swing.WindowConstants;
 
 
+import thaw.gui.IconBox;
+
+
 /**
  * MainWindow. This class create the main window.
  *

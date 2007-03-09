@@ -37,7 +37,7 @@ import javax.swing.table.JTableHeader;
 import thaw.core.Core;
 import thaw.core.FileChooser;
 import thaw.core.I18n;
-import thaw.core.IconBox;
+import thaw.gui.IconBox;
 import thaw.core.Logger;
 import thaw.fcp.FCPClientGet;
 import thaw.fcp.FCPTransferQuery;

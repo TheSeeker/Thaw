@@ -1,4 +1,4 @@
-package thaw.core;
+package thaw.gui;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -9,6 +9,8 @@ import java.awt.event.ActionListener;
 
 import javax.swing.AbstractButton;
 import javax.swing.text.JTextComponent;
+
+import thaw.core.Logger;
 
 public class GUIHelper {
 

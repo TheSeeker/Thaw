@@ -11,7 +11,7 @@ import javax.swing.WindowConstants;
 import thaw.core.Core;
 import thaw.core.FreenetURIHelper;
 import thaw.core.I18n;
-import thaw.core.IconBox;
+import thaw.gui.IconBox;
 import thaw.core.Logger;
 import thaw.fcp.FCPClientGet;
 import thaw.plugins.fetchPlugin.FetchPanel;
@@ -146,6 +146,6 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 
 
 	public javax.swing.ImageIcon getIcon() {
-		return thaw.core.IconBox.downloads;
+		return thaw.gui.IconBox.downloads;
 	}
 }

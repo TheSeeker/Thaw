@@ -12,7 +12,7 @@ import javax.swing.WindowConstants;
 
 import thaw.core.Core;
 import thaw.core.I18n;
-import thaw.core.IconBox;
+import thaw.gui.IconBox;
 import thaw.core.Logger;
 import thaw.core.WarningWindow;
 import thaw.fcp.FCPClientPut;
@@ -160,6 +160,6 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 	}
 
 	public javax.swing.ImageIcon getIcon() {
-		return thaw.core.IconBox.insertions;
+		return thaw.gui.IconBox.insertions;
 	}
 }

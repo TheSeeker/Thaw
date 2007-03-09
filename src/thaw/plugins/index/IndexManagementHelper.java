@@ -330,7 +330,7 @@ public class IndexManagementHelper {
 			popupMenuA = new JPopupMenu();
 			JMenuItem item = new JMenuItem(I18n.getMessage("thaw.common.paste"));
 			popupMenuA.add(item);
-			new thaw.core.GUIHelper.PasteHelper(item, publicKeyField);
+			new thaw.gui.GUIHelper.PasteHelper(item, publicKeyField);
 			publicKeyField.addMouseListener(this);
 
 			if (askPrivateKey) {
@@ -340,7 +340,7 @@ public class IndexManagementHelper {
 				popupMenuB = new JPopupMenu();
 				item = new JMenuItem(I18n.getMessage("thaw.common.paste"));
 				popupMenuB.add(item);
-				new thaw.core.GUIHelper.PasteHelper(item, privateKeyField);
+				new thaw.gui.GUIHelper.PasteHelper(item, privateKeyField);
 				privateKeyField.addMouseListener(this);
 			}
 
@@ -1250,7 +1250,7 @@ public class IndexManagementHelper {
 			final JMenuItem item = new JMenuItem(I18n.getMessage("thaw.common.paste"));
 			popupMenu.add(item);
 			textArea.addMouseListener(this);
-			new thaw.core.GUIHelper.PasteHelper(item, textArea);
+			new thaw.gui.GUIHelper.PasteHelper(item, textArea);
 
 			cancelButton.addActionListener(this);
 			okButton.addActionListener(this);

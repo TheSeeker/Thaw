@@ -10,7 +10,7 @@ import javax.swing.JMenuItem;
 import thaw.core.Core;
 import thaw.core.FileChooser;
 import thaw.core.I18n;
-import thaw.core.IconBox;
+import thaw.gui.IconBox;
 import thaw.core.Logger;
 import thaw.core.Plugin;
 import thaw.plugins.index.DatabaseManager;

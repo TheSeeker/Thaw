@@ -68,7 +68,7 @@ public class IndexConfigPanel implements ActionListener {
 
 	public void addTab() {
 		configWindow.addTab(I18n.getMessage("thaw.plugin.index.indexes"),
-				    thaw.core.IconBox.minIndex,
+				    thaw.gui.IconBox.minIndex,
 				    panel);
 	}
 

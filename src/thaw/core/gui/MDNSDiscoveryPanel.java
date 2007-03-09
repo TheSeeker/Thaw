@@ -2,7 +2,7 @@
  * Public License, version 2 (or at your option any later version). See
  * http://www.gnu.org/ for further details of the GPL. */
 
-package thaw.gui;
+package thaw.core.gui;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -98,7 +98,7 @@ public class MDNSDiscoveryPanel extends JFrame implements ListSelectionListener 
 		setContentPane(panel);
 
 		pack();
-		super.setAlwaysOnTop(true);
+
 		super.setLocationRelativeTo(this.getParent());
 		this.setTitle("ZeroConf discovery plugin... Please hold on");
 		this.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);

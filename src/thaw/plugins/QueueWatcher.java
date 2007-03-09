@@ -14,7 +14,7 @@ import javax.swing.event.ChangeListener;
 
 import thaw.core.Core;
 import thaw.core.I18n;
-import thaw.core.IconBox;
+import thaw.gui.IconBox;
 import thaw.core.Logger;
 import thaw.core.MainWindow;
 import thaw.fcp.FCPTransferQuery;
@@ -248,6 +248,6 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 
 
 	public javax.swing.ImageIcon getIcon() {
-		return thaw.core.IconBox.queueWatcher;
+		return thaw.gui.IconBox.queueWatcher;
 	}
 }

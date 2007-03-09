@@ -67,7 +67,7 @@ public class LogConsole implements Plugin, LogListener, ActionListener, Runnable
 		consolePanel.add(logAreaScrollPane, BorderLayout.CENTER);
 		consolePanel.add(saveToFile, BorderLayout.SOUTH);
 
-		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.console.console"), thaw.core.IconBox.minTerminal, consolePanel);
+		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.console.console"), thaw.gui.IconBox.minTerminal, consolePanel);
 
 		Logger.addLogListener(this);
 
@@ -203,6 +203,6 @@ public class LogConsole implements Plugin, LogListener, ActionListener, Runnable
 
 
 	public javax.swing.ImageIcon getIcon() {
-		return thaw.core.IconBox.terminal;
+		return thaw.gui.IconBox.terminal;
 	}
 }

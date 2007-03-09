@@ -14,7 +14,9 @@ import thaw.fcp.FCPQueryManager;
 import thaw.fcp.FCPQueueLoader;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPWatchGlobal;
-import thaw.gui.MDNSDiscoveryPanel;
+import thaw.core.gui.MDNSDiscoveryPanel;
+
+import thaw.gui.IconBox;
 
 /**
  * A "core" contains references to all the main parts of Thaw.
@@ -144,7 +146,7 @@ public class Core implements Observer {
 			config.setDefaultValues();
 			new MDNSDiscoveryPanel(config).run();
 		}
-		
+
 		return true;
 	}
 

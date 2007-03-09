@@ -109,6 +109,6 @@ public class Hsqldb extends LibraryPlugin {
 	}
 
 	public javax.swing.ImageIcon getIcon() {
-		return thaw.core.IconBox.database;
+		return thaw.gui.IconBox.database;
 	}
 }

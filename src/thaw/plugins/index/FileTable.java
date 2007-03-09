@@ -30,7 +30,7 @@ import javax.swing.table.TableColumnModel;
 import thaw.core.Config;
 import thaw.core.FreenetURIHelper;
 import thaw.core.I18n;
-import thaw.core.IconBox;
+import thaw.gui.IconBox;
 import thaw.core.Logger;
 import thaw.fcp.FCPClientGet;
 import thaw.fcp.FCPClientPut;

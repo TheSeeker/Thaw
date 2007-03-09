@@ -1,8 +1,11 @@
-package thaw.core;
+package thaw.gui;
 
 import java.net.URL;
 
 import javax.swing.ImageIcon;
+
+import thaw.core.Logger;
+
 
 /**
  * This class is simply an helper to find and load quickly some common icons.
