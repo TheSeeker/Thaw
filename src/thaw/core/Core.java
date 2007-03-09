@@ -14,6 +14,7 @@ import thaw.fcp.FCPQueryManager;
 import thaw.fcp.FCPQueueLoader;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPWatchGlobal;
+import thaw.gui.MDNSDiscoveryPanel;
 
 /**
  * A "core" contains references to all the main parts of Thaw.
@@ -138,11 +139,12 @@ public class Core implements Observer {
 	 */
 	public boolean initConfig() {
 		config = new Config(Config.CONFIG_FILE_NAME);
-		
-		// FIXME: awfull hack to set default values if necessary. Maybe the freenet's config framework should be borrowed ;)
-		config.loadConfig();
-		config.setDefaultValues();
 
+		if(!config.loadConfig()){
+			config.setDefaultValues();
+			new MDNSDiscoveryPanel(config).run();
+		}
+		
 		return true;
 	}
 

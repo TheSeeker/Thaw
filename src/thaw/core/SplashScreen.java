@@ -92,7 +92,7 @@ public class SplashScreen {
 	}
 
 	/**
-	 * @param progress In pourcent
+	 * @param progress In percent
 	 */
 	public void setProgression(final int progress) {
 		if(progressBar != null && splashScreen != null) {

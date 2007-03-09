@@ -9,7 +9,12 @@
 	<property name="javadoc.dir" value="javadoc" />
 	<property name="javac.debug" value="false" />
 	<property name="svn.revision" value="@custom@"/>
-
+	
+	<property name="jmdns.location" value="${lib.dir}/jmdns.jar" />
+	<available file="${jmdns.location}" property="jmdns_available" />
+	<fail unless="jmdns_available" status="1"
+	message="You need to download jmdns.jar from http://sourceforge.net/projects/jmdns/ and to put it in lib/" />
+	
 	<property name="hsqldb.location" value="${lib.dir}/hsqldb.jar" />
 	<available file="${hsqldb.location}" property="hsqldb_available" />
 	<fail unless="hsqldb_available" status="1"
@@ -27,6 +32,7 @@
 
 			<!-- <compilerarg value="-Xlint" /> -->
 			<classpath>
+				<pathelement location="${jmdns.location}"/>
 				<pathelement location="${hsqldb.location}"/>
 			</classpath>
 		</javac>
@@ -56,6 +62,7 @@
 
 			<fileset dir="${bin.dir}"/>
 			<ZipFileSet src="${hsqldb.location}"/>
+			<ZipFileSet src="${jmdns.location}"/>
 		</jar>
 	</target>
 
