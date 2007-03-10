@@ -14,13 +14,16 @@ import javax.jmdns.ServiceListener;
 import javax.swing.DefaultListModel;
 import java.awt.GridLayout;
 import java.awt.BorderLayout;
+import javax.swing.JPanel;
 import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.JButton;
 
 import thaw.core.Config;
 import thaw.core.Logger;
@@ -42,16 +45,15 @@ import thaw.fcp.FCPConnection;
  * TODO: implement the "Manual" mode
  * TODO: maybe we should have a small progressbar shown in a new popup to introduce a "delay" at startup
  */
-public class MDNSDiscoveryPanel extends JFrame implements ListSelectionListener {
+public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runnable {
 	private static final long serialVersionUID = 1L;
 
 	private static final String FCP_SERVICE_TYPE = "_fcp._tcp.local.";
 
 	private boolean goon = true;
+	private boolean validated = false;
 	private ServiceInfo selectedValue;
 
-	private final JScrollPane panel;
-	private final JProgressBar progressBar;
 	private final JList list;
 	private final DefaultListModel listModel;
 	private final JLabel label;
@@ -60,7 +62,14 @@ public class MDNSDiscoveryPanel extends JFrame implements ListSelectionListener 
 	private final HashMap foundNodes;
 	private final JmDNS jmdns;
 
-	public MDNSDiscoveryPanel(Config conf) {
+	private JButton okButton;
+	private JButton cancelButton;
+
+
+	public MDNSDiscoveryPanel(java.awt.Dialog owner, Config conf) {
+		super(owner, "ZeroConf");
+
+
 		this.config = conf;
 		this.foundNodes = new HashMap();
 		try {
@@ -76,35 +85,41 @@ public class MDNSDiscoveryPanel extends JFrame implements ListSelectionListener 
 		}
 
 		// The UI
-		panel = new JScrollPane();
-		progressBar = new JProgressBar(0, 30);
 		list = new JList();
 		listModel = new DefaultListModel();
 		label = new JLabel();
 
-		listModel.addElement("Manual configuration (not recommended) : NotYetImplemented ;)");
-
 		list.setModel(listModel);
 		list.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-		list.addListSelectionListener(this);
 
-		label.setText("Select the freenet node you want to connect to from the list below :");
+		label.setText(I18n.getMessage("thaw.zeroconf.searchingNode")
+			      +" ; "+
+			      I18n.getMessage("thaw.zeroconf.nodeList"));
 
-		panel.setLayout(new BorderLayout());
-		panel.add(label, BorderLayout.NORTH);
-		panel.add(list, BorderLayout.CENTER);
-		panel.add(progressBar, BorderLayout.SOUTH);
+		getContentPane().setLayout(new BorderLayout());
+		getContentPane().add(label, BorderLayout.NORTH);
+		getContentPane().add(new JScrollPane(list), BorderLayout.CENTER);
 
-		setContentPane(panel);
+		okButton = new JButton(I18n.getMessage("thaw.common.ok"));
+		cancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
+
+		okButton.addActionListener(this);
+		cancelButton.addActionListener(this);
+
+		JPanel buttonPanel = new JPanel(new GridLayout(1, 2));
+		buttonPanel.add(okButton);
+		buttonPanel.add(cancelButton);
+
+		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+
 
 		pack();
 
 		super.setLocationRelativeTo(this.getParent());
-		this.setTitle("ZeroConf discovery plugin... Please hold on");
-		this.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
 		this.setVisible(true);
 
-		Logger.notice(this, "The configuration file doesn't seems to be valid... MDNSDiscovery is starting!");
+		Logger.notice(this, "Starting MDNSDiscovery");
 	}
 
 
@@ -147,17 +162,18 @@ public class MDNSDiscoveryPanel extends JFrame implements ListSelectionListener 
 	/**
 	 * The user has selected something: notify the main loop and process the data.
 	 */
-	public void valueChanged(ListSelectionEvent e) {
-		if (e.getValueIsAdjusting() == false) {
-			if(list.getSelectedValue() == null) return; // Ignore the user if he clicks nowhere
+	public void actionPerformed(ActionEvent e) {
+		synchronized (this) {
+			selectedValue = (ServiceInfo) foundNodes.get(list.getSelectedValue());
+			goon = false;
 
-			synchronized (this) {
-				selectedValue = (ServiceInfo) foundNodes.get(list.getSelectedValue());
-				goon = false;
-				notify();
-			}
-			Logger.debug(this, "User has selected : "+foundNodes.get(list.getSelectedValue()));
+			validated = (e.getSource() == okButton);
+
+			notify();
 		}
+		Logger.debug(this, "User has selected : "+foundNodes.get(list.getSelectedValue()));
+
+		setVisible(false);
 	}
 
 	/**
@@ -180,7 +196,9 @@ public class MDNSDiscoveryPanel extends JFrame implements ListSelectionListener 
 				list.repaint();
 			}
 
-			if(selectedValue == null) continue; // TODO: implement the "manual" popup there
+			if(selectedValue == null
+			   || !validated)
+				continue;
 
 			Logger.debug(this, "We got something from the UI : let's try to connect");
 
@@ -217,7 +235,7 @@ public class MDNSDiscoveryPanel extends JFrame implements ListSelectionListener 
 	 * Convenient testing function function.
 	 */
 	public static void main(String[] args) {
-		new MDNSDiscoveryPanel(new Config("/tmp/conf.ini")).run();
+		new MDNSDiscoveryPanel(null, new Config("/tmp/conf.ini")).run();
 		System.exit(0);
 	}
 }

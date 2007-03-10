@@ -1,6 +1,7 @@
 package thaw.core;
 
 import java.awt.GridLayout;
+import java.awt.BorderLayout;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -8,12 +9,13 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.JButton;
 
 /**
  * NodeConfigPanel. Creates and manages the panel containing all the things to configure
  *  the settings to access the node.
  */
-public class NodeConfigPanel implements Observer {
+public class NodeConfigPanel implements Observer, java.awt.event.ActionListener {
 	private Core core;
 	private JPanel nodeConfigPanel = null;
 
@@ -36,6 +38,8 @@ public class NodeConfigPanel implements Observer {
 		"thawId"
 	};
 
+	private JButton autodetect;
+
 	/**
 	 * a check is done on the first value, be warned
 	 */
@@ -49,6 +53,7 @@ public class NodeConfigPanel implements Observer {
 
 	private JCheckBox multipleSockets = null;
 	private JCheckBox sameComputer = null; /* if thaw and the node are on the same computer */
+
 
 	public NodeConfigPanel(final ConfigWindow configWindow, final Core core) {
 		this.core = core;
@@ -72,7 +77,20 @@ public class NodeConfigPanel implements Observer {
 			NodeConfigPanel.currentValues[i] = value;
 
 			nodeConfigPanel.add(paramLabels[i]);
-			nodeConfigPanel.add(paramFields[i]);
+
+			if (i != 0) {
+				nodeConfigPanel.add(paramFields[i]);
+			} else {
+				/* autodetection button ! :) */
+				autodetect = new JButton(I18n.getMessage("thaw.common.autodetect"));
+				autodetect.addActionListener(this);
+
+				JPanel sub = new JPanel(new BorderLayout());
+				sub.add(paramFields[i], BorderLayout.CENTER);
+				sub.add(autodetect, BorderLayout.EAST);
+
+				nodeConfigPanel.add(sub);
+			}
 
 			if (i == 0) { /* just after the node address */
 				nodeConfigPanel.add(sameComputer);
@@ -152,16 +170,41 @@ public class NodeConfigPanel implements Observer {
 
 
 		if(arg == core.getConfigWindow().getCancelButton()) {
-			for(int i=0;i < NodeConfigPanel.paramNames.length;i++) {
-				String value;
+			resetValues();
+		}
+	}
 
-				if( (value = core.getConfig().getValue(NodeConfigPanel.configNames[i])) == null)
-					value = "";
 
-				paramFields[i].setText(value);
-			}
+	public void resetValues() {
+		for(int i=0;i < NodeConfigPanel.paramNames.length;i++) {
+			String value;
 
-			multipleSockets.setSelected(Boolean.valueOf(core.getConfig().getValue("multipleSockets")).booleanValue());
+			if( (value = core.getConfig().getValue(NodeConfigPanel.configNames[i])) == null)
+				value = "";
+
+			paramFields[i].setText(value);
+		}
+
+		multipleSockets.setSelected(Boolean.valueOf(core.getConfig().getValue("multipleSockets")).booleanValue());
+	}
+
+
+
+	protected class MDNSDiscovery implements Runnable {
+		public MDNSDiscovery() { }
+
+		public void run() {
+			(new MDNSDiscoveryPanel(core.getConfigWindow().getFrame(), core.getConfig())).run();
+			resetValues();
+		}
+	}
+
+
+
+	public void actionPerformed(java.awt.event.ActionEvent event) {
+		if (event.getSource() == autodetect) {
+			Thread th = new Thread(new NodeConfigPanel.MDNSDiscovery());
+			th.start();
 		}
 	}
 

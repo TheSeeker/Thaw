@@ -78,7 +78,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		tabs.setSize(600, 360);
 		okButton.setSize(100, 40);
 
-		configWin.setSize(600, 400);
+		configWin.setSize(600, 450);
 		configWin.setResizable(false);
 
 		okButton.addActionListener(this);

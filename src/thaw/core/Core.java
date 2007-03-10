@@ -143,7 +143,6 @@ public class Core implements Observer {
 
 		if(!config.loadConfig()){
 			config.setDefaultValues();
-			new MDNSDiscoveryPanel(config).run();
 		}
 
 		return true;
