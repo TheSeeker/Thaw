@@ -90,28 +90,6 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 
 
-	public static String getPrintableSize(final long size) {
-		if(size == 0)
-			return I18n.getMessage("thaw.common.unknown");
-
-		if(size < 1024) /* < 1KB */
-			return ((new Long(size)).toString() + " B");
-
-		if(size < 1048576) { /* < 1MB */
-			final long kb = size / 1024;
-			return ((new Long(kb)).toString() + " KB");
-		}
-
-		if(size < 1073741824) { /* < 1GB */
-			final long mb = size / 1048576;
-			return ((new Long(mb)).toString() + " MB");
-		}
-
-		final long gb = size / 1073741824;
-
-		return ((new Long(gb)).toString() +" GB");
-	}
-
 	public Object getValueAt(final int row, final int column) {
 		if(row >= queries.size())
 			return null;
@@ -122,7 +100,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 			return query.getFilename();
 
 		if(column == 1)
-			return QueueTableModel.getPrintableSize(query.getFileSize());
+			return thaw.gui.GUIHelper.getPrintableSize(query.getFileSize());
 
 		if(!isForInsertions && (column == 2)) {
 			if(query.getPath() != null)

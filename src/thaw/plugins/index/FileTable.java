@@ -464,7 +464,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			if(value instanceof Long) {
 
 				cell = super.getTableCellRendererComponent(table,
-									   thaw.plugins.queueWatcher.QueueTableModel.getPrintableSize(((Long)value).longValue()),
+									   thaw.gui.GUIHelper.getPrintableSize(((Long)value).longValue()),
 									   isSelected, hasFocus, row, column);
 
 			} else {

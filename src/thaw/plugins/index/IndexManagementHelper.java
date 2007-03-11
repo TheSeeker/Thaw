@@ -850,10 +850,7 @@ public class IndexManagementHelper {
 		if (node == null)
 			return;
 
-		final Toolkit tk = Toolkit.getDefaultToolkit();
-		final StringSelection st = new StringSelection(node.getPublicKey());
-		final Clipboard cp = tk.getSystemClipboard();
-		cp.setContents(st, null);
+		thaw.gui.GUIHelper.copyToClipboard(node.getPublicKey());
 	}
 
 

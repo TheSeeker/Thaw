@@ -393,7 +393,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	}
 
 
-	public class ActionReplier implements Runnable, ClipboardOwner {
+	public class ActionReplier implements Runnable {
 		private int action;
 		private int new_priority;
 		private Vector queries;
@@ -410,8 +410,6 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		}
 
 		public void run() {
-
-			final Toolkit tk = Toolkit.getDefaultToolkit();
 			String keys = "";
 			File dir = null;
 
@@ -510,16 +508,11 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 
 			if (action == ACTION_COPY_KEYS_SELECTED) {
-				final StringSelection st = new StringSelection(keys);
-				final Clipboard cp = tk.getSystemClipboard();
-				cp.setContents(st, this);
+				thaw.gui.GUIHelper.copyToClipboard(keys);
 			}
 
 		}
 
-		public void lostOwnership(final Clipboard clipboard, final java.awt.datatransfer.Transferable contents) {
-			/* we dont care */
-		}
 	}
 
 

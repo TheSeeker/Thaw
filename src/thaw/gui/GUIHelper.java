@@ -2,6 +2,8 @@ package thaw.gui;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
@@ -11,6 +13,7 @@ import javax.swing.AbstractButton;
 import javax.swing.text.JTextComponent;
 
 import thaw.core.Logger;
+import thaw.core.I18n;
 
 public class GUIHelper {
 
@@ -56,4 +59,35 @@ public class GUIHelper {
 		}
 	}
 
+
+	public static void copyToClipboard(final String str) {
+		final Toolkit tk = Toolkit.getDefaultToolkit();
+		final StringSelection st = new StringSelection(str);
+		final Clipboard cp = tk.getSystemClipboard();
+		cp.setContents(st, null);
+	}
+
+
+
+	public static String getPrintableSize(final long size) {
+		if(size == 0)
+			return I18n.getMessage("thaw.common.unknown");
+
+		if(size < 1024) /* < 1KB */
+			return ((new Long(size)).toString() + " B");
+
+		if(size < 1048576) { /* < 1MB */
+			final long kb = size / 1024;
+			return ((new Long(kb)).toString() + " KiB");
+		}
+
+		if(size < 1073741824) { /* < 1GB */
+			final long mb = size / 1048576;
+			return ((new Long(mb)).toString() + " MiB");
+		}
+
+		final long gb = size / 1073741824;
+
+		return ((new Long(gb)).toString() +" GiB");
+	}
 }
