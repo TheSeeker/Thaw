@@ -13,6 +13,9 @@ import java.awt.event.ActionEvent;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 
+import java.util.Vector;
+import java.util.HashMap;
+
 import thaw.core.Config;
 import thaw.core.I18n;
 
@@ -62,7 +65,7 @@ public class PeerMonitorPanel implements ActionListener
 		memBar.setStringPainted(true);
 
 		panel.add(mainPanel, BorderLayout.CENTER);
-		panel.add(peerList, BorderLayout.EAST);
+		panel.add(new JScrollPane(peerList), BorderLayout.EAST);
 		panel.add(memBar, BorderLayout.SOUTH);
 	}
 
@@ -86,6 +89,17 @@ public class PeerMonitorPanel implements ActionListener
 	}
 
 
+	/**
+	 * @param peerNames see java.lang.String
+	 * @param peerInfos see java.lang.HashMap
+	 */
+	public synchronized void setPeerList(Vector peerNames, Vector peerInfos)
+	{
+
+	}
+
+
+
 	public JPanel getPanel() {
 		return panel;
 	}
@@ -95,6 +109,5 @@ public class PeerMonitorPanel implements ActionListener
 		if (e.getSource() == refCopyButton) {
 			thaw.gui.GUIHelper.copyToClipboard(refArea.getText());
 		}
-
 	}
 }

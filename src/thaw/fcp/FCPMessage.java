@@ -75,11 +75,11 @@ public class FCPMessage {
 	}
 
 	public void setMessageName(final String name) {
-		if((name == null) || "".equals( name )) {
+		if ((name == null) || "".equals( name )) {
 			Logger.notice(this, "Setting name to empty ? weird");
 		}
 
-		if(name.indexOf("\n")>=0) {
+		if (name.indexOf("\n") >= 0) {
 			Logger.notice(this, "Name shouldn't contain '\n'");
 		}
 
