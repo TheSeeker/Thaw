@@ -51,9 +51,14 @@ public class SearchBar implements ActionListener {
 		userText.setSelectionStart(0);
 		userText.setSelectionEnd(userText.getText().length());
 
+		IndexTreeNode node = indexBrowser.getIndexTree().getSelectedNode();
+
+		if (node == null)
+			node = indexBrowser.getIndexTree().getRoot();
+
 		final SearchResult sr = new SearchResult(indexBrowser.getDb(),
 							 userText.getText().trim(),
-							 indexBrowser.getIndexTree().getSelectedNode());
+							 node);
 		indexBrowser.getTables().setList(sr);
 	}
 
