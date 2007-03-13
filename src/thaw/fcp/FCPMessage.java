@@ -90,6 +90,10 @@ public class FCPMessage {
 		return ((String)fields.get(field));
 	}
 
+	public Hashtable getValues() {
+		return fields;
+	}
+
 	public void setValue(final String field, final String value) {
 		if("DataLength".equals( field )) {
 			setAmountOfDataWaiting((new Long(value)).longValue());

@@ -3,6 +3,8 @@ package thaw.fcp;
 import java.util.Observer;
 import java.util.Observable;
 
+import java.util.Vector;
+import java.util.Hashtable;
 
 public class FCPListPeers extends Observable implements FCPQuery, Observer {
 
@@ -11,10 +13,13 @@ public class FCPListPeers extends Observable implements FCPQuery, Observer {
 
 	private FCPQueueManager queueManager;
 
+	private Hashtable peers; /* key : peer name -> hashtable : key : parameter name -> parameter value */
+
 
 	public FCPListPeers(boolean withMetadata, boolean withVolatile) {
 		this.withMetadata = withMetadata;
 		this.withVolatile = withVolatile;
+		peers = new Hashtable();
 	}
 
 
@@ -41,14 +46,19 @@ public class FCPListPeers extends Observable implements FCPQuery, Observer {
 			final FCPMessage msg = (FCPMessage)param;
 
 			if (msg.getMessageName() == null
-			    || !msg.getMessageName().equals(""))
+			    || !msg.getMessageName().equals("Peer"))
 				return;
 
-			/* TODO */
+			peers.put(msg.getValue("identity"), msg.getValues());
 
 			setChanged();
 			notifyObservers(this);
 		}
+	}
+
+
+	public Hashtable getPeers() {
+		return peers;
 	}
 
 
