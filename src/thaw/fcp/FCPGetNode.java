@@ -50,8 +50,6 @@ public class FCPGetNode extends Observable implements FCPQuery, Observer {
 	}
 
 	public boolean start(FCPQueueManager queueManager) {
-		assert (queueManager != null);
-
 		FCPMessage msg = new FCPMessage();
 
 		msg.setMessageName("GetNode");
