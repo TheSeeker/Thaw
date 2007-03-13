@@ -53,7 +53,7 @@ public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 	public final static Color JLIST_NODE_STAT_BACKGROUND = Color.WHITE;
 	public final static Color JLIST_PEER_BACKGROUND = new Color(240,240,240);
 
-	public final static int STR_INFO_MAX_LNG = 40;
+	public final static int STR_INFO_MAX_LNG = 50;
 	public final static int STR_NODENAME_MAX_LNG = 15;
 
 
@@ -270,7 +270,7 @@ public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 
 	private static JLabel makeInfoLabel(String txt) {
 		if (txt.length() > STR_INFO_MAX_LNG)
-			txt = txt.substring(0, STR_INFO_MAX_LNG);
+			txt = txt.substring(0, STR_INFO_MAX_LNG) + "(...)";
 
 		JLabel lb = new JLabel(txt);
 		return lb;
