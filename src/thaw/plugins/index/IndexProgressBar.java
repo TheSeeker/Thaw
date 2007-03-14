@@ -2,6 +2,7 @@ package thaw.plugins.index;
 
 import javax.swing.JProgressBar;
 
+import thaw.core.I18n;
 import thaw.core.Logger;
 
 public class IndexProgressBar {
@@ -58,7 +59,8 @@ public class IndexProgressBar {
 		} else {
 			pourcent = (current * 100) / total;
 			progressBar.setValue(pourcent);
-			progressBar.setString(Integer.toString(pourcent) + " %");
+			progressBar.setString(I18n.getMessage("thaw.plugin.index.indexLoading")+": "
+					      + Integer.toString(pourcent) + " %");
 		}
 	}
 
