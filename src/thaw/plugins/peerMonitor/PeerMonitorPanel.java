@@ -263,6 +263,10 @@ public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 	}
 
 	public synchronized void setNodeInfos(Hashtable infos) {
+		if (nodeInfos == null) { /* first time */
+			displayInfos(I18n.getMessage("thaw.plugin.peerMonitor.nodeInfos"), infos);
+		}
+
 		nodeInfos = infos;
 	}
 
@@ -409,7 +413,6 @@ public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 		mainPanel.validate();
 		detailsPanel.validate();
 	}
-
 
 
 	public void valueChanged(ListSelectionEvent e) {
