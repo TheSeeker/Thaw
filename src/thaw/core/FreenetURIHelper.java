@@ -133,10 +133,10 @@ public class FreenetURIHelper {
 				USK = split[i];
 				break;
 			case(2):
-				USK = USK + "-" + FreenetURIHelper.abs(split[i]);
+				USK += "-" + FreenetURIHelper.abs(split[i]);
 				break;
 			default:
-				USK = USK + "/" + split[i];
+				USK += "/" + split[i];
 				break;
 			}
 		}
@@ -270,6 +270,43 @@ public class FreenetURIHelper {
 			return key.toLowerCase();
 
 		return key.substring(0, 70).toLowerCase();
+	}
+
+
+	public static boolean compareKeys(String keyA, String keyB) {
+		if (keyA == keyB)
+			return true;
+
+		if (keyA == null || keyB == null) {
+			Logger.notice(new FreenetURIHelper(), "compareKeys : null argument ?!");
+			return false;
+		}
+
+		keyA = cleanURI(keyA);
+		keyB = cleanURI(keyB);
+
+		if (keyA.startsWith("USK@"))
+			keyA = convertUSKtoSSK(keyA);
+
+		if (keyB.startsWith("USK@"))
+			keyB = convertUSKtoSSK(keyB);
+
+		if (!keyA.substring(0, 3).equals(keyB.substring(0, 3))) {
+			Logger.notice(new FreenetURIHelper(), "Not the same kind of key : "+
+				      keyA.substring(0, 3) + " vs " + keyB.substring(0, 3));
+			return false;
+		}
+
+		if (keyA.startsWith("CHK@")) {
+			return getComparablePart(keyA).equals(getComparablePart(keyB));
+		}
+
+		if (keyA.startsWith("SSK@")) {
+			keyA = changeSSKRevision(keyA, 0, 0);
+			keyB = changeSSKRevision(keyB, 0, 0);
+		}
+
+		return keyA.equals(keyB);
 	}
 }
 

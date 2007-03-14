@@ -1386,19 +1386,27 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 			return false;
 		}
 
+		key = key.replaceAll(".xml", ".frdx");
+
 		synchronized(db.dbLock) {
 			try {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT publicKey from indexes WHERE LOWER(publicKey) LIKE ? LIMIT 1");
+				st = db.getConnection().prepareStatement("SELECT publicKey from indexes WHERE LOWER(publicKey) LIKE ?");
 
 				st.setString(1, FreenetURIHelper.getComparablePart(key) +"%");
 
 				ResultSet res = st.executeQuery();
 
-				if (res.next()) {
-					return true;
+				while(res.next()) {
+					String pubKey = res.getString("publicKey").replaceAll(".xml", ".frdx");
+
+					if (FreenetURIHelper.compareKeys(pubKey, key)) {
+						return true;
+					}
 				}
+
+				return false;
 
 			} catch(final SQLException e) {
 				Logger.error(new Index(), "isAlreadyKnown: Unable to check if link '"+key+"' point to a know index because: "+e.toString());

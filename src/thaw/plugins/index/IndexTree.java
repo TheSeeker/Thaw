@@ -114,7 +114,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		boolean loadOnTheFly = false;
 
-		if (config.getValue("loadIndexTreeOnTheFly") != null)
+		if (config != null && config.getValue("loadIndexTreeOnTheFly") != null)
 			loadOnTheFly = Boolean.valueOf(config.getValue("loadIndexTreeOnTheFly")).booleanValue();
 
 		root = new IndexRoot(queueManager, indexBrowser, rootName, loadOnTheFly);

@@ -193,7 +193,7 @@ public class File implements Observer {
 	}
 
 	public void setPublicKey(final String publicKey) {
-		this.publicKey = publicKey;
+		this.publicKey = FreenetURIHelper.cleanURI(publicKey);
 
 		try {
 			PreparedStatement st;

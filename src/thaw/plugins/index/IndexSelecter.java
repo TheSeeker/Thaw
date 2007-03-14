@@ -13,6 +13,7 @@ import javax.swing.JTextField;
 
 import thaw.core.I18n;
 import thaw.core.Logger;
+import thaw.core.FreenetURIHelper;
 import thaw.plugins.Hsqldb;
 
 /**
@@ -86,7 +87,7 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 
 		indexPanel = new JPanel();
 		indexPanel.setLayout(new GridLayout(1, 2));
-		indexPanel.add(new JScrollPane(indexTree.getPanel()));
+		indexPanel.add(indexTree.getPanel());
 
 
 		upPanel.add(indexPanel, BorderLayout.CENTER);
@@ -132,7 +133,7 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 		cancelButton = null;
 		okButton = null;
 
-		return selectedIndexKey;
+		return FreenetURIHelper.cleanURI(selectedIndexKey);
 	}
 
 
