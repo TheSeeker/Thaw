@@ -70,8 +70,11 @@ public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 	private JLabel detailsLabel;
 	private JPanel detailsPanel;
 
+	private boolean advanced;
+
 
 	public PeerMonitorPanel(Config config) {
+		advanced = Boolean.valueOf(config.getValue("advancedMode")).booleanValue();
 
 		panel = new JPanel(new BorderLayout(10, 10));
 
@@ -268,6 +271,93 @@ public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 	}
 
 
+
+	/**
+	 * @return null if it must not be displayed ; else an array with two elements (key translated + value translated)
+	 */
+	public String[] getTranslation(String key, String value) {
+
+		/* PEERS */
+
+		if ("volatile.lastRoutingBackoffReason".equals(key))
+			return new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.lastRoutingBackoffReason"),
+				value
+			};
+
+		if ("volatile.routingBackoffPercent".equals(key))
+			return new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.routingBackoffPercent"),
+				value + "%"
+			};
+
+		if ("version".equals(key))
+			return new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.version"),
+				value
+			};
+
+		if ("volatile.status".equals(key))
+			return new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.status"),
+				value
+			};
+
+		if ("myName".equals(key))
+			return new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.myName"),
+				value
+			};
+
+
+		if ("physical.udp".equals(key))
+			return new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.physical.udp"),
+				value
+			};
+
+		if ("volatile.averagePingTime".equals(key))
+			return new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.averagePingTime"),
+				Integer.toString(new Float(value).intValue()) + " ms"
+			};
+
+		/* NODE */
+
+		if ("volatile.overallSize".equals(key))
+			return new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.node.overallSize"),
+				"~" + thaw.gui.GUIHelper.getPrintableSize(Long.parseLong(value))
+			};
+
+		if ("volatile.uptimeSeconds".equals(key)) {
+			return new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.node.uptimeSeconds"),
+				"~" + thaw.gui.GUIHelper.getPrintableTime(Long.parseLong(value))
+			};
+		}
+
+		if ("volatile.networkSizeEstimateSession".equals(key)) {
+			return new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.node.networkSizeEstimateSession"),
+				value
+			};
+		}
+
+		if ("myName".equals(key)) {
+			return new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.node.myName"),
+				value
+			};
+		}
+
+		if (advanced)
+			return new String[] { key, value };
+
+		return null;
+	}
+
+
 	private static JLabel makeInfoLabel(String txt) {
 		if (txt.length() > STR_INFO_MAX_LNG)
 			txt = txt.substring(0, STR_INFO_MAX_LNG) + "(...)";
@@ -281,18 +371,30 @@ public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 		if (ht == null)
 			return;
 
-		detailsPanel.removeAll();
-
-		detailsPanel.setLayout(new GridLayout(ht.size()+1, 2, 5, 5));
-
-		detailsLabel.setText(title);
+		Vector v = new Vector();
 
 		for (Enumeration e = ht.keys();
 		     e.hasMoreElements(); ) {
 			String key = (String)e.nextElement();
 
-			detailsPanel.add(makeInfoLabel(key + ":"));
-			detailsPanel.add(makeInfoLabel((String)ht.get(key)));
+			String[] val = getTranslation(key, (String)ht.get(key));
+
+			if (val != null)
+				v.add(val);
+		}
+
+		detailsPanel.removeAll();
+
+		detailsPanel.setLayout(new GridLayout(v.size()+1, 2));
+
+		detailsLabel.setText(title);
+
+		for (Iterator i = v.iterator();
+		     i.hasNext();) {
+			String[] val = (String[])i.next();
+
+			detailsPanel.add(makeInfoLabel(val[0] + ":"));
+			detailsPanel.add(makeInfoLabel(val[1]));
 		}
 
 		mainPanel.validate();

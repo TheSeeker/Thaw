@@ -68,6 +68,28 @@ public class GUIHelper {
 	}
 
 
+	public static String getPrintableTime(final long seconds) {
+		if (seconds == 0)
+			return I18n.getMessage("thaw.common.unknown");
+
+		if (seconds < 60)
+			return (new Long(seconds)).toString() + " s";
+
+		if (seconds < 3600) {
+			final long min = seconds / 60;
+			return ((new Long(min)).toString() + " min");
+		}
+
+		if (seconds < 86400) {
+			final long hour = seconds / 3600;
+			return ((new Long(hour)).toString() + " h");
+		}
+
+		final long day = seconds / 86400;
+		return ((new Long(day)).toString()) + " day(s)";
+
+	}
+
 
 	public static String getPrintableSize(final long size) {
 		if(size == 0)
