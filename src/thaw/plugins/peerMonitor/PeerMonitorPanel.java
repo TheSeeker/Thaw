@@ -28,6 +28,8 @@ import java.util.Hashtable;
 import thaw.core.Config;
 import thaw.core.I18n;
 
+import thaw.gui.IconBox;
+
 public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 {
 	/* must match with color list */
@@ -89,7 +91,11 @@ public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 		v.add(I18n.getMessage("thaw.plugin.peerMonitor.nodeStats"));
 		peerList.setListData(v);
 
-		peerPanel.add(new JLabel(I18n.getMessage("thaw.plugin.peerMonitor.peerList")), BorderLayout.NORTH);
+
+		JLabel peerListLabel = new JLabel(I18n.getMessage("thaw.plugin.peerMonitor.peerList"));
+		peerListLabel.setIcon(IconBox.peers);
+
+		peerPanel.add(peerListLabel, BorderLayout.NORTH);
 		peerPanel.add(new JScrollPane(peerList), BorderLayout.CENTER);
 
 
@@ -100,6 +106,8 @@ public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 		JPanel refTitle = new JPanel(new BorderLayout());
 
 		refLabel = new JLabel(I18n.getMessage("thaw.plugin.peerMonitor.yourReference"));
+		refLabel.setIcon(IconBox.identity);
+
 		refCopyButton = new JButton(I18n.getMessage("thaw.plugin.peerMonitor.copyReference"));
 		refCopyButton.addActionListener(this);
 
@@ -388,6 +396,7 @@ public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 		detailsPanel.setLayout(new GridLayout(v.size()+1, 2));
 
 		detailsLabel.setText(title);
+		detailsLabel.setIcon(IconBox.computer);
 
 		for (Iterator i = v.iterator();
 		     i.hasNext();) {

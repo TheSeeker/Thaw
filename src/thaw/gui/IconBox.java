@@ -76,14 +76,18 @@ public class IconBox {
 	public static ImageIcon queueWatcher;
 	public static ImageIcon importExport;
 
-	public static ImageIcon peerMonitor;
-	public static ImageIcon minPeerMonitor;
 
+	public static ImageIcon minPeerMonitor;
 
 	public static ImageIcon minImportAction;
 	public static ImageIcon minExportAction;
 
 	public static ImageIcon database;
+
+	public static ImageIcon computer;
+	public static ImageIcon identity;
+	public static ImageIcon peers;
+
 
 	/**
 	 * Not really used
@@ -165,7 +169,9 @@ public class IconBox {
 		IconBox.minExportAction    = IconBox.loadIcon("min-export.png");
 		IconBox.database           = IconBox.loadIcon("database.png");
 		IconBox.minPeerMonitor     = IconBox.loadIcon("min-peerMonitor.png");
-		IconBox.peerMonitor        = IconBox.loadIcon("peerMonitor.png");
+		IconBox.computer           = IconBox.loadIcon("computer.png");
+		IconBox.identity           = IconBox.loadIcon("identity.png");
+		IconBox.peers              = IconBox.loadIcon("peers.png");
 	}
 
 }

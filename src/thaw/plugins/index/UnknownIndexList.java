@@ -71,7 +71,7 @@ public class UnknownIndexList implements MouseListener {
 
 		button = new JButton(IconBox.indexReuse);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addIndexesFromLink"));
-		toolbarActions.add(new LinkManagementHelper.IndexAdder(button, queueManager, indexBrowser, false));
+		toolbarActions.add(new LinkManagementHelper.IndexAdder(button, queueManager, indexBrowser, true));
 		toolbarModifier.addButtonToTheToolbar(button);
 
 		list.addMouseListener(this);

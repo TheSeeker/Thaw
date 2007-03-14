@@ -169,7 +169,7 @@ public class Link extends java.util.Observable {
 		if (publicKey == null)
 			reloadDataFromDb(id);
 
-		name = Index.getNameFromKey(publicKey);
+		name = Index.getNameFromKey(FreenetURIHelper.cleanURI(publicKey));
 
 		return name;
 	}

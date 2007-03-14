@@ -122,7 +122,7 @@ public class PeerMonitor implements thaw.core.Plugin
 	}
 
 	public javax.swing.ImageIcon getIcon() {
-		return thaw.gui.IconBox.peerMonitor;
+		return thaw.gui.IconBox.peers;
 	}
 
 }
