@@ -256,23 +256,20 @@ public class FreenetURIHelper {
 
 	/**
 	 * will lower the case !
+	 * compare only with another result from this function
 	 */
 	public static String getComparablePart(String key) {
 		if (key == null)
 			return null;
 
-		/* TODO : Being able to compare an USK with a negative rev
-		 * with an USK with a positive rev
-		 */
-
-		if (key.startsWith("CHK@")) {
-			if (key.length() <= 70)
-				return key.toLowerCase();
-
-			return key.substring(0, 70).toLowerCase();
+		if (key.startsWith("KSK@")) {
+			return key;
 		}
 
-		return key;
+		if (key.length() <= 70)
+			return key.toLowerCase();
+
+		return key.substring(0, 70).toLowerCase();
 	}
 }
 

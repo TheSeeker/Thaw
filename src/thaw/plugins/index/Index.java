@@ -1225,8 +1225,8 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 					PreparedStatement st;
 
 					st = db.getConnection().prepareStatement("DELETE FROM links "+
-											 "WHERE toDelete = TRUE "+
-											 "AND indexParent = ?");
+										 "WHERE toDelete = TRUE "+
+										 "AND indexParent = ?");
 					st.setInt(1, id);
 					st.execute();
 				} catch(SQLException exc) {
