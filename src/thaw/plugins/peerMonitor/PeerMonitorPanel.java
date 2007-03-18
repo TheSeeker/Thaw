@@ -233,7 +233,13 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 			}
 
 			if (value instanceof Peer) {
-				setText(((Peer)value).toString());
+				String txt = ((Peer)value).toString();
+
+				if (txt.length() > 35) {
+					txt = txt.substring(0, 35) + "(...)";
+				}
+
+				setText(txt);
 				setForeground(((Peer)value).getTextColor());
 				setBackground(JLIST_PEER_BACKGROUND);
 			}

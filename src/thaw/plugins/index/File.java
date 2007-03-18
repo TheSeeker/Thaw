@@ -9,13 +9,20 @@ import java.util.Observer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.util.Vector;
+import java.util.Iterator;
+
 import thaw.core.FreenetURIHelper;
 import thaw.core.Logger;
+
 import thaw.fcp.FCPClientGet;
 import thaw.fcp.FCPClientPut;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
+import thaw.fcp.FCPQuery;
+
 import thaw.plugins.Hsqldb;
+
 
 public class File implements Observer {
 	private Hsqldb db = null;
@@ -362,5 +369,59 @@ public class File implements Observer {
 			return (new Index(db, parentId)).isModifiable();
 		}
 		return parent.isModifiable();
+	}
+
+
+	/**
+	 * Will browse the queue to see if one of the transfers match
+	 * a file in the database
+	 */
+	public static boolean resumeTransfers(FCPQueueManager queue, Hsqldb db) {
+		PreparedStatement st;
+
+		try {
+			st = db.getConnection().prepareStatement("SELECT id, filename, publicKey, "+
+								 "localPath, mime, size, indexParent "+
+								 "FROM files "+
+								 "WHERE filename LIKE ?");
+		} catch(SQLException e) {
+			Logger.error("thaw.plugin.index.File", "Please tell to JFlesch that his SQL sux because : "+e.toString());
+			return false;
+		}
+
+		for (Iterator it = queue.getRunningQueue().iterator();
+		     it.hasNext();) {
+			FCPTransferQuery tq = (FCPTransferQuery)it.next();
+
+			if (tq instanceof FCPClientPut) {
+				try {
+					st.setString(1, tq.getFilename());
+
+					ResultSet rs = st.executeQuery();
+
+					while(rs.next()) {
+						File file = new File(db,
+								     rs.getInt("id"),
+								     rs.getString("filename"),
+								     rs.getString("publicKey"),
+								     rs.getString("localPath") != null ? new java.io.File(rs.getString("localPath")) : null,
+								     rs.getString("mime"),
+								     rs.getLong("size"),
+								     rs.getInt("indexParent"));
+
+						((Observable)tq).addObserver(file);
+
+						if (tq.getFileKey() != null)
+							file.update(((Observable)tq), null);
+					}
+
+				} catch(SQLException e) {
+					Logger.warning("thaw.plugins.index.File", "Error while resuming key computations : "+e.toString());
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 }

@@ -88,6 +88,8 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 			}
 		}
 
+		thaw.plugins.index.File.resumeTransfers(core.getQueueManager(), hsqldb);
+
 		if (autoRefresh != null)
 			autoRefresh.start();
 
