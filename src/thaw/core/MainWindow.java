@@ -177,7 +177,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		statusBar.setSize(500, 30);
 
 
-		mainWindow.getContentPane().setLayout(new BorderLayout());
+		mainWindow.getContentPane().setLayout(new BorderLayout(5,5));
 
 		mainWindow.setJMenuBar(menuBar);
 
@@ -312,6 +312,12 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 		return true;
 	}
+
+	public boolean setSelectedTab(java.awt.Component c) {
+		tabbedPane.setSelectedComponent(c);
+		return true;
+	}
+
 
 	/**
 	 * Used to remove a tab from the main window.
@@ -512,6 +518,21 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 	public String getStatus() {
 		return statusBar.getText();
+	}
+
+	/**
+	 * @param pos can be BorderLayout.EAST or BorderLayout.WEST
+	 */
+	public void addComponent(java.awt.Component c, Object pos) {
+		mainWindow.getContentPane().add(c, pos);
+	}
+
+
+	/**
+	 * @see #addComponent(java.awt.Component, Object)
+	 */
+	public void removeComponent(java.awt.Component c) {
+		mainWindow.getContentPane().remove(c);
 	}
 
 

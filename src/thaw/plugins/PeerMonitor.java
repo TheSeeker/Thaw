@@ -5,6 +5,8 @@ import java.util.Observer;
 import java.util.Vector;
 import java.util.HashMap;
 
+import java.awt.BorderLayout;
+
 import thaw.core.I18n;
 import thaw.core.Core;
 
@@ -12,7 +14,7 @@ import thaw.plugins.peerMonitor.*;
 import thaw.fcp.*;
 
 
-public class PeerMonitor implements thaw.core.Plugin
+public class PeerMonitor implements thaw.core.Plugin, Observer
 {
 	public final static int DEFAULT_REFRESH_RATE = 10; /* in sec */
 
@@ -22,6 +24,8 @@ public class PeerMonitor implements thaw.core.Plugin
 	private boolean running = false;
 
 	private boolean isRefSet = false;
+
+	private boolean advancedMode;
 
 	public PeerMonitor() {
 
@@ -93,11 +97,21 @@ public class PeerMonitor implements thaw.core.Plugin
 	public boolean run(Core core) {
 		this.core = core;
 
+		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
+
+
 		peerPanel = new PeerMonitorPanel(core.getConfig());
 
-		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.peerMonitor.peerMonitor"),
-					    thaw.gui.IconBox.minPeerMonitor,
-					    peerPanel.getPanel());
+		if (advancedMode)
+			core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.peerMonitor.peerMonitor"),
+						    thaw.gui.IconBox.minPeerMonitor,
+						    peerPanel.getTabPanel());
+
+		if (advancedMode)
+			peerPanel.addObserver(this);
+
+		core.getMainWindow().addComponent(peerPanel.getPeerListPanel(),
+						  BorderLayout.EAST);
 
 		running = true;
 		isRefSet = false;
@@ -109,7 +123,10 @@ public class PeerMonitor implements thaw.core.Plugin
 
 
 	public boolean stop() {
-		core.getMainWindow().removeTab(peerPanel.getPanel());
+		if(advancedMode)
+			core.getMainWindow().removeTab(peerPanel.getTabPanel());
+
+		core.getMainWindow().removeComponent(peerPanel.getPeerListPanel());
 		running = false;
 		return false;
 	}
@@ -125,4 +142,8 @@ public class PeerMonitor implements thaw.core.Plugin
 		return thaw.gui.IconBox.peers;
 	}
 
+
+	public void update(Observable o, Object param) {
+		core.getMainWindow().setSelectedTab(peerPanel.getTabPanel());
+	}
 }

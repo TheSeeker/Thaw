@@ -25,12 +25,20 @@ import java.util.Iterator;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import java.util.Observable;
+import java.util.Observer;
+
+
 import thaw.core.Config;
 import thaw.core.I18n;
 
 import thaw.gui.IconBox;
 
-public class PeerMonitorPanel implements ActionListener, ListSelectionListener
+/**
+ * In fact, here is two panels : A panel with the peer list
+ * and a panel with various details (ref, etc)
+ */
+public class PeerMonitorPanel extends Observable implements ActionListener, ListSelectionListener
 {
 	/* must match with color list */
 	public final static String[] STR_STATUS = {
@@ -58,8 +66,11 @@ public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 	public final static int STR_INFO_MAX_LNG = 50;
 	public final static int STR_NODENAME_MAX_LNG = 15;
 
+	private JPanel refPanel;
 
-	private JPanel panel;
+	private JPanel peerPanel;
+
+	private JPanel tabPanel;
 	private JPanel mainPanel;
 
 	private JLabel refLabel;
@@ -76,11 +87,12 @@ public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 
 
 	public PeerMonitorPanel(Config config) {
+
 		advanced = Boolean.valueOf(config.getValue("advancedMode")).booleanValue();
 
-		panel = new JPanel(new BorderLayout(10, 10));
+		tabPanel = new JPanel(new BorderLayout(10, 10));
 
-		JPanel peerPanel = new JPanel(new BorderLayout());
+		peerPanel = new JPanel(new BorderLayout());
 
 		peerList = new JList();
 
@@ -88,15 +100,25 @@ public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 		peerList.addListSelectionListener(this);
 
 		Vector v = new Vector();
-		v.add(I18n.getMessage("thaw.plugin.peerMonitor.nodeStats"));
+
+		if (advanced)
+			v.add(I18n.getMessage("thaw.plugin.peerMonitor.nodeStats"));
+
 		peerList.setListData(v);
 
 
 		JLabel peerListLabel = new JLabel(I18n.getMessage("thaw.plugin.peerMonitor.peerList"));
 		peerListLabel.setIcon(IconBox.peers);
 
+
+		memBar = new JProgressBar(0, 100);
+		setMemBar(0, 134217728);
+		memBar.setStringPainted(true);
+
+
 		peerPanel.add(peerListLabel, BorderLayout.NORTH);
 		peerPanel.add(new JScrollPane(peerList), BorderLayout.CENTER);
+		peerPanel.add(memBar, BorderLayout.SOUTH);
 
 
 		mainPanel = new JPanel(new GridLayout(2, 1, 10, 10));
@@ -132,13 +154,7 @@ public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 
 		mainPanel.add(globalDetailsPanel);
 
-		memBar = new JProgressBar(0, 100);
-		setMemBar(0, 134217728);
-		memBar.setStringPainted(true);
-
-		panel.add(mainPanel, BorderLayout.CENTER);
-		panel.add(peerPanel, BorderLayout.EAST);
-		panel.add(memBar, BorderLayout.SOUTH);
+		tabPanel.add(mainPanel, BorderLayout.CENTER);
 	}
 
 
@@ -147,7 +163,7 @@ public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 
 		pourcent = (int)((used * 100) / max);
 
-		memBar.setString("Used memory : "
+		memBar.setString(I18n.getMessage("thaw.plugin.peerMonitor.infos.nodeMemory")+ ": "
 				 + thaw.gui.GUIHelper.getPrintableSize(used)
 				 + " / "
 				 + thaw.gui.GUIHelper.getPrintableSize(max)
@@ -245,7 +261,8 @@ public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 	{
 		peers = new Vector();
 
-		peers.add(I18n.getMessage("thaw.plugin.peerMonitor.nodeStats"));
+		if (advanced)
+			peers.add(I18n.getMessage("thaw.plugin.peerMonitor.nodeStats"));
 
 		/* TODO : dirty : should use comparator, etc */
 		for (int i = 0 ; i < STR_STATUS.length ; i++) {
@@ -271,8 +288,12 @@ public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 	}
 
 
-	public JPanel getPanel() {
-		return panel;
+	public JPanel getTabPanel() {
+		return tabPanel;
+	}
+
+	public JPanel getPeerListPanel() {
+		return peerPanel;
 	}
 
 
@@ -424,5 +445,8 @@ public class PeerMonitorPanel implements ActionListener, ListSelectionListener
 			displayInfos(I18n.getMessage("thaw.plugin.peerMonitor.peerInfos") + " '" + peerName + "':",
 				     ((Peer)peers.get(e.getFirstIndex())).getParameters());
 		}
+
+		setChanged();
+		notifyObservers();
 	}
 }

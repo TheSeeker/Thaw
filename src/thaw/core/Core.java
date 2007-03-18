@@ -150,14 +150,83 @@ public class Core implements Observer {
 	}
 
 
+
+	/**
+	 * My node takes too much time to answer. So now the connection process is partially threaded.
+	 */
+	protected class ConnectionProcess implements Runnable {
+		private Core c;
+
+		public ConnectionProcess(Core c) {
+			this.c = c;
+		}
+
+		public void run() {
+			process();
+			connectionProcess = null;
+		}
+
+		public boolean process() {
+			boolean ret = true;
+
+			clientHello = new FCPClientHello(queryManager, config.getValue("thawId"));
+
+			if(!clientHello.start(null)) {
+				Logger.warning(this, "Id already used !");
+				subDisconnect();
+				ret = false;
+			} else {
+				Logger.debug(this, "Hello successful");
+				Logger.debug(this, "Node name    : "+clientHello.getNodeName());
+				Logger.debug(this, "FCP  version : "+clientHello.getNodeFCPVersion());
+				Logger.debug(this, "Node version : "+clientHello.getNodeVersion());
+
+				queueManager.startScheduler();
+
+				queueManager.restartNonPersistent();
+
+				final FCPWatchGlobal watchGlobal = new FCPWatchGlobal(true);
+				watchGlobal.start(queueManager);
+
+				final FCPQueueLoader queueLoader = new FCPQueueLoader(config.getValue("thawId"));
+				queueLoader.start(queueManager);
+
+			}
+
+			if(ret && connection.isConnected())
+				connection.addObserver(c);
+
+			if(getMainWindow() != null) {
+				if (ret)
+					getMainWindow().setStatus(IconBox.minConnectAction,
+								  I18n.getMessage("thaw.statusBar.ready"));
+				else
+					getMainWindow().setStatus(IconBox.minDisconnectAction,
+								  I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
+			}
+
+			return ret;
+		}
+	}
+
+	private ConnectionProcess connectionProcess = null;
+
+
 	/**
 	 * Init the connection to the node.
 	 * If a connection is already established, it will disconnect, so
 	 * if you called canDisconnect() before, then this function can be called safely.
+	 * <br/>
+	 * If the connection is opened successfully, ClientHello will be thread, so you won't have its result
 	 * @see #canDisconnect()
 	 */
 	public boolean initConnection() {
 		boolean ret = true;
+
+		if (connectionProcess != null) {
+			Logger.notice(this, "A connection process is already running");
+			return false;
+		}
 
 		if(getMainWindow() != null) {
 			getMainWindow().setStatus(IconBox.blueBunny,
@@ -217,47 +286,15 @@ public class Core implements Observer {
 				QueueKeeper.loadQueue(queueManager, "thaw.queue.xml");
 
 
-				clientHello = new FCPClientHello(queryManager, config.getValue("thawId"));
-
-				if(!clientHello.start(null)) {
-					Logger.warning(this, "Id already used !");
-					subDisconnect();
-					ret = false;
-				} else {
-					Logger.debug(this, "Hello successful");
-					Logger.debug(this, "Node name    : "+clientHello.getNodeName());
-					Logger.debug(this, "FCP  version : "+clientHello.getNodeFCPVersion());
-					Logger.debug(this, "Node version : "+clientHello.getNodeVersion());
-
-					queueManager.startScheduler();
-
-					queueManager.restartNonPersistent();
-
-					final FCPWatchGlobal watchGlobal = new FCPWatchGlobal(true);
-					watchGlobal.start(queueManager);
-
-					final FCPQueueLoader queueLoader = new FCPQueueLoader(config.getValue("thawId"));
-					queueLoader.start(queueManager);
-
-				}
+				connectionProcess = new ConnectionProcess(this);
+				Thread th = new Thread(connectionProcess);
+				th.start();
 			}
 
 		} catch(final Exception e) { /* A little bit not ... "nice" ... */
 			Logger.warning(this, "Exception while connecting : "+e.toString()+" ; "+e.getMessage() + " ; "+e.getCause());
 			e.printStackTrace();
 			return false;
-		}
-
-		if(ret && connection.isConnected())
-			connection.addObserver(this);
-
-		if(getMainWindow() != null) {
-			if (ret)
-				getMainWindow().setStatus(IconBox.minConnectAction,
-							  I18n.getMessage("thaw.statusBar.ready"));
-			else
-				getMainWindow().setStatus(IconBox.minDisconnectAction,
-							  I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
 		}
 
 		return ret;
