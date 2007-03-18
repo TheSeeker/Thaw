@@ -96,7 +96,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		removeTab( nodeConfigPanel.getPanel() );
 		removeTab( pluginConfigPanel.getPanel() );
 
-		addTab("Thaw", thawConfigPanel.getPanel());
+		addTab("Thaw", IconBox.blueBunny, thawConfigPanel.getPanel());
 		addTab(I18n.getMessage("thaw.common.node"), IconBox.minConnectAction, nodeConfigPanel.getPanel());
 		addTab(I18n.getMessage("thaw.common.plugins"), IconBox.minSettings, pluginConfigPanel.getPanel());
 	}
