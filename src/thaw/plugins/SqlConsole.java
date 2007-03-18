@@ -145,8 +145,8 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 			if (buffer[i] != null)
 				res += buffer[i];
 
-			if ( (readOffset > 0 && i == readOffset-1)
-			     || (readOffset <= 0 && i == MAX_LINE))
+			if ( (readOffset-1 > 0 && i == readOffset-2)
+			     || (readOffset-1 <= 0 && i == MAX_LINE))
 				break;
 
 			if (i == MAX_LINE)
@@ -210,7 +210,9 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 		if("list_tables".equals( cmd.toLowerCase() ))
 			cmd = "SELECT * FROM INFORMATION_SCHEMA.SYSTEM_TABLES";
 
-		addToConsole("\n> "+cmd+"\n\n");
+		addToConsole("\n");
+		addToConsole("> "+cmd+"\n");
+		addToConsole("\n");
 
 		try {
 
