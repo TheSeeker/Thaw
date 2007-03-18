@@ -8,6 +8,8 @@ import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.Main;
 import thaw.core.Plugin;
+
+import thaw.gui.IconBox;
 import thaw.fcp.FCPTransferQuery;
 
 public class StatusBar implements Runnable, Plugin {
@@ -51,12 +53,14 @@ public class StatusBar implements Runnable, Plugin {
 	public void updateStatusBar() {
 
 		if (core.isReconnecting()) {
-			core.getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.connecting"), java.awt.Color.RED);
+			core.getMainWindow().setStatus(IconBox.blueBunny,
+						       I18n.getMessage("thaw.statusBar.connecting"), java.awt.Color.RED);
 			return;
 		}
 
 		if (!core.getConnectionManager().isConnected()) {
-			core.getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
+			core.getMainWindow().setStatus(IconBox.minDisconnectAction,
+						       I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
 			return;
 		}
 
@@ -104,7 +108,8 @@ public class StatusBar implements Runnable, Plugin {
 
 		} catch(final java.util.ConcurrentModificationException e) {
 			Logger.notice(this, "Collision !");
-			core.getMainWindow().setStatus(core.getMainWindow().getStatus()+"*");
+			core.getMainWindow().setStatus(null,
+						       core.getMainWindow().getStatus()+"*");
 			return;
 		}
 
@@ -128,7 +133,7 @@ public class StatusBar implements Runnable, Plugin {
 			+ StatusBar.SEPARATOR + I18n.getMessage("thaw.plugin.statistics.pending") + " "
 			+ Integer.toString(pending) + "/" + Integer.toString(total);
 
-		core.getMainWindow().setStatus(status);
+		core.getMainWindow().setStatus(IconBox.minConnectAction, status);
 
 	}
 
@@ -136,7 +141,7 @@ public class StatusBar implements Runnable, Plugin {
 	public boolean stop() {
 		running = false;
 
-		core.getMainWindow().setStatus("Thaw "+Main.VERSION);
+		core.getMainWindow().setStatus(IconBox.blueBunny, "Thaw "+Main.VERSION);
 
 		return true;
 	}
@@ -147,6 +152,6 @@ public class StatusBar implements Runnable, Plugin {
 	}
 
 	public javax.swing.ImageIcon getIcon() {
-		return thaw.gui.IconBox.remove;
+		return IconBox.remove;
 	}
 }

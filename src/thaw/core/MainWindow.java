@@ -173,7 +173,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		// STATUS BAR
 
 		statusBar = new JLabel();
-		setStatus(null);
+		setStatus(null, null);
 		statusBar.setSize(500, 30);
 
 
@@ -486,8 +486,8 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	}
 
 
-	public void setStatus(final String status) {
-		setStatus(status, java.awt.Color.BLACK);
+	public void setStatus(final javax.swing.Icon icon, final String status) {
+		setStatus(icon, status, java.awt.Color.BLACK);
 	}
 
 
@@ -495,13 +495,18 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 * Change text in the status bar.
 	 * @param status Null is accepted.
 	 */
-	public void setStatus(final String status, java.awt.Color color) {
-		if(status != null)
+	public void setStatus(final javax.swing.Icon icon, final String status, java.awt.Color color) {
+		if(status != null) {
 			statusBar.setText(status);
-		else
+		} else {
 			statusBar.setText(" ");/* not empty else the status bar disappear */
+		}
 
-		statusBar.setForeground(color);
+		if (icon != null)
+			statusBar.setIcon(icon);
+
+		if (color != null)
+			statusBar.setForeground(color);
 	}
 
 

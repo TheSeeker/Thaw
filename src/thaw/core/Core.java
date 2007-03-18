@@ -124,7 +124,8 @@ public class Core implements Observer {
 		splashScreen.setProgressionAndStatus(100, "Ready");
 
 
-		mainWindow.setStatus("Thaw "+Main.VERSION+" : "+I18n.getMessage("thaw.statusBar.ready"));
+		mainWindow.setStatus(IconBox.minDisconnectAction,
+				     "Thaw "+Main.VERSION+" : "+I18n.getMessage("thaw.statusBar.ready"));
 
 		splashScreen.hide();
 
@@ -159,7 +160,8 @@ public class Core implements Observer {
 		boolean ret = true;
 
 		if(getMainWindow() != null) {
-			getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.connecting"), java.awt.Color.RED);
+			getMainWindow().setStatus(IconBox.blueBunny,
+						  I18n.getMessage("thaw.statusBar.connecting"), java.awt.Color.RED);
 
 		}
 
@@ -251,9 +253,11 @@ public class Core implements Observer {
 
 		if(getMainWindow() != null) {
 			if (ret)
-				getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.ready"));
+				getMainWindow().setStatus(IconBox.minConnectAction,
+							  I18n.getMessage("thaw.statusBar.ready"));
 			else
-				getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
+				getMainWindow().setStatus(IconBox.minDisconnectAction,
+							  I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
 		}
 
 		return ret;
@@ -363,7 +367,8 @@ public class Core implements Observer {
 		Logger.info(this, "Disconnecting");
 
 		if (mainWindow != null) {
-			mainWindow.setStatus(I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
+			mainWindow.setStatus(IconBox.minDisconnectAction,
+					     I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
 
 			/* not null because we want to force the cleaning */
 			mainWindow.changeButtonsInTheToolbar(this, new java.util.Vector());
@@ -449,9 +454,11 @@ public class Core implements Observer {
 		public void run() {
 			Logger.notice(this, "Starting reconnection process !");
 
-			getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.connecting"), java.awt.Color.RED);
+			getMainWindow().setStatus(IconBox.blueBunny,
+						  I18n.getMessage("thaw.statusBar.connecting"), java.awt.Color.RED);
 			getPluginManager().stopPlugins(); /* don't forget there is the status bar plugin */
-			getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.connecting"), java.awt.Color.RED);
+			getMainWindow().setStatus(IconBox.blueBunny,
+						  I18n.getMessage("thaw.statusBar.connecting"), java.awt.Color.RED);
 
 			subDisconnect();
 
@@ -468,9 +475,11 @@ public class Core implements Observer {
 			}
 
 			if (running) {
-				getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.ready"));
+				getMainWindow().setStatus(IconBox.minConnectAction,
+							  I18n.getMessage("thaw.statusBar.ready"));
 			} else {
-				getMainWindow().setStatus(I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
+				getMainWindow().setStatus(IconBox.minDisconnectAction,
+							  I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
 			}
 
 			if (running) {
