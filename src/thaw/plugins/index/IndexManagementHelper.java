@@ -503,7 +503,7 @@ public class IndexManagementHelper {
 
 
 	public static Index addIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final IndexFolder target, final String publicKey) {
-		return IndexManagementHelper.reuseIndex(queueManager, indexBrowser, target, publicKey, null, false);
+		return IndexManagementHelper.reuseIndex(queueManager, indexBrowser, target, publicKey, null);
 	}
 
 	public static Index reuseIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final IndexFolder target, String publicKey, String privateKey) {
