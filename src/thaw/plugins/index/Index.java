@@ -537,7 +537,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		}
 
 		if (withRev) {
-			if (rev > 0 || privateKey == null)
+			if (rev > 0 || (rev == 0 && privateKey == null))
 				return displayName + " (r"+Integer.toString(rev)+")";
 			else {
 				if (rev > 0)
@@ -722,6 +722,9 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 			key = publicKey;
 			rewriteKey = true;
 		}
+
+		if (rev < 0)
+			rewriteKey = false;
 
 		Logger.info(this, "Updating index ...");
 		Logger.debug(this, "Key asked: "+key);
@@ -1231,6 +1234,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 				}
 
 				return;
+
 			}
 
 			/* ignore unknown tags */
@@ -1310,19 +1314,21 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	public synchronized void loadXML(final java.io.InputStream input, boolean clean) {
 		IndexHandler handler = new IndexHandler();
 
-		try {
-			// Use the default (non-validating) parser
-			SAXParserFactory factory = SAXParserFactory.newInstance();
+		synchronized(db.dbLock) {
+			try {
+				// Use the default (non-validating) parser
+				SAXParserFactory factory = SAXParserFactory.newInstance();
 
-			// Parse the input
-			SAXParser saxParser = factory.newSAXParser();
-			saxParser.parse(input, handler );
-		} catch(javax.xml.parsers.ParserConfigurationException e) {
-			Logger.error(this, "Error (1) while parsing index: "+e.toString());
-		} catch(org.xml.sax.SAXException e) {
-			Logger.error(this, "Error (2) while parsing index: "+e.toString());
-		} catch(java.io.IOException e) {
-			Logger.error(this, "Error (3) while parsing index: "+e.toString());
+				// Parse the input
+				SAXParser saxParser = factory.newSAXParser();
+				saxParser.parse(input, handler );
+			} catch(javax.xml.parsers.ParserConfigurationException e) {
+				Logger.error(this, "Error (1) while parsing index: "+e.toString());
+			} catch(org.xml.sax.SAXException e) {
+				Logger.error(this, "Error (2) while parsing index: "+e.toString());
+			} catch(java.io.IOException e) {
+				Logger.error(this, "Error (3) while parsing index: "+e.toString());
+			}
 		}
 	}
 

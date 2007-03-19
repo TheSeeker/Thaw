@@ -248,7 +248,7 @@ public class FreenetURIHelper {
 		try {
 			return Integer.parseInt(split[2]);
 		} catch(NumberFormatException e) {
-			Logger.error(new FreenetURIHelper(), "Unable to parse '"+key +"'");
+			Logger.warning(new FreenetURIHelper(), "Unable to parse '"+key +"'");
 			return -1;
 		}
 	}

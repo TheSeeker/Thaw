@@ -550,9 +550,6 @@ public class IndexManagementHelper {
 
 		int revision = FreenetURIHelper.getUSKRevision(publicKey);
 
-		if (revision < 0)
-			return null;
-
 		Hsqldb db = indexBrowser.getDb();
 
 		Index index = null;

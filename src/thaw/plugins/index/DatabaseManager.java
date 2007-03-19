@@ -585,19 +585,22 @@ public class DatabaseManager {
 
 		DatabaseHandler handler = new DatabaseHandler(indexBrowser);
 
-		try {
-			// Use the default (non-validating) parser
-			SAXParserFactory factory = SAXParserFactory.newInstance();
+		/* and remember kids, always lock the database before parsing an index ! */
+		synchronized(indexBrowser.getDb().dbLock) {
+			try {
+				// Use the default (non-validating) parser
+				SAXParserFactory factory = SAXParserFactory.newInstance();
 
-			// Parse the input
-			SAXParser saxParser = factory.newSAXParser();
-			saxParser.parse(input, handler);
-		} catch(javax.xml.parsers.ParserConfigurationException e) {
-			Logger.error(new DatabaseManager(), "Error (1) while importing database : "+e.toString());
-		} catch(org.xml.sax.SAXException e) {
-			Logger.error(new DatabaseManager(), "Error (2) while importing database : "+e.toString());
-		} catch(java.io.IOException e) {
-			Logger.error(new DatabaseManager(), "Error (3) while importing database : "+e.toString());
+				// Parse the input
+				SAXParser saxParser = factory.newSAXParser();
+				saxParser.parse(input, handler);
+			} catch(javax.xml.parsers.ParserConfigurationException e) {
+				Logger.error(new DatabaseManager(), "Error (1) while importing database : "+e.toString());
+			} catch(org.xml.sax.SAXException e) {
+				Logger.error(new DatabaseManager(), "Error (2) while importing database : "+e.toString());
+			} catch(java.io.IOException e) {
+				Logger.error(new DatabaseManager(), "Error (3) while importing database : "+e.toString());
+			}
 		}
 
 
