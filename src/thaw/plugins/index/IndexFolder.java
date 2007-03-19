@@ -1228,6 +1228,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 	}
 
 	public void do_import(IndexBrowserPanel indexBrowser, Element e) {
+		/*
 		NodeList list = e.getChildNodes();
 
 		for (int i = 0 ; i < list.getLength(); i++) {
@@ -1253,6 +1254,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				}
 			}
 		}
+		*/
 
 	}
 }

@@ -19,7 +19,7 @@ import javax.swing.JOptionPane;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 
-/* DOM (to remove) */
+/* DOM */
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -1075,7 +1075,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	}
 
 
-	protected class IndexHandler extends DefaultHandler {
+	public class IndexHandler extends DefaultHandler {
 		private Locator locator = null;
 
 		public IndexHandler() {
@@ -1296,6 +1296,14 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 		}
 
+	}
+
+
+	/**
+	 * see import functionnality
+	 */
+	public IndexHandler getIndexHandler() {
+		return new IndexHandler();
 	}
 
 

@@ -10,6 +10,8 @@ import java.sql.Types;
 import java.util.Iterator;
 import java.util.Vector;
 
+/* DOM */
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -21,6 +23,23 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+
+/* SAX */
+
+import org.xml.sax.*;
+import org.xml.sax.helpers.LocatorImpl;
+
+import java.io.IOException;
+
+import org.xml.sax.helpers.XMLReaderFactory;
+import org.xml.sax.helpers.DefaultHandler;
+
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+
+
 
 import thaw.core.Config;
 import thaw.core.Logger;
@@ -238,12 +257,16 @@ public class DatabaseManager {
 		}
 	}
 
+	/**
+	 * try to use the auto increment instead
+	 */
 	public static int getNextId(Hsqldb db, String table) {
 			try {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT IDENTITY()+1 FROM "+
-									 table);
+				st = db.getConnection().prepareStatement("select id+1 from "+
+									 table +
+									 " order by id desc limit 1");
 				ResultSet res = st.executeQuery();
 
 				if (res.next())
@@ -353,6 +376,200 @@ public class DatabaseManager {
 	}
 
 
+
+	protected static class DatabaseHandler extends DefaultHandler {
+		private Locator locator = null;
+
+		private Hsqldb db;
+		private IndexBrowserPanel indexBrowser;
+
+		private IndexFolder importFolder;
+
+		private IndexFolder folders[] = new IndexFolder[64];
+		private int folderLevel = 0;
+
+
+		public DatabaseHandler(IndexBrowserPanel indexBrowser) {
+			this.db = indexBrowser.getDb();
+			this.indexBrowser = indexBrowser;
+		}
+
+		/**
+		 * @see org.xml.sax.ContentHandler#setDocumentLocator(org.xml.sax.Locator)
+		 */
+		public void setDocumentLocator(Locator value) {
+			locator =  value;
+		}
+
+		/**
+		 * Called when parsing is started
+		 * @see org.xml.sax.ContentHandler#startDocument()
+		 */
+		public void startDocument() throws SAXException {
+			importFolder = indexBrowser.getIndexTree().getRoot().getNewImportFolder(db);
+			folders[0] = importFolder;
+			folderLevel = 0;
+		}
+
+		/**
+		 * Called when parsing is finished
+		 * @see org.xml.sax.ContentHandler#endDocument()
+		 */
+		public void endDocument() throws SAXException {
+			/* \_o< */
+		}
+
+		/**
+		 * Called when starting to parse in a specific name space
+		 * @param prefix name space prefix
+		 * @param URI name space URI
+		 * @see org.xml.sax.ContentHandler#startPrefixMapping(java.lang.String, java.lang.String)
+		 */
+		public void startPrefixMapping(String prefix, String URI) throws SAXException {
+			/* \_o< */
+		}
+
+		/**
+		 * @param prefix name space prefix
+		 * @see org.xml.sax.ContentHandler#endPrefixMapping(java.lang.String)
+		 */
+		public void endPrefixMapping(String prefix) throws SAXException {
+			/* \_o< */
+		}
+
+
+
+		/**
+		 * if null, then not in an index
+		 * else all the tag found will be sent to this handler
+		 */
+		private Index.IndexHandler indexHandler = null;
+
+
+		/**
+		 * Called when the parsed find an opening tag
+		 * @param localName local tag name
+		 * @param rawName rawName (the one used here)
+		 * @see org.xml.sax.ContentHandler#startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
+		 */
+		public void startElement(String nameSpaceURI, String localName,
+					 String rawName, Attributes attrs) throws SAXException {
+			if (rawName == null) {
+				rawName = localName;
+			}
+
+			if (rawName == null)
+				return;
+
+
+			if ("indexCategory".equals(rawName)) {
+				/* should be indexFolder ... but because of the backward compatibility ... */
+
+				if (attrs.getValue("name") == null) {
+					/* this should never happen, but the exporter is a little
+					 * b0rked, and I'm a little bit lazy, so it happens
+					 */
+					return;
+				}
+
+				folderLevel++;
+
+				folders[folderLevel] =
+					IndexManagementHelper.addIndexFolder(indexBrowser,
+									     folders[folderLevel-1],
+									     attrs.getValue("name"));
+
+				return;
+			}
+
+			if ("fullIndex".equals(rawName)) {
+				Index index = IndexManagementHelper.reuseIndex(null, indexBrowser,
+									       folders[folderLevel],
+									       attrs.getValue("publicKey"),
+									       attrs.getValue("privateKey"),
+									       false);
+				if (index != null) {
+					index.rename(attrs.getValue("displayName"));
+
+					indexHandler = index.getIndexHandler();
+
+					indexHandler.startDocument();
+				}
+
+				return;
+			}
+
+			if (indexHandler != null) {
+				indexHandler.startElement(nameSpaceURI, localName,
+							  rawName, attrs);
+			}
+		}
+
+		/**
+		 * Called when a closing tag is met
+		 * @see org.xml.sax.ContentHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
+		 */
+		public void endElement(String nameSpaceURI, String localName,
+				       String rawName) throws SAXException {
+			if (rawName == null) {
+				rawName = localName;
+			}
+
+			if (rawName == null)
+				return;
+
+			if ("indexCategory".equals(rawName)) {
+				folderLevel--;
+				return;
+			}
+
+			if ("fullIndex".equals(rawName)) {
+				indexHandler.endDocument();
+				indexHandler = null;
+				return;
+			}
+
+			if (indexHandler != null)
+				indexHandler.endElement(nameSpaceURI, localName, rawName);
+		}
+
+
+		/**
+		 * Called when a text between two tag is met
+		 * @param ch text
+		 * @param start position
+		 * @param end position
+		 * @see org.xml.sax.ContentHandler#characters(char[], int, int)
+		 */
+		public void characters(char[] ch, int start, int end) throws SAXException {
+			String txt = new String(ch, start, end);
+
+			if (indexHandler != null)
+				indexHandler.characters(ch, start, end);
+
+			/* ignore unkwown stuffs */
+
+		}
+
+		public void ignorableWhitespace(char[] ch, int start, int end) throws SAXException {
+
+		}
+
+		public void processingInstruction(String target, String data) throws SAXException {
+
+		}
+
+		/**
+		 * @see org.xml.sax.ContentHandler#skippedEntity(java.lang.String)
+		 */
+		public void skippedEntity(String arg0) throws SAXException {
+
+		}
+
+
+	}
+
+
 	public static void importDatabase(java.io.File source, IndexBrowserPanel indexBrowser, FCPQueueManager queueManager) {
 		java.io.InputStream input;
 
@@ -365,35 +582,24 @@ public class DatabaseManager {
 			return;
 		}
 
-		final DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder xmlBuilder;
+
+		DatabaseHandler handler = new DatabaseHandler(indexBrowser);
 
 		try {
-			xmlBuilder = xmlFactory.newDocumentBuilder();
-		} catch(final javax.xml.parsers.ParserConfigurationException e) {
-			Logger.error(new DatabaseManager(), "Unable to load index because: "+e.toString());
-			return;
+			// Use the default (non-validating) parser
+			SAXParserFactory factory = SAXParserFactory.newInstance();
+
+			// Parse the input
+			SAXParser saxParser = factory.newSAXParser();
+			saxParser.parse(input, handler);
+		} catch(javax.xml.parsers.ParserConfigurationException e) {
+			Logger.error(new DatabaseManager(), "Error (1) while importing database : "+e.toString());
+		} catch(org.xml.sax.SAXException e) {
+			Logger.error(new DatabaseManager(), "Error (2) while importing database : "+e.toString());
+		} catch(java.io.IOException e) {
+			Logger.error(new DatabaseManager(), "Error (3) while importing database : "+e.toString());
 		}
 
-		Document xmlDoc;
-
-		try {
-			xmlDoc = xmlBuilder.parse(input);
-		} catch(final org.xml.sax.SAXException e) {
-			Logger.error(new DatabaseManager(), "Unable to load XML file because: "+e.toString());
-			return;
-		} catch(final java.io.IOException e) {
-			Logger.error(new DatabaseManager(), "Unable to load index because: "+e.toString());
-			return;
-		}
-
-		final Element rootEl = xmlDoc.getDocumentElement();
-
-		Element e = (Element)rootEl.getElementsByTagName("indexCategory").item(0);
-
-		IndexFolder importCategory = indexBrowser.getIndexTree().getRoot().getNewImportFolder(indexBrowser.getDb());
-
-		importCategory.do_import(indexBrowser, e);
 
 		indexBrowser.getIndexTree().getRoot().forceReload();
 		indexBrowser.getIndexTree().refresh();

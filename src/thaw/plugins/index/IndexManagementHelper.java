@@ -191,7 +191,7 @@ public class IndexManagementHelper {
 										 " publicKey, privateKey, author, "+
 										 " positionInTree, revision, "+
 										 " newRev, parent) "+
-										 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+										 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
 					/* TODO : Author */
 
@@ -214,7 +214,7 @@ public class IndexManagementHelper {
 					if (getTarget().getId() >= 0)
 						st.setInt(10, getTarget().getId());
 					else
-						st.setNull(10, Types.INTEGER);
+						st.setNull(11, Types.INTEGER);
 
 					st.execute();
 
