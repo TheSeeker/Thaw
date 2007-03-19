@@ -19,6 +19,8 @@ import javax.swing.JOptionPane;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 
+/* DOM (to remove) */
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -33,6 +35,24 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
+
+
+
+/* SAX */
+
+import org.xml.sax.*;
+import org.xml.sax.helpers.LocatorImpl;
+
+import java.io.IOException;
+
+import org.xml.sax.helpers.XMLReaderFactory;
+import org.xml.sax.helpers.DefaultHandler;
+
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+
+
 
 import thaw.core.FreenetURIHelper;
 import thaw.core.I18n;
@@ -1054,310 +1074,253 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		}
 	}
 
-	public synchronized void loadXML(final java.io.InputStream input, boolean clean) {
-		final DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder xmlBuilder;
 
-		try {
-			xmlBuilder = xmlFactory.newDocumentBuilder();
-		} catch(final javax.xml.parsers.ParserConfigurationException e) {
-			Logger.error(this, "Unable to load index because: "+e.toString());
-			return;
+	protected class IndexHandler extends DefaultHandler {
+		private Locator locator = null;
+
+		public IndexHandler() {
+
 		}
 
-		Document xmlDoc;
-
-		try {
-			Logger.info(this, "XML parser ready");
-			xmlDoc = xmlBuilder.parse(input);
-			Logger.info(this, "Index parsed");
-		} catch(final org.xml.sax.SAXException e) {
-			Logger.error(this, "Unable to load index because: "+e.toString());
-			return;
-		} catch(final java.io.IOException e) {
-			Logger.error(this, "Unable to load index because: "+e.toString());
-			return;
+		/**
+		 * @see org.xml.sax.ContentHandler#setDocumentLocator(org.xml.sax.Locator)
+		 */
+		public void setDocumentLocator(Locator value) {
+			locator =  value;
 		}
 
-		final Element rootEl = xmlDoc.getDocumentElement();
-
-		Logger.info(this, "Extracting informations from index ...");
-		loadXML(rootEl, clean);
-		Logger.info(this, "Extraction done");
-	}
-
-	public void loadXML(Element rootEl, boolean clean) {
-		loadHeader(rootEl);
-		loadLinks(rootEl, clean);
-		loadFileList(rootEl, clean);
-	}
-
-
-	public void loadHeader(final Element rootEl) {
-		final Element header = (Element)rootEl.getElementsByTagName("header").item(0);
-
-		if (publicKey == null) {
-			Logger.debug(this, "getPublicKey() => loadData()");
-			loadData();
-		}
-
-		String pKey = getHeaderElement(header, "privateKey");
-		if (pKey != null) {
-			if (privateKey == null || privateKey.trim().equals(pKey.trim())) {
-				/* the public key was published, we will have to do the same later */
-				setPublishPrivateKey(true);
-			}
-			else
-				setPublishPrivateKey(false);
-
-			if (privateKey == null)
-				setPrivateKey(pKey.trim());
-		}
-	}
-
-	protected String getHeaderElement(final Element header, final String name) {
-		try {
-			if (header == null)
-				return null;
-
-			final NodeList nl = header.getElementsByTagName(name);
-
-			if (nl == null)
-				return null;
-
-			final Element sub = (Element)nl.item(0);
-
-			if (sub == null)
-				return null;
-
-			final Text txt = (Text)sub.getFirstChild();
-
-			if (txt == null)
-				return null;
-
-			return txt.getData();
-		} catch(final Exception e) {
-			Logger.notice(this, "Unable to get header element '"+name+"', because: "+e.toString());
-			return null;
-		}
-	}
-
-	public void loadLinks(final Element rootEl, boolean clean) {
-		final Element links = (Element)rootEl.getElementsByTagName("indexes").item(0);
-
-		if (links == null) {
-			Logger.notice(this, "No links in index !");
-			return;
-		}
-
-		final NodeList list = links.getChildNodes();
-
-		PreparedStatement updateSt = null;
-		PreparedStatement insertSt = null;
-		int nextId;
-
-		synchronized(db.dbLock) {
+		/**
+		 * Called when parsing is started
+		 * @see org.xml.sax.ContentHandler#startDocument()
+		 */
+		public void startDocument() throws SAXException {
 			try {
-				updateSt =
-					db.getConnection().prepareStatement("UPDATE links "+
-									    "SET publicKey = ?, "+
-									    "toDelete = FALSE "+
-									    "WHERE indexParent = ? "+
-									    "AND LOWER(publicKey) LIKE ?");
-				insertSt =
-					db.getConnection().prepareStatement("INSERT INTO links "
-									    + "(id, publicKey, mark, comment, indexParent, indexTarget) "
-									    + "VALUES (?, ?, 0, ?, ?, NULL)");
-				if ((nextId = DatabaseManager.getNextId(db, "links")) < 0)
-					return;
-
-				PreparedStatement st =
-					db.getConnection().prepareStatement("UPDATE links "+
-									    "SET toDelete = TRUE "+
-									    "WHERE indexParent = ? AND dontDelete = FALSE");
-				st.setInt(1, id);
-				st.execute();
-			} catch(SQLException exc) {
-				Logger.error(this, "Unable to prepare statement because: "+exc.toString());
-				return;
-			}
-
-			if (list.getLength() < 0) {
-				Logger.notice (this, "No link ?!");
-			}
-
-			for(int i = 0; i < list.getLength() ; i++) {
-				if(list.item(i).getNodeType() == Node.ELEMENT_NODE) {
-					final Element e = (Element)list.item(i);
-
-					String key = e.getAttribute("key");
-
-					if (key == null) {
-						Logger.notice(this, "No key in this link ?!");
-						continue;
-					}
-
-					key = key.trim();
-
-					try {
-						updateSt.setString(1, key);
-						updateSt.setInt(2, id);
-						updateSt.setString(3, key);
-
-						if (updateSt.executeUpdate() <= 0) {
-
-							insertSt.setInt(1, nextId);
-							insertSt.setString(2, key);
-							insertSt.setString(3, "No comment"); /* comment not used at the moment */
-							insertSt.setInt(4, id);
-
-							insertSt.execute();
-							nextId++;
-						}
-
-					} catch(SQLException exc) {
-						Logger.error(this, "Unable to add link because: "+exc.toString());
-					}
-				}
-			} /* for() */
-
-			if (clean) {
-				try {
-					PreparedStatement st;
-
-					st = db.getConnection().prepareStatement("DELETE FROM links "+
-										 "WHERE toDelete = TRUE "+
-										 "AND indexParent = ?");
-					st.setInt(1, id);
-					st.execute();
-				} catch(SQLException exc) {
-					Logger.error(this, "error while clean index (links) : "+exc.toString());
-				}
-
-			}
-		}
-
-	}
-
-	public void loadFileList(final Element rootEl, boolean clean) {
-		final Element filesEl = (Element)rootEl.getElementsByTagName("files").item(0);
-
-		if (filesEl == null) {
-			Logger.notice(this, "No file in the index !");
-			return;
-		}
-
-		PreparedStatement updateSt = null;
-		PreparedStatement insertSt = null;
-		int nextId;
-
-		synchronized(db.dbLock) {
-			try {
-				updateSt =
-					db.getConnection().prepareStatement("UPDATE files "+
-									    "SET filename = ?, "+
-									    "publicKey = ?, " +
-									    "mime = ?, "+
-									    "size = ?, "+
-									    "toDelete = FALSE "+
-									    "WHERE indexParent = ? "+
-									    "AND LOWER(publicKey) LIKE ?");
-				insertSt =
-					db.getConnection().prepareStatement("INSERT INTO files "
-									    + "(id, filename, publicKey, localPath, mime, size, category, indexParent) "
-									    + "VALUES (?, ?, ?, NULL, ?, ?, NULL, ?)");
-				if ((nextId = DatabaseManager.getNextId(db, "files")) < 0)
-					return;
-
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("UPDATE files "+
-									 "SET toDelete = TRUE "+
-									 "WHERE indexParent = ? AND dontDelete = FALSE");
+				st = db.getConnection().prepareStatement("DELETE FROM files WHERE indexParent = ? AND dontDelete = FALSE");
 				st.setInt(1, id);
 				st.execute();
-			} catch(SQLException exc) {
-				Logger.error(this, "Unable to prepare statement because: "+exc.toString());
-				return;
-			}
 
-			final NodeList list = filesEl.getChildNodes();
+				st = db.getConnection().prepareStatement("DELETE FROM links WHERE indexParent = ? AND dontDelete = FALSE");
+				st.setInt(1, id);
+				st.execute();
 
-			if (list.getLength() < 0) {
-				Logger.notice(this, "No files?!");
-			}
-
-			for(int i = 0; i < list.getLength() ; i++) {
-				if(list.item(i).getNodeType() == Node.ELEMENT_NODE) {
-
-					final Element e = (Element)list.item(i);
-
-					String key = e.getAttribute("key");
-
-					if (key == null)
-						continue;
-
-					key = key.trim();
-
-					long size = 0;
-
-					if (e.getAttribute("size") != null)
-						size = Long.parseLong(e.getAttribute("size"));
-					String mime = e.getAttribute("mime");
-					String filename = FreenetURIHelper.getFilenameFromKey(key);
-
-					try {
-						updateSt.setString(1, filename);
-						updateSt.setString(2, key);
-						updateSt.setString(3, mime);
-						updateSt.setLong(4, size);
-						updateSt.setInt(5, id);
-						updateSt.setString(6, FreenetURIHelper.getComparablePart(key)+"%");
-
-						int rs = updateSt.executeUpdate();
-
-						if (rs <= 0) {
-							insertSt.setInt(1, nextId);
-							insertSt.setString(2, filename);
-							insertSt.setString(3, key);
-							insertSt.setString(4, mime);
-							insertSt.setLong(5, size);
-							insertSt.setInt(6, id);
-
-							nextId++;
-
-							insertSt.execute();
-						}
-					} catch(SQLException exc) {
-						Logger.error(this, "error while adding file: "+exc.toString());
-						Logger.error(this, "Next id : "+Integer.toString(nextId));
-						exc.printStackTrace();
-						return;
-					}
-
-				}
-			} /* for each file in the XML */
-
-
-			if (clean) {
-				try {
-					PreparedStatement st;
-
-					st = db.getConnection().prepareStatement("DELETE FROM files "+
-										 "WHERE toDelete = TRUE "+
-										 "AND indexParent = ?");
-					st.setInt(1, id);
-					st.execute();
-				} catch(SQLException exc) {
-					Logger.error(this, "error while clean index (files) : "+exc.toString());
-				}
+			} catch(SQLException e) {
+				Logger.error(this, "Hm, failure while starting to parse the index: "+e.toString());
+				throw new SAXException("SQLException ; have a nice day.");
 			}
 		}
 
-	} /* loadFileList() */
+		/**
+		 * Called when parsing is finished
+		 * @see org.xml.sax.ContentHandler#endDocument()
+		 */
+		public void endDocument() throws SAXException {
+			/* \_o< */
+		}
+
+		/**
+		 * Called when starting to parse in a specific name space
+		 * @param prefix name space prefix
+		 * @param URI name space URI
+		 * @see org.xml.sax.ContentHandler#startPrefixMapping(java.lang.String, java.lang.String)
+		 */
+		public void startPrefixMapping(String prefix, String URI) throws SAXException {
+			/* \_o< */
+		}
+
+		/**
+		 * @param prefix name space prefix
+		 * @see org.xml.sax.ContentHandler#endPrefixMapping(java.lang.String)
+		 */
+		public void endPrefixMapping(String prefix) throws SAXException {
+			/* \_o< */
+		}
 
 
-	static String getNameFromKey(final String key) {
+
+		private boolean ownerTag = false;
+		private boolean privateKeyTag = false;
+
+		private PreparedStatement insertFileSt = null;
+		private PreparedStatement insertLinkSt = null;
+
+		/**
+		 * Called when the parsed find an opening tag
+		 * @param localName local tag name
+		 * @param rawName rawName (the one used here)
+		 * @see org.xml.sax.ContentHandler#startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
+		 */
+		public void startElement(String nameSpaceURI, String localName,
+					 String rawName, Attributes attrs) throws SAXException {
+			if (rawName == null) {
+				rawName = localName;
+			}
+
+			if (rawName == null)
+				return;
+
+			ownerTag = false;
+			privateKeyTag = false;
+
+			/* TODO : <title></title> */
+
+			if ("owner".equals(rawName)) {
+				ownerTag = true;
+				return;
+			}
+
+			if ("privateKey".equals(rawName)) {
+				privateKeyTag = true;
+				return;
+			}
+
+			if ("index".equals(rawName)) { /* links */
+
+				int nextId;
+
+				try {
+					if (insertLinkSt == null)
+						insertLinkSt = db.getConnection().prepareStatement("INSERT INTO links "
+												   + "(publicKey, mark, comment, indexParent, indexTarget) "
+												   + "VALUES (?, 0, ?, ?, NULL)");
+
+					String key = attrs.getValue("key");
+
+					if (key == null) /* it was the beginning of the index */
+						return;
+
+					key = key.trim();
+
+					insertLinkSt.setString(1, key);
+					insertLinkSt.setString(2, "No comment"); /* comment not used at the moment */
+					insertLinkSt.setInt(3, id);
+
+					insertLinkSt.execute();
+				} catch(SQLException e) {
+					Logger.error(this, "Error while adding link : "+e.toString());
+				}
+
+				return;
+			}
+
+			if ("file".equals(rawName)) {
+				int nextId;
+
+				try {
+					if (insertFileSt == null)
+						insertFileSt =
+							db.getConnection().prepareStatement("INSERT INTO files "
+											    + "(filename, publicKey, localPath, mime, size, category, indexParent) "
+											    + "VALUES (?, ?, NULL, ?, ?, NULL, ?)");
+
+					String key = attrs.getValue("key");
+					String filename = FreenetURIHelper.getFilenameFromKey(key);
+					String mime = attrs.getValue("mime");
+					long size = Long.parseLong(attrs.getValue("size"));
+
+					insertFileSt.setString(1, filename);
+					insertFileSt.setString(2, key);
+					insertFileSt.setString(3, mime);
+					insertFileSt.setLong(4, size);
+					insertFileSt.setInt(5, id);
+
+					insertFileSt.execute();
+				} catch(SQLException e) {
+					Logger.error(this, "Error while adding file: "+e.toString());
+				}
+
+				return;
+			}
+
+			/* ignore unknown tags */
+
+			/* et paf ! Ca fait des Chocapics(tm)(r)(c)(m)(dtc) ! */
+		}
+
+		/**
+		 * Called when a closing tag is met
+		 * @see org.xml.sax.ContentHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
+		 */
+		public void endElement(String nameSpaceURI, String localName,
+				       String rawName) throws SAXException {
+				/* \_o< */
+		}
+
+
+		/**
+		 * Called when a text between two tag is met
+		 * @param ch text
+		 * @param start position
+		 * @param end position
+		 * @see org.xml.sax.ContentHandler#characters(char[], int, int)
+		 */
+		public void characters(char[] ch, int start, int end) throws SAXException {
+			String txt = new String(ch, start, end);
+
+			if (ownerTag) {
+				/* \_o< ==> TODO */
+				return;
+			}
+
+			if (privateKeyTag) {
+				if (privateKey == null || privateKey.trim().equals(txt.trim())) {
+					/* the public key was published, we will have to do the same later */
+					setPublishPrivateKey(true);
+				}
+				else
+					setPublishPrivateKey(false);
+
+				if (privateKey == null)
+					setPrivateKey(txt.trim());
+
+				return;
+			}
+
+			/* ignore unkwown stuffs */
+
+		}
+
+		public void ignorableWhitespace(char[] ch, int start, int end) throws SAXException {
+
+		}
+
+		public void processingInstruction(String target, String data) throws SAXException {
+
+		}
+
+		/**
+		 * @see org.xml.sax.ContentHandler#skippedEntity(java.lang.String)
+		 */
+		public void skippedEntity(String arg0) throws SAXException {
+
+		}
+
+	}
+
+
+	public synchronized void loadXML(final java.io.InputStream input, boolean clean) {
+		IndexHandler handler = new IndexHandler();
+
+		try {
+			// Use the default (non-validating) parser
+			SAXParserFactory factory = SAXParserFactory.newInstance();
+
+			// Parse the input
+			SAXParser saxParser = factory.newSAXParser();
+			saxParser.parse(input, handler );
+		} catch(javax.xml.parsers.ParserConfigurationException e) {
+			Logger.error(this, "Error (1) while parsing index: "+e.toString());
+		} catch(org.xml.sax.SAXException e) {
+			Logger.error(this, "Error (2) while parsing index: "+e.toString());
+		} catch(java.io.IOException e) {
+			Logger.error(this, "Error (3) while parsing index: "+e.toString());
+		}
+	}
+
+
+
+	public static String getNameFromKey(final String key) {
 		String name = null;
 
 		name = FreenetURIHelper.getFilenameFromKey(key);
@@ -1484,7 +1447,8 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 
 	public void do_import(IndexBrowserPanel indexBrowser, Element e) {
-		loadXML(e, true);
+		/* TODO TODO TODO */
+		//loadXML(e, true);
 	}
 
 
