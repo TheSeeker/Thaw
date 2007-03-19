@@ -238,18 +238,16 @@ public class DatabaseManager {
 		}
 	}
 
-
 	public static int getNextId(Hsqldb db, String table) {
 			try {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT id FROM "+
-									 table+" ORDER BY id DESC "+
-									 " LIMIT 1");
+				st = db.getConnection().prepareStatement("SELECT IDENTITY()+1 FROM "+
+									 table);
 				ResultSet res = st.executeQuery();
 
 				if (res.next())
-					return (res.getInt("id") + 1);
+					return res.getInt(1);
 				else
 					return 1;
 
