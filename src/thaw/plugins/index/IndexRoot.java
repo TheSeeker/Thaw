@@ -34,7 +34,7 @@ public class IndexRoot extends IndexFolder implements IndexTreeNode {
 		/* TODO : Don't do like this
 		 *        Use the database :
 		 *            ask '[importedFolderName]%' ORDER BY name DESC LIMIT 1
-		 *        and pray there is no importedFolder n°10 or more,
+		 *        and pray there is no importedFolder number #10 or more,
 		 *        or that the database will return the good one :p
 		 */
 
