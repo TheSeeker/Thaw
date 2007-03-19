@@ -1227,34 +1227,4 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 		return e;
 	}
 
-	public void do_import(IndexBrowserPanel indexBrowser, Element e) {
-		/*
-		NodeList list = e.getChildNodes();
-
-		for (int i = 0 ; i < list.getLength(); i++) {
-			Node n = list.item(i);
-
-			if (n.getNodeType() == Node.ELEMENT_NODE) {
-				Element el = (Element)n;
-
-				if (el.getTagName().equals("fullIndex")) {
-					Index index = IndexManagementHelper.reuseIndex(null, indexBrowser,
-										       this, el.getAttribute("publicKey"),
-										       el.getAttribute("privateKey"), false);
-					if (index != null) {
-						index.rename(el.getAttribute("displayName"));
-						index.do_import(indexBrowser, el);
-					}
-				}
-
-				if (el.getTagName().equals("indexCategory")) {
-					IndexFolder newCat = IndexManagementHelper.addIndexFolder(indexBrowser, this,
-												  el.getAttribute("name"));
-					newCat.do_import(indexBrowser, el);
-				}
-			}
-		}
-		*/
-
-	}
 }

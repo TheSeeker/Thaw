@@ -55,7 +55,6 @@ public interface IndexTreeNode {
 	 * Will export private keys too !
 	 */
 	public Element do_export(Document xmlDoc, boolean withContent);
-	public void do_import(IndexBrowserPanel indexBrowser, Element e);
 
 
 	/**

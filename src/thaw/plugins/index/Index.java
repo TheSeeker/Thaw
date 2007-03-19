@@ -1454,12 +1454,6 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	}
 
 
-	public void do_import(IndexBrowserPanel indexBrowser, Element e) {
-		/* TODO TODO TODO */
-		//loadXML(e, true);
-	}
-
-
 	public boolean equals(Object o) {
 		if (o == null || !(o instanceof Index))
 			return false;
