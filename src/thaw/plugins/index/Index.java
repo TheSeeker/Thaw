@@ -1269,7 +1269,9 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 			if (privateKeyTag) {
 				if (privateKey == null || privateKey.trim().equals(txt.trim())) {
-					/* the public key was published, we will have to do the same later */
+					/**
+					 * the private key was published, we will have to do the same later
+					 */
 					setPublishPrivateKey(true);
 				}
 				else

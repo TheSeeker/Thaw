@@ -380,12 +380,12 @@ public class File implements Observer {
 		PreparedStatement st;
 
 		try {
-			st = db.getConnection().prepareStatement("SELECT id, filename, publicKey, "+
-								 "localPath, mime, size, indexParent "+
-								 "FROM files "+
-								 "WHERE filename LIKE ?");
+			st = db.getConnection().prepareStatement("SELECT a.id, a.filename, a.publicKey, "+
+								 "a.localPath, a.mime, a.size, a.indexParent "+
+								 "FROM files AS a JOIN indexes AS b ON (a.indexParent = b.id)"+
+								 "WHERE b.privateKey IS NOT NULL AND a.filename LIKE ?");
 		} catch(SQLException e) {
-			Logger.error("thaw.plugin.index.File", "Please tell to JFlesch that his SQL sux because : "+e.toString());
+			Logger.error("thaw.plugin.index.File", "Error while sending query to the database : "+e.toString());
 			return false;
 		}
 
