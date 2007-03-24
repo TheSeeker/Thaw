@@ -223,6 +223,6 @@ public class Restarter implements Observer, Runnable, Plugin {
 	}
 
 	public javax.swing.ImageIcon getIcon() {
-		return null;
+		return thaw.gui.IconBox.refreshAction;
 	}
 }
