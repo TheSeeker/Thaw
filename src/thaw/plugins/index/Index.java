@@ -1360,10 +1360,13 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	}
 
 
-	public static boolean isAlreadyKnown(Hsqldb db, String key) {
+	/**
+	 * @return the index id if found ; -1 else
+	 */
+	public static int isAlreadyKnown(Hsqldb db, String key) {
 		if (key.length() < 40) {
-			Logger.error(new Index(), "isAlreadyKnown: Invalid key: "+key);
-			return false;
+			Logger.error(new Index(), "isAlreadyKnown(): Invalid key: "+key);
+			return -1;
 		}
 
 		key = key.replaceAll(".xml", ".frdx");
@@ -1372,7 +1375,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 			try {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT publicKey from indexes WHERE LOWER(publicKey) LIKE ?");
+				st = db.getConnection().prepareStatement("SELECT id, publicKey from indexes WHERE LOWER(publicKey) LIKE ?");
 
 				st.setString(1, FreenetURIHelper.getComparablePart(key) +"%");
 
@@ -1382,18 +1385,18 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 					String pubKey = res.getString("publicKey").replaceAll(".xml", ".frdx");
 
 					if (FreenetURIHelper.compareKeys(pubKey, key)) {
-						return true;
+						return res.getInt("id");
 					}
 				}
 
-				return false;
+				return -1;
 
 			} catch(final SQLException e) {
 				Logger.error(new Index(), "isAlreadyKnown: Unable to check if link '"+key+"' point to a know index because: "+e.toString());
 			}
 		}
 
-		return false;
+		return -1;
 	}
 
 

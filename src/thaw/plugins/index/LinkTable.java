@@ -43,6 +43,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 	private JPopupMenu rightClickMenu;
 	private Vector rightClickActions;
 	private JMenuItem gotoItem;
+	private JMenuItem gotoCorrespondingItem;
 
 	private ToolbarModifier toolbarModifier;
 	private Vector toolbarActions;
@@ -50,6 +51,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 	private int[] selectedRows;
 
 	private Link firstSelectedLink = null;
+	private int firstSelectedLinkCorrespondingIndexId = -1; /* hmm .. I should make it shorter ... */
 
 
 	public LinkTable (final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser) {
@@ -104,6 +106,10 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		rightClickMenu.add(gotoItem);
 		gotoItem.addActionListener(this);
 
+		gotoCorrespondingItem = new JMenuItem(I18n.getMessage("thaw.plugin.index.gotoCorrespondingIndex"));
+		rightClickMenu.add(gotoCorrespondingItem);
+		gotoCorrespondingItem.addActionListener(this);
+
 		updateRightClickMenu(null);
 	}
 
@@ -127,6 +133,17 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		}
 
 		gotoItem.setEnabled((linkList != null) && !(linkList instanceof Index));
+
+		if (firstSelectedLink != null)
+			firstSelectedLinkCorrespondingIndexId =
+				Index.isAlreadyKnown(indexBrowser.getDb(),
+						     firstSelectedLink.getPublicKey());
+		else
+			firstSelectedLinkCorrespondingIndexId = -1;
+
+		gotoCorrespondingItem.setEnabled((linkList != null)
+						 && !(linkList instanceof Index)
+						 && firstSelectedLinkCorrespondingIndexId >= 0);
 	}
 
 	protected void updateToolbar(final Vector selectedLinks) {
@@ -215,6 +232,15 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 				indexBrowser.selectIndex(firstSelectedLink.getParentId());
 
 			return;
+		}
+
+		if (e.getSource() == gotoCorrespondingItem) {
+			if (selectedRows.length <= 0)
+				return;
+
+			if (firstSelectedLinkCorrespondingIndexId > 0) {
+				indexBrowser.selectIndex(firstSelectedLinkCorrespondingIndexId);
+			}
 		}
 	}
 

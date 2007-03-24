@@ -529,7 +529,7 @@ public class IndexManagementHelper {
 		if (privateKey != null && privateKey.equals(""))
 			privateKey = null;
 
-		if (Index.isAlreadyKnown(indexBrowser.getDb(), publicKey)) {
+		if (Index.isAlreadyKnown(indexBrowser.getDb(), publicKey) >= 0) {
 			Logger.notice(new IndexManagementHelper(), "Index already added !");
 			return null;
 		}

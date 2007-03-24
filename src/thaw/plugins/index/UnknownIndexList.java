@@ -136,7 +136,9 @@ public class UnknownIndexList implements MouseListener {
 	 * will check that the link link to an unknown index before adding
 	 */
 	public boolean addLink(final Link link) {
-		if ((link == null) || Index.isAlreadyKnown(indexBrowser.getDb(), link.getPublicKey()) || isInList(link))
+		if ((link == null)
+		    || Index.isAlreadyKnown(indexBrowser.getDb(), link.getPublicKey()) >= 0
+		    || isInList(link))
 			return false;
 
 		makePlace(0);
