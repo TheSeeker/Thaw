@@ -75,6 +75,8 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 	private boolean sortAsc = false;
 
 
+	private thaw.plugins.index.File firstSelectedFile; /* used for the 'goto corresponding index' option */
+
 
 	public FileTable(final FCPQueueManager queueManager,
 			 IndexBrowserPanel indexBrowser,
@@ -178,6 +180,8 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 	protected void updateRightClickMenu(final Vector selectedFiles) {
 		FileManagementHelper.FileAction action;
 
+		firstSelectedFile = selectedFiles != null ? ((thaw.plugins.index.File)selectedFiles.get(0)) : null;
+
 		for(final Iterator it = rightClickActions.iterator();
 		    it.hasNext();) {
 			action = (FileManagementHelper.FileAction)it.next();
@@ -264,7 +268,8 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			if (selectedRows.length <= 0)
 				return;
 
-			/* TODO : Re-do it :p */
+			if (firstSelectedFile != null)
+				indexBrowser.selectIndex(firstSelectedFile.getParentId());
 
 			return;
 		}

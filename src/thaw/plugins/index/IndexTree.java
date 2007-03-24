@@ -10,6 +10,7 @@ import java.awt.event.MouseListener;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -104,6 +105,8 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			 final FCPQueueManager queueManager,
 			 final IndexBrowserPanel indexBrowser,
 			 final Config config) {
+		this.indexBrowser = indexBrowser;
+
 		updatingIndexes = new Vector();
 
 		this.queueManager = queueManager;
@@ -543,6 +546,96 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			redraw(node);
 		}
 	}
+
+
+
+	/**
+	 * Will find the corresponding index and all its parents, then
+	 * will unfold the tree according to the path to reach the index
+	 * and then select the index. (won't touch filetable / linktable)
+	 */
+	public Index selectIndex(int id) {
+		int nmbFolders;
+		int[] parentFolders = new int[64];
+
+		if (indexBrowser == null
+		    || indexBrowser.getDb() == null) {
+			Logger.error(this, "selectIndex() : No access to the db ?!");
+			return null;
+		}
+
+		try {
+			synchronized(indexBrowser.getDb().dbLock) {
+				PreparedStatement st =
+					indexBrowser.getDb().getConnection().prepareStatement("SELECT folderId FROM indexParents WHERE indexId = ?");
+
+				st.setInt(1, id);
+
+				ResultSet set = st.executeQuery();
+
+				for(nmbFolders = 0 ; set.next() ; nmbFolders++) {
+					if (set.getObject("folderId") != null)
+						parentFolders[nmbFolders] = set.getInt("folderId");
+					else
+						parentFolders[nmbFolders] = -1;
+				}
+
+				if (nmbFolders == 0) {
+					Logger.error(this, "Unable to select specified index : Not found.");
+					return null;
+				}
+			}
+
+		} catch(SQLException e) {
+			Logger.error(this, "Unable to select specified index because : "+e.toString());
+			return null;
+		}
+
+		IndexTreeNode[] nodes = new IndexTreeNode[nmbFolders+1 /* +1 for the index */];
+
+		nodes[0] = getRoot();
+
+		for (int i = 1 ; i < nmbFolders; i++) {
+			IndexFolder folder= null;
+
+			for (int j= 0 ; j < nmbFolders && folder == null; j++) {
+				if (parentFolders[j] < 0)
+					continue;
+
+				folder = ((IndexFolder)nodes[i-1]).getChildFolder(parentFolders[j]);
+
+			}
+
+			nodes[i] = folder;
+
+			if (folder == null) {
+				Logger.error(this, "SelectIndex : Woops, something is missing.");
+
+				Logger.error(this, "Path found :");
+
+				for (int j = 0 ; j < nodes.length && nodes[j] != null ; j++) {
+					Logger.error(this,
+						     " -> "
+						     +Integer.toString(((IndexTreeNode)nodes[j]).getId())
+						     + " - "
+						     +nodes[j].toString());
+				}
+
+				return null;
+			}
+		}
+
+		nodes[nmbFolders] = ((IndexFolder)nodes[nmbFolders-1]).getChildIndex(id);
+
+
+		TreePath path = new TreePath(((Object[])nodes));
+
+		tree.setSelectionPath(path);
+
+		return ((Index)nodes[nmbFolders]);
+	}
+
+
 
 	public class IndexTreeRenderer extends DefaultTreeCellRenderer {
 

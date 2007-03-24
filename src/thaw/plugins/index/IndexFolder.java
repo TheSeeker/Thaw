@@ -1227,4 +1227,52 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 		return e;
 	}
 
+
+	public IndexFolder getChildFolder(int id) {
+		if (id < 0) {
+			Logger.notice(this, "getChildFolder() : Asked me to have the root ?!");
+			return null;
+		}
+
+		if (children == null)
+			loadChildren();
+
+		for (Iterator it = children.iterator() ;
+		     it.hasNext(); ) {
+		        Object child = it.next();
+
+			if (child instanceof IndexFolder) {
+				if (((IndexFolder)child).getId() == id) {
+					return ((IndexFolder)child);
+				}
+			}
+		}
+
+		return null;
+	}
+
+
+	public Index getChildIndex(int id) {
+		if (id < 0) {
+			Logger.error(this, "getChildIndex() : Invalid parameter !");
+			return null;
+		}
+
+		if (children == null)
+			loadChildren();
+
+		for (Iterator it = children.iterator() ;
+		     it.hasNext(); ) {
+		        Object child = it.next();
+
+			if (child instanceof Index) {
+				if (((Index)child).getId() == id) {
+					return ((Index)child);
+				}
+			}
+		}
+
+		return null;
+	}
+
 }

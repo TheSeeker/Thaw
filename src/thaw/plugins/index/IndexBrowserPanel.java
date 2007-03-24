@@ -200,4 +200,18 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	}
 
 
+	/**
+	 * will call IndexTree.selectIndex(id) and next tell to filetable and linktable
+	 * to display the content of the specified index
+	 */
+	public boolean selectIndex(int id) {
+		Index index = indexTree.selectIndex(id);
+
+		if (index != null) {
+			setList(index);
+			return true;
+		} else
+			return false;
+	}
+
 }
