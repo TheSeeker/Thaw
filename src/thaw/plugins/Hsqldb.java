@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.PreparedStatement;
 
 import thaw.core.Core;
 import thaw.core.I18n;
@@ -60,6 +61,9 @@ public class Hsqldb extends LibraryPlugin {
 
 		connection = DriverManager.getConnection(core.getConfig().getValue("hsqldb.url"),
 							 "sa", "");
+
+		PreparedStatement st = connection.prepareStatement("SET LOGSIZE 50");
+		st.execute();
 	}
 
 	public void disconnect() throws java.sql.SQLException {
