@@ -27,6 +27,7 @@ public class PluginManager {
 		"thaw.plugins.Hsqldb",
 		"thaw.plugins.IndexBrowser",
 		"thaw.plugins.IndexExporter",
+		"thaw.plugins.Restarter",
 		"thaw.plugins.SqlConsole",
 		"thaw.plugins.LogConsole"
 	};
