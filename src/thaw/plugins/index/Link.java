@@ -20,6 +20,7 @@ public class Link extends java.util.Observable {
 	private int parentId;
 	private Index parent = null;
 
+
 	public Link(final Hsqldb hsqldb, final int id) {
 		this.id = id;
 		this.db = hsqldb;

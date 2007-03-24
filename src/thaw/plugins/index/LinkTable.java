@@ -49,6 +49,9 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 	private int[] selectedRows;
 
+	private Link firstSelectedLink = null;
+
+
 	public LinkTable (final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser) {
 		this.indexBrowser = indexBrowser;
 
@@ -114,6 +117,8 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 	protected void updateRightClickMenu(final Vector selectedLinks) {
 		LinkManagementHelper.LinkAction action;
+
+		firstSelectedLink = selectedLinks != null ? ((Link)selectedLinks.get(0)) : null;
 
 		for (final Iterator it = rightClickActions.iterator();
 		     it.hasNext(); ) {
@@ -206,7 +211,8 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 			if (selectedRows.length <= 0)
 				return;
 
-			/* TODO */
+			if (firstSelectedLink != null)
+				indexBrowser.selectIndex(firstSelectedLink.getParentId());
 
 			return;
 		}
