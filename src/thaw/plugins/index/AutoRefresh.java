@@ -165,6 +165,9 @@ public class AutoRefresh implements Runnable, java.util.Observer {
 				/* \_o< */
 			}
 
+			if (!threadRunning)
+				break;
+
 			for (int i = 0 ; i < nmbIndexesPerSubInterval ; i++) {
 				lastIdx = updateNext(lastIdx);
 
