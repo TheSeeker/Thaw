@@ -64,7 +64,7 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 	public final static Color JLIST_NODE_STAT_BACKGROUND = Color.WHITE;
 	public final static Color JLIST_PEER_BACKGROUND = new Color(240,240,240);
 
-	public final static int STR_INFO_MAX_LNG = 50;
+	public final static int STR_INFO_MAX_LNG = 55;
 	public final static int STR_NODENAME_MAX_LNG = 15;
 
 	private JPanel refPanel;
@@ -349,85 +349,96 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 	 * @return null if it must not be displayed ; else an array with two elements (key translated + value translated)
 	 */
 	public String[] getTranslation(String key, String value) {
+		String [] result = null;
 
 		/* PEERS */
 
-		if ("volatile.lastRoutingBackoffReason".equals(key))
-			return new String[] {
+		if (result == null && "volatile.lastRoutingBackoffReason".equals(key))
+			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.lastRoutingBackoffReason"),
 				value
 			};
 
-		if ("volatile.routingBackoffPercent".equals(key))
-			return new String[] {
+		if (result == null && "volatile.routingBackoffPercent".equals(key))
+			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.routingBackoffPercent"),
 				value + "%"
 			};
 
-		if ("version".equals(key))
-			return new String[] {
+		if (result == null && "version".equals(key))
+			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.version"),
 				value
 			};
 
-		if ("volatile.status".equals(key))
-			return new String[] {
+		if (result == null && "volatile.status".equals(key))
+			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.status"),
 				value
 			};
 
-		if ("myName".equals(key))
-			return new String[] {
+		if (result == null && "myName".equals(key))
+			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.myName"),
 				value
 			};
 
 
-		if ("physical.udp".equals(key))
-			return new String[] {
+		if (result == null && "physical.udp".equals(key))
+			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.physical.udp"),
 				value
 			};
 
-		if ("volatile.averagePingTime".equals(key))
-			return new String[] {
+		if (result == null && "volatile.averagePingTime".equals(key))
+			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.averagePingTime"),
 				Integer.toString(new Float(value).intValue()) + " ms"
 			};
 
+		if (result == null && "volatile.idle".equals(key))
+			result = new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.idle"),
+				"~" + thaw.gui.GUIHelper.getPrintableTime(Long.parseLong(value) / 1000)
+			};
+
 		/* NODE */
 
-		if ("volatile.overallSize".equals(key))
-			return new String[] {
+		if (result == null && "volatile.overallSize".equals(key))
+			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.node.overallSize"),
 				"~" + thaw.gui.GUIHelper.getPrintableSize(Long.parseLong(value))
 			};
 
-		if ("volatile.uptimeSeconds".equals(key)) {
-			return new String[] {
+		if (result == null && "volatile.uptimeSeconds".equals(key)) {
+			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.node.uptimeSeconds"),
 				"~" + thaw.gui.GUIHelper.getPrintableTime(Long.parseLong(value))
 			};
 		}
 
-		if ("volatile.networkSizeEstimateSession".equals(key)) {
-			return new String[] {
+		if (result == null && "volatile.networkSizeEstimateSession".equals(key)) {
+			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.node.networkSizeEstimateSession"),
 				value
 			};
 		}
 
-		if ("myName".equals(key)) {
-			return new String[] {
+		if (result == null && "myName".equals(key)) {
+			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.node.myName"),
 				value
 			};
 		}
 
-		if (advanced)
-			return new String[] { key, value };
+		if (advanced) {
+			if (result == null)
+				result = new String[] { key, value };
+			else
+				result[0] = result[0] + " ("+key+")";
+		}
 
-		return null;
+		return result;
 	}
 
 
