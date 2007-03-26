@@ -31,6 +31,7 @@ import java.util.Observer;
 
 import thaw.core.Config;
 import thaw.core.I18n;
+import thaw.core.Logger;
 
 import thaw.gui.IconBox;
 
@@ -78,7 +79,8 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 	private JButton refCopyButton;
 
 	private JList peerList;
-	private JProgressBar memBar;
+	private JProgressBar thawMemBar;
+	private JProgressBar nodeMemBar;
 
 	private JLabel detailsLabel;
 	private JPanel detailsPanel;
@@ -111,14 +113,22 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 		peerListLabel.setIcon(IconBox.peers);
 
 
-		memBar = new JProgressBar(0, 100);
+		nodeMemBar = new JProgressBar(0, 100);
+		thawMemBar = new JProgressBar(0, 100);
+		nodeMemBar.setStringPainted(true);
+		thawMemBar.setStringPainted(true);
+
 		setMemBar(0, 134217728);
-		memBar.setStringPainted(true);
 
 
 		peerPanel.add(peerListLabel, BorderLayout.NORTH);
 		peerPanel.add(new JScrollPane(peerList), BorderLayout.CENTER);
-		peerPanel.add(memBar, BorderLayout.SOUTH);
+
+		JPanel memPanel = new JPanel(new GridLayout(2, 1));
+		memPanel.add(nodeMemBar);
+		memPanel.add(thawMemBar);
+
+		peerPanel.add(memPanel, BorderLayout.SOUTH);
 
 
 		mainPanel = new JPanel(new GridLayout(2, 1, 10, 10));
@@ -161,16 +171,40 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 	public void setMemBar(long used, long max) {
 		int pourcent;
 
+		/* node mem bar */
+
 		pourcent = (int)((used * 100) / max);
 
-		memBar.setString(I18n.getMessage("thaw.plugin.peerMonitor.infos.nodeMemory")+ ": "
-				 + thaw.gui.GUIHelper.getPrintableSize(used)
-				 + " / "
-				 + thaw.gui.GUIHelper.getPrintableSize(max)
-				 + " ("+Integer.toString(pourcent)+"%)");
+		nodeMemBar.setString(I18n.getMessage("thaw.plugin.peerMonitor.infos.nodeMemory")+ ": "
+				     + thaw.gui.GUIHelper.getPrintableSize(used)
+				     + " / "
+				     + thaw.gui.GUIHelper.getPrintableSize(max)
+				     + " ("+Integer.toString(pourcent)+"%)");
 
-		memBar.setValue(pourcent);
+		nodeMemBar.setValue(pourcent);
+
+
+		/* thaw mem bar */
+
+		max = Runtime.getRuntime().maxMemory();
+
+		if (max == Long.MAX_VALUE) {
+			max = Runtime.getRuntime().totalMemory();
+		}
+
+		used = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+
+		pourcent = (int)((used * 100) / max);
+
+		thawMemBar.setString(I18n.getMessage("thaw.plugin.peerMonitor.infos.thawMemory")+ ": "
+				     + thaw.gui.GUIHelper.getPrintableSize(used)
+				     + " / "
+				     + thaw.gui.GUIHelper.getPrintableSize(max)
+				     + " ("+Integer.toString(pourcent)+"%)");
+
+		thawMemBar.setValue(pourcent);
 	}
+
 
 	public void setRef(String ref) {
 		refArea.setText(ref);
