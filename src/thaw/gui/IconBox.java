@@ -89,6 +89,9 @@ public class IconBox {
 	public static ImageIcon identity;
 	public static ImageIcon peers;
 
+	public static ImageIcon lookAndFeel;
+	public static ImageIcon minLookAndFeel;
+
 
 	/**
 	 * Not really used
@@ -174,6 +177,8 @@ public class IconBox {
 		IconBox.computer            = IconBox.loadIcon("computer.png");
 		IconBox.identity            = IconBox.loadIcon("identity.png");
 		IconBox.peers               = IconBox.loadIcon("peers.png");
+		IconBox.lookAndFeel         = IconBox.loadIcon("lookAndFeel.png");
+		IconBox.minLookAndFeel      = IconBox.loadIcon("min-lookAndFeel.png");
 	}
 
 }

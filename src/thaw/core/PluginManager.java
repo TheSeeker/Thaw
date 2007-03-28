@@ -13,6 +13,7 @@ public class PluginManager {
 		"thaw.plugins.FetchPlugin",
 		"thaw.plugins.InsertPlugin",
 		"thaw.plugins.StatusBar",
+		"thaw.plugins.ThemeSelector",
 		"thaw.plugins.Hsqldb",
 		"thaw.plugins.IndexBrowser",
 		"thaw.plugins.IndexExporter"
@@ -24,6 +25,7 @@ public class PluginManager {
 		"thaw.plugins.FetchPlugin",
 		"thaw.plugins.InsertPlugin",
 		"thaw.plugins.StatusBar",
+		"thaw.plugins.ThemeSelector",
 		"thaw.plugins.Hsqldb",
 		"thaw.plugins.IndexBrowser",
 		"thaw.plugins.IndexExporter",

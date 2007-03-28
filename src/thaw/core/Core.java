@@ -338,7 +338,11 @@ public class Core implements Observer {
 
 		try {
 			if (Core.lookAndFeel == null) {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				if (config != null
+				    && config.getValue("lookAndFeel") != null)
+					UIManager.setLookAndFeel(config.getValue("lookAndFeel"));
+				else
+					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			} else {
 				UIManager.setLookAndFeel(Core.lookAndFeel);
 			}

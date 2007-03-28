@@ -491,10 +491,15 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 		if (e.getFirstIndex() == 0) {
 			displayInfos(I18n.getMessage("thaw.plugin.peerMonitor.nodeInfos"), nodeInfos);
 		} else {
-			String peerName = peers.get(e.getFirstIndex()).toString();
+			Peer peer;
 
-			displayInfos(I18n.getMessage("thaw.plugin.peerMonitor.peerInfos") + " '" + peerName + "':",
-				     ((Peer)peers.get(e.getFirstIndex())).getParameters());
+			if ((peer = ((Peer)peerList.getSelectedValue())) != null) {
+
+				String peerName = peer.toString();
+
+				displayInfos(I18n.getMessage("thaw.plugin.peerMonitor.peerInfos") + " '" + peerName + "':",
+					     peer.getParameters());
+			}
 		}
 
 		setChanged();
