@@ -1,8 +1,14 @@
 package thaw.core;
 
+import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.jmdns.JmDNS;
+import javax.jmdns.ServiceEvent;
+import javax.jmdns.ServiceInfo;
+import javax.jmdns.ServiceListener;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -25,7 +31,7 @@ public class Core implements Observer {
 	private SplashScreen splashScreen = null;
 
 	private MainWindow mainWindow = null;
-	private Config config = null;
+	Config config = null;
 	private PluginManager pluginManager = null;
 	private ConfigWindow configWindow = null;
 
@@ -41,7 +47,36 @@ public class Core implements Observer {
 	public final static int TIME_BETWEEN_EACH_TRY = 5000;
 
 	private ReconnectionManager reconnectionManager = null;
+	
+	// MDNS stuffs
+	private final JmDNS jmdns;
+	private final LinkedHashMap foundNodes;
+	
+	private class FCPMDNSListener implements ServiceListener {
+		public void serviceAdded(ServiceEvent event) {
+			Logger.notice(this, "Service added   : " + event.getName()+"."+event.getType());
+			// Force the gathering of informations
+			jmdns.getServiceInfo(MDNSDiscoveryPanel.FCP_SERVICE_TYPE, event.getName());
+		}
 
+		public void serviceRemoved(ServiceEvent event) {
+			Logger.notice(this, "Service removed : " + event.getName()+"."+event.getType());
+			ServiceInfo service = event.getInfo();
+
+			synchronized (foundNodes) {
+				foundNodes.remove(service.getName());	
+			}
+		}
+
+		public void serviceResolved(ServiceEvent event) {
+			Logger.debug(this, "Service resolved: " + event.getInfo());
+			ServiceInfo service = event.getInfo();
+
+			synchronized (foundNodes) {
+				foundNodes.put(service.getName(), service);
+			}
+		}
+	}
 
 	/**
 	 * Creates a core, but do nothing else (no initialization).
@@ -50,6 +85,41 @@ public class Core implements Observer {
 		Logger.info(this, "Thaw, version "+Main.VERSION, true);
 		Logger.info(this, "2006(c) Freenet project", true);
 		Logger.info(this, "Released under GPL license version 2 or later (see http://www.fsf.org/licensing/licenses/gpl.html)", true);
+		
+		this.foundNodes = new LinkedHashMap();
+		try {
+			// Spawn the mdns listener
+			Logger.info(this, "Starting JMDNS ...");
+			this.jmdns = new JmDNS();
+
+			// Start listening for new nodes
+			jmdns.addServiceListener(MDNSDiscoveryPanel.FCP_SERVICE_TYPE, new FCPMDNSListener());
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException("Error loading MDNSDiscoveryPanel : " + e.getMessage());
+		}
+	}
+
+	protected int getDiscoveredNodeListSize() {
+		synchronized (foundNodes) {
+			return foundNodes.size();
+		}
+	}
+	
+	protected boolean isHasTheSameIPAddress(ServiceInfo host) {
+		try{
+			return (jmdns.getInterface().equals(host.getAddress()) ? true : false);
+		} catch (IOException e) {
+			return false;
+		}
+	}
+
+	protected ServiceInfo getServiceInfoFromDiscoveredNodeList(Object o) {
+		if(o == null) return null;
+		synchronized (foundNodes) {
+			return (ServiceInfo) foundNodes.get(o);
+		}
 	}
 
 	/**
@@ -444,6 +514,8 @@ public class Core implements Observer {
 					return;
 			}
 		}
+		Logger.info(this, "Stopping JMDNS ...");
+		jmdns.close();
 
 		Logger.info(this, "Stopping scheduler ...");
 		if(queueManager != null)

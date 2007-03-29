@@ -4,30 +4,23 @@
 
 package thaw.core;
 
-import java.io.IOException;
-import java.util.HashMap;
-
-import javax.jmdns.JmDNS;
-import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceInfo;
-import javax.jmdns.ServiceListener;
 import javax.swing.DefaultListModel;
 import java.awt.GridLayout;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
-import javax.swing.JFrame;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.net.Socket;
+
 import javax.swing.JButton;
 
-import thaw.core.Config;
 import thaw.core.Logger;
-import thaw.fcp.FCPConnection;
 
 /**
  * This panel implements Zeroconf (called Bonjour/RendezVous by apple) discovery for Thaw
@@ -46,43 +39,32 @@ import thaw.fcp.FCPConnection;
  * TODO: maybe we should have a small progressbar shown in a new popup to introduce a "delay" at startup
  */
 public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runnable {
+	public interface MDNSDiscoveryPanelCallback {
+		public void onMDNSDiscoverPanelClosure(boolean hasBeenCancelled);
+	}
 	private static final long serialVersionUID = 1L;
 
-	private static final String FCP_SERVICE_TYPE = "_fcp._tcp.local.";
+	public static final String FCP_SERVICE_TYPE = "_fcp._tcp.local.";
 
-	private boolean goon = true;
-	private boolean validated = false;
+	private boolean goon;
+	private boolean cancelledByUser = false;
 	private ServiceInfo selectedValue;
+	private final MDNSDiscoveryPanelCallback cb;
 
 	private final JList list;
 	private final DefaultListModel listModel;
 	private final JLabel label;
 
-	private final Config config;
-	private final HashMap foundNodes;
-	private final JmDNS jmdns;
+	private final Core core;
 
 	private JButton okButton;
 	private JButton cancelButton;
 
 
-	public MDNSDiscoveryPanel(java.awt.Dialog owner, Config conf) {
+	public MDNSDiscoveryPanel(java.awt.Dialog owner, Core core, MDNSDiscoveryPanelCallback cb) {
 		super(owner, "ZeroConf");
-
-
-		this.config = conf;
-		this.foundNodes = new HashMap();
-		try {
-			// Spawn the mdns listener
-			this.jmdns = new JmDNS();
-
-			// Start listening for new nodes
-			jmdns.addServiceListener(MDNSDiscoveryPanel.FCP_SERVICE_TYPE, new FCPMDNSListener(this));
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException("Error loading MDNSDiscoveryPanel : " + e.getMessage());
-		}
+		this.core = core;
+		this.cb = cb;
 
 		// The UI
 		list = new JList();
@@ -111,69 +93,26 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 		buttonPanel.add(cancelButton);
 
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-
-
 		pack();
-
-		super.setLocationRelativeTo(this.getParent());
-		this.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
-		this.setVisible(true);
-
-		Logger.notice(this, "Starting MDNSDiscovery");
 	}
 
 
-	private class FCPMDNSListener implements ServiceListener {
-		private final MDNSDiscoveryPanel panel;
-
-		public FCPMDNSListener(MDNSDiscoveryPanel panel) {
-			this.panel = panel;
-		}
-
-		public void serviceAdded(ServiceEvent event) {
-			Logger.notice(this, "Service added   : " + event.getName()+"."+event.getType());
-			// Force the gathering of informations
-			jmdns.getServiceInfo(MDNSDiscoveryPanel.FCP_SERVICE_TYPE, event.getName());
-		}
-
-		public synchronized void serviceRemoved(ServiceEvent event) {
-			Logger.notice(this, "Service removed : " + event.getName()+"."+event.getType());
-			ServiceInfo service = event.getInfo();
-
-			synchronized (panel) {
-				panel.foundNodes.remove(service.getName());
-				panel.listModel.removeElement(service.getName());
-				notify();
-			}
-		}
-
-		public synchronized void serviceResolved(ServiceEvent event) {
-			Logger.debug(this, "Service resolved: " + event.getInfo());
-			ServiceInfo service = event.getInfo();
-
-			synchronized (panel) {
-				panel.foundNodes.put(service.getName(), service);
-				panel.listModel.addElement(service.getName());
-				notify();
-			}
-		}
-	}
+	
 
 	/**
 	 * The user has selected something: notify the main loop and process the data.
 	 */
 	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == cancelButton)
+			cancelledByUser = true;
+		
+		goon = false;
+		
 		synchronized (this) {
-			selectedValue = (ServiceInfo) foundNodes.get(list.getSelectedValue());
-			goon = false;
-
-			validated = (e.getSource() == okButton);
-
+			selectedValue = core.getServiceInfoFromDiscoveredNodeList(list.getSelectedValue());
 			notify();
 		}
-		Logger.debug(this, "User has selected : "+foundNodes.get(list.getSelectedValue()));
-
-		setVisible(false);
+		Logger.info(this, "User has selected : " + selectedValue);
 	}
 
 	/**
@@ -181,9 +120,14 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 	 *
 	 */
 	public void run() {
+		super.setLocationRelativeTo(this.getParent());
+		this.setVisible(true);
+		
+		Logger.notice(this, "Show the MDNSDiscoveryPanel");
+		Socket testSocket = null;
 		boolean isConfigValid = false;
-		FCPConnection fcp = null;
-
+		
+		goon = true;
 		do {
 			// Loop until a selection is done
 			while(goon) {
@@ -195,47 +139,47 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 
 				list.repaint();
 			}
-
-			if(selectedValue == null
-			   || !validated)
-				continue;
+			
+			if(cancelledByUser) break;
+			else if(selectedValue == null) continue;
 
 			Logger.debug(this, "We got something from the UI : let's try to connect");
 
-			// We try to connect to the server
-			fcp = new FCPConnection(selectedValue.getHostAddress(), selectedValue.getPort(), -1, true, true);
-			isConfigValid = fcp.connect();
+			try {
+				// We try to connect to the server
+				// TODO: implement a proper test!
+				testSocket = new Socket(selectedValue.getHostAddress(), selectedValue.getPort());
+				isConfigValid = testSocket.isConnected();
 
+				// Close the fcp socket we have openned, cleanup
+				testSocket.close();
+			} catch (IOException e) {
+				isConfigValid = false;
+			}
+			
 			Logger.debug(this, "isConfigValid ="+isConfigValid);
 
 			// Reload, just in  case it failed...
 			goon = true;
-			list.removeSelectionInterval(0, foundNodes.size());
+			list.removeSelectionInterval(0, core.getDiscoveredNodeListSize());
 		} while(!isConfigValid);
 
-		Logger.debug(this, "We got something that looks valid from the UI : let's propagate changes to  the config");
 
-		// Save the config. now that we know it's valid
-		config.setValue("nodeAddress", selectedValue.getHostAddress());
-		config.setValue("nodePort", new Integer(selectedValue.getPort()).toString());
-		try {
-			config.setValue("sameComputer", (jmdns.getInterface().equals(selectedValue.getAddress()) ? "true" : "false"));
-		} catch (IOException e ) {} // What can we do except assuming default is fine ?
-
-
-		Logger.info(this, "We are done : configuration has been saved sucessfully.");
-
-		// Close the fcp socket we have openned, cleanup
-		fcp.disconnect();
-		jmdns.close();
 		this.setVisible(false);
-	}
+		
+		if (!cancelledByUser) {
+			Logger.debug(this, "We got something that looks valid from the UI : let's propagate changes to  the config");
+			// Save the config. now that we know it's valid
+			core.config.setValue("nodeAddress", selectedValue.getHostAddress());
+			core.config.setValue("nodePort", new Integer(selectedValue.getPort()).toString());
+			core.config.setValue("sameComputer", String.valueOf(core.isHasTheSameIPAddress(selectedValue)));
 
-	/**
-	 * Convenient testing function function.
-	 */
-	public static void main(String[] args) {
-		new MDNSDiscoveryPanel(null, new Config("/tmp/conf.ini")).run();
-		System.exit(0);
+
+			Logger.info(this, "We are done : configuration has been saved sucessfully.");
+			
+		}else
+			Logger.info(this, "The user has cancelled!");
+		cb.onMDNSDiscoverPanelClosure(cancelledByUser);
+		Logger.notice(this, "We got back from the MDNSDiscoveryPanel callback");
 	}
 }

@@ -11,13 +11,17 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 
+import thaw.core.MDNSDiscoveryPanel.MDNSDiscoveryPanelCallback;
+
 /**
  * NodeConfigPanel. Creates and manages the panel containing all the things to configure
  *  the settings to access the node.
  */
-public class NodeConfigPanel implements Observer, java.awt.event.ActionListener {
+public class NodeConfigPanel implements Observer, java.awt.event.ActionListener, MDNSDiscoveryPanelCallback {
 	private Core core;
 	private JPanel nodeConfigPanel = null;
+	private final MDNSDiscoveryPanel mdnsPanel;
+	private boolean isMDNSPanerShown = false;
 
 
 	private final static String[] paramNames = {
@@ -58,6 +62,8 @@ public class NodeConfigPanel implements Observer, java.awt.event.ActionListener 
 	public NodeConfigPanel(final ConfigWindow configWindow, final Core core) {
 		this.core = core;
 		this.configWindow = configWindow;
+		
+		mdnsPanel = new MDNSDiscoveryPanel(configWindow.getFrame(), core, this);
 
 		sameComputer = new JCheckBox(I18n.getMessage("thaw.config.sameComputer"),
 					     Boolean.valueOf(core.getConfig().getValue("sameComputer")).booleanValue());
@@ -188,24 +194,24 @@ public class NodeConfigPanel implements Observer, java.awt.event.ActionListener 
 		multipleSockets.setSelected(Boolean.valueOf(core.getConfig().getValue("multipleSockets")).booleanValue());
 	}
 
-
-
-	protected class MDNSDiscovery implements Runnable {
-		public MDNSDiscovery() { }
-
-		public void run() {
-			(new MDNSDiscoveryPanel(core.getConfigWindow().getFrame(), core.getConfig())).run();
-			resetValues();
-		}
-	}
-
-
-
 	public void actionPerformed(java.awt.event.ActionEvent event) {
 		if (event.getSource() == autodetect) {
-			Thread th = new Thread(new NodeConfigPanel.MDNSDiscovery());
-			th.start();
+			synchronized (this) {
+				if(isMDNSPanerShown) return;
+				isMDNSPanerShown = true;
+			}
+			autodetect.setEnabled(false);
+			new Thread(mdnsPanel).start();
 		}
 	}
-
+	
+	public void onMDNSDiscoverPanelClosure(boolean hasBeenCancelled) { 
+		// We got back !	
+		synchronized (this) {
+			isMDNSPanerShown = false;
+		}
+		autodetect.setEnabled(true);
+		if(!hasBeenCancelled)
+			resetValues();
+	}
 }
