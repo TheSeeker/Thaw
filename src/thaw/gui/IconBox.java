@@ -105,24 +105,24 @@ public class IconBox {
 		Class daClass;
 		ClassLoader classLoader;
 
-		daClass = (new IconBox()).getClass();
+		daClass = IconBox.class;
 
 		if (daClass == null) {
-			Logger.error(new IconBox(), "Icon '"+fileName+"' not found ! (Class)");
+			Logger.error(IconBox.class, "Icon '"+fileName+"' not found ! (Class)");
 			return null;
 		}
 
 		classLoader = daClass.getClassLoader();
 
 		if (classLoader == null) {
-			Logger.error(new IconBox(), "Icon '"+fileName+"' not found ! (ClassLoader)");
+			Logger.error(IconBox.class, "Icon '"+fileName+"' not found ! (ClassLoader)");
 			return null;
 		}
 
 		url = classLoader.getResource(fileName);
 
 		if (url == null) {
-			Logger.error(new IconBox(), "Icon '"+fileName+"' not found ! (Resource)");
+			Logger.error(IconBox.class, "Icon '"+fileName+"' not found ! (Resource)");
 			return null;
 		}
 
