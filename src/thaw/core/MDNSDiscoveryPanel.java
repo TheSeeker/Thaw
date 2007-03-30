@@ -6,6 +6,8 @@ package thaw.core;
 
 import javax.jmdns.ServiceInfo;
 import javax.swing.DefaultListModel;
+
+import java.awt.Dialog;
 import java.awt.GridLayout;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
@@ -40,6 +42,10 @@ import thaw.core.Logger;
  */
 public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runnable {
 	public interface MDNSDiscoveryPanelCallback {
+		/**
+		 * Called upon exit from MDNSDiscoveryPanelCallback
+		 * It runs on its own thread but still, don't abuse it :)
+		 */
 		public void onMDNSDiscoverPanelClosure(boolean hasBeenCancelled);
 	}
 	private static final long serialVersionUID = 1L;
@@ -50,6 +56,7 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 	private boolean cancelledByUser = false;
 	private ServiceInfo selectedValue;
 	private final MDNSDiscoveryPanelCallback cb;
+	private final Dialog owner;
 
 	private final JList list;
 	private final DefaultListModel listModel;
@@ -61,9 +68,10 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 	private JButton cancelButton;
 
 
-	public MDNSDiscoveryPanel(java.awt.Dialog owner, Core core, MDNSDiscoveryPanelCallback cb) {
+	public MDNSDiscoveryPanel(Dialog owner, Core core, MDNSDiscoveryPanelCallback cb) {
 		super(owner, "ZeroConf");
 		this.core = core;
+		this.owner = owner;
 		this.cb = cb;
 
 		// The UI
@@ -122,6 +130,7 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 	public void run() {
 		super.setLocationRelativeTo(this.getParent());
 		this.setVisible(true);
+		owner.setEnabled(false);
 		
 		Logger.notice(this, "Show the MDNSDiscoveryPanel");
 		Socket testSocket = null;
@@ -166,6 +175,7 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 
 
 		this.setVisible(false);
+		owner.setEnabled(true);
 		
 		if (!cancelledByUser) {
 			Logger.debug(this, "We got something that looks valid from the UI : let's propagate changes to  the config");
