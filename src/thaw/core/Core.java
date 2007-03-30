@@ -433,7 +433,6 @@ public class Core implements Observer {
 		mainWindow = new MainWindow(this);
 
 		configWindow = new ConfigWindow(this);
-		configWindow.setVisible(false);
 
 		return true;
 	}

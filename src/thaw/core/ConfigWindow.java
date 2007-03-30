@@ -85,6 +85,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		cancelButton.addActionListener(this);
 
 		configWin.addWindowListener(this);
+		setVisible(false);
 	}
 
 
@@ -181,7 +182,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 			setChanged();
 			this.notifyObservers(e.getSource());
-
+			core.getMainWindow().setEnabled(true);
 			setVisible(false);
 		}
 

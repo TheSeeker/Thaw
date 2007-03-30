@@ -415,6 +415,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		}
 
 		if(e.getSource() == settingsButton) {
+			setEnabled(false);
 			core.getConfigWindow().setVisible(true);
 		}
 
@@ -527,6 +528,9 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		mainWindow.getContentPane().add(c, pos);
 	}
 
+	protected void setEnabled(boolean value) {
+		mainWindow.setEnabled(value);
+	}
 
 	/**
 	 * @see #addComponent(java.awt.Component, Object)
