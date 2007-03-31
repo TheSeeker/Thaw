@@ -19,6 +19,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import javax.swing.JButton;
 
@@ -57,6 +59,7 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 	private ServiceInfo selectedValue;
 	private final MDNSDiscoveryPanelCallback cb;
 	private final Dialog owner;
+	private final HashMap displayedServiceInfos;
 
 	private final JList list;
 	private final DefaultListModel listModel;
@@ -73,6 +76,7 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 		this.core = core;
 		this.owner = owner;
 		this.cb = cb;
+		this.displayedServiceInfos = new HashMap();
 
 		// The UI
 		list = new JList();
@@ -111,16 +115,21 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 	 * The user has selected something: notify the main loop and process the data.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		if(e.getSource() == cancelButton)
-			cancelledByUser = true;
+		Object source = e.getSource();
 		
-		goon = false;
-		
-		synchronized (this) {
-			selectedValue = core.getServiceInfoFromDiscoveredNodeList(list.getSelectedValue());
-			notify();
+		if ((source == okButton) || (source == cancelButton)){
+			goon = false;
+			if(source == okButton) {
+				if(list.getSelectedValue() == null) return;
+				selectedValue = (ServiceInfo) displayedServiceInfos.get(list.getSelectedValue());
+			} else
+				cancelledByUser = true;
+			
+			synchronized (this) {
+				notifyAll();
+			}
+			Logger.info(this, "User has selected : " + selectedValue);
 		}
-		Logger.info(this, "User has selected : " + selectedValue);
 	}
 
 	/**
@@ -135,20 +144,31 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 		Logger.notice(this, "Show the MDNSDiscoveryPanel");
 		Socket testSocket = null;
 		boolean isConfigValid = false;
-		
 		goon = true;
+		
 		do {
 			// Loop until a selection is done
 			while(goon) {
+				synchronized (core.foundNodes) {
+					if(core.foundNodes.size() > 0) {
+						listModel.clear();
+						Iterator it = core.foundNodes.iterator();
+						while(it.hasNext()) {
+							ServiceInfo current = (ServiceInfo) it.next();
+							listModel.addElement(current.getName());
+							displayedServiceInfos.put(current.getName(), current);
+						}
+						list.repaint();
+					}	
+				}
+								
 				try {
 					synchronized (this) {
-						wait(Long.MAX_VALUE);
+						wait(Integer.MAX_VALUE);
 					}
 				} catch (InterruptedException e) {}
-
-				list.repaint();
 			}
-			
+
 			if(cancelledByUser) break;
 			else if(selectedValue == null) continue;
 
@@ -170,7 +190,7 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 
 			// Reload, just in  case it failed...
 			goon = true;
-			list.removeSelectionInterval(0, core.getDiscoveredNodeListSize());
+			list.removeSelectionInterval(0, core.foundNodes.size());
 		} while(!isConfigValid);
 
 
