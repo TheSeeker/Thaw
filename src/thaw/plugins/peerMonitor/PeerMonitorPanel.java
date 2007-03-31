@@ -153,16 +153,16 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 		refPanel.add(refTitle, BorderLayout.NORTH);
 		refPanel.add(new JScrollPane(refArea), BorderLayout.CENTER);
 
-		mainPanel.add(refPanel);
-
 		detailsLabel = new JLabel();
 		detailsPanel = new JPanel();
 
 		JPanel globalDetailsPanel = new JPanel(new BorderLayout(5, 5));
+
 		globalDetailsPanel.add(detailsLabel, BorderLayout.NORTH);
 		globalDetailsPanel.add(new JScrollPane(detailsPanel), BorderLayout.CENTER);
 
 		mainPanel.add(globalDetailsPanel);
+		mainPanel.add(refPanel);
 
 		tabPanel.add(mainPanel, BorderLayout.CENTER);
 	}
@@ -488,7 +488,7 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 
 
 	public void valueChanged(ListSelectionEvent e) {
-		if (e.getFirstIndex() == 0) {
+		if (e.getFirstIndex() == 0 && advanced) {
 			displayInfos(I18n.getMessage("thaw.plugin.peerMonitor.nodeInfos"), nodeInfos);
 		} else {
 			Peer peer;

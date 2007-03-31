@@ -5,7 +5,7 @@ package thaw.core;
  */
 public class FreenetURIHelper {
 
-	public FreenetURIHelper() {
+	private FreenetURIHelper() {
 
 	}
 
@@ -192,7 +192,7 @@ public class FreenetURIHelper {
 
 				for (int j = 0 ; j < subsplit.length-1 ; j++) {
 					if (j == 0)
-						key = key + subsplit[j];
+						key = key + "/" + subsplit[j];
 					else
 						key = key + "-" + subsplit[j];
 				}
@@ -256,7 +256,7 @@ public class FreenetURIHelper {
 
 	/**
 	 * will lower the case !
-	 * compare only with another result from this function
+	 * will return the begining of the key.
 	 */
 	public static String getComparablePart(String key) {
 		if (key == null)
@@ -273,6 +273,9 @@ public class FreenetURIHelper {
 	}
 
 
+	/**
+	 * this process is not costless.
+	 */
 	public static boolean compareKeys(String keyA, String keyB) {
 		if (keyA == keyB)
 			return true;
@@ -304,9 +307,15 @@ public class FreenetURIHelper {
 		if (keyA.startsWith("SSK@")) {
 			keyA = changeSSKRevision(keyA, 0, 0);
 			keyB = changeSSKRevision(keyB, 0, 0);
+
+			keyA = keyA.replaceAll(".frdx", ".xml"); /* we consider .frdx equivalent to .xml */
+			keyB = keyB.replaceAll(".frdx", ".xml"); /* we consider .frdx equivalent to .xml */
 		}
 
-		return keyA.equals(keyB);
+		if ( keyA.equals(keyB) )
+			return true;
+
+		return false;
 	}
 }
 

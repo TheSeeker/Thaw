@@ -1007,8 +1007,7 @@ public class IndexManagementHelper {
 
 			if (getActionSource() != null)
 				getActionSource().setEnabled(node != null
-							     && (getIndexBrowserPanel().getIndexTree() != null
-								 && node != getIndexBrowserPanel().getIndexTree().getRoot()));
+							     && (getIndexBrowserPanel().getIndexTree() != null));
 		}
 
 		public void apply() {
@@ -1030,6 +1029,34 @@ public class IndexManagementHelper {
 			indexBrowser.getIndexTree().refresh();
 		}
 	}
+
+
+	/**
+	 * Can be used on indexes only
+	 */
+	public static class IndexBlackLister extends IndexDeleter {
+		private IndexBrowserPanel indexBrowser;
+
+		public IndexBlackLister(final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+			super(indexBrowser, actionSource);
+
+			this.indexBrowser = indexBrowser;
+		}
+
+		public void setTarget(final IndexTreeNode node) {
+			if (node != null && node instanceof Index)
+				super.setTarget(node);
+			else
+				super.setTarget(null);
+		}
+
+		public void apply() {
+			BlackList.addToBlackList(indexBrowser.getDb(), getTarget().getPublicKey());
+			super.apply();
+			indexBrowser.getBlackList().updateList();
+		}
+	}
+
 
 
 
@@ -1402,8 +1429,8 @@ public class IndexManagementHelper {
 
 				int nextId = DatabaseManager.getNextId(db, "links");
 
-				st = db.getConnection().prepareStatement("INSERT INTO links (id, publicKey, mark, comment, indexParent, indexTarget) "+
-									 "VALUES (?, ?, ?, ?, ?, ?)");
+				st = db.getConnection().prepareStatement("INSERT INTO links (id, publicKey, mark, comment, indexParent, indexTarget, blackListed) "+
+									 "VALUES (?, ?, ?, ?, ?, ?, FALSE)");
 
 				st.setInt(1, nextId);
 				st.setString(2, linkKey);

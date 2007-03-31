@@ -138,13 +138,14 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		tableModel.addTableModelListener(table);
 
 		rightClickMenu = new JPopupMenu();
+
 		clearFinishedItem = new JMenuItem(I18n.getMessage("thaw.common.clearFinished"));
-		removeItem = new JMenuItem(I18n.getMessage("thaw.common.removeFromTheList"));
-		cancelItem = new JMenuItem(I18n.getMessage("thaw.common.cancel"));
+		removeItem = new JMenuItem(I18n.getMessage("thaw.common.removeFromTheList"), IconBox.minDelete);
+		cancelItem = new JMenuItem(I18n.getMessage("thaw.common.cancel"), IconBox.minStop);
 		delayItem = new JMenuItem(I18n.getMessage("thaw.common.delay"));
 		downloadItem = new JMenuItem(I18n.getMessage("thaw.common.downloadLocally"));
-		forceRestartItem = new JMenuItem(I18n.getMessage("thaw.common.forceRestart"));
-		copyKeysItem = new JMenuItem(I18n.getMessage("thaw.common.copyKeysToClipboard"));
+		forceRestartItem = new JMenuItem(I18n.getMessage("thaw.common.forceRestart"), IconBox.minRefreshAction);
+		copyKeysItem = new JMenuItem(I18n.getMessage("thaw.common.copyKeysToClipboard"), IconBox.minCopy);
 		final JMenu priorityMenu = new JMenu(I18n.getMessage("thaw.common.priority"));
 
 		priorityGroup = new ButtonGroup();

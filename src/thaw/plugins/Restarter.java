@@ -71,7 +71,9 @@ public class Restarter implements Observer, Runnable, Plugin {
 		configPanel.add(restartIntervalField);
 		configPanel.add(restartFatalsBox);
 
-		core.getConfigWindow().addTab(I18n.getMessage("thaw.plugin.restarter.configTabName"), configPanel);
+		core.getConfigWindow().addTab(I18n.getMessage("thaw.plugin.restarter.configTabName"),
+					      thaw.gui.IconBox.minRefreshAction,
+					      configPanel);
 		core.getConfigWindow().addObserver(this);
 
 		running = true;

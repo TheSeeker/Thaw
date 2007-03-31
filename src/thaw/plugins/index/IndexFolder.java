@@ -54,6 +54,12 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 		this.name = name;
 	}
 
+
+	protected Hsqldb getDb() {
+		return db;
+	}
+
+
 	public boolean isInTree() {
 		return (parentNode != null);
 	}
@@ -148,6 +154,11 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 		children = v;
 
 		return true;
+	}
+
+
+	protected Vector getChildren() {
+		return children;
 	}
 
 

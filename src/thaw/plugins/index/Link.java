@@ -20,6 +20,8 @@ public class Link extends java.util.Observable {
 	private int parentId;
 	private Index parent = null;
 
+	private boolean blackListed = false;
+
 
 	public Link(final Hsqldb hsqldb, final int id) {
 		this.id = id;
@@ -29,23 +31,26 @@ public class Link extends java.util.Observable {
 	}
 
 
-	public Link(final Hsqldb hsqldb, final int id, String publicKey,
+	public Link(final Hsqldb hsqldb, final int id, String publicKey, boolean blackListed,
 		    int parentId) {
 		this.id = id;
 		this.db = hsqldb;
 		this.publicKey = publicKey;
+		this.blackListed = blackListed;
 		this.parentId = parentId;
 	}
 
 
-	public Link(final Hsqldb hsqldb, final int id, String publicKey,
+	public Link(final Hsqldb hsqldb, final int id, String publicKey, boolean blackListed,
 		    Index parent) {
 		this.id = id;
 		this.db = hsqldb;
 		this.publicKey = publicKey;
+		this.blackListed = blackListed;
 		this.parentId = parent.getId();
 		this.parent = parent;
 	}
+
 
 	public void reloadDataFromDb(int id) {
 		this.id = id;
@@ -53,7 +58,7 @@ public class Link extends java.util.Observable {
 		try {
 			PreparedStatement st;
 
-			st = db.getConnection().prepareStatement("SELECT publicKey, indexParent FROM links "+
+			st = db.getConnection().prepareStatement("SELECT publicKey, blackListed, indexParent FROM links "+
 								 "WHERE id = ? LIMIT 1");
 
 			st.setInt(1, id);
@@ -63,12 +68,17 @@ public class Link extends java.util.Observable {
 			if (rs.next()) {
 				publicKey = rs.getString("publicKey");
 				parentId = rs.getInt("indexParent");
+				blackListed = rs.getBoolean("blackListed");
 			} else {
 				Logger.error(this, "Link '"+Integer.toString(id)+"' not found.");
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Error while loading data for link '"+Integer.toString(id)+"': "+e.toString());
 		}
+	}
+
+	public boolean isBlackListed() {
+		return blackListed;
 	}
 
 	public String getPublicKey() {
@@ -237,4 +247,5 @@ public class Link extends java.util.Observable {
 
 		return index.isModifiable();
 	}
+
 }

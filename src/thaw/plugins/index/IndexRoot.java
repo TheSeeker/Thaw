@@ -4,8 +4,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.swing.JOptionPane;
+
 import thaw.core.I18n;
 import thaw.core.Logger;
+import thaw.core.MainWindow;
+
 import thaw.fcp.FCPQueueManager;
 import thaw.plugins.Hsqldb;
 
@@ -14,11 +18,15 @@ public class IndexRoot extends IndexFolder implements IndexTreeNode {
 	private FCPQueueManager queueManager;
 	private IndexBrowserPanel indexBrowser;
 
+	private MainWindow mainWindow;
+
 	public IndexRoot(final FCPQueueManager queueManager,
 			 final IndexBrowserPanel indexBrowser,
 			 final String name,
 			 final boolean loadOnTheFly) {
 		super(indexBrowser.getDb(), -1, loadOnTheFly);
+
+		mainWindow = indexBrowser.getMainWindow();
 
 		this.queueManager = queueManager;
 		this.indexBrowser = indexBrowser;
@@ -66,5 +74,57 @@ public class IndexRoot extends IndexFolder implements IndexTreeNode {
 		return IndexManagementHelper.addIndexFolder(indexBrowser, this, fname);
 	}
 
+
+
+	public void delete() {
+		Logger.warning(this, "The user will do something dangerous");
+
+		int ret = JOptionPane.showConfirmDialog(mainWindow.getMainFrame(),
+							I18n.getMessage("thaw.plugin.index.ultimateWarning"),
+							I18n.getMessage("thaw.warning.title"),
+							JOptionPane.YES_NO_OPTION,
+							JOptionPane.WARNING_MESSAGE);
+
+		if (ret != JOptionPane.YES_OPTION) {
+			Logger.info(this, "Cancelled");
+			return;
+		}
+
+		Logger.warning(this, "DELETING ALL THE INDEXES");
+
+		try {
+			synchronized(getDb().dbLock) {
+				PreparedStatement st;
+
+				st = getDb().getConnection().prepareStatement("DELETE FROM FILES");
+				st.execute();
+
+				st = getDb().getConnection().prepareStatement("DELETE FROM LINKS");
+				st.execute();
+
+				st = getDb().getConnection().prepareStatement("DELETE FROM INDEXES");
+				st.execute();
+
+				st = getDb().getConnection().prepareStatement("DELETE FROM INDEXFOLDERS");
+				st.execute();
+
+				st = getDb().getConnection().prepareStatement("DELETE FROM INDEXPARENTS");
+				st.execute();
+
+				st = getDb().getConnection().prepareStatement("DELETE FROM FOLDERPARENTS");
+				st.execute();
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Woops, error while destroying the world : "+e.toString());
+			return;
+		}
+
+		IndexManagementHelper.addIndex(queueManager, indexBrowser, null,
+					       thaw.plugins.IndexBrowser.DEFAULT_INDEX);
+
+		forceReload();
+
+		Logger.notice(this, "Destruction of the world done, have a nice day.");
+	}
 }
 

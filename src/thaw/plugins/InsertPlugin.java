@@ -63,7 +63,7 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 		buttonInToolBar.setToolTipText(I18n.getMessage("thaw.common.insertion"));
 		buttonInToolBar.addActionListener(this);
 
-		menuItem = new JMenuItem(I18n.getMessage("thaw.common.addInsertions"));
+		menuItem = new JMenuItem(I18n.getMessage("thaw.common.addInsertions"), IconBox.minInsertions);
 		menuItem.addActionListener(this);
 
 		if(core.getPluginManager().getPlugin("thaw.plugins.QueueWatcher") == null) {

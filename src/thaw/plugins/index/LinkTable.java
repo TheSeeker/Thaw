@@ -79,7 +79,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		JMenuItem item;
 		JButton button;
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addIndexesFromLink"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addIndexesFromLink"), IconBox.minAdd);
 		button = new JButton(IconBox.indexReuse);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addIndexesFromLink"));
 		toolbarActions.add(new LinkManagementHelper.IndexAdder(button, queueManager,
@@ -90,11 +90,11 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		rightClickActions.add(new LinkManagementHelper.IndexAdder(item, queueManager,
 									  indexBrowser, true));
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKeys"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKeys"), IconBox.minCopy);
 		rightClickMenu.add(item);
 		rightClickActions.add(new LinkManagementHelper.PublicKeyCopier(item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.common.remove"));
+		item = new JMenuItem(I18n.getMessage("thaw.common.remove"), IconBox.minDelete);
 		button = new JButton(IconBox.delete);
 		button.setToolTipText(I18n.getMessage("thaw.common.remove"));
 		toolbarActions.add(new LinkManagementHelper.LinkRemover(indexBrowser, button));
@@ -124,7 +124,8 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 	protected void updateRightClickMenu(final Vector selectedLinks) {
 		LinkManagementHelper.LinkAction action;
 
-		firstSelectedLink = selectedLinks != null ? ((Link)selectedLinks.get(0)) : null;
+		firstSelectedLink = selectedLinks != null && selectedLinks.size() > 0 ?
+			((Link)selectedLinks.get(0)) : null;
 
 		for (final Iterator it = rightClickActions.iterator();
 		     it.hasNext(); ) {

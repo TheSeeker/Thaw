@@ -54,7 +54,7 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 		buttonInToolBar.setToolTipText(I18n.getMessage("thaw.common.download"));
 		buttonInToolBar.addActionListener(this);
 
-		menuItem = new JMenuItem(I18n.getMessage("thaw.common.addDownloads"));
+		menuItem = new JMenuItem(I18n.getMessage("thaw.common.addDownloads"), IconBox.minDownloads);
 		menuItem.addActionListener(this);
 
 		if(core.getPluginManager().getPlugin("thaw.plugins.QueueWatcher") == null) {

@@ -113,7 +113,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		JButton button;
 		JMenuItem item;
 
-		item = new JMenuItem(I18n.getMessage("thaw.common.action.download"));
+		item = new JMenuItem(I18n.getMessage("thaw.common.action.download"), IconBox.minDownloads);
 		button = new JButton(IconBox.downloads);
 		button.setToolTipText(I18n.getMessage("thaw.common.action.download"));
 		toolbarActions.add(new FileManagementHelper.FileDownloader(config, queueManager, indexBrowser, button));
@@ -121,7 +121,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		rightClickMenu.add(item);
 		rightClickActions.add(new FileManagementHelper.FileDownloader(config, queueManager, indexBrowser, item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.insert"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.insert"), IconBox.minInsertions);
 		button = new JButton(IconBox.insertions);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.insert"));
 		toolbarActions.add(new FileManagementHelper.FileInserter(queueManager, indexBrowser, button));
@@ -129,7 +129,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		rightClickMenu.add(item);
 		rightClickActions.add(new FileManagementHelper.FileInserter(queueManager, indexBrowser, item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.recalculateKeys"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.recalculateKeys"), IconBox.minKey);
 		button = new JButton(IconBox.key);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.recalculateKeys"));
 		toolbarActions.add(new FileManagementHelper.FileKeyComputer(queueManager, indexBrowser, button));
@@ -137,11 +137,11 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		rightClickMenu.add(item);
 		rightClickActions.add(new FileManagementHelper.FileKeyComputer(queueManager, indexBrowser, item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.common.removeFromTheList"));
+		item = new JMenuItem(I18n.getMessage("thaw.common.removeFromTheList"), IconBox.minStop);
 		rightClickMenu.add(item);
 		rightClickActions.add(new FileManagementHelper.TransferCanceller(queueManager, indexBrowser, item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.common.remove"));
+		item = new JMenuItem(I18n.getMessage("thaw.common.remove"), IconBox.minDelete);
 		button = new JButton(IconBox.delete);
 		button.setToolTipText(I18n.getMessage("thaw.common.remove"));
 		toolbarActions.add(new FileManagementHelper.FileRemover(indexBrowser, button));
@@ -149,7 +149,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		rightClickMenu.add(item);
 		rightClickActions.add(new FileManagementHelper.FileRemover(indexBrowser, item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.common.copyKeysToClipboard"));
+		item = new JMenuItem(I18n.getMessage("thaw.common.copyKeysToClipboard"), IconBox.minCopy);
 		rightClickMenu.add(item);
 		rightClickActions.add(new FileManagementHelper.PublicKeyCopier(item));
 
@@ -180,7 +180,8 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 	protected void updateRightClickMenu(final Vector selectedFiles) {
 		FileManagementHelper.FileAction action;
 
-		firstSelectedFile = selectedFiles != null ? ((thaw.plugins.index.File)selectedFiles.get(0)) : null;
+		firstSelectedFile = selectedFiles != null && selectedFiles.size() > 0 ?
+			((thaw.plugins.index.File)selectedFiles.get(0)) : null;
 
 		for(final Iterator it = rightClickActions.iterator();
 		    it.hasNext();) {

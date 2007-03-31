@@ -146,19 +146,20 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 		// TOOLBAR
 		connectButton = new JButton(IconBox.connectAction);
-		connectButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.connect"));
 		connectButton.setBorderPainted(false);
+		connectButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.connect"));
+
 		disconnectButton = new JButton(IconBox.disconnectAction);
-		disconnectButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.disconnect"));
 		disconnectButton.setBorderPainted(false);
+		disconnectButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.disconnect"));
 
 		settingsButton = new JButton(IconBox.settings);
-		settingsButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.settings"));
 		settingsButton.setBorderPainted(false);
+		settingsButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.settings"));
 
 		quitButton = new JButton(IconBox.quitAction);
-		quitButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.quit"));
 		quitButton.setBorderPainted(false);
+		quitButton.setToolTipText(I18n.getMessage("thaw.toolbar.button.quit"));
 
 		connectButton.addActionListener(this);
 		disconnectButton.addActionListener(this);

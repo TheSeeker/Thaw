@@ -42,6 +42,7 @@ public class UnknownIndexList implements MouseListener {
 	private FCPQueueManager queueManager;
 	private IndexBrowserPanel indexBrowser;
 
+
 	public UnknownIndexList(final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser) {
 		this.queueManager = queueManager;
 		this.indexBrowser = indexBrowser;
@@ -124,6 +125,25 @@ public class UnknownIndexList implements MouseListener {
 		return ret;
 	}
 
+
+	public boolean removeLink(final Link link) {
+		boolean ret = false;
+
+		for (int i = 0 ; i < linkList.length ; i++) {
+			if ((linkList[i] != null) && linkList[i].compare(link)) {
+				if (!full)
+					vList.remove(linkList[i]);
+				erase(i);
+				ret = true;
+			}
+		}
+
+		refresh();
+
+		return ret;
+	}
+
+
 	public void makePlace(int i) {
 		int j;
 		for (j = linkList.length - 1; j > i ; j--) {
@@ -137,6 +157,7 @@ public class UnknownIndexList implements MouseListener {
 	 */
 	public boolean addLink(final Link link) {
 		if ((link == null)
+		    || link.isBlackListed()
 		    || Index.isAlreadyKnown(indexBrowser.getDb(), link.getPublicKey()) >= 0
 		    || isInList(link))
 			return false;
@@ -189,17 +210,28 @@ public class UnknownIndexList implements MouseListener {
 
 	protected void updateRightClickMenu(Vector links) {
 		if (rightClickMenu == null) {
+			/* first time */
+			/* I don't remember why it's done here .... */
+
 			rightClickMenu = new JPopupMenu();
 			rightClickActions = new Vector();
 			JMenuItem item;
 
-			item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addIndexesFromLink"));
+			item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addIndexesFromLink"), IconBox.minAdd);
 			rightClickMenu.add(item);
 			rightClickActions.add(new LinkManagementHelper.IndexAdder(item, queueManager, indexBrowser, false));
 
 			item = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKeys"));
 			rightClickMenu.add(item);
 			rightClickActions.add(new LinkManagementHelper.PublicKeyCopier(item));
+
+			item = new JMenuItem(I18n.getMessage("thaw.plugin.index.editBlackList"));
+			rightClickMenu.add(item);
+			rightClickActions.add(new LinkManagementHelper.BlackListDisplayer(item, indexBrowser.getBlackList()));
+
+			item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addToBlackList"), IconBox.minStop);
+			rightClickMenu.add(item);
+			rightClickActions.add(new LinkManagementHelper.ToBlackListAdder(item, indexBrowser));
 		}
 
 		LinkManagementHelper.LinkAction action;

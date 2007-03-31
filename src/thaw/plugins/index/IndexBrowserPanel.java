@@ -5,10 +5,12 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
+import thaw.core.Core;
 import thaw.core.Config;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.MainWindow;
+
 import thaw.fcp.FCPQueueManager;
 import thaw.plugins.Hsqldb;
 
@@ -19,6 +21,8 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	private DetailPanel detailPanel;
 	private UnknownIndexList unknownList;
 	private IndexProgressBar indexProgressBar;
+
+	private BlackList blackList;
 
 	private JSplitPane split;
 
@@ -33,11 +37,13 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	private MainWindow mainWindow;
 
 
-	public IndexBrowserPanel(final Hsqldb db, final FCPQueueManager queueManager, final Config config, final MainWindow mainWindow) {
+	public IndexBrowserPanel(final Hsqldb db, final Core core) {
 		this.db = db;
-		this.queueManager = queueManager;
-		this.config = config;
-		this.mainWindow = mainWindow;
+		this.queueManager = core.getQueueManager();
+		this.config       = core.getConfig();
+		this.mainWindow   = core.getMainWindow();
+
+		blackList = new BlackList(core, db, this);
 
 		unknownList = new UnknownIndexList(queueManager, this);
 
@@ -120,6 +126,10 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		return mainWindow;
 	}
 
+	public BlackList getBlackList() {
+		return blackList;
+	}
+
 
 	public JPanel getPanel() {
 		return globalPanel;
@@ -127,6 +137,7 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 
 	public void stopAllThreads() {
 		tables.stopRefresh();
+		blackList.hidePanel();
 	}
 
 	public void saveState() {

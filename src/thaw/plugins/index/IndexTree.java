@@ -150,13 +150,17 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		indexAndFileMenu = new JPopupMenu();
 		indexAndFileActions = new Vector();
 		indexMenu = new JMenu(I18n.getMessage("thaw.plugin.index.index"));
+		indexMenu.setIcon(IconBox.minIndex);
 		fileMenu = new JMenu(I18n.getMessage("thaw.common.files"));
+		fileMenu.setIcon(IconBox.minFile);
 		linkMenu = new JMenu(I18n.getMessage("thaw.plugin.index.links"));
+		linkMenu.setIcon(IconBox.minLink);
 
 
 		// Folder menu
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.downloadIndexes"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.downloadIndexes"),
+				     IconBox.minRefreshAction);
 		indexFolderMenu.add(item);
 		indexFolderActions.add(new IndexManagementHelper.IndexDownloader(queueManager, indexBrowser, item));
 
@@ -168,15 +172,17 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		indexFolderMenu.add(item);
 		indexFolderActions.add(new IndexManagementHelper.IndexFolderReorderer(indexBrowser, item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addAlreadyExistingIndex"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addAlreadyExistingIndex"),
+				     IconBox.minIndexReadOnly);
 		indexFolderMenu.add(item);
 		indexFolderActions.add(new IndexManagementHelper.IndexReuser(queueManager, indexBrowser, item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addCategory"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addCategory"),
+				     IconBox.minFolderNew);
 		indexFolderMenu.add(item);
 		indexFolderActions.add(new IndexManagementHelper.IndexFolderAdder(indexBrowser, item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.createIndex"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.createIndex"), IconBox.minIndexNew);
 		indexFolderMenu.add(item);
 		indexFolderActions.add(new IndexManagementHelper.IndexCreator(queueManager, indexBrowser, item));
 
@@ -184,21 +190,23 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		indexFolderMenu.add(item);
 		indexFolderActions.add(new IndexManagementHelper.IndexRenamer(indexBrowser, item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.delete"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.delete"), IconBox.minDelete);
 		indexFolderMenu.add(item);
 		indexFolderActions.add(new IndexManagementHelper.IndexDeleter(indexBrowser, item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKeys"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKeys"), IconBox.minCopy);
 		indexFolderMenu.add(item);
 		indexFolderActions.add(new IndexManagementHelper.PublicKeyCopier(item));
 
 
 		// Index menu
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.downloadIndex"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.downloadIndex"),
+				     IconBox.minRefreshAction);
 		indexMenu.add(item);
 		indexAndFileActions.add(new IndexManagementHelper.IndexDownloader(queueManager, indexBrowser, item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.insertIndex"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.insertIndex"),
+				     IconBox.minInsertions);
 		indexMenu.add(item);
 		indexAndFileActions.add(new IndexManagementHelper.IndexUploader(queueManager, indexBrowser, item));
 
@@ -206,19 +214,28 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		indexMenu.add(item);
 		indexAndFileActions.add(new IndexManagementHelper.IndexRenamer(indexBrowser, item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.exportIndex"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.exportIndex"),
+				     IconBox.minExportAction);
 		indexMenu.add(item);
 		indexAndFileActions.add(new IndexManagementHelper.IndexExporter(item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.importIndex"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.importIndex"),
+				     IconBox.minImportAction);
 		indexMenu.add(item);
 		indexAndFileActions.add(new IndexManagementHelper.IndexImporter(item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.delete"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.delete"),
+				     IconBox.minDelete);
 		indexMenu.add(item);
 		indexAndFileActions.add(new IndexManagementHelper.IndexDeleter(indexBrowser, item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.changeIndexKeys"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addToBlackList"),
+				     IconBox.minStop);
+		indexMenu.add(item);
+		indexAndFileActions.add(new IndexManagementHelper.IndexBlackLister(indexBrowser, item));
+
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.changeIndexKeys"),
+				     IconBox.minKey);
 		indexMenu.add(item);
 		indexAndFileActions.add(new IndexManagementHelper.IndexKeyModifier(indexBrowser, item));
 
@@ -226,30 +243,35 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		indexMenu.add(item);
 		indexAndFileActions.add(new IndexManagementHelper.PrivateKeyCopier(item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKey"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKey"),
+				     IconBox.minCopy);
 		indexMenu.add(item);
 		indexAndFileActions.add(new IndexManagementHelper.PublicKeyCopier(item));
 
 
 		// File menu
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addFilesWithInserting"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addFilesWithInserting"),
+				     IconBox.minInsertions);
 		fileMenu.add(item);
 		indexAndFileActions.add(new IndexManagementHelper.FileInserterAndAdder(config, queueManager, indexBrowser, item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addFilesWithoutInserting"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addFilesWithoutInserting"),
+				     IconBox.minAdd);
 		fileMenu.add(item);
 		indexAndFileActions.add(new IndexManagementHelper.FileAdder(config, queueManager, indexBrowser, item));
 
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addKeys"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addKeys"),
+				     IconBox.minKey);
 		fileMenu.add(item);
 		IndexManagementHelper.IndexAction ac = new IndexManagementHelper.KeyAdder(indexBrowser, item);
 		indexAndFileActions.add(ac);
 
 
 		// Link menu
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addLink"));
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addLink"),
+				     IconBox.minMakeALinkAction);
 		linkMenu.add(item);
 		indexAndFileActions.add(new IndexManagementHelper.LinkAdder(indexBrowser, item));
 
@@ -652,7 +674,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 								       final boolean leaf,
 								       final int row,
 								       final boolean hasFocus) {
-			setBackgroundNonSelectionColor(Color.WHITE);
+			setBackgroundNonSelectionColor(tree.getBackground());
 			setBackgroundSelectionColor(IndexTree.SELECTION_COLOR);
 
 			if(value instanceof DefaultMutableTreeNode || value instanceof IndexTreeNode) {

@@ -110,17 +110,20 @@ public class SearchResult implements FileAndLinkList {
 			try {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT id, publicKey, indexParent "+
+				st = db.getConnection().prepareStatement("SELECT id, publicKey, indexParent, blackListed "+
 									 "FROM links "+
 									 "WHERE "+getWhereClause(false));
 				fillInStatement(st);
 				ResultSet set = st.executeQuery();
 
 				while(set.next()) {
-					v.add(new Link(db,
-						       set.getInt("id"),
-						       set.getString("publicKey"),
-						       set.getInt("indexParent")));
+					if (!set.getBoolean("blackListed")) {
+						v.add(new Link(db,
+							       set.getInt("id"),
+							       set.getString("publicKey"),
+							       false,
+							       set.getInt("indexParent") ));
+					}
 				}
 
 			} catch(SQLException e) {

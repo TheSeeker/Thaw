@@ -229,6 +229,13 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	}
 
 
+	public void close() {
+		setVisible(false);
+		setChanged();
+		this.notifyObservers(cancelButton); /* Equivalent to a click on the cancel button */
+	}
+
+
 	public void windowActivated(final WindowEvent e) {
 
 	}

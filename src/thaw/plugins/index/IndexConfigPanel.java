@@ -1,6 +1,7 @@
 package thaw.plugins.index;
 
 import java.awt.GridLayout;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -8,6 +9,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.JButton;
 
 import thaw.core.Config;
 import thaw.core.ConfigWindow;
@@ -26,10 +28,15 @@ public class IndexConfigPanel implements ActionListener {
 
 	private JCheckBox loadOnTheFly;
 
+	private JButton editBlackList;
 
-	public IndexConfigPanel(ConfigWindow configWindow, Config config) {
+	private IndexBrowserPanel indexBrowser;
+
+
+	public IndexConfigPanel(ConfigWindow configWindow, Config config, IndexBrowserPanel indexBrowser) {
 		this.configWindow = configWindow;
 		this.config = config;
+		this.indexBrowser = indexBrowser;
 
 		panel = new JPanel();
 		panel.setLayout(new GridLayout(15, 1));
@@ -51,11 +58,21 @@ public class IndexConfigPanel implements ActionListener {
 		configWindow.getOkButton().addActionListener(this);
 		configWindow.getCancelButton().addActionListener(this);
 
+
+		editBlackList = new JButton(I18n.getMessage("thaw.plugin.index.editBlackList")+ " ...");
+		editBlackList.addActionListener(this);
+
+		JPanel editBlackListPanel = new JPanel(new BorderLayout());
+		editBlackListPanel.add(new JLabel(""), BorderLayout.CENTER);
+		editBlackListPanel.add(editBlackList, BorderLayout.EAST);
+
+
 		panel.add(autorefreshActivated);
 		panel.add(refreshIntervalLabel);
 		panel.add(refreshInterval);
 		panel.add(indexPerRefreshLabel);
 		panel.add(indexPerRefresh);
+		panel.add(editBlackListPanel);
 
 		if (Boolean.valueOf(config.getValue("advancedMode")).booleanValue()) {
 			panel.add(new JLabel(" "));
@@ -142,6 +159,11 @@ public class IndexConfigPanel implements ActionListener {
 
 		if (e.getSource() == configWindow.getCancelButton()) {
 			resetValues();
+		}
+
+		if (e.getSource() == editBlackList) {
+			configWindow.close();
+			indexBrowser.getBlackList().displayPanel();
 		}
 	}
 

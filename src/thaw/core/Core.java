@@ -168,7 +168,11 @@ public class Core implements Observer {
 		if(!initConfig())
 			return false;
 
-		splashScreen.setProgressionAndStatus(10, "Connecting ...");
+		splashScreen.setProgressionAndStatus(10, "Applying look and feel ...");
+		if (!initializeLookAndFeel())
+			return false;
+
+		splashScreen.setProgressionAndStatus(20, "Connecting ...");
 		splashScreen.addIcon(IconBox.connectAction);
 		if(!initConnection())
 			new WarningWindow(this, I18n.getMessage("thaw.warning.unableToConnectTo")+
@@ -395,7 +399,7 @@ public class Core implements Observer {
 	 * This method sets the look and feel specified with setLookAndFeel().
 	 * If none was specified, the System Look and Feel is set.
 	 */
-	private void initializeLookAndFeel() { /* non static, else I can't call correctly Logger functions */
+	private boolean initializeLookAndFeel() { /* non static, else I can't call correctly Logger functions */
 
 		JFrame.setDefaultLookAndFeelDecorated(false); /* Don't touch my window decorations ! */
 		JDialog.setDefaultLookAndFeelDecorated(false);
@@ -410,11 +414,15 @@ public class Core implements Observer {
 			} else {
 				UIManager.setLookAndFeel(Core.lookAndFeel);
 			}
+
+			if (splashScreen != null)
+				splashScreen.rebuild();
 		} catch (final Exception e) {
 			Logger.warning(this, "Exception while setting the L&F : " + e.getMessage());
 			Logger.warning(this, "Using the default lookAndFeel");
 		}
 
+		return true;
 	}
 
 
@@ -422,7 +430,7 @@ public class Core implements Observer {
 	 * Init graphics.
 	 */
 	public boolean initGraphics() {
-		initializeLookAndFeel();
+		//initializeLookAndFeel();
 
 		mainWindow = new MainWindow(this);
 

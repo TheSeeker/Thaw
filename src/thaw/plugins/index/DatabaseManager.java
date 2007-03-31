@@ -70,6 +70,8 @@ import thaw.plugins.Hsqldb;
  * indexParents(indexId, folderId) # table de jointure
  * folderParents(folderId, parentId) # table de jointure
  *
+ * indexBlackList(id, key) # key are complete USK@
+ *
  * </pre>
  *
  * positionInTree == position in its JTree branch.
@@ -92,7 +94,7 @@ public class DatabaseManager {
 
 		if (config.getValue("indexDatabaseVersion") == null) {
 			newDb = true;
-			config.setValue("indexDatabaseVersion", "3");
+			config.setValue("indexDatabaseVersion", "4");
 		} else {
 
 			/* CONVERTIONS */
@@ -112,6 +114,13 @@ public class DatabaseManager {
 					splashScreen.setStatus("Converting database ...");
 				if (convertDatabase_2_to_3(db))
 					config.setValue("indexDatabaseVersion", "3");
+			}
+
+			if ("3".equals(config.getValue("indexDatabaseVersion"))) {
+				if (splashScreen != null)
+					splashScreen.setStatus("Converting database ...");
+				if (convertDatabase_3_to_4(db))
+					config.setValue("indexDatabaseVersion", "4");
 			}
 
 			/* ... */
@@ -206,6 +215,7 @@ public class DatabaseManager {
 			  + "indexTarget INTEGER NULL,"
 			  + "toDelete BOOLEAN DEFAULT false NOT NULL,"
 			  + "dontDelete BOOLEAN DEFAULT false NOT NULL,"
+			  + "blackListed BOOLEAN DEFAULT false NOT NULL,"
 			  + "PRIMARY KEY (id),"
 			  + "FOREIGN KEY (indexParent) REFERENCES indexes (id),"
 			  + "FOREIGN KEY (indexTarget) REFERENCES indexes (id))");
@@ -226,6 +236,11 @@ public class DatabaseManager {
 			  + "FOREIGN KEY (fileId) REFERENCES files (id),"
 			  + "FOREIGN KEY (nameId) REFERENCES metadataNames (id))");
 
+		sendQuery(db,
+			  "CREATE CACHED TABLE indexBlackList ("
+			  + "id INTEGER IDENTITY NOT NULL,"
+			  + "publicKey VARCHAR(350) NOT NULL,"
+			  + "name VARCHAR(255) NOT NULL)");
 	}
 
 
@@ -842,6 +857,16 @@ public class DatabaseManager {
 
 		if (!sendQuery(db, "ALTER TABLE files ADD COLUMN dontDelete BOOLEAN DEFAULT false")) {
 			Logger.error(new DatabaseManager(), "Error while converting the database (2 to 3) ! (adding column to file table)");
+			return false;
+		}
+
+		return true;
+	}
+
+
+	public static boolean convertDatabase_3_to_4(Hsqldb db) {
+		if (!sendQuery(db, "ALTER TABLE links ADD COLUMN blackListed BOOLEAN DEFAULT false")) {
+			Logger.error(new DatabaseManager(), "Error while converting the database (3 to 4) ! (adding column to link table)");
 			return false;
 		}
 

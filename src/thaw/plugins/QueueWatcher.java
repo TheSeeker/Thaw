@@ -92,7 +92,7 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 
 		setMainWindow(core.getMainWindow());
 		core.getMainWindow().getTabbedPane().addChangeListener(this);
-		core.getMainWindow().addTab(I18n.getMessage("thaw.common.status"),
+		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.queueWatcher"),
 					    IconBox.minQueue,
 					    panelAdded);
 

@@ -10,7 +10,10 @@ import java.util.Vector;
 
 import javax.swing.AbstractButton;
 
+import thaw.core.Logger;
+import thaw.plugins.Hsqldb;
 import thaw.fcp.FCPQueueManager;
+
 
 public class LinkManagementHelper {
 	public interface LinkAction extends ActionListener {
@@ -158,4 +161,64 @@ public class LinkManagementHelper {
 	}
 
 
+	public static class BlackListDisplayer implements LinkAction {
+		private AbstractButton src;
+		private BlackList blackList;
+
+		public BlackListDisplayer(final AbstractButton actionSource, BlackList blackList) {
+			src = actionSource;
+
+			if (actionSource != null)
+				actionSource.addActionListener(this);
+
+			this.blackList = blackList;
+		}
+
+		public void setTarget(final Vector targets) {
+			src.setEnabled(true);
+		}
+
+		public void actionPerformed(final ActionEvent e) {
+			blackList.displayPanel();
+		}
+	}
+
+
+	public static class ToBlackListAdder implements LinkAction {
+		private AbstractButton src;
+		private Vector t;
+
+		private IndexBrowserPanel indexBrowser;
+
+		public ToBlackListAdder(final AbstractButton actionSource, IndexBrowserPanel indexBrowser) {
+			src = actionSource;
+
+			this.indexBrowser = indexBrowser;
+
+			if (actionSource != null)
+				actionSource.addActionListener(this);
+		}
+
+		public void setTarget(final Vector targets) {
+			t = targets;
+			src.setEnabled((targets != null) && (targets.size() > 0));
+		}
+
+		public void actionPerformed(final ActionEvent e) {
+			if (t == null) {
+				Logger.error(this, "No target !?");
+				return;
+			}
+
+			for (Iterator it = t.iterator();
+			     it.hasNext(); ) {
+				Link link = (Link)it.next();
+
+				BlackList.addToBlackList(indexBrowser.getDb(), link.getPublicKey());
+				indexBrowser.getUnknownIndexList().removeLink(link);
+			}
+
+			indexBrowser.getBlackList().updateList();
+		}
+	}
 }

@@ -864,14 +864,16 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT id, publicKey FROM links WHERE indexParent = ?");
+				st = db.getConnection().prepareStatement("SELECT id, publicKey, blackListed FROM links WHERE indexParent = ?");
 
 				st.setInt(1, id);
 
 				ResultSet res = st.executeQuery();
 
 				while(res.next()) {
-					Link l = new Link(db, res.getInt("id"), res.getString("publicKey"), this);
+					Link l = new Link(db, res.getInt("id"), res.getString("publicKey"),
+							  res.getBoolean("blackListed"),
+							  this);
 					links.add(l);
 				}
 
@@ -1183,11 +1185,6 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 				int nextId;
 
 				try {
-					if (insertLinkSt == null)
-						insertLinkSt = db.getConnection().prepareStatement("INSERT INTO links "
-												   + "(publicKey, mark, comment, indexParent, indexTarget) "
-												   + "VALUES (?, 0, ?, ?, NULL)");
-
 					String key = attrs.getValue("key");
 
 					if (key == null) /* it was the beginning of the index */
@@ -1195,9 +1192,19 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 					key = key.trim();
 
+
+					boolean blackListed = (BlackList.isBlackListed(db, key) >= 0);
+
+
+					if (insertLinkSt == null)
+						insertLinkSt = db.getConnection().prepareStatement("INSERT INTO links "
+												   + "(publicKey, mark, comment, indexParent, indexTarget, blackListed) "
+												   + "VALUES (?, 0, ?, ?, NULL, ?)");
+
 					insertLinkSt.setString(1, key);
 					insertLinkSt.setString(2, "No comment"); /* comment not used at the moment */
 					insertLinkSt.setInt(3, id);
+					insertLinkSt.setBoolean(4, blackListed);
 
 					insertLinkSt.execute();
 				} catch(SQLException e) {

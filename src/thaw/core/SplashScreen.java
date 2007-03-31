@@ -157,4 +157,9 @@ public class SplashScreen {
 		progressBar = null;
 	}
 
+
+	public void rebuild() {
+		if (splashScreen != null)
+			javax.swing.SwingUtilities.updateComponentTreeUI(splashScreen);
+	}
 }

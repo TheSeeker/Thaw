@@ -56,7 +56,7 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 
 		newDb = DatabaseManager.init(hsqldb, core.getConfig(), core.getSplashScreen());
 
-		browserPanel = new IndexBrowserPanel(hsqldb, core.getQueueManager(), core.getConfig(), core.getMainWindow());
+		browserPanel = new IndexBrowserPanel(hsqldb, core);
 		setMainWindow(core.getMainWindow());
 		core.getMainWindow().getTabbedPane().addChangeListener(this);
 
@@ -73,7 +73,7 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 		stateChanged(null);
 
 
-		configPanel = new IndexConfigPanel(core.getConfigWindow(), core.getConfig());
+		configPanel = new IndexConfigPanel(core.getConfigWindow(), core.getConfig(), browserPanel);
 		configPanel.addTab();
 
 		autoRefresh = null;

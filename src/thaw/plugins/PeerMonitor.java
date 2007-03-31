@@ -102,13 +102,11 @@ public class PeerMonitor implements thaw.core.Plugin, Observer
 
 		peerPanel = new PeerMonitorPanel(core.getConfig());
 
-		if (advancedMode)
-			core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.peerMonitor.peerMonitor"),
-						    thaw.gui.IconBox.minPeerMonitor,
-						    peerPanel.getTabPanel());
+		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.peerMonitor.peerMonitor"),
+					    thaw.gui.IconBox.minPeerMonitor,
+					    peerPanel.getTabPanel());
+		peerPanel.addObserver(this);
 
-		if (advancedMode)
-			peerPanel.addObserver(this);
 
 		core.getMainWindow().addComponent(peerPanel.getPeerListPanel(),
 						  BorderLayout.EAST);
@@ -123,9 +121,7 @@ public class PeerMonitor implements thaw.core.Plugin, Observer
 
 
 	public boolean stop() {
-		if(advancedMode)
-			core.getMainWindow().removeTab(peerPanel.getTabPanel());
-
+		core.getMainWindow().removeTab(peerPanel.getTabPanel());
 		core.getMainWindow().removeComponent(peerPanel.getPeerListPanel());
 		running = false;
 		return false;
