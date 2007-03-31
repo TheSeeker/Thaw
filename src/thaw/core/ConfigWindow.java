@@ -31,9 +31,9 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	private JButton okButton;
 	private JButton cancelButton;
 
-	private ThawConfigPanel thawConfigPanel;
-	private NodeConfigPanel nodeConfigPanel;
-	private PluginConfigPanel pluginConfigPanel;
+	protected ThawConfigPanel thawConfigPanel;
+	protected NodeConfigPanel nodeConfigPanel;
+	protected PluginConfigPanel pluginConfigPanel;
 
 	private Core core;
 

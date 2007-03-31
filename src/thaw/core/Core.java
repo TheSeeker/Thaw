@@ -1,7 +1,7 @@
 package thaw.core;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -50,7 +50,8 @@ public class Core implements Observer {
 	
 	// MDNS stuffs
 	private final JmDNS jmdns;
-	private final LinkedHashMap foundNodes;
+	// SYNC IT!!!
+	protected final LinkedList foundNodes;
 	
 	private class FCPMDNSListener implements ServiceListener {
 		public void serviceAdded(ServiceEvent event) {
@@ -64,7 +65,10 @@ public class Core implements Observer {
 			ServiceInfo service = event.getInfo();
 
 			synchronized (foundNodes) {
-				foundNodes.remove(service.getName());	
+				foundNodes.remove(service);
+				synchronized (configWindow.nodeConfigPanel.mdnsPanel) {
+					configWindow.nodeConfigPanel.mdnsPanel.notifyAll();	
+				}
 			}
 		}
 
@@ -73,7 +77,10 @@ public class Core implements Observer {
 			ServiceInfo service = event.getInfo();
 
 			synchronized (foundNodes) {
-				foundNodes.put(service.getName(), service);
+				foundNodes.add(service);
+				synchronized (configWindow.nodeConfigPanel.mdnsPanel) {
+					configWindow.nodeConfigPanel.mdnsPanel.notifyAll();
+				}
 			}
 		}
 	}
@@ -86,7 +93,7 @@ public class Core implements Observer {
 		Logger.info(this, "2006(c) Freenet project", true);
 		Logger.info(this, "Released under GPL license version 2 or later (see http://www.fsf.org/licensing/licenses/gpl.html)", true);
 		
-		this.foundNodes = new LinkedHashMap();
+		this.foundNodes = new LinkedList();
 		try {
 			// Spawn the mdns listener
 			Logger.info(this, "Starting JMDNS ...");
@@ -100,25 +107,12 @@ public class Core implements Observer {
 			throw new RuntimeException("Error loading MDNSDiscoveryPanel : " + e.getMessage());
 		}
 	}
-
-	protected int getDiscoveredNodeListSize() {
-		synchronized (foundNodes) {
-			return foundNodes.size();
-		}
-	}
 	
 	protected boolean isHasTheSameIPAddress(ServiceInfo host) {
 		try{
 			return (jmdns.getInterface().equals(host.getAddress()) ? true : false);
 		} catch (IOException e) {
 			return false;
-		}
-	}
-
-	protected ServiceInfo getServiceInfoFromDiscoveredNodeList(Object o) {
-		if(o == null) return null;
-		synchronized (foundNodes) {
-			return (ServiceInfo) foundNodes.get(o);
 		}
 	}
 
