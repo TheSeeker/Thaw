@@ -105,7 +105,7 @@ public class Restarter implements Observer, Runnable, Plugin {
 				// We really really really don't care.
 			}
 
-			Logger.notice(this, "Restarting [some] failed downloads");
+			Logger.info(this, "Restarting some failed downloads (if there are some)");
 
 			try {
 				if(!running)

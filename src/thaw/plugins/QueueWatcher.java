@@ -48,6 +48,11 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 	private JButton removeSelectedButton;
 
 
+	public QueueWatcher() {
+
+	}
+
+
 	public boolean run(final Core core) {
 		this.core = core;
 
@@ -169,7 +174,7 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 	}
 
 	public String getNameForUser() {
-		return I18n.getMessage("thaw.common.status");
+		return I18n.getMessage("thaw.plugin.queueWatcher");
 	}
 
 
@@ -225,7 +230,7 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 	public void stateChanged(final ChangeEvent e) {
 		int tabId;
 
-		tabId = core.getMainWindow().getTabbedPane().indexOfTab(I18n.getMessage("thaw.common.status"));
+		tabId = core.getMainWindow().getTabbedPane().indexOfTab(I18n.getMessage("thaw.plugin.queueWatcher"));
 
 		if (tabId < 0) {
 			Logger.warning(this, "Unable to find the tab !");

@@ -31,7 +31,7 @@ public class Core implements Observer {
 	private SplashScreen splashScreen = null;
 
 	private MainWindow mainWindow = null;
-	Config config = null;
+	private Config config = null;
 	private PluginManager pluginManager = null;
 	private ConfigWindow configWindow = null;
 
@@ -47,12 +47,12 @@ public class Core implements Observer {
 	public final static int TIME_BETWEEN_EACH_TRY = 5000;
 
 	private ReconnectionManager reconnectionManager = null;
-	
+
 	// MDNS stuffs
 	private final JmDNS jmdns;
 	// SYNC IT!!!
 	protected final LinkedList foundNodes;
-	
+
 	private class FCPMDNSListener implements ServiceListener {
 		public void serviceAdded(ServiceEvent event) {
 			Logger.notice(this, "Service added   : " + event.getName()+"."+event.getType());
@@ -67,7 +67,7 @@ public class Core implements Observer {
 			synchronized (foundNodes) {
 				foundNodes.remove(service);
 				synchronized (configWindow.nodeConfigPanel.mdnsPanel) {
-					configWindow.nodeConfigPanel.mdnsPanel.notifyAll();	
+					configWindow.nodeConfigPanel.mdnsPanel.notifyAll();
 				}
 			}
 		}
@@ -92,7 +92,7 @@ public class Core implements Observer {
 		Logger.info(this, "Thaw, version "+Main.VERSION, true);
 		Logger.info(this, "2006(c) Freenet project", true);
 		Logger.info(this, "Released under GPL license version 2 or later (see http://www.fsf.org/licensing/licenses/gpl.html)", true);
-		
+
 		this.foundNodes = new LinkedList();
 		try {
 			// Spawn the mdns listener
@@ -107,7 +107,7 @@ public class Core implements Observer {
 			throw new RuntimeException("Error loading MDNSDiscoveryPanel : " + e.getMessage());
 		}
 	}
-	
+
 	protected boolean isHasTheSameIPAddress(ServiceInfo host) {
 		try{
 			return (jmdns.getInterface().equals(host.getAddress()) ? true : false);
