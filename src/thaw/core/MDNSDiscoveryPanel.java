@@ -196,17 +196,17 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 
 		this.setVisible(false);
 		owner.setEnabled(true);
-		
+
 		if (!cancelledByUser) {
 			Logger.debug(this, "We got something that looks valid from the UI : let's propagate changes to  the config");
 			// Save the config. now that we know it's valid
-			core.config.setValue("nodeAddress", selectedValue.getHostAddress());
-			core.config.setValue("nodePort", new Integer(selectedValue.getPort()).toString());
-			core.config.setValue("sameComputer", String.valueOf(core.isHasTheSameIPAddress(selectedValue)));
+			core.getConfig().setValue("nodeAddress", selectedValue.getHostAddress());
+			core.getConfig().setValue("nodePort", new Integer(selectedValue.getPort()).toString());
+			core.getConfig().setValue("sameComputer", String.valueOf(core.isHasTheSameIPAddress(selectedValue)));
 
 
 			Logger.info(this, "We are done : configuration has been saved sucessfully.");
-			
+
 		}else
 			Logger.info(this, "The user has cancelled!");
 		cb.onMDNSDiscoverPanelClosure(cancelledByUser);
