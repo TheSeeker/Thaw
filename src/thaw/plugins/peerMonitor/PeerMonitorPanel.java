@@ -41,7 +41,6 @@ import thaw.gui.IconBox;
  */
 public class PeerMonitorPanel extends Observable implements ActionListener, ListSelectionListener
 {
-	/* must match with color list */
 	public final static String[] STR_STATUS = {
 		"CONNECTED",
 		"BACKED OFF",
@@ -82,6 +81,9 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 	private JProgressBar thawMemBar;
 	private JProgressBar nodeMemBar;
 
+	private JLabel nodeThreads;
+	private JLabel thawThreads;
+
 	private JLabel detailsLabel;
 	private JPanel detailsPanel;
 
@@ -120,13 +122,20 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 
 		setMemBar(0, 134217728);
 
+		nodeThreads = new JLabel("");
+		thawThreads = new JLabel("");
+		JPanel threadPanel = new JPanel(new GridLayout(1, 2));
+		threadPanel.add(nodeThreads);
+		threadPanel.add(thawThreads);
+
 
 		peerPanel.add(peerListLabel, BorderLayout.NORTH);
 		peerPanel.add(new JScrollPane(peerList), BorderLayout.CENTER);
 
-		JPanel memPanel = new JPanel(new GridLayout(2, 1));
+		JPanel memPanel = new JPanel(new GridLayout(3, 1));
 		memPanel.add(nodeMemBar);
 		memPanel.add(thawMemBar);
+		memPanel.add(threadPanel);
 
 		peerPanel.add(memPanel, BorderLayout.SOUTH);
 
@@ -206,45 +215,18 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 	}
 
 
+	public void setNmbThreads(int nmbNodeThreads) {
+		nodeThreads.setText(I18n.getMessage("thaw.plugin.peerMonitor.infos.nodeThreads")
+				    + ": "+ Integer.toString(nmbNodeThreads));
+		thawThreads.setText(I18n.getMessage("thaw.plugin.peerMonitor.infos.thawThreads")
+				    + ": "+ Integer.toString(Thread.activeCount()));
+	}
+
+
 	public void setRef(String ref) {
 		refArea.setText(ref);
 	}
 
-
-
-	protected class Peer {
-		private String displayName = null;
-		private Color textColor = Color.BLACK;
-		private Hashtable parameters = null;
-
-		public Peer(Hashtable parameters) {
-			this.parameters = parameters;
-			displayName = (String)parameters.get("myName");
-
-			String status = (String)parameters.get("volatile.status");
-
-			for (int i = 0 ; i < STR_STATUS.length ; i++) {
-				if (STR_STATUS[i].equals(status))
-					setTextColor(COLOR_STATUS[i]);
-			}
-		}
-
-		public void setTextColor(Color c) {
-			textColor = c;
-		}
-
-		public Color getTextColor() {
-			return textColor;
-		}
-
-		public Hashtable getParameters() {
-			return parameters;
-		}
-
-		public String toString() {
-			return displayName;
-		}
-	}
 
 
 	protected class PeerCellRenderer extends JLabel implements ListCellRenderer {

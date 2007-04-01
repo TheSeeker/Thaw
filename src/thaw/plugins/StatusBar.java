@@ -123,6 +123,10 @@ public class StatusBar implements Runnable, Plugin {
 				+ Integer.toString(progressDone) + "/" + Integer.toString(progressTotal);
 		}
 
+
+		int nmbThread = Thread.activeCount();
+
+
 		status = status
 			+ StatusBar.SEPARATOR + I18n.getMessage("thaw.plugin.statistics.finished")+ " "
 			+ Integer.toString(finished) + "/" + Integer.toString(total)

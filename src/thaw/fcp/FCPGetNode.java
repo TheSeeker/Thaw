@@ -37,6 +37,9 @@ public class FCPGetNode extends Observable implements FCPQuery, Observer {
 	public final static String netSizeSessionElement = "volatile.networkSizeEstimateSession";
 	private int netSizeSession = 0;
 
+	public final static String nmbThreadsElement = "volatile.runningThreadCount";
+	private int nmbThreads = 0;
+
 
 	private boolean withPrivate;
 	private boolean withVolatile;
@@ -98,6 +101,9 @@ public class FCPGetNode extends Observable implements FCPQuery, Observer {
 
 				if (msg.getValue(usedMemElement) != null)
 					usedMem = Long.parseLong(msg.getValue(usedMemElement));
+
+				if (msg.getValue(nmbThreadsElement) != null)
+					nmbThreads = Integer.parseInt(msg.getValue(nmbThreadsElement));
 			}
 
 			allParameters = msg.getValues();
@@ -118,6 +124,10 @@ public class FCPGetNode extends Observable implements FCPQuery, Observer {
 
 	public long getUsedJavaMemory() {
 		return usedMem;
+	}
+
+	public int getNmbThreads() {
+		return nmbThreads;
 	}
 
 	public Hashtable getAllParameters() {

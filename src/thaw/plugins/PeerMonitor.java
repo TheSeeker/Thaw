@@ -27,6 +27,7 @@ public class PeerMonitor implements thaw.core.Plugin, Observer
 
 	private boolean advancedMode;
 
+
 	public PeerMonitor() {
 
 	}
@@ -76,6 +77,7 @@ public class PeerMonitor implements thaw.core.Plugin, Observer
 				FCPGetNode gN = (FCPGetNode)o;
 
 				peerPanel.setMemBar(gN.getUsedJavaMemory(), gN.getMaxJavaMemory());
+				peerPanel.setNmbThreads(gN.getNmbThreads());
 				peerPanel.setNodeInfos(gN.getAllParameters());
 
 				if (!isRefSet) {
