@@ -11,7 +11,7 @@ import thaw.core.FreenetURIHelper;
 import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
 
-public class Link extends java.util.Observable {
+public class Link extends java.util.Observable implements Comparable {
 	private int id;
 	private final Hsqldb db;
 
@@ -248,4 +248,12 @@ public class Link extends java.util.Observable {
 		return index.isModifiable();
 	}
 
+
+	public int compareTo(Object o) {
+		if (o instanceof Link) {
+			return getIndexName().compareTo(((Link)o).getIndexName());
+		}
+
+		return 0;
+	}
 }

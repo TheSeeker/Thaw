@@ -21,7 +21,7 @@ public class Main {
 	_svnBuildNumber = "@custom@";
 
 	public final static String
-	VERSION = Main._major + "." + Main._minor + "." + Main._update + " Beta r"+Main._svnBuildNumber;
+	VERSION = Main._major + "." + Main._minor + "." + Main._update + " r"+Main._svnBuildNumber;
 
 
 	/**

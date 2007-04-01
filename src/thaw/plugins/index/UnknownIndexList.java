@@ -3,6 +3,8 @@ package thaw.plugins.index;
 import java.awt.BorderLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -19,7 +21,8 @@ import thaw.gui.IconBox;
 import thaw.fcp.FCPQueueManager;
 import thaw.plugins.ToolbarModifier;
 
-public class UnknownIndexList implements MouseListener {
+
+public class UnknownIndexList implements MouseListener, ActionListener {
 	public final static int MAX_INDEXES = 50;
 
 	private int offset;
@@ -35,6 +38,8 @@ public class UnknownIndexList implements MouseListener {
 
 	private JPopupMenu rightClickMenu = null;
 	private Vector rightClickActions = null;
+
+	private JMenuItem sortItem = null;
 
 	private ToolbarModifier toolbarModifier;
 	private Vector toolbarActions;
@@ -221,6 +226,11 @@ public class UnknownIndexList implements MouseListener {
 			rightClickMenu.add(item);
 			rightClickActions.add(new LinkManagementHelper.IndexAdder(item, queueManager, indexBrowser, false));
 
+			sortItem = new JMenuItem(I18n.getMessage("thaw.plugin.index.sortAlphabetically"));
+			rightClickMenu.add(sortItem);
+			sortItem.addActionListener(this);
+
+
 			item = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKeys"));
 			rightClickMenu.add(item);
 			rightClickActions.add(new LinkManagementHelper.PublicKeyCopier(item));
@@ -276,6 +286,38 @@ public class UnknownIndexList implements MouseListener {
 		list.revalidate();
 		list.repaint();
 	}
+
+
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == sortItem) {
+
+			Vector v;
+
+			if (full) {
+				v = new Vector(linkList.length);
+
+				for (int i = 0 ; i < linkList.length ; i++) {
+					if (linkList[i] != null)
+						v.add(linkList[i]);
+				}
+			} else
+				v = vList;
+
+			java.util.Collections.sort(v);
+
+			if (full) {
+				for (int i = 0 ; i < linkList.length ; i++) {
+					linkList[i] = null;
+				}
+
+				v.toArray(linkList);
+			} else
+				vList = v;
+
+			refresh();
+		}
+	}
+
 
 	public void mouseClicked(final MouseEvent e) {
 		Vector selection;

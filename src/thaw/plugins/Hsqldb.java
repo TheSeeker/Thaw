@@ -67,7 +67,9 @@ public class Hsqldb extends LibraryPlugin {
 	}
 
 	public void disconnect() throws java.sql.SQLException {
-		connection.close();
+		synchronized(dbLock) {
+			connection.close();
+		}
 	}
 
 
