@@ -849,7 +849,7 @@ public class IndexManagementHelper {
 
 		if (node instanceof Index) {
 			if (((Index)node).getRevision() <= 0) {
-				new thaw.core.WarningWindow(null, I18n.getMessage("thaw.plugin.index.stillRev0"));
+				new thaw.gui.WarningWindow(null, I18n.getMessage("thaw.plugin.index.stillRev0"));
 			}
 		}
 

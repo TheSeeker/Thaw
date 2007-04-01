@@ -25,7 +25,7 @@ import thaw.core.FileChooser;
 import thaw.gui.GUIHelper;
 import thaw.core.I18n;
 import thaw.core.Logger;
-import thaw.core.WarningWindow;
+import thaw.gui.WarningWindow;
 import thaw.plugins.FetchPlugin;
 
 public class FetchPanel implements java.awt.event.ActionListener, MouseListener {
@@ -217,7 +217,7 @@ public class FetchPanel implements java.awt.event.ActionListener, MouseListener 
 			}
 
 			if((destinationField.getText() == null) || "".equals( destinationField.getText() )) {
-				new thaw.core.WarningWindow(core, I18n.getMessage("thaw.plugin.fetch.chooseADestination"));
+				new WarningWindow(core, I18n.getMessage("thaw.plugin.fetch.chooseADestination"));
 				return;
 			}
 

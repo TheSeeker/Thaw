@@ -451,9 +451,9 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 * Warns the user by a popup.
 	 */
 	protected void unableToConnect() {
-		new WarningWindow(core,
-				  I18n.getMessage("thaw.warning.unableToConnectTo")+
-				  " "+core.getConfig().getValue("nodeAddress")+":"+ core.getConfig().getValue("nodePort"));
+		new thaw.gui.WarningWindow(core,
+					   I18n.getMessage("thaw.warning.unableToConnectTo")+
+					   " "+core.getConfig().getValue("nodeAddress")+":"+ core.getConfig().getValue("nodePort"));
 	}
 
 	public void update(final java.util.Observable o, final Object arg) {

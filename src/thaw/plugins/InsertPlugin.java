@@ -14,9 +14,10 @@ import thaw.core.Core;
 import thaw.core.I18n;
 import thaw.gui.IconBox;
 import thaw.core.Logger;
-import thaw.core.WarningWindow;
+import thaw.gui.WarningWindow;
 import thaw.fcp.FCPClientPut;
 import thaw.plugins.insertPlugin.InsertPanel;
+
 
 public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 	private Core core;

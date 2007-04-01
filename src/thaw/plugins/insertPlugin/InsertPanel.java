@@ -27,7 +27,7 @@ import thaw.core.Config;
 import thaw.core.FileChooser;
 import thaw.core.I18n;
 import thaw.core.Logger;
-import thaw.core.WarningWindow;
+import thaw.gui.WarningWindow;
 import thaw.fcp.FCPClientPut;
 import thaw.plugins.InsertPlugin;
 

@@ -133,13 +133,13 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 		fetchFrame.setVisible(false);
 
 		if (trollDetected) {
-			new thaw.core.WarningWindow(core,
-						    I18n.getMessage("thaw.plugin.fetch.freenet0.5.l1")+"\n"
-						    + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l2")+"\n"
-						    + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l3")+"\n"
-						    + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l4")+"\n"
-						    + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l5")+"\n"
-						    + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l6"));
+			new thaw.gui.WarningWindow(core,
+						   I18n.getMessage("thaw.plugin.fetch.freenet0.5.l1")+"\n"
+						   + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l2")+"\n"
+						   + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l3")+"\n"
+						   + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l4")+"\n"
+						   + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l5")+"\n"
+						   + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l6"));
 
 		}
 	}
