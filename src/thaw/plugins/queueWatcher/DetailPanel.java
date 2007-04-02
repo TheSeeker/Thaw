@@ -24,21 +24,21 @@ public class DetailPanel implements Observer {
 	private JPanel subPanel;
 	private JPanel panel;
 
-	private final JTextField file       = new JTextField();
-	private final JTextField size       = new JTextField();
-	private final JProgressBar progress = new JProgressBar(0, 100);
+	private final JTextField file                  = new JTextField();
+	private final JTextField size                  = new JTextField();
+	private final JProgressBar progress            = new JProgressBar(0, 100);
 	private final JProgressBar withTheNodeProgress = new JProgressBar(0, 100);
-	private final JTextField status     = new JTextField();
-	private final JTextField key        = new JTextField();
-	private final JTextField path       = new JTextField();
-	private final JTextField priority   = new JTextField();
-	private final JTextField identifier = new JTextField();
-	private final JTextField globalQueue= new JTextField();
+	private final JTextField status                = new JTextField();
+	private final JTextField key                   = new JTextField();
+	private final JTextField path                  = new JTextField();
+	private final JTextField priority              = new JTextField();
+	private final JTextField identifier            = new JTextField();
+	private final JTextField globalQueue           = new JTextField();
 
 	private FCPTransferQuery query = null;
 
 
-	private final static Dimension dim = new Dimension(300, 400);
+	private final static Dimension dim = new Dimension(thaw.plugins.QueueWatcher.DIVIDER_LOCATION-10, 400);
 
 
 	public DetailPanel() {
@@ -46,15 +46,15 @@ public class DetailPanel implements Observer {
 		subPanel = new JPanel();
 
 		final String[] fieldNames = { I18n.getMessage("thaw.common.file"),
-					I18n.getMessage("thaw.common.size"),
-					I18n.getMessage("thaw.common.progress"),
-					I18n.getMessage("thaw.common.withTheNodeProgress"),
-					I18n.getMessage("thaw.common.status"),
-					I18n.getMessage("thaw.common.key"),
-					I18n.getMessage("thaw.common.localPath"),
-					I18n.getMessage("thaw.common.priority"),
-					I18n.getMessage("thaw.common.identifier"),
-					I18n.getMessage("thaw.common.globalQueue")
+					      I18n.getMessage("thaw.common.size"),
+					      I18n.getMessage("thaw.common.progress"),
+					      I18n.getMessage("thaw.common.withTheNodeProgress"),
+					      I18n.getMessage("thaw.common.status"),
+					      I18n.getMessage("thaw.common.key"),
+					      I18n.getMessage("thaw.common.localPath"),
+					      I18n.getMessage("thaw.common.priority"),
+					      I18n.getMessage("thaw.common.identifier"),
+					      I18n.getMessage("thaw.common.globalQueue")
 		};
 
 		subPanel.setLayout(new GridLayout(fieldNames.length*2, 1));

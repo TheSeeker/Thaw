@@ -37,7 +37,7 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 
 	private JSplitPane split;
 
-	private final static int DIVIDER_LOCATION = 310; /* about the details panel */
+	public final static int DIVIDER_LOCATION = 250; /* about the details panel */
 	private long lastChange = 0;
 	private boolean folded = false;
 

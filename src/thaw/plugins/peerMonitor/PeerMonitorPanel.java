@@ -10,8 +10,14 @@ import javax.swing.JButton;
 import javax.swing.ListCellRenderer;
 import javax.swing.BorderFactory;
 
+import javax.swing.JMenu;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
+
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -33,13 +39,15 @@ import thaw.core.Config;
 import thaw.core.I18n;
 import thaw.core.Logger;
 
+import thaw.fcp.FCPQueueManager;
+
 import thaw.gui.IconBox;
 
 /**
  * In fact, here is two panels : A panel with the peer list
  * and a panel with various details (ref, etc)
  */
-public class PeerMonitorPanel extends Observable implements ActionListener, ListSelectionListener
+public class PeerMonitorPanel extends Observable implements ActionListener, MouseListener
 {
 	public final static String[] STR_STATUS = {
 		"CONNECTED",
@@ -87,10 +95,15 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 	private JLabel detailsLabel;
 	private JPanel detailsPanel;
 
+
+	private JPopupMenu rightClickMenu;
+	private Vector rightClickActions;
+
+
 	private boolean advanced;
 
 
-	public PeerMonitorPanel(Config config) {
+	public PeerMonitorPanel(FCPQueueManager queueManager, Config config, thaw.core.MainWindow mainWindow) {
 
 		advanced = Boolean.valueOf(config.getValue("advancedMode")).booleanValue();
 
@@ -101,7 +114,7 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 		peerList = new JList();
 
 		peerList.setCellRenderer(new PeerCellRenderer());
-		peerList.addListSelectionListener(this);
+		//peerList.addListSelectionListener(this);
 
 		Vector v = new Vector();
 
@@ -174,6 +187,25 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 		mainPanel.add(refPanel);
 
 		tabPanel.add(mainPanel, BorderLayout.CENTER);
+
+
+		rightClickMenu = new JPopupMenu();
+		rightClickActions = new Vector();
+
+		JMenuItem item;
+
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.peerMonitor.addPeer"),
+						     IconBox.minAdd);
+		rightClickActions.add(new PeerHelper.PeerAdder(queueManager, mainWindow, item));
+		rightClickMenu.add(item);
+
+
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.peerMonitor.removePeer"),
+						     IconBox.minDelete);
+		rightClickActions.add(new PeerHelper.PeerRemover(queueManager, item));
+		rightClickMenu.add(item);
+
+		peerList.addMouseListener(this);
 	}
 
 
@@ -217,9 +249,9 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 
 	public void setNmbThreads(int nmbNodeThreads) {
 		nodeThreads.setText(I18n.getMessage("thaw.plugin.peerMonitor.infos.nodeThreads")
-				    + ": "+ Integer.toString(nmbNodeThreads));
+				    + " : "+ Integer.toString(nmbNodeThreads));
 		thawThreads.setText(I18n.getMessage("thaw.plugin.peerMonitor.infos.thawThreads")
-				    + ": "+ Integer.toString(Thread.activeCount()));
+				    + " : "+ Integer.toString(Thread.activeCount()));
 	}
 
 
@@ -277,7 +309,7 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 	private Hashtable nodeInfos = null;
 
 	/**
-	 * \param peers : Vectors containing Hashmap containing the parameter list
+	 * \param peers : Hashtable containing Hashtable containing the parameter list
 	 */
 	public synchronized void setPeerList(Hashtable pL)
 	{
@@ -406,6 +438,13 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 			};
 		}
 
+		if (result == null && "volatile.runningThreadCount".equals(key)) {
+			result = new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.node.runningThreads"),
+				value
+			};
+		}
+
 		if (result == null && "myName".equals(key)) {
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.node.myName"),
@@ -413,12 +452,14 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 			};
 		}
 
-		if (advanced) {
-			if (result == null)
-				result = new String[] { key, value };
-			else
-				result[0] = result[0] + " ("+key+")";
-		}
+		/*
+		  if (advanced) {
+		    if (result == null)
+		      result = new String[] { key, value };
+		    else
+		      result[0] = result[0] + " ("+key+")";
+		  }
+		*/
 
 		return result;
 	}
@@ -469,8 +510,9 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 	}
 
 
-	public void valueChanged(ListSelectionEvent e) {
-		if (e.getFirstIndex() == 0 && advanced) {
+	private void clicked() {
+		if (peerList.getSelectedValue() == null
+		    || !(peerList.getSelectedValue() instanceof Peer)) {
 			displayInfos(I18n.getMessage("thaw.plugin.peerMonitor.nodeInfos"), nodeInfos);
 		} else {
 			Peer peer;
@@ -487,4 +529,38 @@ public class PeerMonitorPanel extends Observable implements ActionListener, List
 		setChanged();
 		notifyObservers();
 	}
+
+
+	public void updateMenuState(Peer target) {
+		for (Iterator it = rightClickActions.iterator();
+		     it.hasNext();) {
+			PeerHelper.PeerAction a = ((PeerHelper.PeerAction)it.next());
+			a.setTarget(target);
+		}
+	}
+
+
+	public void mouseClicked(final MouseEvent e) {
+		clicked();
+	}
+
+	public void mouseEntered(final MouseEvent e) { }
+	public void mouseExited(final MouseEvent e) { }
+
+	public void mousePressed(final MouseEvent e) {
+		showPopupMenu(e);
+	}
+
+	public void mouseReleased(final MouseEvent e) {
+		showPopupMenu(e);
+	}
+
+	protected void showPopupMenu(final MouseEvent e) {
+		if(e.isPopupTrigger()) {
+			updateMenuState(((Peer)peerList.getSelectedValue()));
+			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
+		}
+	}
+
+
 }

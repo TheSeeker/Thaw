@@ -54,6 +54,7 @@ public class IndexManagementHelper {
 		return JOptionPane.showInputDialog(parent, prompt, defVal);
 	}
 
+
 	/**
 	 * Class implementing IndexAction will automatically do an addActionListener if necessary
 	 */
@@ -191,7 +192,7 @@ public class IndexManagementHelper {
 										 " publicKey, privateKey, author, "+
 										 " positionInTree, revision, "+
 										 " newRev, parent) "+
-										 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+										 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
 					/* TODO : Author */
 
@@ -214,7 +215,7 @@ public class IndexManagementHelper {
 					if (getTarget().getId() >= 0)
 						st.setInt(10, getTarget().getId());
 					else
-						st.setNull(11, Types.INTEGER);
+						st.setNull(10, Types.INTEGER);
 
 					st.execute();
 
@@ -318,7 +319,7 @@ public class IndexManagementHelper {
 			publishPrivateKeyBox = new JCheckBox(I18n.getMessage("thaw.plugin.index.publishPrivateKey"),
 							     defaultPublishPrivateKey);
 			publishPrivateKeyBox.setEnabled(enablePublishPrivateKeyChoice);
-			final JPanel subPanelA = new JPanel(); /* left => labels */
+			final JPanel subPanelA = new JPanel(); /* left  => labels */
 			final JPanel subPanelB = new JPanel(); /* right => textfield */
 
 			subPanelA.setLayout(new GridLayout(askPrivateKey ? 2 : 1, 1));

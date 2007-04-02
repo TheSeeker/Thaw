@@ -102,7 +102,7 @@ public class PeerMonitor implements thaw.core.Plugin, Observer
 		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 
 
-		peerPanel = new PeerMonitorPanel(core.getConfig());
+		peerPanel = new PeerMonitorPanel(core.getQueueManager(), core.getConfig(), core.getMainWindow());
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.peerMonitor.peerMonitor"),
 					    thaw.gui.IconBox.minPeerMonitor,
