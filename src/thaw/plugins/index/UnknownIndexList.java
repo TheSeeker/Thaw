@@ -16,7 +16,14 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 
+import java.awt.event.MouseAdapter;
+import javax.swing.SwingConstants;
+import javax.swing.TransferHandler;
+
+import javax.swing.JComponent;
+
 import thaw.core.I18n;
+import thaw.core.Logger;
 import thaw.gui.IconBox;
 import thaw.fcp.FCPQueueManager;
 import thaw.plugins.ToolbarModifier;
@@ -64,6 +71,12 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 
 		list.setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
+		list.setDragEnabled(true);
+		list.setTransferHandler(new TransferHandler("text"));
+
+		MouseListener mouseListener = new DragMouseAdapter(); /* see below */
+		list.addMouseListener(mouseListener);
+
 		panel = new JPanel(new BorderLayout());
 		panel.add(new JLabel(I18n.getMessage("thaw.plugin.index.unknownIndexes")),
 			  BorderLayout.NORTH);
@@ -81,6 +94,18 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 		toolbarModifier.addButtonToTheToolbar(button);
 
 		list.addMouseListener(this);
+	}
+
+	private class DragMouseAdapter extends MouseAdapter {
+		public void mousePressed(MouseEvent e) {
+			Logger.error(this, "MOOH");
+
+			JComponent src = (JComponent) e.getSource();
+			TransferHandler handler = src.getTransferHandler();
+
+			handler.exportAsDrag(src, e, TransferHandler.COPY);
+
+		}
 	}
 
 	public ToolbarModifier getToolbarModifier() {

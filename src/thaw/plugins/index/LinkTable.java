@@ -12,6 +12,7 @@ import java.awt.event.MouseListener;
 import java.util.Iterator;
 import java.util.Vector;
 
+import javax.swing.JComponent;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -22,7 +23,14 @@ import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import javax.swing.SwingConstants;
+import javax.swing.TransferHandler;
+
 import thaw.core.I18n;
+import thaw.core.Logger;
 import thaw.gui.IconBox;
 import thaw.fcp.FCPQueueManager;
 import thaw.plugins.ToolbarModifier;
@@ -61,6 +69,12 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		table = new JTable(linkListModel);
 		table.setShowGrid(false);
 		table.setDefaultRenderer(table.getColumnClass(0), new LinkRenderer());
+		table.setDragEnabled(true);
+
+		table.setTransferHandler(new TransferHandler("text"));
+
+		MouseListener mouseListener = new DragMouseAdapter(); /* see below */
+		table.addMouseListener(mouseListener);
 
 		panel = new JPanel();
 		panel.setLayout(new BorderLayout());
@@ -112,6 +126,20 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 		updateRightClickMenu(null);
 	}
+
+
+	private class DragMouseAdapter extends MouseAdapter {
+		public void mousePressed(MouseEvent e) {
+			Logger.error(this, "MOOH");
+
+			JComponent src = (JComponent) e.getSource();
+			TransferHandler handler = src.getTransferHandler();
+
+			handler.exportAsDrag(src, e, TransferHandler.COPY);
+
+		}
+	}
+
 
 	public ToolbarModifier getToolbarModifier() {
 		return toolbarModifier;

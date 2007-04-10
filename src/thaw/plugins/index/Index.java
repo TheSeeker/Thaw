@@ -695,6 +695,12 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		rewriteKey = true;
 
 		publicKey = getPublicKey();
+		String privateKey = getPrivateKey();
+
+		if (rev <= 0 && privateKey != null) {
+			Logger.error(this, "Can't update an non-inserted index !");
+			return 0;
+		}
 
 		if (tree != null && tree.isIndexUpdating(this)) {
 			Logger.notice(this, "A transfer is already running !");
@@ -1255,7 +1261,15 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		 */
 		public void endElement(String nameSpaceURI, String localName,
 				       String rawName) throws SAXException {
-				/* \_o< */
+			if ("owner".equals(rawName)) {
+				ownerTag = false;
+				return;
+			}
+
+			if ("privateKey".equals(rawName)) {
+				privateKeyTag = false;
+				return;
+			}
 		}
 
 
@@ -1271,6 +1285,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 			if (ownerTag) {
 				/* \_o< ==> TODO */
+
 				return;
 			}
 
@@ -1280,13 +1295,17 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 					 * the private key was published, we will have to do the same later
 					 */
 					setPublishPrivateKey(true);
+				} else {
+					/**
+					 * the provided key doesn't match with the one we have,
+					 * we won't publish it anymore
+					 */
+					Logger.notice(this, "A private key was provided, but didn't match with the one we have ; ignored.");
+
 				}
-				else
-					setPublishPrivateKey(false);
 
 				if (privateKey == null)
 					setPrivateKey(txt.trim());
-
 				return;
 			}
 
