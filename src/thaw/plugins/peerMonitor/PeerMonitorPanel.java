@@ -146,7 +146,7 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 		nodeThreads = new JLabel("");
 		thawThreads = new JLabel("");
-		JPanel threadPanel = new JPanel(new GridLayout(1, 2));
+		JPanel threadPanel = new JPanel(new GridLayout(2, 1));
 		threadPanel.add(nodeThreads);
 		threadPanel.add(thawThreads);
 
@@ -237,8 +237,7 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 		nodeMemBar.setString(I18n.getMessage("thaw.plugin.peerMonitor.infos.nodeMemory")+ ": "
 				     + thaw.gui.GUIHelper.getPrintableSize(used)
 				     + " / "
-				     + thaw.gui.GUIHelper.getPrintableSize(max)
-				     + " ("+Integer.toString(pourcent)+"%)");
+				     + thaw.gui.GUIHelper.getPrintableSize(max));
 
 		nodeMemBar.setValue(pourcent);
 
@@ -258,8 +257,7 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 		thawMemBar.setString(I18n.getMessage("thaw.plugin.peerMonitor.infos.thawMemory")+ ": "
 				     + thaw.gui.GUIHelper.getPrintableSize(used)
 				     + " / "
-				     + thaw.gui.GUIHelper.getPrintableSize(max)
-				     + " ("+Integer.toString(pourcent)+"%)");
+				     + thaw.gui.GUIHelper.getPrintableSize(max));
 
 		thawMemBar.setValue(pourcent);
 	}
@@ -301,8 +299,8 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 			if (value instanceof Peer) {
 				String txt = ((Peer)value).toString();
 
-				if (txt.length() > 35) {
-					txt = txt.substring(0, 35) + "(...)";
+				if (txt.length() > 25) {
+					txt = txt.substring(0, 25) + "(...)";
 				}
 
 				setText(txt);
