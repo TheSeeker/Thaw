@@ -5,10 +5,6 @@ import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
 
-import javax.jmdns.JmDNS;
-import javax.jmdns.ServiceEvent;
-import javax.jmdns.ServiceInfo;
-import javax.jmdns.ServiceListener;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -49,41 +45,7 @@ public class Core implements Observer {
 	private ReconnectionManager reconnectionManager = null;
 
 	// MDNS stuffs
-	private final JmDNS jmdns;
-	// SYNC IT!!!
-	protected final LinkedList foundNodes;
-
-	private class FCPMDNSListener implements ServiceListener {
-		public void serviceAdded(ServiceEvent event) {
-			Logger.notice(this, "Service added   : " + event.getName()+"."+event.getType());
-			// Force the gathering of informations
-			jmdns.getServiceInfo(MDNSDiscoveryPanel.FCP_SERVICE_TYPE, event.getName());
-		}
-
-		public void serviceRemoved(ServiceEvent event) {
-			Logger.notice(this, "Service removed : " + event.getName()+"."+event.getType());
-			ServiceInfo service = event.getInfo();
-
-			synchronized (foundNodes) {
-				foundNodes.remove(service);
-				synchronized (configWindow.nodeConfigPanel.mdnsPanel) {
-					configWindow.nodeConfigPanel.mdnsPanel.notifyAll();
-				}
-			}
-		}
-
-		public void serviceResolved(ServiceEvent event) {
-			Logger.debug(this, "Service resolved: " + event.getInfo());
-			ServiceInfo service = event.getInfo();
-
-			synchronized (foundNodes) {
-				foundNodes.add(service);
-				synchronized (configWindow.nodeConfigPanel.mdnsPanel) {
-					configWindow.nodeConfigPanel.mdnsPanel.notifyAll();
-				}
-			}
-		}
-	}
+	private MDNSDiscovery discovery;
 
 	/**
 	 * Creates a core, but do nothing else (no initialization).
@@ -92,29 +54,8 @@ public class Core implements Observer {
 		Logger.info(this, "Thaw, version "+Main.VERSION, true);
 		Logger.info(this, "2006(c) Freenet project", true);
 		Logger.info(this, "Released under GPL license version 2 or later (see http://www.fsf.org/licensing/licenses/gpl.html)", true);
-
-		this.foundNodes = new LinkedList();
-		try {
-			// Spawn the mdns listener
-			Logger.info(this, "Starting JMDNS ...");
-			this.jmdns = new JmDNS();
-
-			// Start listening for new nodes
-			jmdns.addServiceListener(MDNSDiscoveryPanel.FCP_SERVICE_TYPE, new FCPMDNSListener());
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException("Error loading MDNSDiscoveryPanel : " + e.getMessage());
-		}
 	}
 
-	protected boolean isHasTheSameIPAddress(ServiceInfo host) {
-		try{
-			return (jmdns.getInterface().equals(host.getAddress()) ? true : false);
-		} catch (IOException e) {
-			return false;
-		}
-	}
 
 	/**
 	 * Gives a ref to the object containing the config.
@@ -172,20 +113,24 @@ public class Core implements Observer {
 		if (!initializeLookAndFeel())
 			return false;
 
-		splashScreen.setProgressionAndStatus(20, "Connecting ...");
+		splashScreen.setProgressionAndStatus(20, "Starting node autodection ...");
 		splashScreen.addIcon(IconBox.connectAction);
+		if (!initMDNS())
+			return false;
+
+		splashScreen.setProgressionAndStatus(25, "Connecting ...");
 		if(!initConnection())
 			new thaw.gui.WarningWindow(this, I18n.getMessage("thaw.warning.unableToConnectTo")+
 						   " "+ config.getValue("nodeAddress")+
 						   ":"+ config.getValue("nodePort"));
 
 
-		splashScreen.setProgressionAndStatus(30, "Preparing the main window ...");
+		splashScreen.setProgressionAndStatus(40, "Preparing the main window ...");
 		splashScreen.addIcon(IconBox.mainWindow);
 		if(!initGraphics())
 			return false;
 
-		splashScreen.setProgressionAndStatus(40, "Loading plugins ...");
+		splashScreen.setProgressionAndStatus(50, "Loading plugins ...");
 		if(!initPluginManager())
 			return false;
 
@@ -202,6 +147,17 @@ public class Core implements Observer {
 		return true;
 	}
 
+
+	public boolean initMDNS() {
+		discovery = new MDNSDiscovery(this);
+
+		return true;
+	}
+
+
+	public MDNSDiscovery getMDNSDiscovery() {
+		return discovery;
+	}
 
 
 	/**
@@ -515,8 +471,8 @@ public class Core implements Observer {
 					return;
 			}
 		}
-		Logger.info(this, "Stopping JMDNS ...");
-		jmdns.close();
+
+		discovery.stop();
 
 		Logger.info(this, "Stopping scheduler ...");
 		if(queueManager != null)

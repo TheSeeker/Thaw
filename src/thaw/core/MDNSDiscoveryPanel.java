@@ -109,14 +109,13 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 	}
 
 
-	
 
 	/**
 	 * The user has selected something: notify the main loop and process the data.
 	 */
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
-		
+
 		if ((source == okButton) || (source == cancelButton)){
 			goon = false;
 			if(source == okButton) {
@@ -124,7 +123,7 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 				selectedValue = (ServiceInfo) displayedServiceInfos.get(list.getSelectedValue());
 			} else
 				cancelledByUser = true;
-			
+
 			synchronized (this) {
 				notifyAll();
 			}
@@ -140,28 +139,28 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 		super.setLocationRelativeTo(this.getParent());
 		this.setVisible(true);
 		owner.setEnabled(false);
-		
+
 		Logger.notice(this, "Show the MDNSDiscoveryPanel");
 		Socket testSocket = null;
 		boolean isConfigValid = false;
 		goon = true;
-		
+
 		do {
 			// Loop until a selection is done
 			while(goon) {
-				synchronized (core.foundNodes) {
-					if(core.foundNodes.size() > 0) {
+				synchronized (core.getMDNSDiscovery().getFoundNodes()) {
+					if(core.getMDNSDiscovery().getFoundNodes().size() > 0) {
 						listModel.clear();
-						Iterator it = core.foundNodes.iterator();
+						Iterator it = core.getMDNSDiscovery().getFoundNodes().iterator();
 						while(it.hasNext()) {
 							ServiceInfo current = (ServiceInfo) it.next();
 							listModel.addElement(current.getName());
 							displayedServiceInfos.put(current.getName(), current);
 						}
 						list.repaint();
-					}	
+					}
 				}
-								
+
 				try {
 					synchronized (this) {
 						wait(Integer.MAX_VALUE);
@@ -185,12 +184,12 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 			} catch (IOException e) {
 				isConfigValid = false;
 			}
-			
+
 			Logger.debug(this, "isConfigValid ="+isConfigValid);
 
 			// Reload, just in  case it failed...
 			goon = true;
-			list.removeSelectionInterval(0, core.foundNodes.size());
+			list.removeSelectionInterval(0, core.getMDNSDiscovery().getFoundNodes().size());
 		} while(!isConfigValid);
 
 
@@ -202,7 +201,7 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 			// Save the config. now that we know it's valid
 			core.getConfig().setValue("nodeAddress", selectedValue.getHostAddress());
 			core.getConfig().setValue("nodePort", new Integer(selectedValue.getPort()).toString());
-			core.getConfig().setValue("sameComputer", String.valueOf(core.isHasTheSameIPAddress(selectedValue)));
+			core.getConfig().setValue("sameComputer", String.valueOf(core.getMDNSDiscovery().isHasTheSameIPAddress(selectedValue)));
 
 
 			Logger.info(this, "We are done : configuration has been saved sucessfully.");
@@ -212,4 +211,6 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 		cb.onMDNSDiscoverPanelClosure(cancelledByUser);
 		Logger.notice(this, "We got back from the MDNSDiscoveryPanel callback");
 	}
+
+
 }

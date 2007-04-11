@@ -20,7 +20,7 @@ import thaw.core.MDNSDiscoveryPanel.MDNSDiscoveryPanelCallback;
 public class NodeConfigPanel implements Observer, java.awt.event.ActionListener, MDNSDiscoveryPanelCallback {
 	private Core core;
 	private JPanel nodeConfigPanel = null;
-	protected final MDNSDiscoveryPanel mdnsPanel;
+	private final MDNSDiscoveryPanel mdnsPanel;
 	private boolean isMDNSPanerShown = false;
 
 
@@ -117,6 +117,10 @@ public class NodeConfigPanel implements Observer, java.awt.event.ActionListener,
 
 	public JPanel getPanel() {
 		return nodeConfigPanel;
+	}
+
+	public MDNSDiscoveryPanel getMdnsPanel() {
+		return mdnsPanel;
 	}
 
 	private void setVisibility(final boolean advancedMode) {

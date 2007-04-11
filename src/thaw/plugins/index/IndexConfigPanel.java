@@ -162,8 +162,8 @@ public class IndexConfigPanel implements ActionListener {
 		}
 
 		if (e.getSource() == editBlackList) {
-			configWindow.close();
 			indexBrowser.getBlackList().displayPanel();
+			configWindow.close();
 		}
 	}
 

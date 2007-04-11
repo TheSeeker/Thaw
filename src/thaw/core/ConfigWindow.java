@@ -31,15 +31,16 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	private JButton okButton;
 	private JButton cancelButton;
 
-	protected ThawConfigPanel thawConfigPanel;
-	protected NodeConfigPanel nodeConfigPanel;
-	protected PluginConfigPanel pluginConfigPanel;
+	private ThawConfigPanel thawConfigPanel;
+	private NodeConfigPanel nodeConfigPanel;
+	private PluginConfigPanel pluginConfigPanel;
 
 	private Core core;
 
 	private boolean advancedMode = false;
 
 	private boolean needConnectionReset = false;
+
 
 	public ConfigWindow(final Core core) {
 		this.core = core;
@@ -113,6 +114,10 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		}
 
 		configWin.setVisible(v);
+
+		if (v == false) {
+			configWin.dispose();
+		}
 	}
 
 	public boolean addTab(final String name, final java.awt.Component panel) {
@@ -135,6 +140,13 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	 */
 	public JDialog getFrame() {
 		return configWin;
+	}
+
+	/**
+	 * Used to update the MDNSPanel
+	 */
+	public NodeConfigPanel getNodeConfigPanel() {
+		return nodeConfigPanel;
 	}
 
 	/**
