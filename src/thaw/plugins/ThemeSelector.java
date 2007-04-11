@@ -72,6 +72,7 @@ public class ThemeSelector implements thaw.core.Plugin, Observer, ListSelectionL
 
 
 	public boolean stop() {
+		core.getConfigWindow().deleteObserver(this);
 		core.getConfigWindow().removeTab(panel);
 
 		return false;
@@ -113,7 +114,6 @@ public class ThemeSelector implements thaw.core.Plugin, Observer, ListSelectionL
 				if (themeList.getSelectedValue() != null) {
 					core.getConfig().setValue("lookAndFeel",
 								  ((String)themeList.getSelectedValue()));
-
 					resetSelection();
 				}
 
