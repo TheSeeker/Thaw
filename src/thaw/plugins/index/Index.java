@@ -738,7 +738,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 		clientGet = new FCPClientGet(key, 2, 2, false, -1,
 					     System.getProperty("java.io.tmpdir"),
-					     MAX_SIZE);
+					     MAX_SIZE, true /* <= noDDA */);
 
 		/*
 		 * These requests are usually quite fast, and don't consume too much

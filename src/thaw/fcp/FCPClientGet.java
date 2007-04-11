@@ -45,6 +45,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	private boolean alreadySaved = false;
 
+	private boolean noDDA = false;
 
 	/**
 	 * See setParameters().
@@ -107,6 +108,20 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 
 	/**
+	 * See the other entry point
+	 * @param noDDA refuse the use of DDA (if true, request must be *NOT* *PERSISTENT*)
+	 */
+	public FCPClientGet(final String key, final int priority,
+			    final int persistence, boolean globalQueue,
+			    final int maxRetries,
+			    String destinationDir,
+			    boolean noDDA) {
+		this(key, priority, persistence, globalQueue, maxRetries, destinationDir);
+		this.noDDA = noDDA;
+	}
+
+
+	/**
 	 * Entry point:
 	 * Only for initial queries : To resume queries, use FCPClientGet(FCPQueueManager, Hashmap).
 	 * @param destinationDir if null => temporary file
@@ -149,6 +164,20 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	}
 
+
+	/**
+	 * See the other entry point
+	 * @param noDDA refuse the use of DDA (if true, request must be *NOT* *PERSISTENT*)
+	 */
+	public FCPClientGet(final String key, final int priority,
+			    final int persistence, boolean globalQueue,
+			    final int maxRetries,
+			    String destinationDir,
+			    long maxSize,
+			    boolean noDDA) {
+		this(key, priority, persistence, globalQueue, maxRetries, destinationDir, maxSize);
+		this.noDDA = noDDA;
+	}
 
 	/**
 	 * Another entry point allowing to specify a max size
@@ -214,7 +243,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		else
 			queryMessage.setValue("Global", "false");
 
-		if (!queueManager.getQueryManager().getConnection().isLocalSocket())
+		if (!queueManager.getQueryManager().getConnection().isLocalSocket() && !noDDA)
 			queryMessage.setValue("ReturnType", "direct");
 		else {
 			queryMessage.setValue("ReturnType", "disk");
@@ -256,10 +285,10 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 					fileSize = (new Long(message.getValue("DataLength"))).longValue();
 
 					if(isPersistent()
-					   || queueManager.getQueryManager().getConnection().isLocalSocket()) {
+					   || (queueManager.getQueryManager().getConnection().isLocalSocket() && !noDDA)) {
 						if(destinationDir != null) {
 							if(!fileExists()
-							   && !queueManager.getQueryManager().getConnection().isLocalSocket()) {
+							   && !(queueManager.getQueryManager().getConnection().isLocalSocket() && !noDDA)) {
 								status = "Requesting file from the node";
 								progress = 99;
 								running = true;
