@@ -35,7 +35,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 
-
+import thaw.plugins.PeerMonitor;
 
 import thaw.core.Config;
 import thaw.core.I18n;
@@ -102,11 +102,18 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 	private JPopupMenu rightClickMenu;
 	private Vector rightClickActions;
 
+	private JButton closeTabButton;
 
 	private boolean advanced;
 
+	private PeerMonitor peerMonitor;
 
-	public PeerMonitorPanel(FCPQueueManager queueManager, Config config, thaw.core.MainWindow mainWindow) {
+	public PeerMonitorPanel(PeerMonitor peerMonitor,
+				FCPQueueManager queueManager,
+				Config config,
+				thaw.core.MainWindow mainWindow) {
+
+		this.peerMonitor = peerMonitor;
 
 		advanced = Boolean.valueOf(config.getValue("advancedMode")).booleanValue();
 
@@ -121,8 +128,7 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 		Vector v = new Vector();
 
-		if (advanced)
-			v.add(I18n.getMessage("thaw.plugin.peerMonitor.nodeStats"));
+		v.add(I18n.getMessage("thaw.plugin.peerMonitor.nodeStats"));
 
 		peerList.setListData(v);
 
@@ -191,6 +197,15 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 		tabPanel.add(mainPanel, BorderLayout.CENTER);
 
+		closeTabButton = new JButton(IconBox.minClose);
+		closeTabButton.setBorderPainted(false);
+		closeTabButton.addActionListener(this);
+
+		JPanel headPanel = new JPanel(new BorderLayout());
+		headPanel.add(new JLabel(""), BorderLayout.CENTER);
+		headPanel.add(closeTabButton, BorderLayout.EAST);
+
+		tabPanel.add(headPanel, BorderLayout.NORTH);
 
 		rightClickMenu = new JPopupMenu();
 		rightClickActions = new Vector();
@@ -318,8 +333,7 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 	{
 		peers = new Vector();
 
-		if (advanced)
-			peers.add(I18n.getMessage("thaw.plugin.peerMonitor.nodeStats"));
+		peers.add(I18n.getMessage("thaw.plugin.peerMonitor.nodeStats"));
 
 		/* TODO : dirty : should use comparator, etc */
 		for (int i = 0 ; i < STR_STATUS.length ; i++) {
@@ -357,6 +371,10 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == refCopyButton) {
 			thaw.gui.GUIHelper.copyToClipboard(refArea.getText());
+		}
+
+		if (e.getSource() == closeTabButton) {
+			peerMonitor.hideTab();
 		}
 	}
 
@@ -560,8 +578,10 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 	protected void showPopupMenu(final MouseEvent e) {
 		if(e.isPopupTrigger()) {
-			updateMenuState(((Peer)peerList.getSelectedValue()));
-			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
+			if (peerList.getSelectedValue() instanceof Peer) {
+				updateMenuState(((Peer)peerList.getSelectedValue()));
+				rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
+			}
 		}
 	}
 
