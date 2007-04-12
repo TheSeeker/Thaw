@@ -243,7 +243,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		else
 			queryMessage.setValue("Global", "false");
 
-		if (!queueManager.getQueryManager().getConnection().isLocalSocket() && !noDDA)
+		if (!queueManager.getQueryManager().getConnection().isLocalSocket() || noDDA)
 			queryMessage.setValue("ReturnType", "direct");
 		else {
 			queryMessage.setValue("ReturnType", "disk");
