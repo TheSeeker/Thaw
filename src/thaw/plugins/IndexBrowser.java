@@ -19,7 +19,7 @@ import thaw.plugins.index.IndexManagementHelper;
 
 public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListener {
 
-	public static final String DEFAULT_INDEX = "USK@G-ofLp2KlhHBNPezx~GDWDKThJ-QUxJK8c2xiF~-jwE,-55vLnqo3U1H5qmKA1LLADoYGQdk-Y3hSLxyKeUyHNc,AQABAAE/Thaw/2/Thaw.xml";
+	public static final String DEFAULT_INDEX = "USK@G-ofLp2KlhHBNPezx~GDWDKThJ-QUxJK8c2xiF~-jwE,-55vLnqo3U1H5qmKA1LLADoYGQdk-Y3hSLxyKeUyHNc,AQABAAE/Thaw/9/Thaw.xml";
 
 	private Core core;
 	private Hsqldb hsqldb;

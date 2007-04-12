@@ -462,6 +462,32 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 				st.setInt(3, id);
 
 				st.execute();
+
+
+				/* we update also all the links in the index with the private key */
+
+				st = db.getConnection().prepareStatement("SELECT links.id, links.publicKey "+
+									 "FROM LINKS JOIN INDEXES ON links.indexParent = indexes.id "+
+									 "WHERE indexes.privateKey IS NOT NULL AND LOWER(publicKey) LIKE ?");
+
+				st.setString(1, FreenetURIHelper.getComparablePart(publicKey)+"%");
+				ResultSet res = st.executeQuery();
+
+
+				PreparedStatement updateLinkSt;
+
+				updateLinkSt = db.getConnection().prepareStatement("UPDATE links SET publicKey = ? WHERE id = ?");
+
+				while(res.next()) {
+					String pubKey = res.getString("publicKey").replaceAll(".xml", ".frdx");
+
+					if (FreenetURIHelper.compareKeys(pubKey, publicKey)) {
+						updateLinkSt.setString(1, publicKey);
+						updateLinkSt.setInt(2, res.getInt("id"));
+						updateLinkSt.execute();
+					}
+				}
+
 			} catch(SQLException e) {
 				Logger.error(this, "Unable to set public Key because: "+e.toString());
 			}

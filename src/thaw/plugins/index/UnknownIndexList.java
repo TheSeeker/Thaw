@@ -71,12 +71,6 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 
 		list.setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
-		list.setDragEnabled(true);
-		list.setTransferHandler(new TransferHandler("text"));
-
-		MouseListener mouseListener = new DragMouseAdapter(); /* see below */
-		list.addMouseListener(mouseListener);
-
 		panel = new JPanel(new BorderLayout());
 		panel.add(new JLabel(I18n.getMessage("thaw.plugin.index.unknownIndexes")),
 			  BorderLayout.NORTH);
@@ -96,17 +90,6 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 		list.addMouseListener(this);
 	}
 
-	private class DragMouseAdapter extends MouseAdapter {
-		public void mousePressed(MouseEvent e) {
-			Logger.error(this, "MOOH");
-
-			JComponent src = (JComponent) e.getSource();
-			TransferHandler handler = src.getTransferHandler();
-
-			handler.exportAsDrag(src, e, TransferHandler.COPY);
-
-		}
-	}
 
 	public ToolbarModifier getToolbarModifier() {
 		return toolbarModifier;

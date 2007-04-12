@@ -69,12 +69,6 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		table = new JTable(linkListModel);
 		table.setShowGrid(false);
 		table.setDefaultRenderer(table.getColumnClass(0), new LinkRenderer());
-		table.setDragEnabled(true);
-
-		table.setTransferHandler(new TransferHandler("text"));
-
-		MouseListener mouseListener = new DragMouseAdapter(); /* see below */
-		table.addMouseListener(mouseListener);
 
 		panel = new JPanel();
 		panel.setLayout(new BorderLayout());
@@ -125,19 +119,6 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		gotoCorrespondingItem.addActionListener(this);
 
 		updateRightClickMenu(null);
-	}
-
-
-	private class DragMouseAdapter extends MouseAdapter {
-		public void mousePressed(MouseEvent e) {
-			Logger.error(this, "MOOH");
-
-			JComponent src = (JComponent) e.getSource();
-			TransferHandler handler = src.getTransferHandler();
-
-			handler.exportAsDrag(src, e, TransferHandler.COPY);
-
-		}
 	}
 
 
