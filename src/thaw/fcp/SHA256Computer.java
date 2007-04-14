@@ -5,6 +5,8 @@ import java.util.Observable;
 
 import java.io.FileInputStream;
 
+import java.security.MessageDigest;
+
 import freenet.crypt.SHA256;
 import freenet.support.Base64;
 
@@ -28,7 +30,11 @@ public class SHA256Computer extends Observable implements Runnable {
 
 		sha = new SHA256();
 
-		sha.update(header.getBytes("UTF-8"));
+		try {
+			sha.update(header.getBytes("UTF-8"));
+		} catch(java.io.UnsupportedEncodingException e) {
+			sha.update(header.getBytes());
+		}
 	}
 
 
@@ -36,9 +42,13 @@ public class SHA256Computer extends Observable implements Runnable {
 		try {
 			FileInputStream in = new FileInputStream(file);
 
-			SHA256.hash(in, sha);
+			MessageDigest md = sha.getMessageDigest();
 
-			hash = Base64.encore(sha.digest());
+			SHA256.hash(in, md);
+
+			hash = Base64.encode(md.digest());
+
+			SHA256.returnMessageDigest(md);
 
 		} catch(java.io.FileNotFoundException e) {
 			Logger.error(this, "Can't hash file because: "+e.toString());

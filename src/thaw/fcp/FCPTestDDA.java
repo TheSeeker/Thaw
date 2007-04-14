@@ -88,8 +88,7 @@ public class FCPTestDDA extends Observable implements FCPQuery, Observer {
 
 			data = "";
 
-			while(stream.available() > 0) {
-				stream.read(raw);
+			while(stream.read(raw) >= 0) {
 				data += new String(raw);
 			}
 
