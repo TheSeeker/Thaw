@@ -50,6 +50,8 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 	private final static int PACKET_SIZE = 1024;
 
+	private SHA256Computer sha;
+
 	/**
 	 * To resume query from file. (see core.QueueKeeper)
 	 */
@@ -199,6 +201,26 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		successful = false;
 		running = false;
 
+		sha = null;
+
+		if (queueManager.getQueryManager().getConnection().isLocalSocket()) {
+			sha = new SHA256Computer(queueManager.getQueryManager().getConnection().getClientHello().getConnectionId()
+						 +"-"+ (localFile != null ? localFile.getPath() : "")
+						 +"-",
+						 localFile.getPath());
+			sha.addObserver(this);
+
+			Thread th = new Thread(sha);
+			th.start();
+		} else {
+			return startProcess();
+		}
+
+		return true;
+	}
+
+
+	public boolean startProcess() {
 		if((keyType == 2) && (privateKey == null)) {
 			generateSSK();
 		}
@@ -331,6 +353,9 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		} else {
 			msg.setValue("UploadFrom", "disk");
 			msg.setValue("Filename", localFile.getPath());
+
+			if (sha != null)
+				msg.setValue("FileHash", sha.getHash());
 		}
 
 		Logger.info(this, "Sending "+Long.toString(fileSize)+" bytes on socket ...");
@@ -476,6 +501,11 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	}
 
 	public void update(final Observable o, final Object param) {
+		if (o == sha) {
+			startProcess();
+			return;
+		}
+
 		if(o == sskGenerator) {
 			privateKey = sskGenerator.getPrivateKey();
 			publicKey = sskGenerator.getPublicKey() + "/" + name;

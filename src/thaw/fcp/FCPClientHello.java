@@ -17,6 +17,7 @@ public class FCPClientHello implements FCPQuery, Observer {
 	private final static String FCP_EXPECTED_VERSION = "2.0";
 	private String id;
 
+	private String connectionId;
 	private String nodeFCPVersion;
 	private String nodeVersion;
 	private String nodeName = null;
@@ -62,8 +63,11 @@ public class FCPClientHello implements FCPQuery, Observer {
 
 	/**
 	 * Warning: This query is blocking (only this one) !
+	 * @param queueManager always null
 	 */
 	public boolean start(final FCPQueueManager queueManager) {
+
+		queryManager.getConnection().registerClientHello(this);
 
 		final FCPMessage message = new FCPMessage();
 
@@ -113,6 +117,7 @@ public class FCPClientHello implements FCPQuery, Observer {
 			if("NodeHello".equals( answer.getMessageName() )) {
 				Logger.info(this, "Received a nodeHello");
 
+				connectionId = answer.getValue("ConnectionIdentifier");
 				nodeFCPVersion = answer.getValue("FCPVersion");
 				nodeVersion = answer.getValue("Version");
 				nodeName = answer.getValue("Node");
@@ -155,5 +160,9 @@ public class FCPClientHello implements FCPQuery, Observer {
 		return 0;
 	}
 
+
+	public String getConnectionId() {
+		return connectionId;
+	}
 }
 

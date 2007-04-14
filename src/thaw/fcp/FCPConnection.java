@@ -49,6 +49,8 @@ public class FCPConnection extends Observable {
 	private boolean duplicationAllowed = true;
 	private boolean localSocket = false;
 
+	private FCPClientHello clientHello;
+
 
 	/**
 	 * Don't connect. Call connect() for that.
@@ -469,4 +471,12 @@ public class FCPConnection extends Observable {
 		return newConnection;
 	}
 
+
+	public void registerClientHello(FCPClientHello ch) {
+		clientHello = ch;
+	}
+
+	public FCPClientHello getClientHello() {
+		return clientHello;
+	}
 }
