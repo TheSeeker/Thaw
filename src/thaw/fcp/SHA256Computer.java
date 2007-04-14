@@ -10,6 +10,11 @@ import freenet.support.Base64;
 
 import thaw.core.Logger;
 
+
+/**
+ * Automatically used by FCPClientPut.
+ * You shouldn't have to bother about it
+ */
 public class SHA256Computer extends Observable implements Runnable {
 	private SHA256 sha;
 

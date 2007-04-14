@@ -118,6 +118,7 @@ public class FCPTestDDA extends Observable implements FCPQuery, Observer {
 
 		FCPMessage msg = (FCPMessage)param;
 
+		/* TOREMOVE when all the node will be up-to-date */
 		if ("ProtocolError".equals(msg.getMessageName())) {
 			if ("7".equals(msg.getValue("Code"))) {
 				Logger.warning(this, "Node doesn't support TestDDA (-> ProtocolError) => DDA desactivated");
