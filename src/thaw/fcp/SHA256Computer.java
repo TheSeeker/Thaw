@@ -31,8 +31,10 @@ public class SHA256Computer extends Observable implements Runnable {
 
 		sha = new SHA256();
 
+		md = sha.getMessageDigest();
+		md.reset();
+
 		try {
-			md = sha.getMessageDigest();
 			md.update(header.getBytes("UTF-8"));
 		} catch(java.io.UnsupportedEncodingException e) {
 			md.update(header.getBytes());
