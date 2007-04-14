@@ -19,6 +19,7 @@ import thaw.core.Logger;
  */
 public class SHA256Computer extends Observable implements Runnable {
 	private SHA256 sha;
+	private MessageDigest md;
 
 	private String file;
 	private String hash;
@@ -31,9 +32,10 @@ public class SHA256Computer extends Observable implements Runnable {
 		sha = new SHA256();
 
 		try {
-			sha.update(header.getBytes("UTF-8"));
+			md = sha.getMessageDigest();
+			md.update(header.getBytes("UTF-8"));
 		} catch(java.io.UnsupportedEncodingException e) {
-			sha.update(header.getBytes());
+			md.update(header.getBytes());
 		}
 	}
 
@@ -41,8 +43,6 @@ public class SHA256Computer extends Observable implements Runnable {
 	public void run() {
 		try {
 			FileInputStream in = new FileInputStream(file);
-
-			MessageDigest md = sha.getMessageDigest();
 
 			SHA256.hash(in, md);
 
