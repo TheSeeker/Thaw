@@ -3,6 +3,7 @@ package thaw.fcp;
 import java.util.Observable;
 import java.util.Observer;
 
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
@@ -81,20 +82,14 @@ public class FCPTestDDA extends Observable implements FCPQuery, Observer {
 
 
 	protected String readFile(String filename) {
-		byte[] raw = new byte[128];
-
-		StringBuffer data = null;
-
+		String data = null;
 		try {
-			int read;
 			FileInputStream stream = new FileInputStream(filename);
-
-			data = new StringBuffer("");
-
-			while((read  = stream.read(raw)) >= 0) {
-				data.append(new String(raw, 0, read));
-			}
-
+			DataInputStream dis = new DataInputStream(stream);
+			
+			data = dis.readUTF();
+			
+			dis.close();
 			stream.close();
 
 		} catch(java.io.FileNotFoundException e) {
@@ -105,7 +100,7 @@ public class FCPTestDDA extends Observable implements FCPQuery, Observer {
 			return null;
 		}
 
-		return data.toString();
+		return data;
 	}
 
 
