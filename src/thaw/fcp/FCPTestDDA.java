@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
 
+
+
 import thaw.core.Logger;
 
 
@@ -81,15 +83,16 @@ public class FCPTestDDA extends Observable implements FCPQuery, Observer {
 	protected String readFile(String filename) {
 		byte[] raw = new byte[128];
 
-		String data = null;
+		StringBuffer data = null;
 
 		try {
+			int read;
 			FileInputStream stream = new FileInputStream(filename);
 
-			data = "";
+			data = new StringBuffer("");
 
-			while(stream.read(raw) >= 0) {
-				data += new String(raw);
+			while((read  = stream.read(raw)) >= 0) {
+				data.append(new String(raw, 0, read));
 			}
 
 			stream.close();
@@ -102,7 +105,7 @@ public class FCPTestDDA extends Observable implements FCPQuery, Observer {
 			return null;
 		}
 
-		return data;
+		return data.toString();
 	}
 
 
