@@ -63,7 +63,7 @@ public class FCPMessage {
 		}
 
 		if("ProtocolError".equals( getMessageName() )) {
-			Logger.notice(this, "PROTOCOL ERROR:"+toString());
+			Logger.notice(this, "PROTOCOL ERROR:\n"+toString());
 		}
 
 		return true;

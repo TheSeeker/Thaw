@@ -46,6 +46,8 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	private boolean noDDA = false;
 
+	private FCPTestDDA testDDA = null;
+
 
 	/**
 	 * See setParameters().
@@ -200,6 +202,23 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		this.queueManager = queueManager;
 
+		if (queueManager.getQueryManager().getConnection().isLocalSocket()
+		    && !noDDA
+		    && (destinationDir != null || finalPath != null)) {
+
+			if (destinationDir == null)
+				destinationDir = new File(finalPath).getAbsoluteFile().getParent();
+
+			testDDA = new FCPTestDDA(destinationDir, false, true);
+			testDDA.addObserver(this);
+			return testDDA.start(queueManager);
+		}
+
+		return sendClientGet();
+	}
+
+	public boolean sendClientGet() {
+
 		if (finalPath == null && destinationDir == null) {
 			if ((destinationDir = System.getProperty("java.io.tmpdir")) == null) {
 				Logger.error(this, "Unable to find temporary directory ! Will create troubles !");
@@ -262,6 +281,15 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 
 	public void update(final Observable o, final Object arg) {
+		if (o == testDDA) {
+			if (!testDDA.mayTheNodeWrite())
+				noDDA = true;
+
+			sendClientGet();
+
+			return;
+		}
+
 
 		FCPQueryManager queryManager = null;
 		final FCPMessage message = (FCPMessage)arg;
