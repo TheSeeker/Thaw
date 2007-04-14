@@ -19,6 +19,7 @@ public class SHA256Computer extends Observable implements Runnable {
 	private SHA256 sha;
 
 	private String file;
+	private String hash;
 
 	public final static int BLOCK_SIZE = 32768; /* 32 Ko */
 
@@ -27,7 +28,7 @@ public class SHA256Computer extends Observable implements Runnable {
 
 		sha = new SHA256();
 
-		sha.update(header.getBytes());
+		sha.update(header.getBytes("UTF-8"));
 	}
 
 
@@ -35,23 +36,14 @@ public class SHA256Computer extends Observable implements Runnable {
 		try {
 			FileInputStream in = new FileInputStream(file);
 
-			byte[] raw = new byte[BLOCK_SIZE];
+			SHA256.hash(in, sha);
 
-			while(in.available() > 0) {
-				if (in.available() < BLOCK_SIZE)
-					raw = new byte[in.available()];
+			hash = Base64.encore(sha.digest());
 
-				in.read(raw);
-				sha.update(raw);
-			}
-
-			in.close();
 		} catch(java.io.FileNotFoundException e) {
 			Logger.error(this, "Can't hash file because: "+e.toString());
-			sha = null;
 		} catch(java.io.IOException e) {
 			Logger.error(this, "Can't hash file because: "+e.toString());
-			sha = null;
 		}
 
 		setChanged();
@@ -70,11 +62,6 @@ public class SHA256Computer extends Observable implements Runnable {
 	 * Returns the Base64Encode of the hash
 	 */
 	public String getHash() {
-		if (sha != null)
-			return Base64.encode(sha.digest());
-		else {
-			Logger.warning(this, "No hash !");
-			return null;
-		}
+		return hash;
 	}
 }
