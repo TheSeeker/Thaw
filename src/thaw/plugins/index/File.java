@@ -12,7 +12,7 @@ import org.w3c.dom.Element;
 import java.util.Vector;
 import java.util.Iterator;
 
-import thaw.core.FreenetURIHelper;
+import thaw.fcp.FreenetURIHelper;
 import thaw.core.Logger;
 
 import thaw.fcp.FCPClientGet;

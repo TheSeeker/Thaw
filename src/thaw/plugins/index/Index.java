@@ -54,7 +54,7 @@ import javax.xml.parsers.SAXParser;
 
 
 
-import thaw.core.FreenetURIHelper;
+import thaw.fcp.FreenetURIHelper;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.fcp.FCPClientGet;
@@ -996,6 +996,13 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		title.appendChild(titleText);
 
 		header.appendChild(title);
+
+
+		final Element thawVersion = xmlDoc.createElement("client");
+		final Text versionText = xmlDoc.createTextNode("Thaw "+thaw.core.Main.VERSION);
+		thawVersion.appendChild(versionText);
+
+		header.appendChild(thawVersion);
 
 		if (getPublishPrivateKey() && getPrivateKey() != null) {
 			final Element privateKeyEl = xmlDoc.createElement("privateKey");

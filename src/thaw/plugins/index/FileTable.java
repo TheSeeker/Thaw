@@ -28,7 +28,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import thaw.core.Config;
-import thaw.core.FreenetURIHelper;
+import thaw.fcp.FreenetURIHelper;
 import thaw.core.I18n;
 import thaw.gui.IconBox;
 import thaw.core.Logger;
@@ -381,7 +381,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			if (column == 2) {
 				String key = file.getPublicKey();
 
-				if (key == null || !thaw.core.FreenetURIHelper.isAKey(key))
+				if (key == null || !FreenetURIHelper.isAKey(key))
 					key = I18n.getMessage("thaw.common.unknown");
 
 				return key;

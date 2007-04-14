@@ -21,7 +21,7 @@ import java.util.Iterator;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.Core;
-import thaw.core.FreenetURIHelper;
+import thaw.fcp.FreenetURIHelper;
 
 import thaw.gui.IconBox;
 

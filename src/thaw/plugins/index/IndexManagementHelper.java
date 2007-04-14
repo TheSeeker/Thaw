@@ -37,7 +37,7 @@ import javax.swing.tree.TreeNode;
 
 import thaw.core.Config;
 import thaw.core.FileChooser;
-import thaw.core.FreenetURIHelper;
+import thaw.fcp.FreenetURIHelper;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.fcp.FCPGenerateSSK;

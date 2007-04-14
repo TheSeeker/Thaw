@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
-import thaw.core.FreenetURIHelper;
 import thaw.core.Logger;
 
 public class FCPClientGet extends Observable implements Observer, FCPTransferQuery {
@@ -46,6 +45,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	private boolean alreadySaved = false;
 
 	private boolean noDDA = false;
+
 
 	/**
 	 * See setParameters().

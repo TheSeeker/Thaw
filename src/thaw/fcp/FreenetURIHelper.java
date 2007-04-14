@@ -1,4 +1,6 @@
-package thaw.core;
+package thaw.fcp;
+
+import thaw.core.Logger;
 
 /**
  * would be better called "FreenetKeyHelper" ... but too late :p

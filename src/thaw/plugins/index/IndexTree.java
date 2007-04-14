@@ -29,7 +29,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import thaw.core.Config;
-import thaw.core.FreenetURIHelper;
+import thaw.fcp.FreenetURIHelper;
 import thaw.core.I18n;
 import thaw.gui.IconBox;
 import thaw.core.Logger;

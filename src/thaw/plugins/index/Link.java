@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import thaw.core.FreenetURIHelper;
+import thaw.fcp.FreenetURIHelper;
 import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
 

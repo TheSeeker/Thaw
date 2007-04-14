@@ -9,7 +9,7 @@ import javax.swing.JMenuItem;
 import javax.swing.WindowConstants;
 
 import thaw.core.Core;
-import thaw.core.FreenetURIHelper;
+import thaw.fcp.FreenetURIHelper;
 import thaw.core.I18n;
 import thaw.gui.IconBox;
 import thaw.core.Logger;

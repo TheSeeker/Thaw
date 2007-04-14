@@ -13,7 +13,7 @@ import javax.swing.JTextField;
 
 import thaw.core.I18n;
 import thaw.core.Logger;
-import thaw.core.FreenetURIHelper;
+import thaw.fcp.FreenetURIHelper;
 import thaw.plugins.Hsqldb;
 
 /**

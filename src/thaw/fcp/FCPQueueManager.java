@@ -4,7 +4,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
 
-import thaw.core.FreenetURIHelper;
 import thaw.core.Logger;
 
 /**
