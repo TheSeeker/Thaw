@@ -203,11 +203,11 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 		sha = null;
 
-		if (queueManager.getQueryManager().getConnection().isLocalSocket()) {
+		if (queueManager.getQueryManager().getConnection().isLocalSocket() && localFile != null) {
 			status = "Computing hash to get approval from the node ...";
 
 			sha = new SHA256Computer(queueManager.getQueryManager().getConnection().getClientHello().getConnectionId()
-						 +"-"+ (localFile != null ? localFile.getPath() : "") /* Client token */
+						 +"-"+ localFile.getPath() /* Client token */
 						 +"-",
 						 localFile.getPath());
 			sha.addObserver(this);
