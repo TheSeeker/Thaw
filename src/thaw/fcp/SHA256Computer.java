@@ -20,6 +20,8 @@ public class SHA256Computer extends Observable implements Runnable {
 
 	private String file;
 
+	public final static int BLOCK_SIZE = 32768; /* 32 Ko */
+
 	public SHA256Computer(String header, String fileToHash) {
 		file = fileToHash;
 
@@ -33,9 +35,12 @@ public class SHA256Computer extends Observable implements Runnable {
 		try {
 			FileInputStream in = new FileInputStream(file);
 
-			byte[] raw = new byte[32768]; /* 32 Ko */
+			byte[] raw = new byte[BLOCK_SIZE];
 
 			while(in.available() > 0) {
+				if (in.available() < BLOCK_SIZE)
+					raw = new byte[in.available()];
+
 				in.read(raw);
 				sha.update(raw);
 			}
