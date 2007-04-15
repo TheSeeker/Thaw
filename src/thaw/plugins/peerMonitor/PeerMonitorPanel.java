@@ -578,8 +578,10 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 		if(e.isPopupTrigger()) {
 			if (peerList.getSelectedValue() instanceof Peer) {
 				updateMenuState(((Peer)peerList.getSelectedValue()));
-				rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
-			}
+			} else
+				updateMenuState(null);
+
+			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
 		}
 	}
 

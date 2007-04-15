@@ -7,7 +7,9 @@ import javax.swing.JLabel;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -35,6 +37,7 @@ public class PeerHelper {
 		private JButton okButton;
 		private JButton cancelButton;
 		private JTextArea refArea;
+		private JTextField urlField;
 
 		public PeerAdder(FCPQueueManager queueManager, MainWindow mainWindow, AbstractButton actionSource) {
 			this.queueManager = queueManager;
@@ -54,7 +57,9 @@ public class PeerHelper {
 				dialog = new JDialog(mainWindow.getMainFrame(),
 						     I18n.getMessage("thaw.plugin.peerMonitor.addPeer"));
 
-				dialog.setLayout(new BorderLayout());
+				dialog.setLayout(new BorderLayout(5, 5));
+
+				JPanel centerPanel = new JPanel(new BorderLayout());
 
 				JPanel buttonPanel = new JPanel(new GridLayout(1, 2));
 
@@ -70,9 +75,24 @@ public class PeerHelper {
 
 				JLabel label = new JLabel(I18n.getMessage("thaw.plugin.peerMonitor.enterRef"));
 
-				dialog.getContentPane().add(label, BorderLayout.NORTH);
-				dialog.getContentPane().add(refArea, BorderLayout.CENTER);
-				dialog.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+				centerPanel.add(label, BorderLayout.NORTH);
+				centerPanel.add(refArea, BorderLayout.CENTER);
+
+
+				JPanel southPanel = new JPanel(new GridLayout(2, 1));
+
+				JPanel urlPanel = new JPanel(new BorderLayout());
+				JLabel urlLabel = new JLabel("URL : ");
+				urlField = new JTextField("http://");
+
+				urlPanel.add(urlLabel, BorderLayout.WEST);
+				urlPanel.add(urlField, BorderLayout.CENTER);
+
+				southPanel.add(urlPanel);
+				southPanel.add(buttonPanel);
+
+				dialog.getContentPane().add(centerPanel, BorderLayout.CENTER);
+				dialog.getContentPane().add(southPanel, BorderLayout.SOUTH);
 
 				dialog.setSize(700, 300);
 				dialog.setVisible(true);
@@ -82,8 +102,24 @@ public class PeerHelper {
 
 
 			if (e.getSource() == okButton) {
-				/* TODO */
-				dialog.setVisible(false);
+				String ref;
+
+				ref = refArea.getText();
+
+				if (urlField.getText() != null
+				    && !"http://".equals(urlField.getText())) {
+					ref = "URL="+urlField.getText();
+				}
+
+				ref = ref.trim();
+
+				if (looksValid(ref)) {
+					addPeer(queueManager, ref);
+					dialog.setVisible(false);
+				} else {
+					new thaw.gui.WarningWindow(null,
+								   I18n.getMessage("thaw.plugin.peerMonitor.invalidRef"));
+				}
 			}
 
 			if (e.getSource() == cancelButton) {
@@ -93,9 +129,28 @@ public class PeerHelper {
 	}
 
 
+	public static boolean looksValid(String ref) {
+		if (ref.startsWith("URL=") || ref.endsWith("End"))
+			return true;
+
+		return false;
+	}
+
+
+	public static void addPeer(FCPQueueManager queueManager, String ref) {
+		FCPAddPeer addPeer = new FCPAddPeer(ref);
+		addPeer.start(queueManager);
+
+		/* see you later :) */
+		/* (ie when the next ListPeers will be done) */
+	}
+
+
 	public static class PeerRemover implements PeerAction {
 		private FCPQueueManager queueManager;
 		private AbstractButton src;
+
+		private Peer target;
 
 		public PeerRemover(FCPQueueManager queueManager, AbstractButton actionSource) {
 			this.queueManager = queueManager;
@@ -109,11 +164,32 @@ public class PeerHelper {
 			if (src != null) {
 				src.setEnabled(peer != null);
 			}
+
+			target = peer;
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			/* TODO */
+			if (target == null)
+				return;
+
+			int ret = JOptionPane.showConfirmDialog(null,
+								I18n.getMessage("thaw.plugin.peerMonitor.confirmationForRemove"),
+								I18n.getMessage("thaw.warning.title"),
+								JOptionPane.YES_NO_OPTION,
+								JOptionPane.WARNING_MESSAGE);
+
+			if (ret != JOptionPane.YES_OPTION) {
+				return;
+			}
+
+			removePeer(queueManager, target.getIdentity());
 		}
+	}
+
+
+	public static void removePeer(FCPQueueManager queueManager, String peer) {
+		FCPRemovePeer addPeer = new FCPRemovePeer(peer);
+		addPeer.start(queueManager);
 	}
 
 }

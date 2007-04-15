@@ -15,8 +15,11 @@ public class FCPListPeers extends Observable implements FCPQuery, Observer {
 
 	private Hashtable peers; /* key : peer name -> hashtable : key : parameter name -> parameter value */
 
+	private boolean endList;
 
 	public FCPListPeers(boolean withMetadata, boolean withVolatile) {
+		endList = true;
+
 		this.withMetadata = withMetadata;
 		this.withVolatile = withVolatile;
 		peers = new Hashtable();
@@ -24,6 +27,9 @@ public class FCPListPeers extends Observable implements FCPQuery, Observer {
 
 
 	public boolean start(FCPQueueManager queueManager) {
+		endList = false;
+		peers = new Hashtable();
+
 		FCPMessage msg = new FCPMessage();
 
 		msg.setMessageName("ListPeers");
@@ -45,15 +51,23 @@ public class FCPListPeers extends Observable implements FCPQuery, Observer {
 		if (o instanceof FCPQueryManager) {
 			final FCPMessage msg = (FCPMessage)param;
 
-			if (msg.getMessageName() == null
-			    || !msg.getMessageName().equals("Peer"))
+			if (msg.getMessageName() == null)
 				return;
 
-			peers.put(msg.getValue("identity"), msg.getValues());
+			if (msg.getMessageName().equals("Peer")) {
+				peers.put(msg.getValue("identity"), msg.getValues());
+			}
 
-			setChanged();
-			notifyObservers(this);
+			if (msg.getMessageName().equals("EndListPeers")) {
+				endList = true;
+				setChanged();
+				notifyObservers(this);
+			}
 		}
+	}
+
+	public boolean hasEnded() {
+		return endList;
 	}
 
 

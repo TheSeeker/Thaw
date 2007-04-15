@@ -55,7 +55,8 @@ public class PeerMonitor implements thaw.core.Plugin, Observer
 					listPeers.addObserver(this);
 				}
 
-				listPeers.start(core.getQueueManager());
+				if (listPeers.hasEnded())
+					listPeers.start(core.getQueueManager());
 
 				try {
 					Thread.sleep(DEFAULT_REFRESH_RATE * 1000);

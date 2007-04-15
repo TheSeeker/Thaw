@@ -10,11 +10,14 @@ public class Peer {
 
 	private String displayName = null;
 	private Color textColor = Color.BLACK;
+	private String identity = null;
+
 	private Hashtable parameters = null;
 
 	public Peer(Hashtable parameters) {
 		this.parameters = parameters;
 		displayName = (String)parameters.get("myName");
+		identity = (String)parameters.get("identity");
 
 		String status = (String)parameters.get("volatile.status");
 
@@ -24,17 +27,22 @@ public class Peer {
 		}
 	}
 
+
 	public void setTextColor(Color c) {
 		textColor = c;
 	}
 
 	public Color getTextColor() {
 		return textColor;
-		}
+	}
 
 	public Hashtable getParameters() {
 		return parameters;
-		}
+	}
+
+	public String getIdentity() {
+		return identity;
+	}
 
 	public String toString() {
 		return displayName;
