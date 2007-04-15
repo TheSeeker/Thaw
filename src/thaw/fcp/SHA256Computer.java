@@ -4,6 +4,7 @@ import java.util.Observer;
 import java.util.Observable;
 
 import java.io.FileInputStream;
+import java.io.File;
 
 import java.security.MessageDigest;
 
@@ -18,34 +19,26 @@ import thaw.core.Logger;
  * You shouldn't have to bother about it
  */
 public class SHA256Computer extends Observable implements Runnable {
-	private SHA256 sha;
 	private MessageDigest md;
 
-	private String file;
 	private String hash;
+	private final String file;
+	private final String headers;
 
 	public final static int BLOCK_SIZE = 32768; /* 32 Ko */
 
 	public SHA256Computer(String header, String fileToHash) {
-		file = fileToHash;
-
-		sha = new SHA256();
-
-		md = sha.getMessageDigest();
-		md.reset();
-
-		try {
-			md.update(header.getBytes("UTF-8"));
-		} catch(java.io.UnsupportedEncodingException e) {
-			md.update(header.getBytes());
-		}
+		this.file = fileToHash;
+		this.headers = header;
 	}
 
 
 	public void run() {
 		try {
-			FileInputStream in = new FileInputStream(file);
-
+			FileInputStream in = new FileInputStream(new File(file));
+			md = SHA256.getMessageDigest();
+			md.reset();
+			md.update(headers.getBytes("UTF-8"));
 			SHA256.hash(in, md);
 
 			hash = Base64.encode(md.digest());
