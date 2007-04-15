@@ -144,9 +144,13 @@ public class PeerMonitor implements thaw.core.Plugin, Observer
 					    thaw.gui.IconBox.minPeerMonitor,
 					    peerPanel.getTabPanel());
 		core.getMainWindow().setSelectedTab(peerPanel.getTabPanel());
+
+		peerPanel.showToolbarButtons();
 	}
 
 	public void hideTab() {
+		peerPanel.hideToolbarButtons();
+
 		core.getMainWindow().removeTab(peerPanel.getTabPanel());
 	}
 }

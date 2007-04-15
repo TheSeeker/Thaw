@@ -156,8 +156,10 @@ public class PeerHelper {
 			this.queueManager = queueManager;
 			this.src = actionSource;
 
-			if (actionSource != null)
+			if (actionSource != null) {
 				actionSource.addActionListener(this);
+				actionSource.setEnabled(false);
+			}
 		}
 
 		public void setTarget(Peer peer) {

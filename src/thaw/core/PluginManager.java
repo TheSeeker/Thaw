@@ -204,7 +204,8 @@ public class PluginManager {
 			plugins.put(className, plugin);
 
 		} catch(final Exception e) {
-			Logger.warning(this, "loadPlugin('"+className+"'): Exception: "+e);
+			Logger.error(this, "loadPlugin('"+className+"'): Exception: "+e);
+			e.printStackTrace();
 			return null;
 		}
 

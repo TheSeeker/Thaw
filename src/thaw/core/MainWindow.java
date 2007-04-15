@@ -245,11 +245,12 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		JToolBar newToolBar;
 
 		Logger.debug(this, "changeButtonsInTheToolbar() : Called by "+modifier.getClass().getName());
+		Logger.debug(this, newButtons == null ? "-> no button" : Integer.toString(newButtons.size()) + " buttons");
 
 		if ((lastToolBarModifier == null) || (newButtons != null) || (lastToolBarModifier == modifier)) {
 			lastToolBarModifier = modifier;
 		} else
-			/* Only the modifer who added the buttons can remove them */
+			/* Only the modifier who added the buttons can remove them */
 			return;
 
 		if (newButtons == null)

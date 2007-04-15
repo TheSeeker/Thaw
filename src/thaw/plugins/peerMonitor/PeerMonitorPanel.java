@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.ListCellRenderer;
 import javax.swing.BorderFactory;
 
+import javax.swing.JButton;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
@@ -37,10 +38,11 @@ import java.util.Observer;
 
 import thaw.plugins.PeerMonitor;
 
+import thaw.plugins.ToolbarModifier;
+
 import thaw.core.Config;
 import thaw.core.I18n;
 import thaw.core.Logger;
-
 
 import thaw.fcp.FCPQueueManager;
 
@@ -100,7 +102,7 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 
 	private JPopupMenu rightClickMenu;
-	private Vector rightClickActions;
+	private Vector buttonActions;
 
 	private JButton closeTabButton;
 
@@ -108,12 +110,17 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 	private PeerMonitor peerMonitor;
 
+	private ToolbarModifier toolbarModifier;
+
 	public PeerMonitorPanel(PeerMonitor peerMonitor,
 				FCPQueueManager queueManager,
 				Config config,
 				thaw.core.MainWindow mainWindow) {
+		buttonActions = new Vector();
 
 		this.peerMonitor = peerMonitor;
+
+		toolbarModifier = new ToolbarModifier(mainWindow);
 
 		advanced = Boolean.valueOf(config.getValue("advancedMode")).booleanValue();
 
@@ -146,20 +153,45 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 		nodeThreads = new JLabel("");
 		thawThreads = new JLabel("");
+
+		JPanel southSouth = new JPanel(new BorderLayout(5, 5));
+
 		JPanel threadPanel = new JPanel(new GridLayout(2, 1));
 		threadPanel.add(nodeThreads);
 		threadPanel.add(thawThreads);
+
+		southSouth.add(threadPanel, BorderLayout.CENTER);
+
+		JPanel littleButtonPanel = new JPanel(new GridLayout(1, 2));
+
+		JButton littleButton;
+
+		littleButton = new JButton(IconBox.minAdd);
+		littleButton.setToolTipText(I18n.getMessage("thaw.plugin.peerMonitor.addPeer"));
+		buttonActions.add(new PeerHelper.PeerAdder(queueManager, mainWindow, littleButton));
+		littleButtonPanel.add(littleButton);
+
+		littleButton = new JButton(IconBox.minDelete);
+		littleButton.setToolTipText(I18n.getMessage("thaw.plugin.peerMonitor.removePeer"));
+		buttonActions.add(new PeerHelper.PeerRemover(queueManager, littleButton));
+		littleButtonPanel.add(littleButton);
+
+		southSouth.add(littleButtonPanel, BorderLayout.WEST);
+
 
 
 		peerPanel.add(peerListLabel, BorderLayout.NORTH);
 		peerPanel.add(new JScrollPane(peerList), BorderLayout.CENTER);
 
 		JPanel memPanel = new JPanel(new GridLayout(3, 1));
+		memPanel.add(southSouth);
 		memPanel.add(nodeMemBar);
 		memPanel.add(thawMemBar);
-		memPanel.add(threadPanel);
+
 
 		peerPanel.add(memPanel, BorderLayout.SOUTH);
+
+
 
 
 		mainPanel = new JPanel(new GridLayout(2, 1, 10, 10));
@@ -208,22 +240,35 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 		tabPanel.add(headPanel, BorderLayout.NORTH);
 
 		rightClickMenu = new JPopupMenu();
-		rightClickActions = new Vector();
+
 
 		JMenuItem item;
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.peerMonitor.addPeer"),
 						     IconBox.minAdd);
-		rightClickActions.add(new PeerHelper.PeerAdder(queueManager, mainWindow, item));
+		buttonActions.add(new PeerHelper.PeerAdder(queueManager, mainWindow, item));
 		rightClickMenu.add(item);
 
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.peerMonitor.removePeer"),
 						     IconBox.minDelete);
-		rightClickActions.add(new PeerHelper.PeerRemover(queueManager, item));
+		buttonActions.add(new PeerHelper.PeerRemover(queueManager, item));
 		rightClickMenu.add(item);
 
 		peerList.addMouseListener(this);
+
+
+		JButton toolbarButton;
+
+		toolbarButton = new JButton(IconBox.add);
+		toolbarButton.setToolTipText(I18n.getMessage("thaw.plugin.peerMonitor.addPeer"));
+		buttonActions.add(new PeerHelper.PeerAdder(queueManager, mainWindow, toolbarButton));
+		toolbarModifier.addButtonToTheToolbar(toolbarButton);
+
+		toolbarButton = new JButton(IconBox.delete);
+		toolbarButton.setToolTipText(I18n.getMessage("thaw.plugin.peerMonitor.removePeer"));
+		buttonActions.add(new PeerHelper.PeerRemover(queueManager, toolbarButton));
+		toolbarModifier.addButtonToTheToolbar(toolbarButton);
 	}
 
 
@@ -530,6 +575,13 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 
 	private void clicked() {
+
+		if (peerList.getSelectedValue() instanceof Peer) {
+			updateButtonState(((Peer)peerList.getSelectedValue()));
+		} else
+			updateButtonState(null);
+
+
 		if (peerList.getSelectedValue() == null
 		    || !(peerList.getSelectedValue() instanceof Peer)) {
 			displayInfos(I18n.getMessage("thaw.plugin.peerMonitor.nodeInfos"), nodeInfos);
@@ -550,8 +602,8 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 	}
 
 
-	public void updateMenuState(Peer target) {
-		for (Iterator it = rightClickActions.iterator();
+	public void updateButtonState(Peer target) {
+		for (Iterator it = buttonActions.iterator();
 		     it.hasNext();) {
 			PeerHelper.PeerAction a = ((PeerHelper.PeerAction)it.next());
 			a.setTarget(target);
@@ -576,14 +628,17 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 	protected void showPopupMenu(final MouseEvent e) {
 		if(e.isPopupTrigger()) {
-			if (peerList.getSelectedValue() instanceof Peer) {
-				updateMenuState(((Peer)peerList.getSelectedValue()));
-			} else
-				updateMenuState(null);
-
 			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
 		}
 	}
 
+
+	public void showToolbarButtons() {
+		toolbarModifier.displayButtonsInTheToolbar();
+	}
+
+	public void hideToolbarButtons() {
+		toolbarModifier.hideButtonsInTheToolbar();
+	}
 
 }
