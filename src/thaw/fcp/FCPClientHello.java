@@ -118,6 +118,10 @@ public class FCPClientHello implements FCPQuery, Observer {
 				Logger.info(this, "Received a nodeHello");
 
 				connectionId = answer.getValue("ConnectionIdentifier");
+
+				if (connectionId == null)
+					Logger.error(this, "** no connection identifier **");
+
 				nodeFCPVersion = answer.getValue("FCPVersion");
 				nodeVersion = answer.getValue("Version");
 				nodeName = answer.getValue("Node");

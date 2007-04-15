@@ -207,8 +207,9 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			status = "Computing hash to get approval from the node ...";
 
 			String salt = queueManager.getQueryManager().getConnection().getClientHello().getConnectionId()
-						 +"-"+ localFile.getPath()
-						 +"-";
+				+"-"+ localFile.getPath() /* Client token */
+				+"-";
+			Logger.info(this, "Salt used for this transfer: ~" + salt+ "~");
 
 			sha = new SHA256Computer(salt, localFile.getPath());
 			sha.addObserver(this);
