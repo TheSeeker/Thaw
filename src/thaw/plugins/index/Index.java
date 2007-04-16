@@ -577,14 +577,17 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	}
 
 
+	private IndexTree indexTree = null;
+
 
 	public int insertOnFreenet(Observer o, IndexBrowserPanel indexBrowser, FCPQueueManager queueManager) {
 		String privateKey = getPrivateKey();
 		String publicKey = getPublicKey();
 		int rev = getRevision();
 
-
 		if (indexBrowser != null && indexBrowser.getMainWindow() != null) {
+			indexTree = indexBrowser.getIndexTree();
+
 			synchronized(db.dbLock) {
 				try {
 					PreparedStatement st;
@@ -707,8 +710,6 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	 */
 	private boolean rewriteKey = true;
 
-	private IndexTree indexTree = null;
-
 
 	public int downloadFromFreenet(Observer o, IndexTree tree, FCPQueueManager queueManager, int specificRev) {
 		FCPClientGet clientGet;
@@ -827,6 +828,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 				fl.delete();
 
 				((Observable)transfer).deleteObserver(this);
+
 				if (indexTree != null)
 					indexTree.removeUpdatingIndex(this);
 
@@ -1532,4 +1534,16 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 			return true;
 		return false;
 	}
+
+
+
+	/**
+	 * @return an SSK@
+	 */
+	public String getCommentPublicKey() {
+		/* TODO */
+		return null;
+	}
+
+
 }

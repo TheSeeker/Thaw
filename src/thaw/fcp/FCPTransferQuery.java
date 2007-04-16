@@ -142,4 +142,6 @@ public interface FCPTransferQuery extends FCPQuery {
 	public String getIdentifier();
 
 	public String getFilename();
+
+	public void notifyChange();
 }

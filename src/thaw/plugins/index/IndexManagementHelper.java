@@ -1478,4 +1478,47 @@ public class IndexManagementHelper {
 		}
 	}
 
+
+
+
+	public static class IndexCommentAdder extends BasicIndexAction implements Runnable {
+		public IndexCommentAdder(final AbstractButton actionSource) {
+			super(null, null, actionSource);
+
+			if (actionSource != null)
+				actionSource.setEnabled(false);
+		}
+
+
+		public void setTarget(final IndexTreeNode node) {
+			super.setTarget(node);
+			getActionSource().setEnabled(node instanceof Index
+						     && ((Index)node).getCommentPublicKey() != null);
+		}
+
+		public void apply() {
+			/* TODO */
+		}
+	}
+
+
+	public static class IndexCommentViewer extends BasicIndexAction implements Runnable {
+		public IndexCommentViewer(final AbstractButton actionSource) {
+			super(null, null, actionSource);
+
+			if (actionSource != null)
+				actionSource.setEnabled(false);
+		}
+
+
+		public void setTarget(final IndexTreeNode node) {
+			super.setTarget(node);
+			getActionSource().setEnabled(node instanceof Index
+						     && ((Index)node).getCommentPublicKey() != null);
+		}
+
+		public void apply() {
+			/* TODO */
+		}
+	}
 }

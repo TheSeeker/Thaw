@@ -1022,4 +1022,9 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		return (String)metadatas.get(name);
 	}
 
+
+	public void notifyChange() {
+		setChanged();
+		notifyObservers();
+	}
 }

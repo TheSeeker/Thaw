@@ -1011,4 +1011,10 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	public int getTransferWithTheNodeProgression() {
 		return fromTheNodeProgress;
 	}
+
+
+	public void notifyChange() {
+		setChanged();
+		notifyObservers();
+	}
 }

@@ -115,6 +115,9 @@ public class IconBox {
 	public static ImageIcon file;
 	public static ImageIcon minFile;
 
+	public static ImageIcon indexSettings;
+	public static ImageIcon minIndexSettings;
+
 	/**
 	 * Not really used
 	 */
@@ -218,6 +221,8 @@ public class IconBox {
 		IconBox.minFile             = IconBox.loadIcon("min-file.png");
 		IconBox.link                = IconBox.loadIcon("indexBrowser.png");
 		IconBox.minLink             = IconBox.loadIcon("min-indexBrowser.png");
+		IconBox.minIndexSettings    = IconBox.loadIcon("min-indexSettings.png");
+		IconBox.indexSettings       = IconBox.loadIcon("min-indexSettings.png");
 	}
 
 }

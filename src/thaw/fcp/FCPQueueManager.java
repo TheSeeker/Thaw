@@ -4,6 +4,8 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
 
+import java.util.Observable;
+
 import thaw.core.Logger;
 
 /**
@@ -248,6 +250,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 		Logger.info(this, "Restart done.");
 	}
 
+
 	public void remove(final FCPTransferQuery query) {
 		runningQueries.remove(query);
 
@@ -264,6 +267,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 
 		setChanged();
 		this.notifyObservers(query);
+
 	}
 
 
