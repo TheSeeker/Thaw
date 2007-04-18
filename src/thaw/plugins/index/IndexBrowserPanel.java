@@ -58,7 +58,7 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		listAndDetails.setLayout(new BorderLayout(10, 10));
 
 		tables = new Tables(false, queueManager, this, config);
-		detailPanel = new DetailPanel();
+		detailPanel = new DetailPanel(queueManager, this);
 
 		listAndDetails.add(tables.getPanel(), BorderLayout.CENTER);
 		listAndDetails.add(detailPanel.getPanel(), BorderLayout.SOUTH);
@@ -155,7 +155,11 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 
 	protected void setList(final FileAndLinkList l) {
 		tables.setList(l);
-		detailPanel.setList(l);
+
+		if (l instanceof Index)
+			detailPanel.setIndexTarget((Index)l);
+		else
+			detailPanel.setIndexTarget(null);
 	}
 
 	protected void setFileList(final FileList l) {
@@ -183,14 +187,19 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 			return;
 		}
 
-		if (node instanceof FileList) {
-			Logger.debug(this, "FileList !");
-			setFileList((FileList)node);
-		}
+		if (node instanceof FileAndLinkList) {
+			Logger.debug(this, "FileAndLinkList !");
+			setList((FileAndLinkList)node);
+		} else {
+			if (node instanceof FileList) {
+				Logger.debug(this, "FileList !");
+				setFileList((FileList)node);
+			}
 
-		if (node instanceof LinkList) {
-			Logger.debug(this, "LinkList !");
-			setLinkList((LinkList)node);
+			if (node instanceof LinkList) {
+				Logger.debug(this, "LinkList !");
+				setLinkList((LinkList)node);
+			}
 		}
 
 	}

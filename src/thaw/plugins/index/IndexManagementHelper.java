@@ -1512,9 +1512,13 @@ public class IndexManagementHelper {
 
 
 
-	public static class IndexCommentAdder extends BasicIndexAction implements Runnable {
-		public IndexCommentAdder(final AbstractButton actionSource) {
-			super(null, null, actionSource);
+	public static class IndexCommentAdder extends BasicIndexAction implements Runnable, ActionListener {
+
+		public IndexCommentAdder(FCPQueueManager queueManager,
+					 IndexBrowserPanel indexBrowser,
+					 final AbstractButton actionSource) {
+
+			super(queueManager, indexBrowser, actionSource);
 
 			if (actionSource != null)
 				actionSource.setEnabled(false);
@@ -1523,12 +1527,27 @@ public class IndexManagementHelper {
 
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled(node instanceof Index
-						     && ((Index)node).canHaveComments());
+
+			if (getActionSource() != null)
+				getActionSource().setEnabled(node instanceof Index
+							     && ((Index)node).canHaveComments());
 		}
 
+
+		private void showDialog() {
+			
+		}
+
+
+		public void actionPerformed(ActionEvent e) {
+			if (e.getSource() == getActionSource())
+				super.actionPerformed(e);
+
+		}
+
+
 		public void apply() {
-			/* TODO */
+			showDialog();
 		}
 	}
 
@@ -1544,8 +1563,10 @@ public class IndexManagementHelper {
 
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
-			getActionSource().setEnabled(node instanceof Index
-						     && ((Index)node).canHaveComments());
+
+			if (getActionSource() != null)
+				getActionSource().setEnabled(node instanceof Index
+							     && ((Index)node).canHaveComments());
 		}
 
 		public void apply() {
