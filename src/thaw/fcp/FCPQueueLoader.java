@@ -108,11 +108,21 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 			if(msg.getValue("Identifier").startsWith(thawId))
 				filePath = msg.getValue("ClientToken");
 
+			String fileName = null;
+
+			if ((fileName = msg.getValue("TargetFilename")) == null) {
+				if (msg.getValue("Identifier").startsWith(thawId)) {
+					fileName = (new java.io.File(filePath)).getName();
+				} else /* this is not out insertion, and we don't have the filename
+					  so we can't resume it */
+				   return;
+			}
+
 			final FCPClientPut clientPut = new FCPClientPut(msg.getValue("Identifier"),
 									msg.getValue("URI"), // key
 									priority, persistence, global,
 									filePath,
-									msg.getValue("TargetFilename"),
+									fileName,
 									"Inserting", 0, fileSize,
 									queueManager);
 

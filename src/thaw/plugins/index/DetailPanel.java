@@ -12,6 +12,7 @@ import java.util.Iterator;
 
 import thaw.core.I18n;
 import thaw.core.Logger;
+import thaw.core.Config;
 
 import thaw.fcp.FCPQueueManager;
 
@@ -27,7 +28,7 @@ public class DetailPanel {
 	private Vector buttonActions;
 
 
-	public DetailPanel(FCPQueueManager queueManager, IndexBrowserPanel indexBrowser) {
+	public DetailPanel(Config config, FCPQueueManager queueManager, IndexBrowserPanel indexBrowser) {
 		panel = new JPanel(new BorderLayout());
 
 		panel.add(new JLabel(""), BorderLayout.CENTER); /* because we need something */
@@ -41,7 +42,7 @@ public class DetailPanel {
 		buttonPanel.add(button);
 
 		button  = new JButton(I18n.getMessage("thaw.plugin.index.comment.add"));
-		buttonActions.add(new IndexManagementHelper.IndexCommentAdder(queueManager, indexBrowser, button));
+		buttonActions.add(new IndexManagementHelper.IndexCommentAdder(config, queueManager, indexBrowser, button));
 		buttonPanel.add(button);
 
 

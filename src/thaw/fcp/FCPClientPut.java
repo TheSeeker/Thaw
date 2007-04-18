@@ -177,6 +177,8 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	public boolean start(final FCPQueueManager queueManager) {
 		this.queueManager = queueManager;
 
+		identifier = null;
+
 		if((localFile != null) && (localFile.length() <= 0)) {
 			Logger.warning(this, "Empty or unreachable file:"+localFile.getPath());
 

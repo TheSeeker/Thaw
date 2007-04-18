@@ -194,10 +194,16 @@ public class Comment implements Observer {
                         return false;
 
 		FCPClientPut put = new FCPClientPut(xmlFile, 2, 0, "comment",
-                                                    FreenetURIHelper.convertSSKtoUSK(privateKey), 2, false, 0);
+                                                    FreenetURIHelper.convertSSKtoUSK(privateKey)+"/", /* the convertion fonction forget the '/' */
+						    2, false, 0);
                 put.addObserver(this);
 
-		return put.start(queueManager);
+		boolean res = put.start(queueManager);
+
+		if (res)
+			queueManager.addQueryToTheRunningQueue(put, false);
+
+		return res;
 	}
 
 
@@ -228,21 +234,34 @@ public class Comment implements Observer {
 
 
 	public void update(Observable o, Object param) {
-		if (o instanceof FCPClientPut) {
-			FCPClientPut put = (FCPClientPut)o;
+		if (o instanceof FCPTransferQuery) {
 
-			if (put.isFinished() && put.isSuccessful()) {
-				if (put.stop(queueManager))
-					queueManager.remove(put); /* because the PersistentPut message sent by the node problably made it added to the queueManager */
+			if (o instanceof FCPClientPut) {
+				FCPClientPut put = (FCPClientPut)o;
+
+				if (put.isFinished() && put.isSuccessful()) {
+					if (put.stop(queueManager))
+						queueManager.remove(put);
+					/* because the PersistentPut message sent by the node problably made it added to the queueManager  by the QueueLoader*/
+				}
 			}
-		}
 
-		if (o instanceof FCPClientGet) {
-			FCPClientGet get = (FCPClientGet)o;
+			if (o instanceof FCPClientGet) {
+				FCPClientGet get = (FCPClientGet)o;
 
-			if (get.isFinished() && get.isSuccessful()) {
-				parseComment(new java.io.File(get.getPath()));
+				if (get.isFinished() && get.isSuccessful()) {
+					parseComment(new java.io.File(get.getPath()));
+				}
 			}
+
+			FCPTransferQuery q = ((FCPTransferQuery)o);
+
+			if (q.isFinished() && q.isSuccessful()) {
+				java.io.File file = new java.io.File(q.getPath());
+
+				file.delete();
+			}
+
 		}
 
 		if (o instanceof FCPTransferQuery) {

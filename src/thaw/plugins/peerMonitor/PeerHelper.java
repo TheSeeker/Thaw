@@ -57,7 +57,7 @@ public class PeerHelper {
 				dialog = new JDialog(mainWindow.getMainFrame(),
 						     I18n.getMessage("thaw.plugin.peerMonitor.addPeer"));
 
-				dialog.setLayout(new BorderLayout(5, 5));
+				dialog.getContentPane().setLayout(new BorderLayout(5, 5));
 
 				JPanel centerPanel = new JPanel(new BorderLayout());
 

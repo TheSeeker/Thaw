@@ -34,6 +34,9 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
+import javax.swing.JScrollPane;
+
+import thaw.gui.IconBox;
 
 import thaw.core.Config;
 import thaw.core.FileChooser;
@@ -1513,12 +1516,24 @@ public class IndexManagementHelper {
 
 
 	public static class IndexCommentAdder extends BasicIndexAction implements Runnable, ActionListener {
+		private Config config;
 
-		public IndexCommentAdder(FCPQueueManager queueManager,
+		private JDialog dialog;
+
+		private JTextField author;
+		private JTextArea textArea;
+		private JButton okButton;
+		private JButton cancelButton;
+
+
+		public IndexCommentAdder(Config config,
+					 FCPQueueManager queueManager,
 					 IndexBrowserPanel indexBrowser,
 					 final AbstractButton actionSource) {
-
 			super(queueManager, indexBrowser, actionSource);
+
+			this.config = config;
+
 
 			if (actionSource != null)
 				actionSource.setEnabled(false);
@@ -1535,14 +1550,84 @@ public class IndexManagementHelper {
 
 
 		private void showDialog() {
-			
+			if (dialog != null)
+				return;
+
+			String defaultAuthor = config.getValue("userNickname");
+
+			if (defaultAuthor == null)
+				defaultAuthor = "User who didn't configure its Thaw";
+
+
+			dialog = new JDialog(getIndexBrowserPanel().getMainWindow().getMainFrame(),
+					     I18n.getMessage("thaw.plugin.index.comment.add"));
+
+			JLabel headerLabel = new JLabel(I18n.getMessage("thaw.plugin.index.comment.comment"),
+						   IconBox.addComment,
+						   JLabel.LEFT);
+
+			JPanel authorPanel = new JPanel(new BorderLayout(5, 5));
+			authorPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.comment.author")),
+					BorderLayout.WEST);
+
+			author = new JTextField(defaultAuthor);
+			authorPanel.add(author, BorderLayout.CENTER);
+
+			JPanel header = new JPanel(new GridLayout(2, 1));
+
+			header.add(headerLabel);
+			header.add(authorPanel);
+
+
+			textArea = new JTextArea("");
+
+			okButton = new JButton(I18n.getMessage("thaw.common.ok"));
+			cancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
+
+			okButton.addActionListener(this);
+			cancelButton.addActionListener(this);
+
+			JPanel buttonPanel = new JPanel(new GridLayout(1, 2));
+
+			buttonPanel.add(okButton);
+			buttonPanel.add(cancelButton);
+
+			dialog.getContentPane().setLayout(new BorderLayout(5, 5));
+
+			dialog.getContentPane().add(header, BorderLayout.NORTH);
+			dialog.getContentPane().add(new JScrollPane(textArea), BorderLayout.CENTER);
+			dialog.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+
+			dialog.setSize(700, 300);
+			dialog.setVisible(true);
 		}
 
 
 		public void actionPerformed(ActionEvent e) {
-			if (e.getSource() == getActionSource())
-				super.actionPerformed(e);
+			boolean closeDialog = false;
 
+			if (e.getSource() == getActionSource()) {
+				super.actionPerformed(e);
+			}
+
+			if (e.getSource() == okButton) {
+				if (getTarget() instanceof Index) {
+					((Index)getTarget()).postComment(getQueueManager(),
+									 author.getText().trim(),
+									 textArea.getText().trim());
+				}
+
+				closeDialog = true;
+			}
+
+			if (e.getSource() == cancelButton) {
+				closeDialog = true;
+			}
+
+			if (closeDialog) {
+				dialog.setVisible(false);
+				dialog = null;
+			}
 		}
 
 

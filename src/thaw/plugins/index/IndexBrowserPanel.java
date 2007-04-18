@@ -58,7 +58,7 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		listAndDetails.setLayout(new BorderLayout(10, 10));
 
 		tables = new Tables(false, queueManager, this, config);
-		detailPanel = new DetailPanel(queueManager, this);
+		detailPanel = new DetailPanel(core.getConfig(), queueManager, this);
 
 		listAndDetails.add(tables.getPanel(), BorderLayout.CENTER);
 		listAndDetails.add(detailPanel.getPanel(), BorderLayout.SOUTH);

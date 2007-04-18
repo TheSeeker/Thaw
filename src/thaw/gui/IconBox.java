@@ -118,6 +118,12 @@ public class IconBox {
 	public static ImageIcon indexSettings;
 	public static ImageIcon minIndexSettings;
 
+	public static ImageIcon addComment;
+	public static ImageIcon minAddComment;
+
+	public static ImageIcon readComments;
+	public static ImageIcon minReadComments;
+
 	/**
 	 * Not really used
 	 */
@@ -223,6 +229,10 @@ public class IconBox {
 		IconBox.minLink             = IconBox.loadIcon("min-indexBrowser.png");
 		IconBox.minIndexSettings    = IconBox.loadIcon("min-indexSettings.png");
 		IconBox.indexSettings       = IconBox.loadIcon("indexSettings.png");
+		IconBox.addComment          = IconBox.loadIcon("newComment.png");
+		IconBox.minAddComment       = IconBox.loadIcon("min-newComment.png");
+		IconBox.readComments        = IconBox.loadIcon("readComments.png");
+		IconBox.minReadComments     = IconBox.loadIcon("min-readComments.png");
 	}
 
 }
