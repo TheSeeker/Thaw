@@ -62,7 +62,7 @@ import thaw.plugins.Hsqldb;
  *  |-- indexFolders (id, name, positionInTree)
  *  | |-- [...]
  *  |
- *  |-- indexes (id, realName, displayName, publicKey, [privateKey], positionInTree, newRev, publishPrivateKey (0/1))
+ *  |-- indexes (id, realName, displayName, publicKey, [privateKey], positionInTree, ...)
  *    |-- links (id, indexName, indexPublicKey)
  *    |-- files (id, filename, publicKey, mime, size)
  *      |-- metadatas (id, name, value)
@@ -94,7 +94,7 @@ public class DatabaseManager {
 
 		if (config.getValue("indexDatabaseVersion") == null) {
 			newDb = true;
-			config.setValue("indexDatabaseVersion", "4");
+			config.setValue("indexDatabaseVersion", "5");
 		} else {
 
 			/* CONVERTIONS */
@@ -121,6 +121,13 @@ public class DatabaseManager {
 					splashScreen.setStatus("Converting database ...");
 				if (convertDatabase_3_to_4(db))
 					config.setValue("indexDatabaseVersion", "4");
+			}
+
+			if ("4".equals(config.getValue("indexDatabaseVersion"))) {
+				if (splashScreen != null)
+					splashScreen.setStatus("Converting database ...");
+				if (convertDatabase_4_to_5(db))
+					config.setValue("indexDatabaseVersion", "5");
 			}
 
 			/* ... */
@@ -162,6 +169,7 @@ public class DatabaseManager {
 			  + "positionInTree INTEGER NOT NULL, "
 			  + "revision INTEGER NOT NULL, "
 			  + "newRev BOOLEAN DEFAULT FALSE NOT NULL, "
+			  + "newCommment BOOLEAN DEFAULT FALSE NOT NULL, "
 			  + "parent INTEGER NULL, " /* direct parent */
 			  + "PRIMARY KEY (id), "
 			  + "FOREIGN KEY (parent) REFERENCES indexFolders (id))");
@@ -184,6 +192,7 @@ public class DatabaseManager {
 		//+ "FOREIGN KEY (parentId) REFERENCES indexFolders (id))");
 
 
+		/* not used at the moment */
 		sendQuery(db,
 			  "CREATE CACHED TABLE categories ("
 			  + "id INTEGER IDENTITY NOT NULL,"
@@ -241,6 +250,23 @@ public class DatabaseManager {
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "publicKey VARCHAR(350) NOT NULL,"
 			  + "name VARCHAR(255) NOT NULL)");
+
+		sendQuery(db,
+			  "CREATE CACHED TABLE indexCommentKeys ("
+			  + "id INTEGER IDENTITY NOT NULL,"
+			  + "publicKey VARCHAR(255) NOT NULL,"
+			  + "privateKey VARCHAR(255) NOT NULL,"
+			  + "indexId INTEGER NOT NULL,"
+			  + "FOREIGN KEY (indexId) REFERENCES indexes (id))");
+
+		sendQuery(db,
+			  "CREATE CACHED TABLE indexComments ("
+			  + "id INTEGER IDENTITY NOT NULL,"
+			  + "author VARCHAR(255) NOT NULL,"
+			  + "text VARCHAR(16384) NOT NULL," /* 16 KB */
+			  + "rev INTEGER NOT NULL,"
+			  + "indexId INTEGER NOT NULL,"
+			  + "FOREIGN KEY (indexId) REFERENCES indexes (id))");
 	}
 
 
@@ -254,7 +280,17 @@ public class DatabaseManager {
 		sendQuery(db, "DROP TABLE links");
 
 		sendQuery(db, "DROP TABLE indexes");
-		sendQuery(db, "DROP TABLE indexCategories");
+		sendQuery(db, "DROP TABLE indexFolders");
+
+		sendQuery(db, "DROP TABLE indexParents");
+		sendQuery(db, "DROP TABLE folderParents");
+
+		sendQuery(db, "DROP TABLE indexCommentKeys");
+		sendQuery(db, "DROP TABLE indexComments");
+
+		sendQuery(db, "DROP TABLE categories");
+
+		sendQuery(db, "DROP TABLE indexBlackList");
 	}
 
 
@@ -867,6 +903,15 @@ public class DatabaseManager {
 	public static boolean convertDatabase_3_to_4(Hsqldb db) {
 		if (!sendQuery(db, "ALTER TABLE links ADD COLUMN blackListed BOOLEAN DEFAULT false")) {
 			Logger.error(new DatabaseManager(), "Error while converting the database (3 to 4) ! (adding column to link table)");
+			return false;
+		}
+
+		return true;
+	}
+
+	public static boolean convertDatabase_4_to_5(Hsqldb db) {
+		if (!sendQuery(db, "ALTER TABLE indexes ADD COLUMN newComment BOOLEAN DEFAULT false")) {
+			Logger.error(new DatabaseManager(), "Error while converting the database (3 to 4) ! (adding column to index table)");
 			return false;
 		}
 

@@ -415,28 +415,20 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			final int code = Integer.parseInt(message.getValue("Code"));
 
-			if((maxRetries == -1) || (attempt >= maxRetries) || (code == 25)) {
-			    status = "Failed ("+message.getValue("CodeDescription")+")";
-			    progress = 100;
-			    running = false;
-			    successful = false;
+			status = "Failed ("+message.getValue("CodeDescription")+")";
+			progress = 100;
+			running = false;
+			successful = false;
 
-			    fatal = true;
+			fatal = true;
 
-			    if((message.getValue("Fatal") != null) &&
-			       message.getValue("Fatal").equals("false")) {
-				    fatal = false;
-				    status = status + " (non-fatal)";
-			    }
-
-			    queueManager.getQueryManager().deleteObserver(this);
-			} else {
-			    status = "Retrying";
-			    running = true;
-			    successful = true;
-			    progress = 0;
-			    start(queueManager);
+			if((message.getValue("Fatal") != null) &&
+			   message.getValue("Fatal").equals("false")) {
+				fatal = false;
+				status = status + " (non-fatal)";
 			}
+
+			queueManager.getQueryManager().deleteObserver(this);
 
 			setChanged();
 			this.notifyObservers();

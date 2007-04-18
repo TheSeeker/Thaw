@@ -222,7 +222,7 @@ public class IconBox {
 		IconBox.link                = IconBox.loadIcon("indexBrowser.png");
 		IconBox.minLink             = IconBox.loadIcon("min-indexBrowser.png");
 		IconBox.minIndexSettings    = IconBox.loadIcon("min-indexSettings.png");
-		IconBox.indexSettings       = IconBox.loadIcon("min-indexSettings.png");
+		IconBox.indexSettings       = IconBox.loadIcon("indexSettings.png");
 	}
 
 }

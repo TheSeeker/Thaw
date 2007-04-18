@@ -162,7 +162,15 @@ public class File implements Observer {
 		if (filename == null)
 			reloadDataFromDb(id);
 
-		return filename;
+		String res;
+
+		try {
+			res = java.net.URLDecoder.decode(filename, "UTF-8");
+		} catch (final java.io.UnsupportedEncodingException e) {
+		        res = filename;
+		}
+
+		return res;
 	}
 
 	public long getSize() {

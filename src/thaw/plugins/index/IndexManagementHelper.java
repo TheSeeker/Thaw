@@ -245,14 +245,18 @@ public class IndexManagementHelper {
 
 
 
+	/**
+	 * In fact, this dialog allows to change various settings related to the index
+	 */
 	public static class KeyAsker implements ActionListener, MouseListener {
 		private JButton okButton;
 		private JButton cancelButton;
 		private int formState;
 
-		private JTextField publicKeyField = null;
-		private JTextField privateKeyField = null;
+		private JTextField publicKeyField       = null;
+		private JTextField privateKeyField      = null;
 		private JCheckBox  publishPrivateKeyBox = null;
+		private JCheckBox  allowCommentsBox     = null;
 
 		private JPopupMenu popupMenuA;
 		private JPopupMenu popupMenuB;
@@ -266,12 +270,15 @@ public class IndexManagementHelper {
 					       final String defaultPublicKey,
 					       final String defaultPrivateKey,
 					       final boolean defaultPublishPrivateKey,
+					       final boolean defaultAllowComments,
 					       final boolean enablePublishPrivateKeyChoice,
 					       final IndexBrowserPanel indexBrowser) {
 			KeyAsker asker = new KeyAsker();
 			asker.askKeysBis(askPrivateKey, defaultPublicKey,
 					 defaultPrivateKey, defaultPublishPrivateKey,
-					 enablePublishPrivateKeyChoice, indexBrowser);
+					 defaultAllowComments,
+					 enablePublishPrivateKeyChoice,
+					 indexBrowser);
 			if (asker.getPublicKey() != null)
 				return asker;
 			else
@@ -282,6 +289,7 @@ public class IndexManagementHelper {
 		private String publicKeyResult = null;
 		private String privateKeyResult = null;
 		private boolean publishPrivateKey = false;
+		private boolean allowComments = false;
 
 
 		public String getPublicKey() {
@@ -296,10 +304,15 @@ public class IndexManagementHelper {
 			return publishPrivateKey;
 		}
 
+		public boolean getAllowComments() {
+			return allowComments;
+		}
+
 		public synchronized void askKeysBis(final boolean askPrivateKey,
 						    String defaultPublicKey,
 						    String defaultPrivateKey,
 						    boolean defaultPublishPrivateKey,
+						    boolean defaultAllowComments,
 						    final boolean enablePublishPrivateKeyChoice,
 						    final IndexBrowserPanel indexBrowser) {
 			formState = 0;
@@ -314,11 +327,15 @@ public class IndexManagementHelper {
 
 			frame.getContentPane().setLayout(new BorderLayout());
 
-			publicKeyField = new JTextField(defaultPublicKey);
-			privateKeyField = new JTextField(defaultPrivateKey);
+			publicKeyField       = new JTextField(defaultPublicKey);
+			privateKeyField      = new JTextField(defaultPrivateKey);
 			publishPrivateKeyBox = new JCheckBox(I18n.getMessage("thaw.plugin.index.publishPrivateKey"),
 							     defaultPublishPrivateKey);
 			publishPrivateKeyBox.setEnabled(enablePublishPrivateKeyChoice);
+			allowCommentsBox     = new JCheckBox(I18n.getMessage("thaw.plugin.index.allowComments"),
+							     defaultAllowComments);
+			allowCommentsBox.setEnabled(enablePublishPrivateKeyChoice); /* if we can't publish the private key, we can't change comment setting */
+
 			final JPanel subPanelA = new JPanel(); /* left  => labels */
 			final JPanel subPanelB = new JPanel(); /* right => textfield */
 
@@ -349,7 +366,7 @@ public class IndexManagementHelper {
 			frame.getContentPane().add(subPanelB, BorderLayout.CENTER);
 
 			final JPanel subPanelC = new JPanel();
-			subPanelC.setLayout(new GridLayout(2, 1));
+			subPanelC.setLayout(new GridLayout(3, 1));
 
 			final JPanel subSubPanelC = new JPanel();
 			subSubPanelC.setLayout(new GridLayout(1, 2));
@@ -364,11 +381,12 @@ public class IndexManagementHelper {
 			subSubPanelC.add(cancelButton);
 
 			subPanelC.add(publishPrivateKeyBox);
+			subPanelC.add(allowCommentsBox);
 			subPanelC.add(subSubPanelC);
 
 			frame.getContentPane().add(subPanelC, BorderLayout.SOUTH);
 
-			frame.setSize(700, 120);
+			frame.setSize(700, 140);
 			frame.setVisible(true);
 
 			try {
@@ -400,8 +418,9 @@ public class IndexManagementHelper {
 			else
 				publishPrivateKey = publishPrivateKeyBox.isSelected();
 
-			Logger.info(this, "public : "+publicKeyResult + " ; Private : "+privateKeyResult);
+			allowComments = allowCommentsBox.isSelected();
 
+			Logger.info(this, "public : "+publicKeyResult + " ; Private : "+privateKeyResult);
 		}
 
 		public synchronized void actionPerformed(final ActionEvent e) {
@@ -413,7 +432,7 @@ public class IndexManagementHelper {
 				formState = 2;
 			}
 
-			notify();
+			notifyAll();
 		}
 
 		public void mouseClicked(final MouseEvent e) { }
@@ -440,10 +459,10 @@ public class IndexManagementHelper {
 	}
 
 
-	public static class IndexKeyModifier extends BasicIndexAction implements Runnable {
+	public static class IndexModifier extends BasicIndexAction implements Runnable {
 
-		public IndexKeyModifier(final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
-			super(null, indexBrowser, actionSource);
+		public IndexModifier(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+			super(queueManager, indexBrowser, actionSource);
 		}
 
 		public void setTarget(final IndexTreeNode node) {
@@ -456,15 +475,27 @@ public class IndexManagementHelper {
 		public void apply() {
 			final Index index = ((Index)getTarget());
 
-			final KeyAsker asker = KeyAsker.askKeys(true, index.getPublicKey(), index.getPrivateKey(), index.getPublishPrivateKey(), true, getIndexBrowserPanel());
+			final KeyAsker asker = KeyAsker.askKeys(true, index.getPublicKey(),
+								index.getPrivateKey(), index.getPublishPrivateKey(),
+								index.canHaveComments(), true, getIndexBrowserPanel());
 
-			if (asker == null)
+			if (asker == null) {
+				Logger.info(this, "Change cancelled");
 				return;
+			}
 
 			/* Could be done in one shot ... but this way is so easier .... :) */
 			index.setPrivateKey(asker.getPrivateKey());
 			index.setPublishPrivateKey(asker.getPublishPrivateKey());
 			index.setPublicKey(asker.getPublicKey());
+
+			if (index.canHaveComments() && !asker.getAllowComments()) {
+				Logger.notice(this, "Purging comments ...");
+				index.purgeCommentKeys();
+			} else if (!index.canHaveComments() && asker.getAllowComments()) {
+				Logger.notice(this, "Purging comments & regenerating keys ...");
+				index.regeneratedCommentKeys(getQueueManager());
+			}
 
 			getIndexBrowserPanel().getIndexTree().refresh(index);
 		}
@@ -489,7 +520,7 @@ public class IndexManagementHelper {
 			String privateKey = null;
 			boolean publishPrivate = false;
 
-			asker = KeyAsker.askKeys(true, "USK@", "SSK@", false, false, getIndexBrowserPanel());
+			asker = KeyAsker.askKeys(true, "USK@", "SSK@", false, false, false, getIndexBrowserPanel());
 
 			if (asker == null)
 				return;
@@ -1493,7 +1524,7 @@ public class IndexManagementHelper {
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
 			getActionSource().setEnabled(node instanceof Index
-						     && ((Index)node).getCommentPublicKey() != null);
+						     && ((Index)node).canHaveComments());
 		}
 
 		public void apply() {
@@ -1514,7 +1545,7 @@ public class IndexManagementHelper {
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
 			getActionSource().setEnabled(node instanceof Index
-						     && ((Index)node).getCommentPublicKey() != null);
+						     && ((Index)node).canHaveComments());
 		}
 
 		public void apply() {

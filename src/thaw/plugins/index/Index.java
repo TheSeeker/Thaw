@@ -53,14 +53,16 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 
 
-
-import thaw.fcp.FreenetURIHelper;
 import thaw.core.I18n;
 import thaw.core.Logger;
+
+import thaw.fcp.FreenetURIHelper;
 import thaw.fcp.FCPClientGet;
 import thaw.fcp.FCPClientPut;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
+import thaw.fcp.FCPGenerateSSK;
+
 import thaw.plugins.Hsqldb;
 import thaw.plugins.insertPlugin.DefaultMIMETypes;
 
@@ -743,10 +745,6 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 		String key;
 
-		/* We will trust the node for the incrementation
-		   execept if a rev is specified */
-
-
 		if (specificRev >= 0) {
 			key = FreenetURIHelper.convertUSKtoSSK(publicKey);
 			key = FreenetURIHelper.changeSSKRevision(key, specificRev, 0);
@@ -987,6 +985,9 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		rootEl.appendChild(getXMLLinks(xmlDoc));
 		rootEl.appendChild(getXMLFileList(xmlDoc));
 
+		if (canHaveComments())
+			rootEl.appendChild(getXMLCommentInfos(xmlDoc));
+
 		return true;
 	}
 
@@ -1104,6 +1105,23 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 
 
+	public Element getXMLCommentInfos(final Document xmlDoc) {
+		final Element infos = xmlDoc.createElement("comments");
+
+		infos.setAttribute("publicKey", getCommentPublicKey());
+		infos.setAttribute("privateKey", getCommentPrivateKey());
+
+		/* TODO : Black list */
+
+		return infos;
+	}
+
+
+
+
+	/*********** INDEX LOADING **************/
+
+
 	public void loadXML(final String filePath) {
 		loadXML(filePath, true);
 	}
@@ -1158,14 +1176,6 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		}
 
 		/**
-		 * Called when parsing is finished
-		 * @see org.xml.sax.ContentHandler#endDocument()
-		 */
-		public void endDocument() throws SAXException {
-			/* \_o< */
-		}
-
-		/**
 		 * Called when starting to parse in a specific name space
 		 * @param prefix name space prefix
 		 * @param URI name space URI
@@ -1187,6 +1197,8 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 		private boolean ownerTag = false;
 		private boolean privateKeyTag = false;
+
+		private boolean hasCommentTag = false;
 
 		private PreparedStatement insertFileSt = null;
 		private PreparedStatement insertLinkSt = null;
@@ -1285,6 +1297,20 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 			}
 
+
+			if ("comments".equals(rawName)) {
+				String pub = attrs.getValue("publicKey");
+				String priv = attrs.getValue("privateKey");
+
+				if (pub != null && priv != null) {
+					hasCommentTag = true;
+					Logger.debug(this, "Comment allowed in this index");
+					setCommentKeys(pub, priv);
+				}
+			}
+
+
+
 			/* ignore unknown tags */
 
 			/* et paf ! Ca fait des Chocapics(tm)(r)(c)(m)(dtc) ! */
@@ -1363,6 +1389,17 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 		}
 
+
+		/**
+		 * Called when parsing is finished
+		 * @see org.xml.sax.ContentHandler#endDocument()
+		 */
+		public void endDocument() throws SAXException {
+			if (!hasCommentTag) {
+				Logger.debug(this, "No comment allowed in this index");
+				purgeCommentKeys();
+			}
+		}
 	}
 
 
@@ -1541,9 +1578,136 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	 * @return an SSK@
 	 */
 	public String getCommentPublicKey() {
-		/* TODO */
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT publicKey FROM indexCommentKeys WHERE indexId = ? LIMIT 1");
+				st.setInt(1, id);
+
+				ResultSet set = st.executeQuery();
+
+				if (set != null && set.next())
+					return set.getString("publicKey");
+
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Unable to get comment public key because : "+e.toString());
+		}
+
 		return null;
 	}
 
 
+	/**
+	 * @return an SSK@
+	 */
+	public String getCommentPrivateKey() {
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT privateKey FROM indexCommentKeys WHERE indexId = ? LIMIT 1");
+				st.setInt(1, id);
+
+				ResultSet set = st.executeQuery();
+
+				if (set != null && set.next())
+					return set.getString("privateKey");
+
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Unable to get comment public key because : "+e.toString());
+		}
+
+
+		return null;
+	}
+
+	/**
+	 * Will also purge comments !
+	 */
+	public void purgeCommentKeys() {
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("DELETE FROM indexCommentKeys WHERE indexId = ?");
+				st.setInt(1, id);
+				st.execute();
+
+				st = db.getConnection().prepareStatement("DELETE FROM indexComments WHERE indexId = ?");
+				st.setInt(1, id);
+				st.execute();
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Unable to purge comment keys, because : "+e.toString());
+		}
+	}
+
+
+	/**
+	 * will reset the comments !
+	 */
+	public void setCommentKeys(String publicKey, String privateKey) {
+		purgeCommentKeys();
+
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("INSERT INTO indexCommentKeys (publicKey, privateKey, indexId) VALUES (?, ?, ?)");
+				st.setString(1, publicKey);
+				st.setString(2, privateKey);
+				st.setInt(3, id);
+
+				st.execute();
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Unable to set comment keys, because : "+e.toString());
+		}
+	}
+
+
+	protected class CommentKeyRegenerator implements Observer {
+		private FCPGenerateSSK sskGenerator;
+
+		public CommentKeyRegenerator(FCPQueueManager queueManager) {
+			sskGenerator = new FCPGenerateSSK();
+			sskGenerator.addObserver(this);
+
+			sskGenerator.start(queueManager);
+		}
+
+
+		public void update(Observable o, Object param) {
+			if (o instanceof FCPGenerateSSK) {
+				setCommentKeys(((FCPGenerateSSK)o).getPublicKey(),
+					       ((FCPGenerateSSK)o).getPrivateKey());
+			}
+		}
+
+	}
+
+	public void regeneratedCommentKeys(FCPQueueManager queueManager) {
+		new CommentKeyRegenerator(queueManager);
+	}
+
+
+	public boolean canHaveComments() {
+		return (getCommentPublicKey() != null);
+	}
+
+
+	public boolean postComment(FCPQueueManager queueManager, String author, String msg) {
+		String privKey;
+
+		if ((privKey = getCommentPrivateKey()) == null) {
+			return false;
+		}
+
+		Comment comment = new Comment(this, -1, author, msg);
+
+		return comment.insertComment(queueManager);
+	}
 }

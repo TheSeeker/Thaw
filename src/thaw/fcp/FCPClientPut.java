@@ -206,8 +206,10 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		if (queueManager.getQueryManager().getConnection().isLocalSocket() && localFile != null) {
 			status = "Computing hash to get approval from the node ...";
 
+			identifier = queueManager.getAnID() + "-"+ localFile.getName();
+
 			String salt = queueManager.getQueryManager().getConnection().getClientHello().getConnectionId()
-				+"-"+ localFile.getPath() /* Client token */
+				+"-"+ identifier
 				+"-";
 			Logger.info(this, "Salt used for this transfer: ~" + salt+ "~");
 
@@ -298,7 +300,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 		status = "Sending to the node";
 
-		if(identifier == null) {
+		if(identifier == null) { /* see start() ; when computing hash */
 			if (localFile != null)
 				identifier = queueManager.getAnID() + "-"+ localFile.getName();
 			else
@@ -844,14 +846,21 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	public String getInsertionKey() {
 		String key = null;
 
-		if((keyType == 0) && (publicKey != null))
+		if ((keyType == 0) && (publicKey != null))
 			key = publicKey;
-		if((keyType == 0) && (publicKey == null))
+		if ((keyType == 0) && (publicKey == null))
 			key = "CHK@";
-		if(keyType == 1)
+		if (keyType == 1)
 			key = "KSK@" + name + "-"+ Integer.toString(rev);
-		if(keyType == 2)
+		if (keyType == 2 && privateKey.startsWith("SSK"))
 			key = privateKey + name+"-"+rev;
+		if (keyType == 2 && privateKey.startsWith("USK"))
+			key = privateKey + name + "/" + rev;
+
+		if (key == null) {
+			Logger.warning(this, "Unknown key type ?! May result in a strange behavior !");
+			return privateKey;
+		}
 
 		return key;
 	}

@@ -234,10 +234,10 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		indexMenu.add(item);
 		indexAndFileActions.add(new IndexManagementHelper.IndexBlackLister(indexBrowser, item));
 
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.changeIndexKeys"),
-				     IconBox.minKey);
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.indexSettings"),
+				     IconBox.minIndexSettings);
 		indexMenu.add(item);
-		indexAndFileActions.add(new IndexManagementHelper.IndexKeyModifier(indexBrowser, item));
+		indexAndFileActions.add(new IndexManagementHelper.IndexModifier(queueManager, indexBrowser, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyPrivateKey"));
 		indexMenu.add(item);
@@ -321,9 +321,9 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 
-		button = new JButton(IconBox.key);
-		button.setToolTipText(I18n.getMessage("thaw.plugin.index.changeIndexKeys"));
-		action = new IndexManagementHelper.IndexKeyModifier(indexBrowser, button);
+		button = new JButton(IconBox.indexSettings);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.indexSettings"));
+		action = new IndexManagementHelper.IndexModifier(queueManager, indexBrowser, button);
 		action.setTarget(getRoot());
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
