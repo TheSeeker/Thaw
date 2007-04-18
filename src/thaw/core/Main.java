@@ -15,8 +15,8 @@ public class Main {
 
 	public final static int
 	_major  = 0,
-	_minor  = 6,
-	_update = 3;
+	_minor  = 7,
+	_update = 0;
 	public final static String
 	_svnBuildNumber = "@custom@";
 
