@@ -179,7 +179,9 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 			return false;
 		}
 
-		if(!callStart && query.getIdentifier().startsWith(thawId)) {
+		if(!callStart
+		   && query.getIdentifier() != null
+		   && query.getIdentifier().startsWith(thawId)) {
 			/* It's a resumed query => We to adapt the next Id
 			 * to avoid collisions.
 			 */

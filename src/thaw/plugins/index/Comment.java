@@ -198,12 +198,7 @@ public class Comment implements Observer {
 						    2, false, 0);
                 put.addObserver(this);
 
-		boolean res = put.start(queueManager);
-
-		if (res)
-			queueManager.addQueryToTheRunningQueue(put, false);
-
-		return res;
+		return queueManager.addQueryToTheRunningQueue(put, false);
 	}
 
 
