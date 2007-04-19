@@ -380,6 +380,8 @@ public class Comment extends Observable implements Observer {
 	 * @return false if already in the bdd or if there is any error
 	 */
 	public boolean parseComment(java.io.File xmlFile) {
+		newComment = false;
+
 		Logger.info(this, "Parsing comment ...");
 
 		FileInputStream in;
@@ -430,6 +432,8 @@ public class Comment extends Observable implements Observer {
 						return false;
 					}
 
+					Logger.info(this, "New comment !");
+
 					newComment = true;
 
 					st = db.getConnection().prepareStatement("INSERT INTO indexComments "+
@@ -454,6 +458,9 @@ public class Comment extends Observable implements Observer {
 
 
 
+	/**
+	 * On freenet
+	 */
 	public boolean exists() {
 		return (comment != null && author != null);
 	}

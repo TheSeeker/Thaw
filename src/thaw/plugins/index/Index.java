@@ -855,6 +855,8 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 				nmbFailedCommentFetching = 0;
 
 				if (c.isNew()) {
+					Logger.info(this, "New comment !");
+
 					setNewCommentFlag(true);
 
 					setChanged();
@@ -1762,6 +1764,17 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	 * will reset the comments !
 	 */
 	public void setCommentKeys(String publicKey, String privateKey) {
+		String oldPubKey = getCommentPublicKey();
+		String oldPrivKey = getCommentPrivateKey();
+
+		if ( ((publicKey == null && oldPubKey == null)
+		      || (publicKey != null && publicKey.equals(oldPubKey)))
+		     &&
+		     ((privateKey == null && oldPrivKey == null)
+		      || (privateKey != null && privateKey.equals(oldPrivKey))) )
+			return; /* same keys => no change */
+
+
 		purgeCommentKeys();
 
 		try {
