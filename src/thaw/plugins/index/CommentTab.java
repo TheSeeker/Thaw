@@ -59,7 +59,7 @@ public class CommentTab implements ActionListener {
 		closeTabButton.setToolTipText(I18n.getMessage("thaw.common.closeTab"));
 		closeTabButton.addActionListener(this);
 
-		northPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.comment.comment")+":"));
+		northPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.comment.commentList")+" :"));
 		northPanel.add(closeTabButton, BorderLayout.EAST);
 
 		JPanel southPanel = new JPanel(new BorderLayout());
