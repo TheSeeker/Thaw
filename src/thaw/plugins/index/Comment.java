@@ -15,7 +15,10 @@ import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.JButton;
+import javax.swing.BorderFactory;
+import javax.swing.JScrollPane;
 
+import java.awt.GridLayout;
 
 /* DOM */
 
@@ -61,6 +64,7 @@ import java.sql.SQLException;
 
 import thaw.core.Config;
 import thaw.core.Logger;
+import thaw.core.I18n;
 
 import thaw.fcp.FreenetURIHelper;
 import thaw.fcp.FCPTransferQuery;
@@ -107,8 +111,18 @@ public class Comment extends Observable implements Observer {
 	}
 
 
-	public JPanel createPanel() {
-		JPanel panel = null;
+	public JPanel getPanel() {
+		JPanel panel = new JPanel(new GridLayout(1, 1));
+		JTextArea text = new JTextArea(comment.trim());
+
+		panel.setBorder(BorderFactory.createTitledBorder(I18n.getMessage("thaw.plugin.index.comment.author")+" : "+author));
+
+		text.setEditable(false);
+		text.setBackground(panel.getBackground());
+
+		//panel.setPreferredSize(new java.awt.Dimension(600, 150));
+
+		panel.add(text);
 
 		return panel;
 	}
@@ -459,7 +473,7 @@ public class Comment extends Observable implements Observer {
 		publicKey += "comment-"+Integer.toString(rev)+"/comment.xml";
 
 		FCPClientGet get = new FCPClientGet(publicKey, 2 /* priority */, 2 /* persistence */,
-						    false /* global queue */, 3 /* max retries */,
+						    false /* global queue */, 5 /* max retries */,
 						    System.getProperty("java.io.tmpdir"),
 						    MAX_SIZE, true /* no DDA */);
 

@@ -23,6 +23,7 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	private IndexProgressBar indexProgressBar;
 
 	private BlackList blackList;
+	private CommentTab commentTab;
 
 	private JSplitPane split;
 
@@ -49,6 +50,10 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 
 		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"),
 					  false, queueManager, this, config);
+
+		commentTab = new CommentTab(core.getConfig(),
+					    core.getQueueManager(),
+					    this);
 
 		leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 					   indexTree.getPanel(),
@@ -118,6 +123,10 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		return detailPanel;
 	}
 
+	public CommentTab getCommentTab() {
+		return commentTab;
+	}
+
 	public IndexProgressBar getIndexProgressBar() {
 		return indexProgressBar;
 	}
@@ -156,10 +165,13 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	protected void setList(final FileAndLinkList l) {
 		tables.setList(l);
 
-		if (l instanceof Index)
+		if (l instanceof Index) {
 			detailPanel.setIndexTarget((Index)l);
-		else
+			commentTab.setIndex((Index)l);
+		} else {
 			detailPanel.setIndexTarget(null);
+			commentTab.setIndex(null);
+		}
 	}
 
 	protected void setFileList(final FileList l) {

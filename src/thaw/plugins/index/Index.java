@@ -1843,4 +1843,69 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 			comment.fetchComment(queueManager);
 		}
 	}
+
+
+	public Vector getComments() {
+		return getComments(true);
+	}
+
+	public Vector getComments(boolean asc) {
+
+		try {
+			synchronized(db.dbLock) {
+				Vector comments = new Vector();
+
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT author, text, rev FROM indexComments WHERE indexId = ? ORDER BY rev"
+									 + (asc ? "" : " DESC"));
+
+				st.setInt(1, id);
+
+				ResultSet set = st.executeQuery();
+
+				while(set.next())
+					comments.add(new Comment(db, this,
+								 set.getInt("rev"),
+								 set.getString("author"),
+								 set.getString("text")));
+
+				if (comments.size() == 0)
+					Logger.notice(this, "No comment for this index");
+				else
+					Logger.info(this, Integer.toString(comments.size())+ " comments for this index");
+
+				return comments;
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Error while fetching comment list : "+e.toString());
+		}
+
+		return null;
+	}
+
+
+	public int getNmbComments() {
+
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT count(id) FROM indexComments WHERE indexId = ?");
+
+				st.setInt(1, id);
+
+				ResultSet set = st.executeQuery();
+
+				if (set.next())
+					return set.getInt(1);
+
+				return 0;
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Error while fetching comment list : "+e.toString());
+		}
+
+		return 0;
+	}
 }

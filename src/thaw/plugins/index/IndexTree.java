@@ -64,6 +64,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 	private JPopupMenu indexAndFileMenu; /* hem ... and links ... */
 	private Vector indexAndFileActions; /* hem ... and links ... */ /* IndexManagementHelper.MenuAction */
+
 	private JMenu indexMenu;
 	// download
 	// insert
@@ -80,6 +81,10 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 	private JMenu linkMenu;
 	// addALink
+
+	private JMenu commentMenu;
+	// readComments
+	// postComments
 
 	private boolean selectionOnly;
 
@@ -155,6 +160,8 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		fileMenu.setIcon(IconBox.minFile);
 		linkMenu = new JMenu(I18n.getMessage("thaw.plugin.index.links"));
 		linkMenu.setIcon(IconBox.minLink);
+		commentMenu = new JMenu(I18n.getMessage("thaw.plugin.index.comment.commentList"));
+		commentMenu.setIcon(IconBox.minReadComments);
 
 
 		// Folder menu
@@ -275,9 +282,23 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		linkMenu.add(item);
 		indexAndFileActions.add(new IndexManagementHelper.LinkAdder(indexBrowser, item));
 
+
+		// Comment menu
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.comment.readComments"),
+				     IconBox.minReadComments);
+		commentMenu.add(item);
+		indexAndFileActions.add(new IndexManagementHelper.IndexCommentViewer(indexBrowser, item));
+
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.comment.add"),
+				     IconBox.minAddComment);
+		commentMenu.add(item);
+		indexAndFileActions.add(new IndexManagementHelper.IndexCommentAdder(config, queueManager, indexBrowser, item));
+
+
 		indexAndFileMenu.add(indexMenu);
 		indexAndFileMenu.add(fileMenu);
 		indexAndFileMenu.add(linkMenu);
+		indexAndFileMenu.add(commentMenu);
 
 		updateMenuState(null);
 
@@ -730,7 +751,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 					setFont(new Font("Dialog", style, 12));
 
 					if (newComment)
-						value = o.toString() + "*";
+						value = o.toString() + " *";
 				}
 			}
 

@@ -27,6 +27,8 @@ import thaw.fcp.FCPQueueManager;
 public class DetailPanel {
 	private JPanel panel;
 
+	private JButton viewCommentButton;
+
 	private Vector buttonActions;
 
 
@@ -39,10 +41,10 @@ public class DetailPanel {
 		buttonActions = new Vector(2);
 		JButton button;
 
-		button = new JButton(I18n.getMessage("thaw.plugin.index.comment.comments").replaceAll("\\?", "0"),
+		viewCommentButton = new JButton(I18n.getMessage("thaw.plugin.index.comment.comments").replaceAll("\\?", "0"),
 				     IconBox.minReadComments);
-		buttonActions.add(new IndexManagementHelper.IndexCommentViewer(button));
-		buttonPanel.add(button);
+		buttonActions.add(new IndexManagementHelper.IndexCommentViewer(indexBrowser, viewCommentButton));
+		buttonPanel.add(viewCommentButton);
 
 		button  = new JButton(I18n.getMessage("thaw.plugin.index.comment.add"),
 				      IconBox.minAddComment);
@@ -61,6 +63,9 @@ public class DetailPanel {
 
 
 	public void setIndexTarget(Index l) {
+		viewCommentButton.setText(I18n.getMessage("thaw.plugin.index.comment.comments").replaceAll("\\?",
+													   l == null ? "0" : Integer.toString(l.getNmbComments())));
+
 		for (Iterator it = buttonActions.iterator();
 		     it.hasNext();) {
 			IndexManagementHelper.IndexAction action = (IndexManagementHelper.IndexAction)it.next();

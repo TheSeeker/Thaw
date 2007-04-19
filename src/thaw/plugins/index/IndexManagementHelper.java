@@ -1640,8 +1640,8 @@ public class IndexManagementHelper {
 
 
 	public static class IndexCommentViewer extends BasicIndexAction implements Runnable {
-		public IndexCommentViewer(final AbstractButton actionSource) {
-			super(null, null, actionSource);
+		public IndexCommentViewer(IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+			super(null, indexBrowser, actionSource);
 
 			if (actionSource != null)
 				actionSource.setEnabled(false);
@@ -1657,7 +1657,7 @@ public class IndexManagementHelper {
 		}
 
 		public void apply() {
-			/* TODO */
+			getIndexBrowserPanel().getCommentTab().showTab();
 		}
 	}
 }
