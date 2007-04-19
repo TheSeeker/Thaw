@@ -169,7 +169,7 @@ public class DatabaseManager {
 			  + "positionInTree INTEGER NOT NULL, "
 			  + "revision INTEGER NOT NULL, "
 			  + "newRev BOOLEAN DEFAULT FALSE NOT NULL, "
-			  + "newCommment BOOLEAN DEFAULT FALSE NOT NULL, "
+			  + "newComment BOOLEAN DEFAULT FALSE NOT NULL, "
 			  + "parent INTEGER NULL, " /* direct parent */
 			  + "PRIMARY KEY (id), "
 			  + "FOREIGN KEY (parent) REFERENCES indexFolders (id))");
