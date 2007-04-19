@@ -472,6 +472,11 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 					((Index)selectedNode).setHasChangedFlag(false);
 					redraw(path);
 				}
+
+				if (((Index)selectedNode).hasNewComment()) {
+					((Index)selectedNode).setNewCommentFlag(false);
+					redraw(path);
+				}
 			}
 
 		}
@@ -668,7 +673,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		}
 
 		public java.awt.Component getTreeCellRendererComponent(final JTree tree,
-								       final Object value,
+								       Object value,
 								       final boolean selected,
 								       final boolean expanded,
 								       final boolean leaf,
@@ -710,6 +715,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 						((IndexTreeNode)o).forceHasChangedReload();
 
 					boolean hasChanged = ((IndexTreeNode)o).hasChanged();
+					boolean newComment = ((IndexTreeNode)o).hasNewComment();
 
 					int style = 0;
 
@@ -722,6 +728,9 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 						style = Font.PLAIN;
 
 					setFont(new Font("Dialog", style, 12));
+
+					if (newComment)
+						value = o.toString() + "*";
 				}
 			}
 
@@ -815,6 +824,10 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 	public void removeUpdatingIndex(Index index) {
 		updatingIndexes.remove(new Integer(index.getId()));
+	}
+
+	public int numberOfUpdatingIndexes() {
+		return updatingIndexes.size();
 	}
 
 	public boolean isIndexUpdating(Index index) {

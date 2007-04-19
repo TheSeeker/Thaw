@@ -14,6 +14,8 @@ import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.Config;
 
+import thaw.gui.IconBox;
+
 import thaw.fcp.FCPQueueManager;
 
 
@@ -37,11 +39,13 @@ public class DetailPanel {
 		buttonActions = new Vector(2);
 		JButton button;
 
-		button = new JButton(I18n.getMessage("thaw.plugin.index.comment.comments").replaceAll("\\?", "0"));
+		button = new JButton(I18n.getMessage("thaw.plugin.index.comment.comments").replaceAll("\\?", "0"),
+				     IconBox.minReadComments);
 		buttonActions.add(new IndexManagementHelper.IndexCommentViewer(button));
 		buttonPanel.add(button);
 
-		button  = new JButton(I18n.getMessage("thaw.plugin.index.comment.add"));
+		button  = new JButton(I18n.getMessage("thaw.plugin.index.comment.add"),
+				      IconBox.minAddComment);
 		buttonActions.add(new IndexManagementHelper.IndexCommentAdder(config, queueManager, indexBrowser, button));
 		buttonPanel.add(button);
 

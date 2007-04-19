@@ -82,6 +82,11 @@ public class AutoRefresh implements Runnable, java.util.Observer {
 
 
 	public int updateNext(int lastIdx) {
+		if (browserPanel.getIndexTree().numberOfUpdatingIndexes() >= nmbIndexesPerInterval) {
+			Logger.notice(this, "Too many indexes are updating ; won't auto-update another one");
+			return lastIdx;
+		}
+
 		try {
 			Connection c = db.getConnection();
 			PreparedStatement st;
@@ -118,7 +123,7 @@ public class AutoRefresh implements Runnable, java.util.Observer {
 						  results.getInt("revision"),
 						  results.getString("privateKey"),
 						  results.getString("displayName"),
-						  false);
+						  false, false);
 
 				index.downloadFromFreenet(this, browserPanel.getIndexTree(), queueManager);
 

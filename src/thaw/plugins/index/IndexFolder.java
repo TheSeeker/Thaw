@@ -79,7 +79,8 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 			else
 				n = new Index(db, set.getInt("id"), this, set.getString("publicKey"),
 					      set.getInt("revision"), set.getString("privateKey"),
-					      set.getString("displayName"), set.getBoolean("newRev"));
+					      set.getString("displayName"), set.getBoolean("newRev"),
+					      set.getBoolean("newComment"));
 
 			int pos = set.getInt("positionInTree");
 
@@ -134,11 +135,11 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 
 				if (id >= 0) {
-					st = db.getConnection().prepareStatement("SELECT id, positionInTree, displayName, publicKey, privateKey, revision, newRev FROM indexes "
+					st = db.getConnection().prepareStatement("SELECT id, positionInTree, displayName, publicKey, privateKey, revision, newRev, newComment FROM indexes "
 										 + "WHERE parent = ? ORDER BY positionInTree");
 					st.setInt(1, id);
 				} else {
-					st = db.getConnection().prepareStatement("SELECT id, positionInTree, displayName, publicKey, privateKey, revision, newRev FROM indexes "
+					st = db.getConnection().prepareStatement("SELECT id, positionInTree, displayName, publicKey, privateKey, revision, newRev, newComment FROM indexes "
 										 + "WHERE parent IS NULL ORDER BY positionInTree");
 				}
 
@@ -1131,6 +1132,38 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 		return true;
 	}
 
+
+
+	public boolean setNewCommentFlag(boolean flag) {
+		setNewCommentFlagInMem(flag);
+
+		synchronized(db.dbLock) {
+			try {
+				PreparedStatement st;
+				if (id > 0) {
+					st = db.getConnection().prepareStatement("UPDATE indexes "+
+										 "SET newComment = ? "+
+										 "WHERE id IN "+
+										 "(SELECT indexParents.indexId FROM indexParents WHERE indexParents.folderId = ?)");
+					st.setInt(2, id);
+				} else {
+					st = db.getConnection().prepareStatement("UPDATE indexes "+
+										 "SET newComment = ?");
+				}
+				st.setBoolean(1, flag);
+
+				st.execute();
+			} catch(SQLException e) {
+				Logger.error(this, "Error while changing 'newComment' flag: "+e.toString());
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+
+
 	public boolean setHasChangedFlagInMem(boolean flag) {
 		if (children != null) {
 
@@ -1146,6 +1179,23 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 		return true;
 	}
+
+	public boolean setNewCommentFlagInMem(boolean flag) {
+		if (children != null) {
+
+			synchronized(children) {
+				for (Iterator it = children.iterator();
+				     it.hasNext();) {
+					IndexTreeNode child = (IndexTreeNode)it.next();
+
+					child.setNewCommentFlagInMem(flag);
+				}
+			}
+		}
+
+		return true;
+	}
+
 
 
 	private boolean lastHasChangedValue = false;
@@ -1165,6 +1215,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 		hasLastHasChangedValueBeenSet = false;
 		hasChanged();
 	}
+
 
 	public boolean hasChanged() {
 		if (children != null) {
@@ -1213,6 +1264,58 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 		return false;
 	}
+
+
+
+	public boolean hasNewComment() {
+		if (children != null) {
+
+			synchronized(children) {
+				for (Iterator it = children.iterator();
+				     it.hasNext();) {
+					IndexTreeNode child = (IndexTreeNode)it.next();
+
+					if (child.hasNewComment())
+						return true;
+				}
+
+				return false;
+			}
+		}
+
+		/* It's dirty and will probably cause graphical bug :/ */
+		if (hasLastHasChangedValueBeenSet)
+			return lastHasChangedValue;
+
+		synchronized(db.dbLock) {
+			try {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT indexes.id "+
+									 "FROM indexes JOIN indexParents ON indexes.id = indexParents.indexId "+
+									 "WHERE indexParents.folderId = ? AND indexes.newComment = TRUE LIMIT 1");
+				st.setInt(1, id);
+
+				ResultSet set = st.executeQuery();
+
+				boolean ret;
+
+				ret = set.next();
+
+				lastHasChangedValue = ret;
+				hasLastHasChangedValueBeenSet = true;
+
+				return ret;
+
+			} catch(SQLException e) {
+				Logger.error(this, "Error while trying to see if there is any new comment: "+e.toString());
+			}
+		}
+
+		return false;
+	}
+
+
 
 	/**
 	 * Will export private keys too !<br/>

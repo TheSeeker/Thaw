@@ -43,13 +43,18 @@ public interface IndexTreeNode {
 	public String getPrivateKey();
 
 	public boolean isModifiable();
+
 	public boolean hasChanged();
+	public boolean hasNewComment();
+
 	public boolean setHasChangedFlag(boolean flag);
+	public boolean setNewCommentFlag(boolean flag);
 
 	/**
 	 * for internal use only !
 	 */
 	public boolean setHasChangedFlagInMem(boolean flag);
+	public boolean setNewCommentFlagInMem(boolean flag);
 
 	/**
 	 * Will export private keys too !
@@ -65,5 +70,8 @@ public interface IndexTreeNode {
 	public int downloadFromFreenet(Observer o, IndexTree indexTree, FCPQueueManager queueManager, int rev);
 
 
+	/**
+	 * Will also force newComment flag reloading
+	 */
 	public void forceHasChangedReload();
 }

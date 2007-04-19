@@ -83,10 +83,17 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	private int rev = -1;
 	private String displayName = null;
 	private boolean hasChanged = false;
+	private boolean newComment = false;
 
 
 	/* loaded only if asked explictly */
 	private String realName = null;
+
+	/* when all the comment fetching will failed,
+	   loading will stop */
+	public final static int COMMENT_FETCHING_RUNNING_AT_THE_SAME_TIME = 5;
+	private int lastCommentRev = 0;
+	private int nmbFailedCommentFetching = 0;
 
 
 	/**
@@ -104,7 +111,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	/**
 	 * Use it when you can have these infos easily ; else let the index do the job
 	 */
-	public Index(Hsqldb db, int id, TreeNode parentNode, String publicKey, int rev, String privateKey, String displayName, boolean hasChanged) {
+	public Index(Hsqldb db, int id, TreeNode parentNode, String publicKey, int rev, String privateKey, String displayName, boolean hasChanged, boolean newComment) {
 		this(db, id);
 		this.parentNode = parentNode;
 		this.privateKey = privateKey;
@@ -112,6 +119,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		this.rev = rev;
 		this.displayName = displayName;
 		this.hasChanged = hasChanged;
+		this.newComment = newComment;
 	}
 
 
@@ -711,11 +719,14 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	 * if true, when the transfer will finish, the index public key will be updated
 	 */
 	private boolean rewriteKey = true;
+	private FCPQueueManager queueManager;
 
 
 	public int downloadFromFreenet(Observer o, IndexTree tree, FCPQueueManager queueManager, int specificRev) {
 		FCPClientGet clientGet;
 		String publicKey;
+
+		this.queueManager = queueManager;
 
 		int rev = getRevision();
 
@@ -758,6 +769,19 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 			rewriteKey = false;
 
 		Logger.info(this, "Updating index ...");
+
+		/*
+		if (key.startsWith("USK")) {
+			int negRev = 0;
+
+			if ((negRev = FreenetURIHelper.getUSKRevision(key)) > 0) {
+				negRev = -1 * negRev;
+				key = FreenetURIHelper.changeUSKRevision(key, negRev, 0);
+			}
+		}
+		*/
+
+
 		Logger.debug(this, "Key asked: "+key);
 
 
@@ -806,15 +830,55 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 				if (path != null) {
 					loadXML(path);
+
+					if (getCommentPublicKey() != null)
+						loadComments(queueManager);
+					else if (indexTree != null)
+						indexTree.removeUpdatingIndex(this);
 				} else
 					Logger.error(this, "No path specified in transfer ?!");
 			}
 		}
 
+		if (o instanceof FCPClientPut) {
+			/* TODO : check if it's successful, else merge if it's due to a collision */
 
-		/* nothing special to do if it is an insert */
-		/* TODO : check if it's successful, else merge if it's due to a collision */
+			if (indexTree != null)
+				indexTree.removeUpdatingIndex(this);
+		}
 
+		if (o instanceof Comment) {
+
+			Comment c = (Comment)o;
+
+			if (c.exists()) {
+				nmbFailedCommentFetching = 0;
+
+				if (c.isNew()) {
+					setNewCommentFlag(true);
+
+					setChanged();
+					notifyObservers();
+				}
+
+			} else {
+				nmbFailedCommentFetching++;
+			}
+
+			if (nmbFailedCommentFetching > COMMENT_FETCHING_RUNNING_AT_THE_SAME_TIME +1) {
+				if (indexTree != null) {
+					Logger.info(this, "All the comments should be fetched");
+					indexTree.removeUpdatingIndex(this);
+				}
+			}
+			else {
+				lastCommentRev++;
+				Comment comment = new Comment(db, this, lastCommentRev, null, null);
+				comment.addObserver(this);
+				comment.fetchComment(queueManager);
+			}
+
+		}
 
 		if (o instanceof FCPTransferQuery) {
 			FCPTransferQuery transfer = (FCPTransferQuery)o;
@@ -1322,6 +1386,13 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		 */
 		public void endElement(String nameSpaceURI, String localName,
 				       String rawName) throws SAXException {
+			if (rawName == null) {
+				rawName = localName;
+			}
+
+			if (rawName == null)
+				return;
+
 			if ("owner".equals(rawName)) {
 				ownerTag = false;
 				return;
@@ -1513,9 +1584,23 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		return hasChanged;
 	}
 
+	public boolean hasNewComment() {
+		if (publicKey == null) {
+			Logger.debug(this, "hasNewComment() => loadData()");
+			loadData();
+		}
+
+		return newComment;
+	}
+
 
 	public boolean setHasChangedFlagInMem(boolean flag) {
 		hasChanged = flag;
+		return true;
+	}
+
+	public boolean setNewCommentFlagInMem(boolean flag) {
+		newComment = flag;
 		return true;
 	}
 
@@ -1540,6 +1625,33 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 				return false;
 			} catch(SQLException e) {
 				Logger.error(this, "Unable to change 'hasChanged' flag because: "+e.toString());
+			}
+		}
+
+		return false;
+	}
+
+
+	/**
+	 * @return true if a change was done
+	 */
+	public boolean setNewCommentFlag(boolean flag) {
+		setNewCommentFlagInMem(flag);
+
+		synchronized(db.dbLock) {
+			try {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("UPDATE indexes SET newComment = ? "+
+									 "WHERE id = ?");
+
+				st.setBoolean(1, flag);
+				st.setInt(2, id);
+				if (st.executeUpdate() > 0)
+					return true;
+				return false;
+			} catch(SQLException e) {
+				Logger.error(this, "Unable to change 'newComment' flag because: "+e.toString());
 			}
 		}
 
@@ -1706,8 +1818,29 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 			return false;
 		}
 
-		Comment comment = new Comment(this, -1, author, msg);
+		Comment comment = new Comment(db, this, -1, author, msg);
 
 		return comment.insertComment(queueManager);
+	}
+
+
+	public void loadComments(FCPQueueManager queueManager) {
+		String pubKey;
+
+		if ((pubKey = getCommentPublicKey()) == null)
+			return;
+
+		if (queueManager == null) {
+			Logger.warning(this, "Can't load comments ! QueueManager is not set for this index !");
+			return;
+		}
+
+		for (lastCommentRev = 0 ;
+		     lastCommentRev < COMMENT_FETCHING_RUNNING_AT_THE_SAME_TIME;
+		     lastCommentRev++) {
+			Comment comment = new Comment(db, this, lastCommentRev, null, null);
+			comment.addObserver(this);
+			comment.fetchComment(queueManager);
+		}
 	}
 }

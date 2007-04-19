@@ -165,7 +165,7 @@ public class FreenetURIHelper {
 	}
 
 
-	protected static String changeRev(final String revStr, final int rev, final int offset) {
+	private static String changeRev(final String revStr, final int rev, final int offset) {
 		if (offset == 0)
 			return Integer.toString(rev);
 

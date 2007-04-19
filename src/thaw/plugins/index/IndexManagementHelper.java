@@ -194,7 +194,7 @@ public class IndexManagementHelper {
 										 "(id, originalName, displayName, "+
 										 " publicKey, privateKey, author, "+
 										 " positionInTree, revision, "+
-										 " newRev, parent) "+
+										 " newRev, newComment, parent) "+
 										 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
 					/* TODO : Author */
@@ -214,17 +214,18 @@ public class IndexManagementHelper {
 					st.setInt(7, 0 /* positionInTree */);
 					st.setInt(8, 0 /* revision */);
 					st.setBoolean(9, false);
+					st.setBoolean(10, false);
 
 					if (getTarget().getId() >= 0)
-						st.setInt(10, getTarget().getId());
+						st.setInt(11, getTarget().getId());
 					else
-						st.setNull(10, Types.INTEGER);
+						st.setNull(11, Types.INTEGER);
 
 					st.execute();
 
 					Index index = new Index(db, id, (TreeNode)getTarget(),
 								sskGenerator.getPublicKey(), 0, sskGenerator.getPrivateKey(),
-								name, false);
+								name, false, false);
 
 					((MutableTreeNode)getTarget()).insert((index), 0);
 
@@ -626,7 +627,7 @@ public class IndexManagementHelper {
 
 				index = new Index(db, id, parent,
 						  publicKey, revision, privateKey,
-						  name, false);
+						  name, false, false);
 
 			} catch(SQLException e) {
 				Logger.error(new IndexManagementHelper(), "Error while adding index: "+e.toString());
@@ -731,6 +732,7 @@ public class IndexManagementHelper {
 
 		public void apply() {
 			getTarget().setHasChangedFlag(false);
+			getTarget().setNewCommentFlag(false);
 			getIndexBrowserPanel().getIndexTree().redraw(getTarget());
 		}
 	}
@@ -1563,8 +1565,8 @@ public class IndexManagementHelper {
 					     I18n.getMessage("thaw.plugin.index.comment.add"));
 
 			JLabel headerLabel = new JLabel(I18n.getMessage("thaw.plugin.index.comment.comment"),
-						   IconBox.addComment,
-						   JLabel.LEFT);
+							IconBox.addComment,
+							JLabel.CENTER);
 
 			JPanel authorPanel = new JPanel(new BorderLayout(5, 5));
 			authorPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.comment.author")),
