@@ -9,6 +9,13 @@ import java.io.OutputStream;
 import java.util.Observer;
 import java.util.Observable;
 
+/* Swing */
+
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
+import javax.swing.JButton;
+
 
 /* DOM */
 
@@ -101,7 +108,9 @@ public class Comment extends Observable implements Observer {
 
 
 	public JPanel createPanel() {
+		JPanel panel = null;
 
+		return panel;
 	}
 
 
@@ -219,7 +228,7 @@ public class Comment extends Observable implements Observer {
 						    2, false, 0);
                 put.addObserver(this);
 
-		return queueManager.addQueryToTheRunningQueue(put, true);
+		return queueManager.addQueryToTheRunningQueue(put);
 	}
 
 
