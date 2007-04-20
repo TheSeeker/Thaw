@@ -1,9 +1,11 @@
 package thaw.plugins;
 
 
+import thaw.core.I18n;
 import thaw.core.Core;
 import thaw.core.PluginManager;
 
+import thaw.gui.IconBox;
 
 
 public class Signatures implements thaw.core.Plugin {
