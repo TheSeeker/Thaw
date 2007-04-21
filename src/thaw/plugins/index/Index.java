@@ -1531,10 +1531,14 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	}
 
 
+	public static int isAlreadyKnown(Hsqldb db, String key) {
+		return isAlreadyKnown(db, key, false);
+	}
+
 	/**
 	 * @return the index id if found ; -1 else
 	 */
-	public static int isAlreadyKnown(Hsqldb db, String key) {
+	public static int isAlreadyKnown(Hsqldb db, String key, boolean strict) {
 		if (key.length() < 40) {
 			Logger.error(new Index(), "isAlreadyKnown(): Invalid key: "+key);
 			return -1;
@@ -1546,21 +1550,29 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 			try {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT id, publicKey from indexes WHERE LOWER(publicKey) LIKE ?");
+				st = db.getConnection().prepareStatement("SELECT id, publicKey from indexes WHERE LOWER(publicKey) LIKE ?"
+									 + (strict ? "" : " LIMIT 1"));
 
 				st.setString(1, FreenetURIHelper.getComparablePart(key) +"%");
 
 				ResultSet res = st.executeQuery();
 
-				while(res.next()) {
-					String pubKey = res.getString("publicKey").replaceAll(".xml", ".frdx");
+				if (strict) {
+					while(res.next()) {
+						String pubKey = res.getString("publicKey").replaceAll(".xml", ".frdx");
 
-					if (FreenetURIHelper.compareKeys(pubKey, key)) {
-						return res.getInt("id");
+						if (FreenetURIHelper.compareKeys(pubKey, key)) {
+							return res.getInt("id");
+						}
 					}
-				}
 
-				return -1;
+					return -1;
+				} else {
+					if (!res.next())
+						return -1;
+
+					return res.getInt("id");
+				}
 
 			} catch(final SQLException e) {
 				Logger.error(new Index(), "isAlreadyKnown: Unable to check if link '"+key+"' point to a know index because: "+e.toString());
