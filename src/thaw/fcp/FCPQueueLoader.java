@@ -27,8 +27,8 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 		final FCPListPersistentRequests listPersistent = new FCPListPersistentRequests();
 		final boolean ret = listPersistent.start(queueManager);
 
-		if(ret)
-			queueManager.getQueryManager().getConnection().addToWriterQueue();
+		//if(ret)
+		//	queueManager.getQueryManager().getConnection().addToWriterQueue();
 
 		return ret;
 	}
@@ -137,7 +137,7 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 
 		if("EndListPersistentRequests".equals( msg.getMessageName() )) {
 			Logger.info(this, "End Of ListPersistentRequests.");
-			queueManager.getQueryManager().getConnection().removeFromWriterQueue();
+			//queueManager.getQueryManager().getConnection().removeFromWriterQueue();
 			queueManager.setQueueCompleted();
 			return;
 		}

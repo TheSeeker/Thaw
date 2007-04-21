@@ -12,7 +12,7 @@ import thaw.core.Logger;
 public class FCPClientGet extends Observable implements Observer, FCPTransferQuery {
 	private int maxRetries = -1;
 	private final static int PACKET_SIZE = 1024;
-	private final static int BLOCK_SIZE = 32768;
+	private final static int BLOCK_SIZE = 16384;
 
 	private FCPQueueManager queueManager;
 	private FCPQueryManager duplicatedQueryManager;
@@ -400,6 +400,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				Logger.debug(this, "Redirected !");
 				key = message.getValue("RedirectURI");
 				status = "Redirected ...";
+				stop(queueManager);
 				start(queueManager);
 				return;
 			}
