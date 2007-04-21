@@ -47,6 +47,9 @@ public class Signatures extends LibraryPlugin {
 		db = (Hsqldb)core.getPluginManager().getPlugin("thaw.plugins.Hsqldb");
 		db.registerChild(this);
 
+		DatabaseManager.init(db, core.getConfig(),
+				     core.getSplashScreen());
+
 		configTab = new SigConfigTab(core.getConfigWindow(), db);
 
 		core.getConfigWindow().addTab(I18n.getMessage("thaw.plugin.signature.signatures"),

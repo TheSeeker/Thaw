@@ -110,26 +110,35 @@ public class SigConfigTab implements ActionListener {
 			dialog.getContentPane().add(southPanel, BorderLayout.SOUTH);
 
 
-			dialog.setSize(500, 500);
+			dialog.setSize(500, 300);
 			dialog.setVisible(true);
 		}
 
 
 		public void updateList() {
-
+			list.setListData(Identity.getYourIdentities(db));
 		}
 
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == addIdentity) {
 				String nick = JOptionPane.showInputDialog(dialog,
-									  I18n.getMessage("thaw.plugin.signature.enterNick"));
-				Identity id = Identity.generate(nick);
-				id.insert();
-				updateList();
+									  I18n.getMessage("thaw.plugin.signature.enterNick"),
+									  I18n.getMessage("thaw.plugin.signature.enterNick"),
+									  JOptionPane.QUESTION_MESSAGE);
+
+				if (nick != null) {
+					Identity id = Identity.generate(db, nick);
+					id.insert();
+					updateList();
+				}
 			}
 
 			if (e.getSource() == removeIdentity) {
-
+				Identity i = (Identity)list.getSelectedValue();
+				if (i != null) {
+					i.delete();
+					updateList();
+				}
 			}
 
 			if (e.getSource() == closeWindow) {
