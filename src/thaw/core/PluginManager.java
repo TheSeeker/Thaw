@@ -15,7 +15,6 @@ public class PluginManager {
 		"thaw.plugins.StatusBar",
 		"thaw.plugins.ThemeSelector",
 		"thaw.plugins.Hsqldb",
-		"thaw.plugins.Signatures",
 		"thaw.plugins.IndexBrowser",
 		"thaw.plugins.IndexExporter"
 	};

@@ -48,6 +48,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	private FCPTestDDA testDDA = null;
 
+	/* used when redirected */
+	private boolean restartIfFailed = false;
+
 
 	/**
 	 * See setParameters().
@@ -400,7 +403,12 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				Logger.debug(this, "Redirected !");
 				key = message.getValue("RedirectURI");
 				status = "Redirected ...";
+				restartIfFailed = true;
 				stop(queueManager);
+			}
+
+			if (restartIfFailed) {
+				restartIfFailed = false;
 				start(queueManager);
 				return;
 			}

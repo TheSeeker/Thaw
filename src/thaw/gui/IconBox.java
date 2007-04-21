@@ -84,7 +84,9 @@ public class IconBox {
 
 	public static ImageIcon add;
 	public static ImageIcon minAdd;
+
 	public static ImageIcon remove;
+	public static ImageIcon minRemove;
 
 	public static ImageIcon terminal;
 	public static ImageIcon minTerminal;
@@ -208,6 +210,7 @@ public class IconBox {
 		IconBox.terminal            = IconBox.loadIcon("terminal.png");
 		IconBox.minTerminal         = IconBox.loadIcon("min-terminal.png");
 		IconBox.remove              = IconBox.loadIcon("remove.png");
+		IconBox.minRemove           = IconBox.loadIcon("min-remove.png");
 		IconBox.queueWatcher        = IconBox.loadIcon("queueWatcher.png");
 		IconBox.importExport        = IconBox.loadIcon("refresh.png");
 		IconBox.minImportAction     = IconBox.loadIcon("min-import.png");

@@ -23,6 +23,8 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 
 	private Core core;
 	private Hsqldb hsqldb;
+	private Signatures signatures;
+
 
 	private IndexBrowserPanel browserPanel;
 	private Vector toolbarActions;
@@ -51,6 +53,23 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 
 		hsqldb = (Hsqldb)core.getPluginManager().getPlugin("thaw.plugins.Hsqldb");
 		hsqldb.registerChild(this);
+
+
+		/*
+		if(core.getPluginManager().getPlugin("thaw.plugins.Signatures") == null) {
+			Logger.info(this, "Loading signatures plugin");
+
+			if(core.getPluginManager().loadPlugin("thaw.plugins.Signatures") == null
+			   || !core.getPluginManager().runPlugin("thaw.plugins.Signatures")) {
+				Logger.error(this, "Unable to load thaw.plugins.Signatures !");
+				return false;
+			}
+		}
+
+		signatures = (Signatures)core.getPluginManager().getPlugin("thaw.plugins.Signatures");
+		signatures.registerChild(this);
+		*//* (don't forget to unregister) */
+
 
 		boolean newDb;
 
@@ -114,6 +133,7 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 		}
 
 		hsqldb.unregisterChild(this);
+		//signatures.unregisterChild(this);
 
 		if (configPanel != null)
 			configPanel.removeTab();
