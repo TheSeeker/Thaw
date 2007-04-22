@@ -893,9 +893,6 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 				((Observable)transfer).deleteObserver(this);
 
-				if (indexTree != null)
-					indexTree.removeUpdatingIndex(this);
-
 				setChanged();
 				notifyObservers();
 			}
