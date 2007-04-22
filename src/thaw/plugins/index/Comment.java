@@ -141,7 +141,9 @@ public class Comment extends Observable implements Observer {
 								 new java.awt.Font("Dialog", java.awt.Font.BOLD, 14) ));
 
 		JLabel sigLabel = new JLabel(I18n.getMessage("thaw.plugin.signature.trustLevel.trustLevel")+ " : ");
-		JTextField sigLevel = new JTextField(I18n.getMessage(author.getTrustLevelStr()));
+		JTextField sigLevel = new JTextField(I18n.getMessage(author.getTrustLevelStr())
+						     + (author.isDup() ? I18n.getMessage("thaw.plugin.signature.duplicata") : ""));
+
 
 		sigLevel.setDisabledTextColor(author.getTrustLevelColor());
 		sigLevel.setEditable(false);
@@ -490,6 +492,7 @@ public class Comment extends Observable implements Observer {
 		public void endDocument() throws SAXException {
 			if (comment != null && authorTxt != null
 				&& y != null && r != null && s != null) {
+
 				author = Identity.getIdentity(db, authorTxt, y);
 				valid = author.check(index.getCommentPublicKey()+"-"+
 						     author.getNick()+"-"+

@@ -117,15 +117,15 @@ public class Identity {
 		}
 
 		if (i < trustLevelInt.length) {
-			if (!isDup)
-				return trustLevelStr[i];
-			return trustLevelStr[i] + I18n.getMessage("thaw.plugin.signature.duplicata");
+			return trustLevelStr[i];
 		}
 
-		if (!isDup)
-			return "[?]";
-		else
-			return "[?]" + I18n.getMessage("thaw.plugin.signature.duplicata");
+
+		return "[?]";
+	}
+
+	public boolean isDup() {
+		return isDup;
 	}
 
 

@@ -199,7 +199,7 @@ public class IndexManagementHelper {
 										 " publicKey, privateKey, author, "+
 										 " positionInTree, revision, "+
 										 " newRev, newComment, parent) "+
-										 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+										 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
 					/* TODO : Author */
 
