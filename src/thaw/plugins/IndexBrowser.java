@@ -55,7 +55,6 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 		hsqldb.registerChild(this);
 
 
-		/*
 		if(core.getPluginManager().getPlugin("thaw.plugins.Signatures") == null) {
 			Logger.info(this, "Loading signatures plugin");
 
@@ -68,7 +67,6 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 
 		signatures = (Signatures)core.getPluginManager().getPlugin("thaw.plugins.Signatures");
 		signatures.registerChild(this);
-		*//* (don't forget to unregister) */
 
 
 		boolean newDb;
@@ -133,7 +131,7 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 		}
 
 		hsqldb.unregisterChild(this);
-		//signatures.unregisterChild(this);
+		signatures.unregisterChild(this);
 
 		if (configPanel != null)
 			configPanel.removeTab();

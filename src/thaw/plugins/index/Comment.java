@@ -601,7 +601,7 @@ public class Comment extends Observable implements Observer {
 			PreparedStatement st;
 
 			st = db.getConnection().prepareStatement("SELECT id FROM indexComments "+
-							 "WHERE r = ? AND s = ? ");
+								 "WHERE r = ? AND s = ? ");
 
 			st.setBytes(1, r);
 			st.setBytes(2, s);

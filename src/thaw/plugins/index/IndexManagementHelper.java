@@ -1607,8 +1607,15 @@ public class IndexManagementHelper {
 
 			if (e.getSource() == okButton) {
 				if (getTarget() instanceof Index) {
+					Identity i = ((Identity)author.getSelectedItem());
+
+					if (i == null) {
+						new thaw.gui.WarningWindow(null, I18n.getMessage("thaw.plugin.index.comment.mustSelectIdentity"));
+						return;
+					}
+
 					((Index)getTarget()).postComment(getQueueManager(),
-									 ((Identity)author.getSelectedItem()),
+									 i,
 									 textArea.getText().trim());
 				}
 

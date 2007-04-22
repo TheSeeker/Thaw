@@ -19,6 +19,7 @@ import freenet.crypt.RandomSource;
 
 import thaw.core.Core;
 import thaw.core.Logger;
+import thaw.core.I18n;
 import thaw.plugins.Hsqldb;
 
 
@@ -115,25 +116,54 @@ public class Identity {
 				break;
 		}
 
-		if (i < trustLevelInt.length)
-			return trustLevelStr[i];
+		if (i < trustLevelInt.length) {
+			if (!isDup)
+				return trustLevelStr[i];
+			return trustLevelStr[i] + I18n.getMessage("thaw.plugin.signature.duplicata");
+		}
 
-		return "[?]";
+		if (!isDup)
+			return "[?]";
+		else
+			return "[?]" + I18n.getMessage("thaw.plugin.signature.duplicata");
 	}
 
 
 	public Color getTrustLevelColor() {
 		int i;
 
+
 		for (i = 0 ; i < trustLevelInt.length ; i++) {
 			if (trustLevelInt[i] == trustLevel)
 				break;
 		}
 
-		if (i < trustLevelInt.length)
-			return trustLevelColor[i];
+		if (i < trustLevelInt.length) {
+			if (!isDup || trustLevelInt[i] < 0)
+				return trustLevelColor[i];
+			else {
+				return Color.ORANGE;
+			}
+		}
 
 		return Color.BLACK;
+	}
+
+
+	public void setTrustLevel(int i) {
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("UPDATE signatures SET trustLevel = ? WHERE id = ?");
+				st.setInt(1, i);
+				st.setInt(2, id);
+
+				st.execute();
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Unable to change trust level because: "+e.toString());
+		}
 	}
 
 
