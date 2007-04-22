@@ -8,10 +8,12 @@ import java.sql.*;
 
 import java.util.Vector;
 import java.util.Iterator;
+import java.math.BigInteger;
 
 import freenet.crypt.SHA256;
 import freenet.support.Base64;
 
+import freenet.crypt.DSA;
 import freenet.crypt.DSAPrivateKey;
 import freenet.crypt.DSAGroup;
 import freenet.crypt.DSAPublicKey;
@@ -76,6 +78,9 @@ public class Identity {
 	private Identity() {
 	}
 
+	/**
+	 * If you don't have a value, let it to null and pray it won't be used :P
+	 */
 	public Identity(Hsqldb db, int id, String nick,
 			byte[] y, byte[] x,
 			boolean isDup,
@@ -93,7 +98,10 @@ public class Identity {
 		md.update(y);
 
 		hash = Base64.encode(md.digest());
+
+		SHA256.returnMessageDigest(md);
 	}
+
 
 
 	/**
@@ -164,24 +172,67 @@ public class Identity {
 	}
 
 
-	/**
-	 * All the parameters are Base64 encoded, except text.
-	 */
-	public static boolean isValid(String text, /* signed text */
-				      String r, /* sig */
-				      String s, /* sig */
-				      String y) /* publicKey */ {
-		return true;
+	public DSASignature sign(String text) {
+		return sign(text, x);
 	}
 
 
-	/**
-	 * we use q as a reference
-	 */
-	public static boolean isDuplicata(Hsqldb db, String nickName, String q) {
-		return false;
+	public static DSASignature sign(String text, byte[] x) {
+		Yarrow randomSource = new Yarrow();
+
+		MessageDigest md = SHA256.getMessageDigest();
+
+		md.reset();
+
+		try {
+			md.update(text.getBytes("UTF-8"));
+		} catch(java.io.UnsupportedEncodingException e) {
+			md.update(text.getBytes());
+		}
+
+		BigInteger m = new BigInteger(md.digest());
+
+		DSASignature sign = DSA.sign(Global.DSAgroupBigA,
+					     new DSAPrivateKey(new BigInteger(x)),
+					     m,
+					     randomSource);
+
+		SHA256.returnMessageDigest(md);
+
+		return sign;
 	}
 
+
+	public boolean check(String text, byte[] r, byte[] s) {
+		return check(text, r, s, y);
+	}
+
+
+	public static boolean check(String text, /* signed text */
+				    byte[] r, /* sig */
+				    byte[] s, /* sig */
+				    byte[] y) /* publicKey */ {
+
+		MessageDigest md = SHA256.getMessageDigest();
+
+		md.reset();
+
+		try {
+			md.update(text.getBytes("UTF-8"));
+		} catch(java.io.UnsupportedEncodingException e) {
+			md.update(text.getBytes());
+		}
+
+		BigInteger m = new BigInteger(md.digest());
+
+		boolean ret = DSA.verify(new DSAPublicKey(Global.DSAgroupBigA, new BigInteger(y)),
+					 new DSASignature(new BigInteger(r), new BigInteger(s)),
+					 m, false);
+
+		SHA256.returnMessageDigest(md);
+
+		return ret;
+	}
 
 
 	public String toString() {
@@ -196,7 +247,11 @@ public class Identity {
 
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT id, nickName, y, x, isDup, trustLevel FROM signatures WHERE "+cond + " ORDER BY nickName");
+				if (cond != null)
+					st = db.getConnection().prepareStatement("SELECT id, nickName, y, x, isDup, trustLevel FROM signatures WHERE "+cond + " ORDER BY nickName");
+				else
+					st = db.getConnection().prepareStatement("SELECT id, nickName, y, x, isDup, trustLevel FROM signatures ORDER BY nickName");
+
 				ResultSet set = st.executeQuery();
 
 				while(set.next()) {
