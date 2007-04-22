@@ -18,7 +18,6 @@ import freenet.crypt.DSAPrivateKey;
 import freenet.crypt.DSAGroup;
 import freenet.crypt.DSAPublicKey;
 import freenet.crypt.DSASignature;
-import freenet.crypt.Yarrow;
 import freenet.crypt.Global;
 
 import thaw.core.Logger;
@@ -93,13 +92,7 @@ public class Identity {
 		this.isDup = isDup;
 		this.trustLevel = trustLevel;
 
-		MessageDigest md = SHA256.getMessageDigest();
-		md.reset();
-		md.update(y);
-
-		hash = Base64.encode(md.digest());
-
-		SHA256.returnMessageDigest(md);
+		hash = Base64.encode(SHA256.digest(y));
 	}
 
 
@@ -112,7 +105,7 @@ public class Identity {
 	public static Identity generate(Hsqldb db, String nick) {
 		Logger.info(nick, "thaw.plugins.signatures.Identity : Generating new identity ...");
 
-		Yarrow randomSource = new Yarrow();
+		freenet.crypt.RandomSource randomSource = thaw.plugins.signatures.RandomSource.getRandomSource();
 
 		DSAPrivateKey privateKey = new DSAPrivateKey(Global.DSAgroupBigA, randomSource);
 		DSAPublicKey publicKey = new DSAPublicKey(Global.DSAgroupBigA, privateKey);
@@ -178,26 +171,24 @@ public class Identity {
 
 
 	public static DSASignature sign(String text, byte[] x) {
-		Yarrow randomSource = new Yarrow();
+		freenet.crypt.RandomSource randomSource = thaw.plugins.signatures.RandomSource.getRandomSource();
 
-		MessageDigest md = SHA256.getMessageDigest();
+		BigInteger m;
 
-		md.reset();
 
 		try {
-			md.update(text.getBytes("UTF-8"));
+			m = new BigInteger(SHA256.digest(text.getBytes("UTF-8")));
 		} catch(java.io.UnsupportedEncodingException e) {
-			md.update(text.getBytes());
+			Logger.warning(new Identity(), "sign() : UnsupportedEncodingException ? => Falling back on default charset");
+			m = new BigInteger(SHA256.digest(text.getBytes()));
 		}
 
-		BigInteger m = new BigInteger(md.digest());
 
 		DSASignature sign = DSA.sign(Global.DSAgroupBigA,
 					     new DSAPrivateKey(new BigInteger(x)),
 					     m,
 					     randomSource);
 
-		SHA256.returnMessageDigest(md);
 
 		return sign;
 	}
@@ -213,23 +204,18 @@ public class Identity {
 				    byte[] s, /* sig */
 				    byte[] y) /* publicKey */ {
 
-		MessageDigest md = SHA256.getMessageDigest();
-
-		md.reset();
+		BigInteger m;
 
 		try {
-			md.update(text.getBytes("UTF-8"));
+			m = new BigInteger(SHA256.digest(text.getBytes("UTF-8")));
 		} catch(java.io.UnsupportedEncodingException e) {
-			md.update(text.getBytes());
+			/* no logging because if it happens once, it will happen often */
+			m = new BigInteger(SHA256.digest(text.getBytes()));
 		}
-
-		BigInteger m = new BigInteger(md.digest());
 
 		boolean ret = DSA.verify(new DSAPublicKey(Global.DSAgroupBigA, new BigInteger(y)),
 					 new DSASignature(new BigInteger(r), new BigInteger(s)),
 					 m, false);
-
-		SHA256.returnMessageDigest(md);
 
 		return ret;
 	}
