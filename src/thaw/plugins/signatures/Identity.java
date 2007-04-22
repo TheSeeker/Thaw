@@ -2,12 +2,9 @@ package thaw.plugins.signatures;
 
 import java.awt.Color;
 
-import java.security.MessageDigest;
-
 import java.sql.*;
 
 import java.util.Vector;
-import java.util.Iterator;
 import java.math.BigInteger;
 
 import freenet.crypt.SHA256;
@@ -15,11 +12,12 @@ import freenet.support.Base64;
 
 import freenet.crypt.DSA;
 import freenet.crypt.DSAPrivateKey;
-import freenet.crypt.DSAGroup;
 import freenet.crypt.DSAPublicKey;
 import freenet.crypt.DSASignature;
 import freenet.crypt.Global;
+import freenet.crypt.RandomSource;
 
+import thaw.core.Core;
 import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
 
@@ -105,9 +103,7 @@ public class Identity {
 	public static Identity generate(Hsqldb db, String nick) {
 		Logger.info(nick, "thaw.plugins.signatures.Identity : Generating new identity ...");
 
-		freenet.crypt.RandomSource randomSource = thaw.plugins.signatures.RandomSource.getRandomSource();
-
-		DSAPrivateKey privateKey = new DSAPrivateKey(Global.DSAgroupBigA, randomSource);
+		DSAPrivateKey privateKey = new DSAPrivateKey(Global.DSAgroupBigA, Core.getRandom());
 		DSAPublicKey publicKey = new DSAPublicKey(Global.DSAgroupBigA, privateKey);
 
 		Identity identity = new Identity(db, -1, nick,
@@ -171,8 +167,6 @@ public class Identity {
 
 
 	public static DSASignature sign(String text, byte[] x) {
-		freenet.crypt.RandomSource randomSource = thaw.plugins.signatures.RandomSource.getRandomSource();
-
 		BigInteger m;
 
 
@@ -187,7 +181,7 @@ public class Identity {
 		DSASignature sign = DSA.sign(Global.DSAgroupBigA,
 					     new DSAPrivateKey(new BigInteger(x)),
 					     m,
-					     randomSource);
+					     (RandomSource)Core.getRandom());
 
 
 		return sign;

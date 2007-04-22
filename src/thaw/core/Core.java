@@ -1,14 +1,15 @@
 package thaw.core;
 
-import java.io.IOException;
-import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Random;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+
+import freenet.crypt.Yarrow;
 
 import thaw.fcp.FCPClientHello;
 import thaw.fcp.FCPConnection;
@@ -43,6 +44,8 @@ public class Core implements Observer {
 	public final static int TIME_BETWEEN_EACH_TRY = 5000;
 
 	private ReconnectionManager reconnectionManager = null;
+	
+	private static final Random RANDOM = new Yarrow();
 
 	// MDNS stuffs
 	private MDNSDiscovery discovery;
@@ -593,6 +596,11 @@ public class Core implements Observer {
 		if((o == connection) && !connection.isConnected()) {
 			reconnect();
 		}
+	}
+
+
+	public static Random getRandom() {
+		return RANDOM;
 	}
 
 }
