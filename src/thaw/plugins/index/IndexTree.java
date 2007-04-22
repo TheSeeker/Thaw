@@ -292,7 +292,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.comment.add"),
 				     IconBox.minAddComment);
 		commentMenu.add(item);
-		indexAndFileActions.add(new IndexManagementHelper.IndexCommentAdder(config, queueManager, indexBrowser, item));
+		indexAndFileActions.add(new IndexManagementHelper.IndexCommentAdder(queueManager, indexBrowser, item));
 
 
 		indexAndFileMenu.add(indexMenu);

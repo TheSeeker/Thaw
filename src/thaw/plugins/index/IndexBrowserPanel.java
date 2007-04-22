@@ -44,15 +44,14 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		this.config       = core.getConfig();
 		this.mainWindow   = core.getMainWindow();
 
-		blackList = new BlackList(core, db, this);
+		blackList = new BlackList(core, this);
 
 		unknownList = new UnknownIndexList(queueManager, this);
 
 		indexTree = new IndexTree(I18n.getMessage("thaw.plugin.index.indexes"),
 					  false, queueManager, this, config);
 
-		commentTab = new CommentTab(core.getConfig(),
-					    core.getQueueManager(),
+		commentTab = new CommentTab(core.getQueueManager(),
 					    this);
 
 		leftSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
@@ -63,7 +62,7 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		listAndDetails.setLayout(new BorderLayout(10, 10));
 
 		tables = new Tables(false, queueManager, this, config);
-		detailPanel = new DetailPanel(core.getConfig(), queueManager, this);
+		detailPanel = new DetailPanel(queueManager, this);
 
 		listAndDetails.add(tables.getPanel(), BorderLayout.CENTER);
 		listAndDetails.add(detailPanel.getPanel(), BorderLayout.SOUTH);

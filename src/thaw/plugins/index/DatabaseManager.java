@@ -51,9 +51,6 @@ import thaw.plugins.Hsqldb;
  * Creates all the tables used to save the indexes,
  * manages structure changes if needed, etc.
  *
- * <br/> TAKE CARE: because of the conversion mechanisms, the field order is NOT ALWAYS the same !
- *       So DON'T DO "SELECT * [...]" !
- *
  * <br/>
  * "Comprenne qui pourra" :P
  *
@@ -94,7 +91,7 @@ public class DatabaseManager {
 
 		if (config.getValue("indexDatabaseVersion") == null) {
 			newDb = true;
-			config.setValue("indexDatabaseVersion", "5");
+			config.setValue("indexDatabaseVersion", "6");
 		} else {
 
 			/* CONVERTIONS */
@@ -128,6 +125,13 @@ public class DatabaseManager {
 					splashScreen.setStatus("Converting database ...");
 				if (convertDatabase_4_to_5(db))
 					config.setValue("indexDatabaseVersion", "5");
+			}
+
+			if ("5".equals(config.getValue("indexDatabaseVersion"))) {
+				if (splashScreen != null)
+					splashScreen.setStatus("Converting database ...");
+				if (convertDatabase_5_to_6(db))
+					config.setValue("indexDatabaseVersion", "6");
 			}
 
 			/* ... */
@@ -262,11 +266,14 @@ public class DatabaseManager {
 		sendQuery(db,
 			  "CREATE CACHED TABLE indexComments ("
 			  + "id INTEGER IDENTITY NOT NULL,"
-			  + "author VARCHAR(255) NOT NULL,"
+			  + "authorId INTEGER NOT NULL,"
 			  + "text VARCHAR(16384) NOT NULL," /* 16 KB */
 			  + "rev INTEGER NOT NULL,"
 			  + "indexId INTEGER NOT NULL,"
-			  + "FOREIGN KEY (indexId) REFERENCES indexes (id))");
+			  + "r VARBINARY(400) NOT NULL," /* signature */
+			  + "s VARBINARY(400) NOT NULL," /* signature */
+			  + "FOREIGN KEY (indexId) REFERENCES indexes (id),"
+			  + "FOREIGN KEY (authorId) REFERENCES signatures (id))");
 	}
 
 
@@ -912,6 +919,41 @@ public class DatabaseManager {
 	public static boolean convertDatabase_4_to_5(Hsqldb db) {
 		if (!sendQuery(db, "ALTER TABLE indexes ADD COLUMN newComment BOOLEAN DEFAULT false")) {
 			Logger.error(new DatabaseManager(), "Error while converting the database (3 to 4) ! (adding column to index table)");
+			return false;
+		}
+
+		return true;
+	}
+
+
+	public static boolean convertDatabase_5_to_6(Hsqldb db) {
+		if (!sendQuery(db, "DELETE FROM indexComments")) {
+			Logger.error(new DatabaseManager(), "Error while removing all the known comments");
+			return false;
+		}
+
+		if (!sendQuery(db, "ALTER TABLE indexComments DROP COLUMN author")) {
+			Logger.error(new DatabaseManager(), "Error while altering the indexComments table (1)");
+			return false;
+		}
+
+		if (!sendQuery(db, "ALTER TABLE indexComments ADD COLUMN authorId INTEGER NOT NULL")) {
+			Logger.error(new DatabaseManager(), "Error while altering the indexComments table (2)");
+			return false;
+		}
+
+		if (!sendQuery(db, "ALTER TABLE indexComments ADD FOREIGN KEY (authorId) REFERENCES signatures (id)")) {
+			Logger.error(new DatabaseManager(), "Error while altering the indexComments table (3)");
+			return false;
+		}
+
+		if (!sendQuery(db, "ALTER TABLE indexComments ADD COLUMN r VARBINARY(400) NOT NULL")) {
+			Logger.error(new DatabaseManager(), "Error while altering the indexComments table (4)");
+			return false;
+		}
+
+		if (!sendQuery(db, "ALTER TABLE indexComments ADD COLUMN s VARBINARY(400) NOT NULL")) {
+			Logger.error(new DatabaseManager(), "Error while altering the indexComments table (5)");
 			return false;
 		}
 

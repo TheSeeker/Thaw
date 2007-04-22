@@ -46,7 +46,7 @@ public class Identity {
 		Color.BLUE,
 		Color.GREEN,
 		new java.awt.Color(0, 128, 0), /* light green */
-		Color.ORANGE,
+		Color.BLACK,
 		new java.awt.Color(175, 0, 0), /* moderatly red */
 		Color.RED
 	};
@@ -77,6 +77,7 @@ public class Identity {
 
 	/**
 	 * If you don't have a value, let it to null and pray it won't be used :P
+	 * @param nick part *before* the @
 	 */
 	public Identity(Hsqldb db, int id, String nick,
 			byte[] y, byte[] x,
@@ -93,6 +94,112 @@ public class Identity {
 		hash = Base64.encode(SHA256.digest(y));
 	}
 
+
+	public int getId() {
+		return id;
+	}
+
+	public String getNick() {
+		return nick;
+	}
+
+	public byte[] getY() {
+		return y;
+	}
+
+
+	/**
+	 * if the identity doesn't exists, it will be created
+	 */
+	public static Identity getIdentity(Hsqldb db,
+					   String nick,
+					   byte[] y) {
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT id, nickName, y, x, isDup, trustLevel "+
+									 "FROM signatures "+
+									 "WHERE y = ? LIMIT 1");
+				st.setBytes(1, y);
+
+				ResultSet set = st.executeQuery();
+
+				if (set.next()) {
+					Identity i = new Identity(db, set.getInt("id"), set.getString("nickName"),
+								  set.getBytes("y"), set.getBytes("x"),
+								  set.getBoolean("isDup"), set.getInt("trustLevel"));
+					Logger.info(i, "Identity found");
+					return i;
+				}
+
+				/* else we must add it, but first we need to know if it's a dup */
+
+				st = db.getConnection().prepareStatement("SELECT id FROM signatures "+
+									 "WHERE nickName = ? LIMIT 1");
+				st.setString(1, nick);
+
+				set = st.executeQuery();
+
+				boolean isDup = set.next();
+
+				/* and we add */
+
+				st = db.getConnection().prepareStatement("INSERT INTO signatures "+
+									 "(nickName, y, x, isDup, trustLevel) "+
+									 "VALUES (?, ?, ?, ?, 0)");
+
+				st.setString(1, nick);
+				st.setBytes(2, y);
+				st.setNull(3, Types.VARBINARY);
+				st.setBoolean(4, isDup);
+
+				st.execute();
+
+				Identity i = new Identity(db, -1, nick, y, null, isDup, 0);
+				Logger.info(i, "New identity found");
+				return i;
+
+			}
+		} catch(SQLException e) {
+			Logger.error(new Identity(), "Error while getting identity (2) : "+e.toString());
+		}
+
+		return null;
+	}
+
+
+	/**
+	 * won't create
+	 */
+	public static Identity getIdentity(Hsqldb db,
+					   int id) {
+		Identity i = null;
+
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT id, nickName, y, x, isDup, trustLevel "+
+									 "FROM signatures "+
+									 "WHERE id = ? LIMIT 1");
+				st.setInt(1, id);
+
+				ResultSet set = st.executeQuery();
+
+				if (!set.next())
+					return null;
+
+				i = new Identity(db, id, set.getString("nickName"),
+						 set.getBytes("y"), set.getBytes("x"),
+						 set.getBoolean("isDup"), set.getInt("trustLevel"));
+			}
+		} catch(SQLException e) {
+			Logger.error(new Identity(), "Error while getting identity (1) : "+e.toString());
+		}
+
+		return i;
+	}
 
 
 	/**

@@ -26,6 +26,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JComboBox;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -47,6 +49,8 @@ import thaw.fcp.FCPGenerateSSK;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
 import thaw.plugins.Hsqldb;
+import thaw.plugins.signatures.Identity;
+
 
 /**
  * Index.java, IndexFolder.java and IndexTree.java must NEVER use this helper (to avoid loops).
@@ -1518,24 +1522,18 @@ public class IndexManagementHelper {
 
 
 	public static class IndexCommentAdder extends BasicIndexAction implements Runnable, ActionListener {
-		private Config config;
-
 		private JDialog dialog;
 
-		private JTextField author;
+		private JComboBox author;
 		private JTextArea textArea;
 		private JButton okButton;
 		private JButton cancelButton;
 
 
-		public IndexCommentAdder(Config config,
-					 FCPQueueManager queueManager,
+		public IndexCommentAdder(FCPQueueManager queueManager,
 					 IndexBrowserPanel indexBrowser,
 					 final AbstractButton actionSource) {
 			super(queueManager, indexBrowser, actionSource);
-
-			this.config = config;
-
 
 			if (actionSource != null)
 				actionSource.setEnabled(false);
@@ -1555,11 +1553,6 @@ public class IndexManagementHelper {
 			if (dialog != null)
 				return;
 
-			String defaultAuthor = config.getValue("userNickname");
-
-			if (defaultAuthor == null)
-				defaultAuthor = "User who didn't configure its Thaw";
-
 
 			dialog = new JDialog(getIndexBrowserPanel().getMainWindow().getMainFrame(),
 					     I18n.getMessage("thaw.plugin.index.comment.add"));
@@ -1572,7 +1565,7 @@ public class IndexManagementHelper {
 			authorPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.comment.author")),
 					BorderLayout.WEST);
 
-			author = new JTextField(defaultAuthor);
+			author = new JComboBox(Identity.getYourIdentities(getIndexBrowserPanel().getDb()));
 			authorPanel.add(author, BorderLayout.CENTER);
 
 			JPanel header = new JPanel(new GridLayout(2, 1));
@@ -1615,7 +1608,7 @@ public class IndexManagementHelper {
 			if (e.getSource() == okButton) {
 				if (getTarget() instanceof Index) {
 					((Index)getTarget()).postComment(getQueueManager(),
-									 author.getText().trim(),
+									 ((Identity)author.getSelectedItem()),
 									 textArea.getText().trim());
 				}
 

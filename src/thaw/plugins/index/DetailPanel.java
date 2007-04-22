@@ -18,6 +18,8 @@ import thaw.gui.IconBox;
 
 import thaw.fcp.FCPQueueManager;
 
+import thaw.plugins.Hsqldb;
+
 
 /**
  * Initially, I wanted to use it to show details about the
@@ -32,7 +34,7 @@ public class DetailPanel {
 	private Vector buttonActions;
 
 
-	public DetailPanel(Config config, FCPQueueManager queueManager, IndexBrowserPanel indexBrowser) {
+	public DetailPanel(FCPQueueManager queueManager, IndexBrowserPanel indexBrowser) {
 		panel = new JPanel(new BorderLayout());
 
 		panel.add(new JLabel(""), BorderLayout.CENTER); /* because we need something */
@@ -48,7 +50,7 @@ public class DetailPanel {
 
 		button  = new JButton(I18n.getMessage("thaw.plugin.index.comment.add"),
 				      IconBox.minAddComment);
-		buttonActions.add(new IndexManagementHelper.IndexCommentAdder(config, queueManager, indexBrowser, button));
+		buttonActions.add(new IndexManagementHelper.IndexCommentAdder(queueManager, indexBrowser, button));
 		buttonPanel.add(button);
 
 

@@ -26,6 +26,7 @@ import thaw.fcp.FCPQueueManager;
 import thaw.gui.IconBox;
 import thaw.core.I18n;
 
+import thaw.plugins.Hsqldb;
 
 public class CommentTab implements ActionListener {
 	private boolean visible;
@@ -43,8 +44,7 @@ public class CommentTab implements ActionListener {
 	private IndexBrowserPanel indexBrowser;
 
 
-	public CommentTab(Config config,
-			  FCPQueueManager queueManager,
+	public CommentTab(FCPQueueManager queueManager,
 			  IndexBrowserPanel indexBrowser) {
 		this.indexBrowser = indexBrowser;
 
@@ -69,7 +69,7 @@ public class CommentTab implements ActionListener {
 		buttonActions = new Vector();
 
 		button = new JButton(I18n.getMessage("thaw.plugin.index.comment.add"), IconBox.minAddComment);
-		buttonActions.add(new IndexManagementHelper.IndexCommentAdder(config, queueManager, indexBrowser, button));
+		buttonActions.add(new IndexManagementHelper.IndexCommentAdder(queueManager, indexBrowser, button));
 
 		southPanel.add(new JLabel(""), BorderLayout.CENTER);
 		southPanel.add(button, BorderLayout.EAST);

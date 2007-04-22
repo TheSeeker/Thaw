@@ -65,7 +65,7 @@ import thaw.fcp.FCPGenerateSSK;
 
 import thaw.plugins.Hsqldb;
 import thaw.plugins.insertPlugin.DefaultMIMETypes;
-
+import thaw.plugins.signatures.Identity;
 
 
 public class Index extends Observable implements MutableTreeNode, FileAndLinkList, IndexTreeNode, Observer {
@@ -1836,7 +1836,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	}
 
 
-	public boolean postComment(FCPQueueManager queueManager, String author, String msg) {
+	public boolean postComment(FCPQueueManager queueManager, Identity author, String msg) {
 		String privKey;
 
 		if ((privKey = getCommentPrivateKey()) == null) {
@@ -1882,8 +1882,9 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT author, text, rev FROM indexComments WHERE indexId = ? ORDER BY rev"
-									 + (asc ? "" : " DESC"));
+				st = db.getConnection().prepareStatement("SELECT authorId, text, rev "+
+									 "FROM indexComments WHERE indexId = ? ORDER BY rev" +
+									 (asc ? "" : " DESC"));
 
 				st.setInt(1, id);
 
@@ -1892,7 +1893,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 				while(set.next())
 					comments.add(new Comment(db, this,
 								 set.getInt("rev"),
-								 set.getString("author"),
+								 Identity.getIdentity(db, set.getInt("authorId")),
 								 set.getString("text")));
 
 				if (comments.size() == 0)

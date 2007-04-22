@@ -51,9 +51,9 @@ public class BlackList implements ActionListener {
 	}
 
 
-	public BlackList(Core core, Hsqldb db, IndexBrowserPanel indexBrowser) {
+	public BlackList(Core core, IndexBrowserPanel indexBrowser) {
 		this.core = core;
-		this.db = db;
+		this.db = indexBrowser.getDb();
 		this.indexBrowser = indexBrowser;
 
 
