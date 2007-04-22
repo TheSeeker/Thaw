@@ -842,9 +842,10 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 		if (o instanceof FCPClientPut) {
 			/* TODO : check if it's successful, else merge if it's due to a collision */
-
-			if (indexTree != null)
-				indexTree.removeUpdatingIndex(this);
+			if (((FCPClientPut)o).isFinished()) {
+				if (indexTree != null)
+					indexTree.removeUpdatingIndex(this);
+			}
 		}
 
 		if (o instanceof Comment) {
