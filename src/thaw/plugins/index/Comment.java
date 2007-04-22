@@ -14,11 +14,13 @@ import java.util.Observable;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 
 import java.awt.GridLayout;
+import java.awt.BorderLayout;
 
 /* DOM */
 
@@ -129,17 +131,38 @@ public class Comment extends Observable implements Observer {
 
 
 	public JPanel getPanel() {
-		JPanel panel = new JPanel(new GridLayout(1, 1));
+		JPanel panel = new JPanel(new BorderLayout(10, 10));
 		JTextArea text = new JTextArea(comment.trim());
 
-		panel.setBorder(BorderFactory.createTitledBorder(I18n.getMessage("thaw.plugin.index.comment.author")+" : "+author.toString()));
+		panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+								 "--- "+author.toString()+" ---",
+								 javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+								 javax.swing.border.TitledBorder.DEFAULT_POSITION,
+								 new java.awt.Font("Dialog", java.awt.Font.BOLD, 14) ));
+
+		JLabel sigLabel = new JLabel(I18n.getMessage("thaw.plugin.signature.trustLevel.trustLevel")+ " : ");
+		JTextField sigLevel = new JTextField(I18n.getMessage(author.getTrustLevelStr()));
+
+		sigLevel.setDisabledTextColor(author.getTrustLevelColor());
+		sigLevel.setEditable(false);
+		sigLevel.setBackground(panel.getBackground());
+
+
+		JPanel sigPanel = new JPanel(new BorderLayout());
+		sigPanel.add(sigLabel, BorderLayout.WEST);
+		sigPanel.add(sigLevel, BorderLayout.CENTER);
+
+		JPanel bottomPanel = new JPanel(new BorderLayout());
+		bottomPanel.add(sigPanel, BorderLayout.WEST);
+		bottomPanel.add(new JLabel(""), BorderLayout.CENTER);
+
 
 		text.setEditable(false);
 		text.setBackground(panel.getBackground());
 
-		//panel.setPreferredSize(new java.awt.Dimension(600, 150));
 
-		panel.add(text);
+		panel.add(text, BorderLayout.CENTER);
+		panel.add(bottomPanel, BorderLayout.SOUTH);
 
 		return panel;
 	}
@@ -154,6 +177,7 @@ public class Comment extends Observable implements Observer {
 
 		try {
 			outputFile = java.io.File.createTempFile("thaw-", "-comment.xml");
+			outputFile.deleteOnExit();
 		} catch(java.io.IOException e) {
 			Logger.error(new Comment(), "Unable to write comment in a temporary file because: "+e.toString());
 			return null;

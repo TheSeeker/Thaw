@@ -738,7 +738,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 					boolean hasChanged = ((IndexTreeNode)o).hasChanged();
 					boolean newComment = ((IndexTreeNode)o).hasNewComment();
 
-					int style = 0;
+					int style = Font.PLAIN;
 
 					if (modifiable)
 						style |= Font.ITALIC;

@@ -107,6 +107,35 @@ public class Identity {
 		return y;
 	}
 
+	public String getTrustLevelStr() {
+		int i;
+
+		for (i = 0 ; i < trustLevelInt.length ; i++) {
+			if (trustLevelInt[i] == trustLevel)
+				break;
+		}
+
+		if (i < trustLevelInt.length)
+			return trustLevelStr[i];
+
+		return "[?]";
+	}
+
+
+	public Color getTrustLevelColor() {
+		int i;
+
+		for (i = 0 ; i < trustLevelInt.length ; i++) {
+			if (trustLevelInt[i] == trustLevel)
+				break;
+		}
+
+		if (i < trustLevelInt.length)
+			return trustLevelColor[i];
+
+		return Color.BLACK;
+	}
+
 
 	/**
 	 * if the identity doesn't exists, it will be created
