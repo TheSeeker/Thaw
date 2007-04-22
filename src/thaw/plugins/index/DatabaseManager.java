@@ -929,32 +929,26 @@ public class DatabaseManager {
 	public static boolean convertDatabase_5_to_6(Hsqldb db) {
 		if (!sendQuery(db, "DELETE FROM indexComments")) {
 			Logger.error(new DatabaseManager(), "Error while removing all the known comments");
-			return false;
 		}
 
 		if (!sendQuery(db, "ALTER TABLE indexComments DROP COLUMN author")) {
 			Logger.error(new DatabaseManager(), "Error while altering the indexComments table (1)");
-			return false;
 		}
 
 		if (!sendQuery(db, "ALTER TABLE indexComments ADD COLUMN authorId INTEGER NOT NULL")) {
 			Logger.error(new DatabaseManager(), "Error while altering the indexComments table (2)");
-			return false;
 		}
 
 		if (!sendQuery(db, "ALTER TABLE indexComments ADD FOREIGN KEY (authorId) REFERENCES signatures (id)")) {
 			Logger.error(new DatabaseManager(), "Error while altering the indexComments table (3)");
-			return false;
 		}
 
 		if (!sendQuery(db, "ALTER TABLE indexComments ADD COLUMN r VARBINARY(400) NOT NULL")) {
 			Logger.error(new DatabaseManager(), "Error while altering the indexComments table (4)");
-			return false;
 		}
 
 		if (!sendQuery(db, "ALTER TABLE indexComments ADD COLUMN s VARBINARY(400) NOT NULL")) {
 			Logger.error(new DatabaseManager(), "Error while altering the indexComments table (5)");
-			return false;
 		}
 
 		return true;
