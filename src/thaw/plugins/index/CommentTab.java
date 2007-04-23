@@ -100,7 +100,7 @@ public class CommentTab implements ActionListener {
 
 			for (Iterator it = comments.iterator();
 			     it.hasNext();) {
-				JPanel panel = ((Comment)it.next()).getPanel();
+				JPanel panel = ((Comment)it.next()).getPanel(this);
 
 				insidePanel.add(panel);
 			}
@@ -108,6 +108,8 @@ public class CommentTab implements ActionListener {
 
 		centerPanel.add(new JScrollPane(insidePanel), BorderLayout.NORTH);
 		centerPanel.add(new JLabel(""), BorderLayout.CENTER);
+
+		centerPanel.revalidate();
 	}
 
 

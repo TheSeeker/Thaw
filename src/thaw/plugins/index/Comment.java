@@ -9,10 +9,13 @@ import java.io.OutputStream;
 import java.util.Observer;
 import java.util.Observable;
 
+import java.util.Vector;
+
 /* Swing */
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
+import javax.swing.JComboBox;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JButton;
@@ -21,6 +24,9 @@ import javax.swing.JScrollPane;
 
 import java.awt.GridLayout;
 import java.awt.BorderLayout;
+
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 /* DOM */
 
@@ -91,7 +97,7 @@ import thaw.plugins.signatures.Identity;
  * Will use, from the configuration:
  *  'userNickname' as the author name
  */
-public class Comment extends Observable implements Observer {
+public class Comment extends Observable implements Observer, ActionListener {
 	public final static int MAX_SIZE = 16384;
 
 	private Identity author;
@@ -130,7 +136,13 @@ public class Comment extends Observable implements Observer {
 	}
 
 
-	public JPanel getPanel() {
+	private CommentTab tab;
+	private JComboBox trust;
+	private JButton changeTrust;
+
+	public JPanel getPanel(CommentTab tab) {
+		this.tab= tab;
+
 		JPanel panel = new JPanel(new BorderLayout(10, 10));
 		JTextArea text = new JTextArea(comment.trim());
 
@@ -142,10 +154,10 @@ public class Comment extends Observable implements Observer {
 
 		JLabel sigLabel = new JLabel(I18n.getMessage("thaw.plugin.signature.trustLevel.trustLevel")+ " : ");
 		JTextField sigLevel = new JTextField(I18n.getMessage(author.getTrustLevelStr())
-						     + (author.isDup() ? I18n.getMessage("thaw.plugin.signature.duplicata") : ""));
+						     + (author.isDup() ? " - " + I18n.getMessage("thaw.plugin.signature.duplicata") : ""));
 
 
-		sigLevel.setDisabledTextColor(author.getTrustLevelColor());
+		sigLevel.setForeground(author.getTrustLevelColor());
 		sigLevel.setEditable(false);
 		sigLevel.setBackground(panel.getBackground());
 
@@ -154,9 +166,29 @@ public class Comment extends Observable implements Observer {
 		sigPanel.add(sigLabel, BorderLayout.WEST);
 		sigPanel.add(sigLevel, BorderLayout.CENTER);
 
+
+		Vector trustLevels = new Vector();
+
+		for (int i = 0 ; i < Identity.trustLevelInt.length ; i++) {
+			if (Identity.trustLevelInt[i] < 100)
+				trustLevels.add(I18n.getMessage(Identity.trustLevelStr[i]));
+		}
+
+
+		trust = new JComboBox(trustLevels);
+		trust.setSelectedItem(I18n.getMessage(author.getTrustLevelStr()));
+		changeTrust = new JButton(I18n.getMessage("thaw.common.apply"));
+		changeTrust.addActionListener(this);
+
+		JPanel trustPanel = new JPanel(new BorderLayout());
+		trustPanel.add(trust, BorderLayout.CENTER);
+		trustPanel.add(changeTrust, BorderLayout.EAST);
+
+
 		JPanel bottomPanel = new JPanel(new BorderLayout());
 		bottomPanel.add(sigPanel, BorderLayout.WEST);
 		bottomPanel.add(new JLabel(""), BorderLayout.CENTER);
+		bottomPanel.add(trustPanel, BorderLayout.EAST);
 
 
 		text.setEditable(false);
@@ -167,6 +199,17 @@ public class Comment extends Observable implements Observer {
 		panel.add(bottomPanel, BorderLayout.SOUTH);
 
 		return panel;
+	}
+
+
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == changeTrust) {
+			if (author == null)
+				return;
+			author.setTrustLevel((String)trust.getSelectedItem());
+			tab.updateCommentList();
+			return;
+		}
 	}
 
 
