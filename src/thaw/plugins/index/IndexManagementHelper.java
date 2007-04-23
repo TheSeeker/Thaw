@@ -411,7 +411,7 @@ public class IndexManagementHelper {
 			JPanel commentPanel = new JPanel(new BorderLayout());
 			commentPanel.add(allowCommentsBox, BorderLayout.CENTER);
 
-			if (index != null)
+			if (index != null && index.getPrivateKey() != null)
 				commentPanel.add(resetCommentsButton, BorderLayout.EAST);
 
 

@@ -238,6 +238,9 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 
 	public boolean mustBeIgnored(Config config) {
+		if (author == null) /* fix nextgens weird case */
+			return true;
+
 		return author.mustBeIgnored(config);
 	}
 
