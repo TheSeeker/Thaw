@@ -140,11 +140,31 @@ public class Comment extends Observable implements Observer, ActionListener {
 	private JComboBox trust;
 	private JButton changeTrust;
 
+	private JButton changeBlackListState;
+
+	private boolean blackListed;
+
+
 	public JPanel getPanel(CommentTab tab) {
 		this.tab= tab;
 
+		blackListed = isBlackListed();
+		boolean hasPrivateKey = (index.getPrivateKey() != null);
+
+		/**
+		 * we don't display if it is blacklisted and we don't have the private key
+		 */
+		if (blackListed && !hasPrivateKey)
+			return null;
+
 		JPanel panel = new JPanel(new BorderLayout(10, 10));
-		JTextArea text = new JTextArea(comment.trim());
+
+		JTextArea text;
+
+		if (!blackListed)
+			text = new JTextArea(comment.trim());
+		else
+			text = new JTextArea(I18n.getMessage("thaw.plugin.index.comment.moderated"));
 
 		panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
 								 "--- "+author.toString()+" ---",
@@ -187,11 +207,23 @@ public class Comment extends Observable implements Observer, ActionListener {
 			trustPanel.add(changeTrust, BorderLayout.EAST);
 		}
 
+		JPanel bottomRightPanel = new JPanel(new BorderLayout(5, 5));
+
+		bottomRightPanel.add(trustPanel, BorderLayout.CENTER);
+
+		if (hasPrivateKey && (author.getX() == null || blackListed) ) {
+			changeBlackListState = new JButton(blackListed ?
+							   I18n.getMessage("thaw.plugin.index.comment.unmoderate") :
+							   I18n.getMessage("thaw.plugin.index.comment.moderate"));
+			changeBlackListState.addActionListener(this);
+			bottomRightPanel.add(changeBlackListState, BorderLayout.EAST);
+		}
+
 
 		JPanel bottomPanel = new JPanel(new BorderLayout());
 		bottomPanel.add(sigPanel, BorderLayout.WEST);
 		bottomPanel.add(new JLabel(""), BorderLayout.CENTER);
-		bottomPanel.add(trustPanel, BorderLayout.EAST);
+		bottomPanel.add(bottomRightPanel, BorderLayout.EAST);
 
 
 		text.setEditable(false);
@@ -210,12 +242,80 @@ public class Comment extends Observable implements Observer, ActionListener {
 	}
 
 
+	public boolean isBlackListed() {
+		return isBlackListed(db, index.getId(), rev);
+	}
+
+	public void unBlackList() {
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st = db.getConnection().prepareStatement("DELETE FROM indexCommentBlackList WHERE rev = ? AND indexId = ?");
+				st.setInt(1, rev);
+				st.setInt(2, index.getId());
+				st.execute();
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Unable to un-blacklist comment because: "+e.toString());
+		}
+	}
+
+
+	public void blackList() {
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st = db.getConnection().prepareStatement("INSERT INTO indexCommentBlackList (rev, indexId) VALUES (?, ?)");
+				st.setInt(1, rev);
+				st.setInt(2, index.getId());
+				st.execute();
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Unable to blacklist comment because: "+e.toString());
+		}
+	}
+
+
+	/**
+	 * Only index owner(s) must be able to see black listed comments
+	 */
+	public static boolean isBlackListed(Hsqldb db, int indexId, int rev) {
+		try {
+			synchronized(db.dbLock) {
+
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT id FROM indexCommentBlackList WHERE indexId = ? AND rev = ? LIMIT 1");
+				st.setInt(1, indexId);
+				st.setInt(2, rev);
+
+				ResultSet set = st.executeQuery();
+
+				return set.next();
+			}
+		} catch(SQLException e) {
+			Logger.error(db, "thaw.plugins.index.Comment : Error while checking if the message is in the blacklist :"+e.toString());
+		}
+
+		return false;
+	}
+
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == changeTrust) {
 			if (author == null)
 				return;
 			author.setTrustLevel((String)trust.getSelectedItem());
 			tab.updateCommentList();
+			return;
+		}
+
+		if (e.getSource() == changeBlackListState) {
+			if (blackListed) {
+				unBlackList();
+			} else {
+				blackList();
+			}
+
+			tab.updateCommentList();
+
 			return;
 		}
 	}
@@ -692,7 +792,7 @@ public class Comment extends Observable implements Observer, ActionListener {
 		publicKey += "comment-"+Integer.toString(rev)+"/comment.xml";
 
 		FCPClientGet get = new FCPClientGet(publicKey, 2 /* priority */, 2 /* persistence */,
-						    false /* global queue */, 5 /* max retries */,
+						    false /* global queue */, 3 /* max retries */,
 						    System.getProperty("java.io.tmpdir"),
 						    MAX_SIZE, true /* no DDA */);
 

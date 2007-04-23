@@ -116,7 +116,7 @@ public class Identity {
 		int i;
 
 		if (x != null) {
-			return I18n.getMessage("thaw.plugin.signature.trustLevel.me");
+			return "thaw.plugin.signature.trustLevel.me";
 		}
 
 		for (i = 0 ; i < trustLevelInt.length ; i++) {

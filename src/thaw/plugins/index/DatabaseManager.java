@@ -274,6 +274,17 @@ public class DatabaseManager {
 			  + "s VARBINARY(400) NOT NULL," /* signature */
 			  + "FOREIGN KEY (indexId) REFERENCES indexes (id),"
 			  + "FOREIGN KEY (authorId) REFERENCES signatures (id))");
+
+		/**
+		 * black listed comments should not be fetched.
+		 * and if they are already fetched, they will be ignored at display time
+		 */
+		sendQuery(db,
+			  "CREATE CACHED TABLE indexCommentBlackList ("
+			  + "id INTEGER IDENTITY NOT NULL,"
+			  + "rev INTEGER NOT NULL,"
+			  + "indexId INTEGER NOT NULL,"
+			  + "FOREIGN KEY (indexId) REFERENCES indexes (id))");
 	}
 
 

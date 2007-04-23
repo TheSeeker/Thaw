@@ -409,7 +409,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	public boolean getPublishPrivateKey() {
 		try {
 
-			PreparedStatement st
+		PreparedStatement st
 				= db.getConnection().prepareStatement("SELECT publishPrivateKey FROM indexes WHERE id = ? LIMIT 1");
 
 			st.setInt(1, id);
@@ -772,7 +772,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 		Logger.info(this, "Updating index ...");
 
-		/*
+
 		if (key.startsWith("USK")) {
 			int negRev = 0;
 
@@ -781,13 +781,13 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 				key = FreenetURIHelper.changeUSKRevision(key, negRev, 0);
 			}
 		}
-		*/
+
 
 
 		Logger.debug(this, "Key asked: "+key);
 
 
-		clientGet = new FCPClientGet(key, 2, 2, false, -1,
+		clientGet = new FCPClientGet(key, 2, 2, false, 5,
 					     System.getProperty("java.io.tmpdir"),
 					     MAX_SIZE, true /* <= noDDA */);
 
@@ -1177,7 +1177,25 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		infos.setAttribute("publicKey", getCommentPublicKey());
 		infos.setAttribute("privateKey", getCommentPrivateKey());
 
-		/* TODO : Black list */
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT rev FROM indexCommentBlackList WHERE indexId = ?");
+				st.setInt(1, id);
+
+				ResultSet set = st.executeQuery();
+
+				while (set.next()) {
+					Element bl = xmlDoc.createElement("blackListed");
+					bl.setAttribute("rev", set.getString("rev"));
+
+					infos.appendChild(bl);
+				}
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Unable to get comment black list  because: "+e.toString());
+		}
 
 		return infos;
 	}
@@ -1235,6 +1253,10 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 				st.setInt(1, id);
 				st.execute();
 
+				st = db.getConnection().prepareStatement("DELETE FROM indexCommentBlackList WHERE indexId = ?");
+				st.setInt(1, id);
+				st.execute();
+
 			} catch(SQLException e) {
 				Logger.error(this, "Hm, failure while starting to parse the index: "+e.toString());
 				throw new SAXException("SQLException ; have a nice day.");
@@ -1263,6 +1285,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 		private boolean ownerTag = false;
 		private boolean privateKeyTag = false;
+		private boolean commentsTag = false;
 
 		private boolean hasCommentTag = false;
 
@@ -1354,7 +1377,9 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 					insertFileSt.setLong(4, size);
 					insertFileSt.setInt(5, id);
 
-					insertFileSt.execute();
+					synchronized(db.dbLock) {
+						insertFileSt.execute();
+					}
 				} catch(SQLException e) {
 					Logger.error(this, "Error while adding file: "+e.toString());
 				}
@@ -1370,8 +1395,38 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 				if (pub != null && priv != null) {
 					hasCommentTag = true;
+					commentsTag = true;
 					Logger.debug(this, "Comment allowed in this index");
 					setCommentKeys(pub, priv);
+				}
+			}
+
+
+			if ("blackListed".equals(rawName)) {
+				int blRev;
+
+				try {
+					blRev = Integer.parseInt(attrs.getValue("rev"));
+				} catch(Exception e) {
+					/* quick and dirty */
+					return;
+				}
+
+				Logger.notice(this, "BlackListing rev '"+Integer.toString(rev)+"'");
+
+				try {
+					synchronized(db.dbLock) {
+						PreparedStatement st;
+
+						st = db.getConnection().prepareStatement("INSERT into indexCommentBlackList (rev, indexId) VALUES (?, ?)");
+						st.setInt(1, blRev);
+						st.setInt(2, id);
+
+						st.execute();
+
+					}
+				} catch(SQLException e) {
+					Logger.error(this, "Error while adding element to the blackList: "+e.toString());
 				}
 			}
 
@@ -1402,6 +1457,11 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 			if ("privateKey".equals(rawName)) {
 				privateKeyTag = false;
+				return;
+			}
+
+			if ("comments".equals(rawName)) {
+				commentsTag = false;
 				return;
 			}
 		}
@@ -1442,6 +1502,9 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 					setPrivateKey(txt.trim());
 				return;
 			}
+
+
+
 
 			/* ignore unkwown stuffs */
 
@@ -1758,13 +1821,18 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 			synchronized(db.dbLock) {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("DELETE FROM indexCommentKeys WHERE indexId = ?");
+				st = db.getConnection().prepareStatement("DELETE FROM indexCommentBlackList WHERE indexId = ?");
 				st.setInt(1, id);
 				st.execute();
 
 				st = db.getConnection().prepareStatement("DELETE FROM indexComments WHERE indexId = ?");
 				st.setInt(1, id);
 				st.execute();
+
+				st = db.getConnection().prepareStatement("DELETE FROM indexCommentKeys WHERE indexId = ?");
+				st.setInt(1, id);
+				st.execute();
+
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to purge comment keys, because : "+e.toString());
