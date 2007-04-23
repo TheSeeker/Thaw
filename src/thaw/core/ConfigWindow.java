@@ -114,10 +114,6 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		}
 
 		configWin.setVisible(v);
-
-		if (v == false) {
-			configWin.dispose();
-		}
 	}
 
 	public boolean addTab(final String name, final java.awt.Component panel) {
@@ -192,10 +188,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		if((e.getSource() == okButton)
 		   || (e.getSource() == cancelButton)) {
 
-			setChanged();
-			this.notifyObservers(e.getSource());
-			core.getMainWindow().setEnabled(true);
-			setVisible(false);
+			close();
 		}
 
 		if(e.getSource() == okButton) {
@@ -242,9 +235,11 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 
 	public void close() {
-		setVisible(false);
 		setChanged();
 		this.notifyObservers(cancelButton); /* Equivalent to a click on the cancel button */
+
+		core.getMainWindow().setEnabled(true);
+		setVisible(false);
 	}
 
 
