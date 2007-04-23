@@ -3,6 +3,7 @@ package thaw.gui;
 import javax.swing.JOptionPane;
 
 import thaw.core.Core;
+import thaw.core.MainWindow;
 import thaw.core.I18n;
 
 /**
@@ -17,8 +18,13 @@ public class WarningWindow {
 	public WarningWindow(final Core core,
 			     final String warning)
 	{
-		if((core != null) && (core.getMainWindow() != null)) {
-			JOptionPane.showMessageDialog(core.getMainWindow().getMainFrame(),
+		this(core != null ? core.getMainWindow() : null, warning);
+	}
+
+	public WarningWindow(final MainWindow mainWindow, String warning) {
+
+		if (mainWindow != null) {
+			JOptionPane.showMessageDialog(mainWindow.getMainFrame(),
 						      warning,
 						      "Thaw - "+I18n.getMessage("thaw.warning.title"),
 						      JOptionPane.WARNING_MESSAGE);

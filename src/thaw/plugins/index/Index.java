@@ -1826,7 +1826,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 	}
 
-	public void regeneratedCommentKeys(FCPQueueManager queueManager) {
+	public void regenerateCommentKeys(FCPQueueManager queueManager) {
 		new CommentKeyRegenerator(queueManager);
 	}
 

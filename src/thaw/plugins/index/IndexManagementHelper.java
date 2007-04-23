@@ -42,6 +42,7 @@ import thaw.gui.IconBox;
 
 import thaw.core.Config;
 import thaw.core.FileChooser;
+import thaw.core.MainWindow;
 import thaw.fcp.FreenetURIHelper;
 import thaw.core.I18n;
 import thaw.core.Logger;
@@ -50,7 +51,7 @@ import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
 import thaw.plugins.Hsqldb;
 import thaw.plugins.signatures.Identity;
-
+import thaw.gui.WarningWindow;
 
 /**
  * Index.java, IndexFolder.java and IndexTree.java must NEVER use this helper (to avoid loops).
@@ -255,11 +256,17 @@ public class IndexManagementHelper {
 
 	/**
 	 * In fact, this dialog allows to change various settings related to the index
+	 * THIS DIALOG BECOME REALLY DIRTY ! TO REWRITE !
 	 */
 	public static class KeyAsker implements ActionListener, MouseListener {
+		private Index index;
+		private FCPQueueManager queueManager;
+
 		private JButton okButton;
 		private JButton cancelButton;
 		private int formState;
+
+		private JButton resetCommentsButton;
 
 		private JTextField publicKeyField       = null;
 		private JTextField privateKeyField      = null;
@@ -273,8 +280,13 @@ public class IndexManagementHelper {
 
 		}
 
-
-		public static KeyAsker askKeys(final boolean askPrivateKey,
+		/**
+		 * @param index can be null
+		 * @param queueManager can be null if index is null
+		 */
+		public static KeyAsker askKeys(final Index index,
+					       final FCPQueueManager queueManager,
+					       final boolean askPrivateKey,
 					       final String defaultPublicKey,
 					       final String defaultPrivateKey,
 					       final boolean defaultPublishPrivateKey,
@@ -282,7 +294,8 @@ public class IndexManagementHelper {
 					       final boolean enablePublishPrivateKeyChoice,
 					       final IndexBrowserPanel indexBrowser) {
 			KeyAsker asker = new KeyAsker();
-			asker.askKeysBis(askPrivateKey, defaultPublicKey,
+			asker.askKeysBis(index, queueManager,
+					 askPrivateKey, defaultPublicKey,
 					 defaultPrivateKey, defaultPublishPrivateKey,
 					 defaultAllowComments,
 					 enablePublishPrivateKeyChoice,
@@ -316,13 +329,17 @@ public class IndexManagementHelper {
 			return allowComments;
 		}
 
-		public synchronized void askKeysBis(final boolean askPrivateKey,
+		public synchronized void askKeysBis(Index index, FCPQueueManager queueManager,
+						    final boolean askPrivateKey,
 						    String defaultPublicKey,
 						    String defaultPrivateKey,
 						    boolean defaultPublishPrivateKey,
 						    boolean defaultAllowComments,
 						    final boolean enablePublishPrivateKeyChoice,
 						    final IndexBrowserPanel indexBrowser) {
+			this.index = index;
+			this.queueManager = queueManager;
+
 			formState = 0;
 
 			if (defaultPublicKey == null)
@@ -343,6 +360,9 @@ public class IndexManagementHelper {
 			allowCommentsBox     = new JCheckBox(I18n.getMessage("thaw.plugin.index.allowComments"),
 							     defaultAllowComments);
 			allowCommentsBox.setEnabled(enablePublishPrivateKeyChoice); /* if we can't publish the private key, we can't change comment setting */
+
+			resetCommentsButton = new JButton(I18n.getMessage("thaw.plugin.index.comment.reset"));
+			resetCommentsButton.addActionListener(this);
 
 			final JPanel subPanelA = new JPanel(); /* left  => labels */
 			final JPanel subPanelB = new JPanel(); /* right => textfield */
@@ -388,8 +408,15 @@ public class IndexManagementHelper {
 			subSubPanelC.add(okButton);
 			subSubPanelC.add(cancelButton);
 
+			JPanel commentPanel = new JPanel(new BorderLayout());
+			commentPanel.add(allowCommentsBox, BorderLayout.CENTER);
+
+			if (index != null)
+				commentPanel.add(resetCommentsButton, BorderLayout.EAST);
+
+
 			subPanelC.add(publishPrivateKeyBox);
-			subPanelC.add(allowCommentsBox);
+			subPanelC.add(commentPanel);
 			subPanelC.add(subSubPanelC);
 
 			frame.getContentPane().add(subPanelC, BorderLayout.SOUTH);
@@ -434,13 +461,19 @@ public class IndexManagementHelper {
 		public synchronized void actionPerformed(final ActionEvent e) {
 			if (e.getSource() == okButton) {
 				formState = 1;
+				notifyAll();
+				return;
 			}
 
 			if (e.getSource() == cancelButton) {
 				formState = 2;
+				notifyAll();
+				return;
 			}
 
-			notifyAll();
+			if (e.getSource() == resetCommentsButton) {
+				index.regenerateCommentKeys(queueManager);
+			}
 		}
 
 		public void mouseClicked(final MouseEvent e) { }
@@ -483,7 +516,8 @@ public class IndexManagementHelper {
 		public void apply() {
 			final Index index = ((Index)getTarget());
 
-			final KeyAsker asker = KeyAsker.askKeys(true, index.getPublicKey(),
+			final KeyAsker asker = KeyAsker.askKeys(index, getQueueManager(),
+								true, index.getPublicKey(),
 								index.getPrivateKey(), index.getPublishPrivateKey(),
 								index.canHaveComments(), true, getIndexBrowserPanel());
 
@@ -502,10 +536,13 @@ public class IndexManagementHelper {
 				index.purgeCommentKeys();
 			} else if (!index.canHaveComments() && asker.getAllowComments()) {
 				Logger.notice(this, "Purging comments & regenerating keys ...");
-				index.regeneratedCommentKeys(getQueueManager());
+				index.regenerateCommentKeys(getQueueManager());
 			}
 
 			getIndexBrowserPanel().getIndexTree().refresh(index);
+
+			new WarningWindow(getIndexBrowserPanel().getMainWindow(),
+					  I18n.getMessage("thaw.plugin.index.mustReinsert"));
 		}
 	}
 
@@ -528,7 +565,9 @@ public class IndexManagementHelper {
 			String privateKey = null;
 			boolean publishPrivate = false;
 
-			asker = KeyAsker.askKeys(true, "USK@", "SSK@", false, false, false, getIndexBrowserPanel());
+			asker = KeyAsker.askKeys(null, null,
+						 true, "USK@", "SSK@",
+						 false, false, false, getIndexBrowserPanel());
 
 			if (asker == null)
 				return;
@@ -890,7 +929,7 @@ public class IndexManagementHelper {
 
 		if (node instanceof Index) {
 			if (((Index)node).getRevision() <= 0) {
-				new thaw.gui.WarningWindow(null, I18n.getMessage("thaw.plugin.index.stillRev0"));
+				new WarningWindow((MainWindow)null, I18n.getMessage("thaw.plugin.index.stillRev0"));
 			}
 		}
 
@@ -1610,7 +1649,8 @@ public class IndexManagementHelper {
 					Identity i = ((Identity)author.getSelectedItem());
 
 					if (i == null) {
-						new thaw.gui.WarningWindow(null, I18n.getMessage("thaw.plugin.index.comment.mustSelectIdentity"));
+						new WarningWindow(getIndexBrowserPanel().getMainWindow(),
+								  I18n.getMessage("thaw.plugin.index.comment.mustSelectIdentity"));
 						return;
 					}
 
