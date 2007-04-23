@@ -108,6 +108,10 @@ public class Identity {
 		return y;
 	}
 
+	public byte[] getX() {
+		return x;
+	}
+
 	public String getTrustLevelStr() {
 		int i;
 
@@ -190,6 +194,9 @@ public class Identity {
 
 
 	public boolean mustBeIgnored(Config config) {
+		if (x != null)
+			return false;
+
 		int min = Integer.parseInt(config.getValue("minTrustLevel"));
 
 		return (trustLevel < min);

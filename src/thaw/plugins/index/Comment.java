@@ -181,8 +181,11 @@ public class Comment extends Observable implements Observer, ActionListener {
 		changeTrust.addActionListener(this);
 
 		JPanel trustPanel = new JPanel(new BorderLayout(5, 5));
-		trustPanel.add(trust, BorderLayout.CENTER);
-		trustPanel.add(changeTrust, BorderLayout.EAST);
+
+		if (author.getX() == null) {
+			trustPanel.add(trust, BorderLayout.CENTER);
+			trustPanel.add(changeTrust, BorderLayout.EAST);
+		}
 
 
 		JPanel bottomPanel = new JPanel(new BorderLayout());
