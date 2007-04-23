@@ -490,20 +490,26 @@ public class Comment extends Observable implements Observer {
 		 * @see org.xml.sax.ContentHandler#endDocument()
 		 */
 		public void endDocument() throws SAXException {
-			if (comment != null && authorTxt != null
-				&& y != null && r != null && s != null) {
+			try {
+				if (comment != null && authorTxt != null
+				    && y != null && r != null && s != null) {
 
-				author = Identity.getIdentity(db, authorTxt, y);
-				valid = author.check(index.getCommentPublicKey()+"-"+
-						     author.getNick()+"-"+
-						     comment,
-						     r, s);
+					author = Identity.getIdentity(db, authorTxt, y);
+					valid = author.check(index.getCommentPublicKey()+"-"+
+							     author.getNick()+"-"+
+							     comment,
+							     r, s);
 
-				if (!valid) {
-					Logger.notice(this, "Signature validation failed !");
+					if (!valid) {
+						Logger.notice(this, "Signature validation failed !");
+					}
+				} else {
+					Logger.notice(this, "Signature validation failed ! (missing elements)");
+					valid = false;
 				}
-			} else {
-				Logger.notice(this, "Signature validation failed ! (missing elements)");
+			} catch(Exception e) { /* we must not failed ! */
+				Logger.error(this, "Error while checking signature: "+e.toString());
+				e.printStackTrace();
 				valid = false;
 			}
 		}

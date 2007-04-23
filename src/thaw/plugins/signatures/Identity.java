@@ -149,6 +149,22 @@ public class Identity {
 		return Color.BLACK;
 	}
 
+	public void setTrustLevel(String str) {
+		int i;
+
+		for (i = 0 ; i < Identity.trustLevelStr.length ; i++) {
+			if (I18n.getMessage(Identity.trustLevelStr[i]).equals(str))
+				break;
+		}
+
+		if (i >= Identity.trustLevelStr.length) {
+			Logger.error(this, "Unknown trust level: "+str);
+			return;
+		}
+
+		setTrustLevel(trustLevelInt[i]);
+	}
+
 
 	public void setTrustLevel(int i) {
 		try {

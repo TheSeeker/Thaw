@@ -290,7 +290,8 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 			if((selectedFiles.getText() == null)
 			   || "".equals( selectedFiles.getText() )) {
-				new WarningWindow(null, I18n.getMessage("thaw.plugin.insert.specifyFile"));
+				new WarningWindow((thaw.core.MainWindow)null,
+						  I18n.getMessage("thaw.plugin.insert.specifyFile"));
 				return;
 			}
 
@@ -299,7 +300,8 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 				   || "".equals( nameField.getText() )
 				   || (revField.getText() == null)
 				   || revField.getText().equals("")) {
-					new WarningWindow(null, I18n.getMessage("thaw.plugin.insert.specifyNameAndRev"));
+					new WarningWindow(((thaw.core.MainWindow)null),
+							  I18n.getMessage("thaw.plugin.insert.specifyNameAndRev"));
 					return;
 				}
 

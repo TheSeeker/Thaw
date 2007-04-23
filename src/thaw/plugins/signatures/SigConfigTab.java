@@ -293,17 +293,7 @@ public class SigConfigTab implements ActionListener {
 			if (e.getSource() instanceof JButton) {
 				JButton bt = (JButton)e.getSource();
 
-				int i;
-
-				for (i = 0 ; i < Identity.trustLevelStr.length ; i++) {
-					if (I18n.getMessage(Identity.trustLevelStr[i]).equals(bt.getText()))
-						break;
-				}
-
-				if (i >= Identity.trustLevelStr.length)
-					return;
-
-				target.setTrustLevel(Identity.trustLevelInt[i]);
+				target.setTrustLevel(bt.getText());
 
 				updateList();
 			}
