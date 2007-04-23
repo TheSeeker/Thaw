@@ -32,7 +32,14 @@ public class FCPTestDDA extends Observable implements FCPQuery, Observer {
 	public FCPTestDDA(String directory,
 			  boolean wantTheNodeToRead,
 			  boolean wantTheNodeToWrite) {
-		this.dir       = directory;
+
+		try {
+			this.dir = new File(directory).getCanonicalPath();
+		} catch(java.io.IOException e) {
+			Logger.error(this, "IOException while doing a getCanonicalPath() on the directory : "+e.toString());
+			this.dir = new File(directory).getAbsolutePath();
+		}
+
 		this.wantRead  = wantTheNodeToRead;
 		this.wantWrite = wantTheNodeToWrite;
 	}
@@ -86,9 +93,9 @@ public class FCPTestDDA extends Observable implements FCPQuery, Observer {
 		try {
 			FileInputStream stream = new FileInputStream(filename);
 			DataInputStream dis = new DataInputStream(stream);
-			
+
 			data = dis.readUTF();
-			
+
 			dis.close();
 			stream.close();
 
