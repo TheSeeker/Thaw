@@ -171,6 +171,9 @@ public class BlackList implements ActionListener {
 
 
 	public void displayPanel() {
+		if (visible)
+			return;
+
 		visible = true;
 		updateList();
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.index.blackList"),
@@ -180,6 +183,9 @@ public class BlackList implements ActionListener {
 
 
 	public void hidePanel() {
+		if (!visible)
+			return;
+
 		visible = false;
 		purgeList();
 		core.getMainWindow().removeTab(panel);

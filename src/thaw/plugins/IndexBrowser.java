@@ -121,6 +121,9 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 		if (autoRefresh != null)
 			autoRefresh.stop();
 
+		browserPanel.getCommentTab().hideTab();
+		browserPanel.getBlackList().hidePanel();
+
 		browserPanel.stopAllThreads();
 
 		core.getMainWindow().getTabbedPane().removeChangeListener(this);
