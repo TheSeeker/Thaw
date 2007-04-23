@@ -31,7 +31,7 @@ public class FreenetURIHelper {
 			return uri;
 
 		uri = uri.trim();
-		uri = uri.replaceFirst("http://([0-9]+(\\.)*)+:[0-9]+/","");
+		uri = uri.replaceFirst("http://.*/","");
 		uri = uri.replaceFirst("freenet:", "");
 
 		try {
