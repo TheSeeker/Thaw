@@ -192,7 +192,7 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 		peerPanel.add(memPanel, BorderLayout.SOUTH);
 
 
-		//peerPanel.setPreferredSize(
+		peerPanel.setPreferredSize(new java.awt.Dimension(250, 200));
 
 
 		mainPanel = new JPanel(new GridLayout(2, 1, 10, 10));
