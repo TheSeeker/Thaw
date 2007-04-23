@@ -233,13 +233,25 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		}
 	}
 
-
+	/* not for later : the cancelbutton just call this */
 	public void close() {
+		close(true);
+	}
+
+
+	public void close(boolean hideWin) {
 		setChanged();
 		this.notifyObservers(cancelButton); /* Equivalent to a click on the cancel button */
 
 		core.getMainWindow().setEnabled(true);
-		setVisible(false);
+
+		if (hideWin)
+			setVisible(false);
+	}
+
+
+	public void setEnabled(boolean value) {
+		configWin.setEnabled(value);
 	}
 
 
@@ -248,8 +260,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	}
 
 	public void windowClosing(final WindowEvent e) {
-		setChanged();
-		this.notifyObservers(cancelButton); /* Equivalent to a click on the cancel button */
+		close(false);
 	}
 
 	public void windowClosed(final WindowEvent e) {
