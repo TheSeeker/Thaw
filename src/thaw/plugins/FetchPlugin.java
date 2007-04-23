@@ -98,7 +98,9 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 			       final int persistence, final boolean globalQueue,
 			       final String destination) {
 
+		boolean somethingStarted = false;
 		boolean trollDetected = false; /* because of trolls coming from 0.5 */
+
 
 		for(int i = 0 ; i < keys.length ; i++) {
 			if(keys[i].length() < 10)
@@ -128,6 +130,7 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 											  persistence,
 											  globalQueue, -1,
 											  destination));
+			somethingStarted = true;
 		}
 
 		fetchFrame.setVisible(false);
@@ -140,8 +143,15 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 						   + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l4")+"\n"
 						   + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l5")+"\n"
 						   + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l6"));
-
+			return;
 		}
+
+		if (!somethingStarted) {
+			new thaw.gui.WarningWindow(core,
+						   I18n.getMessage("thaw.plugin.fetch.noValidURI"));
+			return;
+		}
+
 	}
 
 
