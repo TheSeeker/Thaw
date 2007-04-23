@@ -31,8 +31,7 @@ public class FreenetURIHelper {
 			return uri;
 
 		uri = uri.trim();
-		uri = uri.replaceFirst("http://127.0.0.1:8888/", "");
-		uri = uri.replaceFirst("http://localhost:8888/", "");
+		uri = uri.replaceFirst("http://([0-9]+(\\.)*)+:[0-9]+/","");
 		uri = uri.replaceFirst("freenet:", "");
 
 		try {
