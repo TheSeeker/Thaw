@@ -14,6 +14,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import javax.swing.JComboBox;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -26,6 +27,8 @@ import java.util.Vector;
 
 import thaw.core.I18n;
 import thaw.core.ConfigWindow;
+import thaw.core.Config;
+import thaw.core.Logger;
 
 import thaw.gui.IconBox;
 
@@ -36,19 +39,25 @@ import thaw.plugins.Hsqldb;
 public class SigConfigTab implements ActionListener {
 	private Hsqldb db;
 	private ConfigWindow configWindow;
-
+	private Config config;
 
 	private JPanel configPanel;
 
 	private JButton yourIdentitiesButton;
 	private JButton otherIdentitiesButton;
 
+	private JComboBox minLevel;
 
-	public SigConfigTab(ConfigWindow configWin, Hsqldb db) {
+
+	public SigConfigTab(Config config, ConfigWindow configWin, Hsqldb db) {
 		this.db = db;
 		this.configWindow = configWin;
+		this.config = config;
 
-		configPanel = new JPanel();
+
+		configPanel = new JPanel(new BorderLayout(5, 5));
+
+		JPanel topPanel = new JPanel();
 
 		yourIdentitiesButton  = new JButton(I18n.getMessage("thaw.plugin.signature.yourIdentities"));
 		otherIdentitiesButton = new JButton(I18n.getMessage("thaw.plugin.signature.otherIdentities"));
@@ -57,15 +66,73 @@ public class SigConfigTab implements ActionListener {
 		otherIdentitiesButton.addActionListener(this);
 
 
-		configPanel.add(yourIdentitiesButton);
-		configPanel.add(otherIdentitiesButton);
+		topPanel.add(yourIdentitiesButton);
+		topPanel.add(otherIdentitiesButton);
+
+		configPanel.add(topPanel, BorderLayout.NORTH);
+
+		JPanel middlePanel = new JPanel();
+
+		JLabel l = new JLabel(I18n.getMessage("thaw.plugin.signature.ignoreLowerThan")+" : ");
+		Vector possibleLevels = new Vector();
+
+		for (int i = 0 ; i < Identity.trustLevelInt.length ; i++) {
+			if (Identity.trustLevelInt[i] < 100)
+				possibleLevels.add(I18n.getMessage(Identity.trustLevelStr[i]));
+		}
+
+		minLevel = new JComboBox(possibleLevels);
+
+		reset();
+
+		middlePanel.add(l);
+		middlePanel.add(minLevel);
+
+		configPanel.add(middlePanel, BorderLayout.CENTER);
 	}
 
 	public JPanel getPanel() {
 		return configPanel;
 	}
 
+	public void apply() {
+		int i ;
 
+		String val = (String)minLevel.getSelectedItem();
+
+		if (val == null) {
+			Logger.error(this, "no value selected ?!");
+			return;
+		}
+
+		for (i = 0 ; i < Identity.trustLevelStr.length ; i++) {
+			if (I18n.getMessage(Identity.trustLevelStr[i]).equals(val))
+				break;
+		}
+
+		if (i >= Identity.trustLevelStr.length)
+			return;
+
+		Logger.error(this, "Setting min trust level to : "+Integer.toString(Identity.trustLevelInt[i]));
+
+		config.setValue("minTrustLevel", Integer.toString(Identity.trustLevelInt[i]));
+	}
+
+	public void reset() {
+		int i;
+
+		int min = Integer.parseInt(config.getValue("minTrustLevel"));
+
+		for (i = 0 ; i < Identity.trustLevelInt.length ; i++) {
+			if (Identity.trustLevelInt[i] == min)
+				break;
+		}
+
+		if (i >= Identity.trustLevelInt.length)
+			return;
+
+		minLevel.setSelectedItem(I18n.getMessage(Identity.trustLevelStr[i]));
+	}
 
 	protected class YourIdentitiesPanel implements ActionListener {
 		private JDialog dialog;

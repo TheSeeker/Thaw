@@ -21,7 +21,7 @@ import thaw.core.Core;
 import thaw.core.Logger;
 import thaw.core.I18n;
 import thaw.plugins.Hsqldb;
-
+import thaw.core.Config;
 
 public class Identity {
 
@@ -180,6 +180,13 @@ public class Identity {
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to change trust level because: "+e.toString());
 		}
+	}
+
+
+	public boolean mustBeIgnored(Config config) {
+		int min = Integer.parseInt(config.getValue("minTrustLevel"));
+
+		return (trustLevel < min);
 	}
 
 

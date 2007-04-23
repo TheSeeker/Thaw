@@ -40,13 +40,15 @@ public class CommentTab implements ActionListener {
 
 	private Vector buttonActions;
 
-
+	private Config config;
 	private IndexBrowserPanel indexBrowser;
 
 
-	public CommentTab(FCPQueueManager queueManager,
+	public CommentTab(Config config,
+			  FCPQueueManager queueManager,
 			  IndexBrowserPanel indexBrowser) {
 		this.indexBrowser = indexBrowser;
+		this.config = config;
 
 		visible = false;
 
@@ -96,13 +98,26 @@ public class CommentTab implements ActionListener {
 			comments = index.getComments();
 
 		if (comments != null) {
-			insidePanel.setLayout(new GridLayout(comments.size(), 1, 20, 20));
+			int nmbCommentToDisplay = 0;
 
 			for (Iterator it = comments.iterator();
 			     it.hasNext();) {
-				JPanel panel = ((Comment)it.next()).getPanel(this);
+				if (!(((Comment)it.next()).mustBeIgnored(config)))
+					nmbCommentToDisplay++;
+			}
 
-				insidePanel.add(panel);
+			insidePanel.setLayout(new GridLayout(nmbCommentToDisplay, 1, 20, 20));
+
+			for (Iterator it = comments.iterator();
+			     it.hasNext();) {
+				Comment c = ((Comment)it.next());
+
+				if (!c.mustBeIgnored(config)) {
+					JPanel panel = c.getPanel(this);
+
+					if (panel != null)
+						insidePanel.add(panel);
+				}
 			}
 		}
 

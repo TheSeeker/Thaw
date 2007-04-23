@@ -1,6 +1,10 @@
 package thaw.plugins;
 
 
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
+
 import thaw.core.I18n;
 import thaw.core.Core;
 import thaw.core.Logger;
@@ -12,10 +16,12 @@ import thaw.gui.IconBox;
 import thaw.plugins.signatures.*;
 
 
-public class Signatures extends LibraryPlugin {
-	public Core core;
-	public Hsqldb db;
-	public SigConfigTab configTab;
+public class Signatures extends LibraryPlugin implements ActionListener {
+	private Core core;
+	private Hsqldb db;
+	private SigConfigTab configTab;
+
+	public final static int DEFAULT_MIN_TRUST_LEVEL = -1; /* see Identity.trustLevelInt */
 
 	/**
 	 * because we must be sure that we won't be used anymore when we will
@@ -50,11 +56,17 @@ public class Signatures extends LibraryPlugin {
 		DatabaseManager.init(db, core.getConfig(),
 				     core.getSplashScreen());
 
-		configTab = new SigConfigTab(core.getConfigWindow(), db);
+		if (core.getConfig().getValue("minTrustLevel") == null)
+			core.getConfig().setValue("minTrustLevel", Integer.toString(DEFAULT_MIN_TRUST_LEVEL));
+
+		configTab = new SigConfigTab(core.getConfig(), core.getConfigWindow(), db);
 
 		core.getConfigWindow().addTab(I18n.getMessage("thaw.plugin.signature.signatures"),
 					      null /*thaw.gui.IconBox.minIdentities*/,
 					      configTab.getPanel());
+
+		core.getConfigWindow().getOkButton().addActionListener(this);
+		core.getConfigWindow().getCancelButton().addActionListener(this);
 
 		return true;
 	}
@@ -92,4 +104,16 @@ public class Signatures extends LibraryPlugin {
 		return IconBox.identity;
 	}
 
+
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == core.getConfigWindow().getOkButton()) {
+			configTab.apply();
+			return;
+		}
+
+		if (e.getSource() == core.getConfigWindow().getCancelButton()) {
+			configTab.reset();
+			return;
+		}
+	}
 }

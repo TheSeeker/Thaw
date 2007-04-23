@@ -180,7 +180,7 @@ public class Comment extends Observable implements Observer, ActionListener {
 		changeTrust = new JButton(I18n.getMessage("thaw.common.apply"));
 		changeTrust.addActionListener(this);
 
-		JPanel trustPanel = new JPanel(new BorderLayout());
+		JPanel trustPanel = new JPanel(new BorderLayout(5, 5));
 		trustPanel.add(trust, BorderLayout.CENTER);
 		trustPanel.add(changeTrust, BorderLayout.EAST);
 
@@ -199,6 +199,11 @@ public class Comment extends Observable implements Observer, ActionListener {
 		panel.add(bottomPanel, BorderLayout.SOUTH);
 
 		return panel;
+	}
+
+
+	public boolean mustBeIgnored(Config config) {
+		return author.mustBeIgnored(config);
 	}
 
 
