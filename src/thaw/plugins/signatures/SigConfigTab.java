@@ -19,6 +19,8 @@ import javax.swing.JComboBox;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 
+import java.awt.event.WindowEvent;
+
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -145,7 +147,7 @@ public class SigConfigTab implements ActionListener {
 		minLevel.setSelectedItem(I18n.getMessage(Identity.trustLevelStr[i]));
 	}
 
-	protected class YourIdentitiesPanel implements ActionListener {
+	protected class YourIdentitiesPanel implements ActionListener, java.awt.event.WindowListener, Runnable {
 		private JDialog dialog;
 
 		private JList list;
@@ -156,8 +158,12 @@ public class SigConfigTab implements ActionListener {
 
 
 		public YourIdentitiesPanel() {
+			configWindow.setEnabled(false);
+
 			dialog = new JDialog(configWindow.getFrame(),
 					     I18n.getMessage("thaw.plugin.signature.dialogTitle.yourIdentities"));
+
+			dialog.addWindowListener(this);
 
 			dialog.getContentPane().setLayout(new BorderLayout(5, 5));
 
@@ -205,18 +211,26 @@ public class SigConfigTab implements ActionListener {
 			list.setListData(Identity.getYourIdentities(db));
 		}
 
+		public void run() {
+			dialog.setEnabled(false);
+			String nick = JOptionPane.showInputDialog(dialog,
+								  I18n.getMessage("thaw.plugin.signature.enterNick"),
+								  I18n.getMessage("thaw.plugin.signature.enterNick"),
+								  JOptionPane.QUESTION_MESSAGE);
+			dialog.setEnabled(true);
+
+			if (nick != null) {
+				Identity id = Identity.generate(db, nick);
+				id.insert();
+				updateList();
+			}
+		}
+
+
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == addIdentity) {
-				String nick = JOptionPane.showInputDialog(dialog,
-									  I18n.getMessage("thaw.plugin.signature.enterNick"),
-									  I18n.getMessage("thaw.plugin.signature.enterNick"),
-									  JOptionPane.QUESTION_MESSAGE);
-
-				if (nick != null) {
-					Identity id = Identity.generate(db, nick);
-					id.insert();
-					updateList();
-				}
+				Thread th = new Thread(this);
+				th.start();
 			}
 
 			if (e.getSource() == removeIdentity) {
@@ -229,8 +243,39 @@ public class SigConfigTab implements ActionListener {
 
 			if (e.getSource() == closeWindow) {
 				dialog.setVisible(false);
+				configWindow.setEnabled(true);
 			}
 		}
+
+		public void windowActivated(final WindowEvent e) {
+
+		}
+
+		public void windowClosing(final WindowEvent e) {
+			// todo //
+		}
+
+		public void windowClosed(final WindowEvent e) {
+			configWindow.setEnabled(true);
+		}
+
+		public void windowDeactivated(final WindowEvent e) {
+			// We don't care
+		}
+
+		public void windowDeiconified(final WindowEvent e) {
+			// idem
+		}
+
+		public void windowIconified(final WindowEvent e) {
+			// idem
+		}
+
+		public void windowOpened(final WindowEvent e) {
+			// idem
+		}
+
+
 	}
 
 
