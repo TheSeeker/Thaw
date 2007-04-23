@@ -298,6 +298,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 				purgeFileList();
 				purgeLinkList();
+				purgeCommentKeys();
 
 				st = db.getConnection().prepareStatement("DELETE FROM indexParents "+
 									 "WHERE indexId = ?");
@@ -305,6 +306,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 				st.execute();
 
 				Logger.notice(this, "DELETING AN INDEX");
+
 
 				st = db.getConnection().prepareStatement("DELETE FROM indexes WHERE id = ?");
 				st.setInt(1, id);
