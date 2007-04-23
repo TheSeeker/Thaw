@@ -54,15 +54,20 @@ public class FreenetURIHelper {
 
 	public static String getFilenameFromKey(final String key) {
 		String filename;
-		final String cutcut[] = key.split("/");
+		final String cutcut[];
 
 		if (key == null)
 			return null;
 
-		if(!key.endsWith("/")) {
+		cutcut = key.split("/");
+
+		if ( (!key.startsWith("USK@")) || cutcut.length >= 4) {
 			filename = cutcut[cutcut.length-1];
 		} else {
-			filename = "index.html";
+			if (cutcut.length >= 2)
+				filename = cutcut[cutcut.length-2];
+			else
+				filename = cutcut[cutcut.length-1];
 		}
 
 		return filename;
