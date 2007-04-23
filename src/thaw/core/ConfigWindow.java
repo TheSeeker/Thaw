@@ -185,13 +185,13 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 				return;
 		}
 
-		if((e.getSource() == okButton)
-		   || (e.getSource() == cancelButton)) {
-
-			close();
-		}
 
 		if(e.getSource() == okButton) {
+			close(false, true);
+
+			setChanged();
+			notifyObservers(okButton);
+
 			advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 
 
@@ -200,6 +200,11 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 			reload.start();
 
 			needConnectionReset = false;
+		}
+
+
+		if(e.getSource() == cancelButton) {
+			close();
 		}
 	}
 
@@ -235,13 +240,15 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 	/* not for later : the cancelbutton just call this */
 	public void close() {
-		close(true);
+		close(true, true);
 	}
 
 
-	public void close(boolean hideWin) {
-		setChanged();
-		this.notifyObservers(cancelButton); /* Equivalent to a click on the cancel button */
+	public void close(boolean notifyCancel, boolean hideWin) {
+		if (notifyCancel) {
+			setChanged();
+			this.notifyObservers(cancelButton); /* Equivalent to a click on the cancel button */
+		}
 
 		core.getMainWindow().setEnabled(true);
 
@@ -260,7 +267,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	}
 
 	public void windowClosing(final WindowEvent e) {
-		close(false);
+		close(true, false);
 	}
 
 	public void windowClosed(final WindowEvent e) {

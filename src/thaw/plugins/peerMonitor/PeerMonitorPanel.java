@@ -192,6 +192,7 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 		peerPanel.add(memPanel, BorderLayout.SOUTH);
 
 
+		//peerPanel.setPreferredSize(
 
 
 		mainPanel = new JPanel(new GridLayout(2, 1, 10, 10));
@@ -344,9 +345,11 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 			if (value instanceof Peer) {
 				String txt = ((Peer)value).toString();
 
+				/*
 				if (txt.length() > 25) {
 					txt = txt.substring(0, 25) + "(...)";
 				}
+				*/
 
 				setText(txt);
 				setForeground(((Peer)value).getTextColor());
