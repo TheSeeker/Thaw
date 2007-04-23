@@ -45,7 +45,7 @@ public class Identity {
 
 	public final static Color[] trustLevelColor = {
 		Color.BLUE,
-		Color.GREEN,
+		new java.awt.Color(0, 175, 0), /* green */
 		new java.awt.Color(0, 128, 0), /* light green */
 		Color.BLACK,
 		new java.awt.Color(175, 0, 0), /* moderatly red */
@@ -111,6 +111,10 @@ public class Identity {
 	public String getTrustLevelStr() {
 		int i;
 
+		if (x != null) {
+			return I18n.getMessage("thaw.plugin.signature.trustLevel.me");
+		}
+
 		for (i = 0 ; i < trustLevelInt.length ; i++) {
 			if (trustLevelInt[i] == trustLevel)
 				break;
@@ -132,6 +136,8 @@ public class Identity {
 	public Color getTrustLevelColor() {
 		int i;
 
+		if (x != null)
+			return new java.awt.Color(0, 175, 0);
 
 		for (i = 0 ; i < trustLevelInt.length ; i++) {
 			if (trustLevelInt[i] == trustLevel)
