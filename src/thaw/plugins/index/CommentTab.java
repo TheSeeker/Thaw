@@ -146,8 +146,14 @@ public class CommentTab implements ActionListener {
 
 
 	public void showTab() {
-		if (index == null || visible)
+		if (index == null)
 			return;
+
+		if (visible) {
+			updateCommentList();
+			indexBrowser.getMainWindow().setSelectedTab(tabPanel);
+			return;
+		}
 
 		Logger.info(this, "Showing comment tab");
 

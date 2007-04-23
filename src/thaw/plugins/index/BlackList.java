@@ -171,8 +171,11 @@ public class BlackList implements ActionListener {
 
 
 	public void displayPanel() {
-		if (visible)
+		if (visible) {
+			updateList();
+			core.getMainWindow().setSelectedTab(panel);
 			return;
+		}
 
 		visible = true;
 		updateList();
