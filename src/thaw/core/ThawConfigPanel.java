@@ -18,9 +18,6 @@ public class ThawConfigPanel implements Observer {
 
 	private JCheckBox advancedModeBox = null;
 
-	private JLabel nicknameLabel = null;
-	private JTextField nicknameField = null;
-
 	private boolean advancedMode;
 
 
@@ -38,17 +35,8 @@ public class ThawConfigPanel implements Observer {
 
 		advancedModeBox = new JCheckBox(I18n.getMessage("thaw.config.advancedMode"), advancedMode);
 
-		nicknameLabel = new JLabel(I18n.getMessage("thaw.config.nickname"));
-
-		if (core.getConfig().getValue("userNickname") == null)
-			nicknameField = new JTextField("Another anonymous");
-		else
-			nicknameField = new JTextField(core.getConfig().getValue("userNickname"));
-
 		thawConfigPanel.add(advancedModeBox);
 		thawConfigPanel.add(new JLabel(" "));
-		thawConfigPanel.add(nicknameLabel);
-		thawConfigPanel.add(nicknameField);
 
 		configWindow.addObserver(this);
 	}
@@ -63,12 +51,10 @@ public class ThawConfigPanel implements Observer {
 		if(arg == core.getConfigWindow().getOkButton()) {
 			advancedMode = advancedModeBox.isSelected();
 			core.getConfig().setValue("advancedMode", Boolean.toString(advancedMode));
-			core.getConfig().setValue("userNickname", nicknameField.getText());
 		}
 
 		if(arg == core.getConfigWindow().getCancelButton()) {
 			advancedModeBox.setSelected(advancedMode);
-			nicknameField.setText(core.getConfig().getValue("userNickname"));
 		}
 	}
 
