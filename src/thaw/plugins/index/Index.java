@@ -1147,7 +1147,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 					final Element xmlFile = xmlDoc.createElement("file");
 
-					xmlFile.setAttribute("id", set.getString("id"));
+					//xmlFile.setAttribute("id", set.getString("id"));
 					xmlFile.setAttribute("key", pubKey);
 					xmlFile.setAttribute("size", set.getString("size"));
 					if (set.getString("mime") == null)

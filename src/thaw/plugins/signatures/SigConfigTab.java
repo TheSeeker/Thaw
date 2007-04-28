@@ -82,7 +82,6 @@ public class SigConfigTab implements ActionListener {
 			if (Identity.trustLevelInt[i] < 100)
 				possibleLevels.add(I18n.getMessage(Identity.trustLevelStr[i]));
 		}
-		possibleLevels.add(I18n.getMessage("thaw.plugin.signature.trustLevel.none"));
 
 		minLevel = new JComboBox(possibleLevels);
 
@@ -108,22 +107,17 @@ public class SigConfigTab implements ActionListener {
 			return;
 		}
 
-		if (I18n.getMessage("thaw.plugin.signature.trustLevel.none").equals(val)) {
-			config.setValue("minTrustLevel", "-254");
-		} else {
-
-			for (i = 0 ; i < Identity.trustLevelStr.length ; i++) {
-				if (I18n.getMessage(Identity.trustLevelStr[i]).equals(val))
-					break;
-			}
-
-			if (i >= Identity.trustLevelStr.length)
-				return;
-
-			Logger.error(this, "Setting min trust level to : "+Integer.toString(Identity.trustLevelInt[i]));
-
-			config.setValue("minTrustLevel", Integer.toString(Identity.trustLevelInt[i]));
+		for (i = 0 ; i < Identity.trustLevelStr.length ; i++) {
+			if (I18n.getMessage(Identity.trustLevelStr[i]).equals(val))
+				break;
 		}
+
+		if (i >= Identity.trustLevelStr.length)
+			return;
+
+		Logger.error(this, "Setting min trust level to : "+Integer.toString(Identity.trustLevelInt[i]));
+
+		config.setValue("minTrustLevel", Integer.toString(Identity.trustLevelInt[i]));
 	}
 
 	public void reset() {
