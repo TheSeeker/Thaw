@@ -161,7 +161,10 @@ public class SigConfigTab implements ActionListener {
 
 			dialog.getContentPane().setLayout(new BorderLayout(5, 5));
 
-			dialog.getContentPane().add(new JLabel(I18n.getMessage("thaw.plugin.signature.dialogTitle.yourIdentities")+" :"),
+			JLabel label = new JLabel(I18n.getMessage("thaw.plugin.signature.dialogTitle.yourIdentities")+" :");
+			label.setIcon(IconBox.identity);
+
+			dialog.getContentPane().add(label,
 						    BorderLayout.NORTH);
 
 			list = new JList();
@@ -276,7 +279,8 @@ public class SigConfigTab implements ActionListener {
 	protected class IdentityModel extends javax.swing.table.AbstractTableModel {
 		public String[] columnNames = {
 			I18n.getMessage("thaw.plugin.signature.nickname"),
-			I18n.getMessage("thaw.plugin.signature.trustLevel")
+			I18n.getMessage("thaw.plugin.signature.trustLevel"),
+			I18n.getMessage("thaw.plugin.signature.isDup")
 		};
 
 		private Vector identities;
@@ -317,6 +321,10 @@ public class SigConfigTab implements ActionListener {
 			if (column == 1)
 				return I18n.getMessage(((Identity)identities.get(row)).getTrustLevelStr());
 
+			if (column == 2)
+				return ((Identity)identities.get(row)).isDup() ?
+					"X" : "";
+
 			return null;
 		}
 
@@ -334,7 +342,8 @@ public class SigConfigTab implements ActionListener {
 
 		private JButton close;
 
-		private Vector statusButtons;
+		private JButton setOriginal;
+		private Vector buttons;
 
 
 		public  OtherIdentitiesPanel() {
@@ -342,6 +351,11 @@ public class SigConfigTab implements ActionListener {
 					     I18n.getMessage("thaw.plugin.signature.dialogTitle.yourIdentities"));
 
 			dialog.getContentPane().setLayout(new BorderLayout(5, 5));
+
+			JLabel label = new JLabel(I18n.getMessage("thaw.plugin.signature.signatures"));
+			label.setIcon(IconBox.peers);
+
+			dialog.getContentPane().add(label, BorderLayout.NORTH);
 
 			model = new IdentityModel();
 
@@ -352,22 +366,29 @@ public class SigConfigTab implements ActionListener {
 
 			JPanel eastPanel = new JPanel(new BorderLayout());
 
-			JPanel statusButtonsPanel = new JPanel(new GridLayout(Identity.trustLevelInt.length -1, 1));
+			JPanel buttonsPanel = new JPanel(new GridLayout(Identity.trustLevelInt.length +1, 1));
 
-			statusButtons = new Vector();
+			buttons = new Vector();
 
 			for (int i = 0 ; i < Identity.trustLevelInt.length ; i++) {
 				if (Identity.trustLevelInt[i] < 100) {
 					JButton button = new JButton(I18n.getMessage(Identity.trustLevelStr[i]));
-					statusButtonsPanel.add(button);
-					statusButtons.add(button);
+					buttonsPanel.add(button);
+					buttons.add(button);
 					button.addActionListener(this);
 				}
 			}
 
+			setOriginal = new JButton(I18n.getMessage("thaw.plugin.signature.setOriginal"));
+			buttonsPanel.add(new JLabel(""));
+			buttonsPanel.add(setOriginal);
+			buttons.add(setOriginal);
+			setOriginal.addActionListener(this);
+
+
 			JPanel eastTopPanel = new JPanel();
 
-			eastTopPanel.add(statusButtonsPanel);
+			eastTopPanel.add(buttonsPanel);
 			eastPanel.add(eastTopPanel, BorderLayout.CENTER);
 
 			JPanel eastBottomPanel = new JPanel();
@@ -383,7 +404,7 @@ public class SigConfigTab implements ActionListener {
 
 			updateList();
 
-			dialog.setSize(500, 300);
+			dialog.setSize(640, 300);
 			dialog.setVisible(true);
 		}
 
@@ -407,14 +428,24 @@ public class SigConfigTab implements ActionListener {
 			if (target == null)
 				return;
 
+
+			if (e.getSource() == setOriginal) {
+				target.setOriginal();
+
+				updateList();
+
+				return;
+			}
+
+
 			if (e.getSource() instanceof JButton) {
 				JButton bt = (JButton)e.getSource();
 
 				target.setTrustLevel(bt.getText());
 
 				updateList();
+				return;
 			}
-
 		}
 	}
 

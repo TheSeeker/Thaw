@@ -149,11 +149,7 @@ public class Identity {
 		}
 
 		if (i < trustLevelInt.length) {
-			if (!isDup || trustLevelInt[i] < 0)
-				return trustLevelColor[i];
-			else {
-				return Color.ORANGE;
-			}
+			return trustLevelColor[i];
 		}
 
 		return Color.BLACK;
@@ -189,6 +185,35 @@ public class Identity {
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to change trust level because: "+e.toString());
+		}
+	}
+
+
+	/**
+	 * will put all the other identities with the same nickname as duplicata,
+	 * and will put this identity as non duplicate
+	 */
+	public void setOriginal() {
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("UPDATE signatures SET isDup = TRUE "
+									 + "WHERE LOWER(nickName) = ?");
+				st.setString(1, nick.toLowerCase());
+
+				st.execute();
+
+				st = db.getConnection().prepareStatement("UPDATE signatures SET isDup = FALSE "
+									 + "WHERE id = ?");
+				st.setInt(1, id);
+
+				st.execute();
+			}
+		} catch(SQLException e) {
+			Logger.error(this,
+				     "SQLException while setting the identity as original : "
+				     +e.toString());
 		}
 	}
 
@@ -231,8 +256,8 @@ public class Identity {
 				/* else we must add it, but first we need to know if it's a dup */
 
 				st = db.getConnection().prepareStatement("SELECT id FROM signatures "+
-									 "WHERE nickName = ? LIMIT 1");
-				st.setString(1, nick);
+									 "WHERE lower(nickName) = ? LIMIT 1");
+				st.setString(1, nick.toLowerCase());
 
 				set = st.executeQuery();
 
