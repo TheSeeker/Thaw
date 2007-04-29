@@ -31,8 +31,7 @@ public class FreenetURIHelper {
 			return uri;
 
 		uri = uri.trim();
-		uri = uri.replaceFirst("http://.*/","");
-		uri = uri.replaceFirst("freenet:", "");
+		uri = uri.replaceFirst("^http://[^/]+/+(freenet:)*","");
 
 		try {
 			uri = java.net.URLDecoder.decode(uri, "UTF-8");
