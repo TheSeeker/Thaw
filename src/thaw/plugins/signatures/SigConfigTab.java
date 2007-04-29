@@ -125,11 +125,6 @@ public class SigConfigTab implements ActionListener {
 
 		int min = Integer.parseInt(config.getValue("minTrustLevel"));
 
-		if (min == -254) {
-			minLevel.setSelectedItem(I18n.getMessage("thaw.plugin.signature.trustLevel.none"));
-			return;
-		}
-
 		for (i = 0 ; i < Identity.trustLevelInt.length ; i++) {
 			if (Identity.trustLevelInt[i] == min)
 				break;
@@ -141,13 +136,17 @@ public class SigConfigTab implements ActionListener {
 		minLevel.setSelectedItem(I18n.getMessage(Identity.trustLevelStr[i]));
 	}
 
-	protected class YourIdentitiesPanel implements ActionListener, java.awt.event.WindowListener, Runnable {
+	protected class YourIdentitiesPanel implements ActionListener, java.awt.event.WindowListener {
 		private JDialog dialog;
 
 		private JList list;
 
 		private JButton addIdentity;
 		private JButton removeIdentity;
+
+		private JButton exportIdentity;
+		private JButton importIdentity;
+
 		private JButton closeWindow;
 
 
@@ -180,18 +179,26 @@ public class SigConfigTab implements ActionListener {
 
 			addIdentity = new JButton(IconBox.minAdd);
 			removeIdentity = new JButton(IconBox.minRemove);
+			importIdentity = new JButton(IconBox.minImportAction);
+			exportIdentity = new JButton(IconBox.minExportAction);
 			closeWindow = new JButton(IconBox.minClose);
 
 			addIdentity.setToolTipText(I18n.getMessage("thaw.plugin.signature.addIdentity"));
 			removeIdentity.setToolTipText(I18n.getMessage("thaw.plugin.signature.removeIdentity"));
+			importIdentity.setToolTipText(I18n.getMessage("thaw.plugin.signature.import"));
+			exportIdentity.setToolTipText(I18n.getMessage("thaw.plugin.signature.export"));
 			closeWindow.setToolTipText(I18n.getMessage("thaw.common.closeWin"));
 
 			addIdentity.addActionListener(this);
 			removeIdentity.addActionListener(this);
+			importIdentity.addActionListener(this);
+			exportIdentity.addActionListener(this);
 			closeWindow.addActionListener(this);
 
 			buttonPanel.add(addIdentity);
 			buttonPanel.add(removeIdentity);
+			buttonPanel.add(importIdentity);
+			buttonPanel.add(exportIdentity);
 			buttonPanel.add(closeWindow);
 
 			southPanel.add(buttonPanel, BorderLayout.EAST);
@@ -208,25 +215,48 @@ public class SigConfigTab implements ActionListener {
 			list.setListData(Identity.getYourIdentities(db));
 		}
 
-		public void run() {
-			dialog.setEnabled(false);
-			String nick = JOptionPane.showInputDialog(dialog,
-								  I18n.getMessage("thaw.plugin.signature.enterNick"),
-								  I18n.getMessage("thaw.plugin.signature.enterNick"),
-								  JOptionPane.QUESTION_MESSAGE);
-			dialog.setEnabled(true);
 
-			if (nick != null) {
-				Identity id = Identity.generate(db, nick);
-				id.insert();
-				updateList();
+		private class IdentityAdder implements Runnable {
+
+
+			public void run() {
+				dialog.setEnabled(false);
+				String nick = JOptionPane.showInputDialog(dialog,
+									  I18n.getMessage("thaw.plugin.signature.enterNick"),
+									  I18n.getMessage("thaw.plugin.signature.enterNick"),
+									  JOptionPane.QUESTION_MESSAGE);
+				dialog.setEnabled(true);
+
+				if (nick != null) {
+					Identity id = Identity.generate(db, nick);
+					id.insert();
+					updateList();
+				}
+			}
+		}
+
+
+		private class IdentityImporter implements Runnable {
+			public IdentityImporter() { }
+
+			public void run() {
+
+			}
+		}
+
+
+		private class IdentityExporter implements Runnable {
+			public IdentityExporter() { }
+
+			public void run() {
+
 			}
 		}
 
 
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == addIdentity) {
-				Thread th = new Thread(this);
+				Thread th = new Thread(new IdentityAdder());
 				th.start();
 			}
 
@@ -236,6 +266,16 @@ public class SigConfigTab implements ActionListener {
 					i.delete();
 					updateList();
 				}
+			}
+
+			if (e.getSource() == importIdentity) {
+				Thread th = new Thread(new IdentityImporter());
+				th.start();
+			}
+
+			if (e.getSource() == exportIdentity) {
+				Thread th = new Thread(new IdentityExporter());
+				th.start();
 			}
 
 			if (e.getSource() == closeWindow) {

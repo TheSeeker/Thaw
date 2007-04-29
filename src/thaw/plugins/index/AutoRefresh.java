@@ -93,17 +93,11 @@ public class AutoRefresh implements Runnable, java.util.Observer {
 			ResultSet results;
 			int ret;
 
-			if (lastIdx != -1) {
-				st = c.prepareStatement("SELECT id, originalName, displayName, publicKey, privateKey, author, positionInTree, revision "+
-							"FROM indexes WHERE id > ? ORDER by id LIMIT 1");
+			st = c.prepareStatement("SELECT id, originalName, displayName, publicKey, privateKey, author, positionInTree, revision "+
+						"FROM indexes ORDER by RAND() LIMIT 1");
 
-				st.setInt(1, lastIdx);
+			results = st.executeQuery();
 
-				results = st.executeQuery();
-			} else {
-				results = db.executeQuery("SELECT id, originalName, displayName, publicKey, privateKey, author, positionInTree, revision "+
-							  "FROM indexes ORDER by Id LIMIT 1");
-			}
 
 			if (results == null || !results.next())
 				return -1;
