@@ -17,11 +17,17 @@ import freenet.crypt.DSASignature;
 import freenet.crypt.Global;
 import freenet.crypt.RandomSource;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+
 import thaw.core.Core;
 import thaw.core.Logger;
 import thaw.core.I18n;
 import thaw.plugins.Hsqldb;
 import thaw.core.Config;
+
+
 
 public class Identity {
 
@@ -488,6 +494,77 @@ public class Identity {
 
 	public static Vector getOtherIdentities(Hsqldb db) {
 		return getIdentities(db, "x IS NULL");
+	}
+
+
+	public boolean exportIdentity(File file) {
+
+		try {
+			FileOutputStream out = new FileOutputStream(file);
+
+			out.write((nick+"\n").getBytes("UTF-8"));
+
+			if (getX() != null)
+				out.write( (Base64.encode(getX())+"\n").getBytes("UTF-8") );
+			else
+				out.write( "\n".getBytes("UTF-8"));
+
+			if (getY() != null)
+				out.write( (Base64.encode(getY())+"\n").getBytes("UTF-8") );
+			else
+				out.write( "\n".getBytes("UTF-8"));
+
+			out.close();
+		} catch(java.io.FileNotFoundException e) {
+			Logger.error(this, "(1) Can't export identity because: "+e.toString());
+			return false;
+		} catch(java.io.UnsupportedEncodingException e) {
+			Logger.error(this, "(2) Can't export identity because: "+e.toString());
+			return false;
+		} catch (java.io.IOException e) {
+			Logger.error(this, "(2) Can't export identity because: "+e.toString());
+			return false;
+		}
+
+		return true;
+	}
+
+	public static Identity importIdentity(Hsqldb db, File file) {
+		try {
+			byte[] lapin = new byte[5120];
+
+			FileInputStream in = new FileInputStream(file);
+
+			for (int i = 0 ; i < 5120 ; i++)
+				lapin[i] = 0;
+
+			in.read(lapin);
+			in.close();
+
+			String[] elements = new String(lapin).split("\n");
+
+
+			if (elements.length < 3) {
+				Logger.error(new Identity(), "not enought inforation in the file");
+				return null;
+			}
+
+			Identity i = new Identity(db, -1, elements[0],
+						  Base64.decode(elements[2]),
+						  Base64.decode(elements[1]),
+						  false, 10);
+			i.insert();
+
+			return i;
+		} catch(java.io.FileNotFoundException e) {
+			Logger.error(new Identity(), "(1) Unable to import identity because : "+e.toString());
+		} catch(java.io.IOException e) {
+			Logger.error(new Identity(), "(2) Unable to import identity because : "+e.toString());
+		} catch(freenet.support.IllegalBase64Exception e) {
+			Logger.error(new Identity(), "(2) Unable to import identity because : "+e.toString());
+		}
+
+		return null;
 	}
 }
 

@@ -16,6 +16,10 @@ public class FileChooser {
 
 	private String finalDir = null;
 
+	public final static int OPEN_DIALOG = JFileChooser.OPEN_DIALOG;
+	public final static int SAVE_DIALOG = JFileChooser.SAVE_DIALOG;
+
+
 	public FileChooser() {
 		fileChooser = new JFileChooser();
 	}
@@ -34,7 +38,8 @@ public class FileChooser {
 		if(v)
 			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		else
-			fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES); /* Directories -> Recursivity */
+			 /* Directories -> Recursivity */
+			fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 	}
 
 	/**

@@ -27,13 +27,16 @@ import java.awt.event.ActionEvent;
 
 import java.util.Vector;
 
+import java.io.File;
+
+
 import thaw.core.I18n;
 import thaw.core.ConfigWindow;
 import thaw.core.Config;
 import thaw.core.Logger;
 
 import thaw.gui.IconBox;
-
+import thaw.gui.FileChooser;
 
 import thaw.plugins.Hsqldb;
 
@@ -178,11 +181,11 @@ public class SigConfigTab implements ActionListener {
 
 			JPanel buttonPanel = new JPanel(new GridLayout(1, 3));
 
-			addIdentity = new JButton(IconBox.minAdd);
+			addIdentity    = new JButton(IconBox.minAdd);
 			removeIdentity = new JButton(IconBox.minRemove);
 			importIdentity = new JButton(IconBox.minImportAction);
 			exportIdentity = new JButton(IconBox.minExportAction);
-			closeWindow = new JButton(IconBox.minClose);
+			closeWindow    = new JButton(IconBox.minClose);
 
 			addIdentity.setToolTipText(I18n.getMessage("thaw.plugin.signature.addIdentity"));
 			removeIdentity.setToolTipText(I18n.getMessage("thaw.plugin.signature.removeIdentity"));
@@ -241,16 +244,40 @@ public class SigConfigTab implements ActionListener {
 			public IdentityImporter() { }
 
 			public void run() {
+				FileChooser fc = new FileChooser();
+				fc.setTitle(I18n.getMessage("thaw.plugin.signature.import"));
+				fc.setDirectoryOnly(false);
+				fc.setDialogType(FileChooser.OPEN_DIALOG);
 
+				File file = fc.askOneFile();
+
+				if (file != null) {
+					Identity.importIdentity(db, file);
+					updateList();
+				}
 			}
 		}
 
 
 		private class IdentityExporter implements Runnable {
-			public IdentityExporter() { }
+			private Identity i;
+
+			public IdentityExporter(Identity i) {
+				this.i = i;
+			}
 
 			public void run() {
+				FileChooser fc = new FileChooser();
+				fc.setTitle(I18n.getMessage("thaw.plugin.signature.export"));
+				fc.setDirectoryOnly(false);
+				fc.setDialogType(FileChooser.SAVE_DIALOG);
 
+				File file = fc.askOneFile();
+
+				if (file != null) {
+					i.exportIdentity(file);
+					updateList();
+				}
 			}
 		}
 
@@ -275,8 +302,12 @@ public class SigConfigTab implements ActionListener {
 			}
 
 			if (e.getSource() == exportIdentity) {
-				Thread th = new Thread(new IdentityExporter());
-				th.start();
+				Identity i = (Identity)list.getSelectedValue();
+
+				if (i != null) {
+					Thread th = new Thread(new IdentityExporter(i));
+					th.start();
+				}
 			}
 
 			if (e.getSource() == closeWindow) {
