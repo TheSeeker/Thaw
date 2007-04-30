@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -17,6 +18,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
+import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
 
@@ -543,7 +545,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 
 	public void showDialogAbout() {
-		final JLabel[] labels = new JLabel[] {
+		final JComponent[] labels = new JComponent[] {
 			null,
 			new JLabel(I18n.getMessage("thaw.about.l2")),
 			new JLabel(I18n.getMessage("thaw.about.l3")),
@@ -555,8 +557,18 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 			new JLabel(I18n.getMessage("thaw.about.l8"))
 		};
 
-		labels[0] = new JLabel("Thaw "+Main.VERSION);
-		labels[0].setFont(new Font("Dialog", Font.BOLD, 30));
+		/*
+		for (int i = 0 ; i < labels.length ; i++) {
+			if (labels[i] instanceof JTextField) {
+				((JTextField)labels[i]).setEditable(false);
+			}
+		}
+		*/
+
+
+		labels[0] = new JTextField("Thaw "+Main.VERSION);
+		((JTextField)labels[0]).setFont(new Font("Dialog", Font.BOLD, 30));
+		((JTextField)labels[0]).setEditable(false);
 
 		JOptionPane.showMessageDialog(null, labels, I18n.getMessage("thaw.about.title"),
 					      JOptionPane.INFORMATION_MESSAGE);
