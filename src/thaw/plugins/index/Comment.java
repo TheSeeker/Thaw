@@ -220,10 +220,10 @@ public class Comment extends Observable implements Observer, ActionListener {
 		}
 
 
-		JPanel bottomPanel = new JPanel(new BorderLayout());
-		bottomPanel.add(sigPanel, BorderLayout.WEST);
-		bottomPanel.add(new JLabel(""), BorderLayout.CENTER);
-		bottomPanel.add(bottomRightPanel, BorderLayout.EAST);
+		JPanel topPanel = new JPanel(new BorderLayout());
+		topPanel.add(sigPanel, BorderLayout.WEST);
+		topPanel.add(new JLabel(""), BorderLayout.CENTER);
+		topPanel.add(bottomRightPanel, BorderLayout.EAST);
 
 
 		text.setEditable(false);
@@ -231,7 +231,7 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 
 		panel.add(text, BorderLayout.CENTER);
-		panel.add(bottomPanel, BorderLayout.SOUTH);
+		panel.add(topPanel, BorderLayout.NORTH);
 
 		return panel;
 	}
