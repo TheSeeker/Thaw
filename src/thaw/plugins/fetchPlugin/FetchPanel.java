@@ -21,7 +21,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import thaw.core.Core;
-import thaw.core.FileChooser;
+import thaw.gui.FileChooser;
 import thaw.gui.GUIHelper;
 import thaw.core.I18n;
 import thaw.core.Logger;

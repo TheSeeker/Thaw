@@ -35,7 +35,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 
 import thaw.core.Core;
-import thaw.core.FileChooser;
+import thaw.gui.FileChooser;
 import thaw.core.I18n;
 import thaw.gui.IconBox;
 import thaw.core.Logger;

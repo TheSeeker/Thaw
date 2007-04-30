@@ -8,7 +8,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
 import thaw.core.Core;
-import thaw.core.FileChooser;
+import thaw.gui.FileChooser;
 import thaw.core.I18n;
 import thaw.gui.IconBox;
 import thaw.core.Logger;

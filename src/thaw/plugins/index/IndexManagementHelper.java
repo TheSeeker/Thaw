@@ -41,7 +41,7 @@ import javax.swing.JScrollPane;
 import thaw.gui.IconBox;
 
 import thaw.core.Config;
-import thaw.core.FileChooser;
+import thaw.gui.FileChooser;
 import thaw.core.MainWindow;
 import thaw.fcp.FreenetURIHelper;
 import thaw.core.I18n;

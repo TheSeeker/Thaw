@@ -1,13 +1,15 @@
-package thaw.core;
+package thaw.gui;
 
 import java.io.File;
 import java.util.Vector;
 
 import javax.swing.JFileChooser;
 
+import thaw.core.Logger;
+
+
 /**
  * FileChooser helps to create and use simple JFileChooser.
- * Don't block any swing component.
  */
 public class FileChooser {
 	private JFileChooser fileChooser = null;

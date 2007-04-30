@@ -13,7 +13,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import thaw.core.Core;
-import thaw.core.FileChooser;
+import thaw.gui.FileChooser;
 import thaw.core.I18n;
 import thaw.core.LogListener;
 import thaw.core.Logger;

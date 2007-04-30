@@ -12,7 +12,7 @@ import javax.swing.AbstractButton;
 import javax.swing.JFileChooser;
 
 import thaw.core.Config;
-import thaw.core.FileChooser;
+import thaw.gui.FileChooser;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.fcp.FCPQueueManager;
