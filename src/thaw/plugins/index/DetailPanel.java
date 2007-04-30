@@ -48,10 +48,10 @@ public class DetailPanel {
 		buttonActions.add(new IndexManagementHelper.IndexCommentViewer(indexBrowser, viewCommentButton));
 		buttonPanel.add(viewCommentButton);
 
-		button  = new JButton(I18n.getMessage("thaw.plugin.index.comment.add"),
-				      IconBox.minAddComment);
-		buttonActions.add(new IndexManagementHelper.IndexCommentAdder(queueManager, indexBrowser, button));
-		buttonPanel.add(button);
+		//button  = new JButton(I18n.getMessage("thaw.plugin.index.comment.add"),
+		//		      IconBox.minAddComment);
+		//buttonActions.add(new IndexManagementHelper.IndexCommentAdder(queueManager, indexBrowser, button));
+		//buttonPanel.add(button);
 
 
 		panel.add(buttonPanel, BorderLayout.EAST);
