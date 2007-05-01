@@ -16,7 +16,8 @@ public class PluginManager {
 		"thaw.plugins.ThemeSelector",
 		"thaw.plugins.Hsqldb",
 		"thaw.plugins.IndexBrowser",
-		"thaw.plugins.IndexExporter"
+		"thaw.plugins.IndexExporter",
+		"thaw.plugins.TransferLogs"
 	};
 
 	private final static String[] knownPlugins = {
@@ -31,6 +32,7 @@ public class PluginManager {
 		"thaw.plugins.IndexBrowser",
 		"thaw.plugins.IndexExporter",
 		"thaw.plugins.Restarter",
+		"thaw.plugins.TransferLogs",
 		"thaw.plugins.SqlConsole",
 		"thaw.plugins.LogConsole"
 	};

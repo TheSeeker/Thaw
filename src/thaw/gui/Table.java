@@ -12,6 +12,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.JTable;
 import javax.swing.JProgressBar;
+import javax.swing.JTextArea;
 import java.awt.Color;
 import java.awt.Component;
 
@@ -192,8 +193,17 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 									   thaw.gui.GUIHelper.getPrintableSize(((Long)value).longValue()),
 									   isSelected, hasFocus, row, column);
 
-			} else {
+			} else if (value instanceof String && ((String)value).indexOf("\n") >= 0) {
+				JTextArea area = new JTextArea((String)value);
+				area.setLineWrap(true);
+				area.setWrapStyleWord(true);
 
+				if (getRowHeight(row) < area.getPreferredSize().getHeight())
+					setRowHeight((int)area.getPreferredSize().getHeight());
+
+				cell = area;
+
+			} else {
 				cell = super.getTableCellRendererComponent(table, value,
 									   isSelected, hasFocus,
 									   row, column);
