@@ -54,6 +54,10 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 	private JButton purgeLogs;
 	private JButton copyKey;
 
+	private JButton importKeys;
+	private JButton exportKeys;
+
+
 	private Table table;
 	private EventListModel model;
 

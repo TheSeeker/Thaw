@@ -1,6 +1,7 @@
 package thaw.gui;
 
 import javax.swing.JOptionPane;
+import java.awt.Component;
 
 import thaw.core.Core;
 import thaw.core.MainWindow;
@@ -20,9 +21,9 @@ public class WarningWindow {
 	{
 		this(core != null ?
 		     (core.getSplashScreen().getDialog() != null ?
-		      core.getSplashScreen().getDialog()
-		      : core.getMainWindow().getMainFrame())
-		     : null,
+		      (Component)core.getSplashScreen().getDialog()
+		      : (Component)core.getMainWindow().getMainFrame())
+		     : (Component)null,
 		     warning);
 	}
 
@@ -31,7 +32,7 @@ public class WarningWindow {
 	}
 
 
-	public WarningWindow(final java.awt.Component parent, String warning) {
+	public WarningWindow(Component parent, String warning) {
 
 		JOptionPane.showMessageDialog(parent,
 					      warning,
