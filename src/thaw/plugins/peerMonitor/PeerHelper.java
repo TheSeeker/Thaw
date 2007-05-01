@@ -117,7 +117,7 @@ public class PeerHelper {
 					addPeer(queueManager, ref);
 					dialog.setVisible(false);
 				} else {
-					new thaw.gui.WarningWindow((thaw.core.MainWindow)null,
+					new thaw.gui.WarningWindow(dialog,
 								   I18n.getMessage("thaw.plugin.peerMonitor.invalidRef"));
 				}
 			}

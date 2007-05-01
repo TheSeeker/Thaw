@@ -18,21 +18,24 @@ public class WarningWindow {
 	public WarningWindow(final Core core,
 			     final String warning)
 	{
-		this(core != null ? core.getMainWindow() : null, warning);
+		this(core != null ?
+		     (core.getSplashScreen().getDialog() != null ?
+		      core.getSplashScreen().getDialog()
+		      : core.getMainWindow().getMainFrame())
+		     : null,
+		     warning);
 	}
 
 	public WarningWindow(final MainWindow mainWindow, String warning) {
+		this(mainWindow != null ? mainWindow.getMainFrame() : null, warning);
+	}
 
-		if (mainWindow != null) {
-			JOptionPane.showMessageDialog(mainWindow.getMainFrame(),
-						      warning,
-						      "Thaw - "+I18n.getMessage("thaw.warning.title"),
-						      JOptionPane.WARNING_MESSAGE);
-		} else {
-			JOptionPane.showMessageDialog(null,
-						      warning,
-						      "Thaw - "+I18n.getMessage("thaw.warning.title"),
-						      JOptionPane.WARNING_MESSAGE);
-		}
+
+	public WarningWindow(final java.awt.Component parent, String warning) {
+
+		JOptionPane.showMessageDialog(parent,
+					      warning,
+					      "Thaw - "+I18n.getMessage("thaw.warning.title"),
+					      JOptionPane.WARNING_MESSAGE);
 	}
 }

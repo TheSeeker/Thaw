@@ -92,6 +92,10 @@ public class SplashScreen {
 	}
 
 
+	public JDialog getDialog() {
+		return splashScreen;
+	}
+
 
 	/**
 	 * @param progress In percent

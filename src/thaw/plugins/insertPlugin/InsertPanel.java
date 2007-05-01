@@ -30,6 +30,7 @@ import thaw.core.Logger;
 import thaw.gui.WarningWindow;
 import thaw.fcp.FCPClientPut;
 import thaw.plugins.InsertPlugin;
+import thaw.core.MainWindow;
 
 
 public class InsertPanel implements ActionListener, ItemListener, Observer {
@@ -81,10 +82,14 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 	private boolean advancedMode = false;
 
 	private Config config; /* keep a ref to the config for the "lastSourceDirectory" option */
+	private MainWindow mainWindow;
 
-	public InsertPanel(final InsertPlugin insertPlugin, final Config config, final boolean advancedMode) {
+	public InsertPanel(final InsertPlugin insertPlugin,
+			   final Config config, final MainWindow mainWindow,
+			   final boolean advancedMode) {
 		this.insertPlugin = insertPlugin;
 		this.config = config;
+		this.mainWindow = mainWindow;
 
 		this.advancedMode = advancedMode;
 
@@ -290,7 +295,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 			if((selectedFiles.getText() == null)
 			   || "".equals( selectedFiles.getText() )) {
-				new WarningWindow((thaw.core.MainWindow)null,
+				new WarningWindow(mainWindow,
 						  I18n.getMessage("thaw.plugin.insert.specifyFile"));
 				return;
 			}
@@ -300,7 +305,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 				   || "".equals( nameField.getText() )
 				   || (revField.getText() == null)
 				   || revField.getText().equals("")) {
-					new WarningWindow(((thaw.core.MainWindow)null),
+					new WarningWindow(mainWindow,
 							  I18n.getMessage("thaw.plugin.insert.specifyNameAndRev"));
 					return;
 				}

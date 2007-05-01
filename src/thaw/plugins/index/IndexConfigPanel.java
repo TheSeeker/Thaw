@@ -176,7 +176,7 @@ public class IndexConfigPanel implements ActionListener {
 
 		if (!fetchNegative.isSelected()
 		    && fetchComments.isSelected()) {
-			new WarningWindow((thaw.core.MainWindow)null,
+			new WarningWindow(configWindow.getFrame(),
 					  I18n.getMessage("thaw.plugin.index.warningNonNegative"));
 		}
 	}
