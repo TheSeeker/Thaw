@@ -103,7 +103,9 @@ public class IconBox {
 
 	public static ImageIcon computer;
 	public static ImageIcon identity;
+
 	public static ImageIcon peers;
+	public static ImageIcon minPeers;
 
 	public static ImageIcon lookAndFeel;
 	public static ImageIcon minLookAndFeel;
@@ -220,6 +222,7 @@ public class IconBox {
 		IconBox.computer            = IconBox.loadIcon("computer.png");
 		IconBox.identity            = IconBox.loadIcon("identity.png");
 		IconBox.peers               = IconBox.loadIcon("peers.png");
+		IconBox.minPeers            = IconBox.loadIcon("min-peers.png");
 		IconBox.lookAndFeel         = IconBox.loadIcon("lookAndFeel.png");
 		IconBox.minLookAndFeel      = IconBox.loadIcon("min-lookAndFeel.png");
 		IconBox.close               = IconBox.loadIcon("emblem-unreadable.png");

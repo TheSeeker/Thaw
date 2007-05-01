@@ -195,6 +195,7 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 
 			} else if (value instanceof String && ((String)value).indexOf("\n") >= 0) {
 				JTextArea area = new JTextArea((String)value);
+				area.setEditable(false);
 				area.setLineWrap(true);
 				area.setWrapStyleWord(true);
 

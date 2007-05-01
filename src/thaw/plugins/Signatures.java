@@ -62,7 +62,7 @@ public class Signatures extends LibraryPlugin implements ActionListener {
 		configTab = new SigConfigTab(core.getConfig(), core.getConfigWindow(), db);
 
 		core.getConfigWindow().addTab(I18n.getMessage("thaw.plugin.signature.signatures"),
-					      null /*thaw.gui.IconBox.minIdentities*/,
+					      thaw.gui.IconBox.minPeers,
 					      configTab.getPanel());
 
 		core.getConfigWindow().getOkButton().addActionListener(this);
