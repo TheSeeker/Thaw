@@ -24,11 +24,19 @@ import java.text.DateFormat;
 
 import java.sql.*;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.DataInputStream;
+import java.io.BufferedReader;
+
 
 import thaw.core.Core;
 import thaw.core.Logger;
 import thaw.gui.IconBox;
 import thaw.gui.Table;
+import thaw.gui.FileChooser;
 import thaw.gui.GUIHelper;
 import thaw.core.I18n;
 import thaw.core.Plugin;
@@ -101,12 +109,19 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 
 		purgeLogs = new JButton(I18n.getMessage("thaw.plugin.transferLogs.purgeLogs"), IconBox.minDelete);
 		copyKey = new JButton(I18n.getMessage("thaw.plugin.transferLogs.copyKey"), IconBox.minCopy );
+		importKeys = new JButton(I18n.getMessage("thaw.plugin.transferLogs.importKeys"), IconBox.minImportAction);
+		exportKeys = new JButton(I18n.getMessage("thaw.plugin.transferLogs.exportKeys"), IconBox.minExportAction);
+
 		purgeLogs.addActionListener(this);
 		copyKey.addActionListener(this);
+		importKeys.addActionListener(this);
+		exportKeys.addActionListener(this);
 
 
-		JPanel buttonPanel = new JPanel(new GridLayout(1, 2));
+		JPanel buttonPanel = new JPanel();
 		buttonPanel.add(purgeLogs);
+		buttonPanel.add(importKeys);
+		buttonPanel.add(exportKeys);
 		buttonPanel.add(copyKey);
 
 		JPanel southPanel = new JPanel(new BorderLayout());
@@ -520,6 +535,120 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 	}
 
 
+	private File chooseFile(boolean save) {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(I18n.getMessage("thaw.plugin.transferLogs.chooseFile"));
+		fileChooser.setDirectoryOnly(false);
+		fileChooser.setDialogType(save ? FileChooser.SAVE_DIALOG
+					  : FileChooser.OPEN_DIALOG);
+		return fileChooser.askOneFile();
+	}
+
+
+	private class KeyImporter implements Runnable {
+		public KeyImporter() { }
+
+		public void run() {
+			java.sql.Timestamp date = new java.sql.Timestamp((new java.util.Date()).getTime());
+
+
+			File file  = chooseFile(false);
+
+			if (file == null)
+				return;
+
+			try {
+				FileInputStream fstream = new FileInputStream(file);
+
+				DataInputStream in = new DataInputStream(fstream);
+				BufferedReader br = new BufferedReader(new InputStreamReader(in));
+
+				String strLine;
+
+				while ((strLine = br.readLine()) != null)   {
+					String key = strLine.trim();
+
+					if (!FreenetURIHelper.isAKey(key))
+						continue;
+
+					boolean isDup = isDup(key);
+					String str = I18n.getMessage("thaw.plugin.transferLogs.importedKey")
+						+ " : "+FreenetURIHelper.getFilenameFromKey(key);
+
+					try {
+						synchronized(db.dbLock) {
+							PreparedStatement st;
+
+							st = db.getConnection().prepareStatement("INSERT INTO transferEvents "+
+												 "(date, msg, key, isDup, isSuccess) "+
+												 " VALUES "+
+												 "(?, ?, ?, ?, FALSE)");
+							st.setTimestamp(1, date);
+							st.setString(2, str);
+							st.setString(3, key);
+							st.setBoolean(4, isDup);
+
+							st.execute();
+						}
+					} catch(SQLException e) {
+						Logger.error(this, "Error while adding an event to the logs: "+e.toString());
+					}
+				}
+
+			in.close();
+
+			} catch(java.io.FileNotFoundException e) {
+				Logger.error(this, "(1) Unable to import keys because: "+e.toString());
+			} catch(java.io.IOException e) {
+				Logger.error(this, "(2) Unable to import keys because: "+e.toString());
+			}
+
+			model.reloadList();
+		}
+	}
+
+
+	private class KeyExporter implements Runnable {
+		public KeyExporter() { }
+
+		public void run() {
+			File file  = chooseFile(true);
+
+			if (file == null)
+				return;
+
+			try {
+				FileOutputStream out = new FileOutputStream(file);
+
+				synchronized(db.dbLock) {
+					PreparedStatement st;
+
+					st = db.getConnection().prepareStatement("SELECT DISTINCT key "+
+										 "FROM transferEvents "+
+										 "WHERE key is NOT NULL");
+
+					ResultSet set = st.executeQuery();
+
+					while(set.next()) {
+						out.write((set.getString("key")+"\n").getBytes("UTF-8"));
+					}
+				}
+
+				out.close();
+
+			} catch(SQLException e) {
+				Logger.error(this, "Unable to export keys because: "+e.toString());
+			} catch(java.io.FileNotFoundException e) {
+				Logger.error(this, "(1) Unable to export keys because : "+e.toString());
+			} catch(java.io.IOException e) {
+				Logger.error(this, "(2) Unable to export keys because : "+e.toString());
+			}
+
+		}
+	}
+
+
+
 	public void actionPerformed(ActionEvent e) {
 
 		if (e.getSource() == purgeLogs) {
@@ -549,6 +678,19 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 
 			GUIHelper.copyToClipboard(str);
 
+			return;
+		}
+
+
+		if (e.getSource() == importKeys) {
+			Thread th = new Thread(new KeyImporter());
+			th.start();
+			return;
+		}
+
+		if (e.getSource() == exportKeys) {
+			Thread th = new Thread(new KeyExporter());
+			th.start();
 			return;
 		}
 	}
