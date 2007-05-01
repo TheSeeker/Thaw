@@ -53,6 +53,7 @@ public class ThemeSelector implements thaw.core.Plugin, Observer, ListSelectionL
 		panel = new JPanel(new BorderLayout(5, 5));
 		themeList = new JList(themes = getPossibleThemes());
 		JLabel label = new JLabel(I18n.getMessage("thaw.plugin.themeSelector.selectATheme"));
+		label.setIcon(thaw.gui.IconBox.lookAndFeel);
 
 		themeList.addListSelectionListener(this);
 
