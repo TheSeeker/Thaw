@@ -78,6 +78,8 @@ public class Signatures extends LibraryPlugin implements ActionListener {
 
 
 	public boolean stop() {
+		core.getConfigWindow().getOkButton().removeActionListener(this);
+		core.getConfigWindow().getCancelButton().removeActionListener(this);
 		core.getConfigWindow().removeTab(configTab.getPanel());
 
 		used--;

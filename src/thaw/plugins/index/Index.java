@@ -1999,6 +1999,8 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	public int getNmbComments() {
 
 		try {
+			int nmb = 0;
+
 			synchronized(db.dbLock) {
 				PreparedStatement st;
 
@@ -2009,9 +2011,10 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 				ResultSet set = st.executeQuery();
 
 				if (set.next())
-					return set.getInt(1);
+					nmb = set.getInt(1);
 
-				return 0;
+
+				return nmb;
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Error while fetching comment list : "+e.toString());
