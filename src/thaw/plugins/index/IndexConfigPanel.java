@@ -16,6 +16,9 @@ import thaw.core.ConfigWindow;
 import thaw.core.I18n;
 import thaw.core.Logger;
 
+import thaw.gui.WarningWindow;
+
+
 public class IndexConfigPanel implements ActionListener {
 	private ConfigWindow configWindow;
 	private Config config;
@@ -27,6 +30,9 @@ public class IndexConfigPanel implements ActionListener {
 	private JTextField indexPerRefresh;
 
 	private JCheckBox loadOnTheFly;
+
+	private JCheckBox fetchNegative;
+	private JCheckBox fetchComments;
 
 	private JButton editBlackList;
 
@@ -52,8 +58,6 @@ public class IndexConfigPanel implements ActionListener {
 		loadOnTheFly = new JCheckBox(I18n.getMessage("thaw.plugin.index.loadOnTheFly"));
 
 
-		resetValues();
-
 		autorefreshActivated.addActionListener(this);
 		configWindow.getOkButton().addActionListener(this);
 		configWindow.getCancelButton().addActionListener(this);
@@ -66,6 +70,9 @@ public class IndexConfigPanel implements ActionListener {
 		editBlackListPanel.add(new JLabel(""), BorderLayout.CENTER);
 		editBlackListPanel.add(editBlackList, BorderLayout.EAST);
 
+		fetchNegative = new JCheckBox(I18n.getMessage("thaw.plugin.index.fetchNegative"));
+		fetchComments = new JCheckBox(I18n.getMessage("thaw.plugin.index.fetchComments"));
+
 
 		panel.add(autorefreshActivated);
 		panel.add(refreshIntervalLabel);
@@ -77,7 +84,11 @@ public class IndexConfigPanel implements ActionListener {
 		if (Boolean.valueOf(config.getValue("advancedMode")).booleanValue()) {
 			panel.add(new JLabel(" "));
 			panel.add(loadOnTheFly);
+			panel.add(fetchNegative);
+			panel.add(fetchComments);
 		}
+
+		resetValues();
 
 		updateTextFieldState();
 	}
@@ -106,6 +117,8 @@ public class IndexConfigPanel implements ActionListener {
 		int refreshIntervalInt = AutoRefresh.DEFAULT_INTERVAL;
 		int nmbIndexInt = AutoRefresh.DEFAULT_INDEX_NUMBER;
 		boolean loadOnTheFlyBoolean = false;
+		boolean fetchNegativeBoolean = true;
+		boolean fetchCommentsBoolean = true;
 
 		try {
 			if (config.getValue("indexAutoRefreshActivated") != null) {
@@ -125,6 +138,14 @@ public class IndexConfigPanel implements ActionListener {
 				loadOnTheFlyBoolean = Boolean.valueOf(config.getValue("loadIndexTreeOnTheFly")).booleanValue();
 			}
 
+			if (config.getValue("indexFetchNegative") != null) {
+				fetchNegativeBoolean = Boolean.valueOf(config.getValue("indexFetchNegative"));
+			}
+
+			if (config.getValue("indexFetchComments") != null) {
+				fetchCommentsBoolean = Boolean.valueOf(config.getValue("indexFetchComments"));
+			}
+
 		} catch(NumberFormatException e) {
 			Logger.error(this, "Error while parsing config !");
 		}
@@ -134,6 +155,8 @@ public class IndexConfigPanel implements ActionListener {
 		refreshInterval.setText(Integer.toString(refreshIntervalInt));
 		indexPerRefresh.setText(Integer.toString(nmbIndexInt));
 		loadOnTheFly.setSelected(loadOnTheFlyBoolean);
+		fetchNegative.setSelected(fetchNegativeBoolean);
+		fetchComments.setSelected(fetchCommentsBoolean);
 	}
 
 
@@ -146,6 +169,16 @@ public class IndexConfigPanel implements ActionListener {
 				indexPerRefresh.getText());
 		config.setValue("loadIndexTreeOnTheFly",
 				Boolean.toString(loadOnTheFly.isSelected()));
+		config.setValue("indexFetchNegative",
+				Boolean.toString(fetchNegative.isSelected()));
+		config.setValue("indexFetchComments",
+				Boolean.toString(fetchComments.isSelected()));
+
+		if (!fetchNegative.isSelected()
+		    && fetchComments.isSelected()) {
+			new WarningWindow((thaw.core.MainWindow)null,
+					  I18n.getMessage("thaw.plugin.index.warningNonNegative"));
+		}
 	}
 
 	public void actionPerformed(ActionEvent e) {

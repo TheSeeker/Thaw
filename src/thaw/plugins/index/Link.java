@@ -167,7 +167,7 @@ public class Link extends java.util.Observable implements Comparable {
 		if (parentId < 0)
 			return null;
 
-		return new Index(db, parentId);
+		return new Index(db, null, parentId);
 	}
 
 	public int getParentId() {

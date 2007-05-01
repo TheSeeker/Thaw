@@ -107,6 +107,10 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		return db;
 	}
 
+	public Config getConfig() {
+		return config;
+	}
+
 	public Tables getTables() {
 		return tables;
 	}

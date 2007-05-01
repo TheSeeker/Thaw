@@ -374,7 +374,7 @@ public class File implements Observer {
 	public boolean isModifiable() {
 		if (parent == null) {
 			Logger.debug(this, "isModifiable() => new Index().isModifiable()");
-			return (new Index(db, parentId)).isModifiable();
+			return (new Index(db, null, parentId)).isModifiable();
 		}
 		return parent.isModifiable();
 	}

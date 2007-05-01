@@ -24,7 +24,7 @@ public class IndexRoot extends IndexFolder implements IndexTreeNode {
 			 final IndexBrowserPanel indexBrowser,
 			 final String name,
 			 final boolean loadOnTheFly) {
-		super(indexBrowser.getDb(), -1, loadOnTheFly);
+		super(indexBrowser.getDb(), indexBrowser.getConfig(), -1, loadOnTheFly);
 
 		mainWindow = indexBrowser.getMainWindow();
 

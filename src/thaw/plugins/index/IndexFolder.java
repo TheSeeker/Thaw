@@ -18,6 +18,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import thaw.core.Logger;
+import thaw.core.Config;
 import thaw.fcp.FCPQueueManager;
 import thaw.plugins.Hsqldb;
 
@@ -27,6 +28,8 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 	private static final long serialVersionUID = 2L;
 
 	private Hsqldb db;
+	private Config config;
+
 	private int id;
 
 	private TreeNode parentNode = null;
@@ -38,8 +41,11 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 
 
-	public IndexFolder(final Hsqldb db, final int id, boolean loadOnTheFly) {
+	public IndexFolder(final Hsqldb db, Config config,
+			   final int id,
+			   boolean loadOnTheFly) {
 		this.id = id;
+		this.config = config;
 		this.db = db;
 		this.loadOnTheFly = loadOnTheFly;
 	}
@@ -47,8 +53,9 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 	/**
 	 * @param parentNode only required if in a tree
 	 */
-	public IndexFolder(final Hsqldb db, final int id, TreeNode parentNode, String name, boolean loadOnTheFly) {
-		this(db, id, loadOnTheFly);
+	public IndexFolder(final Hsqldb db, Config config,
+			   final int id, TreeNode parentNode, String name, boolean loadOnTheFly) {
+		this(db, config, id, loadOnTheFly);
 
 		this.parentNode = parentNode;
 		this.name = name;
@@ -72,12 +79,15 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 			IndexTreeNode n;
 
 			if (folder) {
-				n = new IndexFolder(db, set.getInt("id"), this, set.getString("name"), loadOnTheFly);
+				n = new IndexFolder(db, config,
+						    set.getInt("id"), this,
+						    set.getString("name"), loadOnTheFly);
 				if (!loadOnTheFly) /* => load immediatly */
 					((IndexFolder)n).loadChildren();
 			}
 			else
-				n = new Index(db, set.getInt("id"), this, set.getString("publicKey"),
+				n = new Index(db, config,
+					      set.getInt("id"), this, set.getString("publicKey"),
 					      set.getInt("revision"), set.getString("privateKey"),
 					      set.getString("displayName"), set.getBoolean("newRev"),
 					      set.getBoolean("newComment"));
@@ -341,9 +351,10 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				IndexTreeNode node;
 
 				if (index)
-					node = new Index(db, target_id);
+					node = new Index(db, config, target_id);
 				else
-					node = new IndexFolder(db, target_id, false);
+					node = new IndexFolder(db, config,
+							       target_id, false);
 
 				children.remove(node);
 			}
@@ -782,7 +793,8 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 
 				while(set.next()) {
-					(new Index(db, set.getInt("indexId"))).insertOnFreenet(observer, indexBrowser, queueManager);
+					(new Index(db, config,
+						   set.getInt("indexId"))).insertOnFreenet(observer, indexBrowser, queueManager);
 					i++;
 				}
 
@@ -827,9 +839,9 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 					/* TODO : give publickey too immediatly */
 					if (rev < 0)
-						(new Index(db, indexId)).downloadFromFreenet(observer, indexTree, queueManager);
+						(new Index(db, config, indexId)).downloadFromFreenet(observer, indexTree, queueManager);
 					else
-						(new Index(db, indexId)).downloadFromFreenet(observer, indexTree, queueManager, rev);
+						(new Index(db, config, indexId)).downloadFromFreenet(observer, indexTree, queueManager, rev);
 					i++;
 				}
 

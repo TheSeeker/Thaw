@@ -112,6 +112,7 @@ public class AutoRefresh implements Runnable, java.util.Observer {
 				Logger.debug(this, "Index unavailable on freenet -> not updated");
 
 				index = new Index(browserPanel.getDb(),
+						  config,
 						  results.getInt("id"),
 						  null, results.getString("publicKey"),
 						  results.getInt("revision"),

@@ -228,7 +228,8 @@ public class IndexManagementHelper {
 
 					st.execute();
 
-					Index index = new Index(db, id, (TreeNode)getTarget(),
+					Index index = new Index(db, getIndexBrowserPanel().getConfig(),
+								id, (TreeNode)getTarget(),
 								sskGenerator.getPublicKey(), 0, sskGenerator.getPrivateKey(),
 								name, false, false);
 
@@ -668,7 +669,8 @@ public class IndexManagementHelper {
 
 				st.execute();
 
-				index = new Index(db, id, parent,
+				index = new Index(db, indexBrowser.getConfig(),
+						  id, parent,
 						  publicKey, revision, privateKey,
 						  name, false, false);
 
@@ -748,7 +750,8 @@ public class IndexManagementHelper {
 
 				st.execute();
 
-				folder = new IndexFolder(indexBrowser.getDb(), nextId, target, name, false);
+				folder = new IndexFolder(indexBrowser.getDb(), indexBrowser.getConfig(),
+							 nextId, target, name, false);
 
 			} catch(SQLException e) {
 				Logger.error(new IndexManagementHelper(), "Error while creating folder: "+e.toString());

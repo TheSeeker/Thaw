@@ -112,6 +112,7 @@ public class Core implements Observer {
 		if(!initConfig())
 			return false;
 
+
 		splashScreen.setProgressionAndStatus(10, "Applying look and feel ...");
 		if (!initializeLookAndFeel())
 			return false;

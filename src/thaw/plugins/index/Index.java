@@ -55,6 +55,7 @@ import javax.xml.parsers.SAXParser;
 
 import thaw.core.I18n;
 import thaw.core.Logger;
+import thaw.core.Config;
 
 import thaw.fcp.FreenetURIHelper;
 import thaw.fcp.FCPClientGet;
@@ -95,6 +96,8 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	private int lastCommentRev = 0;
 	private int nmbFailedCommentFetching = 0;
 
+	private Config config;
+
 
 	/**
 	 * @deprecated Just don't use it !
@@ -103,16 +106,19 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		db = null;
 	}
 
-	public Index(Hsqldb db, int id) {
+	public Index(Hsqldb db, Config config, int id) {
 		this.db = db;
+		this.config = config;
 		this.id = id;
 	}
 
 	/**
 	 * Use it when you can have these infos easily ; else let the index do the job
 	 */
-	public Index(Hsqldb db, int id, TreeNode parentNode, String publicKey, int rev, String privateKey, String displayName, boolean hasChanged, boolean newComment) {
-		this(db, id);
+	public Index(Hsqldb db, Config config, int id, TreeNode parentNode,
+		     String publicKey, int rev, String privateKey, String displayName,
+		     boolean hasChanged, boolean newComment) {
+		this(db, config, id);
 		this.parentNode = parentNode;
 		this.privateKey = privateKey;
 		this.publicKey = publicKey;
@@ -774,9 +780,15 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 
 		if (key.startsWith("USK")) {
-			int negRev = 0;
+			int negRev = FreenetURIHelper.getUSKRevision(key);
 
-			if ((negRev = FreenetURIHelper.getUSKRevision(key)) > 0) {
+			boolean fetchNeg = true;
+
+			if (config != null && config.getValue("indexFetchNegative") != null)
+				fetchNeg = Boolean.valueOf(config.getValue("indexFetchNegative"));
+
+			if ((fetchNeg && negRev > 0)
+			    || (!fetchNeg && negRev < 0)) {
 				negRev = -1 * negRev;
 				key = FreenetURIHelper.changeUSKRevision(key, negRev, 0);
 			}
@@ -833,9 +845,14 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 				if (path != null) {
 					loadXML(path);
 
-					if (getCommentPublicKey() != null)
+					boolean loadComm = true;
+
+					if (config != null && config.getValue("indexFetchComments") != null)
+						loadComm = Boolean.valueOf(config.getValue("indexFetchComments"));
+
+					if (getCommentPublicKey() != null && loadComm) {
 						loadComments(queueManager);
-					else if (indexTree != null)
+					} else if (indexTree != null)
 						indexTree.removeUpdatingIndex(this);
 				} else
 					Logger.error(this, "No path specified in transfer ?!");
