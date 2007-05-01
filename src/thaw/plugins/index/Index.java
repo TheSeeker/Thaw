@@ -785,7 +785,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 			boolean fetchNeg = true;
 
 			if (config != null && config.getValue("indexFetchNegative") != null)
-				fetchNeg = Boolean.valueOf(config.getValue("indexFetchNegative"));
+				fetchNeg = Boolean.valueOf(config.getValue("indexFetchNegative")).booleanValue();
 
 			if ((fetchNeg && negRev > 0)
 			    || (!fetchNeg && negRev < 0)) {
@@ -848,7 +848,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 					boolean loadComm = true;
 
 					if (config != null && config.getValue("indexFetchComments") != null)
-						loadComm = Boolean.valueOf(config.getValue("indexFetchComments"));
+						loadComm = Boolean.valueOf(config.getValue("indexFetchComments")).booleanValue();
 
 					if (getCommentPublicKey() != null && loadComm) {
 						loadComments(queueManager);

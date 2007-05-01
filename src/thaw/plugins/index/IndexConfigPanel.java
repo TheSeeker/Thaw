@@ -139,11 +139,11 @@ public class IndexConfigPanel implements ActionListener {
 			}
 
 			if (config.getValue("indexFetchNegative") != null) {
-				fetchNegativeBoolean = Boolean.valueOf(config.getValue("indexFetchNegative"));
+				fetchNegativeBoolean = Boolean.valueOf(config.getValue("indexFetchNegative")).booleanValue();
 			}
 
 			if (config.getValue("indexFetchComments") != null) {
-				fetchCommentsBoolean = Boolean.valueOf(config.getValue("indexFetchComments"));
+				fetchCommentsBoolean = Boolean.valueOf(config.getValue("indexFetchComments")).booleanValue();
 			}
 
 		} catch(NumberFormatException e) {
