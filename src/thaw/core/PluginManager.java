@@ -60,7 +60,7 @@ public class PluginManager {
 	}
 
 
-	public String[] getKnownPlugins() {
+	public static String[] getKnownPlugins() {
 		return knownPlugins;
 	}
 

@@ -21,6 +21,10 @@ public class GUIHelper {
 
 	}
 
+	/**
+	 * when actionPerformed() is called, it will fill in the specified
+	 * text component with what is in the clipboard
+	 */
 	public static class PasteHelper implements ActionListener {
 		JTextComponent txtComp;
 

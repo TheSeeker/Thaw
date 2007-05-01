@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
-
+import javax.swing.JScrollPane;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
@@ -18,6 +18,8 @@ import javax.swing.JPanel;
  */
 public class PluginConfigPanel implements Observer, ActionListener {
 	private Core core;
+
+	private JPanel mainPanel;
 	private JPanel pluginConfigPanel;
 
 	private Vector pluginCheckBoxes = null;
@@ -26,14 +28,17 @@ public class PluginConfigPanel implements Observer, ActionListener {
 		this.core = core;
 
 		pluginConfigPanel = new JPanel();
-		pluginConfigPanel.setLayout(new GridLayout(16,1));
+		pluginConfigPanel.setLayout(new GridLayout(PluginManager.getKnownPlugins().length, 1));
 		configWindow.addObserver(this);
 		//refreshList();
+
+		mainPanel = new JPanel(new GridLayout(1, 1));
+		mainPanel.add(new JScrollPane(pluginConfigPanel));
 	}
 
 
 	public JPanel getPanel() {
-		return pluginConfigPanel;
+		return mainPanel;
 	}
 
 	/**

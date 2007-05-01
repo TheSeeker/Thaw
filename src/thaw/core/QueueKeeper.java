@@ -34,7 +34,7 @@ public class QueueKeeper {
 	/**
 	 * Used to be able to call Logger functions.
 	 */
-	public QueueKeeper() {
+	private QueueKeeper() {
 
 	}
 
