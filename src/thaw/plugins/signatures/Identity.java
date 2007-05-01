@@ -404,17 +404,20 @@ public class Identity {
 	public static DSASignature sign(String text, byte[] x) {
 		BigInteger m;
 
+		byte[] bytes;
 
 		try {
-			m = new BigInteger(SHA256.digest(text.getBytes("UTF-8")));
+			bytes = text.getBytes("UTF-8");
 		} catch(java.io.UnsupportedEncodingException e) {
 			Logger.warning(new Identity(), "sign() : UnsupportedEncodingException ? => Falling back on default charset");
-			m = new BigInteger(SHA256.digest(text.getBytes()));
+			bytes = text.getBytes();
 		}
+
+		m = new BigInteger(1, SHA256.digest(bytes));
 
 
 		DSASignature sign = DSA.sign(Global.DSAgroupBigA,
-					     new DSAPrivateKey(new BigInteger(x)),
+					     new DSAPrivateKey(new BigInteger(1, x)),
 					     m,
 					     (RandomSource)Core.getRandom());
 
@@ -435,15 +438,19 @@ public class Identity {
 
 		BigInteger m;
 
+		byte[] bytes;
+
 		try {
-			m = new BigInteger(SHA256.digest(text.getBytes("UTF-8")));
+			bytes = text.getBytes("UTF-8");
 		} catch(java.io.UnsupportedEncodingException e) {
 			/* no logging because if it happens once, it will happen often */
-			m = new BigInteger(SHA256.digest(text.getBytes()));
+			bytes = text.getBytes();
 		}
 
-		boolean ret = DSA.verify(new DSAPublicKey(Global.DSAgroupBigA, new BigInteger(y)),
-					 new DSASignature(new BigInteger(r), new BigInteger(s)),
+		m = new BigInteger(1, SHA256.digest(bytes));
+
+		boolean ret = DSA.verify(new DSAPublicKey(Global.DSAgroupBigA, new BigInteger(1, y)),
+					 new DSASignature(new BigInteger(1, r), new BigInteger(1, s)),
 					 m, false);
 
 		return ret;
