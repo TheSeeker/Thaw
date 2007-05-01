@@ -201,7 +201,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		progress = 0;
 		finished = false;
 		successful = false;
-		running = false;
+		running = true;
 
 		sha = null;
 

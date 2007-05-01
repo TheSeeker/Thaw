@@ -203,6 +203,9 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 			}
 		}
 
+		if(callStart)
+			query.start(this);
+
 		synchronized(runningQueries) {
 			runningQueries.add(query);
 		}
@@ -219,9 +222,6 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 
 		setChanged();
 		this.notifyObservers(query);
-
-		if(callStart)
-			query.start(this);
 
 		Logger.debug(this, "Adding done");
 

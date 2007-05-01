@@ -113,8 +113,6 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 		tab.add(new JScrollPane(table), BorderLayout.CENTER);
 		tab.add(southPanel, BorderLayout.SOUTH);
 
-		core.getQueueManager().addObserver(this);
-
 		setAsObserverEverywhere(true);
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.transferLogs.transferLogsShort"),
@@ -152,7 +150,7 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 		 */
 		sendQuery("CREATE CACHED TABLE transferEvents ("
 			  + "id INTEGER IDENTITY NOT NULL,"
-			  + "date DATE NOT NULL,"
+			  + "date TIMESTAMP NOT NULL,"
 			  + "msg VARCHAR(500) NOT NULL,"
 			  + "key VARCHAR(500) NULL,"
 			  + "isDup BOOLEAN NOT NULL, "
@@ -167,7 +165,9 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 	 */
 	protected boolean sendQuery(final String query) {
 		try {
-			db.executeQuery(query);
+			synchronized(db.dbLock) {
+				db.executeQuery(query);
+			}
 			return true;
 		} catch(final SQLException e) {
 			Logger.notice(this, "While (re)creating sql tables: "+e.toString());
@@ -184,7 +184,7 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 		if (really)
 			core.getQueueManager().addObserver(this);
 		else
-			core.getQueueManager().addObserver(this);
+			core.getQueueManager().deleteObserver(this);
 
 
 		Vector runningQueue = core.getQueueManager().getRunningQueue();
@@ -194,11 +194,16 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 			     it.hasNext();) {
 				FCPTransferQuery query = (FCPTransferQuery)it.next();
 
-				if (query.isFinished() && !isDup(query.getFileKey()))
-					notifyEnd(query);
+				if (really) {
+					if (query.isFinished() && !isDup(query.getFileKey()))
+						notifyEnd(query);
 
-				if (query instanceof Observable)
-					((Observable)query).addObserver(this);
+					if (query instanceof Observable)
+						((Observable)query).addObserver(this);
+				} else {
+					if (query instanceof Observable)
+						((Observable)query).deleteObserver(this);
+				}
 			}
 		}
 	}
@@ -242,7 +247,7 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 			key = null;
 		}
 
-		java.sql.Date date = new java.sql.Date((new java.util.Date()).getTime());
+		java.sql.Timestamp date = new java.sql.Timestamp((new java.util.Date()).getTime());
 
 		boolean isDup;
 
@@ -260,7 +265,7 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 									 "(date, msg, key, isDup, isSuccess) "+
 									 " VALUES "+
 									 "(?, ?, ?, ?, FALSE)");
-				st.setDate(1, date);
+				st.setTimestamp(1, date);
 				st.setString(2, str);
 				st.setString(3, key);
 				st.setBoolean(4, isDup);
@@ -309,7 +314,7 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 		else
 		        isDup = false;
 
-		java.sql.Date date = new java.sql.Date((new java.util.Date()).getTime());
+		java.sql.Timestamp date = new java.sql.Timestamp((new java.util.Date()).getTime());
 
 
 		try {
@@ -321,7 +326,7 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 									 "(date, msg, key, isDup, isSuccess) "+
 									 " VALUES "+
 									 "(?, ?, ?, ?, ?)");
-				st.setDate(1, date);
+				st.setTimestamp(1, date);
 				st.setString(2, str);
 				st.setString(3, key);
 				st.setBoolean(4, isDup);
@@ -348,7 +353,8 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 
 			FCPTransferQuery query = (FCPTransferQuery)param;
 
-			if(core.getQueueManager().isInTheQueues(query)) { // then it's an addition
+			if(core.getQueueManager().isInTheQueues(query)
+			   && query.isRunning()) { // then it's an addition
 				if (query instanceof Observable)
 					((Observable)query).addObserver(this);
 				if (core.getQueueManager().isQueueCompletlyLoaded())
@@ -370,19 +376,19 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 
 
 	private class Event {
-		private java.sql.Date date;
+		private java.sql.Timestamp date;
 		private String msg;
 		private String key;
 		private boolean isDup;
 
-		public Event(java.sql.Date date, String message, String key, boolean isDup) {
+		public Event(java.sql.Timestamp date, String message, String key, boolean isDup) {
 			this.date = date;
 			this.msg = message;
 			this.key = key;
 			this.isDup = isDup;
 		}
 
-		public java.sql.Date getDate() {
+		public java.sql.Timestamp getDate() {
 			return date;
 		}
 
@@ -418,7 +424,7 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 
 		public EventListModel() {
 			super();
-			dateFormat = DateFormat.getDateInstance();
+			dateFormat = DateFormat.getDateTimeInstance();
 		}
 
 		public void reloadList() {
@@ -436,7 +442,7 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 					events = new Vector();
 
 					while(set.next()) {
-						events.add(new Event(set.getDate("date"),
+						events.add(new Event(set.getTimestamp("date"),
 								     set.getString("msg"),
 								     set.getString("key"),
 								     set.getBoolean("isDup")));
@@ -513,16 +519,8 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 	public void actionPerformed(ActionEvent e) {
 
 		if (e.getSource() == purgeLogs) {
-			try {
-				synchronized(db.dbLock) {
-					PreparedStatement st;
-
-					st = db.getConnection().prepareStatement("DELETE FROM transferEvents");
-					st.execute();
-				}
-			} catch(SQLException exc) {
-				Logger.error(this, "Unable to purge the logs because: "+exc.toString());
-			}
+			sendQuery("DROP TABLE transferEvents");
+			createTables();
 
 			model.reloadList();
 
