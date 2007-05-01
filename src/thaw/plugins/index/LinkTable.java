@@ -31,7 +31,9 @@ import javax.swing.TransferHandler;
 
 import thaw.core.I18n;
 import thaw.core.Logger;
+import thaw.core.Config;
 import thaw.gui.IconBox;
+import thaw.gui.Table;
 import thaw.fcp.FCPQueueManager;
 import thaw.plugins.ToolbarModifier;
 
@@ -39,7 +41,7 @@ import thaw.plugins.ToolbarModifier;
 public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 	private JPanel panel;
-	private JTable table;
+	private Table table;
 
 	private LinkListModel linkListModel = null;
 	private LinkList      linkList = null;
@@ -62,13 +64,14 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 	private int firstSelectedLinkCorrespondingIndexId = -1; /* hmm .. I should make it shorter ... */
 
 
-	public LinkTable (final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser) {
+	public LinkTable (final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser,
+			  Config config) {
 		this.indexBrowser = indexBrowser;
 
 		linkListModel = new LinkListModel();
-		table = new JTable(linkListModel);
+		table = new Table(config, "index_link_table", linkListModel);
 		table.setShowGrid(false);
-		table.setDefaultRenderer(table.getColumnClass(0), new LinkRenderer());
+		table.setIntercellSpacing(new java.awt.Dimension(0, 0));
 
 		panel = new JPanel();
 		panel.setLayout(new BorderLayout());
@@ -339,45 +342,6 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 			this.refresh(); /* TODO : Do it more nicely ... :) */
 		}
-	}
-
-
-	private class LinkRenderer extends DefaultTableCellRenderer {
-		private final static long serialVersionUID = 20060821;
-
-		private Color softGray;
-
-		public LinkRenderer() {
-			softGray = new Color(240,240,240);
-		}
-
-		public Component getTableCellRendererComponent(final JTable table, final Object value,
-							       final boolean isSelected, final boolean hasFocus,
-							       final int row, final int column) {
-
-			if(value == null)
-				return super.getTableCellRendererComponent(table, "",
-									   isSelected, hasFocus, row, column);
-
-			Component cell;
-
-			if(value instanceof Long)
-				cell = super.getTableCellRendererComponent(table,
-									   thaw.gui.GUIHelper.getPrintableSize(((Long)value).longValue()),
-									   isSelected, hasFocus, row, column);
-			else
-				cell = super.getTableCellRendererComponent(table, value,
-									   isSelected, hasFocus,
-									   row, column);
-			if (!isSelected) {
-				if (row % 2 == 0)
-					cell.setBackground(Color.WHITE);
-				else
-					cell.setBackground(softGray);
-			}
-			return cell;
-		}
-
 	}
 
 }

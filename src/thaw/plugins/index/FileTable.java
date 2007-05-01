@@ -37,13 +37,14 @@ import thaw.fcp.FCPClientPut;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
 import thaw.plugins.ToolbarModifier;
+import thaw.gui.Table;
 
 
 public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 	private final JPanel panel;
 
-	private final JTable table;
+	private final Table table;
 	private FileListModel fileListModel;
 
 	private FileList fileList;
@@ -85,9 +86,9 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		this.queueManager = queueManager;
 
 		fileListModel = new FileListModel();
-		table = new JTable(fileListModel);
+		table = new Table(config, "index_file_table", fileListModel);
 		table.setShowGrid(false);
-		table.setDefaultRenderer( table.getColumnClass(0), new FileRenderer() );
+		table.setIntercellSpacing(new java.awt.Dimension(0, 0));
 
 		table.addMouseListener(this);
 
@@ -414,82 +415,6 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		public void refresh(final TableModelEvent e) {
 			fireTableChanged(e);
 		}
-	}
-
-
-	private class FileRenderer extends DefaultTableCellRenderer {
-		private final static long serialVersionUID = 20060821;
-
-		private Color softGray;
-
-		public FileRenderer() {
-			softGray = new Color(240,240,240);
-		}
-
-		public Component getTableCellRendererComponent(final JTable table, final Object value,
-							       final boolean isSelected, final boolean hasFocus,
-							       final int row, final int column) {
-
-			if(value == null)
-				return super.getTableCellRendererComponent(table, "",
-									   isSelected, hasFocus, row, column);
-
-			if(value instanceof FCPTransferQuery) {
-				final FCPTransferQuery query = (FCPTransferQuery)value;
-				final JProgressBar bar = new JProgressBar(0, 100);
-
-				int progress;
-
-				bar.setStringPainted(true);
-				bar.setBorderPainted(false);
-
-				if ((query instanceof FCPClientPut && (query.getTransferWithTheNodeProgression() < 100))
-				    || ((query instanceof FCPClientGet) && (query.getTransferWithTheNodeProgression() > 0)))
-					progress = query.getTransferWithTheNodeProgression();
-				else
-					progress = query.getProgression();
-
-				bar.setValue(progress);
-
-				if(query.isFinished() && !query.isSuccessful())
-					bar.setString(I18n.getMessage("thaw.common.failed"));
-
-				if(query.isFinished() && query.isSuccessful())
-					bar.setString(I18n.getMessage("thaw.common.ok"));
-
-				if(!query.isFinished()) {
-					bar.setString(query.getStatus() +
-						      " [ "+Integer.toString(progress)+"% ]");
-				}
-
-				return bar;
-			}
-
-			Component cell;
-
-			if(value instanceof Long) {
-
-				cell = super.getTableCellRendererComponent(table,
-									   thaw.gui.GUIHelper.getPrintableSize(((Long)value).longValue()),
-									   isSelected, hasFocus, row, column);
-
-			} else {
-
-				cell = super.getTableCellRendererComponent(table, value,
-									   isSelected, hasFocus,
-									   row, column);
-
-			}
-
-			if (!isSelected) {
-				if (row % 2 == 0)
-					cell.setBackground(Color.WHITE);
-				else
-					cell.setBackground(softGray);
-			}
-			return cell;
-		}
-
 	}
 
 

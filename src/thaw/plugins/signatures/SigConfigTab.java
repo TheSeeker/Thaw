@@ -37,6 +37,7 @@ import thaw.core.Logger;
 
 import thaw.gui.IconBox;
 import thaw.gui.FileChooser;
+import thaw.gui.Table;
 
 import thaw.plugins.Hsqldb;
 
@@ -410,7 +411,7 @@ public class SigConfigTab implements ActionListener {
 		private JDialog dialog;
 		private IdentityModel model;
 
-		private JTable table;
+		private Table table;
 
 		private JButton close;
 
@@ -431,7 +432,7 @@ public class SigConfigTab implements ActionListener {
 
 			model = new IdentityModel();
 
-			table = new JTable(model);
+			table = new Table(config, "other_identities_table", model);
 
 			dialog.getContentPane().add(new JScrollPane(table),
 						    BorderLayout.CENTER);

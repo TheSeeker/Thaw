@@ -314,11 +314,11 @@ public class IndexManagementHelper {
 
 
 		public String getPublicKey() {
-			return publicKeyResult.trim();
+			return publicKeyResult;
 		}
 
 		public String getPrivateKey() {
-			return privateKeyResult.trim();
+			return privateKeyResult;
 		}
 
 		public boolean getPublishPrivateKey() {

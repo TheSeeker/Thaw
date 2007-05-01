@@ -41,6 +41,9 @@ import thaw.gui.IconBox;
 import thaw.core.Logger;
 import thaw.fcp.FCPClientGet;
 import thaw.fcp.FCPTransferQuery;
+import thaw.gui.Table;
+
+
 import thaw.plugins.QueueWatcher;
 
 
@@ -58,7 +61,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 	private JButton button;
 
-	private JTable table = null;
+	private Table table = null;
 	private JScrollPane scrollPane = null;
 
 	private JPanel panel;
@@ -100,7 +103,9 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 		tableModel = new QueueTableModel(isForInsertionQueue, core.getQueueManager());
 
-		table = new JTable(tableModel);
+		table = new Table(core.getConfig(),
+				  isForInsertionQueue ? "table_insertions" : "table_downloads",
+				  tableModel);
 
 		table.setShowGrid(true);
 
@@ -230,12 +235,12 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 			insertionQueue = isForInsertion;
 		}
 
-		public Component getTableCellRendererComponent(final JTable table, final Object value,
+		public Component getTableCellRendererComponent(final JTable table, Object value,
 							       boolean isSelected, final boolean hasFocus,
 							       final int row, final int column) {
 
 			if(value == null)
-				return null;
+				value = "";
 
 			final FCPTransferQuery query = model.getQuery(row);
 

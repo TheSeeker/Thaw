@@ -28,7 +28,7 @@ public class Tables {
 		panel.setLayout(new BorderLayout(10, 10));
 
 		fileTable = new FileTable(queueManager, indexBrowser, config);
-		linkTable = new LinkTable(queueManager, indexBrowser);
+		linkTable = new LinkTable(queueManager, indexBrowser, config);
 
 		searchBar = new SearchBar(indexBrowser);
 
