@@ -354,7 +354,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	 * @param queries Vector of FCPTransferQuery only
 	 */
 	public synchronized void addToTable(final Vector queries) {
-		try {
+		synchronized(queries) {
 			for(final Iterator queryIt = queries.iterator();
 			    queryIt.hasNext();) {
 
@@ -362,9 +362,6 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 				this.addToTable(query);
 			}
-
-		} catch(final java.util.ConcurrentModificationException e) {
-			Logger.notice(this, "Collision.");
 		}
 	}
 

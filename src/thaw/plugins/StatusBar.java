@@ -73,9 +73,9 @@ public class StatusBar implements Runnable, Plugin {
 		int pending = 0;
 		int total = 0;
 
-		try {
-			final Vector runningQueue = core.getQueueManager().getRunningQueue();
+		final Vector runningQueue = core.getQueueManager().getRunningQueue();
 
+		synchronized(runningQueue) {
 			for(final Iterator it = runningQueue.iterator();
 			    it.hasNext(); ) {
 				final FCPTransferQuery query = (FCPTransferQuery)it.next();
@@ -96,22 +96,19 @@ public class StatusBar implements Runnable, Plugin {
 					failed++;
 				}
 			}
+		}
 
-			final Vector[] pendingQueues = core.getQueueManager().getPendingQueues();
+		final Vector[] pendingQueues = core.getQueueManager().getPendingQueues();
 
+		synchronized(pendingQueues) {
 			for(int i =0 ; i < pendingQueues.length; i++) {
 
 				progressTotal += pendingQueues[i].size() * 100;
 				pending += pendingQueues[i].size();
 
 			}
-
-		} catch(final java.util.ConcurrentModificationException e) {
-			Logger.notice(this, "Collision !");
-			core.getMainWindow().setStatus(null,
-						       core.getMainWindow().getStatus()+"*");
-			return;
 		}
+
 
 		total = finished + failed + running + pending;
 

@@ -113,6 +113,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	/**
 	 * Take care: Can change while you're using it.
 	 * The running queue contains running request, but also finished/failed ones.
+	 * synchronize on it if you want to do iterate() on it.
 	 */
 	public Vector getRunningQueue() {
 		return runningQueries;
@@ -146,7 +147,9 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 
 		Logger.notice(this, "Adding query to the pending queue ...");
 
-		pendingQueries[query.getThawPriority()].add(query);
+		synchronized(pendingQueries) {
+			pendingQueries[query.getThawPriority()].add(query);
+		}
 
 		String fileKey = query.getFileKey();
 		String filename = query.getFilename();
@@ -200,7 +203,9 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 			}
 		}
 
-		runningQueries.add(query);
+		synchronized(runningQueries) {
+			runningQueries.add(query);
+		}
 
 		String fileKey = query.getFileKey();
 		String filename = query.getFilename();
@@ -254,10 +259,14 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 
 
 	public void remove(final FCPTransferQuery query) {
-		runningQueries.remove(query);
+		synchronized(runningQueries) {
+			runningQueries.remove(query);
+		}
 
-		for(int i = 0 ; i <= FCPQueueManager.PRIORITY_MIN ; i++)
-			pendingQueries[i].remove(query);
+		synchronized(pendingQueries) {
+			for(int i = 0 ; i <= FCPQueueManager.PRIORITY_MIN ; i++)
+				pendingQueries[i].remove(query);
+		}
 
 		String fileKey = query.getFileKey();
 		String filename = query.getFilename();
@@ -306,12 +315,16 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	 * Compare only the refs.
 	 */
 	public boolean isInTheQueues(final FCPTransferQuery query) {
-		if(runningQueries.contains(query))
-			return true;
-
-		for(int i = 0 ; i < pendingQueries.length ; i++) {
-			if(pendingQueries[i].contains(query))
+		synchronized(runningQueries) {
+			if(runningQueries.contains(query))
 				return true;
+		}
+
+		synchronized(pendingQueries) {
+			for(int i = 0 ; i < pendingQueries.length ; i++) {
+				if(pendingQueries[i].contains(query))
+					return true;
+			}
 		}
 
 		return false;
@@ -341,39 +354,30 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	 * Compare using the key.
 	 */
 	public boolean isAlreadyPresent(final FCPTransferQuery query) {
-		boolean interrupted=true;
 
 		Iterator it;
 
-		while(interrupted) {
-			interrupted = false;
+		synchronized(runningQueries) {
+			for(it = runningQueries.iterator();
+			    it.hasNext(); )
+				{
+					final FCPTransferQuery plop = (FCPTransferQuery)it.next();
+					if(isTheSame(plop, query))
+						return true;
+				}
+		}
 
-			try {
-				for(it = runningQueries.iterator();
+		synchronized(pendingQueries) {
+			for(int i = 0 ; i <= FCPQueueManager.PRIORITY_MIN ; i++) {
+				for(it = pendingQueries[i].iterator();
 				    it.hasNext(); )
 					{
 						final FCPTransferQuery plop = (FCPTransferQuery)it.next();
 						if(isTheSame(plop, query))
 							return true;
 					}
-
-				for(int i = 0 ; i <= FCPQueueManager.PRIORITY_MIN ; i++) {
-					for(it = pendingQueries[i].iterator();
-					    it.hasNext(); )
-						{
-							final FCPTransferQuery plop = (FCPTransferQuery)it.next();
-							if(isTheSame(plop, query))
-								return true;
-						}
-
-				}
-			} catch(final java.util.ConcurrentModificationException e) {
-				Logger.notice(this, "isAlreadyPresent(): Collission. Reitering");
-				interrupted = true;
 			}
-
 		}
-
 
 		return false;
 	}
@@ -385,16 +389,18 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 			int runningInsertions = 0;
 			int runningDownloads = 0;
 
-			for(final Iterator it = runningQueries.iterator(); it.hasNext(); ) {
-				final FCPTransferQuery query = (FCPTransferQuery)it.next();
+			synchronized(runningQueries) {
+				for(final Iterator it = runningQueries.iterator(); it.hasNext(); ) {
+					final FCPTransferQuery query = (FCPTransferQuery)it.next();
 
-				if((query.getQueryType() == 1 /* Download */)
-				   && !query.isFinished())
-					runningDownloads++;
+					if((query.getQueryType() == 1 /* Download */)
+					   && !query.isFinished())
+						runningDownloads++;
 
-				if((query.getQueryType() == 2 /* Insertion */)
-				   && !query.isFinished())
-					runningInsertions++;
+					if((query.getQueryType() == 2 /* Insertion */)
+					   && !query.isFinished())
+						runningInsertions++;
+				}
 			}
 
 
@@ -405,11 +411,11 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 					|| ((maxDownloads <= -1) || (runningDownloads < maxDownloads)) ) ;
 			    priority++)	{
 
-				try {
+				synchronized(pendingQueries) {
 					for(Iterator it = pendingQueries[priority].iterator();
 					    it.hasNext()
 						    && ( ((maxInsertions <= -1) || (runningInsertions < maxInsertions))
-							|| ((maxDownloads <= -1) || (runningDownloads < maxDownloads)) ); ) {
+							 || ((maxDownloads <= -1) || (runningDownloads < maxDownloads)) ); ) {
 
 						final FCPTransferQuery query = (FCPTransferQuery)it.next();
 
@@ -436,11 +442,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 							} catch(final java.lang.InterruptedException e) { }
 						}
 					}
-				} catch(final java.util.ConcurrentModificationException e) {
-					Logger.notice(this, "Collision.");
-					priority--;
 				}
-
 			}
 
 	}
@@ -464,15 +466,12 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 				return;
 
 			try {
+
 				if(queryManager.getConnection().isConnected()
 				   && !queryManager.getConnection().isWriting()
-				   && queueCompleted) {
-
+				   && queueCompleted)
 					schedule();
 
-				}
-			} catch(final java.util.ConcurrentModificationException e) {
-				Logger.notice(this, "Ordonnancor: Collision !");
 			} catch(final Exception e) {
 				Logger.error(this, "EXCEPTION FROM ORDONNANCOR : "+e.toString());
 				Logger.error(this, "ERROR : "+e.getMessage());

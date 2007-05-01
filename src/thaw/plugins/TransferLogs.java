@@ -186,27 +186,21 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 		else
 			core.getQueueManager().addObserver(this);
 
-		boolean finished = false;
 
-		do {
-			try {
-				for (Iterator it = core.getQueueManager().getRunningQueue().iterator();
-				     it.hasNext();) {
-					FCPTransferQuery query = (FCPTransferQuery)it.next();
+		Vector runningQueue = core.getQueueManager().getRunningQueue();
 
-					if (query.isFinished() && !isDup(query.getFileKey()))
-						notifyEnd(query);
+		synchronized(runningQueue) {
+			for (Iterator it = runningQueue.iterator();
+			     it.hasNext();) {
+				FCPTransferQuery query = (FCPTransferQuery)it.next();
 
-					if (query instanceof Observable)
-						((Observable)query).addObserver(this);
-				}
+				if (query.isFinished() && !isDup(query.getFileKey()))
+					notifyEnd(query);
 
-				finished = true;
-			} catch(final java.util.ConcurrentModificationException e) {
-				Logger.warning(this, "setAsObserver : Collision !");
+				if (query instanceof Observable)
+					((Observable)query).addObserver(this);
 			}
-		} while(!finished);
-
+		}
 	}
 
 
@@ -284,6 +278,9 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 	protected void notifyEnd(FCPTransferQuery query) {
 		String str;
 		String key;
+
+		if (query.isFinished() && query instanceof Observable)
+			((Observable)query).deleteObserver(this);
 
 		if (query.getQueryType() == 0 || !query.isFinished())
 			return;

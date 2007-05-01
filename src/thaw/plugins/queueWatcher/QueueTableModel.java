@@ -147,33 +147,30 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 
 	public synchronized void reloadQueue() {
-		try {
-			resetTable();
+		resetTable();
 
-			addQueries(queueManager.getRunningQueue());
+		addQueries(queueManager.getRunningQueue());
 
-			final Vector[] pendings = queueManager.getPendingQueues();
+		final Vector[] pendings = queueManager.getPendingQueues();
 
-			for(int i = 0;i < pendings.length ; i++)
-				addQueries(pendings[i]);
-		} catch(final java.util.ConcurrentModificationException e) {
-			Logger.warning(this, "reloadQueue: Collision !");
-			reloadQueue();
-		}
+		for(int i = 0;i < pendings.length ; i++)
+			addQueries(pendings[i]);
 	}
 
 	public synchronized void addQueries(final Vector queries) {
-		for(final Iterator it = queries.iterator();
-		    it.hasNext();) {
+		synchronized(queries) {
 
-			final FCPTransferQuery query = (FCPTransferQuery)it.next();
+			for(final Iterator it = queries.iterator();
+			    it.hasNext();) {
 
-			if((query.getQueryType() == 1) && !isForInsertions)
-				addQuery(query);
+				final FCPTransferQuery query = (FCPTransferQuery)it.next();
 
-			if((query.getQueryType() == 2) && isForInsertions)
-				addQuery(query);
+				if((query.getQueryType() == 1) && !isForInsertions)
+					addQuery(query);
 
+				if((query.getQueryType() == 2) && isForInsertions)
+					addQuery(query);
+			}
 		}
 	}
 

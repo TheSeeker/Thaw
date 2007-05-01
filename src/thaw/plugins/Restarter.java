@@ -107,80 +107,80 @@ public class Restarter implements Observer, Runnable, Plugin {
 
 			Logger.info(this, "Restarting some failed downloads (if there are some)");
 
+			if(!running)
+				break;
+
+			final int maxDownloads = core.getQueueManager().getMaxDownloads();
+			int alreadyRunning = 0;
+			int failed = 0;
+			final Vector runningQueue = core.getQueueManager().getRunningQueue();
+
 			try {
-				if(!running)
-					break;
+				synchronized(runningQueue) {
 
-				final int maxDownloads = core.getQueueManager().getMaxDownloads();
-				int alreadyRunning = 0;
-				int failed = 0;
-				final Vector runningQueue = core.getQueueManager().getRunningQueue();
-
-				if(maxDownloads >= 0) {
-					/* We count how many are really running
-					   and we write down those which are failed */
-					for(final Iterator it = runningQueue.iterator();
-					    it.hasNext();) {
-						final FCPTransferQuery query = (FCPTransferQuery)it.next();
-
-						if(query.getQueryType() != 1)
-							continue;
-
-						if(query.isRunning() && !query.isFinished()) {
-							alreadyRunning++;
-						}
-
-						if(query.isFinished() && !query.isSuccessful()
-						   && (restartFatals || !query.isFatallyFailed()) ) {
-							failed++;
-						}
-					}
-
-					/* We choose randomly the ones to restart */
-					while((alreadyRunning < maxDownloads) && (failed > 0)) {
-						final int toRestart = (new Random()).nextInt(failed);
-
-						final Iterator it = runningQueue.iterator();
-						int i = 0;
-
-						while(it.hasNext()) {
+					if(maxDownloads >= 0) {
+						/* We count how many are really running
+						   and we write down those which are failed */
+						for(final Iterator it = runningQueue.iterator();
+						    it.hasNext();) {
 							final FCPTransferQuery query = (FCPTransferQuery)it.next();
 
 							if(query.getQueryType() != 1)
 								continue;
 
-							if(query.isFinished() && !query.isSuccessful()
-							   && (restartFatals || !query.isFatallyFailed())) {
-								if(i == toRestart) {
-									restartQuery(query);
-									break;
-								}
+							if(query.isRunning() && !query.isFinished()) {
+								alreadyRunning++;
+							}
 
-								i++;
+							if(query.isFinished() && !query.isSuccessful()
+							   && (restartFatals || !query.isFatallyFailed()) ) {
+								failed++;
 							}
 						}
 
-						alreadyRunning++;
-						failed--;
+						/* We choose randomly the ones to restart */
+						while((alreadyRunning < maxDownloads) && (failed > 0)) {
+							final int toRestart = (new Random()).nextInt(failed);
+
+							final Iterator it = runningQueue.iterator();
+							int i = 0;
+
+							while(it.hasNext()) {
+								final FCPTransferQuery query = (FCPTransferQuery)it.next();
+
+								if(query.getQueryType() != 1)
+									continue;
+
+								if(query.isFinished() && !query.isSuccessful()
+								   && (restartFatals || !query.isFatallyFailed())) {
+									if(i == toRestart) {
+										restartQuery(query);
+										break;
+									}
+
+									i++;
+								}
+							}
+
+							alreadyRunning++;
+							failed--;
+						}
+
+
+					} else { /* => if maxDownloads < 0 */
+
+						/* We restart them all */
+						for(final Iterator it = runningQueue.iterator();
+						    it.hasNext();) {
+							final FCPTransferQuery query = (FCPTransferQuery)it.next();
+							if((query.getQueryType() == 1) && query.isFinished()
+							   && !query.isSuccessful()
+							   && (restartFatals || !query.isFatallyFailed()))
+								restartQuery(query);
+						}
 					}
 
-
-				} else { /* => if maxDownloads < 0 */
-
-					/* We restart them all */
-					for(final Iterator it = runningQueue.iterator();
-					    it.hasNext();) {
-						final FCPTransferQuery query = (FCPTransferQuery)it.next();
-
-						if((query.getQueryType() == 1) && query.isFinished()
-						   && !query.isSuccessful()
-						   && (restartFatals || !query.isFatallyFailed()))
-							restartQuery(query);
-					}
 				}
-
-			} catch(final java.util.ConcurrentModificationException e) {
-				Logger.notice(this, "Collision ! Sorry I will restart failed downloads later ...");
 			} catch(final Exception e) {
 				Logger.error(this, "Exception : "+e);
 			}

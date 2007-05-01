@@ -443,8 +443,10 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 				i = 0;
 
-				try {
-					for (Iterator it = fileListModel.getFiles().iterator() ;
+				Vector files = fileListModel.getFiles();
+
+				synchronized(files) {
+					for (Iterator it = files.iterator() ;
 					     it.hasNext(); i++) {
 						thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 
@@ -468,8 +470,6 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 							/* \_o< */
 						}
 					}
-				} catch(final java.util.ConcurrentModificationException e) {
-					Logger.debug(this, "Collision : Restarting refresh from the beginnin");
 				}
 			}
 		}

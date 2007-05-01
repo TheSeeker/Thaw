@@ -813,6 +813,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		running = false;
 		fatal = true;
 		status = "Stopped";
+
 		setChanged();
 		this.notifyObservers();
 
