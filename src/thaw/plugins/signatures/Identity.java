@@ -388,7 +388,9 @@ public class Identity {
 				st.execute();
 			}
 		} catch(SQLException e) {
-			Logger.error(this, "Exception while deleting the identity from the bdd: "+e.toString());
+			Logger.warning(this, "Exception while deleting the identity from the bdd: "+e.toString());
+			new thaw.gui.WarningWindow((thaw.core.MainWindow)null,
+						   I18n.getMessage("thaw.plugin.signature.delete.cant"));
 		}
 
 	}

@@ -283,6 +283,29 @@ public class SigConfigTab implements ActionListener {
 		}
 
 
+		private class IdentityDeleter implements Runnable {
+			private Identity i;
+
+			public IdentityDeleter(Identity i) {
+				this.i = i;
+			}
+
+			public void run() {
+				int ret = JOptionPane.showConfirmDialog(dialog,
+									I18n.getMessage("thaw.plugin.signature.delete.areYouSure"),
+									I18n.getMessage("thaw.plugin.signature.delete.areYouSureTitle"),
+									JOptionPane.YES_NO_OPTION);
+				if (ret != JOptionPane.YES_OPTION) {
+					Logger.info(this, "Deletion cancelled");
+					return;
+				}
+
+				i.delete();
+				updateList();
+			}
+		}
+
+
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == addIdentity) {
 				Thread th = new Thread(new IdentityAdder());
@@ -292,8 +315,8 @@ public class SigConfigTab implements ActionListener {
 			if (e.getSource() == removeIdentity) {
 				Identity i = (Identity)list.getSelectedValue();
 				if (i != null) {
-					i.delete();
-					updateList();
+					Thread th = new Thread(new IdentityDeleter(i));
+					th.start();
 				}
 			}
 
