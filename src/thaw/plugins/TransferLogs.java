@@ -186,16 +186,27 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 		else
 			core.getQueueManager().addObserver(this);
 
-		for (Iterator it = core.getQueueManager().getRunningQueue().iterator();
-		     it.hasNext();) {
-			FCPTransferQuery query = (FCPTransferQuery)it.next();
+		boolean finished = false;
 
-			if (query.isFinished() && !isDup(query.getFileKey()))
-				notifyEnd(query);
+		do {
+			try {
+				for (Iterator it = core.getQueueManager().getRunningQueue().iterator();
+				     it.hasNext();) {
+					FCPTransferQuery query = (FCPTransferQuery)it.next();
 
-			if (query instanceof Observable)
-				((Observable)query).addObserver(this);
-		}
+					if (query.isFinished() && !isDup(query.getFileKey()))
+						notifyEnd(query);
+
+					if (query instanceof Observable)
+						((Observable)query).addObserver(this);
+				}
+
+				finished = true;
+			} catch(final java.util.ConcurrentModificationException e) {
+				Logger.warning(this, "setAsObserver : Collision !");
+			}
+		} while(!finished);
+
 	}
 
 
