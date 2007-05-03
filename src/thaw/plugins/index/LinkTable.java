@@ -170,7 +170,8 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 	}
 
 	protected Vector getSelectedLinks(final int[] selectedRows) {
-		final Vector srcList = linkList.getLinkList(null, false);
+		//final Vector srcList = linkList.getLinkList(null, false);
+		final Vector srcList = linkListModel.getLinks();
 		final Vector links = new Vector();
 
 		for(int i = 0 ; i < selectedRows.length ; i++) {
@@ -287,6 +288,10 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 			this.refresh();
 
+		}
+
+		public Vector getLinks() {
+			return links;
 		}
 
 		public int getRowCount() {

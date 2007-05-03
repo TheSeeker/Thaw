@@ -44,7 +44,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 	private final JPanel panel;
 
-	private final Table table;
+	private final JTable table;
 	private FileListModel fileListModel;
 
 	private FileList fileList;
@@ -87,6 +87,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 		fileListModel = new FileListModel();
 		table = new Table(config, "index_file_table", fileListModel);
+		//table = new JTable(fileListModel);
 		table.setShowGrid(false);
 		table.setIntercellSpacing(new java.awt.Dimension(0, 0));
 
@@ -204,7 +205,8 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 	}
 
 	protected Vector getSelectedFiles(final int[] selectedRows) {
-		final Vector srcList = fileList.getFileList(fileListModel.getColumnNameInDb(columnToSort), sortAsc);
+		//final Vector srcList = fileList.getFileList(fileListModel.getColumnNameInDb(columnToSort), sortAsc);
+		final Vector srcList = fileListModel.getFiles();
 		final Vector files = new Vector();
 
 		for(int i = 0 ; i < selectedRows.length ; i++) {
@@ -445,30 +447,28 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 				Vector files = fileListModel.getFiles();
 
-				synchronized(files) {
-					for (Iterator it = files.iterator() ;
-					     it.hasNext(); i++) {
-						thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+				for (Iterator it = files.iterator() ;
+				     it.hasNext(); i++) {
+					thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
 
-						if (file.getPublicKey() == null
-						    || !FreenetURIHelper.isAKey(file.getPublicKey())) {
-							FCPTransferQuery transfer;
-							transfer = file.getTransfer(queueManager);
+					if (file.getPublicKey() == null
+					    || !FreenetURIHelper.isAKey(file.getPublicKey())) {
+						FCPTransferQuery transfer;
+						transfer = file.getTransfer(queueManager);
 
-							if (transfer != null) {
-								if (transfer.isSuccessful())
-									file.forceReload();
-							}
+						if (transfer != null) {
+							if (transfer.isSuccessful())
+								file.forceReload();
 						}
+					}
 
-						/* won't query the database */
-						fileListModel.refresh(i);
+					/* won't query the database */
+					fileListModel.refresh(i);
 
-						try {
-							Thread.sleep(100);
-						} catch(InterruptedException e) {
-							/* \_o< */
-						}
+					try {
+						Thread.sleep(100);
+					} catch(InterruptedException e) {
+						/* \_o< */
 					}
 				}
 			}
