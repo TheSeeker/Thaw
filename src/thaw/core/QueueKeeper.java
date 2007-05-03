@@ -180,103 +180,106 @@ public class QueueKeeper {
 	public static boolean saveQueue(final FCPQueueManager queueManager, final String fileName) {
 		final Vector[] pendingQueues = queueManager.getPendingQueues();
 
-		boolean needed = false;
+		synchronized(pendingQueues) {
 
-		for(int i = 0 ; i < pendingQueues.length ; i++) {
-			if(pendingQueues[i].size() > 0) {
-				needed = true;
-				break;
+			boolean needed = false;
+
+			for(int i = 0 ; i < pendingQueues.length ; i++) {
+				if(pendingQueues[i].size() > 0) {
+					needed = true;
+					break;
+				}
 			}
-		}
 
-		if(!needed) {
-			Logger.info(new QueueKeeper(), "Nothing in the pending queue to save.");
+			if(!needed) {
+				Logger.info(new QueueKeeper(), "Nothing in the pending queue to save.");
+				final File file = new File(fileName);
+				file.delete(); // Else we may reload something that we shouldn't when restarting
+				return true;
+			}
+
 			final File file = new File(fileName);
-			file.delete(); // Else we may reload something that we shouldn't when restarting
-			return true;
-		}
+			StreamResult fileOut;
 
-		final File file = new File(fileName);
-		StreamResult fileOut;
+			try {
+				if( (!file.exists() && !file.createNewFile())
+				    || !file.canWrite()) {
+					Logger.warning(new QueueKeeper(), "Unable to write config file '"+file.getPath()+"' (can't write)");
+					return false;
+				}
+			} catch(final java.io.IOException e) {
+				Logger.warning(new QueueKeeper(), "Error while checking perms to save config: "+e);
+			}
 
-		try {
-			if( (!file.exists() && !file.createNewFile())
-			    || !file.canWrite()) {
-				Logger.warning(new QueueKeeper(), "Unable to write config file '"+file.getPath()+"' (can't write)");
+
+			fileOut = new StreamResult(file);
+
+			Document xmlDoc = null;
+			DocumentBuilderFactory xmlFactory = null;
+			DocumentBuilder xmlBuilder = null;
+			DOMImplementation impl = null;
+
+			Element rootEl = null;
+
+			xmlFactory = DocumentBuilderFactory.newInstance();
+
+			try {
+				xmlBuilder = xmlFactory.newDocumentBuilder();
+			} catch(final javax.xml.parsers.ParserConfigurationException e) {
+				Logger.error(new QueueKeeper(), "Unable to save queue because: "+e.toString());
 				return false;
 			}
-		} catch(final java.io.IOException e) {
-			Logger.warning(new QueueKeeper(), "Error while checking perms to save config: "+e);
-		}
 
 
-		fileOut = new StreamResult(file);
+			impl = xmlBuilder.getDOMImplementation();
 
-		Document xmlDoc = null;
-		DocumentBuilderFactory xmlFactory = null;
-		DocumentBuilder xmlBuilder = null;
-		DOMImplementation impl = null;
+			xmlDoc = impl.createDocument(null, "queue", null);
 
-		Element rootEl = null;
+			rootEl = xmlDoc.getDocumentElement();
 
-		xmlFactory = DocumentBuilderFactory.newInstance();
+			final Element pendingQueueEl = xmlDoc.createElement("pendingQueue");
 
-		try {
-			xmlBuilder = xmlFactory.newDocumentBuilder();
-		} catch(final javax.xml.parsers.ParserConfigurationException e) {
-			Logger.error(new QueueKeeper(), "Unable to save queue because: "+e.toString());
-			return false;
-		}
+			for(int i = 0 ; i <= QueueKeeper.MIN_PRIORITY ; i++) {
 
+				for(final Iterator runIt = pendingQueues[i].iterator() ;
+				    runIt.hasNext(); ) {
 
-		impl = xmlBuilder.getDOMImplementation();
+					final FCPTransferQuery query = (FCPTransferQuery)runIt.next();
 
-		xmlDoc = impl.createDocument(null, "queue", null);
+					final Element toSave = QueueKeeper.saveQuery(query, xmlDoc);
 
-		rootEl = xmlDoc.getDocumentElement();
+					if(toSave != null)
+						pendingQueueEl.appendChild(toSave);
 
-		final Element pendingQueueEl = xmlDoc.createElement("pendingQueue");
-
-		for(int i = 0 ; i <= QueueKeeper.MIN_PRIORITY ; i++) {
-
-			for(final Iterator runIt = pendingQueues[i].iterator() ;
-			    runIt.hasNext(); ) {
-
-				final FCPTransferQuery query = (FCPTransferQuery)runIt.next();
-
-				final Element toSave = QueueKeeper.saveQuery(query, xmlDoc);
-
-				if(toSave != null)
-					pendingQueueEl.appendChild(toSave);
+				}
 
 			}
 
-		}
+			rootEl.appendChild(pendingQueueEl);
 
-		rootEl.appendChild(pendingQueueEl);
+			/* Serialization */
+			final DOMSource domSource = new DOMSource(xmlDoc);
+			final TransformerFactory transformFactory = TransformerFactory.newInstance();
 
-		/* Serialization */
-		final DOMSource domSource = new DOMSource(xmlDoc);
-		final TransformerFactory transformFactory = TransformerFactory.newInstance();
+			Transformer serializer;
 
-		Transformer serializer;
+			try {
+				serializer = transformFactory.newTransformer();
+			} catch(final javax.xml.transform.TransformerConfigurationException e) {
+				Logger.error(new QueueKeeper(), "Unable to save queue because: "+e.toString());
+				return false;
+			}
 
-		try {
-			serializer = transformFactory.newTransformer();
-		} catch(final javax.xml.transform.TransformerConfigurationException e) {
-			Logger.error(new QueueKeeper(), "Unable to save queue because: "+e.toString());
-			return false;
-		}
+			serializer.setOutputProperty(OutputKeys.ENCODING,"ISO-8859-1");
+			serializer.setOutputProperty(OutputKeys.INDENT,"yes");
 
-		serializer.setOutputProperty(OutputKeys.ENCODING,"ISO-8859-1");
-		serializer.setOutputProperty(OutputKeys.INDENT,"yes");
-
-		/* final step */
-		try {
-			serializer.transform(domSource, fileOut);
-		} catch(final javax.xml.transform.TransformerException e) {
-			Logger.error(new QueueKeeper(), "Unable to save queue because: "+e.toString());
-			return false;
+			/* final step */
+			try {
+				serializer.transform(domSource, fileOut);
+			} catch(final javax.xml.transform.TransformerException e) {
+				Logger.error(new QueueKeeper(), "Unable to save queue because: "+e.toString());
+				return false;
+			}
 		}
 
 		return true;
