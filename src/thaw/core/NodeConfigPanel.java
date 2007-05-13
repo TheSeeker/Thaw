@@ -62,10 +62,11 @@ public class NodeConfigPanel implements Observer, java.awt.event.ActionListener,
 	public NodeConfigPanel(final ConfigWindow configWindow, final Core core) {
 		this.core = core;
 		this.configWindow = configWindow;
-		
+
 		mdnsPanel = new MDNSDiscoveryPanel(configWindow.getFrame(), core, this);
 
-		sameComputer = new JCheckBox(I18n.getMessage("thaw.config.sameComputer"),
+		sameComputer = new JCheckBox(I18n.getMessage("thaw.config.sameComputer") + " " +
+					     I18n.getMessage("thaw.config.desactivateIfTroubles"),
 					     Boolean.valueOf(core.getConfig().getValue("sameComputer")).booleanValue());
 		sameComputer.setVisible(true);
 
@@ -196,6 +197,7 @@ public class NodeConfigPanel implements Observer, java.awt.event.ActionListener,
 		}
 
 		multipleSockets.setSelected(Boolean.valueOf(core.getConfig().getValue("multipleSockets")).booleanValue());
+		sameComputer.setSelected(Boolean.valueOf(core.getConfig().getValue("sameComputer")).booleanValue());
 	}
 
 	public void actionPerformed(java.awt.event.ActionEvent event) {

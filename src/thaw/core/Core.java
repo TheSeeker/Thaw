@@ -17,6 +17,7 @@ import thaw.fcp.FCPQueryManager;
 import thaw.fcp.FCPQueueLoader;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPWatchGlobal;
+import thaw.fcp.FCPMessage;
 
 import thaw.gui.IconBox;
 
@@ -44,7 +45,7 @@ public class Core implements Observer {
 	public final static int TIME_BETWEEN_EACH_TRY = 5000;
 
 	private ReconnectionManager reconnectionManager = null;
-	
+
 	private static final Random RANDOM = new Yarrow();
 
 	// MDNS stuffs
@@ -290,8 +291,10 @@ public class Core implements Observer {
 				ret = false;
 			}
 
-			if(queryManager == null)
+			if(queryManager == null) {
 				queryManager = new FCPQueryManager(connection);
+				queryManager.addObserver(this);
+			}
 
 			if(queueManager == null)
 				queueManager = new FCPQueueManager(queryManager,
@@ -591,11 +594,56 @@ public class Core implements Observer {
 	}
 
 
+	public void askToDisableDDA() {
+		String text =
+			I18n.getMessage("thaw.warning.DDA.l0") + "\n" +
+			I18n.getMessage("thaw.warning.DDA.l1") + "\n" +
+			I18n.getMessage("thaw.warning.DDA.l2") + "\n" +
+			I18n.getMessage("thaw.warning.DDA.l3") + "\n" +
+			I18n.getMessage("thaw.warning.DDA.l4");
+
+		text = text.replace("#", I18n.getMessage("thaw.config.sameComputer"));
+
+		int ret = JOptionPane.showConfirmDialog(mainWindow.getMainFrame(),
+							text,
+							I18n.getMessage("thaw.warning.title"),
+							JOptionPane.YES_NO_OPTION,
+							JOptionPane.WARNING_MESSAGE);
+
+		if (ret == JOptionPane.YES_OPTION) {
+			getConfig().setValue("sameComputer", Boolean.toString(false));
+			getConnectionManager().setLocalSocket(false);
+			getConfigWindow().close(true, false);
+			/* if we are lucky, it's enought */
+		}
+	}
+
+
 	public void update(final Observable o, final Object target) {
 		Logger.debug(this, "Move on the connection (?)");
 
-		if((o == connection) && !connection.isConnected()) {
+		if ((o == connection) && !connection.isConnected()) {
 			reconnect();
+		}
+
+		if ((o == queryManager) && target instanceof FCPMessage) {
+			FCPMessage m = (FCPMessage)target;
+
+			if ("ProtocolError".equals(m.getMessageName())) {
+				int code = Integer.parseInt(m.getValue("Code"));
+
+				if (code == 9 /* File not found */
+				    || code == 10 /* Disk target exists */
+				    || code == 12 /* Couldn't create file */
+				    || code == 13 /* Couldn't write file */
+				    || code == 14 /* Couldn't rename file */
+				    || code == 22 /* File parse error */
+				    || code == 25 /* DDA denied */
+				    || code == 26 /* Could not read file */) {
+					askToDisableDDA();
+				}
+
+			}
 		}
 	}
 
