@@ -129,6 +129,9 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		treeModel = new DefaultTreeModel(root);
 
+		final IndexTreeRenderer treeRenderer = new IndexTreeRenderer();
+		treeRenderer.setLeafIcon(IconBox.minIndexReadOnly);
+
 		if (!selectionOnly) {
 			tree = new JDragTree(treeModel);
 			tree.addMouseListener(this);
@@ -136,9 +139,6 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			tree = new JTree(treeModel);
 			//tree.addMouseListener(this);
 		}
-
-		final IndexTreeRenderer treeRenderer = new IndexTreeRenderer();
-		treeRenderer.setLeafIcon(IconBox.minIndexReadOnly);
 
 		tree.setCellRenderer(treeRenderer);
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -302,9 +302,9 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		updateMenuState(null);
 
-		addTreeSelectionListener(this);
-
 		panel.add(new JScrollPane(tree), BorderLayout.CENTER);
+
+		addTreeSelectionListener(this);
 
 
 		// Toolbar
