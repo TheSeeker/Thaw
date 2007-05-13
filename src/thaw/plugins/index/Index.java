@@ -2004,9 +2004,16 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 			synchronized(db.dbLock) {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT count(id) FROM indexComments WHERE indexId = ?");
+				st = db.getConnection().prepareStatement("SELECT count(indexComments.id) "+
+									 "FROM indexComments "+
+									 "WHERE indexComments.indexId = ? "+
+									 "AND indexComments.rev NOT IN "+
+									 " (SELECT indexCommentBlackList.rev "+
+									 "  FROM indexCommentBlackList "+
+									 "  WHERE indexCommentBlackList.indexId = ?)");
 
 				st.setInt(1, id);
+				st.setInt(2, id);
 
 				ResultSet set = st.executeQuery();
 
