@@ -499,7 +499,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			if (modelIndex < 0)
 				return;
 
-			if (modelIndex == 2) {
+			if (modelIndex == 3) {
 				Logger.notice(this, "Can't order by transfer state because of performances issues");
 				return;
 			}

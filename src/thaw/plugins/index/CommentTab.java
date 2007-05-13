@@ -55,7 +55,7 @@ public class CommentTab implements ActionListener {
 		tabPanel = new JPanel(new BorderLayout(10, 10));
 
 
-		JPanel northPanel = new JPanel(new BorderLayout());
+		JPanel northPanel = new JPanel(new BorderLayout(10, 10));
 
 		closeTabButton = new JButton(IconBox.minClose);
 		closeTabButton.setToolTipText(I18n.getMessage("thaw.common.closeTab"));
