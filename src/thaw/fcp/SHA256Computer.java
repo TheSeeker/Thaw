@@ -53,6 +53,7 @@ public class SHA256Computer extends Observable implements Runnable {
 				md.update(buf, 0, readBytes);
 				readBytes = bis.read(buf);
 				progress = (short) Math.round(readBytes * 100 / realFileSize);
+				setChanged();
 				notifyObservers();
 			}
 			
