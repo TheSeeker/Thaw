@@ -73,7 +73,6 @@ public class IndexConfigPanel implements ActionListener {
 		fetchNegative = new JCheckBox(I18n.getMessage("thaw.plugin.index.fetchNegative"));
 		fetchComments = new JCheckBox(I18n.getMessage("thaw.plugin.index.fetchComments"));
 
-
 		panel.add(autorefreshActivated);
 		panel.add(refreshIntervalLabel);
 		panel.add(refreshInterval);
@@ -91,6 +90,9 @@ public class IndexConfigPanel implements ActionListener {
 		resetValues();
 
 		updateTextFieldState();
+
+		fetchNegative.addActionListener(this);
+		fetchComments.addActionListener(this);
 	}
 
 
@@ -173,30 +175,38 @@ public class IndexConfigPanel implements ActionListener {
 				Boolean.toString(fetchNegative.isSelected()));
 		config.setValue("indexFetchComments",
 				Boolean.toString(fetchComments.isSelected()));
-
-		if (!fetchNegative.isSelected()
-		    && fetchComments.isSelected()) {
-			new WarningWindow(configWindow.getFrame(),
-					  I18n.getMessage("thaw.plugin.index.warningNonNegative"));
-		}
 	}
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == autorefreshActivated) {
 			updateTextFieldState();
+			return;
 		}
 
 		if (e.getSource() == configWindow.getOkButton()) {
 			saveValues();
+			return;
 		}
 
 		if (e.getSource() == configWindow.getCancelButton()) {
 			resetValues();
+			return;
 		}
 
 		if (e.getSource() == editBlackList) {
 			indexBrowser.getBlackList().displayPanel();
 			configWindow.close();
+			return;
+		}
+
+		if (e.getSource() == fetchComments
+		    || e.getSource() == fetchNegative) {
+			if (!fetchNegative.isSelected()
+			    && fetchComments.isSelected()) {
+				new WarningWindow(configWindow.getFrame(),
+						  I18n.getMessage("thaw.plugin.index.warningNonNegative"));
+			}
+			return;
 		}
 	}
 

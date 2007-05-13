@@ -98,7 +98,7 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 
 		tab = new JPanel(new BorderLayout(5, 5));
 
-		JLabel topLabel = new JLabel(I18n.getMessage("thaw.plugin.transferLogs.transferLogs") + " :");
+		JLabel topLabel = new JLabel(I18n.getMessage("thaw.plugin.transferLogs.transferLogs"));
 		topLabel.setIcon(IconBox.file);
 
 		model = new EventListModel();
