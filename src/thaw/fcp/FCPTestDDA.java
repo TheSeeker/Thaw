@@ -68,8 +68,17 @@ public class FCPTestDDA extends Observable implements FCPQuery, Observer {
 	protected boolean writeFile(String filename, String content) {
 		try {
 			FileOutputStream stream = new FileOutputStream(filename, false);
+			byte[] b;
 
-			stream.write(content.getBytes());
+			try {
+				b = content.getBytes("UTF-8");
+			} catch(java.io.UnsupportedEncodingException e) {
+				Logger.warning(this, "UnsupportedEncodingException : "+e.toString());
+				b = content.getBytes();
+			}
+
+			stream.write(b);
+
 			stream.close();
 
 			return true;
