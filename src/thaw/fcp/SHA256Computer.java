@@ -3,6 +3,7 @@ package thaw.fcp;
 import java.util.Observer;
 import java.util.Observable;
 
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.File;
 
@@ -37,10 +38,12 @@ public class SHA256Computer extends Observable implements Runnable {
 	public void run() {
 		try {
 			FileInputStream in = new FileInputStream(new File(file));
+			BufferedInputStream bis = new BufferedInputStream(in);
 			md = SHA256.getMessageDigest();
 			md.reset();
 			md.update(headers.getBytes("UTF-8"));
-			SHA256.hash(in, md);
+			SHA256.hash(bis, md);
+			in.close();
 			
 			synchronized (hashLock) {
 				hash = Base64.encode(md.digest());	
