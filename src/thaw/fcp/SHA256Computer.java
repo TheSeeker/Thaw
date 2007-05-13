@@ -1,6 +1,5 @@
 package thaw.fcp;
 
-import java.util.Observer;
 import java.util.Observable;
 
 import java.io.BufferedInputStream;
@@ -26,6 +25,8 @@ public class SHA256Computer extends Observable implements Runnable {
 	private final Object hashLock = new Object();
 	private final String file;
 	private final String headers;
+	private short progress = 0;
+	private boolean isFinished = false;
 
 	public final static int BLOCK_SIZE = 32768; /* 32 Ko */
 
@@ -36,19 +37,32 @@ public class SHA256Computer extends Observable implements Runnable {
 
 
 	public void run() {
+		File realFile = new File(file);
+		long realFileSize = realFile.length();
+		
 		try {
-			FileInputStream in = new FileInputStream(new File(file));
+			FileInputStream in = new FileInputStream(realFile);
 			BufferedInputStream bis = new BufferedInputStream(in);
 			md = SHA256.getMessageDigest();
 			md.reset();
 			md.update(headers.getBytes("UTF-8"));
-			SHA256.hash(bis, md);
+			
+			byte[] buf = new byte[4096];
+			int readBytes = bis.read(buf);
+			while(readBytes > -1) {
+				md.update(buf, 0, readBytes);
+				readBytes = bis.read(buf);
+				progress = (short) Math.round(readBytes * 100 / realFileSize);
+				notifyObservers();
+			}
+			
+			bis.close();
 			in.close();
 			
 			synchronized (hashLock) {
 				hash = Base64.encode(md.digest());	
 			}
-
+			isFinished = true;
 			SHA256.returnMessageDigest(md);
 
 		} catch(java.io.FileNotFoundException e) {
@@ -66,7 +80,12 @@ public class SHA256Computer extends Observable implements Runnable {
 	 * In %
 	 */
 	public int getProgression() {
-		return 0;
+		if(isFinished)
+			return 100;
+		else if(progress > 99)
+			return 99;
+		else 
+			return progress;
 	}
 
 	/**
@@ -76,5 +95,9 @@ public class SHA256Computer extends Observable implements Runnable {
 		synchronized (hashLock) {
 			return hash;	
 		}
+	}
+	
+	public boolean isFinished() {
+		return isFinished;
 	}
 }

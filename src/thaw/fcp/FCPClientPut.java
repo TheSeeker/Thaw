@@ -512,7 +512,10 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 	public void update(final Observable o, final Object param) {
 		if (o == sha) {
-			startProcess();
+			if(sha.isFinished())
+				startProcess();
+			else
+				progress = sha.getProgression();
 			return;
 		}
 
