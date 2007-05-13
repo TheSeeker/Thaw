@@ -22,6 +22,7 @@ public class SHA256Computer extends Observable implements Runnable {
 	private MessageDigest md;
 
 	private String hash;
+	private final Object hashLock = new Object();
 	private final String file;
 	private final String headers;
 
@@ -40,8 +41,10 @@ public class SHA256Computer extends Observable implements Runnable {
 			md.reset();
 			md.update(headers.getBytes("UTF-8"));
 			SHA256.hash(in, md);
-
-			hash = Base64.encode(md.digest());
+			
+			synchronized (hashLock) {
+				hash = Base64.encode(md.digest());	
+			}
 
 			SHA256.returnMessageDigest(md);
 
@@ -67,6 +70,8 @@ public class SHA256Computer extends Observable implements Runnable {
 	 * Returns the Base64Encode of the hash
 	 */
 	public String getHash() {
-		return hash;
+		synchronized (hashLock) {
+			return hash;	
+		}
 	}
 }
