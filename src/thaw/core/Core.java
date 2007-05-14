@@ -654,7 +654,7 @@ public class Core implements Observer {
 			I18n.getMessage("thaw.warning.DDA.l3") + "\n" +
 			I18n.getMessage("thaw.warning.DDA.l4");
 
-		text = text.replace("#", I18n.getMessage("thaw.config.sameComputer"));
+		text = text.replaceAll("#", I18n.getMessage("thaw.config.sameComputer"));
 
 		int ret = JOptionPane.showConfirmDialog(mainWindow.getMainFrame(),
 							text,
