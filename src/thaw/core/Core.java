@@ -358,6 +358,66 @@ public class Core implements Observer {
 	}
 
 
+
+	private static class LnFSetter implements Runnable {
+		private Core core;
+		private String theme;
+
+		public LnFSetter(Core c, String t) {
+			core = c;
+			theme = t;
+		}
+
+		public void run() {
+			try {
+				UIManager.setLookAndFeel(theme);
+			} catch(ClassNotFoundException e) {
+				Logger.error(this, "Theme '"+theme+"' not found ! : "+e.toString());
+			} catch(InstantiationException e) {
+				Logger.error(this, "(1) Error while loading theme '"+theme+"' : "+e.toString());
+			} catch(IllegalAccessException e) {
+				Logger.error(this, "(2) Error while loading theme '"+theme+"' : "+e.toString());
+			} catch(javax.swing.UnsupportedLookAndFeelException e) {
+				Logger.error(this, "(3) Error while loading theme '"+theme+"' : "+e.toString());
+			}
+
+			if (core.getMainWindow() != null)
+				javax.swing.SwingUtilities.updateComponentTreeUI(core.getMainWindow().getMainFrame());
+			if (core.getConfigWindow() != null)
+				javax.swing.SwingUtilities.updateComponentTreeUI(core.getConfigWindow().getFrame());
+		}
+	}
+
+
+	public static void setTheme(Core core, String theme) {
+		if (theme == null) {
+			if (core.getConfig() != null)
+				theme = core.getConfig().getValue("lookAndFeel");
+
+			if (theme == null)
+				theme = UIManager.getSystemLookAndFeelClassName();
+		}
+
+		if (theme == null)
+			return;
+
+		Logger.notice(core, "Setting theme : "+ theme);
+
+		LnFSetter s = new LnFSetter(core, theme);
+
+		try {
+			javax.swing.SwingUtilities.invokeAndWait(s);
+		} catch(InterruptedException e) {
+			Logger.error(s, "Interrupted while setting theme '"+theme+"' !");
+			Logger.error(s, "Interrupted because: "+e.toString());
+		} catch(java.lang.reflect.InvocationTargetException e) {
+			Logger.error(s, "Error while setting theme : "+e.toString());
+		}
+	}
+
+
+
+
 	/**
 	 * This method sets the look and feel specified with setLookAndFeel().
 	 * If none was specified, the System Look and Feel is set.
@@ -368,15 +428,7 @@ public class Core implements Observer {
 		JDialog.setDefaultLookAndFeelDecorated(false);
 
 		try {
-			if (Core.lookAndFeel == null) {
-				if (config != null
-				    && config.getValue("lookAndFeel") != null)
-					UIManager.setLookAndFeel(config.getValue("lookAndFeel"));
-				else
-					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			} else {
-				UIManager.setLookAndFeel(Core.lookAndFeel);
-			}
+			setTheme(this, Core.lookAndFeel);
 
 			if (splashScreen != null)
 				splashScreen.rebuild();

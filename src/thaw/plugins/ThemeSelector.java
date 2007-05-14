@@ -104,7 +104,8 @@ public class ThemeSelector implements thaw.core.Plugin, Observer, ListSelectionL
 		if (theme == null)
 			theme = UIManager.getSystemLookAndFeelClassName();
 
-		setTheme(core, theme);
+		Thread th = new Thread(new ThemeSetter(theme));
+		th.start();
 	}
 
 
@@ -130,21 +131,24 @@ public class ThemeSelector implements thaw.core.Plugin, Observer, ListSelectionL
 	}
 
 
-	public static void setTheme(Core core, String theme) {
-		try {
-			Logger.notice(core, "Setting theme : "+ theme);
-			UIManager.setLookAndFeel(theme);
-			javax.swing.SwingUtilities.updateComponentTreeUI(core.getMainWindow().getMainFrame());
-			javax.swing.SwingUtilities.updateComponentTreeUI(core.getConfigWindow().getFrame());
-		} catch(Exception exc) {
-			Logger.error(new ThemeSelector(), "Error while changing theme : "+exc.toString());
+	private class ThemeSetter implements Runnable {
+		private String theme;
+
+		public ThemeSetter(String t) {
+			theme = t;
+		}
+
+		public void run() {
+			Core.setTheme(core, theme);
 		}
 	}
+
 
 	public void valueChanged(ListSelectionEvent e) {
 		if (e.getFirstIndex() >= 0
 		    && themes.get(e.getFirstIndex()) != null) {
-			setTheme(core, ((String)themeList.getSelectedValue()));
+			Thread th = new Thread(new ThemeSetter((String)themeList.getSelectedValue()));
+			th.start();
 		}
 	}
 }
