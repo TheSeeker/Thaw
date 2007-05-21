@@ -684,7 +684,8 @@ public class Core implements Observer {
 			if ("ProtocolError".equals(m.getMessageName())) {
 				int code = Integer.parseInt(m.getValue("Code"));
 
-				if (code == 9 /* File not found */
+				if (code == 8 /* Invalid field (?!) */
+				    || code == 9 /* File not found */
 				    || code == 10 /* Disk target exists */
 				    || code == 12 /* Couldn't create file */
 				    || code == 13 /* Couldn't write file */
