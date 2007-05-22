@@ -145,11 +145,11 @@ public class CommentTab implements ActionListener {
 
 		if (titleLabel != null) {
 			if (index != null)
-				titleLabel.setText(I18n.getMessage("thaw.plugin.index.comment.commentList")
+				titleLabel.setText(I18n.getMessage("thaw.plugin.index.comment.commentListTitle")
 						   +" '"+index.toString()+"'"
 						   +" :");
 			else
-				titleLabel.setText(I18n.getMessage("thaw.plugin.index.comment.commentList")
+				titleLabel.setText(I18n.getMessage("thaw.plugin.index.comment.commentListTitle")
 						   +" (null)"
 						   +" :");
 		}
