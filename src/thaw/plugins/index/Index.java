@@ -393,6 +393,11 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		return publicKey;
 	}
 
+
+	public boolean isObsolete() {
+		return (getPublicKey().indexOf("AQABAAE") > 0);
+	}
+
 	public int getRevision() {
 		if (rev < 0) {
 			Logger.debug(this, "getRevision() => loadData()");

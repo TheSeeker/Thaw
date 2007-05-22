@@ -702,6 +702,8 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 								       final boolean hasFocus) {
 			setBackgroundNonSelectionColor(tree.getBackground());
 			setBackgroundSelectionColor(IndexTree.SELECTION_COLOR);
+			setTextNonSelectionColor(Color.BLACK);
+			setTextSelectionColor(Color.BLACK);
 
 			if(value instanceof DefaultMutableTreeNode || value instanceof IndexTreeNode) {
 				Object o;
@@ -723,6 +725,11 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 						setLeafIcon(IconBox.minIndex);
 					} else {
 						setLeafIcon(IconBox.minIndexReadOnly);
+					}
+
+					if (index.isObsolete()) {
+						setTextNonSelectionColor(Color.RED);
+						setTextSelectionColor(Color.RED);
 					}
 
 				}
