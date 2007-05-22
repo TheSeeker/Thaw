@@ -1585,9 +1585,11 @@ public class IndexManagementHelper {
 		public void setTarget(final IndexTreeNode node) {
 			super.setTarget(node);
 
-			if (getActionSource() != null)
-				getActionSource().setEnabled(node instanceof Index
+			if (getActionSource() != null) {
+				getActionSource().setEnabled(node != null
+							     && node instanceof Index
 							     && ((Index)node).canHaveComments());
+			}
 		}
 
 
@@ -1661,6 +1663,9 @@ public class IndexManagementHelper {
 									 getIndexBrowserPanel().getMainWindow(),
 									 i,
 									 textArea.getText().trim());
+
+					//if (getActionSource() != null)
+					//	getActionSource().setEnabled(false);
 				}
 
 				closeDialog = true;

@@ -1922,6 +1922,9 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	}
 
 
+	/**
+	 * @return true if the public key to fetch the comments is available
+	 */
 	public boolean canHaveComments() {
 		return (getCommentPublicKey() != null);
 	}

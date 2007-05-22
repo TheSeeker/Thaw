@@ -67,18 +67,19 @@ public class CommentTab implements ActionListener {
 
 		buttonActions = new Vector();
 
+		/*
 		button = new JButton(I18n.getMessage("thaw.plugin.index.comment.add"), IconBox.minAddComment);
 		buttonActions.add(new IndexManagementHelper.IndexCommentAdder(queueManager, indexBrowser, button));
 
 		northPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.comment.commentList")+" :"));
 		northPanel.add(button, BorderLayout.WEST);
 		northPanel.add(closeTabButton, BorderLayout.EAST);
+		*/
 
 		button = new JButton(I18n.getMessage("thaw.plugin.index.comment.add"), IconBox.minAddComment);
 		buttonActions.add(new IndexManagementHelper.IndexCommentAdder(queueManager, indexBrowser, button));
 
-		southPanel.add(new JLabel(""), BorderLayout.CENTER);
-		southPanel.add(button, BorderLayout.WEST);
+		southPanel.add(button, BorderLayout.CENTER);
 
 
 		centerPanel = new JPanel();
