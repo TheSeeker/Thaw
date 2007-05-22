@@ -305,7 +305,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		{
 			"LOWER(filename)",
 			"size",
-			"LOWER(key)",
+			"LOWER(publicKey)",
 			null
 		};
 
