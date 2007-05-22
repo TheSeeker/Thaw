@@ -1373,7 +1373,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 					insertLinkSt.execute();
 				} catch(SQLException e) {
-					Logger.error(this, "Error while adding link : "+e.toString());
+					Logger.error(this, "Error while adding link to index '"+toString()+"' : "+e.toString());
 				}
 
 				return;
@@ -1391,6 +1391,8 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 					String key = attrs.getValue("key");
 					String filename = FreenetURIHelper.getFilenameFromKey(key);
+					if (filename == null)
+						filename = key;
 					String mime = attrs.getValue("mime");
 					long size = Long.parseLong(attrs.getValue("size"));
 
@@ -1404,7 +1406,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 						insertFileSt.execute();
 					}
 				} catch(SQLException e) {
-					Logger.error(this, "Error while adding file: "+e.toString());
+					Logger.error(this, "Error while adding file to index '"+toString()+"' : "+e.toString());
 				}
 
 				return;
@@ -1580,7 +1582,9 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 				// Parse the input
 				SAXParser saxParser = factory.newSAXParser();
+				Logger.info(this, "Parsing index ...");
 				saxParser.parse(input, handler );
+				Logger.info(this, "Parsing done");
 			} catch(javax.xml.parsers.ParserConfigurationException e) {
 				Logger.error(this, "Error (1) while parsing index: "+e.toString());
 			} catch(org.xml.sax.SAXException e) {
