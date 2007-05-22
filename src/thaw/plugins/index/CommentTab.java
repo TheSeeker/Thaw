@@ -90,7 +90,7 @@ public class CommentTab implements ActionListener {
 		centerPanel = new JPanel();
 
 		tabPanel.add(northPanel,  BorderLayout.NORTH);
-		tabPanel.add(centerPanel, BorderLayout.CENTER);
+		tabPanel.add(new JScrollPane(centerPanel), BorderLayout.CENTER);
 		tabPanel.add(southPanel,  BorderLayout.SOUTH);
 	}
 
@@ -131,7 +131,7 @@ public class CommentTab implements ActionListener {
 			}
 		}
 
-		centerPanel.add(new JScrollPane(insidePanel), BorderLayout.NORTH);
+		centerPanel.add(insidePanel, BorderLayout.NORTH);
 		centerPanel.add(new JLabel(""), BorderLayout.CENTER);
 
 		centerPanel.revalidate();
