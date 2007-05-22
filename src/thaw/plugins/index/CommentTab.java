@@ -43,6 +43,8 @@ public class CommentTab implements ActionListener {
 	private Config config;
 	private IndexBrowserPanel indexBrowser;
 
+	private JLabel titleLabel = null;
+
 
 	public CommentTab(Config config,
 			  FCPQueueManager queueManager,
@@ -73,8 +75,9 @@ public class CommentTab implements ActionListener {
 		northPanel.add(button, BorderLayout.WEST);
 		*/
 
-		northPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.comment.commentList")+" :"),
-			       BorderLayout.CENTER);
+		titleLabel = new JLabel(I18n.getMessage("thaw.plugin.index.comment.commentList")+" :");
+
+		northPanel.add(titleLabel,     BorderLayout.CENTER);
 		northPanel.add(closeTabButton, BorderLayout.EAST);
 
 
@@ -139,6 +142,18 @@ public class CommentTab implements ActionListener {
 	 * will reset the page to 0
 	 */
 	public void setIndex(Index index) {
+
+		if (titleLabel != null) {
+			if (index != null)
+				titleLabel.setText(I18n.getMessage("thaw.plugin.index.comment.commentList")
+						   +" '"+index.toString()+"'"
+						   +" :");
+			else
+				titleLabel.setText(I18n.getMessage("thaw.plugin.index.comment.commentList")
+						   +" (null)"
+						   +" :");
+		}
+
 		for (Iterator it = buttonActions.iterator();
 		     it.hasNext();) {
 			IndexManagementHelper.IndexAction action = (IndexManagementHelper.IndexAction)it.next();
