@@ -261,6 +261,9 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 				+ query.getFilename();
 			key = query.getFileKey();
 		} else {
+			if (query.getPath() == null)
+				return;
+
 			str =  I18n.getMessage("thaw.plugin.transferLogs.insertion.added") + " : "
 				+ query.getPath();
 			key = null;

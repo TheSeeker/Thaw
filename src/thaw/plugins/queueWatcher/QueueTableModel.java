@@ -121,9 +121,20 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 		if( ((isForInsertions && (column == 3))
 		     || (!isForInsertions && (column == 4)) ) ) {
-			if(!query.isFinished() || query.isSuccessful())
-				return new Integer(query.getProgression());
-			else
+
+			if(!query.isFinished() || query.isSuccessful()) {
+				int progress;
+
+				if ((query instanceof thaw.fcp.FCPClientPut
+				     && (query.getTransferWithTheNodeProgression() < 100))
+				    || ((query instanceof thaw.fcp.FCPClientGet)
+					&& (query.getTransferWithTheNodeProgression() > 0)))
+					progress = query.getTransferWithTheNodeProgression();
+				else
+					progress = query.getProgression();
+
+				return new Integer(progress);
+			} else
 				return new Integer(-1);
 
 		}
