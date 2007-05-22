@@ -61,12 +61,24 @@ public class FreenetURIHelper {
 		cutcut = key.split("/");
 
 		if ( (!key.startsWith("USK@")) || cutcut.length >= 4) {
-			filename = cutcut[cutcut.length-1];
-		} else {
 			if (cutcut.length >= 2)
-				filename = cutcut[cutcut.length-2];
-			else
 				filename = cutcut[cutcut.length-1];
+			else /* this key is nameless */
+				filename = null;
+		} else {
+			if (cutcut.length >= 2) {
+				filename = cutcut[cutcut.length-2];
+			} else {
+				filename = cutcut[cutcut.length-1];
+			}
+		}
+
+		if (filename != null) {
+			try {
+				filename = java.net.URLDecoder.decode(filename, "UTF-8");
+			} catch (final java.io.UnsupportedEncodingException e) {
+				Logger.warning(filename, "UnsupportedEncodingException (UTF-8): "+e.toString());
+			}
 		}
 
 		return filename;

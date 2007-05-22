@@ -99,6 +99,21 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		identifier = id;
 
+		/* FIX : This is a fix for the files inserted by Frost */
+		/* To remove when bback will do his work correctly */
+		if (filename == null && id != null) {
+			Logger.warning(this, "Fixing Frost key filename");
+			String[] split = id.split("-");
+
+			if (split.length >= 2) {
+				filename = "";
+				for (int i = 1 ; i < split.length; i++)
+					filename += split[i];
+			}
+		}
+		/* /FIX */
+
+
 		successful = true;
 		running = true;
 
@@ -127,8 +142,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 
 	/**
-	 * Entry point:
-	 * Only for initial queries : To resume queries, use FCPClientGet(FCPQueueManager, Hashmap).
+	 * Entry point: Only for initial queries
 	 * @param destinationDir if null => temporary file
 	 * @param persistence 0 = Forever ; 1 = Until node reboot ; 2 = Until the app disconnect
 	 */
@@ -153,16 +167,14 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		progress = 0;
 		fileSize = 0;
-		attempt = 0;
+		attempt  = 0;
 
 		status = "Waiting";
 
 		filename = FreenetURIHelper.getFilenameFromKey(key);
 
-		try {
-			filename = java.net.URLDecoder.decode(filename, "UTF-8");
-		} catch (final java.io.UnsupportedEncodingException e) {
-			Logger.warning(this, "UnsupportedEncodingException (UTF-8): "+e.toString());
+		if (filename == null) {
+			Logger.warning(this, "Nameless key !!");
 		}
 
 		Logger.debug(this, "Query for getting "+key+" created");

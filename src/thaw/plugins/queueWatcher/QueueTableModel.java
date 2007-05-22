@@ -96,8 +96,14 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 		final FCPTransferQuery query = (FCPTransferQuery)queries.get(row);
 
-		if(column == 0)
-			return query.getFilename();
+		if(column == 0) {
+			String filename = query.getFilename();
+
+			if (filename == null)
+				return "(null)";
+
+			return filename;
+		}
 
 		if(column == 1)
 			return thaw.gui.GUIHelper.getPrintableSize(query.getFileSize());
