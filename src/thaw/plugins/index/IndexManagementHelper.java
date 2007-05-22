@@ -1658,6 +1658,7 @@ public class IndexManagementHelper {
 					}
 
 					((Index)getTarget()).postComment(getQueueManager(),
+									 getIndexBrowserPanel().getMainWindow(),
 									 i,
 									 textArea.getText().trim());
 				}

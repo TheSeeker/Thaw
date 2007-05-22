@@ -21,6 +21,7 @@ import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
+import javax.swing.JOptionPane;
 
 import java.awt.GridLayout;
 import java.awt.BorderLayout;
@@ -82,6 +83,7 @@ import freenet.crypt.DSASignature;
 
 import thaw.core.Config;
 import thaw.core.Logger;
+import thaw.core.MainWindow; /* used for warning popups */
 import thaw.core.I18n;
 
 import thaw.fcp.FreenetURIHelper;
@@ -452,15 +454,16 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 
 	private FCPQueueManager queueManager;
-
+	private MainWindow      mainWindow;
 
 	/**
 	 * @param privateKey must be an SSK without anything useless
 	 */
-	public boolean insertComment(FCPQueueManager queueManager) {
+	public boolean insertComment(FCPQueueManager queueManager, MainWindow mainWindow) {
 		String privateKey = index.getCommentPrivateKey();
 
 		this.queueManager = queueManager;
+		this.mainWindow   = mainWindow;
 
 		java.io.File xmlFile = writeCommentToFile();
 
@@ -817,7 +820,24 @@ public class Comment extends Observable implements Observer, ActionListener {
 				if (put.isFinished() && put.isSuccessful()) {
 					if (put.stop(queueManager))
 						queueManager.remove(put);
-					/* because the PersistentPut message sent by the node problably made it added to the queueManager  by the QueueLoader*/
+					/* because the PersistentPut message sent by the node problably made it
+					 * added to the queueManager  by the QueueLoader*/
+				} else if (put.isFinished() && !put.isSuccessful()) {
+					int ret = JOptionPane.showOptionDialog(mainWindow.getMainFrame(),
+									       I18n.getMessage("thaw.plugin.index.comment.failed"),
+									       I18n.getMessage("thaw.error.title"),
+									       JOptionPane.YES_NO_OPTION,
+									       JOptionPane.ERROR_MESSAGE,
+									       null,
+									       null,
+									       null);
+					if (ret == JOptionPane.YES_OPTION) {
+						/* we stop */
+						if (put.stop(queueManager))
+							queueManager.remove(put);
+						/* and we restart */
+						insertComment(queueManager, mainWindow);
+					}
 				}
 			}
 

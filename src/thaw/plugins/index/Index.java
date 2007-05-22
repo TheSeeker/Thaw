@@ -56,6 +56,7 @@ import javax.xml.parsers.SAXParser;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.Config;
+import thaw.core.MainWindow;
 
 import thaw.fcp.FreenetURIHelper;
 import thaw.fcp.FCPClientGet;
@@ -1926,7 +1927,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	}
 
 
-	public boolean postComment(FCPQueueManager queueManager, Identity author, String msg) {
+	public boolean postComment(FCPQueueManager queueManager, MainWindow mainWindow, Identity author, String msg) {
 		String privKey;
 
 		if ((privKey = getCommentPrivateKey()) == null) {
@@ -1935,7 +1936,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 		Comment comment = new Comment(db, this, -1, author, msg);
 
-		return comment.insertComment(queueManager);
+		return comment.insertComment(queueManager, mainWindow);
 	}
 
 
