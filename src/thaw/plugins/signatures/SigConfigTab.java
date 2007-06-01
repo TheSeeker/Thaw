@@ -141,7 +141,7 @@ public class SigConfigTab implements ActionListener {
 		minLevel.setSelectedItem(I18n.getMessage(Identity.trustLevelStr[i]));
 	}
 
-	protected class YourIdentitiesPanel implements ActionListener, java.awt.event.WindowListener {
+	protected class YourIdentitiesPanel implements ActionListener {
 		private JDialog dialog;
 
 		private JList list;
@@ -156,12 +156,9 @@ public class SigConfigTab implements ActionListener {
 
 
 		public YourIdentitiesPanel() {
-			configWindow.setEnabled(false);
-
 			dialog = new JDialog(configWindow.getFrame(),
 					     I18n.getMessage("thaw.plugin.signature.dialogTitle.yourIdentities"));
 
-			dialog.addWindowListener(this);
 
 			dialog.getContentPane().setLayout(new BorderLayout(5, 5));
 
@@ -336,36 +333,7 @@ public class SigConfigTab implements ActionListener {
 
 			if (e.getSource() == closeWindow) {
 				dialog.setVisible(false);
-				configWindow.setEnabled(true);
 			}
-		}
-
-		public void windowActivated(final WindowEvent e) {
-
-		}
-
-		public void windowClosing(final WindowEvent e) {
-			// todo //
-		}
-
-		public void windowClosed(final WindowEvent e) {
-			configWindow.setEnabled(true);
-		}
-
-		public void windowDeactivated(final WindowEvent e) {
-			// We don't care
-		}
-
-		public void windowDeiconified(final WindowEvent e) {
-			// idem
-		}
-
-		public void windowIconified(final WindowEvent e) {
-			// idem
-		}
-
-		public void windowOpened(final WindowEvent e) {
-			// idem
 		}
 
 
