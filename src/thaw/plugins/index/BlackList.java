@@ -239,25 +239,21 @@ public class BlackList implements ActionListener {
 				PreparedStatement st;
 
 				st = db.getConnection().prepareStatement("SELECT id, publicKey FROM indexBlackList WHERE "+
-									 "LOWER(publicKey) LIKE ?");
+									 "LOWER(publicKey) LIKE ? LIMIT 1");
 				st.setString(1, FreenetURIHelper.getComparablePart(key) +"%");
 
 				ResultSet res = st.executeQuery();
 
-				while(res.next()) {
-					String pubKey = res.getString("publicKey").replaceAll(".xml", ".frdx");
+				if (!res.next())
+					return -1;
 
-					if (FreenetURIHelper.compareKeys(pubKey, key)) {
-						return res.getInt("id");
-					}
-				}
+				return res.getInt("id");
 			}
 		} catch(SQLException e) {
 			Logger.error(new BlackList(), "Error while checking if a given key is blacklisted : "+ e.toString());
 			return -1;
 		}
 
-		return -1;
 	}
 
 	/**
@@ -288,19 +284,18 @@ public class BlackList implements ActionListener {
 
 
 				st = db.getConnection().prepareStatement("SELECT id, publicKey FROM links WHERE "+
-									 "LOWER(publicKey) LIKE ?");
+									 "LOWER(publicKey) LIKE ? LIMIT 1");
 				st.setString(1, FreenetURIHelper.getComparablePart(key) +"%");
 
 				ResultSet res = st.executeQuery();
 
-				while(res.next()) {
-					String pubKey = res.getString("publicKey").replaceAll(".xml", ".frdx");
 
-					if (FreenetURIHelper.compareKeys(pubKey, key)) {
-						anotherSt.setInt(1, res.getInt("id"));
-						anotherSt.execute();
-					}
+				if (!res.next()) {
+					return false;
 				}
+
+				anotherSt.setInt(1, res.getInt("id"));
+				anotherSt.execute();
 
 			}
 		} catch(SQLException e) {
@@ -334,12 +329,8 @@ public class BlackList implements ActionListener {
 				ResultSet res = st.executeQuery();
 
 				while(res.next()) {
-					String pubKey = res.getString("publicKey").replaceAll(".xml", ".frdx");
-
-					if (FreenetURIHelper.compareKeys(pubKey, key)) {
-						anotherSt.setInt(1, res.getInt("id"));
-						anotherSt.execute();
-					}
+					anotherSt.setInt(1, res.getInt("id"));
+					anotherSt.execute();
 				}
 
 
