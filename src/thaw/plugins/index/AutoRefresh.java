@@ -83,7 +83,7 @@ public class AutoRefresh implements Runnable, java.util.Observer {
 
 	public int updateNext(int lastIdx) {
 		if (browserPanel.getIndexTree().numberOfUpdatingIndexes() >= nmbIndexesPerInterval) {
-			Logger.notice(this, "Too many indexes are updating ; won't auto-update another one");
+			Logger.debug(this, "Too many indexes are updating ; won't auto-update another one");
 			return lastIdx;
 		}
 
@@ -138,10 +138,7 @@ public class AutoRefresh implements Runnable, java.util.Observer {
 
 	public void update(java.util.Observable o, Object param) {
 
-		if (((Index)o).hasChanged())
-			browserPanel.getIndexTree().redraw();
-		else
-			browserPanel.getIndexTree().redraw();
+		browserPanel.getIndexTree().refresh(((Index)o).getTreePath(browserPanel.getIndexTree()));
 
 		if (o.equals(browserPanel.getTables().getFileTable().getFileList())) {
 			browserPanel.getTables().getFileTable().refresh();

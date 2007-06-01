@@ -555,7 +555,9 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 
 	public void refresh(TreePath path) {
-		refresh();
+		Object[] nodes = path.getPath();
+		for (int i = 0 ; i < nodes.length ; i++)
+			refresh((IndexTreeNode)(nodes[i]));
 	}
 
 
@@ -578,10 +580,11 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		//refresh(node);
 		forceHasChangedFlagReload = true;
 		if (treeModel != null) {
-			if (node != null && node.isInTree())
+			if (node != null && node.isInTree()) {
 				treeModel.nodeChanged(node.getTreeNode());
-			else
+			} else {
 				treeModel.nodeChanged(getRoot().getTreeNode());
+			}
 		}
 		forceHasChangedFlagReload = false;
 	}
