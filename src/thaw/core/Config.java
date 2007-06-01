@@ -294,6 +294,6 @@ public class Config {
 		setDefaultValue("advancedMode", "false");
 		setDefaultValue("userNickname", "Another anonymous");
 		setDefaultValue("multipleSockets", "true");
-		setDefaultValue("sameComputer", "false");
+		setDefaultValue("sameComputer", "true");
 	}
 }
