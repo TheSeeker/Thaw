@@ -1213,13 +1213,13 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 	private boolean lastHasChangedValue = false;
 	private boolean hasLastHasChangedValueBeenSet = false;
 
-	public void forceHasChangedReload() {
+	public void forceFlagsReload() {
 		if (children != null) {
 			synchronized(children) {
 				for (Iterator it = children.iterator();
 				     it.hasNext();) {
 					IndexTreeNode child = (IndexTreeNode)it.next();
-					child.forceHasChangedReload();
+					child.forceFlagsReload();
 				}
 			}
 		}

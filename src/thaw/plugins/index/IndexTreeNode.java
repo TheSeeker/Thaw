@@ -71,7 +71,7 @@ public interface IndexTreeNode {
 
 
 	/**
-	 * Will also force newComment flag reloading
+	 * Will force hasChanged & newComment flag reloading
 	 */
-	public void forceHasChangedReload();
+	public void forceFlagsReload();
 }

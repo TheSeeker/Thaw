@@ -532,8 +532,6 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	}
 
 
-	private boolean forceHasChangedFlagReload = false;
-
 
 	public void refresh() {
 		refresh(((IndexTreeNode)null));
@@ -541,7 +539,8 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 
 	public void refresh(IndexTreeNode node) {
-		forceHasChangedFlagReload = true;
+		if (node != null)
+			node.forceFlagsReload();
 
 		if (treeModel != null) {
 			if (node != null && node.isInTree())
@@ -549,8 +548,6 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			else
 				treeModel.reload(getRoot().getTreeNode());
 		}
-
-		forceHasChangedFlagReload = false;
 	}
 
 
@@ -577,8 +574,9 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	}
 
 	public void redraw(IndexTreeNode node) {
-		//refresh(node);
-		forceHasChangedFlagReload = true;
+		if (node != null)
+			node.forceFlagsReload();
+
 		if (treeModel != null) {
 			if (node != null && node.isInTree()) {
 				treeModel.nodeChanged(node.getTreeNode());
@@ -586,7 +584,6 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 				treeModel.nodeChanged(getRoot().getTreeNode());
 			}
 		}
-		forceHasChangedFlagReload = false;
 	}
 
 	public void redraw(TreePath path) {
@@ -741,10 +738,6 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 					/* Remember that for the index category,
 					   this kind of query is recursive */
 					boolean modifiable = ((IndexTreeNode)o).isModifiable();
-
-					if (forceHasChangedFlagReload)
-						((IndexTreeNode)o).forceHasChangedReload();
-
 					boolean hasChanged = ((IndexTreeNode)o).hasChanged();
 					boolean newComment = ((IndexTreeNode)o).hasNewComment();
 

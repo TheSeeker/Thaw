@@ -365,7 +365,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		synchronized(db.dbLock) {
 			try {
 				PreparedStatement st =
-					db.getConnection().prepareStatement("SELECT publicKey, revision, privateKey, displayName FROM indexes WHERE id = ? LIMIT 1");
+					db.getConnection().prepareStatement("SELECT publicKey, revision, privateKey, displayName, newRev, newComment FROM indexes WHERE id = ? LIMIT 1");
 
 				st.setInt(1, id);
 
@@ -376,6 +376,8 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 					privateKey = set.getString("privateKey");
 					rev = set.getInt("revision");
 					displayName = set.getString("displayName");
+					hasChanged = set.getBoolean("newRev");
+					newComment = set.getBoolean("newComment");
 					return true;
 				} else {
 					Logger.error(this, "Unable to find index "+Integer.toString(id)+" in the database ?!");
@@ -1677,8 +1679,8 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	}
 
 
-	public void forceHasChangedReload() {
-		Logger.debug(this, "forceHasChangedReload() => loadData()");
+	public void forceFlagsReload() {
+		Logger.debug(this, "forceReload() => loadData()");
 		loadData();
 	}
 

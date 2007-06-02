@@ -138,7 +138,7 @@ public class AutoRefresh implements Runnable, java.util.Observer {
 
 	public void update(java.util.Observable o, Object param) {
 
-		browserPanel.getIndexTree().refresh(((Index)o).getTreePath(browserPanel.getIndexTree()));
+		browserPanel.getIndexTree().redraw(((Index)o).getTreePath(browserPanel.getIndexTree()));
 
 		if (o.equals(browserPanel.getTables().getFileTable().getFileList())) {
 			browserPanel.getTables().getFileTable().refresh();
