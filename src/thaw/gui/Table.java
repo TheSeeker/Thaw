@@ -23,6 +23,7 @@ import thaw.core.Logger;
 import thaw.core.Config;
 import thaw.core.I18n;
 
+import thaw.fcp.FreenetURIHelper;
 import thaw.fcp.FCPTransferQuery;
 import thaw.fcp.FCPClientPut;
 import thaw.fcp.FCPClientGet;
@@ -41,6 +42,8 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 	public final static int TIME_BEFORE_SAVING = 500; /* in ms */
 	private boolean hasChanged = false;
 	private Thread savingThread;
+
+	private int columnWithKeys = -1;
 
 
 	public Table(Config config, String prefix) {
@@ -97,6 +100,10 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 		setDefaultRenderer();
 		setConfigPrefix(config, prefix);
 		setAsListener();
+	}
+
+	public void specifyColumnWithKeys(int c) {
+		columnWithKeys = c;
 	}
 
 
@@ -217,6 +224,16 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 				else
 					cell.setBackground(softGray);
 			}
+
+			cell.setForeground(Color.BLACK);
+
+
+			if (column == columnWithKeys && value instanceof String) {
+				String key = (String)value;
+				if (FreenetURIHelper.isObsolete(key))
+					cell.setForeground(Color.RED);
+			}
+
 			return cell;
 		}
 

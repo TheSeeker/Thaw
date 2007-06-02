@@ -402,7 +402,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 
 	public boolean isObsolete() {
-		return (getPublicKey().indexOf("AQABAAE") > 0);
+		return FreenetURIHelper.isObsolete(getPublicKey());
 	}
 
 	public int getRevision() {

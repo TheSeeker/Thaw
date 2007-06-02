@@ -335,5 +335,29 @@ public class FreenetURIHelper {
 
 		return false;
 	}
+
+
+
+	public static boolean isObsolete(String key) {
+
+		if (key.startsWith("KSK"))
+			return false;
+
+		if (key.startsWith("SSK") || key.startsWith("USK")) {
+			if (key.indexOf("AQABAAE") > 0)
+				return true;
+
+			return false;
+		}
+
+		if (key.startsWith("CHK")) {
+			if (key.indexOf(",AAE") > 0)
+				return true;
+
+			return false;
+		}
+
+		return true;
+	}
 }
 

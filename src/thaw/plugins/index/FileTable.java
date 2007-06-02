@@ -44,7 +44,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 	private final JPanel panel;
 
-	private final JTable table;
+	private final Table table;
 	private FileListModel fileListModel;
 
 	private FileList fileList;
@@ -90,7 +90,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		//table = new JTable(fileListModel);
 		table.setShowGrid(false);
 		table.setIntercellSpacing(new java.awt.Dimension(0, 0));
-
+		table.specifyColumnWithKeys(2);
 		table.addMouseListener(this);
 
 		final JTableHeader header = table.getTableHeader();
