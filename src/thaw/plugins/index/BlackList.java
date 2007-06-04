@@ -276,26 +276,17 @@ public class BlackList implements ActionListener {
 		try {
 			synchronized(db.dbLock) {
 				PreparedStatement st = db.getConnection().prepareStatement("INSERT INTO indexBlackList (publicKey, name) VALUES (?, ?)");
-				PreparedStatement anotherSt = db.getConnection().prepareStatement("UPDATE links SET blackListed = true WHERE id = ?");
 
 				st.setString(1, key);
 				st.setString(2, Index.getNameFromKey(key));
 				st.execute();
 
-
-				st = db.getConnection().prepareStatement("SELECT id, publicKey FROM links WHERE "+
-									 "LOWER(publicKey) LIKE ? LIMIT 1");
+				st = db.getConnection().prepareStatement("UPDATE links "+
+									 "SET blackListed = true "+
+									 "WHERE LOWER(publicKey) LIKE ?");
 				st.setString(1, FreenetURIHelper.getComparablePart(key) +"%");
 
-				ResultSet res = st.executeQuery();
-
-
-				if (!res.next()) {
-					return false;
-				}
-
-				anotherSt.setInt(1, res.getInt("id"));
-				anotherSt.execute();
+				st.execute();
 
 			}
 		} catch(SQLException e) {

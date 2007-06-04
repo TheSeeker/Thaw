@@ -57,8 +57,9 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 
 			boolean global = true;
 
-			if("false".equals( msg.getValue("Global") ))
-				global = false;
+			if (msg.getValue("Global") != null) {
+				global = Boolean.valueOf(msg.getValue("Global"));
+			}
 
 			String destinationDir = null;
 

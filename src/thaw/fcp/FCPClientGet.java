@@ -603,8 +603,12 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 		Logger.info(this, "Duplicating socket ...");
 
-		duplicatedQueryManager = queueManager.getQueryManager().duplicate(identifier);
-		duplicatedQueryManager.addObserver(this);
+		if (globalQueue) {
+			duplicatedQueryManager = queueManager.getQueryManager().duplicate(identifier);
+			duplicatedQueryManager.addObserver(this);
+		} else { /* won't duplicate ; else it will use another id */
+			duplicatedQueryManager = queueManager.getQueryManager();
+		}
 
 		Logger.info(this, "Waiting for socket  ...");
 		status = "Waiting for socket availability ...";
