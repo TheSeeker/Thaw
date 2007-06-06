@@ -17,13 +17,12 @@ public class FCPGetNode extends Observable implements FCPQuery, Observer {
 		"version",
 		"dsaPubKey.y",
 		"physical.udp",
-		"oldark.pubURI",
-		"oldark.number",
 		"dsaGroup.g",
 		"dsaGroup.q",
 		"dsaGroup.p",
 		"ark.pubURI",
-		"ark.number"
+		"ark.number",
+		"auth.negTypes"
 	};
 
 	private String ref;
@@ -88,8 +87,9 @@ public class FCPGetNode extends Observable implements FCPQuery, Observer {
 			ref = "";
 
 			for (int i = 0 ; i < refElements.length ; i++) {
-				ref += refElements[i] + "=" +
-					(msg.getValue(refElements[i]) != null ? msg.getValue(refElements[i]) : "???")
+				if (msg.getValue(refElements[i]) != null)
+					ref += refElements[i] + "=" +
+						msg.getValue(refElements[i])
 					+ "\n";
 			}
 
