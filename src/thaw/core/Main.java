@@ -5,6 +5,8 @@ import java.util.Locale;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
+import java.util.Vector;
+import java.util.Iterator;
 
 /**
  * Main class. Only used to display some informations and init the core.
@@ -100,9 +102,11 @@ public class Main {
 		System.out.println("-lf     Sets the 'Look and Feel' will use.");
 		System.out.println("        (overriden by the skins preferences)\n");
 		System.out.println("        These ones are currently available:");
-		final LookAndFeelInfo[] feels = UIManager.getInstalledLookAndFeels();
-		for (int i = 0; i < feels.length; i++) {
-			System.out.println("           " + feels[i].getClassName());
+		Vector feels = thaw.plugins.ThemeSelector.getPossibleThemes();
+
+		for (Iterator it = feels.iterator() ; it.hasNext(); ) {
+			UIManager.LookAndFeelInfo lnf = (UIManager.LookAndFeelInfo)it.next();
+			System.out.println("           " + lnf.getClassName());
 		}
 		System.out.println("\n         And this one is used by default:");
 		System.out.println("           " + UIManager.getSystemLookAndFeelClassName() + "\n");

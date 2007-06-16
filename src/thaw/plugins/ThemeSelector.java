@@ -34,15 +34,23 @@ public class ThemeSelector implements thaw.core.Plugin, Observer, ListSelectionL
 
 	}
 
-	public Vector getPossibleThemes() {
+	public static void addToVector(Vector v, Object o) {
+		if (v.indexOf(o) < 0)
+			v.add(o);
+	}
+
+	public static Vector getPossibleThemes() {
 		Vector list = new Vector();
 
 		final UIManager.LookAndFeelInfo[] feels =
 			UIManager.getInstalledLookAndFeels();
 
 		for (int i = 0; i < feels.length; i++) {
-		        list.add(feels[i].getClassName());
+		        addToVector(list, feels[i].getClassName());
 		}
+
+		addToVector(list, "net.infonode.gui.laf.InfoNodeLookAndFeel");
+		addToVector(list, "com.birosoft.liquid.LiquidLookAndFeel");
 
 		return list;
 	}

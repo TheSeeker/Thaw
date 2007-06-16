@@ -412,6 +412,9 @@ public class Core implements Observer {
 			Logger.error(s, "Interrupted because: "+e.toString());
 		} catch(java.lang.reflect.InvocationTargetException e) {
 			Logger.error(s, "Error while setting theme : "+e.toString());
+			e.printStackTrace();
+			Logger.error(s, "Original exception: "+e.getTargetException().toString());
+			e.getTargetException().printStackTrace();
 		}
 	}
 
