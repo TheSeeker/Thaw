@@ -78,7 +78,7 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 		core.getMainWindow().getTabbedPane().addChangeListener(this);
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.index.indexes"),
-					    IconBox.minIndexBrowser,
+					    IconBox.indexBrowser,
 					    browserPanel.getPanel());
 
 		browserPanel.restoreState();

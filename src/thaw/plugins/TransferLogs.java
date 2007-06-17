@@ -135,7 +135,7 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 		setAsObserverEverywhere(true);
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.transferLogs.transferLogsShort"),
-					    thaw.gui.IconBox.minFile,
+					    thaw.gui.IconBox.file,
 					    tab);
 
 		return true;

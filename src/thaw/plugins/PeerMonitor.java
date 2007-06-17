@@ -141,7 +141,7 @@ public class PeerMonitor implements thaw.core.Plugin, Observer
 
 	public void update(Observable o, Object param) {
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.peerMonitor.peerMonitor"),
-					    thaw.gui.IconBox.minPeerMonitor,
+					    thaw.gui.IconBox.peers,
 					    peerPanel.getTabPanel());
 		core.getMainWindow().setSelectedTab(peerPanel.getTabPanel());
 

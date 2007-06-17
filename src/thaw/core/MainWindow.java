@@ -22,6 +22,7 @@ import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
 
+import thaw.gui.TabbedPane;
 import thaw.gui.IconBox;
 
 
@@ -77,7 +78,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	private JButton settingsButton = null;
 	private JButton quitButton = null;
 
-	private JTabbedPane tabbedPane = null;
+	private TabbedPane tabbedPane = null;
 	private JLabel statusBar = null;
 
 	private Core core = null; /* core is called back when exit() */
@@ -171,7 +172,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 		// TABBED PANE
 
-		tabbedPane = new JTabbedPane();
+		tabbedPane = new TabbedPane();
 
 		// STATUS BAR
 
@@ -300,18 +301,21 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 	/**
 	 * Used to add a tab in the main window.
-	 * In the future, even if the interface, this function should remain available.
+	 * In the future, even if the interface change,
+	 * this function should remain available.
 	 */
 	public boolean addTab(final String tabName, final java.awt.Component panel) {
-		tabbedPane.addTab(tabName, panel);
-
-		return true;
+		return addTab(tabName, IconBox.add, panel);
 	}
 
 	/**
+	 * Used to add a tab in the main window.
+	 * In the future, even if the interface change,
+	 * this function should remain available
 	 * @see #addTab(String, java.awt.Component)
 	 */
-	public boolean addTab(final String tabName, final Icon icon, final java.awt.Component panel) {
+	public boolean addTab(final String tabName, final Icon icon,
+			      final java.awt.Component panel) {
 		tabbedPane.addTab(tabName, icon, panel);
 
 		return true;

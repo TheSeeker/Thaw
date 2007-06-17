@@ -67,7 +67,8 @@ public class LogConsole implements Plugin, LogListener, ActionListener, Runnable
 		consolePanel.add(logAreaScrollPane, BorderLayout.CENTER);
 		consolePanel.add(saveToFile, BorderLayout.SOUTH);
 
-		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.console.console"), thaw.gui.IconBox.minTerminal, consolePanel);
+		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.console.console"),
+					    thaw.gui.IconBox.terminal, consolePanel);
 
 		Logger.addLogListener(this);
 

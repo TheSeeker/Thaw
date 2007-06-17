@@ -64,7 +64,7 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 		panel = getPanel();
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.hsqldb.console"),
-					    thaw.gui.IconBox.minTerminal,
+					    thaw.gui.IconBox.terminal,
 					    panel);
 
 		return true;

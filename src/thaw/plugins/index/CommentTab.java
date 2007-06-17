@@ -182,6 +182,7 @@ public class CommentTab implements ActionListener {
 		updateCommentList();
 
 		indexBrowser.getMainWindow().addTab(I18n.getMessage("thaw.plugin.index.comment.commentList"),
+						    thaw.gui.IconBox.readComments,
 						    tabPanel);
 		indexBrowser.getMainWindow().setSelectedTab(tabPanel);
 

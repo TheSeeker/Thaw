@@ -180,7 +180,7 @@ public class BlackList implements ActionListener {
 		visible = true;
 		updateList();
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.index.blackList"),
-					    IconBox.minStop, panel);
+					    IconBox.stop, panel);
 		core.getMainWindow().setSelectedTab(panel);
 	}
 
