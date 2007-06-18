@@ -11,7 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
+import thaw.gui.TabbedPane;
 
 import thaw.gui.IconBox;
 
@@ -25,7 +25,7 @@ import thaw.gui.IconBox;
  */
 public class ConfigWindow extends Observable implements ActionListener, java.awt.event.WindowListener {
 	private JDialog configWin;
-	private JTabbedPane tabs;
+	private TabbedPane tabs;
 
 	private JPanel buttons;
 	private JButton okButton;
@@ -50,7 +50,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 		configWin = new JDialog(core.getMainWindow().getMainFrame(), I18n.getMessage("thaw.config.windowName"));
 
-		tabs = new JTabbedPane();
+		tabs = new TabbedPane();
 
 		buttons = new JPanel();
 		buttons.setLayout(new GridLayout(1, 2));
