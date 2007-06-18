@@ -587,12 +587,16 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	}
 
 	public void redraw(TreePath path) {
-		Object[] nodes = (path.getPath());
+		if (path != null) {
+			Object[] nodes = (path.getPath());
 
-		for (int i = 0 ; i < nodes.length ; i++) {
-			IndexTreeNode node = (IndexTreeNode)nodes[i];
-			redraw(node);
+			for (int i = 0 ; i < nodes.length ; i++) {
+				IndexTreeNode node = (IndexTreeNode)nodes[i];
+				redraw(node);
+			}
 		}
+		else
+			redraw(getRoot());
 	}
 
 

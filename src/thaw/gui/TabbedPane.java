@@ -48,6 +48,10 @@ public class TabbedPane extends JTabbedPane implements ChangeListener {
 		super.remove(panel);
 	}
 
+	public int indexOfTab(String tabName) {
+		return tabNames.indexOf(tabName);
+	}
+
 
 	public void stateChanged(final ChangeEvent e) {
 		int x = super.getSelectedIndex();
