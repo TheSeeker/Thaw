@@ -90,6 +90,7 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 		}
 
 		db = (Hsqldb)core.getPluginManager().getPlugin("thaw.plugins.Hsqldb");
+		db.registerChild(this);
 
 		createTables();
 
