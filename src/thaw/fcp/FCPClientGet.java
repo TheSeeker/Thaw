@@ -505,7 +505,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			if(fetchDirectly(queryManager.getConnection(), fileSize, true)) {
 				writingSuccessful = true;
-				successful = false;
+				successful = true;
 				status = "Available";
 			} else {
 				Logger.warning(this, "Unable to fetch correctly the file. This may create problems on socket");
