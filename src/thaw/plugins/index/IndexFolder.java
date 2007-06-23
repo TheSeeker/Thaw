@@ -702,8 +702,28 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 		synchronized(db.dbLock) {
 			try {
-				/* we remove all the files */
 				PreparedStatement st;
+
+				/* we remove all the comments */
+
+				st = db.getConnection().prepareStatement("DELETE FROM indexCommentKeys "+
+									 "WHERE indexCommentKeys.indexId IN "+
+									 " (SELECT indexParents.indexId "+
+									 "  FROM indexParents "+
+									 "  WHERE indexParents.folderId = ?)");
+				st = db.getConnection().prepareStatement("DELETE FROM indexComments "+
+									 "WHERE indexComments.indexId IN "+
+									 " (SELECT indexParents.indexId "+
+									 "  FROM indexParents "+
+									 "  WHERE indexParents.folderId = ?)");
+				st = db.getConnection().prepareStatement("DELETE FROM indexCommentBlackList "+
+									 "WHERE indexCommentBlackList.indexId IN "+
+									 " (SELECT indexParents.indexId "+
+									 "  FROM indexParents "+
+									 "  WHERE indexParents.folderId = ?)");
+
+
+				/* we remove all the files */
 
 				st = db.getConnection().prepareStatement("DELETE FROM files WHERE files.indexParent IN "+
 									 "(SELECT indexParents.indexId FROM indexParents WHERE indexParents.folderId = ?)");
