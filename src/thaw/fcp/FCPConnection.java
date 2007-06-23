@@ -334,6 +334,7 @@ public class FCPConnection extends Observable {
 			if(rdBytes < 0) {
 				Logger.error(this, "Error while reading on the socket => disconnection");
 				disconnect();
+				return rdBytes;
 			}
 
 			rawBytesWaiting = rawBytesWaiting - rdBytes;

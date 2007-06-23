@@ -505,11 +505,15 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			if(fetchDirectly(queryManager.getConnection(), fileSize, true)) {
 				writingSuccessful = true;
+				successful = false;
 				status = "Available";
 			} else {
 				Logger.warning(this, "Unable to fetch correctly the file. This may create problems on socket");
-				writingSuccessful = false;
-				status = "Error while receveing the file";
+				if (writingSuccessful) { /* if we forgot to set the correct values */
+					writingSuccessful = false;
+					successful = false;
+					status = "Error while receveing the file";
+				}
 			}
 
 			Logger.info(this, "File received");
@@ -717,9 +721,17 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			if(amount <= -1) {
 				Logger.error(this, "Socket closed, damn !");
-				status = "Read error";
+				status = "Unable to read data from the node";
 				writingSuccessful = false;
-				break;
+				successful = false;
+				try {
+					outputStream.close();
+				} catch(java.io.IOException ex) {
+					Logger.error(this, "Unable to close the file cleanly : "+ex.toString());
+					Logger.error(this, "Things seem to go wrong !");
+				}
+				newFile.delete();
+				return false;
 			}
 
 			if(reallyWrite) {
@@ -729,6 +741,14 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 					Logger.error(this, "Unable to write file on disk ... out of space ? : "+e.toString());
 					status = "Unable to fetch / disk probably full !";
 					writingSuccessful = false;
+					successful = false;
+					try {
+						outputStream.close();
+					} catch(java.io.IOException ex) {
+						Logger.error(this, "Unable to close the file cleanly : "+ex.toString());
+						Logger.error(this, "Things seem to go wrong !");
+					}
+					newFile.delete();
 					return false;
 				}
 			}
