@@ -84,11 +84,7 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 	public void switchMainWindowVisibility() {
 		boolean v = !core.getMainWindow().isVisible();
 
-		core.getMainWindow().setNonIconified();
-
 		core.getMainWindow().setVisible(v);
-
-		core.getMainWindow().setNonIconified();
 	}
 
 

@@ -236,11 +236,19 @@ public class MainWindow implements java.awt.event.ActionListener, WindowListener
 	}
 
 	public void setIconified() {
-		mainWindow.setExtendedState(JFrame.ICONIFIED);
+		int state = mainWindow.getExtendedState();
+
+		state |= JFrame.ICONIFIED;
+
+		mainWindow.setExtendedState(state);
 	}
 
 	public void setNonIconified() {
-		mainWindow.setExtendedState(JFrame.NORMAL);
+		int state = mainWindow.getExtendedState();
+
+		state &= ~JFrame.ICONIFIED;
+
+		mainWindow.setExtendedState(state);
 	}
 
 
