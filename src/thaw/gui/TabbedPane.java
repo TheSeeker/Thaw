@@ -42,8 +42,14 @@ public class TabbedPane extends JTabbedPane implements ChangeListener {
 
 		if (x >= 0)
 			tabNames.remove(x);
-		else
+		else {
 			Logger.error(this, "remove(): Component not found ?");
+			try { /* dirty way to have a trace back */
+				throw new Exception("bleh");
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
 
 		super.remove(panel);
 	}

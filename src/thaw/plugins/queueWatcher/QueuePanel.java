@@ -111,6 +111,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 		table.setShowGrid(false);
 		table.setIntercellSpacing(new java.awt.Dimension(0, 0));
+		table.showStatusInProgressBars(false);
 
 		final JTableHeader header = table.getTableHeader();
 		header.setUpdateTableInRealTime(true);
@@ -141,7 +142,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		scrollPane = new JScrollPane(table);
 		panel.add(scrollPane, BorderLayout.CENTER);
 
-		table.setDefaultRenderer( table.getColumnClass(0), new ProgressRenderer(table, tableModel, isForInsertionQueue) );
+		//table.setDefaultRenderer( table.getColumnClass(0), new ProgressRenderer(table, tableModel, isForInsertionQueue) );
 
 		tableModel.addTableModelListener(table);
 
@@ -224,124 +225,6 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 	public JButton getButton() {
 		return button;
-	}
-
-
-	private class ProgressRenderer extends DefaultTableCellRenderer {
-		private final static long serialVersionUID = 20060709;
-
-		private final Color SUCCESS = Color.GREEN;
-		private final Color FAILURE = Color.RED;
-		private final Color RUNNING = Color.ORANGE;
-		private final Color PENDING = Color.WHITE;
-		private Color softGray;
-
-		private QueueTableModel model = null;
-		private JTable tabl = null;
-		private boolean insertionQueue;
-
-		public ProgressRenderer(final JTable table, final QueueTableModel model, final boolean isForInsertion) {
-			this.model = model;
-			tabl = table;
-			insertionQueue = isForInsertion;
-			softGray = new Color(240,240,240);
-		}
-
-		public Component getTableCellRendererComponent(final JTable table, Object value,
-							       boolean isSelected, final boolean hasFocus,
-							       final int row, final int column) {
-
-			if(value == null)
-				value = "";
-
-			final FCPTransferQuery query = model.getQuery(row);
-
-			if(value instanceof Integer) {
-
-				final Integer progress = (Integer)value;
-				final JProgressBar bar = new JProgressBar(0, 100);
-
-				bar.setStringPainted(true);
-				bar.setBorderPainted(false);
-
-				if(progress.intValue() >= 0) {
-					bar.setValue(progress.intValue());
-
-					String toAdd = "%";
-
-					if(!query.isProgressionReliable())
-						toAdd = toAdd + " [*]";
-
-					bar.setString(progress.toString() + toAdd);
-				} else {
-					bar.setValue(100);
-					bar.setString(I18n.getMessage("thaw.common.failed"));
-				}
-
-
-				return bar;
-			}
-
-			Component cell = null;
-
-			if (column == 0) {
-				if(query == null)
-					return null;
-
-				if(!query.isRunning() && !query.isFinished())
-					cell = new JLabel("");
-
-				if(query.isFinished() && query.isSuccessful() &&
-				   ( (!(query instanceof FCPClientGet)) || ((FCPClientGet)query).isWritingSuccessful()))
-					cell = new JLabel(IconBox.minGreen);
-
-				if(query.isFinished() && (!query.isSuccessful() ||
-							  ((query instanceof FCPClientGet) && !((FCPClientGet)query).isWritingSuccessful()) ) )
-					cell = new JLabel(IconBox.minRed);
-
-				if(query.isRunning() && !query.isFinished())
-					cell = new JLabel(IconBox.minOrange);
-
-			} else {
-
-				cell = super.getTableCellRendererComponent(table, value,
-									   isSelected, hasFocus,
-									   row, column);
-
-			}
-
-			if (!isSelected) {
-				if (row % 2 == 0)
-					cell.setBackground(Color.WHITE);
-				else
-					cell.setBackground(softGray);
-			}
-
-			/*
-			if(!isSelected) {
-
-				if(query == null)
-					return null;
-
-				if(!query.isRunning() && !query.isFinished())
-					cell.setBackground(PENDING);
-
-				if(query.isFinished() && query.isSuccessful() &&
-				   ( (!(query instanceof FCPClientGet)) || ((FCPClientGet)query).isWritingSuccessful()))
-					cell.setBackground(SUCCESS);
-
-				if(query.isFinished() && (!query.isSuccessful() ||
-							  ((query instanceof FCPClientGet) && !((FCPClientGet)query).isWritingSuccessful()) ) )
-					cell.setBackground(FAILURE);
-
-				if(query.isRunning() && !query.isFinished())
-					cell.setBackground(RUNNING);
-			}
-			*/
-
-			return cell;
-		}
-
 	}
 
 

@@ -18,6 +18,11 @@ import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
+import thaw.fcp.FCPClientGet;
+import thaw.fcp.FCPClientPut;
+
+import thaw.gui.IconBox;
+
 
 public class QueueTableModel extends javax.swing.table.AbstractTableModel implements Observer {
 	private static final long serialVersionUID = 20060708;
@@ -95,17 +100,31 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		if(row >= queries.size())
 			return null;
 
-		/* we don't return any value for the first column,
-		 * the renderer will deduce itself what must be put in this column
-		 */
-		if (column == 0)
-			return null;
-		else
-			column--;
-
 		final FCPTransferQuery query = (FCPTransferQuery)queries.get(row);
 
-		if(column == 0) {
+		if (column == 0) {
+			if(query == null)
+				return null;
+
+			if(!query.isRunning() && !query.isFinished())
+				return " ";
+
+			if(query.isFinished() && query.isSuccessful() &&
+			   ( (!(query instanceof FCPClientGet)) || ((FCPClientGet)query).isWritingSuccessful()))
+				return IconBox.minGreen;
+
+			if(query.isFinished() && (!query.isSuccessful() ||
+						  ((query instanceof FCPClientGet) && !((FCPClientGet)query).isWritingSuccessful()) ) )
+				return IconBox.minRed;
+
+			if(query.isRunning() && !query.isFinished())
+				return IconBox.minOrange;
+
+			return " ";
+		}
+
+
+		if(column == 1) {
 			String filename = query.getFilename();
 
 			if (filename == null)
@@ -114,7 +133,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 			return filename;
 		}
 
-		if(column == 1)
+		if(column == 2)
 			return thaw.gui.GUIHelper.getPrintableSize(query.getFileSize());
 
 		if(!isForInsertions && (column == 2)) {
@@ -124,28 +143,14 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 				return I18n.getMessage("thaw.common.unspecified");
 		}
 
-		if( (isForInsertions && (column == 2))
-		    || (!isForInsertions && (column == 3)) )
+		if( (isForInsertions && (column == 3))
+		    || (!isForInsertions && (column == 4)) )
 			return query.getStatus();
 
-		if( ((isForInsertions && (column == 3))
-		     || (!isForInsertions && (column == 4)) ) ) {
+		if( ((isForInsertions && (column == 4))
+		     || (!isForInsertions && (column == 5)) ) ) {
 
-			if(!query.isFinished() || query.isSuccessful()) {
-				int progress;
-
-				if ((query instanceof thaw.fcp.FCPClientPut
-				     && (query.getTransferWithTheNodeProgression() < 100))
-				    || ((query instanceof thaw.fcp.FCPClientGet)
-					&& (query.getTransferWithTheNodeProgression() > 0)))
-					progress = query.getTransferWithTheNodeProgression();
-				else
-					progress = query.getProgression();
-
-				return new Integer(progress);
-			} else
-				return new Integer(-1);
-
+			return query;
 		}
 
 		return null;

@@ -13,9 +13,10 @@ import javax.swing.ListSelectionModel;
 import javax.swing.JTable;
 import javax.swing.JProgressBar;
 import javax.swing.JTextArea;
+import javax.swing.JLabel;
 import java.awt.Color;
 import java.awt.Component;
-
+import javax.swing.ImageIcon;
 import java.util.Vector;
 
 
@@ -45,6 +46,7 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 
 	private int columnWithKeys = -1;
 
+	private boolean statusInProgressBars = true;
 
 	public Table(Config config, String prefix) {
 		super();
@@ -106,6 +108,9 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 		columnWithKeys = c;
 	}
 
+	public void showStatusInProgressBars(boolean v) {
+		statusInProgressBars = v;
+	}
 
 	public void setDefaultRenderer() {
 		setDefaultRenderer(getColumnClass(0), new DefaultRenderer());
@@ -157,11 +162,11 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 							       final boolean isSelected, final boolean hasFocus,
 							       final int row, final int column) {
 
-			if(value == null)
+			if (value == null)
 				return super.getTableCellRendererComponent(table, "",
 									   isSelected, hasFocus, row, column);
 
-			if(value instanceof FCPTransferQuery) {
+			if (value instanceof FCPTransferQuery) {
 				final FCPTransferQuery query = (FCPTransferQuery)value;
 				final JProgressBar bar = new JProgressBar(0, 100);
 
@@ -185,8 +190,11 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 					bar.setString(I18n.getMessage("thaw.common.ok"));
 
 				if(!query.isFinished()) {
-					bar.setString(query.getStatus() +
-						      " [ "+Integer.toString(progress)+"% ]");
+					if (statusInProgressBars)
+						bar.setString(query.getStatus() +
+							      " [ "+Integer.toString(progress)+"% ]");
+					else
+						bar.setString(Integer.toString(progress)+"%");
 				}
 
 				return bar;
@@ -194,7 +202,9 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 
 			Component cell;
 
-			if(value instanceof Long) {
+			if (value instanceof ImageIcon) {
+				cell = new JLabel(((ImageIcon)value));
+			} else if(value instanceof Long) {
 
 				cell = super.getTableCellRendererComponent(table,
 									   thaw.gui.GUIHelper.getPrintableSize(((Long)value).longValue()),
