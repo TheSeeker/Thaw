@@ -26,6 +26,7 @@ public class PluginManager {
 		"thaw.plugins.FetchPlugin",
 		"thaw.plugins.InsertPlugin",
 		"thaw.plugins.StatusBar",
+		"thaw.plugins.TrayIcon",
 		"thaw.plugins.ThemeSelector",
 		"thaw.plugins.Hsqldb",
 		"thaw.plugins.Signatures",
@@ -226,7 +227,8 @@ public class PluginManager {
 			((Plugin)plugins.get(className)).run(core);
 
 		} catch(final Exception e) {
-			Logger.warning(this, "runPlugin('"+className+"'): Exception: "+e);
+			Logger.error(this, "runPlugin('"+className+"'): Exception: "+e);
+			e.printStackTrace();
 			return false;
 		}
 

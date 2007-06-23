@@ -20,7 +20,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
-
+import java.awt.event.WindowListener;
 
 import thaw.gui.TabbedPane;
 import thaw.gui.IconBox;
@@ -51,7 +51,7 @@ import thaw.gui.IconBox;
  *
  * @author <a href="mailto:jflesch@nerim.net">Jerome Flesch</a>
  */
-public class MainWindow implements java.awt.event.ActionListener, java.awt.event.WindowListener,
+public class MainWindow implements java.awt.event.ActionListener, WindowListener,
 				   java.util.Observer {
 
 	public final static int DEFAULT_SIZE_X = 790;
@@ -208,6 +208,15 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	}
 
 
+	public void addWindowListener(WindowListener wl) {
+		mainWindow.addWindowListener(wl);
+	}
+
+	public void removeWindowListener(WindowListener wl) {
+		mainWindow.removeWindowListener(wl);
+	}
+
+
 	public void connectionHasChanged() {
 		core.getConnectionManager().addObserver(this);
 	}
@@ -219,6 +228,19 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 	 */
 	public void setVisible(final boolean v) {
 		mainWindow.setVisible(v);
+	}
+
+
+	public boolean isVisible() {
+		return mainWindow.isVisible();
+	}
+
+	public void setIconified() {
+		mainWindow.setExtendedState(JFrame.ICONIFIED);
+	}
+
+	public void setNonIconified() {
+		mainWindow.setExtendedState(JFrame.NORMAL);
 	}
 
 
@@ -550,7 +572,7 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 
 	public void showDialogAbout() {
 		final JComponent[] labels = new JComponent[] {
-			null,
+			new JTextField("Thaw "+Main.VERSION),
 			new JLabel(I18n.getMessage("thaw.about.l2")),
 			new JLabel(I18n.getMessage("thaw.about.l3")),
 			new JLabel(I18n.getMessage("thaw.about.l4")),
@@ -569,8 +591,6 @@ public class MainWindow implements java.awt.event.ActionListener, java.awt.event
 		}
 		*/
 
-
-		labels[0] = new JTextField("Thaw "+Main.VERSION);
 		((JTextField)labels[0]).setFont(new Font("Dialog", Font.BOLD, 30));
 		((JTextField)labels[0]).setEditable(false);
 

@@ -290,7 +290,7 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 			TableColumn c = m.getColumn(i);
 			String size = config.getValue(configPrefix+"_col_width_"+Integer.toString(i));
 
-			if (size != null) {
+			if (size != null && !("".equals(size))) {
 				c.setPreferredWidth(Integer.parseInt(size));
 			}
 		}
