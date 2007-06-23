@@ -711,6 +711,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 									 " (SELECT indexParents.indexId "+
 									 "  FROM indexParents "+
 									 "  WHERE indexParents.folderId = ?)");
+				st.setInt(1, id);
 				st.execute();
 
 				st = db.getConnection().prepareStatement("DELETE FROM indexComments "+
@@ -718,6 +719,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 									 " (SELECT indexParents.indexId "+
 									 "  FROM indexParents "+
 									 "  WHERE indexParents.folderId = ?)");
+				st.setInt(1, id);
 				st.execute();
 
 				st = db.getConnection().prepareStatement("DELETE FROM indexCommentBlackList "+
@@ -725,6 +727,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 									 " (SELECT indexParents.indexId "+
 									 "  FROM indexParents "+
 									 "  WHERE indexParents.folderId = ?)");
+				st.setInt(1, id);
 				st.execute();
 
 
