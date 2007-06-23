@@ -82,6 +82,8 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 	}
 
 	public void switchMainWindowVisibility() {
+		Logger.info(this, "Changing main window visibility");
+
 		boolean v = !core.getMainWindow().isVisible();
 
 		core.getMainWindow().setVisible(v);
@@ -230,14 +232,15 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 		realDisplayFrame(x, y);
 	}
 
+
 	public void windowActivated(WindowEvent e) { }
 	public void windowClosed(WindowEvent e) { }
 	public void windowClosing(WindowEvent e) { }
 	public void windowDeactivated(WindowEvent e) { }
-	public void windowDeiconified(WindowEvent e) { }
+	public void windowDeiconified(WindowEvent e) {
+	}
 
         public void windowIconified(WindowEvent e) {
-		switchMainWindowVisibility();
 	}
 
 	public void windowOpened(WindowEvent e) { }
