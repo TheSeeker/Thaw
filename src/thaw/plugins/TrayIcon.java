@@ -212,7 +212,6 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 		dialog.setLocation(x, y);
 
 		dialog.setSize(DIALOG_X, DIALOG_Y);
-		dialog.setPreferredSize(new java.awt.Dimension(DIALOG_X, DIALOG_Y));
 		dialog.validate();
 
 		dialog.setVisible(true);
