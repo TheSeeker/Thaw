@@ -187,7 +187,7 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 					bar.setString(I18n.getMessage("thaw.common.failed"));
 
 				if(query.isFinished() && query.isSuccessful())
-					bar.setString(I18n.getMessage("thaw.common.ok"));
+					bar.setString(I18n.getMessage("thaw.common.finished"));
 
 				if(!query.isFinished()) {
 					if (statusInProgressBars)

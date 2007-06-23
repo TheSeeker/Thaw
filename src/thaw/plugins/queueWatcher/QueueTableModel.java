@@ -136,7 +136,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		if(column == 2)
 			return thaw.gui.GUIHelper.getPrintableSize(query.getFileSize());
 
-		if(!isForInsertions && (column == 2)) {
+		if(!isForInsertions && (column == 3)) {
 			if(query.getPath() != null)
 				return query.getPath();
 			else
