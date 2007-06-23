@@ -168,34 +168,7 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 
 			if (value instanceof FCPTransferQuery) {
 				final FCPTransferQuery query = (FCPTransferQuery)value;
-				final JProgressBar bar = new JProgressBar(0, 100);
-
-				int progress;
-
-				bar.setStringPainted(true);
-				bar.setBorderPainted(false);
-
-				if ((query instanceof FCPClientPut && (query.getTransferWithTheNodeProgression() < 100))
-				    || ((query instanceof FCPClientGet) && (query.getTransferWithTheNodeProgression() > 0)))
-					progress = query.getTransferWithTheNodeProgression();
-				else
-					progress = query.getProgression();
-
-				bar.setValue(progress);
-
-				if(query.isFinished() && !query.isSuccessful())
-					bar.setString(I18n.getMessage("thaw.common.failed"));
-
-				if(query.isFinished() && query.isSuccessful())
-					bar.setString(I18n.getMessage("thaw.common.finished"));
-
-				if(!query.isFinished()) {
-					if (statusInProgressBars)
-						bar.setString(query.getStatus() +
-							      " [ "+Integer.toString(progress)+"% ]");
-					else
-						bar.setString(Integer.toString(progress)+"%");
-				}
+				final JProgressBar bar = new TransferProgressBar(query, statusInProgressBars);
 
 				return bar;
 			}

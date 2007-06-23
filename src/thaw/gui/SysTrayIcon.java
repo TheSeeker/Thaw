@@ -130,4 +130,23 @@ public class SysTrayIcon {
 		}
 	}
 
+
+	/**
+	 * Return the mouse position on the screen
+	 * put here just to keep all the code >= java 1.5 in the same class
+	 */
+	public java.awt.Point getMousePosition() {
+		try {
+			Object pointerInfo = Class.forName("java.awt.MouseInfo").getMethod("getPointerInfo", (Class[])null).invoke(null, (Object[]) null);
+
+			java.awt.Point location = (java.awt.Point)Class.forName("java.awt.PointerInfo").getMethod("getLocation", (Class[])null).invoke(pointerInfo, (Object[])null);
+
+			return location;
+		} catch(Exception e) {
+			Logger.warning(this, "Error while setting popup menu : "+e.toString());
+			return null;
+		}
+
+	}
+
 }
