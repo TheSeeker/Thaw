@@ -36,16 +36,16 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 
 		dragSource = DragSource.getDefaultDragSource();
 
-		for(int i = 0 ; i < queuePanels.length ; i++) {
-			dragSource.createDefaultDragGestureRecognizer(queuePanels[i].getTable(),
-									   DnDConstants.ACTION_COPY_OR_MOVE,
-									   this);
+		//for(int i = 0 ; i < queuePanels.length ; i++) {
+			//dragSource.createDefaultDragGestureRecognizer(queuePanels[i].getTable(),
+			//						   DnDConstants.ACTION_COPY_OR_MOVE,
+			//						   this);
 
 			/* TODO: Finish DnD support */
 			//queuePanels[i].getTable().setTransferHandler(new FileTransferHandler());
 			//queuePanels[i].getTable().setDragEnabled(true);
 
-		}
+		//}
 	}
 
 	private class FileTransferHandler extends TransferHandler {

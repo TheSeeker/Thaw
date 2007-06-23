@@ -128,6 +128,11 @@ public class IconBox {
 	public static ImageIcon readComments;
 	public static ImageIcon minReadComments;
 
+	public static ImageIcon minRed;
+	public static ImageIcon minOrange;
+	public static ImageIcon minGreen;
+
+
 	/**
 	 * Not really used
 	 */
@@ -239,6 +244,9 @@ public class IconBox {
 		IconBox.minAddComment       = IconBox.loadIcon("min-newComment.png");
 		IconBox.readComments        = IconBox.loadIcon("readComments.png");
 		IconBox.minReadComments     = IconBox.loadIcon("min-readComments.png");
+		IconBox.minRed              = IconBox.loadIcon("min-red.png");
+		IconBox.minOrange           = IconBox.loadIcon("min-orange.png");
+		IconBox.minGreen            = IconBox.loadIcon("min-green.png");
 	}
 
 }

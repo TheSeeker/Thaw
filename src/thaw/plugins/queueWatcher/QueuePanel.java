@@ -57,6 +57,8 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	public final static int ACTION_COPY_KEYS_SELECTED       = 6;
 	public final static int ACTION_CHANGE_PRIORITY_SELECTED = 7;
 
+	public final static int FIRST_COLUMN_SIZE               = 20;
+
 	private Core core;
 
 	private JButton button;
@@ -107,7 +109,8 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 				  isForInsertionQueue ? "table_insertions" : "table_downloads",
 				  tableModel);
 
-		table.setShowGrid(true);
+		table.setShowGrid(false);
+		table.setIntercellSpacing(new java.awt.Dimension(0, 0));
 
 		final JTableHeader header = table.getTableHeader();
 		header.setUpdateTableInRealTime(true);
@@ -197,6 +200,13 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		table.addMouseListener(this);
 		table.addKeyListener(this);
 
+		/* we really really want a column 0 with a size of FIRST_COLUMN_SIZE ! */
+		table.getColumnModel().getColumn(0).setPreferredWidth(FIRST_COLUMN_SIZE);
+		table.getColumnModel().getColumn(0).setResizable(false);
+		table.getColumnModel().getColumn(0).setPreferredWidth(FIRST_COLUMN_SIZE);
+		table.getColumnModel().getColumn(0).setMinWidth(FIRST_COLUMN_SIZE);
+		table.getColumnModel().getColumn(0).setMaxWidth(FIRST_COLUMN_SIZE);
+
 		/* If a queue is already existing, we need to add it */
 		if(core.getQueueManager() != null) {
 			this.addToTable(core.getQueueManager().getRunningQueue());
@@ -224,6 +234,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		private final Color FAILURE = Color.RED;
 		private final Color RUNNING = Color.ORANGE;
 		private final Color PENDING = Color.WHITE;
+		private Color softGray;
 
 		private QueueTableModel model = null;
 		private JTable tabl = null;
@@ -233,6 +244,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 			this.model = model;
 			tabl = table;
 			insertionQueue = isForInsertion;
+			softGray = new Color(240,240,240);
 		}
 
 		public Component getTableCellRendererComponent(final JTable table, Object value,
@@ -270,11 +282,42 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 				return bar;
 			}
 
+			Component cell = null;
 
-			final Component cell = super.getTableCellRendererComponent(table, value,
-									     isSelected, hasFocus,
-									     row, column);
+			if (column == 0) {
+				if(query == null)
+					return null;
 
+				if(!query.isRunning() && !query.isFinished())
+					cell = new JLabel("");
+
+				if(query.isFinished() && query.isSuccessful() &&
+				   ( (!(query instanceof FCPClientGet)) || ((FCPClientGet)query).isWritingSuccessful()))
+					cell = new JLabel(IconBox.minGreen);
+
+				if(query.isFinished() && (!query.isSuccessful() ||
+							  ((query instanceof FCPClientGet) && !((FCPClientGet)query).isWritingSuccessful()) ) )
+					cell = new JLabel(IconBox.minRed);
+
+				if(query.isRunning() && !query.isFinished())
+					cell = new JLabel(IconBox.minOrange);
+
+			} else {
+
+				cell = super.getTableCellRendererComponent(table, value,
+									   isSelected, hasFocus,
+									   row, column);
+
+			}
+
+			if (!isSelected) {
+				if (row % 2 == 0)
+					cell.setBackground(Color.WHITE);
+				else
+					cell.setBackground(softGray);
+			}
+
+			/*
 			if(!isSelected) {
 
 				if(query == null)
@@ -294,7 +337,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 				if(query.isRunning() && !query.isFinished())
 					cell.setBackground(RUNNING);
 			}
-
+			*/
 
 			return cell;
 		}

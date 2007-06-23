@@ -43,6 +43,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 		columnNames = new Vector();
 
+		columnNames.add(" ");
 		columnNames.add(I18n.getMessage("thaw.common.file"));
 		columnNames.add(I18n.getMessage("thaw.common.size"));
 
@@ -90,9 +91,17 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 
 
-	public Object getValueAt(final int row, final int column) {
+	public Object getValueAt(final int row, int column) {
 		if(row >= queries.size())
 			return null;
+
+		/* we don't return any value for the first column,
+		 * the renderer will deduce itself what must be put in this column
+		 */
+		if (column == 0)
+			return null;
+		else
+			column--;
 
 		final FCPTransferQuery query = (FCPTransferQuery)queries.get(row);
 
@@ -345,7 +354,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 			final int columnsCount = table.getColumnCount();
 
-			if (modelIndex < 0)
+			if (modelIndex < 0 || columnModelIndex < 1)
 				return;
 
 			if (sortedColumn == modelIndex)
@@ -376,7 +385,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		public QueryComparator(final boolean sortedAsc, final int column,
 				       final boolean isForInsertionTable) {
 			isSortedAsc = sortedAsc;
-			this.column = column;
+			this.column = column - 1; /* can't sort on the first column */
 			this.isForInsertionTable = isForInsertionTable;
 		}
 
