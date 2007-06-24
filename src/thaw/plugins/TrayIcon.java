@@ -70,6 +70,11 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 
 		icon.setVisible(false);
 
+		if (!core.getMainWindow().isVisible()) {
+			Logger.info(this, "Making main window visible again");
+			core.getMainWindow().setVisible(true);
+		}
+
 		return true;
 	}
 
@@ -115,7 +120,7 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 					return -1;
 			}
 
-			result = (new Integer(q1.getProgression())).compareTo(new Integer(q2.getProgression()));
+			result = -1 * (new Integer(q1.getProgression())).compareTo(new Integer(q2.getProgression()));
 
 			return result;
 		}
