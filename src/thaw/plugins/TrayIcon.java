@@ -156,7 +156,7 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 
 		p.add(l);
 
-		TransferProgressBar bar = new TransferProgressBar(q);
+		TransferProgressBar bar = new TransferProgressBar(q, true, true);
 		progressBars.add(bar);
 		p.add(bar);
 

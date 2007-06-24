@@ -11,17 +11,24 @@ import thaw.core.I18n;
 public class TransferProgressBar extends JProgressBar {
 	private FCPTransferQuery query;
 	private boolean statusInProgressBar;
+	private boolean withBorder;
 
 	public TransferProgressBar(FCPTransferQuery q) {
 		this(q, true);
 	}
 
-	public TransferProgressBar(FCPTransferQuery query, boolean statusInProgressBar) {
+	public TransferProgressBar(FCPTransferQuery query, boolean statusInProgressBar,
+				   boolean withBorder) {
 		super(0, 100);
 		this.query = query;
 		this.statusInProgressBar = statusInProgressBar;
+		this.withBorder = withBorder;
 
 		refresh();
+	}
+
+	public TransferProgressBar(FCPTransferQuery query, boolean statusInProgressBar) {
+		this(query, statusInProgressBar, false);
 	}
 
 	public void refresh() {
@@ -29,7 +36,7 @@ public class TransferProgressBar extends JProgressBar {
 		int progress;
 
 		setStringPainted(true);
-		setBorderPainted(false);
+		setBorderPainted(withBorder);
 
 		if ((query instanceof FCPClientPut && (query.getTransferWithTheNodeProgression() < 100))
 		    || ((query instanceof FCPClientGet) && (query.getTransferWithTheNodeProgression() > 0)))
