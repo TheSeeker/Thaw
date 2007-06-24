@@ -9,6 +9,8 @@ import thaw.fcp.FCPClientGet;
 import thaw.core.I18n;
 
 public class TransferProgressBar extends JProgressBar {
+	private FCPTransferQuery query;
+	private boolean statusInProgressBar;
 
 	public TransferProgressBar(FCPTransferQuery q) {
 		this(q, true);
@@ -16,6 +18,13 @@ public class TransferProgressBar extends JProgressBar {
 
 	public TransferProgressBar(FCPTransferQuery query, boolean statusInProgressBar) {
 		super(0, 100);
+		this.query = query;
+		this.statusInProgressBar = statusInProgressBar;
+
+		refresh();
+	}
+
+	public void refresh() {
 
 		int progress;
 
@@ -44,5 +53,4 @@ public class TransferProgressBar extends JProgressBar {
 				setString(Integer.toString(progress)+"%");
 		}
 	}
-
 }

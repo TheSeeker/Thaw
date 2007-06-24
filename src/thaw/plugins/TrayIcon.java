@@ -130,6 +130,8 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 		}
 	}
 
+	private Vector progressBars = null;
+
 
 	private JPanel getTransferPanel(FCPTransferQuery q) {
 		JPanel p = new JPanel(new GridLayout(2, 1));
@@ -153,7 +155,10 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 		l.setIcon(icon);
 
 		p.add(l);
-		p.add(new TransferProgressBar(q));
+
+		TransferProgressBar bar = new TransferProgressBar(q);
+		progressBars.add(bar);
+		p.add(bar);
 
 		return p;
 	}
@@ -187,6 +192,8 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 
 		north = new JPanel(new GridLayout(queries.size(), 1, 10, 10));
 
+		progressBars = new Vector();
+
 		for (Iterator it = newQueries.iterator();
 		     it.hasNext();) {
 			north.add(getTransferPanel((FCPTransferQuery)it.next()));
@@ -219,6 +226,46 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 		dialog.setVisible(true);
 	}
 
+
+	private class ProgressBarRefresher implements Runnable {
+		private Vector bars;
+		private boolean stop;
+
+		public ProgressBarRefresher(Vector bars) {
+			this.bars = bars;
+			stop = false;
+		}
+
+		public void run() {
+			while(!stop) {
+
+				for (Iterator it = bars.iterator();
+				     it.hasNext();) {
+
+					try {
+						Thread.sleep(200);
+					} catch(InterruptedException e) {
+						/* \_o< */
+					}
+
+					if (stop)
+						break;
+
+					TransferProgressBar bar = (TransferProgressBar)it.next();
+					bar.refresh();
+				}
+			}
+		}
+
+		public void stop() {
+			stop = true;
+		}
+	}
+
+
+	private ProgressBarRefresher refresher = null;
+
+
 	public void displayFrame(int x, int y) {
 		java.awt.Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
 		int screen_x = (int)d.getWidth();
@@ -230,6 +277,17 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 			y -= DIALOG_Y;
 
 		realDisplayFrame(x, y);
+
+		/* progressBars vector is generated at the same time than the panels */
+		refresher = new ProgressBarRefresher(progressBars);
+	}
+
+	public void hideFrame() {
+		dialog.setVisible(false);
+		dialog = null;
+		progressBars = null;
+		refresher.stop();
+		refresher = null;
 	}
 
 
@@ -248,8 +306,7 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 
 	public void mouseClicked(MouseEvent e) {
 		if (dialog != null) {
-			dialog.setVisible(false);
-			dialog = null;
+			hideFrame();
 			return;
 		}
 
@@ -271,8 +328,7 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == closeDialog) {
 			if (dialog != null) {
-				dialog.setVisible(false);
-				dialog = null;
+				hideFrame();
 			}
 		}
 	}
