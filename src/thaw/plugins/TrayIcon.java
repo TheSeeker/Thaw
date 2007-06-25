@@ -229,6 +229,7 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 		dialog.validate();
 
 		dialog.setVisible(true);
+		dialog.toFront();
 	}
 
 
@@ -285,6 +286,8 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 
 		/* progressBars vector is generated at the same time than the panels */
 		refresher = new ProgressBarRefresher(progressBars);
+		Thread th = new Thread(refresher);
+		th.start();
 	}
 
 	public void hideFrame() {
