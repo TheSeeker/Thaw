@@ -10,6 +10,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -76,7 +77,7 @@ public class PeerHelper {
 				JLabel label = new JLabel(I18n.getMessage("thaw.plugin.peerMonitor.enterRef"));
 
 				centerPanel.add(label, BorderLayout.NORTH);
-				centerPanel.add(refArea, BorderLayout.CENTER);
+				centerPanel.add(new JScrollPane(refArea), BorderLayout.CENTER);
 
 
 				JPanel southPanel = new JPanel(new GridLayout(2, 1));
