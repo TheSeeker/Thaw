@@ -1367,7 +1367,7 @@ public class IndexManagementHelper {
 
 			frame.getContentPane().setLayout(new BorderLayout());
 			frame.getContentPane().add(header, BorderLayout.NORTH);
-			frame.getContentPane().add(textArea, BorderLayout.CENTER);
+			frame.getContentPane().add(new JScrollPane(textArea), BorderLayout.CENTER);
 
 			buttonPanel.setLayout(new GridLayout(1, 2));
 			buttonPanel.add(okButton);
