@@ -123,8 +123,6 @@ public class AutoRefresh implements Runnable, java.util.Observer {
 				index.downloadFromFreenet(this, browserPanel.getIndexTree(), queueManager);
 
 				browserPanel.getIndexTree().redraw();
-
-				browserPanel.getIndexProgressBar().addTransfer(1);
 			}
 
 			return ret;
@@ -148,7 +146,6 @@ public class AutoRefresh implements Runnable, java.util.Observer {
 			browserPanel.getTables().getLinkTable().refresh();
 		}
 		browserPanel.getUnknownIndexList().addLinks((LinkList)o);
-		browserPanel.getIndexProgressBar().removeTransfer(1);
 	}
 
 

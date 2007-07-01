@@ -785,9 +785,6 @@ public class IndexManagementHelper {
 
 
 	public static class IndexDownloader extends BasicIndexAction implements Runnable, Observer {
-		public boolean allStarted;
-		public int toRemove;
-
 		public IndexDownloader(FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(queueManager, indexBrowser, actionSource);
 		}
@@ -797,21 +794,8 @@ public class IndexManagementHelper {
 		}
 
 		public void apply() {
-			int i;
-
-			toRemove = 0;
-			allStarted = false;
-
-			i = getTarget().downloadFromFreenet(this, getIndexBrowserPanel().getIndexTree(), getQueueManager());
-
+			getTarget().downloadFromFreenet(this, getIndexBrowserPanel().getIndexTree(), getQueueManager());
 			getIndexBrowserPanel().getIndexTree().redraw(getTarget());
-
-			if (i > 0)
-				getIndexBrowserPanel().getIndexProgressBar().addTransfer(i);
-			else
-				Logger.notice(this, "No download started ?!");
-
-			allStarted = true;
 		}
 
 		public void update(Observable o, Object param) {
@@ -827,13 +811,6 @@ public class IndexManagementHelper {
 			}
 
 			getIndexBrowserPanel().getUnknownIndexList().addLinks((LinkList)o);
-
-			toRemove++;
-
-			if (allStarted) {
-				getIndexBrowserPanel().getIndexProgressBar().removeTransfer(toRemove);
-				toRemove = 0;
-			}
 		}
 	}
 
@@ -851,9 +828,6 @@ public class IndexManagementHelper {
 
 
 	public static class IndexUploader extends BasicIndexAction implements Runnable, Observer {
-		private boolean allStarted = false;
-		private int toRemove = 0;
-
 		public IndexUploader(FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(queueManager, indexBrowser, actionSource);
 		}
@@ -866,32 +840,13 @@ public class IndexManagementHelper {
 		}
 
 		public void apply() {
-			int i;
-
-			toRemove = 0;
-			allStarted = false;
-
-			i = getTarget().insertOnFreenet(this, getIndexBrowserPanel(), getQueueManager());
+			getTarget().insertOnFreenet(this, getIndexBrowserPanel(), getQueueManager());
 
 			getIndexBrowserPanel().getIndexTree().redraw(getTarget());
-
-			if (i > 0)
-				getIndexBrowserPanel().getIndexProgressBar().addTransfer(i);
-			else
-				Logger.notice(this, "No insertion started ?!");
-
-			allStarted = true;
 		}
 
 		public void update(Observable o, Object param) {
 			getIndexBrowserPanel().getIndexTree().redraw(((Index)o));
-
-			toRemove++;
-
-			if (allStarted) {
-				getIndexBrowserPanel().getIndexProgressBar().removeTransfer(toRemove);
-				toRemove = 0;
-			}
 		}
 
 	}

@@ -20,7 +20,6 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	private Tables tables;
 	private DetailPanel detailPanel;
 	private UnknownIndexList unknownList;
-	private IndexProgressBar indexProgressBar;
 
 	private BlackList blackList;
 	private CommentTab commentTab;
@@ -73,11 +72,9 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 
 		indexTree.addTreeSelectionListener(this);
 
-		indexProgressBar = new IndexProgressBar();
 
 		globalPanel = new JPanel(new BorderLayout());
 		globalPanel.add(split, BorderLayout.CENTER);
-		globalPanel.add(indexProgressBar.getProgressBar(), BorderLayout.SOUTH);
 	}
 
 
@@ -131,9 +128,6 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		return commentTab;
 	}
 
-	public IndexProgressBar getIndexProgressBar() {
-		return indexProgressBar;
-	}
 
 	public MainWindow getMainWindow() {
 		return mainWindow;
