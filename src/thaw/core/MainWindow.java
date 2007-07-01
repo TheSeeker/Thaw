@@ -227,7 +227,8 @@ public class MainWindow implements java.awt.event.ActionListener, WindowListener
 	 * Make the window visible or not.
 	 */
 	public void setVisible(final boolean v) {
-		mainWindow.setVisible(v);
+		if (!v || !core.isStopping())
+			mainWindow.setVisible(v);
 	}
 
 

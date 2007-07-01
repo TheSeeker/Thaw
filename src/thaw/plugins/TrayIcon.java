@@ -44,6 +44,7 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 	public final static int DIALOG_X = 300;
 	public final static int DIALOG_Y = 500;
 
+
 	public TrayIcon() {
 
 	}
@@ -65,7 +66,7 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 
 
 	public boolean stop() {
-		core.getMainWindow().addWindowListener(this);
+		core.getMainWindow().removeWindowListener(this);
 		icon.removeMouseListener(this);
 
 		icon.setVisible(false);

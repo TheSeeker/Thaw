@@ -48,6 +48,8 @@ public class Core implements Observer {
 
 	private static final Random RANDOM = new Yarrow();
 
+	private boolean isStopping = false;
+
 	// MDNS stuffs
 	private MDNSDiscovery discovery;
 
@@ -55,6 +57,7 @@ public class Core implements Observer {
 	 * Creates a core, but do nothing else (no initialization).
 	 */
 	public Core() {
+		isStopping = false;
 		Logger.info(this, "Thaw, version "+Main.VERSION, true);
 		Logger.info(this, "2006(c) Freenet project", true);
 		Logger.info(this, "Released under GPL license version 2 or later (see http://www.fsf.org/licensing/licenses/gpl.html)", true);
@@ -527,6 +530,8 @@ public class Core implements Observer {
 	 * @see #exit()
 	 */
 	public void exit(boolean force) {
+		isStopping = true;
+
 		if(!force) {
 			if(!canDisconnect()) {
 				if(!askDeconnectionConfirmation())
@@ -708,4 +713,8 @@ public class Core implements Observer {
 		return RANDOM;
 	}
 
+
+	public boolean isStopping() {
+		return isStopping;
+	}
 }
