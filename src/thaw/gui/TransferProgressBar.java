@@ -48,16 +48,22 @@ public class TransferProgressBar extends JProgressBar {
 
 		if(query.isFinished() && !query.isSuccessful())
 			setString(I18n.getMessage("thaw.common.failed"));
-
-		if(query.isFinished() && query.isSuccessful())
+		else if(query.isFinished() && query.isSuccessful())
 			setString(I18n.getMessage("thaw.common.finished"));
+		else if(!query.isFinished()) {
+			String txt= "";
 
-		if(!query.isFinished()) {
 			if (statusInProgressBar)
-				setString(query.getStatus() +
+				txt = (query.getStatus() +
 					      " [ "+Integer.toString(progress)+"% ]");
 			else
-				setString(Integer.toString(progress)+"%");
+				txt = (Integer.toString(progress)+"%");
+
+			if (!query.isProgressionReliable())
+				txt += " [*]";
+
+			setString(txt);
 		}
+
 	}
 }
