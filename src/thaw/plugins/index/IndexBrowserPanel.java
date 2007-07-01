@@ -169,11 +169,11 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	protected void setList(final FileAndLinkList l) {
 		tables.setList(l);
 
+		detailPanel.setTarget(l);
+
 		if (l instanceof Index) {
-			detailPanel.setIndexTarget((Index)l);
 			commentTab.setIndex((Index)l);
 		} else {
-			detailPanel.setIndexTarget(null);
 			commentTab.setIndex(null);
 		}
 	}

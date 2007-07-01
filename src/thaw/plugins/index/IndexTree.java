@@ -400,6 +400,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		selectedNode = (IndexTreeNode)(path.getLastPathComponent());
 
+		indexBrowser.getDetailPanel().setTarget(selectedNode);
 
 		// Update toolbar
 		for (final Iterator it = toolbarActions.iterator();
