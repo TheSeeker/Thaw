@@ -348,7 +348,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 				for(final Iterator it = qs.iterator();
 				    it.hasNext(); ) {
 					final FCPTransferQuery query = (FCPTransferQuery)it.next();
-					if(query.isFinished() &&
+					if(query.isFinished() && query.isSuccessful() &&
 					   (!(query instanceof FCPClientGet) || (!query.isSuccessful() || ((FCPClientGet)query).isWritingSuccessful()))) {
 						if(query.stop(core.getQueueManager())) {
 							core.getQueueManager().remove(query);
