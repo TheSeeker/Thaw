@@ -27,6 +27,7 @@ public class ThawConfigPanel implements Observer, ActionListener {
 
 	private boolean advancedMode;
 
+	private JLabel tmpDirLabel;
 	private JTextField tmpDirField;
 	private JButton tmpDirButton;
 
@@ -52,18 +53,18 @@ public class ThawConfigPanel implements Observer, ActionListener {
 		tmpDirButton = new JButton(I18n.getMessage("thaw.common.browse"));
 		tmpDirButton.addActionListener(this);
 
-		if (advancedMode) {
-			thawConfigPanel.add(new JLabel(I18n.getMessage("thaw.common.tempDir")));
+		tmpDirLabel = new JLabel(I18n.getMessage("thaw.common.tempDir"));
+		thawConfigPanel.add(tmpDirLabel);
 
-			JPanel tempDirPanel = new JPanel(new BorderLayout());
+		JPanel tempDirPanel = new JPanel(new BorderLayout());
 
-			tempDirPanel.add(tmpDirField,
-					 BorderLayout.CENTER);
-			tempDirPanel.add(tmpDirButton,
-					 BorderLayout.EAST);
+		tempDirPanel.add(tmpDirField,
+				 BorderLayout.CENTER);
+		tempDirPanel.add(tmpDirButton,
+				 BorderLayout.EAST);
+		thawConfigPanel.add(tempDirPanel);
 
-			thawConfigPanel.add(tempDirPanel);
-		}
+		setAdvancedOptionsVisibility(advancedMode);
 
 		configWindow.addObserver(this);
 	}
@@ -73,6 +74,12 @@ public class ThawConfigPanel implements Observer, ActionListener {
 		return thawConfigPanel;
 	}
 
+
+	private void setAdvancedOptionsVisibility(boolean v) {
+		tmpDirField.setVisible(v);
+		tmpDirButton.setVisible(v);
+		tmpDirLabel.setVisible(v);
+	}
 
 	public void actionPerformed(ActionEvent e) {
 		FileChooser chooser = new FileChooser(System.getProperty("java.io.tmpdir"));
@@ -93,6 +100,8 @@ public class ThawConfigPanel implements Observer, ActionListener {
 			core.getConfig().setValue("tmpDir", tmpDirField.getText());
 			System.setProperty("java.io.tmpdir", tmpDirField.getText());
 			tmpDirField.setText(System.getProperty("java.io.tmpdir"));
+
+			setAdvancedOptionsVisibility(advancedMode);
 		}
 
 		if(arg == core.getConfigWindow().getCancelButton()) {
