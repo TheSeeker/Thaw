@@ -1,24 +1,34 @@
 package thaw.core;
 
 import java.awt.GridLayout;
+import java.awt.BorderLayout;
 import java.util.Observable;
 import java.util.Observer;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JButton;
 import javax.swing.JTextField;
+import javax.swing.JTextField;
+
+import thaw.gui.FileChooser;
 
 /**
  * Creates and manages the panel containing all the things to configure related to Thaw and only Thaw.
  */
-public class ThawConfigPanel implements Observer {
+public class ThawConfigPanel implements Observer, ActionListener {
 	private Core core;
 	private JPanel thawConfigPanel = null;
 
 	private JCheckBox advancedModeBox = null;
 
 	private boolean advancedMode;
+
+	private JTextField tmpDirField;
+	private JButton tmpDirButton;
 
 
 	public ThawConfigPanel(final ConfigWindow configWindow, final Core core) {
@@ -38,6 +48,23 @@ public class ThawConfigPanel implements Observer {
 		thawConfigPanel.add(advancedModeBox);
 		thawConfigPanel.add(new JLabel(" "));
 
+		tmpDirField = new JTextField(System.getProperty("java.io.tmpdir"));
+		tmpDirButton = new JButton(I18n.getMessage("thaw.common.browse"));
+		tmpDirButton.addActionListener(this);
+
+		if (advancedMode) {
+			thawConfigPanel.add(new JLabel(I18n.getMessage("thaw.common.tempDir")));
+
+			JPanel tempDirPanel = new JPanel(new BorderLayout());
+
+			tempDirPanel.add(tmpDirField,
+					 BorderLayout.CENTER);
+			tempDirPanel.add(tmpDirButton,
+					 BorderLayout.EAST);
+
+			thawConfigPanel.add(tempDirPanel);
+		}
+
 		configWindow.addObserver(this);
 	}
 
@@ -47,14 +74,31 @@ public class ThawConfigPanel implements Observer {
 	}
 
 
+	public void actionPerformed(ActionEvent e) {
+		FileChooser chooser = new FileChooser(System.getProperty("java.io.tmpdir"));
+		chooser.setTitle(I18n.getMessage("thaw.common.tempDir"));
+		chooser.setDirectoryOnly(true);
+		chooser.setDialogType(javax.swing.JFileChooser.OPEN_DIALOG);
+
+		java.io.File file = chooser.askOneFile();
+		tmpDirField.setText(file.getPath());
+	}
+
+
 	public void update(final Observable o, final Object arg) {
 		if(arg == core.getConfigWindow().getOkButton()) {
 			advancedMode = advancedModeBox.isSelected();
 			core.getConfig().setValue("advancedMode", Boolean.toString(advancedMode));
+
+			core.getConfig().setValue("tmpDir", tmpDirField.getText());
+			System.setProperty("java.io.tmpdir", tmpDirField.getText());
+			tmpDirField.setText(System.getProperty("java.io.tmpdir"));
 		}
 
 		if(arg == core.getConfigWindow().getCancelButton()) {
 			advancedModeBox.setSelected(advancedMode);
+
+			tmpDirField.setText(System.getProperty("java.io.tmpdir"));
 		}
 	}
 

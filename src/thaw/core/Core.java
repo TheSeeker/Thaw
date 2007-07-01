@@ -178,6 +178,9 @@ public class Core implements Observer {
 			config.setDefaultValues();
 		}
 
+		if (config.getValue("tmpDir") != null)
+			System.setProperty("java.io.tmpdir", config.getValue("tmpDir"));
+
 		return true;
 	}
 
