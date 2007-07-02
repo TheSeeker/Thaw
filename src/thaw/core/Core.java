@@ -181,6 +181,9 @@ public class Core implements Observer {
 		if (config.getValue("tmpDir") != null)
 			System.setProperty("java.io.tmpdir", config.getValue("tmpDir"));
 
+		if (config.getValue("lang") != null)
+			I18n.setLocale(new java.util.Locale(config.getValue("lang")));
+
 		return true;
 	}
 

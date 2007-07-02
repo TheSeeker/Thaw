@@ -34,6 +34,10 @@ import java.util.ResourceBundle;
  * @version $Id: I18n.java 355 2006-03-24 15:04:11Z bombe $
  */
 public class I18n {
+	public final static Locale[] supportedLocales = {
+		new Locale("en"),
+		new Locale("fr")
+	};
 
 	private static Locale currentLocale;
 

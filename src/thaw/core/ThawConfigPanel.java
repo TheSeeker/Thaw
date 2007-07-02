@@ -13,6 +13,10 @@ import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JTextField;
 import javax.swing.JTextField;
+import javax.swing.JComboBox;
+
+import java.util.Vector;
+import java.util.Locale;
 
 import thaw.gui.FileChooser;
 
@@ -31,6 +35,8 @@ public class ThawConfigPanel implements Observer, ActionListener {
 	private JTextField tmpDirField;
 	private JButton tmpDirButton;
 
+	private JLabel langLabel;
+	private JComboBox langBox;
 
 	public ThawConfigPanel(final ConfigWindow configWindow, final Core core) {
 		this.core = core;
@@ -41,6 +47,8 @@ public class ThawConfigPanel implements Observer, ActionListener {
 		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 
 
+		/* advanced mode */
+
 		thawConfigPanel = new JPanel();
 		thawConfigPanel.setLayout(new GridLayout(15, 1));
 
@@ -48,6 +56,9 @@ public class ThawConfigPanel implements Observer, ActionListener {
 
 		thawConfigPanel.add(advancedModeBox);
 		thawConfigPanel.add(new JLabel(" "));
+
+
+		/* tmpdir */
 
 		tmpDirField = new JTextField(System.getProperty("java.io.tmpdir"));
 		tmpDirButton = new JButton(I18n.getMessage("thaw.common.browse"));
@@ -64,6 +75,19 @@ public class ThawConfigPanel implements Observer, ActionListener {
 				 BorderLayout.EAST);
 		thawConfigPanel.add(tempDirPanel);
 
+		/* lang */
+		langLabel = new JLabel(I18n.getMessage("thaw.common.language"));
+		langBox = new JComboBox(I18n.supportedLocales);
+
+		setLang();
+
+		thawConfigPanel.add(new JLabel(""));
+		thawConfigPanel.add(langLabel);
+		thawConfigPanel.add(langBox);
+
+
+		/* misc */
+
 		setAdvancedOptionsVisibility(advancedMode);
 
 		configWindow.addObserver(this);
@@ -74,11 +98,19 @@ public class ThawConfigPanel implements Observer, ActionListener {
 		return thawConfigPanel;
 	}
 
+	private void setLang() {
+		for (int i = 0 ; i < I18n.supportedLocales.length; i++) {
+			if (I18n.supportedLocales[i].getLanguage().equals(I18n.getLocale().getLanguage()))
+				langBox.setSelectedItem(I18n.supportedLocales[i]);
+		}
+	}
 
 	private void setAdvancedOptionsVisibility(boolean v) {
 		tmpDirField.setVisible(v);
 		tmpDirButton.setVisible(v);
 		tmpDirLabel.setVisible(v);
+		langLabel.setVisible(v);
+		langBox.setVisible(v);
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -101,6 +133,9 @@ public class ThawConfigPanel implements Observer, ActionListener {
 			System.setProperty("java.io.tmpdir", tmpDirField.getText());
 			tmpDirField.setText(System.getProperty("java.io.tmpdir"));
 
+			core.getConfig().setValue("lang",
+						  ((Locale)langBox.getSelectedItem()).getLanguage());
+
 			setAdvancedOptionsVisibility(advancedMode);
 		}
 
@@ -108,6 +143,7 @@ public class ThawConfigPanel implements Observer, ActionListener {
 			advancedModeBox.setSelected(advancedMode);
 
 			tmpDirField.setText(System.getProperty("java.io.tmpdir"));
+			setLang();
 		}
 	}
 
