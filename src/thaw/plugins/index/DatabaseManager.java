@@ -593,7 +593,8 @@ public class DatabaseManager {
 			}
 
 			if ("fullIndex".equals(rawName)) {
-				indexHandler.endDocument();
+				if (indexHandler != null)
+					indexHandler.endDocument();
 				indexHandler = null;
 				return;
 			}
