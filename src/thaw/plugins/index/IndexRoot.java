@@ -92,32 +92,8 @@ public class IndexRoot extends IndexFolder implements IndexTreeNode {
 
 		Logger.warning(this, "DELETING ALL THE INDEXES");
 
-		try {
-			synchronized(getDb().dbLock) {
-				PreparedStatement st;
-
-				st = getDb().getConnection().prepareStatement("DELETE FROM FILES");
-				st.execute();
-
-				st = getDb().getConnection().prepareStatement("DELETE FROM LINKS");
-				st.execute();
-
-				st = getDb().getConnection().prepareStatement("DELETE FROM INDEXES");
-				st.execute();
-
-				st = getDb().getConnection().prepareStatement("DELETE FROM INDEXFOLDERS");
-				st.execute();
-
-				st = getDb().getConnection().prepareStatement("DELETE FROM INDEXPARENTS");
-				st.execute();
-
-				st = getDb().getConnection().prepareStatement("DELETE FROM FOLDERPARENTS");
-				st.execute();
-			}
-		} catch(SQLException e) {
-			Logger.error(this, "Woops, error while destroying the world : "+e.toString());
-			return;
-		}
+		DatabaseManager.dropTables(indexBrowser.getDb());
+		DatabaseManager.createTables(indexBrowser.getDb());
 
 		IndexManagementHelper.addIndex(queueManager, indexBrowser, null,
 					       thaw.plugins.IndexBrowser.DEFAULT_INDEX);

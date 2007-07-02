@@ -297,18 +297,19 @@ public class DatabaseManager {
 		sendQuery(db, "DROP TABLE files");
 		sendQuery(db, "DROP TABLE links");
 
+		sendQuery(db, "DROP TABLE indexBlackList");
+
+		sendQuery(db, "DROP TABLE indexCommentKeys");
+		sendQuery(db, "DROP TABLE indexComments");
+		sendQuery(db, "DROP TABLE indexCommentBlackList");
+
 		sendQuery(db, "DROP TABLE indexes");
 		sendQuery(db, "DROP TABLE indexFolders");
 
 		sendQuery(db, "DROP TABLE indexParents");
 		sendQuery(db, "DROP TABLE folderParents");
 
-		sendQuery(db, "DROP TABLE indexCommentKeys");
-		sendQuery(db, "DROP TABLE indexComments");
-
 		sendQuery(db, "DROP TABLE categories");
-
-		sendQuery(db, "DROP TABLE indexBlackList");
 	}
 
 
