@@ -11,8 +11,11 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import thaw.gui.TabbedPane;
+import javax.swing.JLabel;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 
+import thaw.gui.TabbedPane;
 import thaw.gui.IconBox;
 
 
@@ -220,12 +223,34 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		}
 
 		public void run() {
+			JDialog dialog = new JDialog(core.getMainWindow().getMainFrame(),
+						     I18n.getMessage("thaw.common.pleaseWait"));
+
+			dialog.getContentPane().setLayout(new GridLayout(1, 1));
+			dialog.getContentPane().add(new JLabel(I18n.getMessage("thaw.common.pleaseWait")));
+
+			dialog.setUndecorated(true);
+			dialog.setResizable(false);
+
+			dialog.setSize(150, 30);
+
+			final Dimension screenSize =
+				Toolkit.getDefaultToolkit().getScreenSize();
+
+			final Dimension dialogSize = dialog.getSize();
+			dialog.setLocation(dialogSize.width/2 - (dialogSize.width/2),
+					   dialogSize.height/2 - (dialogSize.height/2));
+
+			dialog.setVisible(true);
 
 			/* should reinit the whole connection correctly */
 			core.getPluginManager().stopPlugins();
 
 			if (resetConnection && !core.initConnection()) {
-				new thaw.gui.WarningWindow(core, I18n.getMessage("thaw.warning.unableToConnectTo")+ " "+core.getConfig().getValue("nodeAddress")+":"+ core.getConfig().getValue("nodePort"));
+				new thaw.gui.WarningWindow(dialog,
+							   I18n.getMessage("thaw.warning.unableToConnectTo")+
+							   " "+core.getConfig().getValue("nodeAddress")+
+							   ":"+ core.getConfig().getValue("nodePort"));
 			}
 
 			needConnectionReset = false;
@@ -235,6 +260,8 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 			core.getPluginManager().loadPlugins();
 			core.getPluginManager().runPlugins();
+
+			dialog.setVisible(false);
 		}
 	}
 
