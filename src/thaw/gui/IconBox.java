@@ -132,6 +132,7 @@ public class IconBox {
 	public static ImageIcon minOrange;
 	public static ImageIcon minGreen;
 
+	public static ImageIcon minDetails;
 
 	/**
 	 * Not really used
@@ -247,6 +248,7 @@ public class IconBox {
 		IconBox.minRed              = IconBox.loadIcon("min-red.png");
 		IconBox.minOrange           = IconBox.loadIcon("min-orange.png");
 		IconBox.minGreen            = IconBox.loadIcon("min-green.png");
+		IconBox.minDetails          = IconBox.loadIcon("min-details.png");
 	}
 
 }

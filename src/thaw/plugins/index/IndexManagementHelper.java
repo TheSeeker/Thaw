@@ -39,6 +39,8 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.JScrollPane;
 
+import java.text.DateFormat;
+
 import thaw.gui.IconBox;
 
 import thaw.core.Config;
@@ -1658,12 +1660,164 @@ public class IndexManagementHelper {
 			super.setTarget(node);
 
 			if (getActionSource() != null)
-				getActionSource().setEnabled(node instanceof Index
+				getActionSource().setEnabled(node != null
+							     && node instanceof Index
 							     && ((Index)node).canHaveComments());
 		}
 
 		public void apply() {
 			getIndexBrowserPanel().getCommentTab().showTab();
+		}
+	}
+
+
+	public static class IndexDetailsViewer extends BasicIndexAction implements Runnable, ActionListener {
+		private DateFormat dateFormat;
+
+		public IndexDetailsViewer(IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+			super(null, indexBrowser, actionSource);
+
+			dateFormat = DateFormat.getDateInstance();
+
+			if (actionSource != null)
+				actionSource.setEnabled(false);
+		}
+
+
+		public void setTarget(final IndexTreeNode node) {
+			super.setTarget(node);
+
+			getActionSource().setEnabled(node != null);
+		}
+
+
+		private JDialog dialog;
+		private JButton closeButton;
+
+		private void displayDialog(MainWindow mainWindow,
+					   int nmbFiles,
+					   int nmbLinks,
+					   java.sql.Date dateSql) {
+
+			String dateStr = null;
+
+			if (dateSql != null)
+				dateStr = dateFormat.format(dateSql);
+
+			if (dateStr == null && dateSql != null)
+				Logger.warning(this, "There is a date in the db, but I'm unable to print it");
+
+			if (dateStr == null)
+				dateStr = "";
+
+
+			dialog = new JDialog(mainWindow.getMainFrame(),
+					     I18n.getMessage("thaw.plugin.index.details"));
+
+			dialog.getContentPane().setLayout(new BorderLayout(5, 5));
+
+			JPanel statPanel = new JPanel(new GridLayout(3, 2));
+
+			statPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.numberOfFiles")));
+			statPanel.add(new JLabel(Integer.toString(nmbFiles), JLabel.RIGHT));
+
+			statPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.numberOfLinks")));
+			statPanel.add(new JLabel(Integer.toString(nmbLinks), JLabel.RIGHT));
+
+			statPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.insertionDate")));
+			statPanel.add(new JLabel(dateStr, JLabel.RIGHT));
+
+			dialog.getContentPane().add(statPanel, BorderLayout.CENTER);
+
+			closeButton = new JButton(I18n.getMessage("thaw.common.ok"));
+			closeButton.addActionListener(this);
+			dialog.getContentPane().add(closeButton, BorderLayout.SOUTH);
+
+			dialog.pack();
+
+			dialog.setVisible(true);
+
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			if (e.getSource() == closeButton) {
+				if (dialog != null) {
+					dialog.setVisible(false);
+					dialog = null;
+				}
+			} else {
+				super.actionPerformed(e);
+			}
+		}
+
+
+		public void apply() {
+			IndexTreeNode node = getTarget();
+
+			Hsqldb db = getIndexBrowserPanel().getDb();
+			PreparedStatement st;
+			ResultSet rs;
+
+			int nmbFilesInt = 0;
+			int nmbLinksInt = 0;
+			java.sql.Date insertionDate = null;
+
+			synchronized(db.dbLock) {
+				try {
+					if (node instanceof IndexFolder) {
+						if (node instanceof IndexRoot) {
+							st = db.getConnection().prepareStatement("SELECT count(id) from files");
+							rs = st.executeQuery();
+							rs.next();
+							nmbFilesInt = rs.getInt(1);
+
+							st = db.getConnection().prepareStatement("SELECT count(id) from links");
+							rs = st.executeQuery();
+							rs.next();
+							nmbLinksInt = rs.getInt(1);
+						} else {
+							st = db.getConnection().prepareStatement("SELECT count(id) "+
+												 "FROM files WHERE files.indexParent IN "+
+												 "(SELECT indexParents.indexId "+
+												 " FROM indexParents "+
+												 " WHERE indexParents.folderId = ?)");
+
+							st.setInt(1, node.getId());
+							rs = st.executeQuery();
+							rs.next();
+							nmbFilesInt = rs.getInt(1);
+
+
+							st = db.getConnection().prepareStatement("SELECT count(id) "+
+												 "FROM links WHERE links.indexParent IN "+
+												 "(SELECT indexParents.indexId "+
+												 " FROM indexParents "+
+												 " WHERE indexParents.folderId = ?)");
+							st.setInt(1, node.getId());
+							rs = st.executeQuery();
+							rs.next();
+							nmbLinksInt = rs.getInt(1);
+
+						}
+
+						insertionDate = null;
+
+
+					} else if (node instanceof Index) {
+						nmbFilesInt = ((Index)node).getFileList(null, true).size();
+						nmbLinksInt = ((Index)node).getLinkList(null, true).size();
+						insertionDate = ((Index)node).getDate();
+
+					}
+
+				} catch(SQLException e) {
+					Logger.error(this, "Exception while counting files/links : "+e.toString());
+					return;
+				}
+			}
+
+			displayDialog(getIndexBrowserPanel().getMainWindow(),
+				      nmbFilesInt, nmbLinksInt, insertionDate);
 		}
 	}
 }

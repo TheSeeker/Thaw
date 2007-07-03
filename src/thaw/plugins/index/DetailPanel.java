@@ -37,6 +37,7 @@ public class DetailPanel {
 	private JPanel panel;
 
 	private JButton viewCommentButton;
+	private JButton detailsButton;
 
 	private Vector buttonActions;
 
@@ -51,33 +52,23 @@ public class DetailPanel {
 		this.dateFormat = DateFormat.getDateInstance();
 		this.indexBrowser = indexBrowser;
 
-		nmbFilesLabel = new JLabel(I18n.getMessage("thaw.plugin.index.numberOfFiles").replaceAll("\\?", ""));
-		nmbLinksLabel = new JLabel(I18n.getMessage("thaw.plugin.index.numberOfLinks").replaceAll("\\?", ""));
-		insertionDateLabel = new JLabel(I18n.getMessage("thaw.plugin.index.insertionDate").replaceAll("\\?", ""));
-
 		panel = new JPanel(new BorderLayout());
 
-		JPanel stats = new JPanel(new GridLayout(1, 3));
-		stats.add(nmbFilesLabel);
-		stats.add(nmbLinksLabel);
-		stats.add(insertionDateLabel);
-
-		panel.add(stats, BorderLayout.CENTER);
+		panel.add(new JLabel(""), BorderLayout.CENTER);
 
 		JPanel buttonPanel = new JPanel(new GridLayout(1, 1));
 		buttonActions = new Vector(2);
 		JButton button;
 
+		detailsButton = new JButton(I18n.getMessage("thaw.plugin.index.details"),
+					    IconBox.minDetails);
+		buttonActions.add(new IndexManagementHelper.IndexDetailsViewer(indexBrowser, detailsButton));
+		buttonPanel.add(detailsButton);
+
 		viewCommentButton = new JButton(I18n.getMessage("thaw.plugin.index.comment.comments").replaceAll("\\?", "0"),
-				     IconBox.minReadComments);
+						IconBox.minReadComments);
 		buttonActions.add(new IndexManagementHelper.IndexCommentViewer(indexBrowser, viewCommentButton));
 		buttonPanel.add(viewCommentButton);
-
-		//button  = new JButton(I18n.getMessage("thaw.plugin.index.comment.add"),
-		//		      IconBox.minAddComment);
-		//buttonActions.add(new IndexManagementHelper.IndexCommentAdder(queueManager, indexBrowser, button));
-		//buttonPanel.add(button);
-
 
 		panel.add(buttonPanel, BorderLayout.EAST);
 	}
@@ -89,44 +80,19 @@ public class DetailPanel {
 
 
 
-	private void setIndexTarget(Index l) {
+	public void setTarget(IndexTreeNode l) {
 
-		viewCommentButton.setText(I18n.getMessage("thaw.plugin.index.comment.comments").replaceAll("\\?",
-													   l == null ? "0" : Integer.toString(l.getNmbComments())));
+		if (l != null && l instanceof Index)
+			viewCommentButton.setText(I18n.getMessage("thaw.plugin.index.comment.comments").replaceAll("\\?",
+														   Integer.toString(((Index)l).getNmbComments())));
+		else
+			viewCommentButton.setText(I18n.getMessage("thaw.plugin.index.comment.comments").replaceAll("\\?",
+														   "0"));
 
 		for (Iterator it = buttonActions.iterator();
 		     it.hasNext();) {
 			IndexManagementHelper.IndexAction action = (IndexManagementHelper.IndexAction)it.next();
-			action.setTarget((Index)l);
-		}
-	}
-
-
-	private void setStats(int nmbFiles, int nmbLinks) {
-		nmbFilesLabel.setText(I18n.getMessage("thaw.plugin.index.numberOfFiles").replaceAll("\\?",
-												    Integer.toString(nmbFiles)));
-		nmbLinksLabel.setText(I18n.getMessage("thaw.plugin.index.numberOfLinks").replaceAll("\\?",
-												    Integer.toString(nmbLinks)));
-	}
-
-
-	private void setInsertionDate(Index index) {
-		if (index == null) {
-			insertionDateLabel.setText(I18n.getMessage("thaw.plugin.index.insertionDate").replaceAll("\\?", ""));
-			return;
-		}
-
-		String dateStr = null;
-
-		java.sql.Date dateSql = index.getDate();
-
-		if (dateSql != null)
-			dateStr = dateFormat.format(dateSql);
-
-		if (dateStr != null)
-			insertionDateLabel.setText(I18n.getMessage("thaw.plugin.index.insertionDate").replaceAll("\\?", dateStr));
-		else if (dateSql != null) {
-			Logger.warning(this, "There is a date in the db, but I'm unable to print it");
+			action.setTarget(l);
 		}
 	}
 
@@ -134,102 +100,10 @@ public class DetailPanel {
 	/* called by IndexBrowserPanel.setList() */
 	public void setTarget(FileAndLinkList node) {
 		if (node instanceof Index) {
-			setIndexTarget((Index)node);
-			setInsertionDate((Index)node);
+			setTarget((IndexTreeNode)node);
 		} else {
-			setIndexTarget(null);
-			setInsertionDate(null);
+			setTarget((IndexTreeNode)null);
 		}
-
-		int nmbFilesInt = 0;
-		int nmbLinksInt = 0;
-
-		if (node != null) {
-			nmbFilesInt = node.getFileList(null, true).size();
-			nmbLinksInt = node.getLinkList(null, true).size();
-		}
-
-		setStats(nmbFilesInt, nmbLinksInt);
-	}
-
-
-	/* called by IndexTree.valueChanged() */
-	public void setTarget(IndexTreeNode node) {
-		Hsqldb db = indexBrowser.getDb();
-		PreparedStatement st;
-		ResultSet rs;
-
-		int nmbFilesInt = 0;
-		int nmbLinksInt = 0;
-
-		synchronized(db.dbLock) {
-			try {
-				if (node instanceof IndexFolder) {
-					if (node instanceof IndexRoot) {
-						st = db.getConnection().prepareStatement("SELECT count(id) from files");
-						rs = st.executeQuery();
-						rs.next();
-						nmbFilesInt = rs.getInt(1);
-
-						st = db.getConnection().prepareStatement("SELECT count(id) from links");
-						rs = st.executeQuery();
-						rs.next();
-						nmbLinksInt = rs.getInt(1);
-					} else {
-						st = db.getConnection().prepareStatement("SELECT count(id) "+
-											 "FROM files WHERE files.indexParent IN "+
-											 "(SELECT indexParents.indexId "+
-											 " FROM indexParents "+
-											 " WHERE indexParents.folderId = ?)");
-
-
-						st.setInt(1, node.getId());
-						rs = st.executeQuery();
-						rs.next();
-						nmbFilesInt = rs.getInt(1);
-
-
-						st = db.getConnection().prepareStatement("SELECT count(id) "+
-											 "FROM links WHERE links.indexParent IN "+
-											 "(SELECT indexParents.indexId "+
-											 " FROM indexParents "+
-											 " WHERE indexParents.folderId = ?)");
-						st.setInt(1, node.getId());
-						rs = st.executeQuery();
-						rs.next();
-						nmbLinksInt = rs.getInt(1);
-
-					}
-
-					setInsertionDate(null);
-
-
-				} else if (node instanceof Index) {
-					st = db.getConnection().prepareStatement("SELECT count(id) "+
-										 "FROM files WHERE files.indexParent = ?");
-					st.setInt(1, node.getId());
-					rs = st.executeQuery();
-					rs.next();
-					nmbFilesInt = rs.getInt(1);
-
-
-					st = db.getConnection().prepareStatement("SELECT count(id) "+
-										 "FROM links WHERE links.indexParent = ?");
-					st.setInt(1, node.getId());
-					rs = st.executeQuery();
-					rs.next();
-					nmbLinksInt = rs.getInt(1);
-
-					setInsertionDate((Index)node);
-
-				}
-
-			} catch(SQLException e) {
-				Logger.error(this, "Exception while counting files/links : "+e.toString());
-			}
-		}
-
-		setStats(nmbFilesInt, nmbLinksInt);
 	}
 
 }
