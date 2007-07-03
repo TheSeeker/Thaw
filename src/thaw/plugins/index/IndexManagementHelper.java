@@ -1708,7 +1708,7 @@ public class IndexManagementHelper {
 				Logger.warning(this, "There is a date in the db, but I'm unable to print it");
 
 			if (dateStr == null)
-				dateStr = "";
+				dateStr = I18n.getMessage("thaw.common.unknown");;
 
 
 			dialog = new JDialog(mainWindow.getMainFrame(),

@@ -121,7 +121,7 @@ public class PeerMonitor implements thaw.core.Plugin, Observer
 
 
 	public boolean stop() {
-		core.getMainWindow().removeTab(peerPanel.getTabPanel());
+		hideTab();
 		core.getMainWindow().removeComponent(peerPanel.getPeerListPanel());
 		running = false;
 		return false;
@@ -139,18 +139,25 @@ public class PeerMonitor implements thaw.core.Plugin, Observer
 	}
 
 
+	private boolean tabVisible = false;
+
 	public void update(Observable o, Object param) {
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.peerMonitor.peerMonitor"),
 					    thaw.gui.IconBox.peers,
 					    peerPanel.getTabPanel());
 		core.getMainWindow().setSelectedTab(peerPanel.getTabPanel());
 
+		tabVisible = true;
+
 		peerPanel.showToolbarButtons();
 	}
 
 	public void hideTab() {
-		peerPanel.hideToolbarButtons();
+		if (tabVisible) {
+			peerPanel.hideToolbarButtons();
 
-		core.getMainWindow().removeTab(peerPanel.getTabPanel());
+			core.getMainWindow().removeTab(peerPanel.getTabPanel());
+			tabVisible = false;
+		}
 	}
 }

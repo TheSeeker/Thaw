@@ -12,8 +12,8 @@ import thaw.plugins.Hsqldb;
 public class AutoRefresh implements Runnable, java.util.Observer {
 
 	public final static boolean DEFAULT_ACTIVATED = true;
-	public final static int DEFAULT_INTERVAL = 300;
-	public final static int DEFAULT_INDEX_NUMBER = 20;
+	public final static int DEFAULT_INTERVAL = 150;
+	public final static int DEFAULT_INDEX_NUMBER = 10;
 
 	private Hsqldb db;
 	private IndexBrowserPanel browserPanel;

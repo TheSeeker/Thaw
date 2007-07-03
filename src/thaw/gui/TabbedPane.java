@@ -43,12 +43,13 @@ public class TabbedPane extends JTabbedPane implements ChangeListener {
 		if (x >= 0)
 			tabNames.remove(x);
 		else {
-			Logger.error(this, "remove(): Component not found ?");
-			try { /* dirty way to have a trace back */
-				throw new Exception("bleh");
-			} catch(Exception e) {
-				e.printStackTrace();
-			}
+			/* ConfigWindow is a little bit lazy :
+			 * when you call ConfigWindow.addTabs(),
+			 * it will first try to remove the tabs before readding them.
+			 * This way, it's sure that there is not twice the tabs
+			 */
+			/* so this situation can be perfectly normal */
+			Logger.debug(this, "remove(): Component not found ?");
 		}
 
 		super.remove(panel);
