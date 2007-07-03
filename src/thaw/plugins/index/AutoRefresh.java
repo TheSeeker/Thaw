@@ -93,7 +93,7 @@ public class AutoRefresh implements Runnable, java.util.Observer {
 			ResultSet results;
 			int ret;
 
-			st = c.prepareStatement("SELECT id, originalName, displayName, publicKey, privateKey, author, positionInTree, revision "+
+			st = c.prepareStatement("SELECT id, originalName, displayName, publicKey, privateKey, author, positionInTree, revision, insertionDate "+
 						"FROM indexes ORDER by RAND() LIMIT 1");
 
 			results = st.executeQuery();
@@ -118,6 +118,7 @@ public class AutoRefresh implements Runnable, java.util.Observer {
 						  results.getInt("revision"),
 						  results.getString("privateKey"),
 						  results.getString("displayName"),
+						  results.getDate("insertionDate"),
 						  false, false);
 
 				index.downloadFromFreenet(this, browserPanel.getIndexTree(), queueManager);

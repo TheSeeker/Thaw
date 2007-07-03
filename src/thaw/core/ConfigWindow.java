@@ -234,18 +234,25 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 			dialog.setSize(150, 30);
 
-			final Dimension screenSize =
+			Dimension screenSize =
 				Toolkit.getDefaultToolkit().getScreenSize();
 
-			final Dimension dialogSize = dialog.getSize();
+			Dimension dialogSize = dialog.getSize();
 			dialog.setLocation(dialogSize.width/2 - (dialogSize.width/2),
 					   dialogSize.height/2 - (dialogSize.height/2));
 
 			dialog.setVisible(true);
 
-			/* should reinit the whole connection correctly */
+			dialog.setSize(150, 30);
+
+			dialogSize = dialog.getSize();
+			dialog.setLocation(dialogSize.width/2 - (dialogSize.width/2),
+					   dialogSize.height/2 - (dialogSize.height/2));
+
+
 			core.getPluginManager().stopPlugins();
 
+			/* should reinit the whole connection correctly */
 			if (resetConnection && !core.initConnection()) {
 				new thaw.gui.WarningWindow(dialog,
 							   I18n.getMessage("thaw.warning.unableToConnectTo")+

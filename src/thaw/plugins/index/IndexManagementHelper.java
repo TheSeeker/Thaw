@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
+import java.util.Calendar;
 
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
@@ -231,7 +232,8 @@ public class IndexManagementHelper {
 					Index index = new Index(db, getIndexBrowserPanel().getConfig(),
 								id, (TreeNode)getTarget(),
 								sskGenerator.getPublicKey(), 0, sskGenerator.getPrivateKey(),
-								name, false, false);
+								name, null,
+								false, false);
 
 					((MutableTreeNode)getTarget()).insert((index), 0);
 
@@ -672,7 +674,7 @@ public class IndexManagementHelper {
 				index = new Index(db, indexBrowser.getConfig(),
 						  id, parent,
 						  publicKey, revision, privateKey,
-						  name, false, false);
+						  name, null, false, false);
 
 			} catch(SQLException e) {
 				Logger.error(new IndexManagementHelper(), "Error while adding index: "+e.toString());

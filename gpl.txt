@@ -1,3 +1,9 @@
+The following license is only valid for the code provided in the java
+package 'thaw'. For the other packages, see the corresponding
+licenses.
+
+======================================================================
+
 		    GNU GENERAL PUBLIC LICENSE
 		       Version 2, June 1991
 

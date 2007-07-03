@@ -12,6 +12,9 @@ import java.util.Iterator;
 
 import java.sql.*;
 
+import java.text.DateFormat;
+
+
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.Config;
@@ -39,19 +42,25 @@ public class DetailPanel {
 
 	private JLabel nmbFilesLabel;
 	private JLabel nmbLinksLabel;
+	private JLabel insertionDateLabel;
+
+	private DateFormat dateFormat;
 
 
 	public DetailPanel(FCPQueueManager queueManager, IndexBrowserPanel indexBrowser) {
+		this.dateFormat = DateFormat.getDateInstance();
 		this.indexBrowser = indexBrowser;
 
 		nmbFilesLabel = new JLabel(I18n.getMessage("thaw.plugin.index.numberOfFiles").replaceAll("\\?", ""));
 		nmbLinksLabel = new JLabel(I18n.getMessage("thaw.plugin.index.numberOfLinks").replaceAll("\\?", ""));
+		insertionDateLabel = new JLabel(I18n.getMessage("thaw.plugin.index.insertionDate").replaceAll("\\?", ""));
 
 		panel = new JPanel(new BorderLayout());
 
-		JPanel stats = new JPanel(new GridLayout(1, 2));
+		JPanel stats = new JPanel(new GridLayout(1, 3));
 		stats.add(nmbFilesLabel);
 		stats.add(nmbLinksLabel);
+		stats.add(insertionDateLabel);
 
 		panel.add(stats, BorderLayout.CENTER);
 
@@ -101,12 +110,36 @@ public class DetailPanel {
 	}
 
 
+	private void setInsertionDate(Index index) {
+		if (index == null) {
+			insertionDateLabel.setText(I18n.getMessage("thaw.plugin.index.insertionDate").replaceAll("\\?", ""));
+			return;
+		}
+
+		String dateStr = null;
+
+		java.sql.Date dateSql = index.getDate();
+
+		if (dateSql != null)
+			dateStr = dateFormat.format(dateSql);
+
+		if (dateStr != null)
+			insertionDateLabel.setText(I18n.getMessage("thaw.plugin.index.insertionDate").replaceAll("\\?", dateStr));
+		else if (dateSql != null) {
+			Logger.warning(this, "There is a date in the db, but I'm unable to print it");
+		}
+	}
+
+
 	/* called by IndexBrowserPanel.setList() */
 	public void setTarget(FileAndLinkList node) {
-		if (node instanceof Index)
+		if (node instanceof Index) {
 			setIndexTarget((Index)node);
-		else
+			setInsertionDate((Index)node);
+		} else {
 			setIndexTarget(null);
+			setInsertionDate(null);
+		}
 
 		int nmbFilesInt = 0;
 		int nmbLinksInt = 0;
@@ -165,7 +198,10 @@ public class DetailPanel {
 						rs = st.executeQuery();
 						rs.next();
 						nmbLinksInt = rs.getInt(1);
+
 					}
+
+					setInsertionDate(null);
 
 
 				} else if (node instanceof Index) {
@@ -183,6 +219,9 @@ public class DetailPanel {
 					rs = st.executeQuery();
 					rs.next();
 					nmbLinksInt = rs.getInt(1);
+
+					setInsertionDate((Index)node);
+
 				}
 
 			} catch(SQLException e) {

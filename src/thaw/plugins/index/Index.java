@@ -14,6 +14,7 @@ import java.util.Enumeration;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
+import java.util.Calendar;
 
 import javax.swing.JOptionPane;
 import javax.swing.tree.MutableTreeNode;
@@ -90,7 +91,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	private String displayName = null;
 	private boolean hasChanged = false;
 	private boolean newComment = false;
-
+	private java.sql.Date date = null;
 
 	/* loaded only if asked explictly */
 	private String realName = null;
@@ -103,6 +104,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 	private Config config;
 
+	public final static String DATE_FORMAT = "yyyyMMdd";
 
 	/**
 	 * @deprecated Just don't use it !
@@ -122,6 +124,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	 */
 	public Index(Hsqldb db, Config config, int id, TreeNode parentNode,
 		     String publicKey, int rev, String privateKey, String displayName,
+		     java.sql.Date insertionDate,
 		     boolean hasChanged, boolean newComment) {
 		this(db, config, id);
 		this.parentNode = parentNode;
@@ -129,6 +132,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		this.publicKey = publicKey;
 		this.rev = rev;
 		this.displayName = displayName;
+		this.date = insertionDate;
 		this.hasChanged = hasChanged;
 		this.newComment = newComment;
 	}
@@ -365,7 +369,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		synchronized(db.dbLock) {
 			try {
 				PreparedStatement st =
-					db.getConnection().prepareStatement("SELECT publicKey, revision, privateKey, displayName, newRev, newComment FROM indexes WHERE id = ? LIMIT 1");
+					db.getConnection().prepareStatement("SELECT publicKey, revision, privateKey, displayName, newRev, newComment, insertionDate FROM indexes WHERE id = ? LIMIT 1");
 
 				st.setInt(1, id);
 
@@ -378,6 +382,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 					displayName = set.getString("displayName");
 					hasChanged = set.getBoolean("newRev");
 					newComment = set.getBoolean("newComment");
+					date = set.getDate("insertionDate");
 					return true;
 				} else {
 					Logger.error(this, "Unable to find index "+Integer.toString(id)+" in the database ?!");
@@ -398,6 +403,15 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		}
 
 		return publicKey;
+	}
+
+	public java.sql.Date getDate() {
+		if (publicKey == null) {
+			Logger.debug(this, "getDate() => loadData()");
+			loadData();
+		}
+
+		return date;
 	}
 
 
@@ -876,6 +890,27 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 			if (((FCPClientPut)o).isFinished()) {
 				if (indexTree != null)
 					indexTree.removeUpdatingIndex(this);
+
+				try {
+					synchronized(db.dbLock) {
+						/* TODO : Find a nicer way */
+
+						PreparedStatement st;
+
+						Calendar cal= Calendar.getInstance();
+						java.sql.Date dateSql = new java.sql.Date(cal.getTime().getTime() );
+
+						st = db.getConnection().prepareStatement("UPDATE indexes "+
+											 "SET insertionDate = ? "+
+											 "WHERE id = ?");
+						st.setDate(1, dateSql);
+						st.setInt(2, id);
+
+						st.execute();
+					}
+				} catch(SQLException e) {
+					Logger.error(this, "Error while updating the insertion date : "+e.toString());
+				}
 			}
 		}
 
@@ -1110,6 +1145,19 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 			header.appendChild(privateKeyEl);
 		}
 
+		/* insertion date */
+		String dateStr;
+
+		java.text.SimpleDateFormat sdf =
+			new java.text.SimpleDateFormat(DATE_FORMAT);
+		Calendar c1 = Calendar.getInstance(); // today
+		dateStr = sdf.format(c1.getTime());
+
+		final Element date = xmlDoc.createElement("date");
+		final Text dateText = xmlDoc.createTextNode(dateStr);
+		date.appendChild(dateText);
+
+		header.appendChild(date);
 
 		/* TODO : Author */
 
@@ -1314,9 +1362,12 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 		private boolean ownerTag = false;
 		private boolean privateKeyTag = false;
+		private boolean dateTag = false;
 		private boolean commentsTag = false;
 
 		private boolean hasCommentTag = false;
+
+		private String dateStr = null;
 
 		private PreparedStatement insertFileSt = null;
 		private PreparedStatement insertLinkSt = null;
@@ -1348,6 +1399,11 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 			if ("privateKey".equals(rawName)) {
 				privateKeyTag = true;
+				return;
+			}
+
+			if ("date".equals(rawName)) {
+				dateTag = true;
 				return;
 			}
 
@@ -1491,6 +1547,37 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 				return;
 			}
 
+			if ("date".equals(rawName)) {
+				dateTag = false;
+				return;
+			}
+
+			if ("header".equals(rawName)) {
+				try {
+					synchronized(db.dbLock) {
+						java.sql.Date dateSql = null;
+
+						if (dateStr != null) {
+							java.text.SimpleDateFormat sdf =
+								new java.text.SimpleDateFormat(DATE_FORMAT);
+							java.util.Date dateUtil = sdf.parse(dateStr, new java.text.ParsePosition(0));
+							dateSql = new java.sql.Date(dateUtil.getTime());
+						}
+
+						PreparedStatement st =
+							db.getConnection().prepareStatement("UPDATE indexes "+
+											    "SET insertionDate = ? "+
+											    "WHERE id = ?");
+						st.setDate(1, dateSql);
+						st.setInt(2, id);
+
+						st.execute();
+					}
+				} catch(SQLException e) {
+					Logger.error(this, "Error while updating index insertion date: "+e.toString());
+				}
+			}
+
 			if ("comments".equals(rawName)) {
 				commentsTag = false;
 				return;
@@ -1514,6 +1601,10 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 				return;
 			}
 
+			if (dateTag) {
+				dateStr = txt;
+			}
+
 			if (privateKeyTag) {
 				if (privateKey == null || privateKey.trim().equals(txt.trim())) {
 					/**
@@ -1525,12 +1616,24 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 					 * the provided key doesn't match with the one we have,
 					 * we won't publish it anymore
 					 */
-					Logger.notice(this, "A private key was provided, but didn't match with the one we have ; ignored.");
+					Logger.warning(this, "A private key was provided, but didn't match with the one we have ; ignored.");
 
 				}
 
-				if (privateKey == null)
-					setPrivateKey(txt.trim());
+				if (privateKey == null) {
+					String newPrivate = txt.trim();
+
+					/* check that nobody is trying to inject some FCP commands
+					 * through the private key
+					 */
+					if (!newPrivate.startsWith("SSK@")
+					    || newPrivate.indexOf('\n') >= 0) {
+						Logger.warning(this, "Invalid private key");
+						return;
+					}
+
+					setPrivateKey(newPrivate);
+				}
 				return;
 			}
 

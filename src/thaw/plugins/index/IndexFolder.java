@@ -89,8 +89,8 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				n = new Index(db, config,
 					      set.getInt("id"), this, set.getString("publicKey"),
 					      set.getInt("revision"), set.getString("privateKey"),
-					      set.getString("displayName"), set.getBoolean("newRev"),
-					      set.getBoolean("newComment"));
+					      set.getString("displayName"), set.getDate("insertionDate"),
+					      set.getBoolean("newRev"), set.getBoolean("newComment"));
 
 			int pos = set.getInt("positionInTree");
 
@@ -145,11 +145,11 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 
 				if (id >= 0) {
-					st = db.getConnection().prepareStatement("SELECT id, positionInTree, displayName, publicKey, privateKey, revision, newRev, newComment FROM indexes "
+					st = db.getConnection().prepareStatement("SELECT id, positionInTree, displayName, publicKey, privateKey, revision, newRev, newComment, insertionDate FROM indexes "
 										 + "WHERE parent = ? ORDER BY positionInTree");
 					st.setInt(1, id);
 				} else {
-					st = db.getConnection().prepareStatement("SELECT id, positionInTree, displayName, publicKey, privateKey, revision, newRev, newComment FROM indexes "
+					st = db.getConnection().prepareStatement("SELECT id, positionInTree, displayName, publicKey, privateKey, revision, newRev, newComment, insertionDate FROM indexes "
 										 + "WHERE parent IS NULL ORDER BY positionInTree");
 				}
 
