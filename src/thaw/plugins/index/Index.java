@@ -786,8 +786,6 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 			return 0;
 		}
 
-		Logger.info(this, "Getting lastest version ...");
-
 		String key;
 
 		if (specificRev >= 0) {

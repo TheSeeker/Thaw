@@ -21,7 +21,7 @@ import thaw.fcp.FCPTransferQuery;
 
 public class FileManagementHelper {
 	/**
-	 * Class implementing IndexAction will automatically do an addActionListener if necessary
+	 * Class implementing FileAction will automatically do an addActionListener if necessary
 	 */
 	public interface FileAction extends ActionListener {
 

@@ -45,13 +45,19 @@ import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
 import thaw.fcp.FreenetURIHelper;
 
+import thaw.plugins.transferLogs.*;
 
-/**
- * Quick and dirty plugin to log the transfers
- */
+
 public class TransferLogs implements Plugin, ActionListener, Observer {
-	public final static String MAX_DISPLAYED = "1000";
+	public final static byte TRANSFER_TYPE_NULL      = 0;
+	public final static byte TRANSFER_TYPE_DOWNLOAD  = 1;
+	public final static byte TRANSFER_TYPE_INSERTION = 2;
 
+	public final static String[] TRANSFER_TYPE_NAMES = {
+		I18n.getMessage("thaw.plugin.transferLogs.importedKey"),
+		I18n.getMessage("thaw.common.download"),
+		I18n.getMessage("thaw.common.insertion")
+	};
 
 	private Core core;
 	private Hsqldb db;
@@ -60,14 +66,11 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 
 
 	private JButton purgeLogs;
-	private JButton copyKey;
 
 	private JButton importKeys;
 	private JButton exportKeys;
 
-
-	private Table table;
-	private EventListModel model;
+	private TransferTable table;
 
 	public TransferLogs() {
 
@@ -102,19 +105,18 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 		JLabel topLabel = new JLabel(I18n.getMessage("thaw.plugin.transferLogs.transferLogs"));
 		topLabel.setIcon(IconBox.file);
 
-		model = new EventListModel();
-		model.reloadList();
 
-		table = new Table(core.getConfig(), "transfer_log_table",
-					model);
+		table = new TransferTable(db, core.getConfig());
 
-		purgeLogs = new JButton(I18n.getMessage("thaw.plugin.transferLogs.purgeLogs"), IconBox.minDelete);
-		copyKey = new JButton(I18n.getMessage("thaw.plugin.transferLogs.copyKey"), IconBox.minCopy );
-		importKeys = new JButton(I18n.getMessage("thaw.plugin.transferLogs.importKeys"), IconBox.minImportAction);
-		exportKeys = new JButton(I18n.getMessage("thaw.plugin.transferLogs.exportKeys"), IconBox.minExportAction);
+
+		purgeLogs  = new JButton(I18n.getMessage("thaw.plugin.transferLogs.purgeLogs"),
+					 IconBox.minDelete);
+		importKeys = new JButton(I18n.getMessage("thaw.plugin.transferLogs.importKeys"),
+					 IconBox.minImportAction);
+		exportKeys = new JButton(I18n.getMessage("thaw.plugin.transferLogs.exportKeys"),
+					 IconBox.minExportAction);
 
 		purgeLogs.addActionListener(this);
-		copyKey.addActionListener(this);
 		importKeys.addActionListener(this);
 		exportKeys.addActionListener(this);
 
@@ -123,17 +125,16 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 		buttonPanel.add(purgeLogs);
 		buttonPanel.add(importKeys);
 		buttonPanel.add(exportKeys);
-		buttonPanel.add(copyKey);
 
 		JPanel southPanel = new JPanel(new BorderLayout());
 		southPanel.add(buttonPanel, BorderLayout.WEST);
 		southPanel.add(new JLabel(""), BorderLayout.CENTER);
 
 		tab.add(topLabel, BorderLayout.NORTH);
-		tab.add(new JScrollPane(table), BorderLayout.CENTER);
+		tab.add(table.getPanel(), BorderLayout.CENTER);
 		tab.add(southPanel, BorderLayout.SOUTH);
 
-		setAsObserverEverywhere(true);
+		setAsObserverEverywhere();
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.transferLogs.transferLogsShort"),
 					    thaw.gui.IconBox.file,
@@ -145,7 +146,11 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 
 	public boolean stop() {
 		core.getMainWindow().removeTab(tab);
-		setAsObserverEverywhere(false);
+		core.getQueueManager().deleteObserver(this);
+
+		/* TODO : delete observers ! */
+		/* Hm should we ? Just remove the observer on the queue should be enought ? */
+		/* Others observers will just keep data sync ? */
 
 		db.unregisterChild(this);
 
@@ -164,18 +169,41 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 
 
 	protected void createTables() {
-		/*
-		 * this db structure is dirty, I know it, and at the moment,
-		 * I don't care => I will fix it later
-		 */
-		sendQuery("CREATE CACHED TABLE transferEvents ("
+		sendQuery("CREATE CACHED TABLE transferLogs ("
 			  + "id INTEGER IDENTITY NOT NULL,"
-			  + "date TIMESTAMP NOT NULL,"
-			  + "msg VARCHAR(500) NOT NULL,"
+			  + "dateStart TIMESTAMP NOT NULL,"
+			  + "dateEnd TIMESTAMP NULL,"
+			  + "transferType TINYINT NOT NULL,"
 			  + "key VARCHAR(500) NULL,"
+			  + "filename VARCHAR(128) NULL, "
+			  + "size BIGINT NULL, " /* long */
 			  + "isDup BOOLEAN NOT NULL, "
 			  + "isSuccess BOOLEAN NOT NULL, "
 			  + "PRIMARY KEY (id))");
+	}
+
+	protected boolean isDup(String key) {
+		return isDup(db, key);
+	}
+
+	public static boolean isDup(Hsqldb db, String key) {
+		try {
+			synchronized(db.dbLock) {
+
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT id FROM transferEvents "+
+									 "WHERE LOWER(key) LIKE ? AND isSuccess = TRUE");
+				st.setString(1, FreenetURIHelper.getComparablePart(key)+"%");
+				ResultSet set = st.executeQuery();
+				return set.next();
+
+			}
+		} catch(SQLException e) {
+			Logger.error(new TransferLogs(), "Unable to know if a key is dup in the event because : "+e.toString());
+		}
+
+		return false;
 	}
 
 
@@ -198,172 +226,28 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 
 	/**
 	 * Add the current plugin as an observer on all the running query
-	 * @param really if set to false, will deleteObserver() instead of addObserver()
 	 */
-	public void setAsObserverEverywhere(boolean really) {
-		if (really)
-			core.getQueueManager().addObserver(this);
-		else
-			core.getQueueManager().deleteObserver(this);
-
-
+	public void setAsObserverEverywhere() {
 		Vector runningQueue = core.getQueueManager().getRunningQueue();
 
 		synchronized(runningQueue) {
 			for (Iterator it = runningQueue.iterator();
 			     it.hasNext();) {
 				FCPTransferQuery query = (FCPTransferQuery)it.next();
-
-				if (really) {
-					if (query.isFinished() && !isDup(query.getFileKey()))
-						notifyEnd(query);
-
-					if (query instanceof Observable)
-						((Observable)query).addObserver(this);
-				} else {
-					if (query instanceof Observable)
-						((Observable)query).deleteObserver(this);
-				}
+				notifyAddition(query);
 			}
+
+			core.getQueueManager().addObserver(this);
 		}
 	}
 
-
-	protected boolean isDup(String key) {
-		try {
-			synchronized(db.dbLock) {
-
-				PreparedStatement st;
-
-				st = db.getConnection().prepareStatement("SELECT id FROM transferEvents "+
-									 "WHERE LOWER(key) LIKE ? AND isSuccess = TRUE");
-				st.setString(1, FreenetURIHelper.getComparablePart(key)+"%");
-				ResultSet set = st.executeQuery();
-				return set.next();
-
-			}
-		} catch(SQLException e) {
-			Logger.error(this, "Unable to know if a key is dup in the event because : "+e.toString());
-		}
-
-		return false;
-	}
 
 
 	protected void notifyAddition(FCPTransferQuery query) {
-		String str;
-		String key;
-
-		if (query.getQueryType() == 0)
-			return;
-
-		if (query.getQueryType() == 1) {
-			str = I18n.getMessage("thaw.plugin.transferLogs.download.added") + " : "
-				+ query.getFilename();
-			key = query.getFileKey();
-		} else {
-			if (query.getPath() == null)
-				return;
-
-			str =  I18n.getMessage("thaw.plugin.transferLogs.insertion.added") + " : "
-				+ query.getPath();
-			key = null;
-		}
-
-		java.sql.Timestamp date = new java.sql.Timestamp((new java.util.Date()).getTime());
-
-		boolean isDup;
-
-		if (key != null)
-			isDup = isDup(key);
-		else
-			isDup = false;
-
-		try {
-			synchronized(db.dbLock) {
-				PreparedStatement st;
-
-
-				st = db.getConnection().prepareStatement("INSERT INTO transferEvents "+
-									 "(date, msg, key, isDup, isSuccess) "+
-									 " VALUES "+
-									 "(?, ?, ?, ?, FALSE)");
-				st.setTimestamp(1, date);
-				st.setString(2, str);
-				st.setString(3, key);
-				st.setBoolean(4, isDup);
-
-				st.execute();
-			}
-		} catch(SQLException e) {
-			Logger.error(this, "Error while adding an event to the logs: "+e.toString());
-		}
-
-		model.reloadList();
+		new Transfer(db, query, table);
+		table.refresh();
 	}
 
-
-	protected void notifyEnd(FCPTransferQuery query) {
-		String str;
-		String key;
-
-		if (query.isFinished() && query instanceof Observable)
-			((Observable)query).deleteObserver(this);
-
-		if (query.getQueryType() == 0 || !query.isFinished())
-			return;
-
-		if (query.getQueryType() == 1)
-			str = "thaw.plugin.transferLogs.download.";
-		else
-			str = "thaw.plugin.transferLogs.insertion.";
-
-		if (query.isSuccessful())
-			str = I18n.getMessage(str+"successful");
-		else
-			str = I18n.getMessage(str+"failed");
-
-		key = query.getFileKey();
-
-		str += " : "+query.getFilename();
-
-		str += "\n" + I18n.getMessage("thaw.plugin.transferLogs.finalStatus") + " : "+query.getStatus();
-
-		boolean isDup;
-		boolean isSuccess = query.isSuccessful();
-
-		if (key != null)
-			isDup = isDup(key);
-		else
-		        isDup = false;
-
-		java.sql.Timestamp date = new java.sql.Timestamp((new java.util.Date()).getTime());
-
-
-		try {
-			synchronized(db.dbLock) {
-				PreparedStatement st;
-
-
-				st = db.getConnection().prepareStatement("INSERT INTO transferEvents "+
-									 "(date, msg, key, isDup, isSuccess) "+
-									 " VALUES "+
-									 "(?, ?, ?, ?, ?)");
-				st.setTimestamp(1, date);
-				st.setString(2, str);
-				st.setString(3, key);
-				st.setBoolean(4, isDup);
-				st.setBoolean(5, isSuccess);
-
-				st.execute();
-			}
-		} catch(SQLException e) {
-			Logger.error(this, "Error while adding an event to the logs: "+e.toString());
-		}
-
-
-		model.reloadList();
-	}
 
 
 	public void update(Observable o, Object param) {
@@ -378,165 +262,13 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 
 			if(core.getQueueManager().isInTheQueues(query)
 			   && query.isRunning()) { // then it's an addition
-				if (query instanceof Observable)
-					((Observable)query).addObserver(this);
-				if (core.getQueueManager().isQueueCompletlyLoaded())
-					notifyAddition(query);
+				notifyAddition(query);
 				return;
 			}
 		}
 
-
-		if (o instanceof FCPTransferQuery) {
-			FCPTransferQuery query = (FCPTransferQuery)o;
-
-			if (query.isFinished()) {
-				notifyEnd(query);
-				return;
-			}
-		}
 	}
 
-
-	private class Event {
-		private java.sql.Timestamp date;
-		private String msg;
-		private String key;
-		private boolean isDup;
-
-		public Event(java.sql.Timestamp date, String message, String key, boolean isDup) {
-			this.date = date;
-			this.msg = message;
-			this.key = key;
-			this.isDup = isDup;
-		}
-
-		public java.sql.Timestamp getDate() {
-			return date;
-		}
-
-		public String getMsg() {
-			return msg;
-		}
-
-		public String getKey() {
-			return key;
-		}
-
-		public boolean isDup() {
-			return isDup;
-		}
-	}
-
-	private class EventListModel extends javax.swing.table.AbstractTableModel {
-		private static final long serialVersionUID = 1L;
-
-		private DateFormat dateFormat;
-
-		public String[] columnNames =
-		{
-			I18n.getMessage("thaw.plugin.transferLogs.date"),
-			I18n.getMessage("thaw.plugin.transferLogs.message"),
-			I18n.getMessage("thaw.plugin.transferLogs.key"),
-			I18n.getMessage("thaw.plugin.transferLogs.isDup")
-		};
-
-
-		public Vector events = null; /* thaw.plugins.index.File Vector */
-
-
-		public EventListModel() {
-			super();
-			dateFormat = DateFormat.getDateTimeInstance();
-		}
-
-		public void reloadList() {
-			events = null;
-
-			try {
-				synchronized(db.dbLock) {
-					PreparedStatement st;
-
-					st = db.getConnection().prepareStatement("SELECT date, msg, key, isDup FROM "+
-										 "transferEvents ORDER BY date DESC LIMIT "+MAX_DISPLAYED);
-
-					ResultSet set = st.executeQuery();
-
-					events = new Vector();
-
-					while(set.next()) {
-						events.add(new Event(set.getTimestamp("date"),
-								     set.getString("msg"),
-								     set.getString("key"),
-								     set.getBoolean("isDup")));
-					}
-				}
-			} catch(SQLException e) {
-				Logger.error(this, "Error while getting the list of events from the logs: "+e.toString());
-			}
-
-			refresh();
-		}
-
-
-		protected void refresh() {
-			final TableModelEvent event = new TableModelEvent(this);
-			fireTableChanged(event);
-		}
-
-		public int getRowCount() {
-			if (events == null)
-				return 0;
-
-			return events.size();
-		}
-
-		public int getColumnCount() {
-			return columnNames.length;
-		}
-
-		public String getColumnName(final int column) {
-			return columnNames[column];
-
-		}
-
-		public Object getValueAt(final int row, final int column) {
-			if (events == null)
-				return null;
-
-			if (column == 0)
-				return dateFormat.format(((Event)events.get(row)).getDate());
-
-			if (column == 1)
-				return ((Event)events.get(row)).getMsg();
-
-			if (column == 2) {
-				String key = ((Event)events.get(row)).getKey();
-				return key != null ? key : I18n.getMessage("thaw.plugin.transferLogs.none");
-			}
-
-			if (column == 3)
-				return ((Event)events.get(row)).isDup() ? "X" : "";
-
-			return null;
-		}
-
-
-		public Vector getSelectedRows(Table table) {
-			int[] selectedRows = table.getSelectedRows();
-
-			if (selectedRows == null)
-				return null;
-
-			Vector r = new Vector();
-
-			for (int i = 0 ; i < selectedRows.length ; i++) {
-				r.add(events.get(selectedRows[i]));
-			}
-
-			return r;
-		}
-	}
 
 
 	private File chooseFile(boolean save) {
@@ -549,11 +281,16 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 	}
 
 
+	public static java.sql.Timestamp getNow() {
+		return new java.sql.Timestamp((new java.util.Date()).getTime());
+	}
+
+
 	private class KeyImporter implements Runnable {
 		public KeyImporter() { }
 
 		public void run() {
-			java.sql.Timestamp date = new java.sql.Timestamp((new java.util.Date()).getTime());
+			java.sql.Timestamp date = getNow();
 
 
 			File file  = chooseFile(false);
@@ -569,6 +306,18 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 
 				String strLine;
 
+				PreparedStatement st = null;
+
+				try {
+					st = db.getConnection().prepareStatement("INSERT INTO transferLogs "+
+										 "(dateStart, dateEnd, transferType,"+
+										 " key, filename, size, isDup, isSuccess) "+
+										 " VALUES "+
+										 "(?, ?, 0, ?, ?, NULL, ?, TRUE)");
+				} catch(SQLException e) {
+					Logger.error(this, "Error while preparing to import keys : "+e.toString()); 
+				}
+
 				while ((strLine = br.readLine()) != null)   {
 					String key = strLine.trim();
 
@@ -576,21 +325,14 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 						continue;
 
 					boolean isDup = isDup(key);
-					String str = I18n.getMessage("thaw.plugin.transferLogs.importedKey")
-						+ " : "+FreenetURIHelper.getFilenameFromKey(key);
 
 					try {
 						synchronized(db.dbLock) {
-							PreparedStatement st;
-
-							st = db.getConnection().prepareStatement("INSERT INTO transferEvents "+
-												 "(date, msg, key, isDup, isSuccess) "+
-												 " VALUES "+
-												 "(?, ?, ?, ?, FALSE)");
 							st.setTimestamp(1, date);
-							st.setString(2, str);
+							st.setTimestamp(2, date);
 							st.setString(3, key);
-							st.setBoolean(4, isDup);
+							st.setString(4, FreenetURIHelper.getFilenameFromKey(key));
+							st.setBoolean(5, isDup);
 
 							st.execute();
 						}
@@ -607,7 +349,7 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 				Logger.error(this, "(2) Unable to import keys because: "+e.toString());
 			}
 
-			model.reloadList();
+			table.refresh();
 		}
 	}
 
@@ -628,8 +370,9 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 					PreparedStatement st;
 
 					st = db.getConnection().prepareStatement("SELECT DISTINCT key "+
-										 "FROM transferEvents "+
-										 "WHERE key is NOT NULL");
+										 "FROM transferLogs "+
+										 "WHERE key is NOT NULL"+
+										 " AND isSuccess = TRUE");
 
 					ResultSet set = st.executeQuery();
 
@@ -657,30 +400,10 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 
 		if (e.getSource() == purgeLogs) {
 			sendQuery("DROP TABLE transferEvents");
+			sendQuery("DROP TABLE transferLogs");
 			createTables();
 
-			model.reloadList();
-
-			return;
-		}
-
-		if (e.getSource() == copyKey) {
-			Vector v = model.getSelectedRows(table);
-
-			if (v == null)
-				return;
-
-			String str = "";
-
-			for (Iterator it = v.iterator();
-			     it.hasNext();) {
-				String key = ((Event)it.next()).getKey();
-
-				if (key != null)
-					str += key + "\n";
-			}
-
-			GUIHelper.copyToClipboard(str);
+			table.refresh();
 
 			return;
 		}

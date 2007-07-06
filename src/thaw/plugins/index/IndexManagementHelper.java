@@ -1306,7 +1306,7 @@ public class IndexManagementHelper {
 			JLabel header = null;
 			JPanel buttonPanel = null;
 
-			frame = new JDialog(getIndexBrowserPanel().getMainWindow().getMainFrame(), I18n.getMessage("thaw.plugins.index.addKeys"));
+			frame = new JDialog(getIndexBrowserPanel().getMainWindow().getMainFrame(), I18n.getMessage("thaw.plugin.index.addKeys"));
 			frame.setVisible(false);
 
 			header = new JLabel(I18n.getMessage("thaw.plugin.fetch.keyList"));

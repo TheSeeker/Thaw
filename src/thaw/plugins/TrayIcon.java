@@ -41,7 +41,7 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 	private JDialog dialog;
 	private JButton closeDialog;
 
-	public final static int DIALOG_X = 300;
+	public final static int DIALOG_X = 400;
 	public final static int DIALOG_Y = 500;
 
 

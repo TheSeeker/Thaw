@@ -14,6 +14,7 @@ import javax.swing.JTable;
 import javax.swing.JProgressBar;
 import javax.swing.JTextArea;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Component;
 import javax.swing.ImageIcon;
@@ -43,8 +44,6 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 	public final static int TIME_BEFORE_SAVING = 500; /* in ms */
 	private boolean hasChanged = false;
 	private Thread savingThread;
-
-	private int columnWithKeys = -1;
 
 	private boolean statusInProgressBars = true;
 
@@ -104,16 +103,19 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 		setAsListener();
 	}
 
+	private DefaultRenderer renderer;
+
 	public void specifyColumnWithKeys(int c) {
-		columnWithKeys = c;
+		renderer.specifyColumnWithKeys(c);
 	}
 
 	public void showStatusInProgressBars(boolean v) {
-		statusInProgressBars = v;
+		renderer.showStatusInProgressBars(v);
 	}
 
 	public void setDefaultRenderer() {
-		setDefaultRenderer(getColumnClass(0), new DefaultRenderer());
+		renderer = new DefaultRenderer();
+		setDefaultRenderer(getColumnClass(0), renderer);
 	}
 
 
@@ -149,22 +151,33 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 
 
 
-	protected class DefaultRenderer extends DefaultTableCellRenderer {
+	public static class DefaultRenderer extends DefaultTableCellRenderer {
 		private final static long serialVersionUID = 20060821;
 
+		private boolean statusInProgressBars = true;
+		private int columnWithKeys = -1;
+
 		private Color softGray;
+
 
 		public DefaultRenderer() {
 			softGray = new Color(240,240,240);
 		}
 
-		public Component getTableCellRendererComponent(final JTable table, final Object value,
+		public void showStatusInProgressBars(boolean v) {
+			statusInProgressBars = v;
+		}
+
+		public void specifyColumnWithKeys(int c) {
+			columnWithKeys = c;
+		}
+
+		public Component getTableCellRendererComponent(final JTable table, Object value,
 							       final boolean isSelected, final boolean hasFocus,
 							       final int row, final int column) {
 
 			if (value == null)
-				return super.getTableCellRendererComponent(table, "",
-									   isSelected, hasFocus, row, column);
+				value = "";
 
 			if (value instanceof FCPTransferQuery) {
 				final FCPTransferQuery query = (FCPTransferQuery)value;
@@ -176,7 +189,9 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 			Component cell;
 
 			if (value instanceof ImageIcon) {
-				cell = new JLabel(((ImageIcon)value));
+				return new JLabel(((ImageIcon)value));
+			} if (value instanceof JPanel) {
+				cell = (Component)value;
 			} else if(value instanceof Long) {
 
 				cell = super.getTableCellRendererComponent(table,
@@ -189,8 +204,8 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 				area.setLineWrap(true);
 				area.setWrapStyleWord(true);
 
-				if (getRowHeight(row) < area.getPreferredSize().getHeight())
-					setRowHeight((int)area.getPreferredSize().getHeight());
+				if (table.getRowHeight(row) < area.getPreferredSize().getHeight())
+					table.setRowHeight((int)area.getPreferredSize().getHeight());
 
 				cell = area;
 
