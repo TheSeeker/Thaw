@@ -44,6 +44,10 @@ public class SearchBar implements ActionListener {
 		return panel;
 	}
 
+	public void clear() {
+		userText.setText("");
+	}
+
 	public void actionPerformed(final ActionEvent e) {
 		if (userText.getText() == null)
 			return;

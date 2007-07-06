@@ -212,6 +212,7 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 			}
 		}
 
+		tables.getSearchBar().clear();
 	}
 
 

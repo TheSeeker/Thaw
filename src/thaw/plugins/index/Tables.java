@@ -67,6 +67,10 @@ public class Tables {
 		return linkTable;
 	}
 
+	public SearchBar getSearchBar() {
+		return searchBar;
+	}
+
 	public void setLinkList(final LinkList linkList) {
 		getLinkTable().setLinkList(linkList);
 	}
