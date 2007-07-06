@@ -108,6 +108,9 @@ public class TransferTable implements MouseListener {
 		table.setDefaultRenderer(table.getColumnClass(0), new TransferTableRenderer());
 		table.addMouseListener(this);
 
+		table.setShowGrid(true);
+		table.setIntercellSpacing(new java.awt.Dimension(1, 1));
+
 		panel.add(new JScrollPane(table), BorderLayout.CENTER);
 		panel.add(pageSelecter.getPanel(), BorderLayout.SOUTH);
 
