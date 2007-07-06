@@ -26,6 +26,29 @@ public class LinkManagementHelper {
 	}
 
 
+	public static abstract class BasicLinkAction implements LinkAction, Runnable {
+		private AbstractButton src;
+
+		public BasicLinkAction(AbstractButton src) {
+			this.src = src;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			if (e.getSource() == src) {
+				Thread th = new Thread(this);
+				th.start();
+			}
+		}
+
+		public void run() {
+			apply();
+		}
+
+		public abstract void setTarget(Vector files);
+		public abstract void apply();
+	}
+
+
 	public static class LinkRemover implements LinkAction {
 		private IndexBrowserPanel indexBrowser;
 		private AbstractButton actionSource;
@@ -73,7 +96,7 @@ public class LinkManagementHelper {
 	}
 
 
-	public static class IndexAdder implements LinkAction, Runnable {
+	public static class IndexAdder extends BasicLinkAction {
 		private FCPQueueManager queueManager;
 		private IndexBrowserPanel indexBrowser;
 
@@ -86,6 +109,8 @@ public class LinkManagementHelper {
 				  final FCPQueueManager queueManager,
 				  final IndexBrowserPanel indexBrowser,
 				  boolean addToParent) {
+			super(actionSource);
+
 			src = actionSource;
 			if (actionSource != null)
 				actionSource.addActionListener(this);
@@ -99,13 +124,8 @@ public class LinkManagementHelper {
 			src.setEnabled((targets != null) && (targets.size() > 0));
 		}
 
-		public void actionPerformed(final ActionEvent e) {
-			Thread adder = new Thread(this);
-			adder.start();
-		}
 
-
-		public void run() {
+		public void apply() {
 			for (final Iterator it = t.iterator();
 			     it.hasNext(); ) {
 				final Link link = (Link)it.next();

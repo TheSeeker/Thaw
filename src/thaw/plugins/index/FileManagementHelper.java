@@ -34,8 +34,32 @@ public class FileManagementHelper {
 
 
 
+	public static abstract class BasicFileAction implements FileAction, Runnable {
+		private AbstractButton src;
 
-	public static class FileDownloader implements FileAction {
+		public BasicFileAction(AbstractButton src) {
+			this.src = src;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			if (e.getSource() == src) {
+				Thread th = new Thread(this);
+				th.start();
+			}
+		}
+
+		public void run() {
+			apply();
+		}
+
+		public abstract void setTarget(Vector files);
+		public abstract void apply();
+	}
+
+
+
+
+	public static class FileDownloader extends BasicFileAction {
 		private FCPQueueManager queueManager;
 		private AbstractButton actionSource;
 		private IndexBrowserPanel indexBrowser;
@@ -43,6 +67,7 @@ public class FileManagementHelper {
 		private Config config;
 
 		public FileDownloader(final Config config, final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+			super(actionSource);
 			this.queueManager = queueManager;
 			this.actionSource = actionSource;
 			this.config = config;
@@ -56,7 +81,7 @@ public class FileManagementHelper {
 			actionSource.setEnabled((target != null) && (target.size() != 0));
 		}
 
-		public void actionPerformed(final ActionEvent e) {
+		public void apply() {
 			FileChooser fileChooser;
 
 			if (config.getValue("lastDestinationDirectory") == null)
@@ -97,13 +122,14 @@ public class FileManagementHelper {
 	}
 
 
-	public static class FileInserter implements FileAction {
+	public static class FileInserter extends BasicFileAction {
 		private FCPQueueManager queueManager;
 		private AbstractButton actionSource;
 		private IndexBrowserPanel indexBrowser;
 		private Vector target;
 
 		public FileInserter(final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+			super(actionSource);
 			this.queueManager = queueManager;
 			this.actionSource = actionSource;
 			this.indexBrowser = indexBrowser;
@@ -134,7 +160,7 @@ public class FileManagementHelper {
 			actionSource.setEnabled((target != null) && (target.size() != 0) && isOk);
 		}
 
-		public void actionPerformed(final ActionEvent e) {
+		public void apply() {
 			FileManagementHelper.insertFiles(queueManager, indexBrowser, target);
 		}
 	}
@@ -158,13 +184,14 @@ public class FileManagementHelper {
 	}
 
 
-	public static class FileKeyComputer implements FileAction {
+	public static class FileKeyComputer extends BasicFileAction {
 		private FCPQueueManager queueManager;
 		private IndexBrowserPanel indexBrowser;
 		private AbstractButton actionSource;
 		private Vector target;
 
 		public FileKeyComputer(final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+			super(actionSource);
 			this.queueManager = queueManager;
 			this.actionSource = actionSource;
 			this.indexBrowser = indexBrowser;
@@ -194,7 +221,7 @@ public class FileManagementHelper {
 			actionSource.setEnabled((target != null) && isOk);
 		}
 
-		public void actionPerformed(final ActionEvent e) {
+		public void apply() {
 			Logger.notice(this, "COMPUTING");
 			FileManagementHelper.computeFileKeys(queueManager, indexBrowser, target);
 		}
@@ -221,7 +248,7 @@ public class FileManagementHelper {
 	}
 
 
-	public static class FileRemover implements FileAction {
+	public static class FileRemover extends BasicFileAction {
 		private IndexBrowserPanel indexBrowser;
 		private AbstractButton actionSource;
 		private Vector target;
@@ -230,6 +257,7 @@ public class FileManagementHelper {
 		 * @param queueManager is used to stop transfers if needed
 		 */
 		public FileRemover(final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+			super(actionSource);
 			this.indexBrowser = indexBrowser;
 			this.actionSource = actionSource;
 			if (actionSource != null)
@@ -257,7 +285,7 @@ public class FileManagementHelper {
 			actionSource.setEnabled((target != null) && (target.size() != 0) && isOk);
 		}
 
-		public void actionPerformed(final ActionEvent e) {
+		public void apply() {
 			FileManagementHelper.removeFiles(indexBrowser, target);
 		}
 	}
@@ -320,7 +348,7 @@ public class FileManagementHelper {
 
 
 
-	public static class TransferCanceller implements FileAction {
+	public static class TransferCanceller extends BasicFileAction {
 		private AbstractButton src;
 		private FCPQueueManager queueManager;
 		private IndexBrowserPanel indexBrowser;
@@ -329,6 +357,8 @@ public class FileManagementHelper {
 		public TransferCanceller(FCPQueueManager queueManager,
 					 IndexBrowserPanel indexBrowser,
 					 final AbstractButton actionSource) {
+			super(actionSource);
+
 			src = actionSource;
 			this.queueManager = queueManager;
 			this.indexBrowser = indexBrowser;
@@ -355,7 +385,7 @@ public class FileManagementHelper {
 			src.setEnabled(enable);
 		}
 
-		public void actionPerformed(final ActionEvent e) {
+		public void apply() {
 			FileManagementHelper.cancelTransfers(queueManager, indexBrowser, t);
 		}
 	}
