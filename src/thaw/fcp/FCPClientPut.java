@@ -14,20 +14,28 @@ import thaw.core.Logger;
  * Allow to insert a simple file.
  */
 public class FCPClientPut extends Observable implements FCPTransferQuery, Observer {
-	public final static int DEFAULT_INSERTION_PRIORITY = 4;
+	public final static int DEFAULT_PRIORITY = 4;
+
+	public final static int KEY_TYPE_CHK = 0;
+	public final static int KEY_TYPE_KSK = 1;
+	public final static int KEY_TYPE_SSK = 2; /* also USK */
+
+	public final static int PERSISTENCE_FOREVER           = 0;
+	public final static int PERSISTENCE_UNTIL_NODE_REBOOT = 1;
+	public final static int PERSISTENCE_UNTIL_DISCONNECT  = 2;
 
 	private FCPQueueManager queueManager;
 
 	private File localFile;
 	private long fileSize = 0;
-	private int keyType = 0;
+	private int keyType = KEY_TYPE_CHK;
 	private int rev = 0;
 	private String name;
 	private String privateKey; /* must finish by '/' (cf SSKKeypair) */
 	private String publicKey; /* publicKey contains the filename etc */
-	private int priority = -1;
+	private int priority = DEFAULT_PRIORITY;
 	private boolean global = true;
-	private int persistence = 2;
+	private int persistence = PERSISTENCE_FOREVER;
 	private boolean getCHKOnly = false;
 
 	private int progress = 0;
@@ -62,18 +70,17 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 	/**
 	 * To start a new insertion.
-	 * @param keyType : 0 = CHK ; 1 = KSK ; 2 = SSK
+	 * @param keyType : KEY_TYPE_CHK ; KEY_TYPE_KSK ; KEY_TYPE_SSK
 	 * @param rev  : ignored if key == CHK
 	 * @param name : ignored if key == CHK
 	 * @param privateKey : ignored if key == CHK/KSK ; can be null if it has to be generated ; USK@[...]/
-	 * @param persistence 0 = Forever ; 1 = Until node reboot ; 2 = Until the app disconnect
+	 * @param persistence PERSISTENCE_FOREVER ; PERSISTENCE_UNTIL_NODE_REBOOT ; PERSISTENCE_UNTIL_DISCONNEC
 	 */
 	public FCPClientPut(final File file, final int keyType,
 			    final int rev, final String name,
 			    final String privateKey, final int priority,
 			    final boolean global, final int persistence) {
-		this(file, keyType, rev, name, privateKey, priority, global, persistence,
-		     false);
+		this(file, keyType, rev, name, privateKey, priority, global, persistence, false);
 	}
 
 	/**
@@ -143,13 +150,13 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		this.identifier = identifier;
 
 		if(publicKey.startsWith("CHK"))
-			keyType = 0;
-		if(publicKey.startsWith("KSK"))
-			keyType = 1;
-		if(publicKey.startsWith("SSK"))
-			keyType = 2;
-		if(publicKey.startsWith("USK"))
-			keyType = 2;
+			keyType = KEY_TYPE_CHK;
+		else if(publicKey.startsWith("KSK"))
+			keyType = KEY_TYPE_KSK;
+		else if(publicKey.startsWith("SSK"))
+			keyType = KEY_TYPE_SSK;
+		else if(publicKey.startsWith("USK"))
+			keyType = KEY_TYPE_SSK;
 
 
 		this.publicKey = publicKey;
@@ -229,11 +236,11 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 
 	public boolean startProcess() {
-		if((keyType == 2) && (privateKey == null)) {
+		if((keyType == KEY_TYPE_SSK) && (privateKey == null)) {
 			generateSSK();
 		}
 
-		if( ((keyType == 2) && (privateKey != null)) || (keyType != 2)) {
+		if( ((keyType == KEY_TYPE_SSK) && (privateKey != null)) || (keyType != KEY_TYPE_SSK)) {
 			startInsert();
 		}
 
@@ -346,10 +353,10 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			msg.setValue("ClientToken", localFile.getPath());
 
 		switch(persistence) {
-		case(0): msg.setValue("Persistence", "forever"); break;
-		case(1): msg.setValue("Persistence", "reboot"); break;
-		case(2): msg.setValue("Persistence", "connection"); break;
-		default: Logger.notice(this, "Unknow persistence !?"); break;
+		case(PERSISTENCE_FOREVER): msg.setValue("Persistence", "forever"); break;
+		case(PERSISTENCE_UNTIL_NODE_REBOOT): msg.setValue("Persistence", "reboot"); break;
+		case(PERSISTENCE_UNTIL_DISCONNECT): msg.setValue("Persistence", "connection"); break;
+		default: Logger.error(this, "Unknow persistence !?"); break;
 		}
 
 		if (localFile != null)
@@ -591,9 +598,9 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 				publicKey = publicKey.replaceAll("freenet:", "");
 
-				if(keyType == 1)
+				if(keyType == KEY_TYPE_KSK)
 					publicKey = "KSK@"+name+"-" + Integer.toString(rev);
-				//if(keyType == 2)
+				//if(keyType == KEY_TYPE_SSK)
 				//	publicKey = publicKey + "/" + name + "-" + Integer.toString(rev);
 
 
@@ -879,15 +886,19 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	public String getInsertionKey() {
 		String key = null;
 
-		if ((keyType == 0) && (publicKey != null))
+		if ((keyType == KEY_TYPE_CHK) && (publicKey != null))
 			key = publicKey;
-		if ((keyType == 0) && (publicKey == null))
+
+		else if ((keyType == KEY_TYPE_CHK) && (publicKey == null))
 			key = "CHK@";
-		if (keyType == 1)
+
+		else if (keyType == KEY_TYPE_KSK)
 			key = "KSK@" + name + "-"+ Integer.toString(rev);
-		if (keyType == 2 && privateKey.startsWith("SSK"))
+
+		else if (keyType == KEY_TYPE_SSK && privateKey.startsWith("SSK"))
 			key = privateKey + name+"-"+rev;
-		if (keyType == 2 && privateKey.startsWith("USK"))
+
+		else if (keyType == KEY_TYPE_SSK && privateKey.startsWith("USK"))
 			key = privateKey + name + "/" + rev;
 
 		if (key == null) {
@@ -1009,7 +1020,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		successful = Boolean.valueOf((String)parameters.get("successful")).booleanValue();
 		finished = Boolean.valueOf((String)parameters.get("finished")).booleanValue();
 
-		if((persistence == 2) && !isFinished()) {
+		if ((persistence == PERSISTENCE_UNTIL_DISCONNECT) && !isFinished()) {
 			progress = 0;
 			status = "Waiting";
 		}

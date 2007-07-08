@@ -707,7 +707,10 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 			rev++;
 
-			put = new FCPClientPut(targetFile, 2, rev, realName, privateKey, 2, true, 0);
+			put = new FCPClientPut(targetFile, FCPClientPut.KEY_TYPE_SSK,
+					       rev, realName, privateKey, 2 /*priority*/,
+					       true /* global queue */,
+					       FCPClientPut.PERSISTENCE_FOREVER);
 			put.setMetadata("ContentType", "application/x-freenet-index");
 
 			if (indexBrowser != null && indexBrowser.getIndexTree() != null)
@@ -826,9 +829,14 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		Logger.debug(this, "Key asked: "+key);
 
 
-		clientGet = new FCPClientGet(key, 2, 2, false, 5,
-					     System.getProperty("java.io.tmpdir"),
-					     MAX_SIZE, true /* <= noDDA */);
+		clientGet = new FCPClientGet(key,
+					     2, /* <= priority */
+					     FCPClientGet.PERSISTENCE_UNTIL_DISCONNECT,
+					     false, /* <= globalQueue */
+					     5, /* maxRetries */
+					     System.getProperty("java.io.tmpdir"), /* destination directory */
+					     MAX_SIZE, /* max size */
+					     true /* <= noDDA */);
 
 		/*
 		 * These requests are usually quite fast, and don't consume too much

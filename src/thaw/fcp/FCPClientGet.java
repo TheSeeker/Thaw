@@ -10,6 +10,13 @@ import java.util.Observer;
 import thaw.core.Logger;
 
 public class FCPClientGet extends Observable implements Observer, FCPTransferQuery {
+	public final static int DEFAULT_PRIORITY = 4;
+
+	public final static int PERSISTENCE_FOREVER           = 0;
+	public final static int PERSISTENCE_UNTIL_NODE_REBOOT = 1;
+	public final static int PERSISTENCE_UNTIL_DISCONNECT  = 2;
+
+
 	private int maxRetries = -1;
 	private final static int PACKET_SIZE = 1024;
 	private final static int BLOCK_SIZE = 16384;
@@ -19,9 +26,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	private String key = null;
 	private String filename = null; /* Extract from the key */
-	private int priority = 6;
-	private int persistence = 0;
-	private boolean globalQueue = false;
+	private int priority = DEFAULT_PRIORITY;
+	private int persistence = PERSISTENCE_FOREVER;
+	private boolean globalQueue = true;
 	private String destinationDir = null;
 	private String finalPath = null;
 
@@ -144,7 +151,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	/**
 	 * Entry point: Only for initial queries
 	 * @param destinationDir if null => temporary file
-	 * @param persistence 0 = Forever ; 1 = Until node reboot ; 2 = Until the app disconnect
+	 * @param persistence PERSISTENCE_FOREVER ; PERSISTENCE_UNTIL_NODE_REBOOT ; PERSISTENCE_UNTIL_DISCONNECT
 	 */
 	public FCPClientGet(final String key, final int priority,
 			    final int persistence, boolean globalQueue,
@@ -152,7 +159,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			    String destinationDir) {
 
 
-		if(globalQueue && (persistence >= 2))
+		if (globalQueue && (persistence >= PERSISTENCE_UNTIL_DISCONNECT))
 			globalQueue = false; /* else protocol error */
 
 		progressReliable = false;
@@ -265,11 +272,11 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		if(destinationDir != null)
 			queryMessage.setValue("ClientToken", destinationDir);
 
-		if(persistence == 0)
+		if(persistence == PERSISTENCE_FOREVER)
 			queryMessage.setValue("Persistence", "forever");
-		if(persistence == 1)
+		if(persistence == PERSISTENCE_UNTIL_NODE_REBOOT)
 			queryMessage.setValue("Persistence", "reboot");
-		if(persistence == 2)
+		if(persistence == PERSISTENCE_UNTIL_DISCONNECT)
 			queryMessage.setValue("Persistence", "connection");
 
 		if(globalQueue)
@@ -1055,7 +1062,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		successful     = Boolean.valueOf((String)parameters.get("Successful")).booleanValue();
 		maxRetries     = Integer.parseInt((String)parameters.get("MaxRetries"));
 
-		if((persistence == 2) && !isFinished()) {
+		if((persistence == PERSISTENCE_UNTIL_DISCONNECT) && !isFinished()) {
 			progress = 0;
 			running = false;
 			status = "Waiting";
@@ -1066,7 +1073,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 
 	public boolean isPersistent() {
-		return (persistence < 2);
+		return (persistence < PERSISTENCE_UNTIL_DISCONNECT);
 	}
 
 

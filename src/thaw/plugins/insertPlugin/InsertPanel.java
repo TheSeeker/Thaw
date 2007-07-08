@@ -300,7 +300,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 				return;
 			}
 
-			if((keyType == 1) || (keyType == 2)) {
+			if((keyType == FCPClientPut.KEY_TYPE_KSK) || (keyType == FCPClientPut.KEY_TYPE_SSK)) {
 				if((nameField.getText() == null)
 				   || "".equals( nameField.getText() )
 				   || (revField.getText() == null)
@@ -314,7 +314,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 				name = nameField.getText();
 			}
 
-			if(keyType == 2) {
+			if(keyType == FCPClientPut.KEY_TYPE_SSK) {
 				if((privateKeyField.getText() != null)
 				   && !"".equals( privateKeyField.getText() )) {
 					privateKey = privateKeyField.getText();
@@ -349,7 +349,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 			insertPlugin.insertFile(selectedFiles.getText(),
 						keyType, rev, name, privateKey, priority,
-						global, 0, mimeType);
+						global, FCPClientPut.PERSISTENCE_FOREVER, mimeType);
 
 			selectedFiles.setText("");
 		}
@@ -399,7 +399,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 			selectedFiles.setText(fileList);
 
-			if(keyType != 0)
+			if(keyType != FCPClientPut.KEY_TYPE_CHK)
 				nameField.setText(getFileNameFromPath());
 		}
 	}
@@ -422,7 +422,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 			resetOptionalFields();
 
-			keyType = 0;
+			keyType = FCPClientPut.KEY_TYPE_CHK;
 
 			return;
 		}
@@ -434,7 +434,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 			resetOptionalFields();
 
-			keyType = 1;
+			keyType = FCPClientPut.KEY_TYPE_KSK;
 			return;
 		}
 
@@ -445,7 +445,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 			resetOptionalFields();
 
-			keyType = 2;
+			keyType = FCPClientPut.KEY_TYPE_SSK;
 			return;
 		}
 	}

@@ -223,8 +223,8 @@ public class FetchPanel implements java.awt.event.ActionListener, MouseListener 
 
 
 			fetchPlugin.fetchFiles(fileList.getText().split("\n"),
-					       priority, 0, globalQueue,
-					       destinationField.getText());
+					       priority, thaw.fcp.FCPClientGet.PERSISTENCE_FOREVER,
+					       globalQueue, destinationField.getText());
 
 			fileList.setText("");
 		}

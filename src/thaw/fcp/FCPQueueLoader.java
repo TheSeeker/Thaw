@@ -50,10 +50,12 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 		if("PersistentGet".equals( msg.getMessageName() )) {
 			Logger.info(this, "Resuming from PersistentGet");
 
-			int persistence = 0;
+			int persistence = FCPClientGet.PERSISTENCE_FOREVER;
 
 			if("reboot".equals( msg.getValue("PersistenceType") ))
-				persistence = 1;
+				persistence = FCPClientGet.PERSISTENCE_UNTIL_NODE_REBOOT;
+			else if ("connection".equals( msg.getValue("PersistenceType") ))
+				persistence = FCPClientGet.PERSISTENCE_UNTIL_DISCONNECT;
 
 			boolean global = true;
 
@@ -86,11 +88,12 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 		if("PersistentPut".equals( msg.getMessageName() )) {
 			Logger.info(this, "Resuming from PersistentPut");
 
-			int persistence = 0;
+			int persistence = FCPClientGet.PERSISTENCE_FOREVER;
 
-			if((msg.getValue("PersistenceType") != null)
-			   && msg.getValue("PersistenceType").equals("reboot"))
-				persistence = 1;
+			if("reboot".equals( msg.getValue("PersistenceType") ))
+				persistence = FCPClientGet.PERSISTENCE_UNTIL_NODE_REBOOT;
+			else if ("connection".equals( msg.getValue("PersistenceType") ))
+				persistence = FCPClientGet.PERSISTENCE_UNTIL_DISCONNECT;
 
 			boolean global = true;
 
@@ -121,10 +124,14 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 
 			final FCPClientPut clientPut = new FCPClientPut(msg.getValue("Identifier"),
 									msg.getValue("URI"), // key
-									priority, persistence, global,
+									priority,
+									persistence,
+									global,
 									filePath,
 									fileName,
-									"Inserting", 0, fileSize,
+									"Inserting",
+									0, /* progress */
+									fileSize,
 									queueManager);
 
 

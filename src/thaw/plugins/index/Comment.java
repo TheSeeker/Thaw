@@ -470,9 +470,14 @@ public class Comment extends Observable implements Observer, ActionListener {
 		if (xmlFile == null)
                         return false;
 
-		FCPClientPut put = new FCPClientPut(xmlFile, 2, 0, "comment",
+		FCPClientPut put = new FCPClientPut(xmlFile,
+						    FCPClientPut.KEY_TYPE_SSK,
+						    0, /* rev : as we insert as USK => EDONTCARE */
+						    "comment", /* filename (not really used anymore) */
                                                     FreenetURIHelper.convertSSKtoUSK(privateKey)+"/", /* the convertion fonction forget the '/' */
-						    2, false, 0);
+						    2, /* priority */
+						    false, /* global */
+						    FCPClientPut.PERSISTENCE_FOREVER ); /* persistence */
                 put.addObserver(this);
 
 		return queueManager.addQueryToTheRunningQueue(put);
@@ -797,7 +802,8 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 		publicKey += "comment-"+Integer.toString(rev)+"/comment.xml";
 
-		FCPClientGet get = new FCPClientGet(publicKey, 2 /* priority */, 2 /* persistence */,
+		FCPClientGet get = new FCPClientGet(publicKey, 2 /* priority */,
+						    FCPClientGet.PERSISTENCE_UNTIL_DISCONNECT /* persistence */,
 						    false /* global queue */, 3 /* max retries */,
 						    System.getProperty("java.io.tmpdir"),
 						    MAX_SIZE, true /* no DDA */);

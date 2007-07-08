@@ -286,7 +286,12 @@ public class File implements Observer {
 			return null;
 		}
 
-		final FCPClientGet clientGet = new FCPClientGet(publicKey, 4, 0, true, -1, targetPath);
+		final FCPClientGet clientGet = new FCPClientGet(publicKey,
+								FCPClientGet.DEFAULT_PRIORITY,
+								FCPClientGet.PERSISTENCE_FOREVER,
+								true, /* <= global queue */
+								-1, /* <= max retries */
+								targetPath);
 
 		queueManager.addQueryToThePendingQueue(clientGet);
 
@@ -311,7 +316,13 @@ public class File implements Observer {
 		}
 
 		final FCPClientPut clientPut = new FCPClientPut(new java.io.File(localPath),
-								0, 0, null, null, 4, true, 0);
+								FCPClientPut.KEY_TYPE_CHK,
+								0,    /* rev        : EDONTCARE */
+								null, /* name       : EDONTCARE */
+								null, /* privateKey : EDONTCARE */
+								FCPClientPut.DEFAULT_PRIORITY,
+								true, /* global queue */
+								FCPClientPut.PERSISTENCE_FOREVER);
 		queueManager.addQueryToThePendingQueue(clientPut);
 
 		clientPut.addObserver(this);
