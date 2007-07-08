@@ -408,15 +408,50 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			return;
 		}
 
-		if(message.getMessageName().equals("GetFailed")) {
+
+		/* we assume that the change is not about the clientToken */
+		if ("PersistentRequestModified".equals(message.getMessageName())) {
+			if (message.getValue("PriorityClass") == null) {
+				Logger.warning(this, "No priority specified ?! Message ignored.");
+			} else {
+				priority = Integer.parseInt(message.getValue("PriorityClass"));
+			}
+			return;
+		}
+
+		if ("PersistentRequestRemoved".equals(message.getMessageName())) {
+			status = "Removed";
+
+			if (!isFinished()) {
+				progress = 100;
+				running = false;
+				successful = false;
+				fatal = true;
+			}
+
+			Logger.info(this, "PersistentRequestRemoved >> Removing from the queue");
+			queueManager.getQueryManager().deleteObserver(this);
+			queueManager.remove(this);
+
+			setChanged();
+			notifyObservers();
+			return;
+		}
+
+
+		if ("GetFailed".equals(message.getMessageName())) {
 			Logger.debug(this, "GetFailed !");
 
 			if (message.getValue("RedirectURI") != null) {
 				Logger.debug(this, "Redirected !");
 				key = message.getValue("RedirectURI");
 				status = "Redirected ...";
-				restartIfFailed = true;
-				stop(queueManager);
+				if (queueManager.isOur(message.getValue("Identifier"))) {
+					restartIfFailed = true;
+					stop(queueManager);
+				} else {
+					Logger.debug(this, "Not our transfer ; we don't touch");
+				}
 			}
 
 			if (restartIfFailed) {
@@ -449,15 +484,13 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 				status = status + " (non-fatal)";
 			}
 
-			queueManager.getQueryManager().deleteObserver(this);
-
 			setChanged();
 			this.notifyObservers();
 
 			return;
 		}
 
-		if(message.getMessageName().equals("SimpleProgress")) {
+		if ("SimpleProgress".equals(message.getMessageName())) {
 			Logger.debug(this, "SimpleProgress !");
 
 			progress = 0;
@@ -487,7 +520,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			return;
 		}
 
-		if(message.getMessageName().equals("AllData")) {
+		if ("AllData".equals(message.getMessageName())) {
 			Logger.debug(this, "AllData ! : " + identifier);
 
 			fileSize = message.getAmountOfDataWaiting();
@@ -541,7 +574,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 			return;
 		}
 
-		if(message.getMessageName().equals("PersistentGet")) {
+		if ("PersistentGet".equals(message.getMessageName())) {
 			Logger.debug(this, "PersistentGet !");
 			setChanged();
 			notifyObservers();

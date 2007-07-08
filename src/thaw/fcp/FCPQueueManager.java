@@ -257,7 +257,9 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 		Logger.info(this, "Restart done.");
 	}
 
-
+	/**
+	 * Don't stop()
+	 */
 	public void remove(final FCPTransferQuery query) {
 		synchronized(runningQueries) {
 			runningQueries.remove(query);
@@ -501,6 +503,11 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 
 		return (thawId+"_"+ Integer.toString(lastId));
 	}
+
+	public boolean isOur(String queryId) {
+		return queryId.startsWith(thawId);
+	}
+
 
 	public void update(final java.util.Observable o, final Object arg) {
 		if((o == queryManager.getConnection())

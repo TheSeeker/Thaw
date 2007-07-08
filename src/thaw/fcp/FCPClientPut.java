@@ -606,7 +606,35 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				return;
 			}
 
-			if("PutFailed".equals( msg.getMessageName() )) {
+			if ("PersistentRequestModified".equals(msg.getMessageName())) {
+				if (msg.getValue("PriorityClass") == null) {
+					Logger.warning(this, "No priority specified ?! Message ignored.");
+				} else {
+					priority = Integer.parseInt(msg.getValue("PriorityClass"));
+				}
+				return;
+			}
+
+			if ("PersistentRequestRemoved".equals(msg.getMessageName())) {
+				if (!isFinished()) {
+					successful = false;
+					running = false;
+					finished = true;
+					fatal = true;
+					status = "Removed";
+				}
+
+				Logger.info(this, "PersistentRequestRemoved >> Removing from the queue");
+				queueManager.getQueryManager().deleteObserver(this);
+				queueManager.remove(this);
+
+				setChanged();
+				notifyObservers();
+				return;
+			}
+
+
+			if ("PutFailed".equals( msg.getMessageName() )) {
 
 				successful = false;
 				running = false;
