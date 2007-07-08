@@ -105,8 +105,9 @@ public class Main {
 		Vector feels = thaw.plugins.ThemeSelector.getPossibleThemes();
 
 		for (Iterator it = feels.iterator() ; it.hasNext(); ) {
-			UIManager.LookAndFeelInfo lnf = (UIManager.LookAndFeelInfo)it.next();
-			System.out.println("           " + lnf.getClassName());
+			String str = (String)it.next();
+
+			System.out.println("           " + str);
 		}
 		System.out.println("\n         And this one is used by default:");
 		System.out.println("           " + UIManager.getSystemLookAndFeelClassName() + "\n");
