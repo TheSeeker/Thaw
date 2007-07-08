@@ -293,6 +293,8 @@ public class FreenetURIHelper {
 
 	/**
 	 * this process is not costless.
+	 * Ignore the revisions
+	 * @return true if they match
 	 */
 	public static boolean compareKeys(String keyA, String keyB) {
 		if (keyA == keyB)

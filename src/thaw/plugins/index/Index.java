@@ -1173,6 +1173,29 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		return header;
 	}
 
+
+	/**
+	 * must be in a synchronized(db.dbLock)
+	 */
+	private String findTheLatestKey(String linkKey) throws SQLException {
+		PreparedStatement st = db.getConnection().prepareStatement("SELECT publicKey FROM indexes "+
+									   "WHERE publicKey LIKE ?");
+		st.setString(1, FreenetURIHelper.getComparablePart(linkKey));
+
+		ResultSet set = st.executeQuery();
+
+		while (set.next()) {
+			/* we will assume that we have *always* the latest version of the index */
+
+			String oKey = set.getString("publicKey");
+			if (FreenetURIHelper.compareKeys(oKey, linkKey))
+				return oKey;
+		}
+
+		return linkKey;
+	}
+
+
 	public Element getXMLLinks(final Document xmlDoc) {
 		final Element links = xmlDoc.createElement("indexes");
 		synchronized(db.dbLock) {
@@ -1185,9 +1208,11 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 				ResultSet set = st.executeQuery();
 
 				while (set.next()) {
+					String key = findTheLatestKey(set.getString("publicKey"));
+
 					final Element xmlLink = xmlDoc.createElement("index");
 
-					xmlLink.setAttribute("key", set.getString("publicKey"));
+					xmlLink.setAttribute("key", key);
 
 					if (xmlLink != null)
 						links.appendChild(xmlLink);
