@@ -39,7 +39,7 @@ public class Core implements Observer {
 
 	private FCPClientHello clientHello = null;
 
-	private static String lookAndFeel = null;
+	private String lookAndFeel = null;
 
 	public final static int MAX_CONNECT_TRIES = 3;
 	public final static int TIME_BETWEEN_EACH_TRY = 5000;
@@ -362,8 +362,8 @@ public class Core implements Observer {
 	 * To call before initGraphics() !
 	 * @param lAndF LookAndFeel name
 	 */
-	public static void setLookAndFeel(final String lAndF) {
-		Core.lookAndFeel = lAndF;
+	public void setLookAndFeel(final String lAndF) {
+		this.lookAndFeel = lAndF;
 	}
 
 
@@ -398,10 +398,10 @@ public class Core implements Observer {
 	}
 
 
-	public static void setTheme(Core core, String theme) {
+	public void setTheme(String theme) {
 		if (theme == null) {
-			if (core.getConfig() != null)
-				theme = core.getConfig().getValue("lookAndFeel");
+			if (getConfig() != null)
+				theme = getConfig().getValue("lookAndFeel");
 
 			if (theme == null)
 				theme = UIManager.getSystemLookAndFeelClassName();
@@ -410,9 +410,9 @@ public class Core implements Observer {
 		if (theme == null)
 			return;
 
-		Logger.notice(core, "Setting theme : "+ theme);
+		Logger.notice(this, "Setting theme : "+ theme);
 
-		LnFSetter s = new LnFSetter(core, theme);
+		LnFSetter s = new LnFSetter(this, theme);
 
 		try {
 			javax.swing.SwingUtilities.invokeAndWait(s);
@@ -440,7 +440,7 @@ public class Core implements Observer {
 		JDialog.setDefaultLookAndFeelDecorated(false);
 
 		try {
-			setTheme(this, Core.lookAndFeel);
+			setTheme(this.lookAndFeel);
 
 			if (splashScreen != null)
 				splashScreen.rebuild();

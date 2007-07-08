@@ -162,7 +162,7 @@ public class ThemeSelector implements thaw.core.Plugin, Observer, ListSelectionL
 		}
 
 		public void run() {
-			Core.setTheme(core, theme);
+			core.setTheme(theme);
 		}
 	}
 

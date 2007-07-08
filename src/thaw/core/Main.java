@@ -52,7 +52,14 @@ public class Main {
 			I18n.setLocale(new Locale(Main.locale));
 
 		core = new Core();
-		Core.setLookAndFeel(Main.lookAndFeel);
+
+		/* we specify to the core what lnf to use */
+		core.setLookAndFeel(Main.lookAndFeel);
+
+		/* and we force it to refresh change it right now */
+		if (Main.lookAndFeel != null)
+			core.setTheme(Main.lookAndFeel);
+
 		core.initAll();
 	}
 
