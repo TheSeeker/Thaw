@@ -1387,6 +1387,7 @@ public class IndexManagementHelper {
 
 	}
 
+
 	/**
 	 * @param keys => String
 	 */
@@ -1396,14 +1397,20 @@ public class IndexManagementHelper {
 
 		Hsqldb db;
 		PreparedStatement st;
+		PreparedStatement preSt;
 		int nextId;
 
 		db = indexBrowser.getDb();
 
 		synchronized(db.dbLock) {
 			try {
+				preSt = db.getConnection().prepareStatement("SELECT id FROM files "+
+									    "WHERE indexParent = ? AND "+
+									    "LOWER(publicKey) LIKE ? LIMIT 1");
+
 				st = db.getConnection().prepareStatement("INSERT INTO files "+
-									 "(id, filename, publicKey, localPath, mime, size, category, indexParent) "+
+									 "(id, filename, publicKey, localPath, "+
+									 " mime, size, category, indexParent) "+
 									 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 				nextId = DatabaseManager.getNextId(db, "files");
 
@@ -1420,18 +1427,28 @@ public class IndexManagementHelper {
 				final String key = (String)it.next();
 
 				try {
-					st.setInt(1, nextId);
-					st.setString(2, FreenetURIHelper.getFilenameFromKey(key));
-					st.setString(3, key);
-					st.setNull(4, Types.VARCHAR /* localPath */);
-					st.setString(5, thaw.plugins.insertPlugin.DefaultMIMETypes.guessMIMEType(FreenetURIHelper.getFilenameFromKey(key)));
-					st.setLong(6, 0L);
-					st.setNull(7 /* category */, Types.INTEGER /* not used at the moment */);
-					st.setInt(8, target.getId());
+					preSt.setInt(1, target.getId());
+					preSt.setString(2, FreenetURIHelper.getComparablePart(key) +"%");
 
-					st.execute();
+					ResultSet res = preSt.executeQuery();
 
-					nextId++;
+					if (!res.next()) {
+
+						st.setInt(1, nextId);
+						st.setString(2, FreenetURIHelper.getFilenameFromKey(key));
+						st.setString(3, key);
+						st.setNull(4, Types.VARCHAR /* localPath */);
+						st.setString(5, thaw.plugins.insertPlugin.DefaultMIMETypes.guessMIMEType(FreenetURIHelper.getFilenameFromKey(key)));
+						st.setLong(6, 0L);
+						st.setNull(7 /* category */, Types.INTEGER /* not used at the moment */);
+						st.setInt(8, target.getId());
+
+						st.execute();
+
+						nextId++;
+					} else {
+						Logger.notice(target, "Key already in the specified index, not added");
+					}
 				} catch(SQLException e) {
 					Logger.error(new IndexManagementHelper(), "Error while adding file: "+e.toString());
 				}
