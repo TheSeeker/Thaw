@@ -667,12 +667,15 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 		}
 
 
-
+		/* Let's hope that users are not stupid
+		 * and won't insert 5 revisions at once. */
+		/*
 		if (indexBrowser != null && indexBrowser.getIndexTree() != null
 		    && indexBrowser.getIndexTree().isIndexUpdating(this)) {
 			Logger.notice(this, "A transfer is already running !");
 			return 0;
 		}
+		*/
 
 		if (!FreenetURIHelper.isAKey(publicKey)
 		    || !FreenetURIHelper.isAKey(privateKey)) { /* non modifiable */
