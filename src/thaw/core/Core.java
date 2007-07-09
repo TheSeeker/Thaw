@@ -723,4 +723,35 @@ public class Core implements Observer {
 	public boolean isStopping() {
 		return isStopping;
 	}
+
+
+	/*
+	 * @param major always 1 atm
+	 * @param minor 5, 6, etc, depending of what you want
+	 */
+	public static boolean checkJavaVersion(int major, int minor) {
+		String ver = System.getProperty("java.version");
+
+		if (ver == null) {
+			Logger.notice(ver, "No Jvm version ?!");
+			return false;
+		}
+
+		Logger.info(ver, "JVM Version : "+ver);
+
+		String[] version = ver.split("\\.");
+
+		if (version.length < 2) {
+			Logger.notice(ver, "Can't parse the jvm version !");
+			return false;
+		}
+
+		if (Integer.parseInt(version[0]) < major)
+			return false;
+
+		if (Integer.parseInt(version[1]) < minor)
+			return false;
+
+		return true;
+	}
 }

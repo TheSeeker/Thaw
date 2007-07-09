@@ -33,6 +33,7 @@ import thaw.fcp.FCPTransferQuery;
 import thaw.gui.SysTrayIcon;
 import thaw.gui.TransferProgressBar;
 import thaw.gui.IconBox;
+import thaw.gui.WarningWindow;
 
 public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener, ActionListener {
 	private Core core;
@@ -53,6 +54,12 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 	public boolean run(Core core) {
 		this.core = core;
 
+		if (!Core.checkJavaVersion(1, 6)) {
+			new WarningWindow(core,
+					  I18n.getMessage("thaw.plugin.trayIcon.java1.6"));
+			return false;
+		}
+
 		icon = new SysTrayIcon(thaw.gui.IconBox.blueBunny);
 		icon.setToolTip("Thaw "+thaw.core.Main.VERSION);
 		icon.addMouseListener(this);
@@ -66,6 +73,9 @@ public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener
 
 
 	public boolean stop() {
+		if (icon == null)
+			return false;
+
 		core.getMainWindow().removeWindowListener(this);
 		icon.removeMouseListener(this);
 
