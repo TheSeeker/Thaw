@@ -260,7 +260,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		final FCPMessage queryMessage = new FCPMessage();
 
 		queryMessage.setMessageName("ClientGet");
-		queryMessage.setValue("URI", getFileKey());
+		queryMessage.setValue("URI", key);
 		queryMessage.setValue("Identifier", identifier);
 		queryMessage.setValue("Verbosity", "1");
 		queryMessage.setValue("MaxRetries", Integer.toString(maxRetries));
@@ -955,6 +955,15 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 	}
 
 	public String getFileKey() {
+		// TODO : It's fix due to Frost
+		//        => to remove when it will become unneeded
+
+		if (filename != null && key != null
+		    && key.startsWith("CHK@")
+		    && key.indexOf('/') < 0) {
+			return key + "/" + filename;
+		}
+
 		return key;
 	}
 
