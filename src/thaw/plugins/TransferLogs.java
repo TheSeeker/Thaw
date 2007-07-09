@@ -192,7 +192,7 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT id FROM transferEvents "+
+				st = db.getConnection().prepareStatement("SELECT id FROM transferLogs "+
 									 "WHERE LOWER(key) LIKE ? AND isSuccess = TRUE");
 				st.setString(1, FreenetURIHelper.getComparablePart(key)+"%");
 				ResultSet set = st.executeQuery();

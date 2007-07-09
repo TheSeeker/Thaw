@@ -109,7 +109,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		/* FIX : This is a fix for the files inserted by Frost */
 		/* To remove when bback will do his work correctly */
 		if (filename == null && id != null) {
-			Logger.warning(this, "Fixing Frost key filename");
+			Logger.notice(this, "Fixing Frost key filename");
 			String[] split = id.split("-");
 
 			if (split.length >= 2) {
