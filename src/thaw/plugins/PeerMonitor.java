@@ -6,15 +6,20 @@ import java.util.Vector;
 import java.util.HashMap;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
+import javax.swing.JButton;
 
 import thaw.core.I18n;
 import thaw.core.Core;
+import thaw.core.Logger;
 
 import thaw.plugins.peerMonitor.*;
 import thaw.fcp.*;
 
 
-public class PeerMonitor implements thaw.core.Plugin, Observer
+public class PeerMonitor implements thaw.core.Plugin, Observer, ActionListener
 {
 	public final static int DEFAULT_REFRESH_RATE = 10; /* in sec */
 
@@ -27,6 +32,8 @@ public class PeerMonitor implements thaw.core.Plugin, Observer
 
 	private boolean advancedMode;
 
+	private JButton unfoldButton;
+	private boolean folded = false;
 
 	public PeerMonitor() {
 
@@ -102,11 +109,13 @@ public class PeerMonitor implements thaw.core.Plugin, Observer
 
 		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 
+		unfoldButton = new JButton("<");
+		unfoldButton.addActionListener(this);
 
 		peerPanel = new PeerMonitorPanel(this, core.getQueueManager(), core.getConfig(), core.getMainWindow());
 
 		peerPanel.addObserver(this);
-
+		peerPanel.getFoldButton().addActionListener(this);
 
 		core.getMainWindow().addComponent(peerPanel.getPeerListPanel(),
 						  BorderLayout.EAST);
@@ -116,13 +125,24 @@ public class PeerMonitor implements thaw.core.Plugin, Observer
 		Thread th = new Thread(new DisplayRefresher());
 		th.start();
 
+		if (core.getConfig().getValue("peerMonitorFolded") != null) {
+			boolean f = (new Boolean(core.getConfig().getValue("peerMonitorFolded"))).booleanValue();
+			if (f) foldPanel();
+		}
+
 		return true;
 	}
 
 
 	public boolean stop() {
 		hideTab();
-		core.getMainWindow().removeComponent(peerPanel.getPeerListPanel());
+		if (!folded)
+			core.getMainWindow().removeComponent(peerPanel.getPeerListPanel());
+		else
+			core.getMainWindow().removeComponent(unfoldButton);
+
+		core.getConfig().setValue("peerMonitorFolded", Boolean.toString(folded));
+
 		running = false;
 		return false;
 	}
@@ -159,5 +179,33 @@ public class PeerMonitor implements thaw.core.Plugin, Observer
 			core.getMainWindow().removeTab(peerPanel.getTabPanel());
 			tabVisible = false;
 		}
+	}
+
+
+	public void foldPanel() {
+		Logger.info(this, "Folding peer monitor panel");
+		core.getMainWindow().removeComponent(peerPanel.getPeerListPanel());
+		core.getMainWindow().getMainFrame().validate();
+		core.getMainWindow().addComponent(unfoldButton,
+						  BorderLayout.EAST);
+		core.getMainWindow().getMainFrame().validate();
+		folded = true;
+	}
+
+	public void unfoldPanel() {
+		Logger.info(this, "Unfolding peer monitor panel");
+		core.getMainWindow().removeComponent(unfoldButton);
+		core.getMainWindow().getMainFrame().validate();
+		core.getMainWindow().addComponent(peerPanel.getPeerListPanel(),
+						  BorderLayout.EAST);
+		core.getMainWindow().getMainFrame().validate();
+		folded = false;
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == peerPanel.getFoldButton())
+			foldPanel();
+		else if (e.getSource() == unfoldButton)
+			unfoldPanel();
 	}
 }

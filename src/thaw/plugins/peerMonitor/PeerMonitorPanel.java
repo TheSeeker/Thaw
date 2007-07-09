@@ -112,6 +112,9 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 	private ToolbarModifier toolbarModifier;
 
+	private JButton foldButton;
+
+
 	public PeerMonitorPanel(PeerMonitor peerMonitor,
 				FCPQueueManager queueManager,
 				Config config,
@@ -142,6 +145,10 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 		JLabel peerListLabel = new JLabel(I18n.getMessage("thaw.plugin.peerMonitor.peerList"));
 		peerListLabel.setIcon(IconBox.peers);
+
+		/* We are not the listener */
+		/* te listener will be thaw.plugins.PeerMonitor */
+		foldButton = new JButton(">");
 
 
 		nodeMemBar = new JProgressBar(0, 100);
@@ -179,8 +186,11 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 		southSouth.add(littleButtonPanel, BorderLayout.WEST);
 
 
+		JPanel titlePanel = new JPanel(new BorderLayout(5, 5));
+		titlePanel.add(peerListLabel, BorderLayout.CENTER);
+		titlePanel.add(foldButton, BorderLayout.EAST);
 
-		peerPanel.add(peerListLabel, BorderLayout.NORTH);
+		peerPanel.add(titlePanel, BorderLayout.NORTH);
 		peerPanel.add(new JScrollPane(peerList), BorderLayout.CENTER);
 
 		JPanel memPanel = new JPanel(new GridLayout(3, 1));
@@ -270,6 +280,11 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 		toolbarButton.setToolTipText(I18n.getMessage("thaw.plugin.peerMonitor.removePeer"));
 		buttonActions.add(new PeerHelper.PeerRemover(queueManager, toolbarButton));
 		toolbarModifier.addButtonToTheToolbar(toolbarButton);
+	}
+
+
+	public JButton getFoldButton() {
+		return foldButton;
 	}
 
 
