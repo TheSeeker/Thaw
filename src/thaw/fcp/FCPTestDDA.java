@@ -21,7 +21,8 @@ public class FCPTestDDA extends Observable implements FCPQuery, Observer {
 	private boolean wantRead;
 	private boolean wantWrite;
 
-	private String testFile;
+	private String writeTestFile;
+	private String readTestFile;
 
 	private boolean nodeCanRead;
 	private boolean nodeCanWrite;
@@ -67,7 +68,9 @@ public class FCPTestDDA extends Observable implements FCPQuery, Observer {
 
 	protected boolean writeFile(String filename, String content) {
 		try {
-			FileOutputStream stream = new FileOutputStream(filename, false);
+			File file = new File(filename);
+			file.deleteOnExit();
+			FileOutputStream stream = new FileOutputStream(file, false);
 			byte[] b;
 
 			try {
@@ -100,7 +103,9 @@ public class FCPTestDDA extends Observable implements FCPQuery, Observer {
 	protected String readFile(String filename) {
 		String data = null;
 		try {
-			FileInputStream stream = new FileInputStream(filename);
+			File file = new File(filename);
+			file.deleteOnExit();
+			FileInputStream stream = new FileInputStream(file);
 			DataInputStream dis = new DataInputStream(stream);
 
 			data = dis.readUTF();
@@ -121,6 +126,11 @@ public class FCPTestDDA extends Observable implements FCPQuery, Observer {
 
 
 	protected boolean deleteFile(String filename) {
+		if (filename == null) {
+			Logger.error(this, "Can't delete file '(null)'!");
+			return false;
+		}
+
 		return (new File(filename)).delete();
 	}
 
@@ -161,12 +171,13 @@ public class FCPTestDDA extends Observable implements FCPQuery, Observer {
 			answer.setValue("Directory", dir);
 
 			if (wantWrite) {
-				testFile = msg.getValue("WriteFilename");
-				writeFile(testFile, msg.getValue("ContentToWrite"));
+				writeTestFile = msg.getValue("WriteFilename");
+				writeFile(writeTestFile, msg.getValue("ContentToWrite"));
 			}
 
 			if (wantRead) {
-				String data = readFile(msg.getValue("ReadFilename"));
+				readTestFile = msg.getValue("ReadFilename");
+				String data = readFile(readTestFile);
 
 				if (data == null) {
 					Logger.error(this, "Thaw can't read the file written by the node !");
@@ -194,8 +205,10 @@ public class FCPTestDDA extends Observable implements FCPQuery, Observer {
 				    "TestDDA : R : " +Boolean.toString(wantRead)
 				    + " ; W : "+Boolean.toString(wantWrite));
 
+			if (wantRead)
+				deleteFile(readTestFile);
 			if (wantWrite)
-				deleteFile(testFile);
+				deleteFile(writeTestFile);
 
 			queueManager.getQueryManager().deleteObserver(this);
 

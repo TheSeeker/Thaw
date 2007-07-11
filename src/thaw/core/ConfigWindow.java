@@ -224,7 +224,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 		public void run() {
 			JDialog dialog = new JDialog(core.getMainWindow().getMainFrame(),
-						     I18n.getMessage("thaw.common.pleaseWait"));
+						     " "+I18n.getMessage("thaw.common.pleaseWait"));
 
 			dialog.getContentPane().setLayout(new GridLayout(1, 1));
 			dialog.getContentPane().add(new JLabel(I18n.getMessage("thaw.common.pleaseWait")));
