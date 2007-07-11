@@ -55,7 +55,7 @@ public class Config {
 	 * Set the value in the config.
 	 */
 	public void setValue(final String key, final String value) {
-		Logger.info(this, "Setting value '"+key+"' to '"+value+"'");
+		Logger.debug(this, "Setting value '"+key+"' to '"+value+"'");
 		parameters.put(key, value);
 	}
 

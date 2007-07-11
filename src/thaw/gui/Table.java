@@ -320,8 +320,6 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 
 		int nmb = m.getColumnCount();
 
-		Logger.info(this, "saving column size for table '"+configPrefix+"'");
-
 		for (int i = 0 ; i < nmb ; i++) {
 			TableColumn c = m.getColumn(i);
 			config.setValue(configPrefix+"_col_width_"+Integer.toString(i),

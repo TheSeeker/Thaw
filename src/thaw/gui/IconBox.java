@@ -176,8 +176,8 @@ public class IconBox {
 		IconBox.connectAction       = IconBox.loadIcon("connect.png");
 		IconBox.minConnectAction    = IconBox.loadIcon("min-connect.png");
 		IconBox.disconnectAction    = IconBox.loadIcon("disconnect.png");
-		IconBox.minStop             = IconBox.loadIcon("min-disconnect.png");
-		IconBox.stop                = IconBox.loadIcon("disconnect.png");
+		IconBox.minStop             = IconBox.loadIcon("min-stop.png");
+		IconBox.stop                = IconBox.loadIcon("stop.png");
 		IconBox.minDisconnectAction = IconBox.loadIcon("min-disconnect.png");
 		IconBox.queue               = IconBox.loadIcon("connect.png");
 		IconBox.minQueue            = IconBox.loadIcon("min-connect.png");
