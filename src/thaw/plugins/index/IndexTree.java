@@ -317,6 +317,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		button = new JButton(IconBox.refreshAction);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.downloadIndexes"));
+		button.setMnemonic(KeyEvent.VK_R);
 		action = new IndexManagementHelper.IndexDownloader(queueManager, indexBrowser, button);
 		action.setTarget(getRoot());
 		toolbarModifier.addButtonToTheToolbar(button);
@@ -346,6 +347,21 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		button = new JButton(IconBox.indexSettings);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.indexSettings"));
 		action = new IndexManagementHelper.IndexModifier(queueManager, indexBrowser, button);
+		action.setTarget(getRoot());
+		toolbarModifier.addButtonToTheToolbar(button);
+		toolbarActions.add(action);
+
+		button = new JButton(IconBox.copy);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.copyKeys"));
+		action = new IndexManagementHelper.PublicKeyCopier(button);
+		action.setTarget(null);
+		toolbarModifier.addButtonToTheToolbar(button);
+		toolbarActions.add(action);
+
+		button = new JButton(IconBox.stop);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addToBlackList"));
+		button.setMnemonic(KeyEvent.VK_B);
+		action = new IndexManagementHelper.IndexBlackLister(indexBrowser, button);
 		action.setTarget(getRoot());
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);

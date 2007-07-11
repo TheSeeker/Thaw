@@ -274,7 +274,7 @@ public class IndexManagementHelper {
 
 	/**
 	 * In fact, this dialog allows to change various settings related to the index
-	 * THIS DIALOG BECOME REALLY DIRTY ! TO REWRITE !
+	 * THIS DIALOG BECOMES REALLY DIRTY ! TO REWRITE !
 	 */
 	public static class KeyAsker implements ActionListener, MouseListener {
 		private Index index;
