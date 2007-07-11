@@ -59,7 +59,7 @@ import thaw.plugins.Hsqldb;
  * right click menu : copy key(s) to clipboard
  */
 public class TransferTable implements MouseListener {
-	public final static int NMB_ELEMENTS_PER_PAGE = 30;
+	public final static int NMB_ELEMENTS_PER_PAGE = 20;
 	public final static int DEFAULT_LINE_HEIGHT = 18;
 
 	public final static String[] COLUMN_NAMES = {
