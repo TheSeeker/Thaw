@@ -50,8 +50,6 @@ public class Core implements Observer {
 
 	private boolean isStopping = false;
 
-	// MDNS stuffs
-	private MDNSDiscovery discovery;
 
 	/**
 	 * Creates a core, but do nothing else (no initialization).
@@ -121,12 +119,7 @@ public class Core implements Observer {
 		if (!initializeLookAndFeel())
 			return false;
 
-		splashScreen.setProgressionAndStatus(20, "Starting node autodection ...");
-		splashScreen.addIcon(IconBox.connectAction);
-		if (!initMDNS())
-			return false;
-
-		splashScreen.setProgressionAndStatus(25, "Connecting ...");
+		splashScreen.setProgressionAndStatus(20, "Connecting ...");
 		if(!initConnection())
 			new thaw.gui.WarningWindow(this, I18n.getMessage("thaw.warning.unableToConnectTo")+
 						   " "+ config.getValue("nodeAddress")+
@@ -155,17 +148,6 @@ public class Core implements Observer {
 		return true;
 	}
 
-
-	public boolean initMDNS() {
-		discovery = new MDNSDiscovery(this);
-
-		return true;
-	}
-
-
-	public MDNSDiscovery getMDNSDiscovery() {
-		return discovery;
-	}
 
 
 	/**
@@ -544,8 +526,6 @@ public class Core implements Observer {
 					return;
 			}
 		}
-
-		discovery.stop();
 
 		Logger.info(this, "Stopping scheduler ...");
 		if(queueManager != null)

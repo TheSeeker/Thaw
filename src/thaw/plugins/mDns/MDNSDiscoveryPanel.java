@@ -2,7 +2,7 @@
  * Public License, version 2 (or at your option any later version). See
  * http://www.gnu.org/ for further details of the GPL. */
 
-package thaw.core;
+package thaw.plugins.mDns;
 
 import javax.jmdns.ServiceInfo;
 import javax.swing.DefaultListModel;
@@ -25,6 +25,9 @@ import java.util.Iterator;
 import javax.swing.JButton;
 
 import thaw.core.Logger;
+import thaw.core.I18n;
+import thaw.plugins.MDns;
+
 
 /**
  * This panel implements Zeroconf (called Bonjour/RendezVous by apple) discovery for Thaw
@@ -63,17 +66,16 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 
 	private final JList list;
 	private final DefaultListModel listModel;
-	private final JLabel label;
 
-	private final Core core;
+	private final MDns mDns;
 
 	private JButton okButton;
 	private JButton cancelButton;
 
 
-	public MDNSDiscoveryPanel(Dialog owner, Core core, MDNSDiscoveryPanelCallback cb) {
+	public MDNSDiscoveryPanel(Dialog owner, MDns mDns, MDNSDiscoveryPanelCallback cb) {
 		super(owner, "ZeroConf");
-		this.core = core;
+		this.mDns = mDns;
 		this.owner = owner;
 		this.cb = cb;
 		this.displayedServiceInfos = new HashMap();
@@ -81,18 +83,22 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 		// The UI
 		list = new JList();
 		listModel = new DefaultListModel();
-		label = new JLabel();
+
+		JLabel mainLabel = new JLabel(I18n.getMessage("thaw.plugin.MDNS.searchingNode"));
+		JLabel titleListLabel = new JLabel(I18n.getMessage("thaw.plugin.MDNS.nodeList"));
 
 		list.setModel(listModel);
 		list.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 
-		label.setText(I18n.getMessage("thaw.zeroconf.searchingNode")
-			      +" ; "+
-			      I18n.getMessage("thaw.zeroconf.nodeList"));
+		mainLabel.setIcon(thaw.gui.IconBox.mDns);
 
-		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(label, BorderLayout.NORTH);
-		getContentPane().add(new JScrollPane(list), BorderLayout.CENTER);
+		JPanel listPanel = new JPanel(new BorderLayout());
+		listPanel.add(titleListLabel, BorderLayout.NORTH);
+		listPanel.add(new JScrollPane(list), BorderLayout.CENTER);
+
+		getContentPane().setLayout(new BorderLayout(5, 5));
+		getContentPane().add(mainLabel, BorderLayout.NORTH);
+		getContentPane().add(listPanel, BorderLayout.CENTER);
 
 		okButton = new JButton(I18n.getMessage("thaw.common.ok"));
 		cancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
@@ -105,7 +111,8 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 		buttonPanel.add(cancelButton);
 
 		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-		pack();
+
+		super.setSize(300, 300);
 	}
 
 
@@ -148,10 +155,10 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 		do {
 			// Loop until a selection is done
 			while(goon) {
-				synchronized (core.getMDNSDiscovery().getFoundNodes()) {
-					if(core.getMDNSDiscovery().getFoundNodes().size() > 0) {
+				synchronized (mDns.getMDNSDiscovery().getFoundNodes()) {
+					if(mDns.getMDNSDiscovery().getFoundNodes().size() > 0) {
 						listModel.clear();
-						Iterator it = core.getMDNSDiscovery().getFoundNodes().iterator();
+						Iterator it = mDns.getMDNSDiscovery().getFoundNodes().iterator();
 						while(it.hasNext()) {
 							ServiceInfo current = (ServiceInfo) it.next();
 							listModel.addElement(current.getName());
@@ -189,7 +196,7 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 
 			// Reload, just in  case it failed...
 			goon = true;
-			list.removeSelectionInterval(0, core.getMDNSDiscovery().getFoundNodes().size());
+			list.removeSelectionInterval(0, mDns.getMDNSDiscovery().getFoundNodes().size());
 		} while(!isConfigValid);
 
 
@@ -199,9 +206,9 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 		if (!cancelledByUser) {
 			Logger.debug(this, "We got something that looks valid from the UI : let's propagate changes to  the config");
 			// Save the config. now that we know it's valid
-			core.getConfig().setValue("nodeAddress", selectedValue.getHostAddress());
-			core.getConfig().setValue("nodePort", new Integer(selectedValue.getPort()).toString());
-			core.getConfig().setValue("sameComputer", String.valueOf(core.getMDNSDiscovery().isHasTheSameIPAddress(selectedValue)));
+			mDns.getConfig().setValue("nodeAddress", selectedValue.getHostAddress());
+			mDns.getConfig().setValue("nodePort", new Integer(selectedValue.getPort()).toString());
+			mDns.getConfig().setValue("sameComputer", String.valueOf(mDns.getMDNSDiscovery().isHasTheSameIPAddress(selectedValue)));
 
 
 			Logger.info(this, "We are done : configuration has been saved sucessfully.");

@@ -2,7 +2,7 @@
  * Public License, version 2 (or at your option any later version). See
  * http://www.gnu.org/ for further details of the GPL. */
 
-package thaw.core;
+package thaw.plugins.mDns;
 
 
 import java.util.LinkedList;
@@ -13,16 +13,24 @@ import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
 
 
+import thaw.plugins.MDns;
+import thaw.core.Logger;
+
 public class MDNSDiscovery {
 	// SYNC IT!!!
-	private final LinkedList foundNodes;
-	private final JmDNS jmdns;
-	private Core core;
+	private LinkedList foundNodes;
+	private JmDNS jmdns;
+	private MDns mDns;
 
-	public MDNSDiscovery(Core core) {
-		this.core = core;
+	public MDNSDiscovery(MDns mDns) {
+		this.mDns = mDns;
 		this.foundNodes = new LinkedList();
 
+		start();
+	}
+
+	public void start() {
+		this.foundNodes = new LinkedList();
 		try {
 			// Spawn the mdns listener
 			Logger.info(this, "Starting JMDNS ...");
@@ -51,8 +59,8 @@ public class MDNSDiscovery {
 
 			synchronized (foundNodes) {
 				foundNodes.remove(service);
-				synchronized (core.getConfigWindow().getNodeConfigPanel().getMdnsPanel()) {
-					core.getConfigWindow().getNodeConfigPanel().getMdnsPanel().notifyAll();
+				synchronized (mDns.getMdnsPanel()) {
+					mDns.getMdnsPanel().notifyAll();
 				}
 			}
 		}
@@ -63,8 +71,8 @@ public class MDNSDiscovery {
 
 			synchronized (foundNodes) {
 				foundNodes.add(service);
-				synchronized (core.getConfigWindow().getNodeConfigPanel().getMdnsPanel()) {
-					core.getConfigWindow().getNodeConfigPanel().getMdnsPanel().notifyAll();
+				synchronized (mDns.getMdnsPanel()) {
+					mDns.getMdnsPanel().notifyAll();
 				}
 			}
 		}

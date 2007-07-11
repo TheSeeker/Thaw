@@ -134,6 +134,9 @@ public class IconBox {
 
 	public static ImageIcon minDetails;
 
+	public static ImageIcon mDns;
+	public static ImageIcon minMDns;
+
 	/**
 	 * Not really used
 	 */
@@ -249,6 +252,8 @@ public class IconBox {
 		IconBox.minOrange           = IconBox.loadIcon("min-orange.png");
 		IconBox.minGreen            = IconBox.loadIcon("min-green.png");
 		IconBox.minDetails          = IconBox.loadIcon("min-details.png");
+		IconBox.mDns                = IconBox.loadIcon("mDns.png");
+		IconBox.minMDns             = IconBox.loadIcon("min-mDns.png");
 	}
 
 }

@@ -11,17 +11,13 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 
-import thaw.core.MDNSDiscoveryPanel.MDNSDiscoveryPanelCallback;
-
 /**
  * NodeConfigPanel. Creates and manages the panel containing all the things to configure
  *  the settings to access the node.
  */
-public class NodeConfigPanel implements Observer, java.awt.event.ActionListener, MDNSDiscoveryPanelCallback {
+public class NodeConfigPanel implements Observer {
 	private Core core;
 	private JPanel nodeConfigPanel = null;
-	private final MDNSDiscoveryPanel mdnsPanel;
-	private boolean isMDNSPanerShown = false;
 
 
 	private final static String[] paramNames = {
@@ -63,8 +59,6 @@ public class NodeConfigPanel implements Observer, java.awt.event.ActionListener,
 		this.core = core;
 		this.configWindow = configWindow;
 
-		mdnsPanel = new MDNSDiscoveryPanel(configWindow.getFrame(), core, this);
-
 		sameComputer = new JCheckBox(I18n.getMessage("thaw.config.sameComputer") + " " +
 					     I18n.getMessage("thaw.config.desactivateIfTroubles"),
 					     Boolean.valueOf(core.getConfig().getValue("sameComputer")).booleanValue());
@@ -89,8 +83,9 @@ public class NodeConfigPanel implements Observer, java.awt.event.ActionListener,
 				nodeConfigPanel.add(paramFields[i]);
 			} else {
 				/* autodetection button ! :) */
-				autodetect = new JButton(I18n.getMessage("thaw.common.autodetect"));
-				autodetect.addActionListener(this);
+				autodetect = new JButton(I18n.getMessage("thaw.common.autodetect"),
+							 thaw.gui.IconBox.minMDns);
+				autodetect.setEnabled(false);
 
 				JPanel sub = new JPanel(new BorderLayout());
 				sub.add(paramFields[i], BorderLayout.CENTER);
@@ -120,9 +115,11 @@ public class NodeConfigPanel implements Observer, java.awt.event.ActionListener,
 		return nodeConfigPanel;
 	}
 
-	public MDNSDiscoveryPanel getMdnsPanel() {
-		return mdnsPanel;
+	public JButton getAutodetectButton() {
+		return autodetect;
 	}
+
+
 
 	private void setVisibility(final boolean advancedMode) {
 		for(int i= 2; i < NodeConfigPanel.paramNames.length;i++) {
@@ -200,24 +197,4 @@ public class NodeConfigPanel implements Observer, java.awt.event.ActionListener,
 		sameComputer.setSelected(Boolean.valueOf(core.getConfig().getValue("sameComputer")).booleanValue());
 	}
 
-	public void actionPerformed(java.awt.event.ActionEvent event) {
-		if (event.getSource() == autodetect) {
-			synchronized (this) {
-				if(isMDNSPanerShown) return;
-				isMDNSPanerShown = true;
-			}
-			autodetect.setEnabled(false);
-			new Thread(mdnsPanel).start();
-		}
-	}
-	
-	public void onMDNSDiscoverPanelClosure(boolean hasBeenCancelled) { 
-		// We got back !	
-		synchronized (this) {
-			isMDNSPanerShown = false;
-		}
-		autodetect.setEnabled(true);
-		if(!hasBeenCancelled)
-			resetValues();
-	}
 }

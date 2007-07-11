@@ -34,6 +34,7 @@ public class PluginManager {
 		"thaw.plugins.IndexExporter",
 		"thaw.plugins.Restarter",
 		"thaw.plugins.TransferLogs",
+		"thaw.plugins.MDns",
 		"thaw.plugins.SqlConsole",
 		"thaw.plugins.LogConsole"
 	};
