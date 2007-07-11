@@ -340,7 +340,7 @@ public class Transfer implements Observer {
 	 * @return a value in byte / s
 	 */
 	public long getAverageSpeed() {
-		if (getDateEnd() == null || getSize() <= 0)
+		if (!isSuccess() || getDateEnd() == null || getSize() <= 0)
 			return -1;
 
 		long diff = (getDateEnd().getTime() - getDateStart().getTime())/1000;
