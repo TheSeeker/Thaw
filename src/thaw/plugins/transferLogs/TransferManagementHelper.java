@@ -2,6 +2,9 @@ package thaw.plugins.transferLogs;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
+
 
 import javax.swing.AbstractButton;
 
@@ -24,7 +27,10 @@ public class TransferManagementHelper {
 	}
 
 
-	public static class TransferRemover implements TransferAction {
+	/*
+	 * As a key listener, it reacts with the key 'suppr'
+	 */
+	public static class TransferRemover implements TransferAction, KeyListener {
 		private AbstractButton b;
 		private Vector targets;
 		private TransferTable tt;
@@ -43,11 +49,21 @@ public class TransferManagementHelper {
 			targets = transfers;
 		}
 
+		public void keyPressed(final KeyEvent e) { }
+
+		public void keyReleased(final KeyEvent e) {
+			if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+				actionPerformed(null);
+			}
+		}
+
+		public void keyTyped(final KeyEvent e) { }
+
 		public void actionPerformed(ActionEvent e) {
 			if (targets == null)
 				return;
 
-			if (b == null || e.getSource() == b) {
+			if (e == null || b == null || e.getSource() == b) {
 
 				for (Iterator it = targets.iterator();
 				     it.hasNext(); ) {

@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -353,6 +354,8 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.delete"));
 		action = new IndexManagementHelper.IndexDeleter(indexBrowser, button);
 		action.setTarget(getRoot());
+		if (!selectionOnly)
+			tree.addKeyListener((IndexManagementHelper.IndexDeleter)action);
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 

@@ -39,6 +39,9 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.JScrollPane;
 
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
 import java.text.DateFormat;
 
 import thaw.gui.IconBox;
@@ -79,7 +82,9 @@ public class IndexManagementHelper {
 	}
 
 
-	public static abstract class BasicIndexAction implements IndexAction, Runnable {
+	public static abstract class BasicIndexAction
+		implements IndexAction, Runnable {
+
 		private FCPQueueManager queueManager;
 		private AbstractButton actionSource;
 		private IndexTreeNode target;
@@ -94,9 +99,11 @@ public class IndexManagementHelper {
 			target = null;
 			this.queueManager = queueManager;
 
-			if (actionSource != null)
+			if (actionSource != null) {
 				actionSource.addActionListener(this);
+			}
 		}
+
 
 		public AbstractButton getActionSource() {
 			return actionSource;
@@ -122,10 +129,16 @@ public class IndexManagementHelper {
 
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == actionSource) {
-				Thread th = new Thread(this);
-				th.start();
+				startThread();
 			}
 		}
+
+
+		protected void startThread() {
+			Thread th = new Thread(this);
+			th.start();
+		}
+
 
 		public void run() {
 			apply();
@@ -1044,8 +1057,9 @@ public class IndexManagementHelper {
 
 	/**
 	 * Can be used on indexes or index categories.
+	 * Can be also used as a keylistener : will only react with the key 'delete'
 	 */
-	public static class IndexDeleter extends BasicIndexAction {
+	public static class IndexDeleter extends BasicIndexAction implements KeyListener {
 		public IndexDeleter(final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(null, indexBrowser, actionSource);
 		}
@@ -1056,6 +1070,20 @@ public class IndexManagementHelper {
 			if (getActionSource() != null)
 				getActionSource().setEnabled(node != null
 							     && (getIndexBrowserPanel().getIndexTree() != null));
+		}
+
+		public void  keyPressed(KeyEvent e) {
+
+		}
+
+		public void  keyReleased(KeyEvent e) {
+			if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+				startThread();
+			}
+		}
+
+		public void  keyTyped(KeyEvent e) {
+
 		}
 
 		public void apply() {
@@ -1076,6 +1104,8 @@ public class IndexManagementHelper {
 		} else {
 			indexBrowser.getIndexTree().refresh();
 		}
+
+		indexBrowser.getIndexTree().updateMenuState(null);
 	}
 
 

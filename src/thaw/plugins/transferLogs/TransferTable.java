@@ -59,7 +59,7 @@ import thaw.plugins.Hsqldb;
  * right click menu : copy key(s) to clipboard
  */
 public class TransferTable implements MouseListener {
-	public final static int NMB_ELEMENTS_PER_PAGE = 20;
+	public final static int NMB_ELEMENTS_PER_PAGE = 30;
 	public final static int DEFAULT_LINE_HEIGHT = 18;
 
 	public final static String[] COLUMN_NAMES = {
@@ -78,6 +78,8 @@ public class TransferTable implements MouseListener {
 
 	private JPopupMenu rightClickMenu;
 	private Vector rightClickActions;
+
+	private TransferManagementHelper.TransferRemover remover;
 
 	private DateFormat dateFormat;
 
@@ -113,6 +115,9 @@ public class TransferTable implements MouseListener {
 
 		panel.add(new JScrollPane(table), BorderLayout.CENTER);
 		panel.add(pageSelecter.getPanel(), BorderLayout.SOUTH);
+
+		remover = new TransferManagementHelper.TransferRemover(null, this);
+		table.addKeyListener(remover);
 
 		refresh();
 	}
@@ -512,6 +517,7 @@ public class TransferTable implements MouseListener {
 
 		if (e.getButton() == MouseEvent.BUTTON1) {
 			updateToolbar(selection);
+			remover.setTarget(selection);
 		}
 
 		if (e.getButton() == MouseEvent.BUTTON3) {

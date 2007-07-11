@@ -515,7 +515,12 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 	public void keyPressed(final KeyEvent e) { }
 
-	public void keyReleased(final KeyEvent e) { refreshDetailPanel(); }
+	public void keyReleased(final KeyEvent e) {
+		if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+			removeSelectedTransfers();
+		}
+		refreshDetailPanel();
+	}
 
 	public void keyTyped(final KeyEvent e) { }
 }
