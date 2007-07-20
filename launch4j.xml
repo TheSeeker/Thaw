@@ -1,0 +1,28 @@
+<launch4jConfig>
+  <headerType>0</headerType>
+  <outfile>lib/Thaw.exe</outfile>
+  <jar>lib/Thaw.jar</jar>
+  <dontWrapJar>false</dontWrapJar>
+
+  <errTitle>Thaw</errTitle>
+
+  <stayAlive>true</stayAlive>
+
+  <icon>images/blueBunny.ico</icon>
+
+  <jre>
+    <!-- Specify one of the following or both -->
+    <path />
+    <minVersion>1.4.2</minVersion>
+  </jre>
+
+  <!--
+  <splash>
+    <file>images/splash.bmp</file>
+    <waitForWindow>true</waitForWindow>
+    <timeout>60</timeout>
+    <timeoutErr>true</timeoutErr>
+  </splash>
+  -->
+
+</launch4jConfig>
