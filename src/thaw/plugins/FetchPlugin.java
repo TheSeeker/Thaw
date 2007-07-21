@@ -103,7 +103,7 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 
 
 		for(int i = 0 ; i < keys.length ; i++) {
-			if(keys[i].length() < 10)
+			if(keys[i].length() < 10 && !keys[i].startsWith("KSK@"))
 				continue;
 
 			final String[] subKey = keys[i].split("\\?"); /* Because of VolodyA :p */
@@ -113,16 +113,18 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 			if (key == null || !FreenetURIHelper.isAKey(key))
 				continue;
 
-			int slash_pos = key.indexOf("/");
+			if (!key.startsWith("KSK@")) {
+				int slash_pos = key.indexOf("/");
 
-			if (slash_pos < 0)
-				continue;
+				if (slash_pos < 0)
+					continue;
 
-			if (slash_pos < MIN_SLASH_POSITION) {
-				trollDetected = true;
-				/* We'll let Thaw continue to show how
-				 * useful these keys are
-				 */
+				if (slash_pos < MIN_SLASH_POSITION) {
+					trollDetected = true;
+					/* We'll let Thaw continue to show how
+					 * useful these keys are
+					 */
+				}
 			}
 
 			core.getQueueManager().addQueryToThePendingQueue(new FCPClientGet(key,
@@ -135,6 +137,7 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 
 		fetchFrame.setVisible(false);
 
+		/*
 		if (trollDetected) {
 			new thaw.gui.WarningWindow(core,
 						   I18n.getMessage("thaw.plugin.fetch.freenet0.5.l1")+"\n"
@@ -145,6 +148,7 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 						   + I18n.getMessage("thaw.plugin.fetch.freenet0.5.l6"));
 			return;
 		}
+		*/
 
 		if (!somethingStarted) {
 			new thaw.gui.WarningWindow(core,
