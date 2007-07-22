@@ -82,8 +82,8 @@ public class FileAccess {
     /**
      * Returns all files starting from given directory/file that have a given extension.
      */
-    public static ArrayList<File> getAllEntries(File file, final String extension) {
-        ArrayList<File> files = new ArrayList<File>();
+    public static ArrayList getAllEntries(File file, final String extension) {
+        ArrayList files = new ArrayList();
         getAllFiles(file, extension, files);
         return files;
     }
@@ -91,7 +91,7 @@ public class FileAccess {
     /**
      * Returns all files starting from given directory/file that have a given extension.
      */
-    private static void getAllFiles(File file, String extension, ArrayList<File> filesLst) {
+    private static void getAllFiles(File file, String extension, ArrayList filesLst) {
         if( file != null ) {
             if( file.isDirectory() ) {
                 File[] dirfiles = file.listFiles();
@@ -267,9 +267,9 @@ public class FileAccess {
     /**
      * Reads an InputStream and returns a List of lines.
      */
-    public static ArrayList<String> readLines(InputStream is, String encoding) {
+    public static ArrayList readLines(InputStream is, String encoding) {
         String line;
-        ArrayList<String> data = new ArrayList<String>();
+        ArrayList data = new ArrayList();
         try {
             InputStreamReader iSReader = new InputStreamReader(is, encoding);
             BufferedReader reader = new BufferedReader(iSReader);
@@ -288,18 +288,25 @@ public class FileAccess {
      * Reads a file and returns its contents in a String
      */
     public static String readFile(File file) {
-        String line;
-        StringBuilder sb = new StringBuilder();
-        try {
-            BufferedReader f = new BufferedReader(new FileReader(file));
-            while( (line = f.readLine()) != null ) {
-                sb.append(line).append("\n");
-            }
-            f.close();
-        } catch (IOException e) {
-            Logger.error(e, "Exception thrown in readFile(String path): "+e.toString());
-        }
-        return sb.toString();
+	    String data = null;
+	    try {
+		    FileInputStream stream = new FileInputStream(file);
+		    DataInputStream dis = new DataInputStream(stream);
+
+		    data = dis.readUTF();
+
+		    dis.close();
+		    stream.close();
+
+	    } catch(java.io.FileNotFoundException e) {
+		    Logger.warning(e, "frost.util.FileAcces: Unable to read file : "+e.toString());
+		    return null;
+	    } catch(java.io.IOException e) {
+		    Logger.warning(e, "frost.util.FileAcces: Unable to read file : "+e.toString());
+		    return null;
+	    }
+
+	    return data;
     }
 
     /**
@@ -310,19 +317,8 @@ public class FileAccess {
      * @return the contents of the file
      */
     public static String readFile(File file, String encoding) {
-        String line;
-        StringBuilder sb = new StringBuilder();
-        try {
-            InputStreamReader iSReader = new InputStreamReader(new FileInputStream(file), encoding);
-            BufferedReader reader = new BufferedReader(iSReader);
-            while ((line = reader.readLine()) != null) {
-                sb.append(line).append("\n");
-            }
-            reader.close();
-        } catch (IOException e) {
-            Logger.error(e, "Exception thrown in readFile(String path, String encoding): "+ e.toString());
-        }
-        return sb.toString();
+	    /* Jflesch> No really, I don't care of the encoding. */
+	    return readFile(file);
     }
 
     /**

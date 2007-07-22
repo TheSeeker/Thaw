@@ -186,7 +186,7 @@ public class KSKMessage
 		return subject;
 	}
 
-	public KSKAuthor getSender() {
+	public thaw.plugins.miniFrost.interfaces.Author getSender() {
 		return author;
 	}
 
@@ -371,8 +371,9 @@ public class KSKMessage
 			if (v == null || (size = v.size()) <= 0) {
 				parsed = false;
 			} else {
-				((KSKSubMessage)v.get(size-1)).setAuthor(getSender());
-				((KSKSubMessage)v.get(size-1)).setDate(getDate());
+				KSKSubMessage lastMsg = (KSKSubMessage)v.get(size-1);
+				lastMsg.setAuthor((KSKAuthor)getSender());
+				lastMsg.setDate(getDate());
 			}
 
 		} catch(Exception e) { /* dirty, but should work */

@@ -221,9 +221,9 @@ public class XMLTools {
     /**
      * Returns a list containing all Elements of this parent with given tag name.
      */
-    public static List<Element> getChildElementsByTagName(Element parent, String name) {
+    public static List getChildElementsByTagName(Element parent, String name) {
 
-        LinkedList<Element> newList = new LinkedList<Element>();
+        LinkedList newList = new LinkedList();
 
         NodeList childs = parent.getChildNodes();
         for( int x=0; x<childs.getLength(); x++ ) {
@@ -276,7 +276,7 @@ public class XMLTools {
             return txtname.getData();
         }
         
-        StringBuilder sb = new StringBuilder(txtname.getData());
+        StringBuffer sb = new StringBuffer(txtname.getData());
         while( txtname.getNextSibling() != null ) {
             txtname = (CDATASection)txtname.getNextSibling();
             sb.append(txtname.getData());
