@@ -58,8 +58,8 @@ public class BoardManagementHelper {
 
 		public BoardTypeAsker(MiniFrostPanel mainPanel) {
 			selection = (BoardFactory)JOptionPane.showInputDialog(mainPanel.getPluginCore().getCore().getMainWindow().getMainFrame(),
-									      I18n.getMessage("thaw.plugin.miniFrost.boardName"),
-									      I18n.getMessage("thaw.plugin.miniFrost.boardName"),
+									      I18n.getMessage("thaw.plugin.miniFrost.selectType"),
+									      I18n.getMessage("thaw.plugin.miniFrost.selectType"),
 									      JOptionPane.QUESTION_MESSAGE,
 									      null, /* icon */
 									      mainPanel.getPluginCore().getFactories(),
