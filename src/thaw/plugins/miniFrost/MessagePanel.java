@@ -187,7 +187,9 @@ public class MessagePanel
 
 				retracted = !retracted;
 
-				panel.validate();
+				this.revalidate();
+				panel.revalidate();
+				msgsPanel.revalidate();
 			}
 		}
 
@@ -223,18 +225,21 @@ public class MessagePanel
 			i++;
 		}
 
-		if (insidePanel != null)
+		if (insidePanel != null) {
 			msgsPanel.remove(insidePanel);
+			msgsPanel.revalidate();
+			panel.revalidate();
+		}
 
 		if (iPanel != null) {
 			msgsPanel.add(iPanel, BorderLayout.NORTH);
 			msgsPanel.add(new JLabel(""), BorderLayout.CENTER);
 		}
 
-		insidePanel = msgsPanel;
+		insidePanel = iPanel;
 
-		msgsPanel.validate();
-		panel.validate();
+		msgsPanel.revalidate();
+		panel.revalidate();
 
 		putScrollBarAtBottom();
 	}
