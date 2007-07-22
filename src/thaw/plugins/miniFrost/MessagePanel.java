@@ -166,6 +166,7 @@ public class MessagePanel
 
 			a.setLineWrap(true);
 			a.setFont(a.getFont().deriveFont((float)13.5));
+			a.setEditable(false);
 
 			return a;
 		}
