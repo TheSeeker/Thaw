@@ -112,13 +112,6 @@ public class KSKBoard
 	protected int getNextNonDownloadedRev(Date daDate, int rev) {
 		java.sql.Date date = new java.sql.Date(daDate.getTime());
 
-		/* just a check */
-		for (int i = 0 ; i < runningDownloads.length ; i++) {
-			if (runningDownloads[i] != null
-			    && runningDownloads[i].getRev() > rev)
-				rev = runningDownloads[i].getRev();
-		}
-
 		try {
 			Hsqldb db = factory.getDb();
 
@@ -126,7 +119,7 @@ public class KSKBoard
 				PreparedStatement st;
 
 				st = db.getConnection().prepareStatement("SELECT rev FROM frostKSKMessages "+
-									 "WHERE date >= ? AND date <= ? "+
+									 "WHERE date >= ? AND date < ? "+
 									 "AND rev > ? ORDER by rev");
 				st.setDate(1, date);
 				st.setDate(2, new java.sql.Date(date.getTime() + 24*60*60*1000));
@@ -178,12 +171,15 @@ public class KSKBoard
 
 		int rev = getNextNonDownloadedRev(lastDate, lastRev);
 
+		Logger.debug(this, "Rev : "+Integer.toString(lastRev)+
+			     " ; "+Integer.toString(rev));
+
 		runningDownloads[slot] = new KSKMessage(this, lastDate, rev);
 		runningDownloads[slot].addObserver(this);
 		runningDownloads[slot].download(factory.getCore().getQueueManager(),
 						factory.getDb());
-
-		lastRev = rev;
+		if (lastRev < rev)
+			lastRev = rev;
 
 	}
 
