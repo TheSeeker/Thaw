@@ -14,6 +14,8 @@ public interface Message /* extends TreeNode */ {
 	public Author getSender();
 	public java.util.Date getDate();
 
+	public int getRev();
+
 	public boolean isArchived();
 	public boolean isRead();
 

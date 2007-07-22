@@ -232,7 +232,9 @@ public class MessageTreeTable implements Observer,
 			}
 
 			if (column == 1) {
-				return ((Message)msgs.get(row)).getSubject();
+				Message msg = (Message)msgs.get(row);
+				return "("+Integer.toString(msg.getRev()) + ") "+
+					msg.getSubject();
 			}
 
 			if (column == 2) {

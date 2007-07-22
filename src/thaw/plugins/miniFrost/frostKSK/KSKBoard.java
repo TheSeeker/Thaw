@@ -126,9 +126,11 @@ public class KSKBoard
 				PreparedStatement st;
 
 				st = db.getConnection().prepareStatement("SELECT rev FROM frostKSKMessages "+
-									 "WHERE date = ? AND rev > ? ORDER by rev");
+									 "WHERE date >= ? AND date <= ? "+
+									 "AND rev > ? ORDER by rev");
 				st.setDate(1, date);
-				st.setInt( 2, rev);
+				st.setDate(2, new java.sql.Date(date.getTime() + 24*60*60*1000));
+				st.setInt( 3, rev);
 
 				ResultSet set = st.executeQuery();
 
