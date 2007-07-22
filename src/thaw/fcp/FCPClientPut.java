@@ -71,7 +71,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	/**
 	 * To start a new insertion.
 	 * @param keyType : KEY_TYPE_CHK ; KEY_TYPE_KSK ; KEY_TYPE_SSK
-	 * @param rev  : ignored if key == CHK
+	 * @param rev  : ignored if key == CHK || rev == -1
 	 * @param name : ignored if key == CHK
 	 * @param privateKey : ignored if key == CHK/KSK ; can be null if it has to be generated ; USK@[...]/
 	 * @param persistence PERSISTENCE_FOREVER ; PERSISTENCE_UNTIL_NODE_REBOOT ; PERSISTENCE_UNTIL_DISCONNEC
@@ -598,8 +598,12 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 				publicKey = publicKey.replaceAll("freenet:", "");
 
-				if(keyType == KEY_TYPE_KSK)
-					publicKey = "KSK@"+name+"-" + Integer.toString(rev);
+				if(keyType == KEY_TYPE_KSK) {
+					if (rev >= 0)
+						publicKey = "KSK@"+name+"-" + Integer.toString(rev);
+					else
+						publicKey = "KSK@"+name;
+				}
 				//if(keyType == KEY_TYPE_SSK)
 				//	publicKey = publicKey + "/" + name + "-" + Integer.toString(rev);
 
@@ -892,8 +896,12 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		else if ((keyType == KEY_TYPE_CHK) && (publicKey == null))
 			key = "CHK@";
 
-		else if (keyType == KEY_TYPE_KSK)
-			key = "KSK@" + name + "-"+ Integer.toString(rev);
+		else if (keyType == KEY_TYPE_KSK) {
+			if (rev >= 0)
+				key = "KSK@" + name + "-"+ Integer.toString(rev);
+			else
+				key = "KSK@" + name;
+		}
 
 		else if (keyType == KEY_TYPE_SSK && privateKey.startsWith("SSK"))
 			key = privateKey + name+"-"+rev;

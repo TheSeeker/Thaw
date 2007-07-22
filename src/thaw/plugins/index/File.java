@@ -12,6 +12,8 @@ import org.w3c.dom.Element;
 import java.util.Vector;
 import java.util.Iterator;
 
+import thaw.plugins.insertPlugin.DefaultMIMETypes;
+
 import thaw.fcp.FreenetURIHelper;
 import thaw.core.Logger;
 
@@ -257,6 +259,7 @@ public class File implements Observer {
 		final FCPClientPut insertion = new FCPClientPut(localPath, 0, 0, null,
 								null, 4,
 								true, 2, true); /* getCHKOnly */
+
 
 		this.queueManager = queueManager; /* so the transfer will be removed when finished */
 		queueManager.addQueryToTheRunningQueue(insertion);

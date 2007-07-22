@@ -207,18 +207,22 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 	}
 
 
+	protected boolean sendQuery(String query) {
+		return sendQuery(db, query);
+	}
+
 	/**
 	 * Returns no error / Throws no exception.
 	 * @return false if an exception happened
 	 */
-	protected boolean sendQuery(final String query) {
+	protected static boolean sendQuery(Hsqldb db, final String query) {
 		try {
 			synchronized(db.dbLock) {
 				db.executeQuery(query);
 			}
 			return true;
 		} catch(final SQLException e) {
-			Logger.notice(this, "While (re)creating sql tables: "+e.toString());
+			Logger.notice(e, "While (re)creating sql tables: "+e.toString());
 			return false;
 		}
 	}
@@ -395,12 +399,15 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 	}
 
 
+	public static void dropTables(Hsqldb db) {
+		sendQuery(db, "DROP TABLE transferEvents");
+		sendQuery(db, "DROP TABLE transferLogs");
+	}
+
 
 	public void actionPerformed(ActionEvent e) {
 
 		if (e.getSource() == purgeLogs) {
-			sendQuery("DROP TABLE transferEvents");
-			sendQuery("DROP TABLE transferLogs");
 			createTables();
 
 			table.refresh();

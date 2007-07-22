@@ -141,7 +141,9 @@ public class BlackList implements ActionListener {
 			synchronized(db.dbLock) {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT id, name, publicKey FROM indexBlackList ORDER BY name");
+				st = db.getConnection().prepareStatement("SELECT id, name, publicKey "+
+									 "FROM indexBlackList "+
+									 "ORDER BY LOWER(name)");
 
 				ResultSet res = st.executeQuery();
 

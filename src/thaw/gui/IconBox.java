@@ -137,6 +137,29 @@ public class IconBox {
 	public static ImageIcon mDns;
 	public static ImageIcon minMDns;
 
+	public static ImageIcon msgReply;
+	public static ImageIcon msgNew;
+
+	public static ImageIcon minMsgReply;
+	public static ImageIcon minMsgNew;
+
+	public static ImageIcon search;
+	public static ImageIcon minSearch;
+
+	public static ImageIcon nextUnread;
+	public static ImageIcon minNextUnread;
+
+	public static ImageIcon up;
+	public static ImageIcon down;
+	public static ImageIcon left;
+	public static ImageIcon right;
+
+	public static ImageIcon minUp;
+	public static ImageIcon minDown;
+	public static ImageIcon minLeft;
+	public static ImageIcon minRight;
+
+
 	/**
 	 * Not really used
 	 */
@@ -244,8 +267,8 @@ public class IconBox {
 		IconBox.minLink             = IconBox.loadIcon("min-indexBrowser.png");
 		IconBox.minIndexSettings    = IconBox.loadIcon("min-indexSettings.png");
 		IconBox.indexSettings       = IconBox.loadIcon("indexSettings.png");
-		IconBox.addComment          = IconBox.loadIcon("newComment.png");
-		IconBox.minAddComment       = IconBox.loadIcon("min-newComment.png");
+		IconBox.addComment          = IconBox.loadIcon("mail-message-new.png");
+		IconBox.minAddComment       = IconBox.loadIcon("min-mail-message-new.png");
 		IconBox.readComments        = IconBox.loadIcon("readComments.png");
 		IconBox.minReadComments     = IconBox.loadIcon("min-readComments.png");
 		IconBox.minRed              = IconBox.loadIcon("min-red.png");
@@ -254,6 +277,22 @@ public class IconBox {
 		IconBox.minDetails          = IconBox.loadIcon("min-details.png");
 		IconBox.mDns                = IconBox.loadIcon("mDns.png");
 		IconBox.minMDns             = IconBox.loadIcon("min-mDns.png");
+		IconBox.msgReply            = IconBox.loadIcon("mail-reply-sender.png");
+		IconBox.msgNew              = IconBox.loadIcon("mail-message-new.png");
+		IconBox.minMsgReply         = IconBox.loadIcon("min-mail-reply-sender.png");
+		IconBox.minMsgNew           = IconBox.loadIcon("min-mail-message-new.png");
+		IconBox.search              = IconBox.loadIcon("mDns.png");
+		IconBox.minSearch           = IconBox.loadIcon("min-mDns.png");
+		IconBox.nextUnread          = IconBox.loadIcon("mail-forward.png");
+		IconBox.minNextUnread       = IconBox.loadIcon("min-mail-forward.png");
+		IconBox.up                  = IconBox.loadIcon("go-up.png");
+		IconBox.down                = IconBox.loadIcon("go-down.png");
+		IconBox.left                = IconBox.loadIcon("go-previous.png");
+		IconBox.right               = IconBox.loadIcon("go-next.png");
+		IconBox.minUp               = IconBox.loadIcon("min-go-up.png");
+		IconBox.minDown             = IconBox.loadIcon("min-go-down.png");
+		IconBox.minLeft             = IconBox.loadIcon("min-go-previous.png");
+		IconBox.minRight            = IconBox.loadIcon("min-go-next.png");
 	}
 
 }

@@ -302,15 +302,16 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 			if((keyType == FCPClientPut.KEY_TYPE_KSK) || (keyType == FCPClientPut.KEY_TYPE_SSK)) {
 				if((nameField.getText() == null)
-				   || "".equals( nameField.getText() )
-				   || (revField.getText() == null)
-				   || revField.getText().equals("")) {
+				   || "".equals( nameField.getText() )) {
 					new WarningWindow(mainWindow,
 							  I18n.getMessage("thaw.plugin.insert.specifyNameAndRev"));
 					return;
 				}
 
-				rev = Integer.parseInt(revField.getText());
+				if (revField.getText() != null && !revField.getText().equals(""))
+					rev = Integer.parseInt(revField.getText());
+				else
+					rev = -1;
 				name = nameField.getText();
 			}
 

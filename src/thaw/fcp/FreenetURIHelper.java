@@ -58,6 +58,10 @@ public class FreenetURIHelper {
 		if (key == null)
 			return null;
 
+		if (key.startsWith("KSK@")) {
+			return key.substring(4);
+		}
+
 		cutcut = key.split("/");
 
 		if ( (!key.startsWith("USK@")) || cutcut.length >= 4) {

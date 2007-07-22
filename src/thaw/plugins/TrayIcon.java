@@ -35,7 +35,11 @@ import thaw.gui.TransferProgressBar;
 import thaw.gui.IconBox;
 import thaw.gui.WarningWindow;
 
-public class TrayIcon implements thaw.core.Plugin, MouseListener, WindowListener, ActionListener {
+public class TrayIcon implements thaw.core.Plugin,
+				 MouseListener,
+				 WindowListener,
+				 ActionListener {
+
 	private Core core;
 	private SysTrayIcon icon;
 

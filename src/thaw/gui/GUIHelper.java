@@ -104,16 +104,16 @@ public class GUIHelper {
 
 		if(size < 1048576) { /* < 1MB */
 			final long kb = size / 1024;
-			return ((new Long(kb)).toString() + " KiB");
+			return ((new Long(kb)).toString() + " KB");
 		}
 
 		if(size < 1073741824) { /* < 1GB */
 			final long mb = size / 1048576;
-			return ((new Long(mb)).toString() + " MiB");
+			return ((new Long(mb)).toString() + " MB");
 		}
 
 		final long gb = size / 1073741824;
 
-		return ((new Long(gb)).toString() +" GiB");
+		return ((new Long(gb)).toString() +" GB");
 	}
 }

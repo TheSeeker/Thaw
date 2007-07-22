@@ -201,7 +201,8 @@ public class TransferTable implements MouseListener {
 
 
 
-	protected class TransferTableModel extends javax.swing.table.AbstractTableModel {
+	protected class TransferTableModel
+		extends javax.swing.table.AbstractTableModel {
 
 		private int page;
 

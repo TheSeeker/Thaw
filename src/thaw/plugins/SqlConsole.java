@@ -15,7 +15,7 @@ import thaw.core.Core;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.Plugin;
-import thaw.plugins.index.DatabaseManager;
+
 
 public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 	public final static int MAX_LINE = 512;
@@ -195,6 +195,14 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 		addToConsole(fTxt);
 	}
 
+
+	protected void printHelp() {
+		addToConsole("Non-SQL commands:\n");
+		addToConsole(" - list_tables : List all the tables\n");
+		addToConsole(" - drop_tables : Drop all the known tables\n");
+	}
+
+
 	public synchronized void sendCommand(String cmd) {
 
 		if ("clear".equals(cmd.toLowerCase())) {
@@ -215,6 +223,11 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 		addToConsole("\n");
 
 		try {
+			if ("help".equals(cmd.toLowerCase())) {
+				printHelp();
+				return;
+			}
+
 
 			if("reconnect".equals( cmd.toLowerCase() )) {
 				hsqldb.connect();
@@ -234,7 +247,8 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 					return;
 				}
 			} else {
-				DatabaseManager.dropTables(hsqldb);
+				thaw.plugins.index.DatabaseManager.dropTables(hsqldb);
+				thaw.plugins.TransferLogs.dropTables(hsqldb);
 				addToConsole("Ok\n");
 				return;
 			}

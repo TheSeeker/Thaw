@@ -9,7 +9,9 @@ import java.util.Observer;
 
 import thaw.core.Logger;
 
-public class FCPClientGet extends Observable implements Observer, FCPTransferQuery {
+public class FCPClientGet extends Observable
+	implements Observer, FCPTransferQuery {
+
 	public final static int DEFAULT_PRIORITY = 4;
 
 	public final static int PERSISTENCE_FOREVER           = 0;
@@ -57,6 +59,9 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 	/* used when redirected */
 	private boolean restartIfFailed = false;
+
+
+	private int getFailedCode = 0;
 
 
 	/**
@@ -469,6 +474,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			Logger.warning(this, "==== GET FAILED ===\n"+message.toString());
 
+
 			if(!isRunning()) { /* Must be a "GetFailed: cancelled by caller", so we simply ignore */
 				Logger.info(this, "Cancellation confirmed.");
 				return;
@@ -476,7 +482,7 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 
 			//removeRequest();
 
-			final int code = Integer.parseInt(message.getValue("Code"));
+			getFailedCode = Integer.parseInt(message.getValue("Code"));
 
 			status = "Failed ("+message.getValue("CodeDescription")+")";
 			progress = 100;
@@ -1101,9 +1107,12 @@ public class FCPClientGet extends Observable implements Observer, FCPTransferQue
 		return fromTheNodeProgress;
 	}
 
-
 	public void notifyChange() {
 		setChanged();
 		notifyObservers();
+	}
+
+	public int getGetFailedCode() {
+		return getFailedCode;
 	}
 }

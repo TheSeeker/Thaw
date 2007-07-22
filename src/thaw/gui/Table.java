@@ -20,6 +20,7 @@ import java.awt.Component;
 import javax.swing.ImageIcon;
 import java.util.Vector;
 
+import javax.swing.DefaultCellEditor;
 
 import thaw.core.Logger;
 import thaw.core.Config;
@@ -148,7 +149,6 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 	protected void setAsListener() {
 		super.getColumnModel().addColumnModelListener(this);
 	}
-
 
 
 	public static class DefaultRenderer extends DefaultTableCellRenderer {

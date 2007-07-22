@@ -23,7 +23,7 @@ import org.w3c.dom.NodeList;
 
 
 /**
- * This class the thaw config.
+ * This class manages the thaw config.
  *
  * @author <a href="mailto:jflesch@gmail.com">Jerome Flesch</a>
  */
@@ -43,8 +43,6 @@ public class Config {
 	}
 
 	/**
-	 * Returns the corresponding value
-	 * 
 	 * @return null if the value doesn't exit in the config.
 	 */
 	public String getValue(final String key) {
