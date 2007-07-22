@@ -54,6 +54,7 @@ public class FCPClientGet extends Observable
 	private boolean alreadySaved = false;
 
 	private boolean noDDA = false;
+	private boolean noRedir = false;
 
 	private FCPTestDDA testDDA = null;
 
@@ -219,6 +220,13 @@ public class FCPClientGet extends Observable
 		this(key, priority, persistence, globalQueue, maxRetries,
 		     destinationDir);
 		this.maxSize = maxSize;
+	}
+
+	/**
+	 * won't follow the redirections
+	 */
+	public void setNoRedirectionFlag(boolean noRedir) {
+		this.noRedir = noRedir;
 	}
 
 
@@ -454,7 +462,7 @@ public class FCPClientGet extends Observable
 		if ("GetFailed".equals(message.getMessageName())) {
 			Logger.debug(this, "GetFailed !");
 
-			if (message.getValue("RedirectURI") != null) {
+			if (message.getValue("RedirectURI") != null && !noRedir) {
 				Logger.debug(this, "Redirected !");
 				key = message.getValue("RedirectURI");
 				status = "Redirected ...";

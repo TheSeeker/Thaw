@@ -88,6 +88,7 @@ public class KSKMessage
 						    System.getProperty("java.io.tmpdir"),
 						    FCP_MAX_SIZE,
 						    true /* noDDA */);
+		get.setNoRedirectionFlag(true);
 		get.addObserver(this);
 
 		/* we override the queueManager */
