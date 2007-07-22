@@ -37,7 +37,7 @@ public class MessagePanel
 		I18n.getMessage("thaw.plugin.miniFrost.unfoldAll")
 	};
 
-	//public final static int DEFAULT_UNFOLDED = 2;
+	public final static int DEFAULT_UNFOLDED = 2;
 
 	private MiniFrostPanel mainPanel;
 
@@ -211,7 +211,7 @@ public class MessagePanel
 		     it.hasNext();) {
 			SubMessage subMsg = (SubMessage)it.next();
 			SubMessagePanel panel = new SubMessagePanel(subMsg,
-								    false);
+								    (i + DEFAULT_UNFOLDED) < subMsgs.size());
 
 			if (iPanel == null) {
 				iPanel = panel;
