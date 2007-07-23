@@ -8,6 +8,7 @@ import java.util.Observable;
 import java.sql.*;
 
 import java.util.Date;
+import java.util.Calendar;
 
 import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
@@ -21,7 +22,7 @@ public class KSKBoard
 
 	public final static int DAYS_BEFORE_THE_LAST_REFRESH   = 1;
 	public final static int MIN_DAYS_IN_THE_PAST           = 3;
-	public final static int MAX_DAYS_IN_THE_PAST           = 7;
+	public final static int MAX_DAYS_IN_THE_PAST           = 5;
 
 	public final static int MIN_DAYS_IN_THE_FUTURE         = 1;
 	public final static int MAX_DAYS_IN_THE_FUTURE         = 1; /* not really used */
@@ -109,8 +110,22 @@ public class KSKBoard
 	private KSKMessage runningDownloads[] = new KSKMessage[MAX_DOWNLOADS_AT_THE_SAME_TIME];
 
 
+	protected Date getMidnight(Date date) {
+		Calendar cal = new java.util.GregorianCalendar();
+		cal.setTime(date);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		return cal.getTime();
+	}
+
+
 	protected int getNextNonDownloadedRev(Date daDate, int rev) {
-		java.sql.Date date = new java.sql.Date(daDate.getTime());
+		daDate = getMidnight(daDate);
+
+		java.sql.Timestamp date = new java.sql.Timestamp(daDate.getTime());
+
 
 		try {
 			Hsqldb db = factory.getDb();
@@ -121,8 +136,8 @@ public class KSKBoard
 				st = db.getConnection().prepareStatement("SELECT rev FROM frostKSKMessages "+
 									 "WHERE date >= ? AND date < ? "+
 									 "AND rev > ? ORDER by rev");
-				st.setDate(1, date);
-				st.setDate(2, new java.sql.Date(date.getTime() + 24*60*60*1000));
+				st.setTimestamp(1, date);
+				st.setTimestamp(2, new java.sql.Timestamp(date.getTime() + 24*60*60*1000));
 				st.setInt( 3, rev);
 
 				ResultSet set = st.executeQuery();
@@ -172,7 +187,7 @@ public class KSKBoard
 		int rev = getNextNonDownloadedRev(lastDate, lastRev);
 
 		Logger.debug(this, "Rev : "+Integer.toString(lastRev)+
-			     " ; "+Integer.toString(rev));
+			     " ; "+Integer.toString(rev)+" ; Date : "+lastDate.toString());
 
 		runningDownloads[slot] = new KSKMessage(this, lastDate, rev);
 		runningDownloads[slot].addObserver(this);
