@@ -35,6 +35,13 @@ public interface Board {
 	 */
 	public Vector getMessages();
 
+
+	/**
+	 * @return null if none
+	 */
+	public Message getNextUnreadMessage();
+
+
 	/**
 	 * must refresh() the board list each time a new message is found
 	 * and when the refresh is finished.

@@ -259,6 +259,8 @@ public class MessagePanel
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == back) {
 			mainPanel.displayMessageTable();
+		} else if (e.getSource() == nextUnread) {
+			
 		}
 	}
 }

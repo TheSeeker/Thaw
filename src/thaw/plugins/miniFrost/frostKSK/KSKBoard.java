@@ -21,7 +21,7 @@ public class KSKBoard
 	public final static int MAX_FAILURES_IN_A_ROW          = 5;
 
 	public final static int DAYS_BEFORE_THE_LAST_REFRESH   = 1;
-	public final static int MIN_DAYS_IN_THE_PAST           = 3;
+	public final static int MIN_DAYS_IN_THE_PAST           = 5;
 	public final static int MAX_DAYS_IN_THE_PAST           = 5;
 
 	public final static int MIN_DAYS_IN_THE_FUTURE         = 1;
@@ -99,6 +99,44 @@ public class KSKBoard
 	}
 
 
+	public thaw.plugins.miniFrost.interfaces.Message getNextUnreadMessage() {
+		try {
+			Hsqldb db = factory.getDb();
+
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT id, subject, nick, "+
+									 "       sigId, date, rev "+
+									 "FROM frostKSKMessages "+
+									 "WHERE boardId = ? AND "+
+									 "archived = FALSE AND read = FALSE "+
+									 "ORDER BY date DESC LIMIT 1");
+				st.setInt(1, id);
+
+				ResultSet set = st.executeQuery();
+
+				if (set.next()) {
+					return new KSKMessage(set.getInt("id"),
+							      set.getString("subject"),
+							      set.getString("nick"),
+							      set.getInt("sigId"),
+							      set.getTimestamp("date"),
+							      set.getInt("rev"),
+							      false, false,
+							      this);
+				}
+			}
+
+		} catch(SQLException e) {
+			Logger.error(this, "Can't get message list because : "+e.toString());
+		}
+
+		return null;
+	}
+
+
+
 	/* last started */
 	private int lastRev;
 	private Date lastDate;
@@ -135,10 +173,11 @@ public class KSKBoard
 
 				st = db.getConnection().prepareStatement("SELECT rev FROM frostKSKMessages "+
 									 "WHERE date >= ? AND date < ? "+
-									 "AND rev > ? ORDER by rev");
+									 "AND rev > ? AND boardId = ? ORDER by rev");
 				st.setTimestamp(1, date);
 				st.setTimestamp(2, new java.sql.Timestamp(date.getTime() + 24*60*60*1000));
 				st.setInt( 3, rev);
+				st.setInt(4, id);
 
 				ResultSet set = st.executeQuery();
 
