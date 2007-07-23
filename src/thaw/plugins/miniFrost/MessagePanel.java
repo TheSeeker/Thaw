@@ -258,9 +258,21 @@ public class MessagePanel
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == back) {
+
 			mainPanel.displayMessageTable();
+
 		} else if (e.getSource() == nextUnread) {
-			
+			if (msg == null) {
+				Logger.warning(this, "No message selected atm ; can't get the next unread message");
+				return;
+			}
+			Message newMsg = msg.getBoard().getNextUnreadMessage();
+			if (newMsg != null) {
+				setMessage(newMsg);
+				newMsg.setRead(true);
+				mainPanel.getMessageTreeTable().refresh();
+				mainPanel.getBoardTree().refresh(newMsg.getBoard());
+			}
 		}
 	}
 }

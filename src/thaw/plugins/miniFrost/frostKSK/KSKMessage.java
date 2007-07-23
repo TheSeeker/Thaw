@@ -392,4 +392,15 @@ public class KSKMessage
 
 		return v;
 	}
+
+	protected int getId() {
+		return id;
+	}
+
+	public boolean equals(Object o) {
+		if (!(o instanceof KSKMessage))
+			return false;
+
+		return (((KSKMessage)o).getId() == id);
+	}
 }

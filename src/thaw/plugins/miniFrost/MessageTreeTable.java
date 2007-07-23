@@ -158,6 +158,16 @@ public class MessageTreeTable implements Observer,
 		mainPanel.getBoardTree().addObserver(this);
 	}
 
+	/**
+	 * due to a swing bug ?
+	 */
+	public void redisplayed() {
+		table.getColumnModel().getColumn(0).setPreferredWidth(FIRST_COLUMN_SIZE);
+		table.getColumnModel().getColumn(0).setResizable(false);
+		table.getColumnModel().getColumn(0).setPreferredWidth(FIRST_COLUMN_SIZE);
+		table.getColumnModel().getColumn(0).setMinWidth(FIRST_COLUMN_SIZE);
+		table.getColumnModel().getColumn(0).setMaxWidth(FIRST_COLUMN_SIZE);
+	}
 
 	public JPanel getPanel() {
 		return panel;
@@ -292,6 +302,11 @@ public class MessageTreeTable implements Observer,
 		}
 
 		public void refresh(int row) {
+			if (row == -1) {
+				Logger.error(this, "Message not found in the list ?!");
+				return;
+			}
+
 			fireTableChanged(new TableModelEvent(this, row));
 		}
 

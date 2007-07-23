@@ -28,4 +28,7 @@ public interface Message /* extends TreeNode */ {
 	 * SubMessage vector. (Don't store / cache !)
 	 */
 	public Vector getSubMessages();
+
+
+	public boolean equals(Object o);
 }

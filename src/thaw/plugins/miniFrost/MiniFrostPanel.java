@@ -53,6 +53,7 @@ public class MiniFrostPanel implements Observer {
 	public void displayMessageTable() {
 		saveState();
 		mainSplit.setRightComponent(messageTreeTable.getPanel());
+		messageTreeTable.redisplayed();
 		mainSplit.validate();
 		loadState();
 	}
