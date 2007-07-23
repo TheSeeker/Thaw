@@ -17,6 +17,13 @@ import java.util.Iterator;
 import javax.swing.AbstractListModel;
 import javax.swing.DefaultListCellRenderer;
 
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+
+
 import java.awt.Color;
 
 import java.awt.Font;
@@ -33,7 +40,8 @@ import thaw.plugins.miniFrost.interfaces.Board;
  * Notify each time the selection is changed (board is given in argument)
  */
 public class BoardTree extends Observable
-	implements javax.swing.event.ListSelectionListener {
+	implements javax.swing.event.ListSelectionListener,
+		   MouseListener {
 
 
 	private JPanel panel;
@@ -41,6 +49,7 @@ public class BoardTree extends Observable
 	private BoardListModel model;
 	private JList list;
 
+	private JPopupMenu rightClickMenu;
 	private Vector actions;
 
 	private MiniFrostPanel mainPanel;
@@ -48,7 +57,6 @@ public class BoardTree extends Observable
 	public final static Color SELECTION_COLOR         = new Color(190, 190, 190);
 	public final static Color LOADING_COLOR           = new Color(230, 230, 230);
 	public final static Color LOADING_SELECTION_COLOR = new Color(150, 150, 150);
-
 
 
 	public BoardTree(MiniFrostPanel mainPanel) {
@@ -72,9 +80,32 @@ public class BoardTree extends Observable
 		list.setCellRenderer(new BoardListRenderer());
 		list.addListSelectionListener(this);
 		list.setPreferredSize(new java.awt.Dimension(100, 100));
+		list.addMouseListener(this);
 
 		panel.add(new JScrollPane(list), BorderLayout.CENTER);
 
+		actions = new Vector();
+
+		/* right click menu */
+
+		JMenuItem item;
+
+		rightClickMenu = new JPopupMenu();
+
+		item = new JMenuItem(I18n.getMessage("thaw.common.add"),
+				     IconBox.minAdd);
+		rightClickMenu.add(item);
+		actions.add(new BoardManagementHelper.BoardAdder(mainPanel, item));
+
+		item = new JMenuItem(I18n.getMessage("thaw.common.remove"),
+				     IconBox.minDelete);
+		rightClickMenu.add(item);
+		actions.add(new BoardManagementHelper.BoardAdder(mainPanel, item));
+
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.miniFrost.loadNewMessages"),
+				     IconBox.minRefreshAction);
+		rightClickMenu.add(item);
+		actions.add(new BoardManagementHelper.BoardAdder(mainPanel, item));
 
 		/* buttons */
 
@@ -83,8 +114,6 @@ public class BoardTree extends Observable
 		JPanel buttonPanel = new JPanel(new GridLayout(1, 2));
 
 		JButton button;
-
-		actions = new Vector();
 
 		button = new JButton(IconBox.minAdd);
 		button.setToolTipText(I18n.getMessage("thaw.common.add"));
@@ -264,5 +293,27 @@ public class BoardTree extends Observable
 
 		setChanged();
 		notifyObservers(b);
+	}
+
+
+	public void mouseClicked(final MouseEvent e) {
+
+	}
+
+	public void mouseEntered(final MouseEvent e) { }
+	public void mouseExited(final MouseEvent e) { }
+
+	public void mousePressed(final MouseEvent e) {
+		showPopupMenu(e);
+	}
+
+	public void mouseReleased(final MouseEvent e) {
+		showPopupMenu(e);
+	}
+
+	protected void showPopupMenu(final MouseEvent e) {
+		if(e.isPopupTrigger()) {
+			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
+		}
 	}
 }
