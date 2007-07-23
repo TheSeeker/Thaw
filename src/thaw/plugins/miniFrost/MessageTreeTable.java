@@ -94,6 +94,7 @@ public class MessageTreeTable implements Observer,
 	private JTextField searchField;
 	private JCheckBox everywhereBox;
 	private JButton searchButton;
+	private JButton nextUnread;
 
 	private JComboBox actions;
 
@@ -113,11 +114,18 @@ public class MessageTreeTable implements Observer,
 		searchButton = new JButton(I18n.getMessage("thaw.common.search"),
 					   IconBox.minSearch);
 
+		nextUnread = new JButton("", IconBox.minNextUnread);
+		nextUnread.setToolTipText(I18n.getMessage("thaw.plugin.miniFrost.nextUnread"));
+		nextUnread.addActionListener(this);
+
 		JPanel searchPanel = new JPanel(new BorderLayout(5, 5));
 		searchPanel.add(searchField, BorderLayout.CENTER);
+
 		JPanel boxAndButtonPanel = new JPanel(new BorderLayout(5, 5));
 		boxAndButtonPanel.add(everywhereBox, BorderLayout.CENTER);
 		boxAndButtonPanel.add(searchButton, BorderLayout.EAST);
+
+		searchPanel.add(nextUnread, BorderLayout.WEST);
 		searchPanel.add(boxAndButtonPanel, BorderLayout.EAST);
 
 
@@ -348,7 +356,24 @@ public class MessageTreeTable implements Observer,
 
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == actions) {
+		if (e.getSource() == nextUnread) {
+
+			if (targetBoard == null) {
+				Logger.warning(this, "No message selected atm ; can't get the next unread message");
+				return;
+			}
+
+			Message newMsg = targetBoard.getNextUnreadMessage();
+
+			if (newMsg != null) {
+				mainPanel.getMessagePanel().setMessage(newMsg);
+				newMsg.setRead(true);
+				refresh();
+				mainPanel.getBoardTree().refresh(targetBoard);
+				mainPanel.displayMessage();
+			}
+
+		} else if (e.getSource() == actions) {
 			int sel = actions.getSelectedIndex();
 			boolean[] selected = model.getSelection();
 
