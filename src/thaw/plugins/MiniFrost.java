@@ -8,6 +8,7 @@ import thaw.plugins.miniFrost.MiniFrostPanel;
 import thaw.plugins.miniFrost.interfaces.BoardFactory;
 
 import thaw.plugins.miniFrost.AutoRefresh;
+import thaw.plugins.miniFrost.MiniFrostConfigTab;
 
 
 public class MiniFrost implements thaw.core.Plugin {
@@ -15,6 +16,7 @@ public class MiniFrost implements thaw.core.Plugin {
 	private Hsqldb hsqldb;
 
 	private MiniFrostPanel miniFrostPanel;
+	private MiniFrostConfigTab configTab;
 	private AutoRefresh autoRefresh;
 
 	private boolean firstStart;
@@ -34,6 +36,10 @@ public class MiniFrost implements thaw.core.Plugin {
 		    || !loadGUI()
 		    || !loadAutoRefresh())
 			return false;
+
+		configTab = new MiniFrostConfigTab(core.getConfig(),
+						   core.getConfigWindow());
+		configTab.display();
 
 		return true;
 	}
@@ -98,6 +104,7 @@ public class MiniFrost implements thaw.core.Plugin {
 			autoRefresh.stop();
 
 		core.getMainWindow().removeTab(miniFrostPanel.getPanel());
+		configTab.hide();
 
 		if (hsqldb != null)
 			hsqldb.unregisterChild(this);
