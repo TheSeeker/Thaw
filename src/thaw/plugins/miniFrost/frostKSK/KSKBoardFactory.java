@@ -6,6 +6,7 @@ import javax.swing.JOptionPane;
 import java.sql.*;
 
 import java.util.HashMap;
+import java.util.Iterator;
 
 import thaw.core.Core;
 import thaw.core.Logger;
@@ -13,6 +14,8 @@ import thaw.core.I18n;
 
 import thaw.plugins.Hsqldb;
 import thaw.plugins.MiniFrost;
+
+
 
 public class KSKBoardFactory
 	implements thaw.plugins.miniFrost.interfaces.BoardFactory {
@@ -147,6 +150,30 @@ public class KSKBoardFactory
 
 		return v;
 	}
+
+
+	protected KSKBoard getBoard(String name) {
+		return (KSKBoard)boards.get(name);
+	}
+
+
+	protected KSKBoard getBoard(int id) {
+		for (Iterator it = boards.values().iterator();
+		     it.hasNext();) {
+			KSKBoard board = (KSKBoard)it.next();
+
+			if (board.getId() == id)
+				return board;
+		}
+
+		return null;
+	}
+
+
+	public Vector getAllMessages(String[] keywords, int orderBy, boolean desc) {
+		return KSKBoard.getMessages(-1, this, null, keywords, orderBy, desc, true);
+	}
+
 
 
 	public void createBoard(thaw.core.MainWindow mainWindow) {

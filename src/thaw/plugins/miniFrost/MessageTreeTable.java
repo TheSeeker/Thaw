@@ -50,6 +50,7 @@ import thaw.core.I18n;
 import thaw.core.Logger;
 
 import thaw.plugins.miniFrost.interfaces.Board;
+import thaw.plugins.miniFrost.interfaces.BoardFactory;
 import thaw.plugins.miniFrost.interfaces.Message;
 
 
@@ -98,9 +99,15 @@ public class MessageTreeTable implements Observer,
 
 	private JComboBox actions;
 
+	private int orderBy;
+	private boolean desc;
+
 
 	public MessageTreeTable(MiniFrostPanel mainPanel) {
 		this.mainPanel = mainPanel;
+
+		orderBy = Board.ORDER_DATE;
+		desc = true;
 
 		panel = new JPanel(new BorderLayout(5, 5));
 
@@ -113,6 +120,10 @@ public class MessageTreeTable implements Observer,
 		everywhereBox = new JCheckBox(I18n.getMessage("thaw.plugin.miniFrost.onAllBoards"));
 		searchButton = new JButton(I18n.getMessage("thaw.common.search"),
 					   IconBox.minSearch);
+
+		searchButton.addActionListener(this);
+		searchField.addActionListener(this);
+
 
 		nextUnread = new JButton("", IconBox.minNextUnread);
 		nextUnread.setToolTipText(I18n.getMessage("thaw.plugin.miniFrost.nextUnread"));
@@ -325,6 +336,9 @@ public class MessageTreeTable implements Observer,
 
 	public void setBoard(Board board) {
 		this.targetBoard = board;
+
+		searchField.setText("");
+		everywhereBox.setSelected(false);
 	}
 
 	public Board getBoard() {
@@ -332,8 +346,30 @@ public class MessageTreeTable implements Observer,
 	}
 
 	public void refresh() {
-		if (targetBoard != null)
-			model.setMessages(targetBoard.getMessages());
+		refresh(null, Board.ORDER_DATE, true, false);
+	}
+
+	public void refresh(String[] keywords, int orderBy, boolean desc, boolean allBoards) {
+		Vector msgs = null;
+
+		if ((!allBoards) && targetBoard != null) {
+			msgs = targetBoard.getMessages(keywords, orderBy, desc);
+		}
+
+		if (allBoards) {
+			msgs = new Vector();
+
+			BoardFactory[] factories = mainPanel.getPluginCore().getFactories();
+
+			for (int i = 0 ; i < factories.length ; i++) {
+				Vector boardMsgs = factories[i].getAllMessages(keywords, orderBy, desc);
+				msgs.addAll(boardMsgs);
+			}
+		}
+
+		if (msgs != null)
+			model.setMessages(msgs);
+
 		model.refresh();
 	}
 
@@ -356,7 +392,16 @@ public class MessageTreeTable implements Observer,
 
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == nextUnread) {
+		if (e.getSource() == searchButton
+		    || e.getSource() == searchField) {
+
+			String[] keywords = searchField.getText().split(" ");
+
+			Logger.info(this, "Searching ...");
+
+			refresh(keywords, orderBy, desc, everywhereBox.isSelected());
+
+		} else if (e.getSource() == nextUnread) {
 
 			if (targetBoard == null) {
 				Logger.warning(this, "No message selected atm ; can't get the next unread message");

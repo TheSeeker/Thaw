@@ -13,9 +13,10 @@ import java.util.Calendar;
 import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
 
+import thaw.plugins.miniFrost.interfaces.Board;
 
 public class KSKBoard
-	implements thaw.plugins.miniFrost.interfaces.Board, Runnable, Observer {
+	implements Board, Runnable, Observer {
 
 	public final static int MAX_DOWNLOADS_AT_THE_SAME_TIME = 5;
 	public final static int MAX_FAILURES_IN_A_ROW          = 5;
@@ -42,6 +43,10 @@ public class KSKBoard
 
 	private int newMsgs;
 
+	private KSKBoard() {
+
+	}
+
 
 	public KSKBoard(KSKBoardFactory factory,
 			int id, String name,
@@ -58,7 +63,49 @@ public class KSKBoard
 	}
 
 
-	public Vector getMessages() {
+	public Vector getMessages(String[] keywords,
+				  int orderBy,
+				  boolean desc) {
+		return getMessages(id, factory, this, keywords, orderBy, desc, false);
+	}
+
+
+	protected static Vector getMessages(int id,
+					    KSKBoardFactory factory,
+					    KSKBoard board,
+					    String[] keywords,
+					    int orderBy,
+					    boolean desc,
+					    boolean allBoards) {
+
+		String orderColumn;
+
+		if (orderBy == Board.ORDER_SUBJECT)
+			orderColumn = "LOWER(subject)";
+		else if (orderBy == Board.ORDER_SENDER)
+			orderColumn = "LOWER(nick)";
+		else
+			orderColumn = "date";
+
+		if (desc)
+			orderColumn += " DESC";
+
+		String whereBase = "WHERE true AND ";
+
+		if (!allBoards) {
+			whereBase = "WHERE boardId = ? AND ";
+		}
+
+		String keywordsStr = "";
+
+		if (keywords != null) {
+			for (int i = 0 ; i < keywords.length ; i++) {
+				keywordsStr += " AND (LOWER(subject) LIKE ? "+
+					"  OR LOWER(content) LIKE ? "+
+					"  OR LOWER(nick) LIKE ?)";
+			}
+		}
+
 		Vector v = new Vector();
 
 		try {
@@ -67,18 +114,41 @@ public class KSKBoard
 			synchronized(db.dbLock) {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT id, subject, nick, "+
-									 "       sigId, date, rev, "+
-									 "       read "+
+				st = db.getConnection().prepareStatement("SELECT id, "+
+									 "       subject, "+
+									 "       nick, "+
+									 "       sigId, "+
+									 "       date, "+
+									 "       rev, "+
+									 "       read, "+
+									 "       boardId "+
 									 "FROM frostKSKMessages "+
-									 "WHERE boardId = ? AND "+
+									 whereBase+
 									 "archived = FALSE "+
-									 "ORDER BY date DESC");
-				st.setInt(1, id);
+									 keywordsStr+
+									 "ORDER BY "+orderColumn);
+				int i = 1;
+
+				if (!allBoards)
+					st.setInt(i++, id);
+
+				if (keywords != null) {
+					for (int j = 0 ; j < keywords.length ; j++) {
+						String word = keywords[j].toLowerCase();
+
+						st.setString(i++, "%"+word+"%");
+						st.setString(i++, "%"+word+"%");
+						st.setString(i++, "%"+word+"%");
+					}
+				}
 
 				ResultSet set = st.executeQuery();
 
 				while(set.next()) {
+					KSKBoard daBoard = ((board != null) ?
+							    board :
+							    factory.getBoard(set.getInt("boardId")));
+
 					v.add(new KSKMessage(set.getInt("id"),
 							     set.getString("subject"),
 							     set.getString("nick"),
@@ -87,12 +157,12 @@ public class KSKBoard
 							     set.getInt("rev"),
 							     set.getBoolean("read"),
 							     false,
-							     this));
+							     daBoard));
 				}
 			}
 
 		} catch(SQLException e) {
-			Logger.error(this, "Can't get message list because : "+e.toString());
+			Logger.error(new KSKBoard(), "Can't get message list because : "+e.toString());
 		}
 
 		return v;

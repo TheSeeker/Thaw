@@ -29,11 +29,20 @@ public interface Board {
 	//public BoardFolder getParentFolder();
 
 
+	public final static int ORDER_SUBJECT = 0;
+	public final static int ORDER_SENDER  = 1;
+	public final static int ORDER_DATE    = 2;
+
 	/**
 	 * don't store/cache the messages,
 	 * just give them.
+	 * @param keywords can be null
+	 * @param orderBy specify an order
+	 * @param desc
 	 */
-	public Vector getMessages();
+	public Vector getMessages(String[] keywords,
+				  int orderBy,
+				  boolean desc);
 
 
 	/**

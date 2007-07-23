@@ -16,11 +16,18 @@ public interface BoardFactory {
 	public boolean init(Hsqldb db, thaw.core.Core core,
 			    MiniFrost miniFrost);
 
+
 	/**
 	 * @return all the boards managed by this factory
 	 */
 	public Vector getBoards();
 
+
+	/**
+	 * similar to Board.getMessages()
+	 * @param orderBy see Board
+	 */
+	public Vector getAllMessages(String[] keywords, int orderBy, boolean desc);
 
 	/**
 	 * display the dialog asking for a name, etc.
