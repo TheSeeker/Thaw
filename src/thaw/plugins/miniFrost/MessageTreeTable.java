@@ -233,9 +233,22 @@ public class MessageTreeTable implements Observer,
 			c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
 								row, column);
 
-			if (!model.getMsg(row).isRead()) {
-				c.setFont(c.getFont().deriveFont(Font.BOLD));
+			Message msg = model.getMsg(row);
+
+			int mod = Font.PLAIN;
+
+			if (!msg.isRead()) {
+				mod = Font.BOLD;
 			}
+
+			if (msg.isArchived()) {
+				if (mod == Font.BOLD)
+					mod = Font.ITALIC | Font.BOLD;
+				else
+					mod = Font.ITALIC;
+			}
+
+			c.setFont(c.getFont().deriveFont(mod));
 
 			return c;
 		}

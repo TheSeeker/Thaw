@@ -130,6 +130,7 @@ public class KSKBoard
 									 "       date, "+
 									 "       rev, "+
 									 "       read, "+
+									 "       archived, "+
 									 "       boardId "+
 									 "FROM frostKSKMessages "+
 									 whereBase+
@@ -165,7 +166,7 @@ public class KSKBoard
 							     set.getTimestamp("date"),
 							     set.getInt("rev"),
 							     set.getBoolean("read"),
-							     false,
+							     set.getBoolean("archived"),
 							     daBoard));
 				}
 			}
