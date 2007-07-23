@@ -45,8 +45,8 @@ public class BoardTree extends Observable
 
 	private MiniFrostPanel mainPanel;
 
-	public final static Color SELECTION_COLOR = new Color(190, 190, 190);
-	public final static Color LOADING_COLOR = new Color(230, 230, 230);
+	public final static Color SELECTION_COLOR         = new Color(190, 190, 190);
+	public final static Color LOADING_COLOR           = new Color(230, 230, 230);
 	public final static Color LOADING_SELECTION_COLOR = new Color(150, 150, 150);
 
 
@@ -157,11 +157,16 @@ public class BoardTree extends Observable
 			boardList = null;
 		}
 
+		public Vector getBoardList() {
+			return boardList;
+		}
+
 		public void setBoardList(Vector l) {
 			int oldSize = 0;
 
-			if (boardList != null)
+			if (boardList != null) {
 				oldSize = boardList.size();
+			}
 
 			boardList = l;
 
@@ -198,11 +203,14 @@ public class BoardTree extends Observable
 	}
 
 
+	public Vector getBoards() {
+		return model.getBoardList();
+	}
 
 
 
 	public void refresh() {
-		Vector boardList = new Vector();
+		Vector boards = new Vector();
 
 		BoardFactory[] factories = mainPanel.getPluginCore().getFactories();
 
@@ -213,7 +221,7 @@ public class BoardTree extends Observable
 				if (v != null) {
 					for (Iterator it = v.iterator();
 					     it.hasNext();) {
-						boardList.add(it.next());
+						boards.add(it.next());
 					}
 
 				}
@@ -222,7 +230,7 @@ public class BoardTree extends Observable
 
 		/* TODO : Sort the vector */
 
-		model.setBoardList(boardList);
+		model.setBoardList(boards);
 	}
 
 	public void refresh(Board board) {

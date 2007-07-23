@@ -7,12 +7,15 @@ import thaw.core.Logger;
 import thaw.plugins.miniFrost.MiniFrostPanel;
 import thaw.plugins.miniFrost.interfaces.BoardFactory;
 
+import thaw.plugins.miniFrost.AutoRefresh;
+
 
 public class MiniFrost implements thaw.core.Plugin {
 	private Core core;
 	private Hsqldb hsqldb;
 
 	private MiniFrostPanel miniFrostPanel;
+	private AutoRefresh autoRefresh;
 
 	public final static BoardFactory[] factories =
 		new BoardFactory[] {
@@ -25,7 +28,8 @@ public class MiniFrost implements thaw.core.Plugin {
 
 		if (!loadDeps()
 		    || !initFactories()
-		    || !loadGUI())
+		    || !loadGUI()
+		    || !loadAutoRefresh())
 			return false;
 
 		return true;
@@ -80,10 +84,20 @@ public class MiniFrost implements thaw.core.Plugin {
 	}
 
 
+	public boolean loadAutoRefresh() {
+		autoRefresh = new AutoRefresh(core.getConfig(),
+					      miniFrostPanel.getBoardTree());
+		return true;
+	}
+
 	public boolean stop() {
+		if (autoRefresh != null)
+			autoRefresh.stop();
+
 		core.getMainWindow().removeTab(miniFrostPanel.getPanel());
 
-		hsqldb.unregisterChild(this);
+		if (hsqldb != null)
+			hsqldb.unregisterChild(this);
 
 		return true;
 	}
