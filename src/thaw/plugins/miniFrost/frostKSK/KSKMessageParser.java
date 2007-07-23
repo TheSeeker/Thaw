@@ -16,7 +16,7 @@ import thaw.core.Logger;
 
 /**
  * Dirty parser reusing some Frost functions
- * (Note: dirty because of the XML)
+ * (Note: dirty mainly because of the Frost format :p)
  */
 public class KSKMessageParser {
 
@@ -36,6 +36,28 @@ public class KSKMessageParser {
 	private String body;
 
 
+	private boolean alreadyInTheDb(Hsqldb db, String msgId) {
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT id FROM frostKSKMessages "+
+									 "WHERE msgId = ? LIMIT 1");
+				st.setString(1, msgId);
+
+				ResultSet res = st.executeQuery();
+
+				return (res.next());
+			}
+		} catch(SQLException e) {
+			Logger.error(this,
+				     "Exception while checking if the message was already in the db: "+
+				     e.toString());
+			return false;
+		}
+	}
+
+
 	public boolean insert(Hsqldb db,
 			      int boardId, int rev,
 			      String boardNameExpected) {
@@ -48,6 +70,10 @@ public class KSKMessageParser {
 		    || !(boardNameExpected.toLowerCase().equals(board.toLowerCase())))
 			return false;
 
+		if (alreadyInTheDb(db, messageId)) {
+			Logger.info(this, "We have already this id in the db ?!");
+			return false;
+		}
 
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.M.d HH:mm:ss");
 
