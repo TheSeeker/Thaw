@@ -111,7 +111,7 @@ public class KSKBoard
 									 "FROM frostKSKMessages "+
 									 "WHERE boardId = ? AND "+
 									 "archived = FALSE AND read = FALSE "+
-									 "ORDER BY date DESC LIMIT 1");
+									 "ORDER BY date LIMIT 1");
 				st.setInt(1, id);
 
 				ResultSet set = st.executeQuery();

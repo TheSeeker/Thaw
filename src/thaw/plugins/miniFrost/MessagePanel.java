@@ -33,8 +33,8 @@ public class MessagePanel
 		"",
 		I18n.getMessage("thaw.plugin.miniFrost.archivate"),
 		I18n.getMessage("thaw.plugin.miniFrost.reply"),
-		I18n.getMessage("thaw.plugin.miniFrost.foldAll"),
-		I18n.getMessage("thaw.plugin.miniFrost.unfoldAll")
+		I18n.getMessage("thaw.plugin.miniFrost.unfoldAll"),
+		I18n.getMessage("thaw.plugin.miniFrost.foldAll")
 	};
 
 	public final static int DEFAULT_UNFOLDED = 2;
@@ -56,6 +56,8 @@ public class MessagePanel
 	private JComboBox actions;
 	private JButton back;
 	private JButton nextUnread;
+
+	private Vector subPanels;
 
 
 	public MessagePanel(MiniFrostPanel mainPanel) {
@@ -115,6 +117,7 @@ public class MessagePanel
 	}
 
 
+
 	protected class SubMessagePanel extends JPanel implements ActionListener {
 		private JButton upDownButton;
 		private boolean retracted;
@@ -172,24 +175,30 @@ public class MessagePanel
 		}
 
 
+		public void setRetracted(boolean retracted) {
+			if (!retracted) {
+				area = getTextArea(msg.getMessage());
+				this.add(area, BorderLayout.CENTER);
+
+				upDownButton.setIcon(IconBox.minUp);
+			} else {
+				if (area != null)
+					this.remove(area);
+				area = null;
+				upDownButton.setIcon(IconBox.minDown);
+			}
+
+			this.retracted = retracted;
+
+			this.revalidate();
+			panel.revalidate();
+			msgsPanel.revalidate();
+		}
+
+
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == upDownButton) {
-				if (retracted) {
-					area = getTextArea(msg.getMessage());
-					this.add(area, BorderLayout.CENTER);
-
-					upDownButton.setIcon(IconBox.minUp);
-				} else {
-					this.remove(area);
-					area = null;
-					upDownButton.setIcon(IconBox.minDown);
-				}
-
-				retracted = !retracted;
-
-				this.revalidate();
-				panel.revalidate();
-				msgsPanel.revalidate();
+				setRetracted(!retracted);
 			}
 		}
 
@@ -197,6 +206,7 @@ public class MessagePanel
 
 
 	public void refresh() {
+		subPanels = new Vector();
 
 		/* will imbricate BorderLayout */
 		/* it's dirty, but it should work */
@@ -212,6 +222,8 @@ public class MessagePanel
 			SubMessage subMsg = (SubMessage)it.next();
 			SubMessagePanel panel = new SubMessagePanel(subMsg,
 								    (i + DEFAULT_UNFOLDED) < subMsgs.size());
+
+			subPanels.add(panel);
 
 			if (iPanel == null) {
 				iPanel = panel;
@@ -262,6 +274,7 @@ public class MessagePanel
 			mainPanel.displayMessageTable();
 
 		} else if (e.getSource() == nextUnread) {
+
 			if (msg == null) {
 				Logger.warning(this, "No message selected atm ; can't get the next unread message");
 				return;
@@ -273,6 +286,33 @@ public class MessagePanel
 				mainPanel.getMessageTreeTable().refresh();
 				mainPanel.getBoardTree().refresh(newMsg.getBoard());
 			}
+
+		} else if (e.getSource() == actions) {
+
+			int sel = actions.getSelectedIndex();
+
+			if (sel == 1) { /* archivate */
+
+				msg.setArchived(true);
+				mainPanel.getMessageTreeTable().refresh();
+				mainPanel.displayMessageTable();
+
+			} else if (sel == 2) { /* reply */
+
+				/* TODO */
+
+			} else if (sel == 3 || sel == 4) { /* (un)fold */
+				boolean retracted = (sel == 4);
+
+				for (Iterator it = subPanels.iterator();
+				     it.hasNext();) {
+
+					((SubMessagePanel)it.next()).setRetracted(retracted);
+				}
+			}
+
+			actions.setSelectedIndex(0);
+
 		}
 	}
 }
