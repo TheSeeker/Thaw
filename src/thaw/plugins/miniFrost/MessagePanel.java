@@ -17,6 +17,8 @@ import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
+import java.awt.event.KeyEvent;
+
 
 import thaw.gui.IconBox;
 import thaw.core.I18n;
@@ -67,7 +69,6 @@ public class MessagePanel
 
 		panel = new JPanel(new BorderLayout(5, 5));
 
-
 		/* messages Panel */
 
 		msgsPanel = new JPanel(new BorderLayout(0, 20));
@@ -93,6 +94,7 @@ public class MessagePanel
 		nextUnread = new JButton("", IconBox.minNextUnread);
 		nextUnread.setToolTipText(I18n.getMessage("thaw.plugin.miniFrost.nextUnread"));
 		nextUnread.addActionListener(this);
+
 		buttonPanel.add(nextUnread);
 
 		JPanel northPanel = new JPanel(new BorderLayout());
@@ -102,7 +104,15 @@ public class MessagePanel
 
 
 		panel.add(northPanel, BorderLayout.NORTH);
+	}
 
+	public void hided() {
+		nextUnread.setMnemonic(KeyEvent.VK_Z);
+	}
+
+	public void redisplayed() {
+		nextUnread.setMnemonic(KeyEvent.VK_N);
+		nextUnread.requestFocus();
 	}
 
 	public void setMessage(Message msg) {
@@ -269,6 +279,20 @@ public class MessagePanel
 	}
 
 
+	private void nextUnread() {
+		if (msg == null) {
+			Logger.warning(this, "No message selected atm ; can't get the next unread message");
+			return;
+		}
+		Message newMsg = msg.getBoard().getNextUnreadMessage();
+		if (newMsg != null) {
+			setMessage(newMsg);
+			newMsg.setRead(true);
+			mainPanel.getMessageTreeTable().refresh();
+			mainPanel.getBoardTree().refresh(newMsg.getBoard());
+		}
+	}
+
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == back) {
 
@@ -276,17 +300,7 @@ public class MessagePanel
 
 		} else if (e.getSource() == nextUnread) {
 
-			if (msg == null) {
-				Logger.warning(this, "No message selected atm ; can't get the next unread message");
-				return;
-			}
-			Message newMsg = msg.getBoard().getNextUnreadMessage();
-			if (newMsg != null) {
-				setMessage(newMsg);
-				newMsg.setRead(true);
-				mainPanel.getMessageTreeTable().refresh();
-				mainPanel.getBoardTree().refresh(newMsg.getBoard());
-			}
+			nextUnread();
 
 		} else if (e.getSource() == actions) {
 

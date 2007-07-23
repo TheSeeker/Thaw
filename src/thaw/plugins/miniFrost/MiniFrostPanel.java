@@ -52,22 +52,30 @@ public class MiniFrostPanel implements Observer {
 
 	public void displayMessageTable() {
 		saveState();
+		messagePanel.hided();
 		mainSplit.setRightComponent(messageTreeTable.getPanel());
-		messageTreeTable.redisplayed();
 		mainSplit.validate();
+
+		messageTreeTable.redisplayed();
+
 		loadState();
 	}
 
 	public void displayMessage() {
 		saveState();
+		messageTreeTable.hided();
 		mainSplit.setRightComponent(messagePanel.getPanel());
+		messagePanel.redisplayed();
 		mainSplit.validate();
 
-		if (messagePanel.getMessage() != null) {
+		if (messagePanel.getMessage() != null
+		    && !messagePanel.getMessage().isRead()) {
 			messagePanel.getMessage().setRead(true);
 			messageTreeTable.refresh(messagePanel.getMessage());
 			boardTree.refresh(messagePanel.getMessage().getBoard());
 		}
+
+		messagePanel.redisplayed();
 
 		loadState();
 	}

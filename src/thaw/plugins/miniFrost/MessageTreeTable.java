@@ -41,7 +41,7 @@ import javax.swing.JCheckBox;
 
 import java.awt.Font;
 
-
+import java.awt.event.KeyEvent;
 
 
 import thaw.gui.Table;
@@ -193,15 +193,23 @@ public class MessageTreeTable implements Observer,
 		mainPanel.getBoardTree().addObserver(this);
 	}
 
-	/**
-	 * due to a swing bug ?
-	 */
+
+	public void hided() {
+		nextUnread.setMnemonic(KeyEvent.VK_Z);
+	}
+
 	public void redisplayed() {
+		/**
+		 * due to a swing bug ?
+		 */
 		table.getColumnModel().getColumn(0).setPreferredWidth(FIRST_COLUMN_SIZE);
 		table.getColumnModel().getColumn(0).setResizable(false);
 		table.getColumnModel().getColumn(0).setPreferredWidth(FIRST_COLUMN_SIZE);
 		table.getColumnModel().getColumn(0).setMinWidth(FIRST_COLUMN_SIZE);
 		table.getColumnModel().getColumn(0).setMaxWidth(FIRST_COLUMN_SIZE);
+
+		nextUnread.setMnemonic(KeyEvent.VK_N);
+		nextUnread.requestFocus();
 	}
 
 	public JPanel getPanel() {
