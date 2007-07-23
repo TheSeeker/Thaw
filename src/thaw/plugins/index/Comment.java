@@ -169,6 +169,7 @@ public class Comment extends Observable implements Observer, ActionListener {
 			text = new JTextArea(I18n.getMessage("thaw.plugin.index.comment.moderated"));
 
 		text.setLineWrap(true);
+		text.setWrapStyleWord(true);
 
 		panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
 								 "--- "+author.toString()+" ---",

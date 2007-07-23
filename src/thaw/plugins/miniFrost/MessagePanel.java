@@ -168,6 +168,7 @@ public class MessagePanel
 			JTextArea a = new JTextArea(txt);
 
 			a.setLineWrap(true);
+			a.setWrapStyleWord(true);
 			a.setFont(a.getFont().deriveFont((float)13.5));
 			a.setEditable(false);
 
