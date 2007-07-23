@@ -65,8 +65,9 @@ public class KSKBoard
 
 	public Vector getMessages(String[] keywords,
 				  int orderBy,
-				  boolean desc) {
-		return getMessages(id, factory, this, keywords, orderBy, desc, false);
+				  boolean desc,
+				  boolean archived) {
+		return getMessages(id, factory, this, keywords, orderBy, desc, archived, false);
 	}
 
 
@@ -76,6 +77,7 @@ public class KSKBoard
 					    String[] keywords,
 					    int orderBy,
 					    boolean desc,
+					    boolean archived,
 					    boolean allBoards) {
 
 		String orderColumn;
@@ -95,6 +97,13 @@ public class KSKBoard
 		if (!allBoards) {
 			whereBase = "WHERE boardId = ? AND ";
 		}
+
+
+		String archivedStr = " true ";
+
+		if (!archived)
+			archivedStr = "archived = FALSE ";
+
 
 		String keywordsStr = "";
 
@@ -124,7 +133,7 @@ public class KSKBoard
 									 "       boardId "+
 									 "FROM frostKSKMessages "+
 									 whereBase+
-									 "archived = FALSE "+
+									 archivedStr+
 									 keywordsStr+
 									 "ORDER BY "+orderColumn);
 				int i = 1;

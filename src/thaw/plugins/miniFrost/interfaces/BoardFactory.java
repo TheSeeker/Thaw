@@ -27,7 +27,8 @@ public interface BoardFactory {
 	 * similar to Board.getMessages()
 	 * @param orderBy see Board
 	 */
-	public Vector getAllMessages(String[] keywords, int orderBy, boolean desc);
+	public Vector getAllMessages(String[] keywords, int orderBy,
+				     boolean desc, boolean archived);
 
 	/**
 	 * display the dialog asking for a name, etc.

@@ -97,8 +97,11 @@ public class MessageTreeTable implements Observer,
 	private JButton searchButton;
 	private JButton nextUnread;
 
+	private JCheckBox seeArchived;
+
 	private JComboBox actions;
 
+	private String[] keywords;
 	private int orderBy;
 	private boolean desc;
 
@@ -173,6 +176,19 @@ public class MessageTreeTable implements Observer,
 
 		panel.add(northPanel, BorderLayout.NORTH);
 		panel.add(new JScrollPane(table), BorderLayout.CENTER);
+
+
+		/* some filters */
+
+		seeArchived = new JCheckBox(I18n.getMessage("thaw.plugin.miniFrost.seeArchived"));
+		seeArchived.setSelected(false);
+		seeArchived.addActionListener(this);
+
+		JPanel southPanel = new JPanel(new BorderLayout(5, 5));
+		southPanel.add(new JLabel(""), BorderLayout.CENTER);
+		southPanel.add(seeArchived, BorderLayout.EAST);
+
+		panel.add(southPanel, BorderLayout.SOUTH);
 
 		mainPanel.getBoardTree().addObserver(this);
 	}
@@ -339,6 +355,7 @@ public class MessageTreeTable implements Observer,
 
 		searchField.setText("");
 		everywhereBox.setSelected(false);
+		keywords = null;
 	}
 
 	public Board getBoard() {
@@ -346,14 +363,15 @@ public class MessageTreeTable implements Observer,
 	}
 
 	public void refresh() {
-		refresh(null, Board.ORDER_DATE, true, false);
+		refresh(keywords, orderBy, desc, everywhereBox.isSelected());
 	}
 
 	public void refresh(String[] keywords, int orderBy, boolean desc, boolean allBoards) {
 		Vector msgs = null;
 
 		if ((!allBoards) && targetBoard != null) {
-			msgs = targetBoard.getMessages(keywords, orderBy, desc);
+			msgs = targetBoard.getMessages(keywords, orderBy,
+						       desc, seeArchived.isSelected());
 		}
 
 		if (allBoards) {
@@ -362,7 +380,8 @@ public class MessageTreeTable implements Observer,
 			BoardFactory[] factories = mainPanel.getPluginCore().getFactories();
 
 			for (int i = 0 ; i < factories.length ; i++) {
-				Vector boardMsgs = factories[i].getAllMessages(keywords, orderBy, desc);
+				Vector boardMsgs = factories[i].getAllMessages(keywords, orderBy, desc,
+									       seeArchived.isSelected());
 				msgs.addAll(boardMsgs);
 			}
 		}
@@ -392,10 +411,14 @@ public class MessageTreeTable implements Observer,
 
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == searchButton
+		if (e.getSource() == seeArchived) {
+
+			refresh();
+
+		} else if (e.getSource() == searchButton
 		    || e.getSource() == searchField) {
 
-			String[] keywords = searchField.getText().split(" ");
+			keywords = searchField.getText().split(" ");
 
 			Logger.info(this, "Searching ...");
 

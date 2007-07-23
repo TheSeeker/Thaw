@@ -39,10 +39,12 @@ public interface Board {
 	 * @param keywords can be null
 	 * @param orderBy specify an order
 	 * @param desc
+	 * @param archived If true, archived messages will also be returned
 	 */
 	public Vector getMessages(String[] keywords,
 				  int orderBy,
-				  boolean desc);
+				  boolean desc,
+				  boolean archived);
 
 
 	/**

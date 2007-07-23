@@ -170,8 +170,10 @@ public class KSKBoardFactory
 	}
 
 
-	public Vector getAllMessages(String[] keywords, int orderBy, boolean desc) {
-		return KSKBoard.getMessages(-1, this, null, keywords, orderBy, desc, true);
+	public Vector getAllMessages(String[] keywords, int orderBy,
+				     boolean desc, boolean archived) {
+		return KSKBoard.getMessages(-1, this, null, keywords,
+					    orderBy, desc, archived, true);
 	}
 
 
