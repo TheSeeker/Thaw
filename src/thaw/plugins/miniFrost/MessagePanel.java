@@ -279,18 +279,22 @@ public class MessagePanel
 	}
 
 
-	private void nextUnread() {
+	private boolean nextUnread() {
 		if (msg == null) {
 			Logger.warning(this, "No message selected atm ; can't get the next unread message");
-			return;
+			return false;
 		}
 		Message newMsg = msg.getBoard().getNextUnreadMessage();
+
 		if (newMsg != null) {
 			setMessage(newMsg);
 			newMsg.setRead(true);
 			mainPanel.getMessageTreeTable().refresh();
 			mainPanel.getBoardTree().refresh(newMsg.getBoard());
+			return true;
 		}
+
+		return false;
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -310,7 +314,9 @@ public class MessagePanel
 
 				msg.setArchived(true);
 				mainPanel.getMessageTreeTable().refresh();
-				mainPanel.displayMessageTable();
+
+				if (!nextUnread())
+					mainPanel.displayMessageTable();
 
 			} else if (sel == 2) { /* reply */
 
