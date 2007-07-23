@@ -20,13 +20,31 @@ import thaw.plugins.MiniFrost;
 public class KSKBoardFactory
 	implements thaw.plugins.miniFrost.interfaces.BoardFactory {
 
+	public final static String[] DEFAULT_BOARDS = new String[] {
+		"freenet",
+		"thaw",
+		"frost",
+		"fuqid",
+		"successful",
+		"unsuccessful",
+		"Thaw-indexes",
+		"de.freenet",
+		"fr.accueil",
+		"fr.boards",
+		"fr.discussion",
+		"fr.freenet",
+		"boards",
+		"public",
+		"sites",
+		"test"
+	};
+
+
 	private Hsqldb db;
 	private Core core;
 	private MiniFrost plugin;
 
-
 	private HashMap boards;
-
 
 	public KSKBoardFactory() {
 
@@ -38,7 +56,13 @@ public class KSKBoardFactory
 		this.core = core;
 		this.plugin = plugin;
 
+		boolean firstStart = (core.getConfig().getValue("frostKSKDatabaseVersion") == null);
+
 		createTables();
+
+		if (firstStart)
+			addDefaultBoards();
+
 		boards = new HashMap();
 
 		return true;
@@ -97,6 +121,13 @@ public class KSKBoardFactory
 			  + "FOREIGN KEY (boardId) REFERENCES frostKSKBoards (id), "
 			  + "FOREIGN KEY (inReplyTo) REFERENCES frostKSKMessages (id), "
 			  + "FOREIGN KEY (sigId) REFERENCES signatures (id))");
+	}
+
+
+	private void addDefaultBoards() {
+		for (int i = 0 ; i < DEFAULT_BOARDS.length ; i++) {
+			createBoard(DEFAULT_BOARDS[i]);
+		}
 	}
 
 
@@ -186,6 +217,10 @@ public class KSKBoardFactory
 		if (name == null)
 			return;
 
+		createBoard(name);
+	}
+
+	public void createBoard(String name) {
 		try {
 			synchronized(db.dbLock) {
 				PreparedStatement st;

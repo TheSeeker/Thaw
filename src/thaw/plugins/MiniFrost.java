@@ -17,6 +17,9 @@ public class MiniFrost implements thaw.core.Plugin {
 	private MiniFrostPanel miniFrostPanel;
 	private AutoRefresh autoRefresh;
 
+	private boolean firstStart;
+
+
 	public final static BoardFactory[] factories =
 		new BoardFactory[] {
 			new thaw.plugins.miniFrost.frostKSK.KSKBoardFactory(),
