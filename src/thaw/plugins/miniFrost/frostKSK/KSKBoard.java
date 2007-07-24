@@ -222,6 +222,7 @@ public class KSKBoard
 	private Date lastDate;
 
 	private int lastSuccessfulRev;
+	private int failed;
 
 	/* we keep the failed one in this queue as long as no other succeed */
 	/* sync() on it ! */
@@ -353,11 +354,11 @@ public class KSKBoard
 			KSKMessage msg = (KSKMessage)o;
 
 			boolean successful = !msg.isDownloading()
-				&& msg.isSuccessful()
-				&& msg.isParsable();
+				&& msg.isSuccessful();
 
 			if (successful) {
 				newMsgs++;
+
 				notifyChange();
 				lastSuccessfulRev = msg.getRev();
 
