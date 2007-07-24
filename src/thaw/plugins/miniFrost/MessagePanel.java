@@ -148,7 +148,7 @@ public class MessagePanel
 
 
 			/* header */
-			JPanel headPanel = new JPanel(new BorderLayout(20, 0));
+			JPanel headPanel = new JPanel(new BorderLayout(10, 0));
 
 			JLabel dateLabel = new JLabel(msg.getDate().toString());
 			JLabel authorLabel = new JLabel(msg.getAuthor().toString());
@@ -270,6 +270,7 @@ public class MessagePanel
 
 
 	private void putScrollBarAtBottom() {
+		scrollPane.revalidate();
 		int max = scrollPane.getVerticalScrollBar().getMaximum();
 		scrollPane.getVerticalScrollBar().setValue(max);
 	}

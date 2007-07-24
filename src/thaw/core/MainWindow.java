@@ -582,26 +582,29 @@ public class MainWindow implements java.awt.event.ActionListener, WindowListener
 	public void showDialogAbout() {
 		final JComponent[] labels = new JComponent[] {
 			new JTextField("Thaw "+Main.VERSION),
-			new JLabel(I18n.getMessage("thaw.about.l2")),
-			new JLabel(I18n.getMessage("thaw.about.l3")),
-			new JLabel(I18n.getMessage("thaw.about.l4")),
+			new JLabel(I18n.getMessage("thaw.about.l02")),
+			new JLabel(I18n.getMessage("thaw.about.l03")),
+			new JLabel(I18n.getMessage("thaw.about.l04")),
 			new JLabel(""),
-			new JLabel(I18n.getMessage("thaw.about.l6")),
+			new JLabel(I18n.getMessage("thaw.about.l06")),
 			new JLabel(""),
-			new JLabel(I18n.getMessage("thaw.about.l7")),
-			new JLabel(I18n.getMessage("thaw.about.l8"))
+			new JLabel(I18n.getMessage("thaw.about.l07")),
+			new JLabel(I18n.getMessage("thaw.about.l08")),
+			new JLabel(I18n.getMessage("thaw.about.l09")),
+			new JLabel(I18n.getMessage("thaw.about.l10")),
+			new JLabel(I18n.getMessage("thaw.about.l11")),
+			new JLabel(I18n.getMessage("thaw.about.l12")),
 		};
 
-		/*
+
 		for (int i = 0 ; i < labels.length ; i++) {
 			if (labels[i] instanceof JTextField) {
 				((JTextField)labels[i]).setEditable(false);
 			}
 		}
-		*/
+
 
 		((JTextField)labels[0]).setFont(new Font("Dialog", Font.BOLD, 30));
-		((JTextField)labels[0]).setEditable(false);
 
 		JOptionPane.showMessageDialog(null, labels, I18n.getMessage("thaw.about.title"),
 					      JOptionPane.INFORMATION_MESSAGE);
