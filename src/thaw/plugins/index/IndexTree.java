@@ -155,6 +155,13 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		indexAndFileMenu = new JPopupMenu();
 		indexAndFileActions = new Vector();
+
+		item = new JMenuItem("");
+		indexAndFileMenu.add(item);
+		indexAndFileActions.add(new IndexManagementHelper.NodeNameDisplayer(item));
+
+		indexAndFileMenu.addSeparator();
+
 		indexMenu = new JMenu(I18n.getMessage("thaw.plugin.index.index"));
 		indexMenu.setIcon(IconBox.minIndex);
 		fileMenu = new JMenu(I18n.getMessage("thaw.common.files"));
@@ -166,6 +173,11 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 
 		// Folder menu
+		item = new JMenuItem("");
+		indexFolderMenu.add(item);
+		indexFolderActions.add(new IndexManagementHelper.NodeNameDisplayer(item));
+
+		indexFolderMenu.addSeparator();
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.downloadIndexes"),
 				     IconBox.minRefreshAction);
@@ -208,6 +220,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 
 		// Index menu
+
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.downloadIndex"),
 				     IconBox.minRefreshAction);
 		indexMenu.add(item);

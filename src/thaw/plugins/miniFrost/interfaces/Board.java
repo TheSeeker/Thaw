@@ -33,6 +33,8 @@ public interface Board {
 	public final static int ORDER_SENDER  = 1;
 	public final static int ORDER_DATE    = 2;
 
+	public String getName();
+
 	/**
 	 * don't store/cache the messages,
 	 * just give them.

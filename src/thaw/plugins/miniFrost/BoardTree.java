@@ -89,8 +89,13 @@ public class BoardTree extends Observable
 		/* right click menu */
 
 		JMenuItem item;
-
 		rightClickMenu = new JPopupMenu();
+
+		item = new JMenuItem("");
+		rightClickMenu.add(item);
+		actions.add(new BoardManagementHelper.BoardNameDisplayer(item));
+
+		rightClickMenu.addSeparator();
 
 		item = new JMenuItem(I18n.getMessage("thaw.common.add"),
 				     IconBox.minAdd);

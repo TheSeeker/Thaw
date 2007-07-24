@@ -1867,4 +1867,31 @@ public class IndexManagementHelper {
 				      nmbFilesInt, nmbLinksInt, insertionDate);
 		}
 	}
+
+
+	public static class NodeNameDisplayer implements IndexAction {
+		private AbstractButton button;
+
+		public NodeNameDisplayer(AbstractButton source) {
+			button = source;
+
+			button.setEnabled(false);
+		}
+
+		public void setTarget(IndexTreeNode node) {
+			if (node == null) {
+				button.setText("N/A");
+				return;
+			}
+
+			if (node instanceof Index)
+				button.setText(((Index)node).toString(false));
+			else
+				button.setText(node.toString());
+		}
+
+		public void actionPerformed(ActionEvent e) {
+
+		}
+	}
 }

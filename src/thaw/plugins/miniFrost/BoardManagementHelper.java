@@ -180,4 +180,30 @@ public class BoardManagementHelper {
 		}
 	}
 
+
+	public static class BoardNameDisplayer implements BoardAction {
+		private AbstractButton source;
+
+
+		public BoardNameDisplayer(AbstractButton source) {
+			this.source = source;
+
+			source.setEnabled(false);
+		}
+
+
+		public void setTarget(Board board) {
+			if (board == null) {
+				source.setText("N/A");
+				return;
+			}
+
+			source.setText(board.getName());
+		}
+
+		public void actionPerformed(ActionEvent e) {
+
+		}
+	}
+
 }
