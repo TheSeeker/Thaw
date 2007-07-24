@@ -1,0 +1,157 @@
+========================
+Frost boards : Dev notes
+========================
+
+Keys used:
+
+Unsigned board:
+KSK@frost|message|news|[YYYY.M.D]-[board name]-[revision].xml
+
+Signed board:
+SSK@[publicKey]/[boardName]|[YYYY.M.D]-[revision].xml
+
+YYYY=Year
+M=Month : ([1-9]|1[0-2])
+D=Day   : ([1-9]|[1-2][0-9]|3[0-1])
+
+
+Examples:
+KSK@frost|message|news|2007.7.23-public-1.xml
+SSK@4yxtkac-scho~6w-unv6pl-uxibfugngrzo3bjh0ck,4n48yl8e4rh9uppv26ev1zgrrrgegotgw1voka6lk4g,aqacaae/frost-announce|2007.7.19-0.xml
+
+
+Thaw specific
+=============
+
+Thaw method to fetch the messages:
+-> Start with the date of tomorrow
+-> Go back day by day, down to 5 days back
+-> For each day, it tries to fetch 5 revisions
+-> Each time a revision is successfully downloaded, it continues to go upper
+
+For the insertions:
+-> Refresh the board
+-> Try to insert it at (lastRevision+1)
+-> If it fails, go upper (the node seems to detect sometimes the collisions)
+
+Security notes:
+-> When fetching, don't accept the redirection as failed (Thaw only accept the DNDs and 'Route not found' as a failure)
+
+
+Message format
+==============
+
+<!-- This format is UGLY. -->
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<FrostMessage>
+
+<MessageId><![CDATA[2E01E431CBD655671B1A1FE1C919D899211CC1571AD020EC9D35AA09FF83EAA1]]></MessageId>
+
+<!--
+	Message ID list.
+	The first ID is the initial message.
+	This message answer to the last ID.
+	IDs are comma separated (no space).
+	(Note : why not using xml tags instead of a comma ? :P)
+-->
+<InReplyTo><![CDATA[3677AC9EB291D5BDB9076FF27A66A9AD9ADE2A5C249C9A75781592310C1FA3F2,C6F339A701245E514379E9598927777BB300D2A8EF392C085964D693E1A5D108]]></InReplyTo>
+
+<!--
+	 No fucking idea of what it can be
+	 => Useless as hell => Ignore.
+	 Thaw will put 0 in these two fields
+	 (I don't care about the side effects for Frost)
+-->
+<IdLinePos>404</IdLinePos>
+<IdLineLen>76</IdLineLen>
+
+
+<!-- Unsigned post : nick
+     Signed post : nick@hash(pubKey)
+
+     Never take into consideration the hash of the publicKey (INSECURE)
+     Take the nick only if the post is non-signed, or if it's the first
+     time you see this public key
+-->
+<From><![CDATA[bback@xgVRApPk+Yngy+jmtOeGzIbN_A0]]></From>
+
+
+<Subject><![CDATA[Re: File uploads and ID association]]></Subject>
+
+
+<Date><![CDATA[2007.7.21]]></Date>
+
+
+<Time><![CDATA[17:05:39GMT]]></Time>
+
+
+<!--
+	This format SUCKS. Really.
+	VVVVVVVVVVVVVVVVVVVVVVVVVV
+-->
+<Body><![CDATA[----- Calipsos@yQWKyAkB7sdl1Bw545Qn7COfV3M ----- 2007.07.20 - 21:51:30GMT -----
+
+Why must frost associate an ID with a file you are uploading?
+
+----- Anonymous ----- 2007.07.21 - 15:57:22GMT -----
+
+the ID identifies the queue entry between the node and the application program I think. This is included in the FCP2 protocol. This doesn't mean that the ID is propagated to the node store or other nodes.
+
+----- bback@xgVRApPk+Yngy+jmtOeGzIbN_A0 ----- 2007.07.21 - 16:59:19GMT -----
+
+This is correct. The id is needed by frost to find the files that frost sent to the global queue. Unknown ids belong to other applications (or another frost).
+--
+rgds, bback.
+_-Frost aCtIVe DeVeLoPMeNT cREW-_
+
+Latest stable Frost release (19-Jul-2007):
+USK@QRZAI1nSm~dAY2hTdzVWXmEhkaI~dso0OadnppBR7kE,wq5rHGBI7kpChBe4yRmgBChIGDug7Xa5SG9vYGXdxR0,AQACAAE/frost/1]]></Body>
+
+<!-- What is the point of this field ?! -->
+<!-- Possible security issue => Ignore this field -->
+<Board><![CDATA[frost]]></Board>
+
+
+<!--
+	Signature public key.
+	Frost uses RSA (BouncyCastle implementation)
+-->
+<pubKey><![CDATA[CHwpbtSA+asXiF3s0xGX1hd3nA2scMMjSZbh:AKLw/y7/oDmXYYT0KWNeAfJPcVRgns+Nw9rJ0X/2JLt7o73Yt9PMkx5STJhlJekF36sf+l3vkTzPNHa2xmyjHms2biHl3jGy9dHdAduqNKs99PyW0Z19/QbZ1HEeeCXgllKE+z4aHgWK2CzeID6wPkzZLjFInKLb3gZtQLh5cm3n]]></pubKey>
+
+<!-- Obsolete -->
+<Signature><![CDATA[oMQS9OuM1jjTQPvfjHbiGrNEkgrK8avqXlDXqZ6mjweEotZdnt4V2xvXYSMuUwQj3qwOfQejhub55Ii15NBI6J8xZ2sTJr0uiSwZ8ToJspHB+h5PwG9ROuvtsoRUt23rKT2gzjXOu/HMygwZ1j3+ilAd2Rua9x9WQ+KJgPvVSPQ=]]></Signature>
+
+<!-- Signature (see the public RSA key above)
+     The signature is made from the elements:
+     *TODO*
+-->
+<SignatureV2><![CDATA[clfW3OggCYIy2MIKAMXkreBPqMzpZR/AWguWfjlnuwGogj/HBJuRgWji0GPrbA4KmmYsakMgoMt3rQ4hwZLlyxEW7ncz2cCEiXZLfecfmDe/rQ/wFn/LSsVIxxZRDXVuWMWkuPLsLxpUGztAf7hWoax5h4KsMvzMiqHJzUZHQEI=]]></SignatureV2>
+
+
+<!-- Wasn't in the original message, it's just for the example -->
+<AttachmentList>
+	<Attachment type="board">
+		    <Name><![CDATA[debate]]></Name>
+		    <description><![CDATA[Polite and civil debate on a variety of topics.]]></description>
+        </Attachment>
+
+        <Attachment type="board">
+		    <Name><![CDATA[freenet-refs-open]]></Name>
+		    <pubKey><![CDATA[SSK@PqIPlEEWGB06~qC8X~if~G70JEZKSf-HK9viEQZdbGk,XQePZDKsgkHSag7L9qF2-5Nlnnvow-80jdvIX79nBvw,AQACAAE]]></pubKey>
+		    <privKey><![CDATA[SSK@AI1xjALJtF8Gl9JyvTxFVRBtu-DHNmzCfmSYM0mZVtCt,XQePZDKsgkHSag7L9qF2-5Nlnnvow-80jdvIX79nBvw,AQECAAE]]></privKey>
+		    <description><![CDATA[The board for exchanging Freenet Opennet References]]></description>
+	</Attachment>
+
+	<Attachment type="file">
+		    <File>
+			<name><![CDATA[Frost.txt]]></name>
+			<size>5017</size>
+			<key>CHK@eSoSUEygke4ZpnWjcTBPz7OJlQ0gqd3xVvSBTVoU8QM,qlWgXBHTBpZxVJu0ENoKgO6P2tI8xZUBB~yUVLw9d38,AAIC--8/Frost.txt</key>
+		    </File>
+	</Attachment>
+
+</AttachmentList>
+
+</FrostMessage>
