@@ -34,6 +34,7 @@ public class MessagePanel
 	public final static String[] ACTIONS = {
 		"",
 		I18n.getMessage("thaw.plugin.miniFrost.archivate"),
+		I18n.getMessage("thaw.plugin.miniFrost.unarchivate"),
 		I18n.getMessage("thaw.plugin.miniFrost.reply"),
 		I18n.getMessage("thaw.plugin.miniFrost.unfoldAll"),
 		I18n.getMessage("thaw.plugin.miniFrost.foldAll")
@@ -310,12 +311,13 @@ public class MessagePanel
 
 			int sel = actions.getSelectedIndex();
 
-			if (sel == 1) { /* archivate */
+			if (sel == 1 || sel == 2) { /* (un)archive */
+				boolean archive = (sel == 1);
 
-				msg.setArchived(true);
+				msg.setArchived(archive);
 				mainPanel.getMessageTreeTable().refresh();
 
-				if (!nextUnread())
+				if (archive && !nextUnread())
 					mainPanel.displayMessageTable();
 
 			} else if (sel == 2) { /* reply */

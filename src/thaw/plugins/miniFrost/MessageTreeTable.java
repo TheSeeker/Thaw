@@ -74,7 +74,8 @@ public class MessageTreeTable implements Observer,
 		I18n.getMessage("thaw.plugin.miniFrost.selectNone"),
 		I18n.getMessage("thaw.plugin.miniFrost.markAsRead"),
 		I18n.getMessage("thaw.plugin.miniFrost.markAsNonRead"),
-		I18n.getMessage("thaw.plugin.miniFrost.archivate")
+		I18n.getMessage("thaw.plugin.miniFrost.archivate"),
+		I18n.getMessage("thaw.plugin.miniFrost.unarchivate")
 	};
 
 
@@ -482,10 +483,12 @@ public class MessageTreeTable implements Observer,
 				}
 
 				mainPanel.getBoardTree().refresh(targetBoard);
-			} else if (sel == 5) { /* archive */
+			} else if (sel == 5 || sel == 6) { /* (un)archive */
+				boolean archive = (sel == 5);
+
 				for (int i = 0 ; i < selected.length ; i++) {
 					if (selected[i])
-						model.getMsg(i).setArchived(true);
+						model.getMsg(i).setArchived(archive);
 				}
 				refresh();
 
