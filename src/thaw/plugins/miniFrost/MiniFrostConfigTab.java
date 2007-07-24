@@ -66,6 +66,7 @@ public class MiniFrostConfigTab implements Observer {
 
 		if (config.getValue("miniFrostAutoRefreshMaxBoards") != null) {
 			max = Integer.parseInt(config.getValue("miniFrostAutoRefreshMaxBoards"));
+			Logger.info(this, "Max: "+Integer.toString(max));
 		} else {
 			max = AutoRefresh.DEFAULT_MAX_BOARDS_REFRESHING;
 		}

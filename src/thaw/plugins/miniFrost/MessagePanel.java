@@ -322,12 +322,12 @@ public class MessagePanel
 				if (archive && !nextUnread())
 					mainPanel.displayMessageTable();
 
-			} else if (sel == 2) { /* reply */
+			} else if (sel == 3) { /* reply */
 
 				/* TODO */
 
-			} else if (sel == 3 || sel == 4) { /* (un)fold */
-				boolean retracted = (sel == 4);
+			} else if (sel == 4 || sel == 5) { /* (un)fold */
+				boolean retracted = (sel == 5);
 
 				for (Iterator it = subPanels.iterator();
 				     it.hasNext();) {
