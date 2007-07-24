@@ -298,6 +298,8 @@ public class BoardTree extends Observable
 
 		setChanged();
 		notifyObservers(b);
+
+		list.requestFocus();
 	}
 
 
