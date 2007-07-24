@@ -384,9 +384,10 @@ public class KSKMessage
 		if (!parsed) {
 			Logger.warning(this, "Unable to parse the message ?! returning raw content");
 			v = new Vector();
-			v.add(new KSKSubMessage(new KSKAuthor(I18n.getMessage("thaw.plugin.miniFrost.rawMessage"), null),
+			v.add(new KSKSubMessage((KSKAuthor)getSender(),
 						getDate(),
-						content));
+						"==== "+I18n.getMessage("thaw.plugin.miniFrost.rawMessage")+" ===="
+						+"\n\n"+content));
 		}
 
 

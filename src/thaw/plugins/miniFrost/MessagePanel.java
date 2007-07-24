@@ -152,7 +152,7 @@ public class MessagePanel
 
 			JLabel dateLabel = new JLabel(msg.getDate().toString());
 			JLabel authorLabel = new JLabel(msg.getAuthor().toString());
-			authorLabel.setPreferredSize(new java.awt.Dimension(350, 15));
+			authorLabel.setPreferredSize(new java.awt.Dimension(300, 15));
 
 
 			upDownButton = new JButton("", (retracted ? IconBox.minDown : IconBox.minUp));
@@ -305,7 +305,8 @@ public class MessagePanel
 
 		} else if (e.getSource() == nextUnread) {
 
-			nextUnread();
+			if (!nextUnread())
+				mainPanel.displayMessageTable();
 
 		} else if (e.getSource() == actions) {
 
