@@ -357,7 +357,8 @@ public class KSKBoard
 				&& msg.isSuccessful();
 
 			if (successful) {
-				newMsgs++;
+				if (msg.isParsable())
+					newMsgs++;
 
 				notifyChange();
 				lastSuccessfulRev = msg.getRev();

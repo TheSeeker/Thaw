@@ -29,6 +29,10 @@ public interface Message /* extends TreeNode */ {
 	 */
 	public Vector getSubMessages();
 
+	/**
+	 * @return null if none
+	 */
+	public Vector getAttachments();
 
 	public boolean equals(Object o);
 }

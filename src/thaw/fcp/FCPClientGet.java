@@ -13,7 +13,7 @@ public class FCPClientGet extends Observable
 	implements Observer, FCPTransferQuery {
 
 	public final static int DEFAULT_PRIORITY = 4;
-
+	public final static int DEFAULT_MAX_RETRIES = -1;
 	public final static int PERSISTENCE_FOREVER           = 0;
 	public final static int PERSISTENCE_UNTIL_NODE_REBOOT = 1;
 	public final static int PERSISTENCE_UNTIL_DISCONNECT  = 2;
@@ -480,7 +480,7 @@ public class FCPClientGet extends Observable
 				return;
 			}
 
-			Logger.warning(this, "==== GET FAILED ===\n"+message.toString());
+			Logger.notice(this, "==== GET FAILED ===\n"+message.toString());
 
 
 			if(!isRunning()) { /* Must be a "GetFailed: cancelled by caller", so we simply ignore */

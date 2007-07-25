@@ -80,7 +80,17 @@ public class MiniFrostPanel implements Observer {
 		loadState();
 	}
 
+	/**
+	 * notify major changes : board added / removed
+	 */
+	public void notifyChange() {
+		boardTree.refresh();
+	}
 
+	/**
+	 * notify a change on this board. usually
+	 * that a new non-read message has been added
+	 */
 	public void notifyChange(Board board) {
 		boardTree.refresh(board);
 

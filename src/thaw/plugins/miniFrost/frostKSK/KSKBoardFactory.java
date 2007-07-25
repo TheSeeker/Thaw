@@ -20,6 +20,9 @@ import thaw.plugins.MiniFrost;
 public class KSKBoardFactory
 	implements thaw.plugins.miniFrost.interfaces.BoardFactory {
 
+	/* must correspond at the position in the array of boardfactory in miniFrost */
+	public final static int BOARD_FACTORY_ID = 0;
+
 	public final static String[] DEFAULT_BOARDS = new String[] {
 		"freenet",
 		"thaw",
@@ -121,6 +124,23 @@ public class KSKBoardFactory
 			  + "FOREIGN KEY (boardId) REFERENCES frostKSKBoards (id), "
 			  + "FOREIGN KEY (inReplyTo) REFERENCES frostKSKMessages (id), "
 			  + "FOREIGN KEY (sigId) REFERENCES signatures (id))");
+
+		sendQuery("CREATE CACHED TABLE frostKSKAttachmentFiles ("
+			  + "id INTEGER IDENTITY NOT NULL, "
+			  + "filename VARCHAR(256) NOT NULL, "
+			  + "size BIGINT NOT NULL, "
+			  + "key VARCHAR(512) NOT NULL, "
+			  + "messageId INTEGER NOT NULL, "
+			  + "FOREIGN KEY (messageId) REFERENCES frostKSKMessages (id))");
+
+		sendQuery("CREATE CACHED TABLE frostKSKAttachmentBoards ("
+			  + "id INTEGER IDENTITY NOT NULL, "
+			  + "name VARCHAR(128) NOT NULL, "
+			  + "publicKey VARCHAR(256) NULL, "
+			  + "privateKey VARCHAR(256) NULL, "
+			  + "description VARCHAR(512) NULL, "
+			  + "messageId INTEGER NOT NULL, "
+			  + "FOREIGN KEY (messageId) REFERENCES frostKSKMessages (id))");
 	}
 
 

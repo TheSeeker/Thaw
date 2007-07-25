@@ -8,11 +8,15 @@ import org.xml.sax.*;
 import java.text.SimpleDateFormat;
 import java.io.File;
 
+import java.util.Vector;
+import java.util.Iterator;
+import java.util.List;
+
+
 import frost.util.XMLTools;
 
 import thaw.plugins.Hsqldb;
 import thaw.core.Logger;
-
 
 /**
  * Dirty parser reusing some Frost functions
@@ -34,6 +38,8 @@ public class KSKMessageParser {
 	private String recipient;
 	private String board;
 	private String body;
+
+	private Vector attachments;
 
 
 	private boolean alreadyInTheDb(Hsqldb db, String msgId) {
@@ -99,6 +105,7 @@ public class KSKMessageParser {
 			synchronized(db.dbLock) {
 				PreparedStatement st;
 
+				/* we search the message to this one answer */
 				if (inReplyTo != null) {
 					String[] split = inReplyTo.split(",");
 					inReplyTo = split[split.length-1];
@@ -114,6 +121,7 @@ public class KSKMessageParser {
 
 				}
 
+				/* we insert the message */
 
 				st = db.getConnection().prepareStatement("INSERT INTO frostKSKMessages ("+
 									 "subject, nick, sigId, content, "+
@@ -143,6 +151,28 @@ public class KSKMessageParser {
 
 				st.execute();
 
+
+				/* we need the id of the message */
+
+				st = db.getConnection().prepareStatement("SELECT id FROM frostKSKmessages "+
+									 "WHERE msgId = ? LIMIT 1");
+				st.setString(1, messageId);
+
+				ResultSet set = st.executeQuery();
+
+				set.next();
+
+				int id = set.getInt("id");
+
+				/* we insert the attachments */
+
+				if (attachments != null) {
+					for(Iterator it = attachments.iterator();
+					    it.hasNext();) {
+						KSKAttachment a = (KSKAttachment)it.next();
+						a.insert(db, id);
+					}
+				}
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Can't insert the message into the db because : "+e.toString());
@@ -164,6 +194,22 @@ public class KSKMessageParser {
 		recipient     = XMLTools.getChildElementsCDATAValue(root, "recipient");
 		board         = XMLTools.getChildElementsCDATAValue(root, "Board");
 		body          = XMLTools.getChildElementsCDATAValue(root, "Body");
+
+		List l = XMLTools.getChildElementsByTagName(root, "AttachmentList");
+		if (l.size() == 1) {
+			attachments = new Vector();
+
+			KSKAttachmentFactory factory = new KSKAttachmentFactory();
+
+			Element attachmentsEl = (Element) l.get(0);
+			Iterator i = XMLTools.getChildElementsByTagName(attachmentsEl,"Attachment").iterator();
+			while (i.hasNext()){
+				Element el = (Element)i.next();
+				KSKAttachment attachment = factory.getAttachment(el);
+				if (attachment != null)
+					attachments.add(attachment);
+			}
+		}
 
 		return true;
 	}
@@ -195,7 +241,9 @@ public class KSKMessageParser {
 			return loadXMLElements(rootNode);
 
 		} catch(Exception e) {
+			/* XMLTools throws runtime exception sometimes ... */
 			Logger.warning(this, "Unable to parse XML message because : "+e.toString());
+			e.printStackTrace();
 			return false;
 		}
 	}

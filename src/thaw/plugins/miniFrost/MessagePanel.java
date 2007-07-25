@@ -19,12 +19,17 @@ import java.awt.event.ActionEvent;
 
 import java.awt.event.KeyEvent;
 
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+
 
 import thaw.gui.IconBox;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.plugins.miniFrost.interfaces.Message;
 import thaw.plugins.miniFrost.interfaces.SubMessage;
+import thaw.plugins.miniFrost.interfaces.Attachment;
 
 
 public class MessagePanel
@@ -52,6 +57,8 @@ public class MessagePanel
 
 	private Message msg;
 	private Vector subMsgs;
+	private Vector attachments;
+
 
 	private JScrollPane scrollPane;
 
@@ -119,6 +126,7 @@ public class MessagePanel
 	public void setMessage(Message msg) {
 		this.msg = msg;
 		subMsgs = msg.getSubMessages();
+		attachments = msg.getAttachments();
 
 		refresh();
 	}
@@ -217,6 +225,75 @@ public class MessagePanel
 	}
 
 
+	protected class AttachmentAction extends JMenuItem
+		implements ActionListener {
+
+		private Attachment a;
+		private String action;
+
+		public AttachmentAction(Attachment a, String action) {
+			super(action);
+
+			this.a = a;
+			this.action = action;
+
+			super.addActionListener(this);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			a.apply(mainPanel.getDb(),
+				mainPanel.getPluginCore().getCore().getQueueManager(),
+				action);
+		}
+	}
+
+
+	protected class AttachmentPanel extends JPanel
+		implements ActionListener {
+
+		private JButton button;
+		private Vector attachments;
+
+		public AttachmentPanel(Vector attachments) {
+			super();
+			this.attachments = attachments;
+			button = new JButton(IconBox.attachment);
+			button.setToolTipText(I18n.getMessage("thaw.plugin.miniFrost.attachments"));
+			button.addActionListener(this);
+			super.add(button);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			if (e.getSource() == button) {
+				JPopupMenu menu = new JPopupMenu();
+
+				/* make the menu */
+
+				for(Iterator it = attachments.iterator();
+				    it.hasNext();) {
+					Attachment a = (Attachment)it.next();
+					JMenu subMenu = new JMenu(a.getPrintableType() + " : "+a.toString());
+
+					String[] actions = a.getActions();
+
+					for (int i = 0 ; i < actions.length ; i++) {
+						subMenu.add(new AttachmentAction(a, actions[i]));
+					}
+
+					menu.add(subMenu);
+				}
+
+
+				/* and next display it */
+				menu.show(this,
+					  this.getWidth()/2,
+					  this.getHeight()/2);
+			}
+		}
+	}
+
+
+
 	public void refresh() {
 		subPanels = new Vector();
 
@@ -229,6 +306,7 @@ public class MessagePanel
 
 		int i = 0;
 
+		/* sub messages */
 		for (Iterator it = subMsgs.iterator();
 		     it.hasNext();) {
 			SubMessage subMsg = (SubMessage)it.next();
@@ -248,6 +326,22 @@ public class MessagePanel
 
 			i++;
 		}
+
+
+		/* attachments */
+		if (attachments != null) {
+			AttachmentPanel panel = new AttachmentPanel(attachments);
+
+			if (iPanel == null) {
+				iPanel = panel;
+			} else {
+				JPanel newPanel = new JPanel(new BorderLayout(0, 20));
+				newPanel.add(iPanel, BorderLayout.NORTH);
+				newPanel.add(panel, BorderLayout.CENTER);
+				iPanel = newPanel;
+			}
+		}
+
 
 		if (insidePanel != null) {
 			msgsPanel.remove(insidePanel);

@@ -398,6 +398,15 @@ public class KSKMessage
 		return id;
 	}
 
+
+	public Vector getAttachments() {
+		return KSKAttachmentFactory.getAttachments(this,
+							   board.getFactory(),
+							   board.getFactory().getDb());
+
+	}
+
+
 	public boolean equals(Object o) {
 		if (!(o instanceof KSKMessage))
 			return false;

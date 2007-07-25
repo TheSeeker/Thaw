@@ -159,6 +159,8 @@ public class IconBox {
 	public static ImageIcon minLeft;
 	public static ImageIcon minRight;
 
+	public static ImageIcon attachment;
+	public static ImageIcon minAttachment;
 
 	/**
 	 * Not really used
@@ -293,6 +295,8 @@ public class IconBox {
 		IconBox.minDown             = IconBox.loadIcon("min-go-down.png");
 		IconBox.minLeft             = IconBox.loadIcon("min-go-previous.png");
 		IconBox.minRight            = IconBox.loadIcon("min-go-next.png");
+		IconBox.attachment          = IconBox.loadIcon("mail-attachment.png");
+		IconBox.minAttachment       = IconBox.loadIcon("min-mail-attachment.png");
 	}
 
 }
