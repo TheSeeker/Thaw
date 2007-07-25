@@ -105,12 +105,12 @@ public class BoardTree extends Observable
 		item = new JMenuItem(I18n.getMessage("thaw.common.remove"),
 				     IconBox.minDelete);
 		rightClickMenu.add(item);
-		actions.add(new BoardManagementHelper.BoardAdder(mainPanel, item));
+		actions.add(new BoardManagementHelper.BoardRemover(mainPanel, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.miniFrost.loadNewMessages"),
 				     IconBox.minRefreshAction);
 		rightClickMenu.add(item);
-		actions.add(new BoardManagementHelper.BoardAdder(mainPanel, item));
+		actions.add(new BoardManagementHelper.BoardRefresher(mainPanel, item));
 
 		/* buttons */
 
