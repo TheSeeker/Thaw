@@ -359,14 +359,16 @@ public class MessagePanel
 		msgsPanel.revalidate();
 		panel.revalidate();
 
+		panel.repaint();
+
 		putScrollBarAtBottom();
 	}
 
 
 	private void putScrollBarAtBottom() {
 		scrollPane.revalidate();
-		int max = scrollPane.getVerticalScrollBar().getMaximum();
-		scrollPane.getVerticalScrollBar().setValue(max);
+		//int max = scrollPane.getVerticalScrollBar().getMaximum();
+		scrollPane.getVerticalScrollBar().setValue(Integer.MAX_VALUE);
 	}
 
 
