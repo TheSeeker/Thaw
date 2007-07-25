@@ -3,16 +3,20 @@ package thaw.plugins;
 import java.util.Iterator;
 import java.util.Vector;
 
+import java.awt.Color;
+
+
 import thaw.core.Core;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.Main;
 import thaw.core.Plugin;
+import thaw.core.LogListener;
 
 import thaw.gui.IconBox;
 import thaw.fcp.FCPTransferQuery;
 
-public class StatusBar implements Runnable, Plugin {
+public class StatusBar implements Runnable, Plugin, LogListener {
 	public final static int INTERVAL = 3000; /* in ms */
 	public final static String SEPARATOR = "     ";
 
@@ -21,6 +25,12 @@ public class StatusBar implements Runnable, Plugin {
 	private Thread refresher;
 
 	private boolean advancedMode = false;
+
+	private boolean dropNextRefresh = false;
+
+	private Object barLock = new Object();
+
+	public final static Color ORANGE = new Color(240, 160, 0);
 
 	public boolean run(final Core core) {
 		this.core = core;
@@ -31,6 +41,8 @@ public class StatusBar implements Runnable, Plugin {
 		refresher = new Thread(this);
 
 		refresher.start();
+
+		Logger.addLogListener(this);
 
 		return true;
 	}
@@ -44,11 +56,29 @@ public class StatusBar implements Runnable, Plugin {
 				// pfff :P
 			}
 
-			updateStatusBar();
+			if (!dropNextRefresh)
+				updateStatusBar();
+			else
+				dropNextRefresh = false;
 
 		}
 
 	}
+
+
+	public void newLogLine(int level, Object src, String line) {
+		if (level <= 1) { /* error / warnings */
+			dropNextRefresh = true;
+
+			String str = Logger.PREFIXES[level]+" "
+				+ ((src != null) ? (src.getClass().getName() + ": ") : "")
+				+ line;
+
+			core.getMainWindow().setStatus(IconBox.minStop, str,
+						       ((level == 0) ? Color.RED : ORANGE));
+		}
+	}
+
 
 	public void updateStatusBar() {
 
@@ -135,7 +165,6 @@ public class StatusBar implements Runnable, Plugin {
 			+ Integer.toString(pending) + "/" + Integer.toString(total);
 
 		core.getMainWindow().setStatus(IconBox.minConnectAction, status);
-
 	}
 
 

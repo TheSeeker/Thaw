@@ -24,84 +24,107 @@ public class Logger {
 	 */
 	public final static int LOG_LEVEL = 3;
 
+
+	public final static String[] PREFIXES = new String[] {
+		"[ ERROR ]",
+		"[WARNING]",
+		"[NOTICE ]",
+		"[ INFO  ]",
+		"[ DEBUG ]",
+		"[VERBOSE]"
+	};
+
+
 	private static Vector logListeners = null;
 
 
-	protected static void displayErr(final String msg) {
+	private static void displayErr(final String msg) {
 		System.err.println(msg);
-		Logger.notifyLogListeners(msg);
 	}
 
-	protected static void display(final String msg) {
+	private static void display(final String msg) {
 		System.out.println(msg);
-		Logger.notifyLogListeners(msg);
 	}
+
+	private static void log(final int level, final Object o, final String msg) {
+		log(level, o, msg, false);
+	}
+
+	private static void log(final int level, final Object o, final String msg,
+				final boolean manda) {
+		if (Logger.LOG_LEVEL < level && !manda)
+			return;
+
+		String str = ((o != null) ? o.getClass().getName()+": " : "");
+
+		if (level <= 1)
+			displayErr(PREFIXES[level]+" "+str+msg);
+		else
+			display(PREFIXES[level]+" "+str+msg);
+
+		notify(level, o, msg);
+	}
+
 
 	/**
 	 * Errors.
+	 * A process ended because of it.
 	 */
 	public static void error(final Object o, final String message) {
-		Logger.displayErr("[ ERROR ] "+o.getClass().getName()+": "+message);
+		log(0, o, message);
 	}
 
 	/**
 	 * Warnings.
+	 * Some informations will probably be / are probably missing.
+	 * Or: Can't do something, but it's normal.
 	 */
 	public static void warning(final Object o, final String message) {
-		if(Logger.LOG_LEVEL >= 1)
-			Logger.displayErr("[WARNING] "+o.getClass().getName()+": "+message);
+		log(1, o, message);
 	}
 
 	/**
 	 * Notices.
+	 * Strange event, but probably not unusual.
+	 * Or: Normal event, but who can create troubles.
 	 */
 	public static void notice(final Object o, final String msg) {
-		if(Logger.LOG_LEVEL >= 2)
-			Logger.display("[NOTICE ] " +o.getClass().getName()+": "+msg);
+		log(2, o, msg);
 	}
 
 
+	/**
+	 * Infos.
+	 * Normal process.
+	 */
 	public static void info(final Object o, final String msg) {
-		Logger.info(o, msg, false);
+		log(3, o, msg);
 	}
 
 	/**
 	 * Infos.
+	 * @param manda force the display of these informations
 	 */
 	public static void info(final Object o, final String msg, final boolean manda) {
-		if((Logger.LOG_LEVEL >= 3) || manda)
-			Logger.display("[ INFO  ] "+o.getClass().getName()+": "+msg);
+		log(3, o, msg, manda);
 	}
 
 	/**
 	 * Debug.
+	 * Details about a normal process.
 	 */
 	public static void debug(final Object o, final String msg) {
-		if(Logger.LOG_LEVEL >= 4)
-			Logger.display("[ DEBUG ] "+o.getClass().getName()+": "+msg);
+		log(4, o, msg);
 	}
 
 
 	/**
 	 * Verbose. Too Verbose.
+	 * Details, a LOT of details.
 	 */
 	public static void verbose(final Object o, final String msg) {
-		if(Logger.LOG_LEVEL >= 5) {
-			System.out.println("[VERBOSE] "+ o.getClass().getName()+": "+msg);
-			Logger.notifyLogListeners(msg);
-		}
+		log(5, o, msg);
 	}
-
-	/**
-	 * As it. Similar to verbose()
-	 */
-	public static void asIt(final Object o, final String msg) {
-		if(Logger.LOG_LEVEL >= 5) {
-			System.out.println(msg);
-			Logger.notifyLogListeners(msg);
-		}
-	}
-
 
 
 
@@ -118,10 +141,16 @@ public class Logger {
 			return;
 
 		Logger.logListeners.remove(logListener);
+
+		if (logListeners.size() == 0)
+			logListeners = null;
 	}
 
 
-	private static void notifyLogListeners(final String line) {
+	/**
+	 * notify the observers if there is.
+	 */
+	private static void notify(final int level, final Object src, final String line) {
 		if(Logger.logListeners == null)
 			return;
 
@@ -129,7 +158,7 @@ public class Logger {
 		    it.hasNext(); ) {
 			final LogListener logListener = (LogListener)it.next();
 
-			logListener.newLogLine(line);
+			logListener.newLogLine(level, src, line);
 		}
 	}
 

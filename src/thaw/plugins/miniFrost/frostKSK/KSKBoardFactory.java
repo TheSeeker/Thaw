@@ -252,7 +252,7 @@ public class KSKBoardFactory
 				ResultSet set = st.executeQuery();
 
 				if (set.next()) {
-					Logger.notice(this, "Board already added");
+					Logger.warning(this, "Board already added");
 					return;
 				}
 

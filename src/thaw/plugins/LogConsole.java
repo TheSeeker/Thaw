@@ -138,8 +138,12 @@ public class LogConsole implements Plugin, LogListener, ActionListener, Runnable
 		}
 	}
 
-	public void newLogLine(final String line) {
-		addLine(line + "\n");
+
+	public void newLogLine(int level, Object src, String line) {
+		if (src != null)
+			addLine(Logger.PREFIXES[level] + " "+src.getClass().getName()+": "+line + "\n");
+		else
+			addLine(Logger.PREFIXES[level] + " "+line+"\n");
 	}
 
 
