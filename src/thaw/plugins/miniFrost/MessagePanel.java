@@ -83,7 +83,6 @@ public class MessagePanel
 		msgsPanel.add(new JLabel(""), BorderLayout.CENTER);
 
 		scrollPane = new JScrollPane(msgsPanel);
-
 		panel.add(scrollPane, BorderLayout.CENTER);
 
 
@@ -194,6 +193,10 @@ public class MessagePanel
 			return a;
 		}
 
+
+		public void forceDot() {
+			area.getCaret().setDot(msg.getMessage().length());
+		}
 
 		public void setRetracted(boolean retracted) {
 			if (!retracted) {
@@ -356,7 +359,6 @@ public class MessagePanel
 
 		insidePanel = iPanel;
 
-		msgsPanel.revalidate();
 		panel.revalidate();
 
 		panel.repaint();
@@ -366,9 +368,30 @@ public class MessagePanel
 
 
 	private void putScrollBarAtBottom() {
-		scrollPane.revalidate();
-		//int max = scrollPane.getVerticalScrollBar().getMaximum();
-		scrollPane.getVerticalScrollBar().setValue(Integer.MAX_VALUE);
+		int max = scrollPane.getVerticalScrollBar().getMaximum();
+		scrollPane.getVerticalScrollBar().setValue(max);
+
+		Runnable doScroll = new Runnable() {
+				public void run() {
+					int max = scrollPane.getVerticalScrollBar().getMaximum();
+					int extent = scrollPane.getVerticalScrollBar().getVisibleAmount();
+					int min = scrollPane.getVerticalScrollBar().getMinimum();
+					int value = scrollPane.getVerticalScrollBar().getValue();
+
+					Logger.info(this, "ScrollBar: "
+						    +"min : "+Integer.toString(min)
+						    +" ; max : "+Integer.toString(max)
+						    +" ; extent : "+Integer.toString(extent)
+						    +" ; value : "+Integer.toString(value));
+
+					///scrollPane.getVerticalScrollBar().setValues(max-extent,
+					//					    extent,
+					//					    min, max);
+					scrollPane.getVerticalScrollBar().setValue(max);
+				}
+			};
+
+		javax.swing.SwingUtilities.invokeLater(doScroll);
 	}
 
 
@@ -389,6 +412,8 @@ public class MessagePanel
 			newMsg.setRead(true);
 			mainPanel.getMessageTreeTable().refresh();
 			mainPanel.getBoardTree().refresh(newMsg.getBoard());
+			//putScrollBarAtBottom();
+			setMessage(newMsg);
 			return true;
 		}
 

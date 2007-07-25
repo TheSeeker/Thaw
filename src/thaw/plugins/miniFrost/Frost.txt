@@ -59,10 +59,9 @@ Message format
 <InReplyTo><![CDATA[3677AC9EB291D5BDB9076FF27A66A9AD9ADE2A5C249C9A75781592310C1FA3F2,C6F339A701245E514379E9598927777BB300D2A8EF392C085964D693E1A5D108]]></InReplyTo>
 
 <!--
-	 No fucking idea of what it can be
-	 => Useless as hell => Ignore.
-	 Thaw will put 0 in these two fields
-	 (I don't care about the side effects for Frost)
+	Only used by Frost for a display purpose.
+	No logical client would use that.
+	Put 0.
 -->
 <IdLinePos>404</IdLinePos>
 <IdLineLen>76</IdLineLen>
