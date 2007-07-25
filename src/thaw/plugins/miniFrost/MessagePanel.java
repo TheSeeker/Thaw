@@ -378,15 +378,12 @@ public class MessagePanel
 					int min = scrollPane.getVerticalScrollBar().getMinimum();
 					int value = scrollPane.getVerticalScrollBar().getValue();
 
-					Logger.info(this, "ScrollBar: "
+					Logger.debug(this, "ScrollBar: "
 						    +"min : "+Integer.toString(min)
 						    +" ; max : "+Integer.toString(max)
 						    +" ; extent : "+Integer.toString(extent)
 						    +" ; value : "+Integer.toString(value));
 
-					///scrollPane.getVerticalScrollBar().setValues(max-extent,
-					//					    extent,
-					//					    min, max);
 					scrollPane.getVerticalScrollBar().setValue(max);
 				}
 			};

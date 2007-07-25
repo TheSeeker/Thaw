@@ -45,6 +45,8 @@ public class CommentTab implements ActionListener {
 
 	private JLabel titleLabel = null;
 
+	private JScrollPane scrollPane;
+
 
 	public CommentTab(Config config,
 			  FCPQueueManager queueManager,
@@ -89,8 +91,10 @@ public class CommentTab implements ActionListener {
 
 		centerPanel = new JPanel();
 
+		scrollPane = new JScrollPane(centerPanel);
+
 		tabPanel.add(northPanel,  BorderLayout.NORTH);
-		tabPanel.add(new JScrollPane(centerPanel), BorderLayout.CENTER);
+		tabPanel.add(scrollPane, BorderLayout.CENTER);
 		tabPanel.add(southPanel,  BorderLayout.SOUTH);
 	}
 
@@ -135,6 +139,15 @@ public class CommentTab implements ActionListener {
 		centerPanel.add(new JLabel(""), BorderLayout.CENTER);
 
 		centerPanel.revalidate();
+
+		Runnable doScroll = new Runnable() {
+				public void run() {
+					int max = scrollPane.getVerticalScrollBar().getMaximum();
+					scrollPane.getVerticalScrollBar().setValue(max);
+				}
+			};
+
+		javax.swing.SwingUtilities.invokeLater(doScroll);
 	}
 
 
