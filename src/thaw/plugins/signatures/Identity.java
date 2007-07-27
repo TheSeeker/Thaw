@@ -103,6 +103,16 @@ public class Identity {
 			String publicKey, String privateKey,
 			boolean isDup,
 			int trustLevel) {
+
+		if (nick == null || publicKey == null) {
+			Logger.error(this, "missing value ?!");
+
+			if (nick == null)
+				Logger.error(this, "nick missing");
+			if (publicKey == null)
+				Logger.error(this, "publicKey missing");
+		}
+
 		this.db = db;
 		this.id = id;
 		this.nick = nick;
@@ -113,6 +123,7 @@ public class Identity {
 
 		//hash = Base64.encode(SHA256.digest(publicKey.getBytes("UTF-8")));
 		initFrostCrypt();
+
 		hash = frostCrypt.digest(publicKey);
 	}
 
@@ -142,22 +153,33 @@ public class Identity {
 		return trustLevel;
 	}
 
-	public String getTrustLevelStr() {
+	public static int getTrustLevel(String str) {
 		int i;
 
+		for (i = 0 ; i < trustLevelStr.length ; i++) {
+			if (trustLevelStr[i].equals(str))
+				return trustLevelInt[i];
+		}
+
+		return 0;
+
+	}
+
+	public String getTrustLevelStr() {
 		if (privateKey != null) {
 			return "thaw.plugin.signature.trustLevel.me";
 		}
 
+		return getTrustLevelStr(trustLevel);
+	}
+
+	public static String getTrustLevelStr(int trustLevel) {
+		int i;
+
 		for (i = 0 ; i < trustLevelInt.length ; i++) {
 			if (trustLevelInt[i] == trustLevel)
-				break;
+				return trustLevelStr[i];
 		}
-
-		if (i < trustLevelInt.length) {
-			return trustLevelStr[i];
-		}
-
 
 		return "[?]";
 	}

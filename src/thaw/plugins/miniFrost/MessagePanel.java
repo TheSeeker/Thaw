@@ -439,23 +439,10 @@ public class MessagePanel
 
 
 	private boolean nextUnread() {
-		if (msg == null) {
-			Logger.warning(this, "No message selected atm ; can't get the next unread message");
-			return false;
-		}
-		Message newMsg = msg.getBoard().getNextUnreadMessage();
-
-		if (newMsg != null) {
-			setMessage(newMsg);
-			newMsg.setRead(true);
-			mainPanel.getMessageTreeTable().refresh();
-			mainPanel.getBoardTree().refresh(newMsg.getBoard());
-			//putScrollBarAtBottom();
-			setMessage(newMsg);
-			return true;
-		}
-
-		return false;
+		/**
+		 * because it knows the filter rules
+		 */
+		return mainPanel.getMessageTreeTable().nextUnread();
 	}
 
 	public void actionPerformed(ActionEvent e) {

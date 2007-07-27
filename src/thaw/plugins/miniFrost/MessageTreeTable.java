@@ -51,6 +51,8 @@ import thaw.gui.IconBox;
 import thaw.core.I18n;
 import thaw.core.Logger;
 
+import thaw.plugins.signatures.Identity;
+
 import thaw.plugins.miniFrost.interfaces.Author;
 import thaw.plugins.miniFrost.interfaces.Board;
 import thaw.plugins.miniFrost.interfaces.BoardFactory;
@@ -109,6 +111,9 @@ public class MessageTreeTable implements Observer,
 	private int orderBy;
 	private boolean desc;
 
+	private JCheckBox seeUnsigned;
+	private JComboBox minTrustLevel;
+	private int minTrustLevelInt;
 
 	public MessageTreeTable(MiniFrostPanel mainPanel) {
 		this.mainPanel = mainPanel;
@@ -182,14 +187,44 @@ public class MessageTreeTable implements Observer,
 		panel.add(new JScrollPane(table), BorderLayout.CENTER);
 
 
-		/* some filters */
+		/** some filters **/
+
+		/* archived */
 
 		seeArchived = new JCheckBox(I18n.getMessage("thaw.plugin.miniFrost.seeArchived"));
 		seeArchived.setSelected(false);
 		seeArchived.addActionListener(this);
 
+		/* trust level */
+
+		String minTrustLvlStr = mainPanel.getConfig().getValue("minTrustLevel");
+		minTrustLevelInt = thaw.plugins.Signatures.DEFAULT_MIN_TRUST_LEVEL;
+
+		if (minTrustLvlStr != null)
+			minTrustLevelInt = Integer.parseInt(minTrustLvlStr);
+
+
+		JPanel trustLevelFiltersPanel = new JPanel(new BorderLayout(30, 30));
+
+		JPanel minTrustLevelPanel = new JPanel(new BorderLayout(3, 3));
+		minTrustLevelPanel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.hideStatusBelow")), BorderLayout.WEST);
+		minTrustLevel = new JComboBox(Identity.trustLevelUserStr);
+		minTrustLevel.setSelectedItem(Identity.getTrustLevelStr(minTrustLevelInt));
+		minTrustLevel.addActionListener(this);
+		minTrustLevelPanel.add(minTrustLevel, BorderLayout.CENTER);
+
+		seeUnsigned = new JCheckBox(I18n.getMessage("thaw.plugin.miniFrost.seeUnsigned"), true);
+		seeUnsigned.addActionListener(this);
+
+
+		trustLevelFiltersPanel.add(minTrustLevelPanel, BorderLayout.CENTER);
+		trustLevelFiltersPanel.add(seeUnsigned, BorderLayout.EAST);
+
+
 		JPanel southPanel = new JPanel(new BorderLayout(5, 5));
+
 		southPanel.add(new JLabel(""), BorderLayout.CENTER);
+		southPanel.add(trustLevelFiltersPanel, BorderLayout.WEST);
 		southPanel.add(seeArchived, BorderLayout.EAST);
 
 		panel.add(southPanel, BorderLayout.SOUTH);
@@ -411,7 +446,9 @@ public class MessageTreeTable implements Observer,
 
 		if ((!allBoards) && targetBoard != null) {
 			msgs = targetBoard.getMessages(keywords, orderBy,
-						       desc, seeArchived.isSelected());
+						       desc, seeArchived.isSelected(),
+						       seeUnsigned.isSelected(),
+						       minTrustLevelInt);
 		}
 
 		if (allBoards) {
@@ -421,7 +458,9 @@ public class MessageTreeTable implements Observer,
 
 			for (int i = 0 ; i < factories.length ; i++) {
 				Vector boardMsgs = factories[i].getAllMessages(keywords, orderBy, desc,
-									       seeArchived.isSelected());
+									       seeArchived.isSelected(),
+									       seeUnsigned.isSelected(),
+									       minTrustLevelInt);
 				msgs.addAll(boardMsgs);
 			}
 		}
@@ -448,11 +487,36 @@ public class MessageTreeTable implements Observer,
 		}
 	}
 
+	public boolean nextUnread() {
+
+		if (targetBoard == null) {
+			Logger.warning(this, "No message selected atm ; can't get the next unread message");
+			return false;
+		}
+
+		Message newMsg = targetBoard.getNextUnreadMessage(seeUnsigned.isSelected(),
+								  minTrustLevelInt);
+
+		if (newMsg != null) {
+			mainPanel.getMessagePanel().setMessage(newMsg);
+			newMsg.setRead(true);
+			refresh();
+			mainPanel.getBoardTree().refresh(targetBoard);
+			mainPanel.displayMessage();
+
+			return true;
+		}
+
+		return false;
+	}
 
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == seeArchived) {
+		if (e.getSource() == seeUnsigned
+		    || e.getSource() == minTrustLevel
+		    || e.getSource() == seeArchived) {
 
+			minTrustLevelInt = Identity.getTrustLevel((String)(minTrustLevel.getSelectedItem()));
 			refresh();
 
 		} else if (e.getSource() == searchButton
@@ -466,20 +530,7 @@ public class MessageTreeTable implements Observer,
 
 		} else if (e.getSource() == nextUnread) {
 
-			if (targetBoard == null) {
-				Logger.warning(this, "No message selected atm ; can't get the next unread message");
-				return;
-			}
-
-			Message newMsg = targetBoard.getNextUnreadMessage();
-
-			if (newMsg != null) {
-				mainPanel.getMessagePanel().setMessage(newMsg);
-				newMsg.setRead(true);
-				refresh();
-				mainPanel.getBoardTree().refresh(targetBoard);
-				mainPanel.displayMessage();
-			}
+			nextUnread();
 
 		} else if (e.getSource() == actions) {
 			int sel = actions.getSelectedIndex();

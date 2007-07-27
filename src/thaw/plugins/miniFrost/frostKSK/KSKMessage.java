@@ -170,21 +170,14 @@ public class KSKMessage
 
 	public KSKMessage(int id,
 			  String subject, String nick,
-			  int sigId,
+			  int sigId, Identity identity,
 			  java.util.Date date, int rev,
 			  boolean read, boolean archived,
 			  KSKBoard board) {
 		this.id        = id;
 		this.subject   = subject;
 
-		Identity identity = null;
-
-		if (sigId >= 0)
-			identity = Identity.getIdentity(board.getFactory().getDb(),
-							sigId);
-
 		this.author    = new KSKAuthor(nick, identity);
-
 
 		this.sigId     = sigId;
 		this.date      = date;

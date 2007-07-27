@@ -13,7 +13,10 @@ import java.util.Calendar;
 import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
 
+import thaw.plugins.signatures.Identity;
+
 import thaw.plugins.miniFrost.interfaces.Board;
+
 
 public class KSKBoard
 	implements Board, Runnable, Observer {
@@ -66,8 +69,12 @@ public class KSKBoard
 	public Vector getMessages(String[] keywords,
 				  int orderBy,
 				  boolean desc,
-				  boolean archived) {
-		return getMessages(id, factory, this, keywords, orderBy, desc, archived, false);
+				  boolean archived,
+				  boolean unsigned,
+				  int minTrustLevel) {
+		return getMessages(id, factory, this, keywords,
+				   orderBy, desc, archived, unsigned,
+				   minTrustLevel, false);
 	}
 
 
@@ -78,16 +85,18 @@ public class KSKBoard
 					    int orderBy,
 					    boolean desc,
 					    boolean archived,
+					    boolean unsigned,
+					    int minTrustLevel,
 					    boolean allBoards) {
 
 		String orderColumn;
 
 		if (orderBy == Board.ORDER_SUBJECT)
-			orderColumn = "LOWER(subject)";
+			orderColumn = "LOWER(frostKSKMessages.subject)";
 		else if (orderBy == Board.ORDER_SENDER)
-			orderColumn = "LOWER(nick)";
+			orderColumn = "LOWER(frostKSKMessages.nick)";
 		else
-			orderColumn = "date";
+			orderColumn = "frostKSKMessages.date";
 
 		if (desc)
 			orderColumn += " DESC";
@@ -95,25 +104,35 @@ public class KSKBoard
 		String whereBase = "WHERE true AND ";
 
 		if (!allBoards) {
-			whereBase = "WHERE boardId = ? AND ";
+			whereBase = "WHERE frostKSKMessages.boardId = ? AND ";
 		}
 
 
 		String archivedStr = " true ";
 
 		if (!archived)
-			archivedStr = "archived = FALSE ";
+			archivedStr = "frostKSKMessages.archived = FALSE ";
 
 
 		String keywordsStr = "";
 
 		if (keywords != null) {
 			for (int i = 0 ; i < keywords.length ; i++) {
-				keywordsStr += " AND (LOWER(subject) LIKE ? "+
-					"  OR LOWER(content) LIKE ? "+
-					"  OR LOWER(nick) LIKE ?)";
+				keywordsStr += " AND (LOWER(frostKSKMessages.subject) LIKE ? "+
+					"  OR LOWER(frostKSKMessages.content) LIKE ? "+
+					"  OR LOWER(frostKSKMessages.nick) LIKE ?)";
 			}
 		}
+
+
+		String trustLvlStr;
+
+		if (unsigned)
+			trustLvlStr = " AND (signatures.trustLevel IS NULL "+
+				"  OR signatures.trustLevel >= "+Integer.toString(minTrustLevel)+") ";
+		else
+			trustLvlStr = " AND signatures.trustLevel >= "+Integer.toString(minTrustLevel)+" ";
+
 
 		Vector v = new Vector();
 
@@ -123,20 +142,31 @@ public class KSKBoard
 			synchronized(db.dbLock) {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT id, "+
-									 "       subject, "+
-									 "       nick, "+
-									 "       sigId, "+
-									 "       date, "+
-									 "       rev, "+
-									 "       read, "+
-									 "       archived, "+
-									 "       boardId "+
-									 "FROM frostKSKMessages "+
-									 whereBase+
-									 archivedStr+
-									 keywordsStr+
-									 "ORDER BY "+orderColumn);
+				String query = "SELECT frostKSKMessages.id, "+
+					"       frostKSKMessages.subject, "+
+					"       frostKSKMessages.nick, "+
+					"       frostKSKMessages.sigId, "+
+					"       frostKSKMessages.date, "+
+					"       frostKSKMessages.rev, "+
+					"       frostKSKMessages.read, "+
+					"       frostKSKMessages.archived, "+
+					"       frostKSKMessages.boardId, "+
+					"       signatures.nickName, "+
+					"       signatures.publicKey, "+
+					"       signatures.privateKey, "+
+					"       signatures.isDup, "+
+					"       signatures.trustLevel "+
+					"FROM frostKSKMessages LEFT OUTER JOIN signatures "+
+					" ON frostKSKMessages.sigId = signatures.id "+
+					whereBase+
+					archivedStr+
+					keywordsStr+
+					trustLvlStr+
+					"ORDER BY "+orderColumn;
+
+
+				st = db.getConnection().prepareStatement(query);
+
 				int i = 1;
 
 				if (!allBoards)
@@ -159,10 +189,21 @@ public class KSKBoard
 							    board :
 							    factory.getBoard(set.getInt("boardId")));
 
+					int sigId = set.getInt("sigId");
+					String nick = set.getString("nickname");
+
 					v.add(new KSKMessage(set.getInt("id"),
 							     set.getString("subject"),
 							     set.getString("nick"),
-							     set.getInt("sigId"),
+							     sigId,
+							     (nick != null ?
+							      new Identity(db, sigId,
+									   nick,
+									   set.getString("publicKey"),
+									   set.getString("privateKey"),
+									   set.getBoolean("isDup"),
+									   set.getInt("trustLevel"))
+							      : null),
 							     set.getTimestamp("date"),
 							     set.getInt("rev"),
 							     set.getBoolean("read"),
@@ -179,28 +220,61 @@ public class KSKBoard
 	}
 
 
-	public thaw.plugins.miniFrost.interfaces.Message getNextUnreadMessage() {
+	public thaw.plugins.miniFrost.interfaces.Message getNextUnreadMessage(boolean unsigned,
+									      int minTrustLevel) {
+		String trustLvlStr;
+
+		if (unsigned)
+			trustLvlStr = " AND (signatures.trustLevel IS NULL "+
+				"  OR signatures.trustLevel >= "+Integer.toString(minTrustLevel)+") ";
+		else
+			trustLvlStr = " AND signatures.trustLevel >= "+Integer.toString(minTrustLevel)+" ";
+
+
 		try {
 			Hsqldb db = factory.getDb();
 
 			synchronized(db.dbLock) {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT id, subject, nick, "+
-									 "       sigId, date, rev "+
-									 "FROM frostKSKMessages "+
-									 "WHERE boardId = ? AND "+
-									 "archived = FALSE AND read = FALSE "+
-									 "ORDER BY date LIMIT 1");
+				String query = "SELECT frostKSKMessages.id AS id, "+
+					"       frostKSKMessages.subject AS subject, "+
+					"       frostKSKMessages.nick AS nick, "+
+					"       frostKSKMessages.sigId AS sigId, "+
+					"       frostKSKMessages.date AS date, "+
+					"       frostKSKMessages.rev AS rev, "+
+					"       signatures.nickName AS sigNick, "+
+					"       signatures.publicKey AS sigPublicKey, "+
+					"       signatures.privateKey AS sigPrivateKey, "+
+					"       signatures.isDup AS sigIsDup, "+
+					"       signatures.trustLevel AS sigTrustLevel "+
+					"FROM frostKSKMessages LEFT OUTER JOIN signatures "+
+					" ON frostKSKMessages.sigId = signatures.id "+
+					"WHERE frostKSKMessages.boardId = ? AND "+
+					"frostKSKMessages.archived = FALSE AND frostKSKMessages.read = FALSE "+
+					trustLvlStr+
+					"ORDER BY frostKSKMessages.date LIMIT 1";
+
+				st = db.getConnection().prepareStatement(query);
 				st.setInt(1, id);
 
 				ResultSet set = st.executeQuery();
 
 				if (set.next()) {
+					int sigId = set.getInt("sigId");
+
 					return new KSKMessage(set.getInt("id"),
 							      set.getString("subject"),
 							      set.getString("nick"),
-							      set.getInt("sigId"),
+							      sigId,
+							      (sigId > 0 ?
+							       new Identity(db, sigId,
+									   set.getString("sigNick"),
+									   set.getString("sigPublicKey"),
+									   set.getString("sigPrivateKey"),
+									   set.getBoolean("sigIsDup"),
+									   set.getInt("sigTrustLevel"))
+							       : null),
 							      set.getTimestamp("date"),
 							      set.getInt("rev"),
 							      false, false,

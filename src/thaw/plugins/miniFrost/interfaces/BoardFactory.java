@@ -28,7 +28,8 @@ public interface BoardFactory {
 	 * @param orderBy see Board
 	 */
 	public Vector getAllMessages(String[] keywords, int orderBy,
-				     boolean desc, boolean archived);
+				     boolean desc, boolean archived,
+				     boolean unsigned, int minTrustLevel);
 
 	/**
 	 * display the dialog asking for a name, etc.

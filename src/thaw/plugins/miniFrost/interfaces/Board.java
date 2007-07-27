@@ -46,13 +46,15 @@ public interface Board {
 	public Vector getMessages(String[] keywords,
 				  int orderBy,
 				  boolean desc,
-				  boolean archived);
+				  boolean archived,
+				  boolean unsigned,
+				  int minTrustLevel);
 
 
 	/**
 	 * @return null if none
 	 */
-	public Message getNextUnreadMessage();
+	public Message getNextUnreadMessage(boolean unsigned, int minTrustLevel);
 
 
 	/**
