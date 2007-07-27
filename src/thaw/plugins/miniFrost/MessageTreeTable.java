@@ -243,9 +243,9 @@ public class MessageTreeTable implements Observer,
 			Color color = Color.BLACK;
 
 
-			if (column == 3)
+			if (column == 2)
 				value = author.toString();
-			else if (column == 4) {
+			else if (column == 3) {
 				if (author.getIdentity() != null)
 					value = author.getIdentity().getTrustLevelStr();
 				else
