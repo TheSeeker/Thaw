@@ -10,12 +10,14 @@ import java.math.BigInteger;
 import freenet.crypt.SHA256;
 import freenet.support.Base64;
 
-import freenet.crypt.DSA;
-import freenet.crypt.DSAPrivateKey;
-import freenet.crypt.DSAPublicKey;
-import freenet.crypt.DSASignature;
+//import freenet.crypt.DSA;
+//import freenet.crypt.DSAPrivateKey;
+//import freenet.crypt.DSAPublicKey;
+//import freenet.crypt.DSASignature;
 import freenet.crypt.Global;
 import freenet.crypt.RandomSource;
+
+import frost.crypt.FrostCrypt;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -66,17 +68,19 @@ public class Identity {
 	private String nick;
 
 
-	/* public key */
-	private byte[] y;
+	/* public key (aka Y) */
+	private String publicKey;
 
-	/* private key */
-	private byte[] x;
+	/* private key (aka X) */
+	private String privateKey;
 
 	private boolean isDup;
 	private int trustLevel;
 
 
 	private String hash;
+
+	private static FrostCrypt frostCrypt;
 
 
 	private Identity() {
@@ -87,20 +91,27 @@ public class Identity {
 	 * @param nick part *before* the @
 	 */
 	public Identity(Hsqldb db, int id, String nick,
-			byte[] y, byte[] x,
+			String publicKey, String privateKey,
 			boolean isDup,
 			int trustLevel) {
 		this.db = db;
 		this.id = id;
 		this.nick = nick;
-		this.y = y;
-		this.x = x;
+		this.publicKey = publicKey;
+		this.privateKey = privateKey;
 		this.isDup = isDup;
 		this.trustLevel = trustLevel;
 
-		hash = Base64.encode(SHA256.digest(y));
+		//hash = Base64.encode(SHA256.digest(publicKey.getBytes("UTF-8")));
+		initFrostCrypt();
+		hash = frostCrypt.digest(publicKey);
 	}
 
+
+	private static void initFrostCrypt() {
+		if (frostCrypt == null)
+			frostCrypt = new FrostCrypt();
+	}
 
 	public int getId() {
 		return id;
@@ -110,18 +121,18 @@ public class Identity {
 		return nick;
 	}
 
-	public byte[] getY() {
-		return y;
+	public String getPublicKey() {
+		return publicKey;
 	}
 
-	public byte[] getX() {
-		return x;
+	public String getPrivateKey() {
+		return privateKey;
 	}
 
 	public String getTrustLevelStr() {
 		int i;
 
-		if (x != null) {
+		if (privateKey != null) {
 			return "thaw.plugin.signature.trustLevel.me";
 		}
 
@@ -146,7 +157,7 @@ public class Identity {
 	public Color getTrustLevelColor() {
 		int i;
 
-		if (x != null)
+		if (privateKey != null)
 			return new java.awt.Color(0, 175, 0);
 
 		for (i = 0 ; i < trustLevelInt.length ; i++) {
@@ -225,7 +236,7 @@ public class Identity {
 
 
 	public boolean mustBeIgnored(Config config) {
-		if (x != null)
+		if (privateKey != null)
 			return false;
 
 		int min = Integer.parseInt(config.getValue("minTrustLevel"));
@@ -239,21 +250,22 @@ public class Identity {
 	 */
 	public static Identity getIdentity(Hsqldb db,
 					   String nick,
-					   byte[] y) {
+					   String publicKey) {
 		try {
 			synchronized(db.dbLock) {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT id, nickName, y, x, isDup, trustLevel "+
+				st = db.getConnection().prepareStatement("SELECT id, nickName, publicKey, "+
+									 "privateKey, isDup, trustLevel "+
 									 "FROM signatures "+
 									 "WHERE y = ? LIMIT 1");
-				st.setBytes(1, y);
+				st.setString(1, publicKey);
 
 				ResultSet set = st.executeQuery();
 
 				if (set.next()) {
 					Identity i = new Identity(db, set.getInt("id"), set.getString("nickName"),
-								  set.getBytes("y"), set.getBytes("x"),
+								  set.getString("publicKey"), set.getString("privateKey"),
 								  set.getBoolean("isDup"), set.getInt("trustLevel"));
 					Logger.info(i, "Identity found");
 					return i;
@@ -272,17 +284,17 @@ public class Identity {
 				/* and we add */
 
 				st = db.getConnection().prepareStatement("INSERT INTO signatures "+
-									 "(nickName, y, x, isDup, trustLevel) "+
+									 "(nickName, publicKey, privateKey, isDup, trustLevel) "+
 									 "VALUES (?, ?, ?, ?, 0)");
 
 				st.setString(1, nick);
-				st.setBytes(2, y);
-				st.setNull(3, Types.VARBINARY);
+				st.setString(2, publicKey);
+				st.setNull(3, Types.VARCHAR);
 				st.setBoolean(4, isDup);
 
 				st.execute();
 
-				Identity i = new Identity(db, -1, nick, y, null, isDup, 0);
+				Identity i = new Identity(db, -1, nick, publicKey, null, isDup, 0);
 				Logger.info(i, "New identity found");
 				return i;
 
@@ -306,7 +318,8 @@ public class Identity {
 			synchronized(db.dbLock) {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT id, nickName, y, x, isDup, trustLevel "+
+				st = db.getConnection().prepareStatement("SELECT id, nickName, publicKey, "+
+									 "privateKey, isDup, trustLevel "+
 									 "FROM signatures "+
 									 "WHERE id = ? LIMIT 1");
 				st.setInt(1, id);
@@ -317,7 +330,7 @@ public class Identity {
 					return null;
 
 				i = new Identity(db, id, set.getString("nickName"),
-						 set.getBytes("y"), set.getBytes("x"),
+						 set.getString("publicKey"), set.getString("privateKey"),
 						 set.getBoolean("isDup"), set.getInt("trustLevel"));
 			}
 		} catch(SQLException e) {
@@ -330,18 +343,22 @@ public class Identity {
 
 	/**
 	 * Generate a new identity
-	 * you have to insert() it
+	 * you have to insert() it after
 	 * @param db just here to fill in the class
 	 */
 	public static Identity generate(Hsqldb db, String nick) {
-		Logger.info(nick, "thaw.plugins.signatures.Identity : Generating new identity ...");
+		Logger.info(null, "thaw.plugins.signatures.Identity : Generating new identity ...");
 
-		DSAPrivateKey privateKey = new DSAPrivateKey(Global.DSAgroupBigA, Core.getRandom());
-		DSAPublicKey publicKey = new DSAPublicKey(Global.DSAgroupBigA, privateKey);
+		//DSAPrivateKey privateKey = new DSAPrivateKey(Global.DSAgroupBigA, Core.getRandom());
+		//DSAPublicKey publicKey = new DSAPublicKey(Global.DSAgroupBigA, privateKey);
+
+		initFrostCrypt();
+
+		String[] keys = frostCrypt.generateKeys();
 
 		Identity identity = new Identity(db, -1, nick,
-						 publicKey.getY().toByteArray(),
-						 privateKey.getX().toByteArray(),
+						 keys[1], /* public */
+						 keys[0], /* private */
 						 false,
 						 10);
 
@@ -360,11 +377,13 @@ public class Identity {
 			synchronized(db.dbLock) {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("INSERT INTO signatures (nickName, y, x, isDup, trustLevel) "+
+				st = db.getConnection().prepareStatement("INSERT INTO signatures "+
+									 "(nickName, publicKey, privateKey, "+
+									 "isDup, trustLevel) "+
 									 "VALUES (?, ?, ?, ?, ?)");
 				st.setString(1, nick);
-				st.setBytes(2, y);
-				st.setBytes(3, x);
+				st.setString(2, publicKey);
+				st.setString(3, privateKey);
 				st.setBoolean(4, isDup);
 				st.setInt(5, trustLevel);
 
@@ -396,69 +415,41 @@ public class Identity {
 	}
 
 
-	public DSASignature sign(String text) {
-		return sign(text, x);
+	public String sign(String text) {
+		initFrostCrypt();
+
+		return frostCrypt.detachedSign(text, privateKey);
 	}
 
 
-	public static DSASignature sign(String text, byte[] x) {
-		BigInteger m;
+	public static String sign(String text, String privateKey) {
+		initFrostCrypt();
 
-		byte[] bytes;
-
-		try {
-			bytes = text.getBytes("UTF-8");
-		} catch(java.io.UnsupportedEncodingException e) {
-			Logger.warning(new Identity(), "sign() : UnsupportedEncodingException ? => Falling back on default charset");
-			bytes = text.getBytes();
-		}
-
-		m = new BigInteger(1, SHA256.digest(bytes));
-
-
-		DSASignature sign = DSA.sign(Global.DSAgroupBigA,
-					     new DSAPrivateKey(new BigInteger(1, x)),
-					     m,
-					     (RandomSource)Core.getRandom());
-
-
-		return sign;
+		return frostCrypt.detachedSign(text, privateKey);
 	}
 
 
-	public boolean check(String text, byte[] r, byte[] s) {
-		return check(text, r, s, y);
+	public boolean check(String text, String sig) {
+		initFrostCrypt();
+		return frostCrypt.detachedVerify(text, publicKey, sig);
 	}
 
 
 	public static boolean check(String text, /* signed text */
-				    byte[] r, /* sig */
-				    byte[] s, /* sig */
-				    byte[] y) /* publicKey */ {
-
-		BigInteger m;
-
-		byte[] bytes;
-
-		try {
-			bytes = text.getBytes("UTF-8");
-		} catch(java.io.UnsupportedEncodingException e) {
-			/* no logging because if it happens once, it will happen often */
-			bytes = text.getBytes();
-		}
-
-		m = new BigInteger(1, SHA256.digest(bytes));
-
-		boolean ret = DSA.verify(new DSAPublicKey(Global.DSAgroupBigA, new BigInteger(1, y)),
-					 new DSASignature(new BigInteger(1, r), new BigInteger(1, s)),
-					 m, false);
-
-		return ret;
+				    String sig,
+				    String publicKey) /* y */ {
+		initFrostCrypt();
+		return frostCrypt.detachedVerify(text, publicKey, sig);
 	}
 
 
 	public String toString() {
-		return nick+"@"+hash;
+		String n = nick;
+
+		if (n.indexOf('@') >= 0)
+			n.replaceAll("@", "_");
+
+		return n+"@"+hash;
 	}
 
 
@@ -470,9 +461,15 @@ public class Identity {
 				PreparedStatement st;
 
 				if (cond != null)
-					st = db.getConnection().prepareStatement("SELECT id, nickName, y, x, isDup, trustLevel FROM signatures WHERE "+cond + " ORDER BY nickName");
+					st = db.getConnection().prepareStatement("SELECT id, nickName, publicKey, "+
+										 "privateKey, isDup, trustLevel "+
+										 "FROM signatures "+
+										 "WHERE "+cond + " "+
+										 "ORDER BY nickName");
 				else
-					st = db.getConnection().prepareStatement("SELECT id, nickName, y, x, isDup, trustLevel FROM signatures ORDER BY nickName");
+					st = db.getConnection().prepareStatement("SELECT id, nickName, publicKey, "+
+										 "privateKey, isDup, trustLevel "+
+										 "FROM signatures ORDER BY nickName");
 
 				ResultSet set = st.executeQuery();
 
@@ -480,8 +477,8 @@ public class Identity {
 					v.add(new Identity(db,
 							   set.getInt("id"),
 							   set.getString("nickName"),
-							   set.getBytes("y"),
-							   set.getBytes("x"),
+							   set.getString("publicKey"),
+							   set.getString("privateKey"),
 							   set.getBoolean("isDup"),
 							   set.getInt("trustLevel")));
 				}
@@ -497,12 +494,12 @@ public class Identity {
 
 
 	public static Vector getYourIdentities(Hsqldb db) {
-		return getIdentities(db, "x IS NOT NULL");
+		return getIdentities(db, "privateKey IS NOT NULL");
 	}
 
 
 	public static Vector getOtherIdentities(Hsqldb db) {
-		return getIdentities(db, "x IS NULL");
+		return getIdentities(db, "privateKey IS NULL");
 	}
 
 
@@ -513,13 +510,13 @@ public class Identity {
 
 			out.write((nick+"\n").getBytes("UTF-8"));
 
-			if (getX() != null)
-				out.write( (Base64.encode(getX())+"\n").getBytes("UTF-8") );
+			if (getPrivateKey() != null)
+				out.write( (getPrivateKey()+"\n").getBytes("UTF-8") );
 			else
 				out.write( "\n".getBytes("UTF-8"));
 
-			if (getY() != null)
-				out.write( (Base64.encode(getY())+"\n").getBytes("UTF-8") );
+			if (getPublicKey() != null)
+				out.write( (getPublicKey()+"\n").getBytes("UTF-8") );
 			else
 				out.write( "\n".getBytes("UTF-8"));
 
@@ -559,8 +556,8 @@ public class Identity {
 			}
 
 			Identity i = new Identity(db, -1, elements[0],
-						  Base64.decode(elements[2]),
-						  Base64.decode(elements[1]),
+						  elements[2],
+						  elements[1],
 						  false, 10);
 			i.insert();
 
@@ -568,8 +565,6 @@ public class Identity {
 		} catch(java.io.FileNotFoundException e) {
 			Logger.error(new Identity(), "(1) Unable to import identity because : "+e.toString());
 		} catch(java.io.IOException e) {
-			Logger.error(new Identity(), "(2) Unable to import identity because : "+e.toString());
-		} catch(freenet.support.IllegalBase64Exception e) {
 			Logger.error(new Identity(), "(2) Unable to import identity because : "+e.toString());
 		}
 

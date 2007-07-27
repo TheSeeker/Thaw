@@ -12,7 +12,6 @@ import java.util.Vector;
 import java.util.Iterator;
 import java.util.List;
 
-
 import frost.util.XMLTools;
 
 import thaw.plugins.Hsqldb;
@@ -39,6 +38,8 @@ public class KSKMessageParser {
 	private String board;
 	private String body;
 
+	private String signature;
+
 	private Vector attachments;
 
 
@@ -62,6 +63,7 @@ public class KSKMessageParser {
 			return false;
 		}
 	}
+
 
 
 	public boolean insert(Hsqldb db,
@@ -178,6 +180,17 @@ public class KSKMessageParser {
 			Logger.error(this, "Can't insert the message into the db because : "+e.toString());
 			return false;
 		}
+
+		return true;
+	}
+
+
+	public String getSignedContent() {
+		return null;
+	}
+
+
+	public boolean checkSignature(Hsqldb db) {
 
 		return true;
 	}

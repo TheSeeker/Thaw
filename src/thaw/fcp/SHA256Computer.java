@@ -56,12 +56,12 @@ public class SHA256Computer extends Observable implements Runnable {
 				setChanged();
 				notifyObservers();
 			}
-			
+
 			bis.close();
 			in.close();
-			
+
 			synchronized (hashLock) {
-				hash = Base64.encode(md.digest());	
+				hash = Base64.encode(md.digest());
 			}
 			isFinished = true;
 			SHA256.returnMessageDigest(md);

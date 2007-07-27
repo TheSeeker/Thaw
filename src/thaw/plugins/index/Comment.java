@@ -70,14 +70,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 
-/* Base 64 */
-
-import freenet.support.Base64;
-
-/* a little bit of DSA */
-
-import freenet.crypt.DSASignature;
-
 
 /* Thaw */
 
@@ -115,8 +107,7 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 
 	/* needed to check the signature */
-	private byte[] r;
-	private byte[] s;
+	private String sig;
 
 
 	private Comment() {
@@ -207,7 +198,7 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 		JPanel trustPanel = new JPanel(new BorderLayout(5, 5));
 
-		if (author.getX() == null) {
+		if (author.getPrivateKey() == null) {
 			trustPanel.add(trust, BorderLayout.CENTER);
 			trustPanel.add(changeTrust, BorderLayout.EAST);
 		}
@@ -216,7 +207,7 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 		bottomRightPanel.add(trustPanel, BorderLayout.CENTER);
 
-		if (hasPrivateKey && (author.getX() == null || blackListed) ) {
+		if (hasPrivateKey && (author.getPrivateKey() == null || blackListed) ) {
 			changeBlackListState = new JButton(blackListed ?
 							   I18n.getMessage("thaw.plugin.index.comment.unmoderate") :
 							   I18n.getMessage("thaw.plugin.index.comment.moderate"));
@@ -390,31 +381,21 @@ public class Comment extends Observable implements Observer, ActionListener {
 		Element signatureTag = xmlDoc.createElement("signature");
 
 		Element sigTag = xmlDoc.createElement("sig");
-		Element rTag = xmlDoc.createElement("r");
-		Element sTag = xmlDoc.createElement("s");
 
-		DSASignature sig = author.sign(index.getCommentPublicKey()+"-"+
-					       author.getNick()+"-"+
-					       comment);
+		String sig = author.sign(index.getCommentPublicKey()+"-"+
+					 author.getNick()+"-"+
+					 comment);
 
-		Text rTxt = xmlDoc.createTextNode(Base64.encode(sig.getR().toByteArray()));
-		Text sTxt = xmlDoc.createTextNode(Base64.encode(sig.getS().toByteArray()));
+		Text sigTxt = xmlDoc.createTextNode(sig);
 
-		rTag.appendChild(rTxt);
-		sTag.appendChild(sTxt);
-
-		sigTag.appendChild(rTag);
-		sigTag.appendChild(sTag);
+		sigTag.appendChild(sigTxt);
 
 
 		Element publicKeyTag = xmlDoc.createElement("publicKey");
 
-		Element yTag = xmlDoc.createElement("y");
+		Text publicKeyTxt = xmlDoc.createTextNode(author.getPublicKey());
 
-		Text yTxt = xmlDoc.createTextNode(Base64.encode(author.getY()));
-
-		yTag.appendChild(yTxt);
-		publicKeyTag.appendChild(yTag);
+		publicKeyTag.appendChild(publicKeyTxt);
 
 		signatureTag.appendChild(sigTag);
 		signatureTag.appendChild(publicKeyTag);
@@ -534,13 +515,12 @@ public class Comment extends Observable implements Observer, ActionListener {
 		private boolean authorTag;
 		private boolean textTag;
 
-		private boolean yTag;
-		private boolean rTag;
-		private boolean sTag;
+		private boolean publicKeyTag;
+		private boolean sigTag;
 
 		/* needed to create / get the corresponding identity */
 		private String authorTxt;
-		private byte[] y;
+		private String publicKey;
 
 
 		/**
@@ -564,14 +544,11 @@ public class Comment extends Observable implements Observer, ActionListener {
 			if ("text".equals(rawName))
 				textTag = true;
 
-			if ("y".equals(rawName))
-				yTag = true;
+			if ("publicKey".equals(rawName))
+				publicKeyTag = true;
 
-			if ("r".equals(rawName))
-				rTag = true;
-
-			if ("s".equals(rawName))
-				sTag = true;
+			if ("sig".equals(rawName))
+				sigTag = true;
 		}
 
 
@@ -594,14 +571,11 @@ public class Comment extends Observable implements Observer, ActionListener {
 			if ("text".equals(rawName))
 				textTag = false;
 
-			if ("y".equals(rawName))
-				yTag = false;
+			if ("publicKey".equals(rawName))
+				publicKeyTag = false;
 
-			if ("r".equals(rawName))
-				rTag = false;
-
-			if ("s".equals(rawName))
-				sTag = false;
+			if ("sig".equals(rawName))
+				sigTag = false;
 		}
 
 
@@ -621,18 +595,11 @@ public class Comment extends Observable implements Observer, ActionListener {
 			if (textTag)
 				comment = txt;
 
-			try {
-				if (yTag)
-					y = Base64.decode(txt);
+			if (publicKeyTag)
+				publicKey = txt;
 
-				if (rTag)
-					r = Base64.decode(txt);
-
-				if (sTag)
-					s = Base64.decode(txt);
-			} catch(freenet.support.IllegalBase64Exception e) {
-				Logger.error(this, "IllegalBase64Exception => won't validate :P");
-			}
+			if (sigTag)
+				sig = txt;
 		}
 
 		public void ignorableWhitespace(char[] ch, int start, int end) throws SAXException {
@@ -657,13 +624,13 @@ public class Comment extends Observable implements Observer, ActionListener {
 		public void endDocument() throws SAXException {
 			try {
 				if (comment != null && authorTxt != null
-				    && y != null && r != null && s != null) {
+				    && publicKey != null && sig != null) {
 
-					author = Identity.getIdentity(db, authorTxt, y);
+					author = Identity.getIdentity(db, authorTxt, publicKey);
 					valid = author.check(index.getCommentPublicKey()+"-"+
 							     author.getNick()+"-"+
 							     comment,
-							     r, s);
+							     sig);
 
 					if (!valid) {
 						Logger.notice(this, "Signature validation failed !");
@@ -733,14 +700,13 @@ public class Comment extends Observable implements Observer, ActionListener {
 					PreparedStatement st;
 
 					st = db.getConnection().prepareStatement("INSERT INTO indexComments "+
-										 "(authorId, text, rev, indexId, r, s) "+
-										 "VALUES (?, ?, ?, ?, ?, ?)");
+										 "(authorId, text, rev, indexId, sig) "+
+										 "VALUES (?, ?, ?, ?, ?)");
 					st.setInt(1, author.getId());
 					st.setString(2, comment);
 					st.setInt(3, rev);
 					st.setInt(4, index.getId());
-					st.setBytes(5, r);
-					st.setBytes(6, s);
+					st.setString(5, sig);
 
 					st.execute();
 
@@ -775,10 +741,9 @@ public class Comment extends Observable implements Observer, ActionListener {
 			PreparedStatement st;
 
 			st = db.getConnection().prepareStatement("SELECT id FROM indexComments "+
-								 "WHERE r = ? AND s = ? ");
+								 "WHERE sig = ?");
 
-			st.setBytes(1, r);
-			st.setBytes(2, s);
+			st.setString(1, sig);
 
 			ResultSet set = st.executeQuery();
 

@@ -91,7 +91,7 @@ public class DatabaseManager {
 
 		if (config.getValue("indexDatabaseVersion") == null) {
 			newDb = true;
-			config.setValue("indexDatabaseVersion", "7");
+			config.setValue("indexDatabaseVersion", "8");
 		} else {
 
 			/* CONVERTIONS */
@@ -139,6 +139,13 @@ public class DatabaseManager {
 					splashScreen.setStatus("Converting database ...");
 				if (convertDatabase_6_to_7(db))
 					config.setValue("indexDatabaseVersion", "7");
+			}
+
+			if ("7".equals(config.getValue("indexDatabaseVersion"))) {
+				if (splashScreen != null)
+					splashScreen.setStatus("Converting database ...");
+				if (convertDatabase_7_to_8(db))
+					config.setValue("indexDatabaseVersion", "8");
 			}
 
 			/* ... */
@@ -278,8 +285,7 @@ public class DatabaseManager {
 			  + "text VARCHAR(16384) NOT NULL," /* 16 KB */
 			  + "rev INTEGER NOT NULL,"
 			  + "indexId INTEGER NOT NULL,"
-			  + "r VARBINARY(400) NOT NULL," /* signature */
-			  + "s VARBINARY(400) NOT NULL," /* signature */
+			  + "sig VARCHAR(400) NOT NULL," /* signature */
 			  + "FOREIGN KEY (indexId) REFERENCES indexes (id),"
 			  + "FOREIGN KEY (authorId) REFERENCES signatures (id))");
 
@@ -979,6 +985,19 @@ public class DatabaseManager {
 	public static boolean convertDatabase_6_to_7(Hsqldb db) {
 		if (!sendQuery(db, "ALTER TABLE indexes ADD COLUMN insertionDate DATE DEFAULT NULL NULL")) {
 			Logger.error(new DatabaseManager(), "Error while converting the database (6 to 7) ! (adding column to index table)");
+			return false;
+		}
+
+		return true;
+	}
+
+	public static boolean convertDatabase_7_to_8(Hsqldb db) {
+		if (!sendQuery(db, "DELETE FROM indexComments")
+		    || !sendQuery(db, "ALTER TABLE indexComments DROP r")
+		    || !sendQuery(db, "ALTER TABLE indexComments DROP s")
+		    || !sendQuery(db, "ALTER TABLE indexComments ADD sig VARCHAR(400) NOT NULL")) {
+
+			Logger.error(new DatabaseManager(), "Error while converting the database (7 to 8) !");
 			return false;
 		}
 

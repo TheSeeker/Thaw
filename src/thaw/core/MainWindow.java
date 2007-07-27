@@ -594,6 +594,7 @@ public class MainWindow implements java.awt.event.ActionListener, WindowListener
 			new JLabel(I18n.getMessage("thaw.about.l10")),
 			new JLabel(I18n.getMessage("thaw.about.l11")),
 			new JLabel(I18n.getMessage("thaw.about.l12")),
+			new JLabel(I18n.getMessage("thaw.about.l13"))
 		};
 
 
