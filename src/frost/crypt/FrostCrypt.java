@@ -85,7 +85,7 @@ public final class FrostCrypt {
 
         //the return value
         String[] result = new String[2];
-        StringBuilder temp = new StringBuilder();
+        StringBuffer temp = new StringBuffer();
 
         //create the keys
         temp.append( new String(Base64.encode(pubKey.getExponent().toByteArray())));
@@ -94,7 +94,7 @@ public final class FrostCrypt {
         result[1] = temp.toString(); // public key
 
         //rince and repeat, this time exactly the way its done in the constructor
-        temp = new StringBuilder();
+        temp = new StringBuffer();
         temp.append(new String(Base64.encode(privKey.getModulus().toByteArray())));
         temp.append(":");
         temp.append(new String(Base64.encode(privKey.getPublicExponent().toByteArray())));
@@ -531,7 +531,7 @@ public final class FrostCrypt {
             sha256.update(food);
             byte[] poop = sha256.digest();
             
-            StringBuilder sb = new StringBuilder();
+            StringBuffer sb = new StringBuffer();
             for (int i=0; i < poop.length; i++) {
                 sb.append(Integer.toString( ( poop[i] & 0xff ) + 0x100 , 16).substring(1));
             }
@@ -580,7 +580,7 @@ public final class FrostCrypt {
             
             byte[] poop = sha256.digest();
             
-            StringBuilder sb = new StringBuilder();
+            StringBuffer sb = new StringBuffer();
             for (int i=0; i < poop.length; i++) {
                 sb.append(Integer.toString( ( poop[i] & 0xff ) + 0x100 , 16).substring(1));
             }
