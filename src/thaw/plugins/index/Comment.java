@@ -169,7 +169,7 @@ public class Comment extends Observable implements Observer, ActionListener {
 								 new java.awt.Font("Dialog", java.awt.Font.BOLD, 14) ));
 
 		JLabel sigLabel = new JLabel(I18n.getMessage("thaw.plugin.signature.trustLevel.trustLevel")+ " : ");
-		JTextField sigLevel = new JTextField(I18n.getMessage(author.getTrustLevelStr())
+		JTextField sigLevel = new JTextField(author.getTrustLevelStr()
 						     + (author.isDup() ? " - " + I18n.getMessage("thaw.plugin.signature.duplicata") : ""));
 
 
@@ -187,12 +187,12 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 		for (int i = 0 ; i < Identity.trustLevelInt.length ; i++) {
 			if (Identity.trustLevelInt[i] < 100)
-				trustLevels.add(I18n.getMessage(Identity.trustLevelStr[i]));
+				trustLevels.add(Identity.trustLevelStr[i]);
 		}
 
 
 		trust = new JComboBox(trustLevels);
-		trust.setSelectedItem(I18n.getMessage(author.getTrustLevelStr()));
+		trust.setSelectedItem(author.getTrustLevelStr());
 		changeTrust = new JButton(I18n.getMessage("thaw.common.apply"));
 		changeTrust.addActionListener(this);
 

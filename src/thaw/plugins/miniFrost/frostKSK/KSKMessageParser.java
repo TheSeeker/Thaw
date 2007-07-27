@@ -14,6 +14,8 @@ import java.util.List;
 
 import frost.util.XMLTools;
 
+import thaw.plugins.signatures.Identity;
+
 import thaw.plugins.Hsqldb;
 import thaw.core.Logger;
 
@@ -33,15 +35,17 @@ public class KSKMessageParser {
 	private String subject;
 	private String date;
 	private String time;
-	private String pubKey;
 	private String recipient;
 	private String board;
 	private String body;
-
+	private String publicKey;
 	private String signature;
+	private String idLinePos;
+	private String idLineLen;
 
 	private Vector attachments;
 
+	private Identity identity;
 
 	private boolean alreadyInTheDb(Hsqldb db, String msgId) {
 		try {
@@ -129,27 +133,31 @@ public class KSKMessageParser {
 									 "subject, nick, sigId, content, "+
 									 "date, msgId, inReplyTo, inReplyToId, "+
 									 "rev, read, archived, boardId) VALUES ("+
-									 "?, ?, NULL, ?, "+
+									 "?, ?, ?, ?, "+
 									 "?, ?, ?, ?, "+
 									 "?, FALSE, FALSE, ?)");
 				st.setString(1, subject);
 				st.setString(2, from); /* nick */
-				st.setString(3, body); /* content */
-				st.setTimestamp(4, dateSql);
-				st.setString(5, messageId);
+				if (identity != null)
+					st.setInt(3, identity.getId());
+				else
+					st.setNull(3, Types.INTEGER);
+				st.setString(4, body); /* content */
+				st.setTimestamp(5, dateSql);
+				st.setString(6, messageId);
 
 				if (replyToId >= 0)
-					st.setInt(6, replyToId);
+					st.setInt(7, replyToId);
 				else
-					st.setNull(6, Types.INTEGER);
+					st.setNull(7, Types.INTEGER);
 
 				if (inReplyTo != null)
-					st.setString(7, inReplyTo);
+					st.setString(8, inReplyTo);
 				else
-					st.setNull(7, Types.VARCHAR);
+					st.setNull(8, Types.VARCHAR);
 
-				st.setInt(8, rev);
-				st.setInt(9, boardId);
+				st.setInt(9, rev);
+				st.setInt(10, boardId);
 
 				st.execute();
 
@@ -185,14 +193,55 @@ public class KSKMessageParser {
 	}
 
 
-	public String getSignedContent() {
-		return null;
+	public final static char SIGNATURE_ELEMENTS_SEPARATOR = '|';
+
+	private String getSignedContent() {
+		final StringBuilder allContent = new StringBuilder();
+
+		allContent.append(date).append(SIGNATURE_ELEMENTS_SEPARATOR);
+		allContent.append(time).append(SIGNATURE_ELEMENTS_SEPARATOR);
+		allContent.append(board).append(SIGNATURE_ELEMENTS_SEPARATOR);
+		allContent.append(from).append(SIGNATURE_ELEMENTS_SEPARATOR);
+		allContent.append(messageId).append(SIGNATURE_ELEMENTS_SEPARATOR);
+		if( inReplyTo != null && inReplyTo.length() > 0 ) {
+			allContent.append(inReplyTo).append(SIGNATURE_ELEMENTS_SEPARATOR);
+		}
+		if( recipient != null && recipient.length() > 0 ) {
+			allContent.append(recipient).append(SIGNATURE_ELEMENTS_SEPARATOR);
+		}
+		allContent.append(idLinePos).append(SIGNATURE_ELEMENTS_SEPARATOR);
+		allContent.append(idLineLen).append(SIGNATURE_ELEMENTS_SEPARATOR);
+		allContent.append(subject).append(SIGNATURE_ELEMENTS_SEPARATOR);
+		allContent.append(body).append(SIGNATURE_ELEMENTS_SEPARATOR);
+
+		if (attachments != null) {
+			for (Iterator it = attachments.iterator();
+			     it.hasNext();) {
+				KSKAttachment a = (KSKAttachment)it.next();
+				allContent.append(a.getSignedStr());
+			}
+		}
+
+		return allContent.toString();
+
 	}
 
 
 	public boolean checkSignature(Hsqldb db) {
+		if (publicKey == null || signature == null) {
+			from = from.replaceAll("@", "_");
+			return true;
+		}
 
-		return true;
+		String[] split = from.split("@");
+		if (split.length < 2 || "".equals(split[0].trim()))
+			return false;
+
+		String nick = split[0].trim();
+
+		identity = Identity.getIdentity(db, nick, publicKey);
+
+		return identity.check(getSignedContent(), signature);
 	}
 
 
@@ -203,10 +252,13 @@ public class KSKMessageParser {
 		subject       = XMLTools.getChildElementsCDATAValue(root, "Subject");
 		date          = XMLTools.getChildElementsCDATAValue(root, "Date");
 		time          = XMLTools.getChildElementsCDATAValue(root, "Time");
-		pubKey        = XMLTools.getChildElementsCDATAValue(root, "pubKey");
 		recipient     = XMLTools.getChildElementsCDATAValue(root, "recipient");
 		board         = XMLTools.getChildElementsCDATAValue(root, "Board");
 		body          = XMLTools.getChildElementsCDATAValue(root, "Body");
+		signature     = XMLTools.getChildElementsCDATAValue(root, "SignatureV2");
+		publicKey     = XMLTools.getChildElementsCDATAValue(root, "pubKey");
+		idLinePos     = XMLTools.getChildElementsTextValue(root, "IdLinePos");
+		idLineLen     = XMLTools.getChildElementsTextValue(root, "IdLineLen");
 
 		List l = XMLTools.getChildElementsByTagName(root, "AttachmentList");
 		if (l.size() == 1) {

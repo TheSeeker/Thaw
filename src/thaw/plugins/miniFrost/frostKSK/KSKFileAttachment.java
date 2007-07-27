@@ -256,4 +256,13 @@ public class KSKFileAttachment
 
 		return (v.size() > 0 ? v : null);
 	}
+
+	public StringBuffer getSignedStr() {
+		StringBuffer buf = new StringBuffer();
+
+		buf.append(filename).append(KSKMessageParser.SIGNATURE_ELEMENTS_SEPARATOR);
+		buf.append(key).append(KSKMessageParser.SIGNATURE_ELEMENTS_SEPARATOR);
+
+		return buf;
+	}
 }

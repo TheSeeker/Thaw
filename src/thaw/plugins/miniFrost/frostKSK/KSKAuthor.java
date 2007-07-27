@@ -21,6 +21,9 @@ public class KSKAuthor
 	}
 
 	public String toString() {
+		if (identity != null)
+			return identity.toString();
+
 		return nick;
 	}
 }

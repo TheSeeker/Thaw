@@ -27,6 +27,8 @@ import javax.swing.JPopupMenu;
 import thaw.gui.IconBox;
 import thaw.core.I18n;
 import thaw.core.Logger;
+import thaw.plugins.signatures.Identity;
+import thaw.plugins.miniFrost.interfaces.Author;
 import thaw.plugins.miniFrost.interfaces.Message;
 import thaw.plugins.miniFrost.interfaces.SubMessage;
 import thaw.plugins.miniFrost.interfaces.Attachment;
@@ -135,6 +137,45 @@ public class MessagePanel
 	}
 
 
+	protected class AuthorPanel extends JPanel implements ActionListener {
+		private JComboBox box = null;
+		private JLabel nick;
+		private Author author;
+
+		public AuthorPanel(Author author) {
+			super(new BorderLayout(5, 5));
+
+			this.author = author;
+
+			nick = new JLabel(author.toString());
+
+			add(nick, BorderLayout.CENTER);
+
+			if (author.getIdentity() != null) {
+				if (author.getIdentity().getTrustLevel()
+				    == Identity.trustLevelInt[0]) /* if dev */
+					box = new JComboBox(Identity.trustLevelStr);
+				else
+					box = new JComboBox(Identity.trustLevelUserStr);
+
+				nick.setForeground(author.getIdentity().getTrustLevelColor());
+
+				box.setSelectedItem(author.getIdentity().getTrustLevelStr());
+				box.addActionListener(this);
+
+				add(box, BorderLayout.EAST);
+			}
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			author.getIdentity().setTrustLevel((String)box.getSelectedItem());
+			nick.setForeground(author.getIdentity().getTrustLevelColor());
+
+			/* we just refresh, because if now the trust level is below what must be
+			 * displayed ... */
+			mainPanel.getMessageTreeTable().refresh();
+		}
+	}
 
 	protected class SubMessagePanel extends JPanel implements ActionListener {
 		private JButton upDownButton;
@@ -158,8 +199,8 @@ public class MessagePanel
 			JPanel headPanel = new JPanel(new BorderLayout(10, 0));
 
 			JLabel dateLabel = new JLabel(msg.getDate().toString());
-			JLabel authorLabel = new JLabel(msg.getAuthor().toString());
-			authorLabel.setPreferredSize(new java.awt.Dimension(300, 15));
+			AuthorPanel authorLabel = new AuthorPanel(msg.getAuthor());
+			authorLabel.setPreferredSize(new java.awt.Dimension(350, 15));
 
 
 			upDownButton = new JButton("", (retracted ? IconBox.minDown : IconBox.minUp));

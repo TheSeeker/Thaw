@@ -231,4 +231,18 @@ public class KSKBoardAttachment
 
 		return (v.size() > 0 ? v : null);
 	}
+
+
+	public StringBuffer getSignedStr() {
+		StringBuffer buf = new StringBuffer();
+
+		buf.append(boardName).append(KSKMessageParser.SIGNATURE_ELEMENTS_SEPARATOR);
+
+		if (publicKey != null)
+			buf.append(publicKey).append(KSKMessageParser.SIGNATURE_ELEMENTS_SEPARATOR);
+		if (privateKey != null)
+			buf.append(privateKey).append(KSKMessageParser.SIGNATURE_ELEMENTS_SEPARATOR);
+
+		return buf;
+	}
 }

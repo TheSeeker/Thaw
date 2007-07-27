@@ -9,4 +9,6 @@ public interface KSKAttachment
 	extends thaw.plugins.miniFrost.interfaces.Attachment {
 
 	public void   insert(Hsqldb db, int messageId);
+
+	public StringBuffer getSignedStr();
 }

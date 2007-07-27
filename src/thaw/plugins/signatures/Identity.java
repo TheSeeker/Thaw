@@ -43,12 +43,20 @@ public class Identity {
 	};
 
 	public final static String[] trustLevelStr = {
-		"thaw.plugin.signature.trustLevel.dev",
-		"thaw.plugin.signature.trustLevel.good",
-		"thaw.plugin.signature.trustLevel.observe",
-		"thaw.plugin.signature.trustLevel.check",
-		"thaw.plugin.signature.trustLevel.bad",
-		"thaw.plugin.signature.trustLevel.evil"
+		I18n.getMessage("thaw.plugin.signature.trustLevel.dev"),
+		I18n.getMessage("thaw.plugin.signature.trustLevel.good"),
+		I18n.getMessage("thaw.plugin.signature.trustLevel.observe"),
+		I18n.getMessage("thaw.plugin.signature.trustLevel.check"),
+		I18n.getMessage("thaw.plugin.signature.trustLevel.bad"),
+		I18n.getMessage("thaw.plugin.signature.trustLevel.evil")
+	};
+
+	public final static String[] trustLevelUserStr= {
+		I18n.getMessage("thaw.plugin.signature.trustLevel.good"),
+		I18n.getMessage("thaw.plugin.signature.trustLevel.observe"),
+		I18n.getMessage("thaw.plugin.signature.trustLevel.check"),
+		I18n.getMessage("thaw.plugin.signature.trustLevel.bad"),
+		I18n.getMessage("thaw.plugin.signature.trustLevel.evil")
 	};
 
 	public final static Color[] trustLevelColor = {
@@ -85,6 +93,7 @@ public class Identity {
 
 	private Identity() {
 	}
+
 
 	/**
 	 * If you don't have a value, let it to null and pray it won't be used :P
@@ -127,6 +136,10 @@ public class Identity {
 
 	public String getPrivateKey() {
 		return privateKey;
+	}
+
+	public int getTrustLevel() {
+		return trustLevel;
 	}
 
 	public String getTrustLevelStr() {
@@ -176,7 +189,7 @@ public class Identity {
 		int i;
 
 		for (i = 0 ; i < Identity.trustLevelStr.length ; i++) {
-			if (I18n.getMessage(Identity.trustLevelStr[i]).equals(str))
+			if (Identity.trustLevelStr[i].equals(str))
 				break;
 		}
 
@@ -200,6 +213,9 @@ public class Identity {
 
 				st.execute();
 			}
+
+			trustLevel = i;
+
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to change trust level because: "+e.toString());
 		}
@@ -258,7 +274,7 @@ public class Identity {
 				st = db.getConnection().prepareStatement("SELECT id, nickName, publicKey, "+
 									 "privateKey, isDup, trustLevel "+
 									 "FROM signatures "+
-									 "WHERE y = ? LIMIT 1");
+									 "WHERE publicKey = ? LIMIT 1");
 				st.setString(1, publicKey);
 
 				ResultSet set = st.executeQuery();
@@ -267,7 +283,7 @@ public class Identity {
 					Identity i = new Identity(db, set.getInt("id"), set.getString("nickName"),
 								  set.getString("publicKey"), set.getString("privateKey"),
 								  set.getBoolean("isDup"), set.getInt("trustLevel"));
-					Logger.info(i, "Identity found");
+					Logger.debug(i, "Identity found");
 					return i;
 				}
 
@@ -294,7 +310,21 @@ public class Identity {
 
 				st.execute();
 
-				Identity i = new Identity(db, -1, nick, publicKey, null, isDup, 0);
+
+				/* and next we find back the id */
+
+				st = db.getConnection().prepareStatement("SELECT id "+
+									 "FROM signatures "+
+									 "WHERE publicKey = ? LIMIT 1");
+				st.setString(1, publicKey);
+
+				set = st.executeQuery();
+
+				set.next();
+
+				int id = set.getInt("id");
+
+				Identity i = new Identity(db, id, nick, publicKey, null, isDup, 0);
 				Logger.info(i, "New identity found");
 				return i;
 

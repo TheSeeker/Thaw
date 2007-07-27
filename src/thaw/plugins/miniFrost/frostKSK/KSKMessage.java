@@ -17,6 +17,8 @@ import thaw.core.Logger;
 import thaw.core.I18n;
 
 import thaw.plugins.Hsqldb;
+import thaw.plugins.signatures.Identity;
+
 
 /**
  * only notify when the message has been fully parsed
@@ -122,6 +124,7 @@ public class KSKMessage
 			KSKMessageParser parser = new KSKMessageParser();
 
 			if (parser.loadFile(new File(get.getPath()))
+			    && parser.checkSignature(db)
 			    && parser.insert(db, board.getId(), rev, board.getName())) {
 
 				new File(get.getPath()).delete();
@@ -173,7 +176,16 @@ public class KSKMessage
 			  KSKBoard board) {
 		this.id        = id;
 		this.subject   = subject;
-		this.author    = new KSKAuthor(nick, null);
+
+		Identity identity = null;
+
+		if (sigId >= 0)
+			identity = Identity.getIdentity(board.getFactory().getDb(),
+							sigId);
+
+		this.author    = new KSKAuthor(nick, identity);
+
+
 		this.sigId     = sigId;
 		this.date      = date;
 		this.rev       = rev;

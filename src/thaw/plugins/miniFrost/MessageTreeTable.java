@@ -15,6 +15,8 @@ import javax.swing.JButton;
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
 
+import java.awt.Color;
+
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.DefaultCellEditor;
 import javax.swing.event.TableModelEvent;
@@ -49,6 +51,7 @@ import thaw.gui.IconBox;
 import thaw.core.I18n;
 import thaw.core.Logger;
 
+import thaw.plugins.miniFrost.interfaces.Author;
 import thaw.plugins.miniFrost.interfaces.Board;
 import thaw.plugins.miniFrost.interfaces.BoardFactory;
 import thaw.plugins.miniFrost.interfaces.Message;
@@ -227,6 +230,8 @@ public class MessageTreeTable implements Observer,
 							       final int row, final int column) {
 			Component c;
 
+			Author author = model.getMsg(row).getSender();
+
 			if (value instanceof Boolean) {
 				JCheckBox box = new JCheckBox();
 
@@ -235,12 +240,25 @@ public class MessageTreeTable implements Observer,
 				return box;
 			}
 
-			if (column == 3) {
-				value = "NOT CHECKED";
+			Color color = Color.BLACK;
+
+
+			if (column == 3)
+				value = author.toString();
+			else if (column == 4) {
+				if (author.getIdentity() != null)
+					value = author.getIdentity().getTrustLevelStr();
+				else
+					value = I18n.getMessage("thaw.plugin.signature.trustLevel.none");
 			}
+
+			if (author.getIdentity() != null)
+				color = author.getIdentity().getTrustLevelColor();
 
 			c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
 								row, column);
+
+			c.setForeground(color);
 
 			Message msg = model.getMsg(row);
 
@@ -305,7 +323,7 @@ public class MessageTreeTable implements Observer,
 			}
 
 			if (column == 2) {
-				return ((Message)msgs.get(row)).getSender().toString();
+				return ((Message)msgs.get(row)).getSender();
 			}
 
 			if (column == 3) {

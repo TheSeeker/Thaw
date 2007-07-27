@@ -565,4 +565,5 @@ public class KSKBoard
 	public KSKBoardFactory getFactory() {
 		return factory;
 	}
+
 }
