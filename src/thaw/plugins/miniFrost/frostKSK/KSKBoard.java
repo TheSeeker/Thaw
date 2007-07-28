@@ -16,6 +16,8 @@ import thaw.plugins.Hsqldb;
 import thaw.plugins.signatures.Identity;
 
 import thaw.plugins.miniFrost.interfaces.Board;
+import thaw.plugins.miniFrost.interfaces.Message;
+import thaw.plugins.miniFrost.interfaces.Draft;
 
 
 public class KSKBoard
@@ -220,8 +222,9 @@ public class KSKBoard
 	}
 
 
-	public thaw.plugins.miniFrost.interfaces.Message getNextUnreadMessage(boolean unsigned,
-									      int minTrustLevel) {
+	public Message getNextUnreadMessage(boolean unsigned,
+					    int minTrustLevel) {
+
 		String trustLvlStr;
 
 		if (unsigned)
@@ -640,4 +643,8 @@ public class KSKBoard
 		return factory;
 	}
 
+
+	public Draft getDraft(Message inReplyTo) {
+		return new KSKDraft(this, (KSKMessage)inReplyTo);
+	}
 }

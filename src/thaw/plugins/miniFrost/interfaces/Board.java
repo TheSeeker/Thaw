@@ -50,6 +50,7 @@ public interface Board {
 				  boolean unsigned,
 				  int minTrustLevel);
 
+	public Draft getDraft(Message inReplyTo);
 
 	/**
 	 * @return null if none

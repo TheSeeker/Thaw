@@ -71,6 +71,8 @@ public class MessagePanel
 
 	private Vector subPanels;
 
+	private JLabel subject;
+
 
 	public MessagePanel(MiniFrostPanel mainPanel) {
 		this.mainPanel = mainPanel;
@@ -106,8 +108,10 @@ public class MessagePanel
 
 		buttonPanel.add(nextUnread);
 
-		JPanel northPanel = new JPanel(new BorderLayout());
-		northPanel.add(new JLabel(""), BorderLayout.CENTER);
+		subject = new JLabel("");
+
+		JPanel northPanel = new JPanel(new BorderLayout(10, 10));
+		northPanel.add(subject, BorderLayout.CENTER);
 		northPanel.add(actions, BorderLayout.EAST);
 		northPanel.add(buttonPanel, BorderLayout.WEST);
 
@@ -350,6 +354,8 @@ public class MessagePanel
 		/* it's dirty, but it should work */
 
 		JPanel iPanel = null;
+
+		subject.setText(I18n.getMessage("thaw.plugin.miniFrost.subject")+": "+msg.getSubject());
 
 		Logger.info(this, "Displaying "+Integer.toString(subMsgs.size())+" sub-msgs");
 
