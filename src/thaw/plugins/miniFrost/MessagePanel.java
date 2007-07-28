@@ -161,6 +161,7 @@ public class MessagePanel
 				nick.setForeground(author.getIdentity().getTrustLevelColor());
 
 				box.setSelectedItem(author.getIdentity().getTrustLevelStr());
+				box.setForeground(author.getIdentity().getTrustLevelColor());
 				box.addActionListener(this);
 
 				add(box, BorderLayout.EAST);
@@ -169,6 +170,7 @@ public class MessagePanel
 
 		public void actionPerformed(ActionEvent e) {
 			author.getIdentity().setTrustLevel((String)box.getSelectedItem());
+			box.setForeground(author.getIdentity().getTrustLevelColor());
 			nick.setForeground(author.getIdentity().getTrustLevelColor());
 
 			/* we just refresh, because if now the trust level is below what must be
@@ -196,19 +198,22 @@ public class MessagePanel
 
 
 			/* header */
-			JPanel headPanel = new JPanel(new BorderLayout(10, 0));
+			JPanel headPanel = new JPanel(new BorderLayout(40, 40));
 
 			JLabel dateLabel = new JLabel(msg.getDate().toString());
 			AuthorPanel authorLabel = new AuthorPanel(msg.getAuthor());
-			authorLabel.setPreferredSize(new java.awt.Dimension(350, 15));
+			//authorLabel.setPreferredSize(new java.awt.Dimension(400, 15));
 
 
 			upDownButton = new JButton("", (retracted ? IconBox.minDown : IconBox.minUp));
 			upDownButton.addActionListener(this);
 
-			headPanel.add(authorLabel, BorderLayout.WEST);
-			headPanel.add(dateLabel, BorderLayout.CENTER);
-			headPanel.add(upDownButton, BorderLayout.EAST);
+			JPanel rightPanel = new JPanel(new BorderLayout(10, 10));
+			rightPanel.add(dateLabel, BorderLayout.CENTER);
+			rightPanel.add(upDownButton,BorderLayout.EAST);
+
+			headPanel.add(authorLabel, BorderLayout.CENTER);
+			headPanel.add(rightPanel, BorderLayout.EAST);
 
 			this.add(headPanel, BorderLayout.NORTH);
 
