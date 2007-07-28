@@ -284,7 +284,7 @@ public class KSKMessage
 
 		Vector v = new Vector();
 
-		String[] split = fullMsg.split("-----");
+		String[] split = fullMsg.split("(\\A|[^-])-----[^-]");
 
 		if (split.length < 4) {
 			Logger.notice(this, "Not enought elements in the messages");
