@@ -70,6 +70,7 @@ public class I18n {
 		} catch(final Exception e) {
 			Logger.warning(new I18n(),/* we need a ref -> random ref -> this is *bad* */
 				       "Unable to find translation for '"+key+"'");
+			e.printStackTrace();
 			return key;
 		}
 	}

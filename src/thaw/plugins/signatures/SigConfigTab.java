@@ -85,7 +85,7 @@ public class SigConfigTab implements ActionListener {
 
 		for (int i = 0 ; i < Identity.trustLevelInt.length ; i++) {
 			if (Identity.trustLevelInt[i] < 100)
-				possibleLevels.add(I18n.getMessage(Identity.trustLevelStr[i]));
+				possibleLevels.add(Identity.trustLevelStr[i]);
 		}
 
 		minLevel = new JComboBox(possibleLevels);
@@ -113,7 +113,7 @@ public class SigConfigTab implements ActionListener {
 		}
 
 		for (i = 0 ; i < Identity.trustLevelStr.length ; i++) {
-			if (I18n.getMessage(Identity.trustLevelStr[i]).equals(val))
+			if (Identity.trustLevelStr[i].equals(val))
 				break;
 		}
 
@@ -138,7 +138,7 @@ public class SigConfigTab implements ActionListener {
 		if (i >= Identity.trustLevelInt.length)
 			return;
 
-		minLevel.setSelectedItem(I18n.getMessage(Identity.trustLevelStr[i]));
+		minLevel.setSelectedItem(Identity.trustLevelStr[i]);
 	}
 
 	protected class YourIdentitiesPanel implements ActionListener {
@@ -383,7 +383,7 @@ public class SigConfigTab implements ActionListener {
 				return ((Identity)identities.get(row)).toString();
 
 			if (column == 1)
-				return I18n.getMessage(((Identity)identities.get(row)).getTrustLevelStr());
+				return ((Identity)identities.get(row)).getTrustLevelStr();
 
 			if (column == 2)
 				return ((Identity)identities.get(row)).isDup() ?
@@ -436,7 +436,7 @@ public class SigConfigTab implements ActionListener {
 
 			for (int i = 0 ; i < Identity.trustLevelInt.length ; i++) {
 				if (Identity.trustLevelInt[i] < 100) {
-					JButton button = new JButton(I18n.getMessage(Identity.trustLevelStr[i]));
+					JButton button = new JButton(Identity.trustLevelStr[i]);
 					buttonsPanel.add(button);
 					buttons.add(button);
 					button.addActionListener(this);
