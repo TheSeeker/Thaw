@@ -79,10 +79,12 @@ public class BoardTree extends Observable
 		list.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 		list.setCellRenderer(new BoardListRenderer());
 		list.addListSelectionListener(this);
-		list.setPreferredSize(new java.awt.Dimension(100, 100));
+		//list.setPreferredSize(new java.awt.Dimension(100, 100));
 		list.addMouseListener(this);
 
-		panel.add(new JScrollPane(list), BorderLayout.CENTER);
+		JScrollPane scroll = new JScrollPane(list);
+		scroll.setPreferredSize(new java.awt.Dimension(100, 100));
+		panel.add(scroll, BorderLayout.CENTER);
 
 		actions = new Vector();
 
