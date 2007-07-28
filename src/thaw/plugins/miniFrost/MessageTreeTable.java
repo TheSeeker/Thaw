@@ -130,8 +130,8 @@ public class MessageTreeTable implements Observer,
 
 		searchField = new JTextField("");
 		everywhereBox = new JCheckBox(I18n.getMessage("thaw.plugin.miniFrost.onAllBoards"));
-		searchButton = new JButton(I18n.getMessage("thaw.common.search"),
-					   IconBox.minSearch);
+		searchButton = new JButton(IconBox.minSearch);
+		searchButton.setToolTipText(I18n.getMessage("thaw.common.search"));
 
 		searchButton.addActionListener(this);
 		searchField.addActionListener(this);
@@ -204,8 +204,6 @@ public class MessageTreeTable implements Observer,
 			minTrustLevelInt = Integer.parseInt(minTrustLvlStr);
 
 
-		JPanel trustLevelFiltersPanel = new JPanel(new BorderLayout(30, 30));
-
 		JPanel minTrustLevelPanel = new JPanel(new BorderLayout(3, 3));
 		minTrustLevelPanel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.hideStatusBelow")), BorderLayout.WEST);
 		minTrustLevel = new JComboBox(Identity.trustLevelUserStr);
@@ -217,15 +215,20 @@ public class MessageTreeTable implements Observer,
 		seeUnsigned.addActionListener(this);
 
 
-		trustLevelFiltersPanel.add(minTrustLevelPanel, BorderLayout.CENTER);
-		trustLevelFiltersPanel.add(seeUnsigned, BorderLayout.EAST);
 
+		JPanel southEastPanel = new JPanel(new GridLayout(2, 1));
+
+		JPanel southEastPanelTop = new JPanel(new GridLayout(1, 2, 10, 10));
+		southEastPanelTop.add(seeUnsigned);
+		southEastPanelTop.add(seeArchived);
+
+		southEastPanel.add(southEastPanelTop);
+		southEastPanel.add(minTrustLevelPanel);
 
 		JPanel southPanel = new JPanel(new BorderLayout(5, 5));
 
 		southPanel.add(new JLabel(""), BorderLayout.CENTER);
-		southPanel.add(trustLevelFiltersPanel, BorderLayout.WEST);
-		southPanel.add(seeArchived, BorderLayout.EAST);
+		southPanel.add(southEastPanel, BorderLayout.EAST);
 
 		panel.add(southPanel, BorderLayout.SOUTH);
 
