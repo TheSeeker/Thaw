@@ -106,9 +106,27 @@ public class KSKDraft
 	private FCPQueueManager queueManager;
 	private int revUsed;
 
+	private boolean waiting;
+	private boolean posting;
+
+	public void notifyPlugin() {
+		board.getFactory().getPlugin().getPanel().update(this);
+	}
+
+	public boolean isWaiting() {
+		return waiting;
+	}
+
+	public boolean isPosting() {
+		return posting;
+	}
 
 	public void post(FCPQueueManager queueManager) {
 		this.queueManager = queueManager;
+
+		waiting = true;
+		posting = false;
+		notifyPlugin();
 
 		/* we start immediatly a board refresh (we will need it) */
 		synchronized(board) {
@@ -151,6 +169,10 @@ public class KSKDraft
 	}
 
 	private void startInsertion() {
+		waiting = false;
+		posting = true;
+		notifyPlugin();
+
 		String key = getKey(date, revUsed);
 
 		Logger.info(this, "Inserting : KSK@"+key);
@@ -193,6 +215,10 @@ public class KSKDraft
 			FCPClientPut put = (FCPClientPut)o;
 
 			if (put.isFinished() && put.isSuccessful()) {
+				posting = false;
+				waiting = false;
+				notifyPlugin();
+
 				put.deleteObserver(this);
 				put.stop(queueManager);
 				queueManager.remove(put);
@@ -213,6 +239,9 @@ public class KSKDraft
 				if (put.getPutFailedCode() != 9) { /* !Collision */
 					Logger.error(this, "Can't insert the message on the board '"+
 						     board.toString()+"' ; Code: "+Integer.toString(put.getPutFailedCode()));
+					waiting = false;
+					posting = false;
+					notifyPlugin();
 					return;
 				}
 

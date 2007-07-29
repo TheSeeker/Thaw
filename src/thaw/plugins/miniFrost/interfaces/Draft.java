@@ -34,5 +34,11 @@ public interface Draft {
 	public boolean removeAttachment(java.io.File file);
 	public boolean removeAttachment(Board board);
 
+	/**
+	 * must notify thaw.plugins.MiniFrostPanel at each change
+	 */
 	public void post(thaw.fcp.FCPQueueManager queueManager);
+
+	public boolean isWaiting();
+	public boolean isPosting();
 }

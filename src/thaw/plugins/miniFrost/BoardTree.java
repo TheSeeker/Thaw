@@ -43,6 +43,8 @@ public class BoardTree extends Observable
 	implements javax.swing.event.ListSelectionListener,
 		   MouseListener {
 
+	/* X and Y are replaced */
+	public final static String DRAFTS_STR = "W: X / U : Y";
 
 	private JPanel panel;
 
@@ -57,6 +59,8 @@ public class BoardTree extends Observable
 	public final static Color SELECTION_COLOR         = new Color(190, 190, 190);
 	public final static Color LOADING_COLOR           = new Color(230, 230, 230);
 	public final static Color LOADING_SELECTION_COLOR = new Color(150, 150, 150);
+
+	private JLabel draftsState;
 
 
 	public BoardTree(MiniFrostPanel mainPanel) {
@@ -137,8 +141,14 @@ public class BoardTree extends Observable
 		actions.add(new BoardManagementHelper.BoardRefresher(mainPanel, button));
 		buttonPanel.add(button);
 
+		/* drafts state */
+
+		draftsState = new JLabel("");
+		updateDraftValues(0, 0);
+
 		southPanel.add(new JLabel(""), BorderLayout.CENTER);
 		southPanel.add(buttonPanel, BorderLayout.WEST);
+		southPanel.add(draftsState, BorderLayout.SOUTH);
 
 		panel.add(southPanel, BorderLayout.SOUTH);
 	}
@@ -288,6 +298,15 @@ public class BoardTree extends Observable
 
 	public JPanel getPanel() {
 		return panel;
+	}
+
+	public void updateDraftValues(int waitings, int postings) {
+		String str;
+
+		str = DRAFTS_STR.replaceAll("X", Integer.toString(waitings));
+		str = str.replaceAll(       "Y", Integer.toString(postings));
+
+		draftsState.setText(str);
 	}
 
 	public void valueChanged(javax.swing.event.ListSelectionEvent e) {

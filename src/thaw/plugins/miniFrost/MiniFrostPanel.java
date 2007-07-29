@@ -6,11 +6,16 @@ import javax.swing.JLabel;
 import java.util.Observer;
 import java.util.Observable;
 
+import java.util.Vector;
+import java.util.Iterator;
+
+
 import thaw.core.Config;
 import thaw.plugins.Hsqldb;
 import thaw.plugins.MiniFrost;
 
 import thaw.plugins.miniFrost.interfaces.Board;
+import thaw.plugins.miniFrost.interfaces.Draft;
 
 
 /**
@@ -187,4 +192,29 @@ public class MiniFrostPanel implements Observer {
 		}
 	}
 
+
+	private Vector drafts = null;
+
+	public void update(Draft draft) {
+		if (drafts == null)
+			drafts = new Vector();
+
+		if (!draft.isPosting() && !draft.isWaiting())
+			drafts.remove(draft);
+		else if (drafts.indexOf(draft) < 0)
+			drafts.add(draft);
+
+		int waitings = 0;
+		int postings = 0;
+
+		for (Iterator it = drafts.iterator();
+		     it.hasNext();) {
+			Draft draftIt = (Draft)it.next();
+
+			if (draftIt.isPosting()) postings++;
+			if (draftIt.isWaiting()) waitings++;
+		}
+
+		boardTree.updateDraftValues(waitings, postings);
+	}
 }
