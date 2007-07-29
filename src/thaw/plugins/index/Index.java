@@ -856,6 +856,19 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 	}
 
 
+	public void useTrayIconToNotifyNewRev() {
+		if (indexTree == null)
+			return;
+
+		String announcement = I18n.getMessage("thaw.plugin.index.newRev");
+		announcement = announcement.replaceAll("X", toString(false));
+		announcement = announcement.replaceAll("Y", Integer.toString(getRevision()));
+
+		thaw.plugins.TrayIcon.popMessage(indexTree.getIndexBrowserPanel().getCore().getPluginManager(),
+						 I18n.getMessage("thaw.plugin.index.browser"),
+						 announcement);
+	}
+
 
 	public void update(Observable o, Object param) {
 		if (o instanceof FCPClientGet) {
@@ -872,8 +885,10 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 					setPublicKey(key, newRev);
 				}
 
-				if (oldRev < newRev)
+				if (oldRev < newRev) {
 					setHasChangedFlag(true);
+					useTrayIconToNotifyNewRev();
+				}
 
 				String path = get.getPath();
 

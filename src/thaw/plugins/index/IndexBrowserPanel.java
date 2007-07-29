@@ -35,10 +35,11 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	private FCPQueueManager queueManager;
 	private Config config;
 	private MainWindow mainWindow;
-
+	private Core core;
 
 	public IndexBrowserPanel(final Hsqldb db, final Core core) {
 		this.db = db;
+		this.core = core;
 		this.queueManager = core.getQueueManager();
 		this.config       = core.getConfig();
 		this.mainWindow   = core.getMainWindow();
@@ -75,6 +76,11 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 
 		globalPanel = new JPanel(new BorderLayout());
 		globalPanel.add(split, BorderLayout.CENTER);
+	}
+
+
+	public Core getCore() {
+		return core;
 	}
 
 

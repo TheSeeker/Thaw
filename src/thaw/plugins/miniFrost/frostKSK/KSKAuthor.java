@@ -1,7 +1,7 @@
 package thaw.plugins.miniFrost.frostKSK;
 
 import thaw.plugins.signatures.Identity;
-
+import thaw.core.I18n;
 
 
 public class KSKAuthor
@@ -21,8 +21,15 @@ public class KSKAuthor
 	}
 
 	public String toString() {
-		if (identity != null)
-			return identity.toString();
+		return toString(true);
+	}
+
+	public String toString(boolean noDup) {
+		if (identity != null) {
+			if (noDup || !identity.isDup())
+				return identity.toString();
+			return I18n.getMessage("thaw.plugin.miniFrost.DUP")+" "+identity.toString();
+		}
 
 		return nick;
 	}

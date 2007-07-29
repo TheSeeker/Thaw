@@ -60,6 +60,9 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 	private SHA256Computer sha;
 
+
+	private int putFailedCode = -1;
+
 	/**
 	 * To resume query from file. (see core.QueueKeeper)
 	 */
@@ -183,7 +186,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 	public boolean start(final FCPQueueManager queueManager) {
 		this.queueManager = queueManager;
-
+		putFailedCode = -1;
 		identifier = null;
 
 		if((localFile != null) && (localFile.length() <= 0)) {
@@ -652,6 +655,8 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				finished = true;
 				fatal = true;
 
+				putFailedCode = Integer.parseInt(msg.getValue("Code"));
+
 				status = "Failed ("+msg.getValue("CodeDescription")+")";
 
 				if((msg.getValue("Fatal") != null) &&
@@ -1087,5 +1092,13 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	public void notifyChange() {
 		setChanged();
 		notifyObservers();
+	}
+
+
+	/**
+	 * @return -1 if none
+	 */
+	public int getPutFailedCode() {
+		return putFailedCode;
 	}
 }

@@ -468,7 +468,7 @@ public class SigConfigTab implements ActionListener {
 
 			updateList();
 
-			dialog.setSize(640, 300);
+			dialog.setSize(640, 500);
 			dialog.setVisible(true);
 		}
 

@@ -9,6 +9,7 @@ import thaw.plugins.signatures.Identity;
 
 import thaw.core.Logger;
 import thaw.plugins.miniFrost.interfaces.Board;
+import thaw.core.I18n;
 
 
 public class KSKDraft
@@ -198,14 +199,29 @@ public class KSKDraft
 
 				fileToInsert.delete();
 
+				Logger.info(this, "Message sent.");
+
+				String announce = I18n.getMessage("thaw.plugin.miniFrost.messageSent");
+				announce = announce.replaceAll("X", board.toString());
+
+				thaw.plugins.TrayIcon.popMessage(board.getFactory().getCore().getPluginManager(),
+								 "MiniFrost",
+								 announce);
+
+
 			} else if (put.isFinished() && !put.isSuccessful()) {
+				if (put.getPutFailedCode() != 9) { /* !Collision */
+					Logger.error(this, "Can't insert the message on the board '"+
+						     board.toString()+"' ; Code: "+Integer.toString(put.getPutFailedCode()));
+					return;
+				}
+
 				put.deleteObserver(this);
 				put.stop(queueManager);
 				queueManager.remove(put);
 
 				revUsed = board.getNextNonDownloadedRev(date, revUsed);
 				startInsertion();
-
 			}
 		}
 

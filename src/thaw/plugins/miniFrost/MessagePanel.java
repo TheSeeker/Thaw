@@ -152,7 +152,7 @@ public class MessagePanel
 
 			this.author = author;
 
-			nick = new JLabel(author.toString());
+			nick = new JLabel(author.toString(false));
 
 			add(nick, BorderLayout.CENTER);
 

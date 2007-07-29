@@ -407,6 +407,10 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	}
 
 
+	public IndexBrowserPanel getIndexBrowserPanel() {
+		return indexBrowser;
+	}
+
 
 	/**
 	 * Used by IndexBrowserPanel when the visibility changed

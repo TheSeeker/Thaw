@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.Calendar;
 
 import thaw.core.Logger;
+import thaw.core.I18n;
 import thaw.plugins.Hsqldb;
 
 import thaw.plugins.signatures.Identity;
@@ -428,6 +429,16 @@ public class KSKBoard
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to update the lastUpdate date :"+e.toString());
+		}
+
+		if (newMsgs > 0) {
+			String announce = I18n.getMessage("thaw.plugin.miniFrost.newMsgAnnounce");
+			announce = announce.replaceAll("X", Integer.toString(newMsgs));
+			announce = announce.replaceAll("Y", toString());
+
+			thaw.plugins.TrayIcon.popMessage(factory.getCore().getPluginManager(),
+							 "MiniFrost",
+							 announce);
 		}
 
 		refreshing = false;
