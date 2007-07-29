@@ -133,23 +133,13 @@ public class ThemeSelector implements thaw.core.Plugin, Observer, ListSelectionL
 
 	public void update(Observable o, Object arg) {
 		if (o == core.getConfigWindow()) {
-
-			if (arg == core.getConfigWindow().getOkButton()) {
-				if (themeList.getSelectedValue() != null) {
-					String[] str = ((String)themeList.getSelectedValue()).split(" ");
-					core.getConfig().setValue("lookAndFeel",
-								  str[0]);
-					resetSelection();
-				}
-
-				return;
-			}
-
-			if (arg == core.getConfigWindow().getCancelButton()) {
+			if (themeList.getSelectedValue() != null) {
+				String[] str = ((String)themeList.getSelectedValue()).split(" ");
+				core.getConfig().setValue("lookAndFeel",
+							  str[0]);
 				resetSelection();
-				resetTheme();
-				return;
 			}
+
 		}
 	}
 
