@@ -71,7 +71,7 @@ public class KSKMessage
 		downloading = true;
 
 		java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("yyyy.M.d");
-		formatter.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
+		//formatter.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
 
 		StringBuffer keyBuf = new StringBuffer("KSK@"+KEY_HEADER);
 
@@ -283,7 +283,7 @@ public class KSKMessage
 
 	protected Vector parseMessage(final String fullMsg) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd - HH:mm:ss");
-		sdf.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
+		//sdf.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
 
 		Vector v = new Vector();
 

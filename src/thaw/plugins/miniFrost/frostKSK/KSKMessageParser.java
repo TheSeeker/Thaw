@@ -370,7 +370,7 @@ public class KSKMessageParser {
 
 		} catch(Exception e) {
 			/* XMLTools throws runtime exception sometimes ... */
-			Logger.warning(this, "Unable to parse XML message because : "+e.toString());
+			Logger.notice(this, "Unable to parse XML message because : "+e.toString());
 			e.printStackTrace();
 			return false;
 		}

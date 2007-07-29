@@ -156,7 +156,7 @@ public class KSKDraft
 
 	private String getKey(Date date, int rev) {
 		java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("yyyy.M.d");
-		formatter.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
+		//formatter.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
 
 		StringBuffer keyBuf = new StringBuffer(KSKMessage.KEY_HEADER);
 
