@@ -5,23 +5,18 @@ import java.awt.Color;
 import java.sql.*;
 
 import java.util.Vector;
-import java.math.BigInteger;
-
-import freenet.crypt.SHA256;
-import freenet.support.Base64;
-
-//import freenet.crypt.DSA;
-//import freenet.crypt.DSAPrivateKey;
-//import freenet.crypt.DSAPublicKey;
-//import freenet.crypt.DSASignature;
-import freenet.crypt.Global;
-import freenet.crypt.RandomSource;
+import java.util.Iterator;
+import java.util.List;
 
 import frost.crypt.FrostCrypt;
+import frost.util.XMLTools;
+import org.w3c.dom.*;
+import org.xml.sax.*;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+
 
 import thaw.core.Core;
 import thaw.core.Logger;
@@ -555,69 +550,85 @@ public class Identity {
 	}
 
 
+	public Element makeCDATA(Document doc, String tagName, String content) {
+		if (content == null || tagName == null)
+			return null;
+
+		CDATASection cdata;
+		Element current;
+
+		current = doc.createElement(tagName);
+		cdata = doc.createCDATASection(content);
+		current.appendChild(cdata);
+
+		return current;
+	}
+
+
 	public boolean exportIdentity(File file) {
 
-		try {
-			FileOutputStream out = new FileOutputStream(file);
+		Document doc = XMLTools.createDomDocument();
 
-			out.write((nick+"\n").getBytes("UTF-8"));
+		Element root = doc.createElement("FrostLocalIdentities");
+		Element identityEl = doc.createElement("MyIdentity");
 
-			if (getPrivateKey() != null)
-				out.write( (getPrivateKey()+"\n").getBytes("UTF-8") );
-			else
-				out.write( "\n".getBytes("UTF-8"));
+		identityEl.appendChild(makeCDATA(doc, "name", toString()));
+		identityEl.appendChild(makeCDATA(doc, "key", publicKey));
+		identityEl.appendChild(makeCDATA(doc, "privKey", privateKey));
 
-			if (getPublicKey() != null)
-				out.write( (getPublicKey()+"\n").getBytes("UTF-8") );
-			else
-				out.write( "\n".getBytes("UTF-8"));
+		root.appendChild(identityEl);
+		doc.appendChild(root);
 
-			out.close();
-		} catch(java.io.FileNotFoundException e) {
-			Logger.error(this, "(1) Can't export identity because: "+e.toString());
-			return false;
-		} catch(java.io.UnsupportedEncodingException e) {
-			Logger.error(this, "(2) Can't export identity because: "+e.toString());
-			return false;
-		} catch (java.io.IOException e) {
-			Logger.error(this, "(2) Can't export identity because: "+e.toString());
-			return false;
-		}
-
-		return true;
+		return XMLTools.writeXmlFile(doc, file.getPath());
 	}
 
 	public static Identity importIdentity(Hsqldb db, File file) {
 		try {
-			byte[] lapin = new byte[5120];
-
-			FileInputStream in = new FileInputStream(file);
-
-			for (int i = 0 ; i < 5120 ; i++)
-				lapin[i] = 0;
-
-			in.read(lapin);
-			in.close();
-
-			String[] elements = new String(lapin).split("\n");
-
-
-			if (elements.length < 3) {
-				Logger.error(new Identity(), "not enought inforation in the file");
+			Document doc = null;
+			try {
+				doc = XMLTools.parseXmlFile(file, false);
+			} catch(Exception ex) {  // xml format error
+				Logger.warning(ex, "Invalid Xml");
 				return null;
 			}
 
-			Identity i = new Identity(db, -1, elements[0],
-						  elements[2],
-						  elements[1],
-						  false, 10);
-			i.insert();
+			if( doc == null ) {
+				Logger.warning(null,
+					       "Error: couldn't parse XML Document - " +
+					       "File name: '" + file.getName() + "'");
+				return null;
+			}
 
-			return i;
-		} catch(java.io.FileNotFoundException e) {
-			Logger.error(new Identity(), "(1) Unable to import identity because : "+e.toString());
-		} catch(java.io.IOException e) {
-			Logger.error(new Identity(), "(2) Unable to import identity because : "+e.toString());
+			Element rootEl = doc.getDocumentElement();
+
+			List l = XMLTools.getChildElementsByTagName(rootEl, "MyIdentity");
+
+			if (l == null) {
+				Logger.error(null, "No identity to import");
+				return null;
+			}
+
+			for (Iterator it = l.iterator();
+			     it.hasNext();) {
+				Element identityEl = (Element)it.next();
+
+				String[] split = XMLTools.getChildElementsCDATAValue(identityEl, "name").split("@");
+				String nick = split[0];
+				String publicKey = XMLTools.getChildElementsCDATAValue(identityEl, "key");
+				String privateKey = XMLTools.getChildElementsCDATAValue(identityEl, "privKey");
+
+
+				Identity identity = new Identity(db, -1, nick,
+								 publicKey, privateKey, false,
+								 10);
+				identity.insert();
+			}
+
+		} catch(Exception e) {
+			/* XMLTools throws runtime exception sometimes ... */
+			Logger.error(e, "Unable to parse XML message because : "+e.toString());
+			e.printStackTrace();
+			return null;
 		}
 
 		return null;
