@@ -258,7 +258,7 @@ public class KSKMessageParser {
 	public final static char SIGNATURE_ELEMENTS_SEPARATOR = '|';
 
 	private String getSignedContent() {
-		final StringBuilder allContent = new StringBuilder();
+		final StringBuffer allContent = new StringBuffer();
 
 		allContent.append(date).append(SIGNATURE_ELEMENTS_SEPARATOR);
 		allContent.append(time+"GMT").append(SIGNATURE_ELEMENTS_SEPARATOR);
