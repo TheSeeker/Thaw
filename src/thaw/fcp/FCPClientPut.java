@@ -665,8 +665,11 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 					fatal = false;
 				}
 
-				Logger.warning(this, "==== PUT FAILED ===");
-				Logger.warning(this, msg.toString());
+				if (putFailedCode != 9)
+					Logger.warning(this, "Insertion failed");
+				else
+					Logger.warning(this, "Insertion error : collision");
+				Logger.notice(this, msg.toString());
 
 				setChanged();
 				this.notifyObservers();

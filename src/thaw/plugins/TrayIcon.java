@@ -144,7 +144,7 @@ public class TrayIcon implements thaw.core.Plugin,
 
 		int msgType = ((level == 0) ? SysTrayIcon.MSG_ERROR : SysTrayIcon.MSG_WARNING);
 
-		popMessage(Logger.PREFIXES[level], line, msgType);
+		popMessage("Thaw : "+Logger.PREFIXES[level], line, msgType);
 	}
 
 

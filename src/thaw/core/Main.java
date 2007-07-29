@@ -20,7 +20,7 @@ public class Main {
 	_minor  = 7,
 	_update = 1;
 	public final static String
-	_svnBuildNumber = "14418:14424M";
+	_svnBuildNumber = "@custom@";
 
 	public final static String
 	VERSION = Main._major + "." + Main._minor + "." + Main._update + " r"+Main._svnBuildNumber;
