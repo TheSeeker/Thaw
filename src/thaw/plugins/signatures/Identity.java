@@ -56,8 +56,8 @@ public class Identity {
 
 	public final static Color[] trustLevelColor = {
 		Color.BLUE,
-		new java.awt.Color(0, 175, 0), /* green */
 		new java.awt.Color(0, 128, 0), /* light green */
+		new java.awt.Color(0, 175, 0), /* green */
 		Color.BLACK,
 		new java.awt.Color(175, 0, 0), /* moderatly red */
 		Color.RED
