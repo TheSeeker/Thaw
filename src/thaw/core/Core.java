@@ -145,6 +145,8 @@ public class Core implements Observer {
 
 		mainWindow.setVisible(true);
 
+		reallySetTheme(lookAndFeel);
+
 		return true;
 	}
 
@@ -380,15 +382,7 @@ public class Core implements Observer {
 	}
 
 
-	public void setTheme(String theme) {
-		if (theme == null) {
-			if (getConfig() != null)
-				theme = getConfig().getValue("lookAndFeel");
-
-			if (theme == null)
-				theme = UIManager.getSystemLookAndFeelClassName();
-		}
-
+	private void reallySetTheme(String theme) {
 		if (theme == null)
 			return;
 
@@ -407,6 +401,21 @@ public class Core implements Observer {
 			Logger.error(s, "Original exception: "+e.getTargetException().toString());
 			e.getTargetException().printStackTrace();
 		}
+	}
+
+	public void setTheme(String theme) {
+		if (theme == null) {
+			if (getConfig() != null)
+				theme = getConfig().getValue("lookAndFeel");
+
+			if (theme == null)
+				theme = UIManager.getSystemLookAndFeelClassName();
+		}
+
+		lookAndFeel = theme;
+
+		if (mainWindow.getMainFrame().isVisible())
+			reallySetTheme(lookAndFeel);
 	}
 
 
