@@ -310,7 +310,12 @@ public class KSKBoard
 	private KSKMessage runningDownloads[] = new KSKMessage[MAX_DOWNLOADS_AT_THE_SAME_TIME];
 
 
-	protected Date getMidnight(Date date) {
+	protected Date getCurrentlyRefreshedDate() {
+		return lastDate;
+	}
+
+
+	protected static Date getMidnight(Date date) {
 		Calendar cal = new java.util.GregorianCalendar();
 		cal.setTime(date);
 		cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -466,10 +471,11 @@ public class KSKBoard
 					startNewMessageDownload();
 
 				return;
-			}
+			} else {
+				/* we notify a change anyway because of KSKDraft */
+				notifyChange();
 
-
-			if (!successful) { /* if not successful, we look if all the other failed */
+				/* if not successful, we look if all the other failed */
 				/* we look first if we can restart some of the failed transfers
 				 * up to lastSuccessfulRev + MAX_FAILURES_IN_A_ROW */
 

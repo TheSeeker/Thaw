@@ -167,10 +167,20 @@ public class KSKDraft
 	}
 
 
+	private boolean isBoardUpToDateForToday() {
+		if (!board.isRefreshing()
+		    || (KSKBoard.getMidnight(board.getCurrentlyRefreshedDate()).getTime()
+			< KSKBoard.getMidnight(date).getTime()) ) {
+			return true;
+		}
+		return false;
+	}
+
+
 	public void update(Observable o, Object param) {
 		if (o instanceof Board) {
 			synchronized(board) {
-				if (fileToInsert == null || board.isRefreshing())
+				if (fileToInsert == null || !isBoardUpToDateForToday())
 					return;
 				revUsed = board.getNextNonDownloadedRev(date, -1);
 			}
