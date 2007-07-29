@@ -27,8 +27,11 @@ public class MiniFrostPanel implements Observer {
 	private Config config;
 	private Hsqldb db;
 	private BoardTree boardTree;
+
 	private MessageTreeTable messageTreeTable;
 	private MessagePanel messagePanel;
+	private DraftPanel draftPanel;
+
 	private MiniFrost pluginCore;
 
 	private JSplitPane mainSplit;
@@ -42,17 +45,38 @@ public class MiniFrostPanel implements Observer {
 		boardTree = new BoardTree(this);
 		messageTreeTable = new MessageTreeTable(this);
 		messagePanel = new MessagePanel(this);
+		draftPanel = new DraftPanel(this);
 
 		boardTree.addObserver(this);
 
-		mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, /* so it will be vertical ... don't ask me why ... */
+		/* so it will be vertical ... don't ask me why ... */
+		mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
 					   boardTree.getPanel(),
 					   messageTreeTable.getPanel());
 	}
 
+
+	public void displayDraftPanel() {
+		saveState();
+
+		messagePanel.hided();
+		messageTreeTable.hided();
+
+		mainSplit.setRightComponent(draftPanel.getPanel());
+		mainSplit.validate();
+
+		draftPanel.redisplayed();
+
+		loadState();
+	}
+
+
 	public void displayMessageTable() {
 		saveState();
+
 		messagePanel.hided();
+		draftPanel.hided();
+
 		mainSplit.setRightComponent(messageTreeTable.getPanel());
 		mainSplit.validate();
 
@@ -63,7 +87,10 @@ public class MiniFrostPanel implements Observer {
 
 	public void displayMessage() {
 		saveState();
+
 		messageTreeTable.hided();
+		draftPanel.hided();
+
 		mainSplit.setRightComponent(messagePanel.getPanel());
 		messagePanel.redisplayed();
 		mainSplit.validate();
@@ -127,6 +154,10 @@ public class MiniFrostPanel implements Observer {
 
 	public MessagePanel getMessagePanel() {
 		return messagePanel;
+	}
+
+	public DraftPanel getDraftPanel() {
+		return draftPanel;
 	}
 
 	public void loadState() {

@@ -412,7 +412,7 @@ public class SigConfigTab implements ActionListener {
 
 		public  OtherIdentitiesPanel() {
 			dialog = new JDialog(configWindow.getFrame(),
-					     I18n.getMessage("thaw.plugin.signature.dialogTitle.yourIdentities"));
+					     I18n.getMessage("thaw.plugin.signature.dialogTitle.otherIdentities"));
 
 			dialog.getContentPane().setLayout(new BorderLayout(5, 5));
 

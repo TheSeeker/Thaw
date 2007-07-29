@@ -32,6 +32,7 @@ import thaw.plugins.miniFrost.interfaces.Author;
 import thaw.plugins.miniFrost.interfaces.Message;
 import thaw.plugins.miniFrost.interfaces.SubMessage;
 import thaw.plugins.miniFrost.interfaces.Attachment;
+import thaw.plugins.miniFrost.interfaces.Draft;
 
 
 public class MessagePanel
@@ -481,7 +482,9 @@ public class MessagePanel
 
 			} else if (sel == 3) { /* reply */
 
-				/* TODO */
+				Draft draft = msg.getBoard().getDraft(msg);
+				mainPanel.getDraftPanel().setDraft(draft);
+				mainPanel.displayDraftPanel();
 
 			} else if (sel == 4 || sel == 5) { /* (un)fold */
 				boolean retracted = (sel == 5);

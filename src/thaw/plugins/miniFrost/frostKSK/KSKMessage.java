@@ -36,7 +36,7 @@ public class KSKMessage
 	public final static int FCP_MAX_SIZE    = 32*1024;
 
 	/* for example KSK@frost|message|news|2007.7.21-boards-47.xml */
-	public final static String KEY_HEADER = "KSK@frost|message|news|";
+	public final static String KEY_HEADER = /* "KSK@" + */"frost|message|news|";
 
 
 	/* content is not kept in memory (at least not here) */
@@ -71,8 +71,9 @@ public class KSKMessage
 		downloading = true;
 
 		java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("yyyy.M.d");
+		formatter.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
 
-		StringBuffer keyBuf = new StringBuffer(KEY_HEADER);
+		StringBuffer keyBuf = new StringBuffer("KSK@"+KEY_HEADER);
 
 		keyBuf = formatter.format(date, keyBuf, new java.text.FieldPosition(0));
 		keyBuf.append("-"+board.getName()+"-");
@@ -125,7 +126,8 @@ public class KSKMessage
 
 			if (parser.loadFile(new File(get.getPath()))
 			    && parser.checkSignature(db)
-			    && parser.insert(db, board.getId(), rev, board.getName())) {
+			    && parser.insert(db, board.getId(),
+					     date, rev, board.getName())) {
 
 				new File(get.getPath()).delete();
 
@@ -281,6 +283,7 @@ public class KSKMessage
 
 	protected Vector parseMessage(final String fullMsg) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd - HH:mm:ss");
+		sdf.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
 
 		Vector v = new Vector();
 
@@ -331,6 +334,61 @@ public class KSKMessage
 	}
 
 
+	protected String getMsgId() {
+		try {
+			Hsqldb db = board.getFactory().getDb();
+
+			synchronized(db.dbLock) {
+
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT msgId "+
+									 "FROM frostKSKMessages "+
+									 "WHERE id = ? "+
+									 "LIMIT 1");
+				st.setInt(1, id);
+
+				ResultSet set = st.executeQuery();
+
+				if (!set.next())
+					return null;
+
+				return set.getString("msgId");
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Error while getting the messages : "+e.toString());
+			return null;
+		}
+	}
+
+
+	public String getRawMessage() {
+		try {
+			Hsqldb db = board.getFactory().getDb();
+
+			synchronized(db.dbLock) {
+
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT content "+
+									 "FROM frostKSKMessages "+
+									 "WHERE id = ? "+
+									 "LIMIT 1");
+				st.setInt(1, id);
+
+				ResultSet set = st.executeQuery();
+
+				if (!set.next())
+					return null;
+
+				return set.getString("content");
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Error while getting the messages : "+e.toString());
+			return null;
+		}
+	}
+
 
 	/** no caching */
 	public Vector getSubMessages() {
@@ -357,8 +415,6 @@ public class KSKMessage
 
 				content = set.getString("content");
 				nick = set.getString("nick");
-
-				/* TODO signature */
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Error while getting the messages : "+e.toString());

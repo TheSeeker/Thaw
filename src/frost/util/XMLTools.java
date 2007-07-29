@@ -20,9 +20,17 @@ package frost.util;
 
 import java.io.*;
 import java.util.*;
+import thaw.core.Logger;
 import java.util.logging.*;
 
 import javax.xml.parsers.*;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.OutputKeys;
+
+
 
 import org.apache.xml.serialize.*;
 import org.w3c.dom.*;
@@ -32,8 +40,6 @@ import org.xml.sax.*;
  * A place to hold utility methods for XML processing.
  */
 public class XMLTools {
-
-    private static final Logger logger = Logger.getLogger(XMLTools.class.getName());
 
     private static DocumentBuilderFactory validatingFactory = DocumentBuilderFactory.newInstance();
     private static DocumentBuilderFactory nonValidatingFactory = DocumentBuilderFactory.newInstance();
@@ -77,7 +83,7 @@ public class XMLTools {
             writeXmlFile(doc, tmp.getPath());
             result = FileAccess.readByteArray(tmp);
         } catch (Throwable t) {
-            logger.log(Level.SEVERE, "Exception thrown in getRawXMLDocument(XMLizable element)", t);
+            Logger.error(t, "Exception thrown in getRawXMLDocument(XMLizable element): "+ t.toString());
         }
         tmp.delete();
         return result;
@@ -95,7 +101,7 @@ public class XMLTools {
             FileAccess.writeFile(content, tmp);
             result = XMLTools.parseXmlFile(tmp, validating);
         } catch(Throwable t) {
-            logger.log(Level.SEVERE, "Exception thrown in parseXmlContent", t);
+            Logger.error(t, "Exception thrown in parseXmlContent: "+ t.toString());
         }
         tmp.delete();
         return result;
@@ -133,25 +139,19 @@ public class XMLTools {
             return builder.parse(file);
         } catch (SAXException e) {
             // A parsing error occurred; the xml input is not valid
-            logger.log(
-                Level.SEVERE,
-                "Parsing of xml file failed (send badfile.xml to a dev for analysis) - " +
-                "File name: '" + file.getName() + "'",
-                e);
+		Logger.error(e,
+			     "Parsing of xml file failed (send badfile.xml to a dev for analysis) - " +
+			     "File name: '" + file.getName() + "': "+e.toString());
             file.renameTo(new File("badfile.xml"));
             throw new IllegalArgumentException();
         } catch (ParserConfigurationException e) {
-            logger.log(
-                Level.SEVERE,
-                "Exception thrown in parseXmlFile(File file, boolean validating) - " +
-                "File name: '" + file.getName() + "'",
-                e);
+            Logger.error(e, "Exception thrown in parseXmlFile(File file, boolean validating) - " +
+			 "File name: '" + file.getName() + "': "+
+			 e.toString());
         } catch (IOException e) {
-            logger.log(
-                Level.SEVERE,
-                "Exception thrown in parseXmlFile(File file, boolean validating) - " +
-                "File name: '" + file.getName() + "'",
-                e);
+            Logger.error(e,
+			 "Exception thrown in parseXmlFile(File file, boolean validating) - " +
+			 "File name: '" + file.getName() + "': "+e);
         }
         return null;
     }
@@ -167,22 +167,45 @@ public class XMLTools {
      * This method writes a DOM document to a file.
      */
     public static boolean writeXmlFile(Document doc, File file) {
-        try {
-            OutputFormat format = new OutputFormat(doc, "UTF-8", false);
-            format.setLineSeparator(LineSeparator.Windows);
-            //format.setIndenting(true);
-            format.setLineWidth(0);
-            format.setPreserveSpace(true);
-            OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
-            XMLSerializer serializer = new XMLSerializer(writer, format);
-            serializer.asDOMSerializer();
-            serializer.serialize(doc);
-            writer.close(); //this also flushes
-            return true;
-        } catch (Exception ex) {
-            logger.log(Level.SEVERE, "Exception thrown in writeXmlFile(Document doc, String filename)", ex);
-        }
-        return false;
+	    /* This method didn't work for me, so I replaced it by mine */
+	    try {
+		    FileOutputStream out = new FileOutputStream(file);
+		    StreamResult streamResult;
+
+		    streamResult = new StreamResult(out);
+
+
+		    final DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
+		    DocumentBuilder xmlBuilder;
+
+		    xmlBuilder = xmlFactory.newDocumentBuilder();
+
+		    final DOMImplementation impl = xmlBuilder.getDOMImplementation();
+
+		    /* Serialization */
+		    final DOMSource domSource = new DOMSource(doc);
+		    final TransformerFactory transformFactory = TransformerFactory.newInstance();
+
+		    Transformer serializer;
+
+		    serializer = transformFactory.newTransformer();
+
+		    serializer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+		    serializer.setOutputProperty(OutputKeys.INDENT, "yes");
+
+
+		    serializer.transform(domSource, streamResult);
+
+		    return true;
+	    } catch(final javax.xml.transform.TransformerException e) {
+		    Logger.error(e, "Unable to generate XML because: "+e.toString());
+	    } catch(java.io.FileNotFoundException e) {
+		    Logger.error(e, "File not found exception ?!");
+	    } catch(final javax.xml.parsers.ParserConfigurationException e) {
+		    Logger.error(e, "Unable to generate XML because : "+e.toString());
+	    }
+
+	    return false;
     }
 
     /**
@@ -195,7 +218,7 @@ public class XMLTools {
             Document doc = builder.newDocument();
             return doc;
         } catch (ParserConfigurationException e) {
-            logger.log(Level.SEVERE, "Exception thrown in createDomDocument()", e);
+            Logger.error(e, "Exception thrown in createDomDocument(): "+e.toString());
         }
         return null;
     }

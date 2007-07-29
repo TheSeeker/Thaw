@@ -11,7 +11,7 @@ import thaw.fcp.FCPQueueManager;
 
 
 public class KSKBoardAttachment
-	implements KSKAttachment {
+	extends KSKAttachment {
 
 	private String boardName;
 	private String publicKey;
@@ -245,4 +245,5 @@ public class KSKBoardAttachment
 
 		return buf;
 	}
+
 }

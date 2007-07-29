@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import frost.util.XMLTools;
+import frost.crypt.FrostCrypt;
 
 import thaw.plugins.signatures.Identity;
 
@@ -47,7 +48,65 @@ public class KSKMessageParser {
 
 	private Identity identity;
 
+	private static FrostCrypt frostCrypt;
+
+
+	public KSKMessageParser(String inReplyTo,
+				String from,
+				String subject,
+				java.util.Date dateUtil,
+				String recipient,
+				String board,
+				String body,
+				String publicKey,
+				Vector attachments,
+				Identity identity) {
+
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.M.d HH:mm:ss");
+		dateFormat.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
+
+		this.messageId = ""; /* will be generated from the SHA1 of the content */
+		this.inReplyTo = inReplyTo;
+		this.from = from;
+		this.subject = subject;
+
+		String[] date = dateFormat.format(dateUtil).toString().split(" ");
+		this.date = date[0];
+		this.time = date[1];
+
+		this.recipient = null;
+
+		this.board = board;
+		this.body = body;
+		this.publicKey = publicKey;
+		this.idLinePos = "0";
+		this.idLineLen = "0";
+
+		this.attachments = attachments;
+
+		this.identity = identity;
+
+		if (frostCrypt == null)
+			frostCrypt = new FrostCrypt();
+
+		/* frost want a SHA256 hash, but can't check from what is comes :p */
+		this.messageId = frostCrypt.computeChecksumSHA256(getSignedContent());
+
+		if (identity == null)
+			signature = null;
+		else {
+			signature = identity.sign(getSignedContent());
+		}
+	}
+
+
 	private boolean alreadyInTheDb(Hsqldb db, String msgId) {
+		if (msgId == null) {
+			Logger.notice(this, "no message id => ignoring this message by supposing it "
+				      +"already in the db");
+			return true;
+		}
+
 		try {
 			synchronized(db.dbLock) {
 				PreparedStatement st;
@@ -71,7 +130,7 @@ public class KSKMessageParser {
 
 
 	public boolean insert(Hsqldb db,
-			      int boardId, int rev,
+			      int boardId, java.util.Date boardDate, int rev,
 			      String boardNameExpected) {
 		if (boardNameExpected == null) {
 			Logger.error(this, "Board name expected == null ?!");
@@ -89,7 +148,9 @@ public class KSKMessageParser {
 
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.M.d HH:mm:ss");
 
-		time = time.replaceAll("GMT", "").trim();
+		time = time.trim();
+
+		/*
 		date = date.trim();
 
 		date += " "+time;
@@ -101,8 +162,9 @@ public class KSKMessageParser {
 				date = "(null)";
 			Logger.warning(this, "Unable to parse the date ?! : "+date);
 		}
+		*/
 
-		java.sql.Timestamp dateSql = new java.sql.Timestamp(dateUtil.getTime());
+		java.sql.Timestamp dateSql = new java.sql.Timestamp(boardDate.getTime());
 
 
 		int replyToId = -1;
@@ -185,7 +247,7 @@ public class KSKMessageParser {
 				}
 			}
 		} catch(SQLException e) {
-			Logger.error(this, "Can't insert the message into the db because : "+e.toString());
+			Logger.warning(this, "Can't insert the message into the db because : "+e.toString());
 			return false;
 		}
 
@@ -199,7 +261,7 @@ public class KSKMessageParser {
 		final StringBuilder allContent = new StringBuilder();
 
 		allContent.append(date).append(SIGNATURE_ELEMENTS_SEPARATOR);
-		allContent.append(time).append(SIGNATURE_ELEMENTS_SEPARATOR);
+		allContent.append(time+"GMT").append(SIGNATURE_ELEMENTS_SEPARATOR);
 		allContent.append(board).append(SIGNATURE_ELEMENTS_SEPARATOR);
 		allContent.append(from).append(SIGNATURE_ELEMENTS_SEPARATOR);
 		allContent.append(messageId).append(SIGNATURE_ELEMENTS_SEPARATOR);
@@ -252,6 +314,7 @@ public class KSKMessageParser {
 		subject       = XMLTools.getChildElementsCDATAValue(root, "Subject");
 		date          = XMLTools.getChildElementsCDATAValue(root, "Date");
 		time          = XMLTools.getChildElementsCDATAValue(root, "Time");
+		time          = time.replaceAll("GMT", "");
 		recipient     = XMLTools.getChildElementsCDATAValue(root, "recipient");
 		board         = XMLTools.getChildElementsCDATAValue(root, "Board");
 		body          = XMLTools.getChildElementsCDATAValue(root, "Body");
@@ -313,6 +376,88 @@ public class KSKMessageParser {
 		}
 	}
 
+	public Element makeText(Document doc, String tagName, String content) {
+		if (content == null || tagName == null)
+			return null;
 
+		Text txt;
+		Element current;
+
+		current = doc.createElement(tagName);
+		txt = doc.createTextNode(content);
+		current.appendChild(txt);
+
+		return current;
+	}
+
+
+	public Element makeCDATA(Document doc, String tagName, String content) {
+		if (content == null || tagName == null)
+			return null;
+
+		CDATASection cdata;
+		Element current;
+
+		current = doc.createElement(tagName);
+		cdata = doc.createCDATASection(content);
+		current.appendChild(cdata);
+
+		return current;
+	}
+
+
+	public Element getXMLTree(Document doc) {
+		Element root = doc.createElement("FrostMessage");
+
+		Element el;
+
+		if ((el = makeText( doc, "client",    "Thaw "+thaw.core.Main.VERSION)) != null)
+			root.appendChild(el);
+		if ((el = makeCDATA(doc, "MessageId", messageId)) != null)   root.appendChild(el);
+		if ((el = makeCDATA(doc, "InReplyTo", inReplyTo)) != null)   root.appendChild(el);
+		if ((el = makeText( doc, "IdLinePos", idLinePos)) != null)   root.appendChild(el);
+		if ((el = makeText( doc, "IdLineLen", idLineLen)) != null)   root.appendChild(el);
+		if ((el = makeCDATA(doc, "From", from)) != null)             root.appendChild(el);
+		if ((el = makeCDATA(doc, "Subject", subject)) != null)       root.appendChild(el);
+		if ((el = makeCDATA(doc, "Date", date)) != null)             root.appendChild(el);
+		if ((el = makeCDATA(doc, "Time", time+"GMT")) != null)       root.appendChild(el);
+		if ((el = makeCDATA(doc, "Body", body)) != null)             root.appendChild(el);
+		if ((el = makeCDATA(doc, "Board", board)) != null)           root.appendChild(el);
+		if ((el = makeCDATA(doc, "pubKey", publicKey)) != null)      root.appendChild(el);
+		if ((el = makeCDATA(doc, "recipient", recipient)) != null)   root.appendChild(el);
+		if ((el = makeCDATA(doc, "SignatureV2", signature)) != null) root.appendChild(el);
+
+		if (attachments != null) {
+			el = doc.createElement("AttachmentList");
+
+			for (Iterator it = attachments.iterator();
+			     it.hasNext();) {
+				el.appendChild(((KSKAttachment)it.next()).getXML(doc));
+			}
+
+			root.appendChild(el);
+		}
+
+		return root;
+	}
+
+
+	public File generateXML() {
+		File tmpFile;
+
+		try {
+			tmpFile = File.createTempFile("thaw-", "-message.xml");
+			tmpFile.deleteOnExit();
+		} catch(java.io.IOException e) {
+			Logger.error(this, "Can't create temporary file because : "+e.toString());
+			return null;
+		}
+
+		Document doc = XMLTools.createDomDocument();
+
+		doc.appendChild(getXMLTree(doc));
+
+		return (XMLTools.writeXmlFile(doc, tmpFile.getPath()) ? tmpFile : null);
+	}
 
 }

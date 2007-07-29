@@ -57,6 +57,7 @@ import thaw.plugins.miniFrost.interfaces.Author;
 import thaw.plugins.miniFrost.interfaces.Board;
 import thaw.plugins.miniFrost.interfaces.BoardFactory;
 import thaw.plugins.miniFrost.interfaces.Message;
+import thaw.plugins.miniFrost.interfaces.Draft;
 
 
 public class MessageTreeTable implements Observer,
@@ -80,7 +81,8 @@ public class MessageTreeTable implements Observer,
 		I18n.getMessage("thaw.plugin.miniFrost.markAsRead"),
 		I18n.getMessage("thaw.plugin.miniFrost.markAsNonRead"),
 		I18n.getMessage("thaw.plugin.miniFrost.archivate"),
-		I18n.getMessage("thaw.plugin.miniFrost.unarchivate")
+		I18n.getMessage("thaw.plugin.miniFrost.unarchivate"),
+		I18n.getMessage("thaw.plugin.miniFrost.newMessage")
 	};
 
 
@@ -204,7 +206,7 @@ public class MessageTreeTable implements Observer,
 			minTrustLevelInt = Integer.parseInt(minTrustLvlStr);
 
 
-		JPanel minTrustLevelPanel = new JPanel(new BorderLayout(3, 3));
+		JPanel minTrustLevelPanel = new JPanel(new BorderLayout(5, 5));
 		minTrustLevelPanel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.hideStatusBelow")), BorderLayout.WEST);
 		minTrustLevel = new JComboBox(Identity.trustLevelUserStr);
 		minTrustLevel.setSelectedItem(Identity.getTrustLevelStr(minTrustLevelInt));
@@ -569,6 +571,10 @@ public class MessageTreeTable implements Observer,
 				boolean select = (sel == 1);
 				model.setSelectedAll(select);
 				model.refresh();
+			} else if (sel == 7) { /* new message */
+				Draft draft = targetBoard.getDraft(null);
+				mainPanel.getDraftPanel().setDraft(draft);
+				mainPanel.displayDraftPanel();
 			}
 
 			actions.setSelectedIndex(0);

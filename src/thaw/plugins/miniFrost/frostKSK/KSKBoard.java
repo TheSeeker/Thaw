@@ -21,6 +21,7 @@ import thaw.plugins.miniFrost.interfaces.Draft;
 
 
 public class KSKBoard
+	extends Observable
 	implements Board, Runnable, Observer {
 
 	public final static int MAX_DOWNLOADS_AT_THE_SAME_TIME = 5;
@@ -301,6 +302,9 @@ public class KSKBoard
 	private int lastSuccessfulRev;
 	private int failed;
 
+	private int maxDaysInThePast;
+
+
 	/* we keep the failed one in this queue as long as no other succeed */
 	/* sync() on it ! */
 	private KSKMessage runningDownloads[] = new KSKMessage[MAX_DOWNLOADS_AT_THE_SAME_TIME];
@@ -397,6 +401,8 @@ public class KSKBoard
 
 	protected void notifyChange() {
 		factory.getPlugin().getPanel().notifyChange(this);
+		setChanged();
+		notifyObservers();
 	}
 
 	protected void endOfRefresh() {
@@ -531,7 +537,7 @@ public class KSKBoard
 					lastRev = -1;
 					lastSuccessfulRev = 0;
 
-					Date maxInPast = new Date(new Date().getTime() - (MAX_DAYS_IN_THE_PAST * 24*60*60*1000));
+					Date maxInPast = new Date(new Date().getTime() - ((maxDaysInThePast+1) * 24*60*60*1000));
 					Date lastUpdatePast = ((lastUpdate == null) ? null :
 							       new Date(lastUpdate.getTime() - (DAYS_BEFORE_THE_LAST_REFRESH * 24*60*60*1000)));
 
@@ -560,12 +566,20 @@ public class KSKBoard
 	}
 
 	public void refresh() {
+		refresh(MAX_DAYS_IN_THE_PAST);
+	}
+
+	public void refresh(int maxDaysInThePast) {
 		if (refreshing) {
 			Logger.warning(this, "Already refreshing");
 			return;
 		}
 
+		this.maxDaysInThePast = maxDaysInThePast;
+
 		refreshing = true;
+
+		notifyChange();
 
 		Thread th = new Thread(this);
 		th.start();

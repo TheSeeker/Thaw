@@ -14,7 +14,7 @@ import thaw.fcp.*;
 
 
 public class KSKFileAttachment
-	implements KSKAttachment, Runnable {
+	extends KSKAttachment implements Runnable {
 
 	private String filename;
 	private long size;
@@ -265,4 +265,5 @@ public class KSKFileAttachment
 
 		return buf;
 	}
+
 }

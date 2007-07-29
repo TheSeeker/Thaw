@@ -162,6 +162,10 @@ public class IconBox {
 	public static ImageIcon attachment;
 	public static ImageIcon minAttachment;
 
+	public static ImageIcon windowNew;
+	public static ImageIcon minWindowNew;
+
+
 	/**
 	 * Not really used
 	 */
@@ -297,6 +301,8 @@ public class IconBox {
 		IconBox.minRight            = IconBox.loadIcon("min-go-next.png");
 		IconBox.attachment          = IconBox.loadIcon("mail-attachment.png");
 		IconBox.minAttachment       = IconBox.loadIcon("min-mail-attachment.png");
+		IconBox.windowNew           = IconBox.loadIcon("window-new.png");
+		IconBox.minWindowNew        = IconBox.loadIcon("min-window-new.png");
 	}
 
 }
