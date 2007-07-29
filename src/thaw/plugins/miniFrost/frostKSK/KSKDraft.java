@@ -29,7 +29,10 @@ public class KSKDraft
 		this.inReplyTo = inReplyTo;
 	}
 
-	public String getInitialSubject() {
+	public String getSubject() {
+		if (subject != null)
+			return subject;
+
 		if (inReplyTo != null) {
 			String subject = inReplyTo.getSubject();
 			if (subject.indexOf("Re: ") == 0)
@@ -40,7 +43,10 @@ public class KSKDraft
 		return "";
 	}
 
-	public String getInitialText() {
+	public String getText() {
+		if (txt != null)
+			return txt;
+
 		String txt = "";
 
 		if (inReplyTo != null) {

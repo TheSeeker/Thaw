@@ -162,7 +162,7 @@ public class Identity {
 
 	public String getTrustLevelStr() {
 		if (privateKey != null) {
-			return "thaw.plugin.signature.trustLevel.me";
+			return I18n.getMessage("thaw.plugin.signature.trustLevel.me");
 		}
 
 		return getTrustLevelStr(trustLevel);
@@ -424,17 +424,38 @@ public class Identity {
 			synchronized(db.dbLock) {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("INSERT INTO signatures "+
-									 "(nickName, publicKey, privateKey, "+
-									 "isDup, trustLevel) "+
-									 "VALUES (?, ?, ?, ?, ?)");
-				st.setString(1, nick);
-				st.setString(2, publicKey);
-				st.setString(3, privateKey);
-				st.setBoolean(4, isDup);
-				st.setInt(5, trustLevel);
-
+				st = db.getConnection().prepareStatement("SELECT id FROM signatures "+
+									 "WHERE publicKey = ? LIMIT 1");
+				st.setString(1, publicKey);
 				st.execute();
+
+				ResultSet set = st.executeQuery();
+
+				if (set.next()) {
+					int id = set.getInt("id");
+
+					st = db.getConnection().prepareStatement("UPDATE signatures SET "+
+										 "privateKey = ?, trustLevel = ? "+
+										 "WHERE id = ?");
+					st.setString(1, privateKey);
+					st.setInt(2, trustLevel);
+					st.setInt(3, id);
+
+					st.execute();
+				} else {
+
+					st = db.getConnection().prepareStatement("INSERT INTO signatures "+
+										 "(nickName, publicKey, privateKey, "+
+										 "isDup, trustLevel) "+
+										 "VALUES (?, ?, ?, ?, ?)");
+					st.setString(1, nick);
+					st.setString(2, publicKey);
+					st.setString(3, privateKey);
+					st.setBoolean(4, isDup);
+					st.setInt(5, trustLevel);
+
+					st.execute();
+				}
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Exception while adding the identity to the bdd: "+e.toString());

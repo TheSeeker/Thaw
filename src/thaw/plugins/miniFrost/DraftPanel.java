@@ -106,11 +106,11 @@ public class DraftPanel implements ActionListener {
 		for (Iterator it = ids.iterator(); it.hasNext();)
 			authorBox.addItem(it.next());
 
-		subjectField.setText(draft.getInitialSubject());
+		subjectField.setText(draft.getSubject());
 
-		String txt = draft.getInitialText();
+		String txt = draft.getText();
 
-		textArea.setText(draft.getInitialText());
+		textArea.setText(draft.getText());
 	}
 
 

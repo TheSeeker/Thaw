@@ -5,13 +5,14 @@ import thaw.plugins.signatures.Identity;
 
 public interface Draft {
 
-	public String getInitialSubject();
+	public String getSubject();
 
 	/**
 	 * Returned result may contains $sender$, $dateAndTime$.
 	 * They will be replaced.
+	 * @return a default value if setText() was never called
 	 */
-	public String getInitialText();
+	public String getText();
 
 	public boolean allowUnsignedPost();
 
