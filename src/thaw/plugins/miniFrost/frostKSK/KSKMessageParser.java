@@ -89,7 +89,7 @@ public class KSKMessageParser {
 		if (frostCrypt == null)
 			frostCrypt = new FrostCrypt();
 
-		/* frost want a SHA256 hash, but can't check from what is comes :p */
+		/* frost wants a SHA256 hash, but can't check from what is comes :p */
 		this.messageId = frostCrypt.computeChecksumSHA256(getSignedContent());
 
 		if (identity == null)

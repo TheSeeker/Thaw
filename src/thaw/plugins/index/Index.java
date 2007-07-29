@@ -716,7 +716,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 			if (indexBrowser != null && indexBrowser.getIndexTree() != null)
 				indexBrowser.getIndexTree().addUpdatingIndex(this);
 
-			queueManager.addQueryToThePendingQueue(put);
+			queueManager.addQueryToTheRunningQueue(put);
 
 			put.addObserver(this);
 			this.addObserver(o);
