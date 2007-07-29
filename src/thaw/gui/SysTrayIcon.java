@@ -18,6 +18,11 @@ import thaw.core.Logger;
  * <br/>
  */
 public class SysTrayIcon {
+	public final static int MSG_ERROR   = 0;
+	public final static int MSG_INFO    = 1;
+	public final static int MSG_NONE    = 2;
+	public final static int MSG_WARNING = 3;
+
 	private Object systemTray;
 	private Object trayIcon;
 
@@ -111,6 +116,46 @@ public class SysTrayIcon {
 			});
 		} catch(Exception e) {
 			Logger.warning(this, "Error while setting tooltip : "+e.toString());
+		}
+	}
+
+
+	public void popMessage(String title, String msg, int msgTypeInt) {
+		if (!canWork())
+			return;
+
+		try {
+			Object type;
+
+			String typeName;
+
+			switch(msgTypeInt) {
+			case(MSG_ERROR):   typeName = "ERROR";   break;
+			case(MSG_INFO):    typeName = "INFO";    break;
+			case(MSG_NONE):    typeName = "NONE";    break;
+			case(MSG_WARNING): typeName = "WARNING"; break;
+			default:
+				Logger.warning(this, "Unknown message type: "+Integer.toString(msgTypeInt));
+				return;
+			}
+
+			Class messageTypeClass = Class.forName("java.awt.TrayIcon").getClasses()[0];
+
+			type = messageTypeClass.getMethod("valueOf", new Class[] {
+				String.class
+			}).invoke(null, new Object[] {
+				typeName
+			});
+
+
+			Class.forName("java.awt.TrayIcon").getMethod("displayMessage", new Class[] {
+				String.class, String.class, type.getClass()
+			}).invoke(trayIcon, new Object[] {
+				title, msg, type
+			});
+
+		} catch(Exception e) {
+			Logger.warning(this, "Error while poping up a message: "+e.toString());
 		}
 	}
 

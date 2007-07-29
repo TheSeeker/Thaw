@@ -38,7 +38,8 @@ import thaw.gui.WarningWindow;
 public class TrayIcon implements thaw.core.Plugin,
 				 MouseListener,
 				 WindowListener,
-				 ActionListener {
+				 ActionListener,
+				 thaw.core.LogListener {
 
 	private Core core;
 	private SysTrayIcon icon;
@@ -72,6 +73,8 @@ public class TrayIcon implements thaw.core.Plugin,
 
 		icon.setVisible(true);
 
+		Logger.addLogListener(this);
+
 		return true;
 	}
 
@@ -79,6 +82,8 @@ public class TrayIcon implements thaw.core.Plugin,
 	public boolean stop() {
 		if (icon == null)
 			return false;
+
+		Logger.removeLogListener(this);
 
 		core.getMainWindow().removeWindowListener(this);
 		icon.removeMouseListener(this);
@@ -90,8 +95,59 @@ public class TrayIcon implements thaw.core.Plugin,
 			core.getMainWindow().setVisible(true);
 		}
 
+		Logger.addLogListener(this);
+
 		return true;
 	}
+
+
+	public static boolean popMessage(thaw.core.PluginManager pluginManager,
+					 String title,
+					 String message) {
+		return popMessage(pluginManager, title, message, SysTrayIcon.MSG_NONE);
+	}
+
+	/**
+	 * that's an helper to make my life easier :
+	 *  it tries to find a loaded instance of this plugin, it succeed, it tries to
+	 *   pop the message with it. Else if returns false.
+	 * @param msgType see thaw.gui.SysTrayIcon
+	 */
+	public static boolean popMessage(thaw.core.PluginManager pluginManager,
+					 String title,
+					 String message,
+					 int msgType) {
+		TrayIcon plugin = (TrayIcon)pluginManager.getPlugin("thaw.plugins.TrayIcon");
+
+		if (plugin == null)
+			return false;
+
+		return plugin.popMessage(title, message, msgType);
+	}
+
+	/**
+	 * Made to be also used by other plugins
+	 */
+	public boolean popMessage(String title, String message, int msgType) {
+		if (icon == null || !icon.canWork())
+			return false;
+
+		icon.popMessage(title, message, msgType);
+
+		return true;
+	}
+
+
+	public void newLogLine(int level, Object src, String line) {
+		if (level > 1 || src == this || src == icon)
+			return;
+
+		int msgType = ((level == 0) ? SysTrayIcon.MSG_ERROR : SysTrayIcon.MSG_WARNING);
+		String str = ((src != null) ? src.getClass().getName() + ": " : "") + line;
+
+		popMessage(Logger.PREFIXES[level], str, msgType);
+	}
+
 
 	public String getNameForUser() {
 		return I18n.getMessage("thaw.plugin.trayIcon.pluginName");
