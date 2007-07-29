@@ -156,7 +156,9 @@ public class MessagePanel
 
 			add(nick, BorderLayout.CENTER);
 
-			if (author.getIdentity() != null) {
+			if (author.getIdentity() != null
+			    && author.getIdentity().getPrivateKey() == null) {
+
 				if (author.getIdentity().getTrustLevel()
 				    == Identity.trustLevelInt[0]) /* if dev */
 					box = new JComboBox(Identity.trustLevelStr);
@@ -170,6 +172,13 @@ public class MessagePanel
 				box.addActionListener(this);
 
 				add(box, BorderLayout.EAST);
+
+			} else if (author.getIdentity() != null) {
+
+				JLabel status = new JLabel(I18n.getMessage("thaw.plugin.signature.trustLevel.me"));
+				status.setForeground(author.getIdentity().getTrustLevelColor());
+				add(status, BorderLayout.EAST);
+
 			}
 		}
 
