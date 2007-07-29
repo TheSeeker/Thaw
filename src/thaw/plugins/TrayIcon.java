@@ -143,14 +143,14 @@ public class TrayIcon implements thaw.core.Plugin,
 			return;
 
 		int msgType = ((level == 0) ? SysTrayIcon.MSG_ERROR : SysTrayIcon.MSG_WARNING);
-		String str = ((src != null) ? src.getClass().getName() + ": " : "") + line;
 
-		popMessage(Logger.PREFIXES[level], str, msgType);
+		popMessage(Logger.PREFIXES[level], line, msgType);
 	}
 
 
 	public String getNameForUser() {
-		return I18n.getMessage("thaw.plugin.trayIcon.pluginName");
+		return I18n.getMessage("thaw.plugin.trayIcon.pluginName")
+			+ " "+I18n.getMessage("thaw.common.unstable.linux");
 	}
 
 	public javax.swing.ImageIcon getIcon() {

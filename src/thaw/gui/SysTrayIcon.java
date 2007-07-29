@@ -18,10 +18,10 @@ import thaw.core.Logger;
  * <br/>
  */
 public class SysTrayIcon {
-	public final static int MSG_ERROR   = 0;
-	public final static int MSG_INFO    = 1;
-	public final static int MSG_NONE    = 2;
-	public final static int MSG_WARNING = 3;
+	public final static int MSG_ERROR = 0;
+	public final static int MSG_WARNING = 1;
+	public final static int MSG_NONE = 2;
+	public final static int MSG_INFO = 3;
 
 	private Object systemTray;
 	private Object trayIcon;
