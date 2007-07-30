@@ -608,6 +608,20 @@ public class Identity {
 		return XMLTools.writeXmlFile(doc, file.getPath());
 	}
 
+
+	public byte[] decode(byte[] input) {
+		initFrostCrypt();
+
+		try {
+			return frostCrypt.decrypt(input, privateKey);
+		} catch(Exception e) {
+			Logger.info(this, "hm, '"+e.toString()+"' => probably not for us ("+toString()+")");
+		}
+
+		return null;
+	}
+
+
 	public static Identity importIdentity(Hsqldb db, File file) {
 		try {
 			Document doc = null;

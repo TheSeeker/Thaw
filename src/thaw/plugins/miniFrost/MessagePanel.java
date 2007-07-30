@@ -152,7 +152,7 @@ public class MessagePanel
 
 			this.author = author;
 
-			nick = new JLabel(author.toString(false));
+			nick = new JLabel(" "+author.toString(false));
 
 			add(nick, BorderLayout.CENTER);
 
@@ -356,6 +356,12 @@ public class MessagePanel
 	}
 
 
+	public JPanel getEncryptedForPanel(Identity id) {
+		JPanel panel = new JPanel(new GridLayout(1, 1));
+		panel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.encryptedBody").replaceAll("X", id.toString())));
+		return panel;
+	}
+
 
 	public void refresh() {
 		subPanels = new Vector();
@@ -368,6 +374,11 @@ public class MessagePanel
 		subject.setText(I18n.getMessage("thaw.plugin.miniFrost.subject")+": "+msg.getSubject());
 
 		Logger.info(this, "Displaying "+Integer.toString(subMsgs.size())+" sub-msgs");
+
+		if (msg.encryptedFor() != null) {
+			iPanel = getEncryptedForPanel(msg.encryptedFor());
+			Logger.info(this, "(Encrypted message)");
+		}
 
 		int i = 0;
 
@@ -392,6 +403,17 @@ public class MessagePanel
 			i++;
 		}
 
+
+		if (msg.encryptedFor() != null) {
+			if (iPanel == null) {
+				iPanel = getEncryptedForPanel(msg.encryptedFor());
+			} else {
+				JPanel newPanel = new JPanel(new BorderLayout(0, 20));
+				newPanel.add(iPanel, BorderLayout.NORTH);
+				newPanel.add(getEncryptedForPanel(msg.encryptedFor()), BorderLayout.CENTER);
+				iPanel = newPanel;
+			}
+		}
 
 		/* attachments */
 		if (attachments != null) {

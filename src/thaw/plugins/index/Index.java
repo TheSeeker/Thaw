@@ -56,6 +56,7 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 
+import thaw.core.Main;
 
 import thaw.core.I18n;
 import thaw.core.Logger;
@@ -1156,7 +1157,7 @@ public class Index extends Observable implements MutableTreeNode, FileAndLinkLis
 
 
 		final Element thawVersion = xmlDoc.createElement("client");
-		final Text versionText = xmlDoc.createTextNode("Thaw "+thaw.core.Main.VERSION);
+		final Text versionText = xmlDoc.createTextNode("Thaw "+Main.VERSION);
 		thawVersion.appendChild(versionText);
 
 		header.appendChild(thawVersion);

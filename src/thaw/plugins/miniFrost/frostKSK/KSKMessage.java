@@ -45,6 +45,7 @@ public class KSKMessage
 	private int            rev;
 	private boolean        read;
 	private boolean        archived;
+	private Identity       encryptedFor;
 	private KSKBoard       board;
 
 
@@ -115,7 +116,7 @@ public class KSKMessage
 
 			KSKMessageParser parser = new KSKMessageParser();
 
-			if (parser.loadFile(new File(get.getPath()))
+			if (parser.loadFile(new File(get.getPath()), db)
 			    && parser.checkSignature(db)
 			    && parser.insert(db, board.getId(),
 					     date, rev, board.getName())) {
@@ -126,12 +127,14 @@ public class KSKMessage
 				successfullyDownloaded = true;
 				downloading            = false;
 				successfullyParsed     = true;
+				read = parser.mustBeDisplayedAsRead();
 
 			} else {
 				Logger.notice(this, "Unable to parse. File not deleted");
 				successfullyDownloaded = true;
 				downloading            = false;
 				successfullyParsed     = false;
+				read = true;
 			}
 		}
 
@@ -166,6 +169,7 @@ public class KSKMessage
 			  int sigId, Identity identity,
 			  java.util.Date date, int rev,
 			  boolean read, boolean archived,
+			  Identity encryptedFor,
 			  KSKBoard board) {
 		this.id        = id;
 		this.subject   = subject;
@@ -178,6 +182,7 @@ public class KSKMessage
 		this.read      = read;
 		this.archived  = archived;
 		this.board     = board;
+		this.encryptedFor = encryptedFor;
 	}
 
 	public String getSubject() {
@@ -203,6 +208,10 @@ public class KSKMessage
 
 	public boolean isRead() {
 		return read;
+	}
+
+	public Identity encryptedFor() {
+		return encryptedFor;
 	}
 
 	public thaw.plugins.miniFrost.interfaces.Board getBoard() {

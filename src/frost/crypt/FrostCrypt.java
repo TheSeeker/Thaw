@@ -25,10 +25,11 @@ import java.nio.channels.*;
 import java.security.*;
 import java.security.spec.*;
 import java.util.*;
-import java.util.logging.*;
 
 import javax.crypto.*;
 import javax.crypto.spec.*;
+
+import thaw.core.Logger;
 
 import org.bouncycastle.crypto.*;
 import org.bouncycastle.crypto.digests.*;
@@ -44,7 +45,6 @@ import org.bouncycastle.util.encoders.*;
  */
 public final class FrostCrypt {
 
-    private static final Logger logger = Logger.getLogger(FrostCrypt.class.getName());
 
     private PSSSigner signer;
     private SecureRandom secureRandom = null;
@@ -128,7 +128,7 @@ public final class FrostCrypt {
             stomach.doFinal(poop, 0);
             return (new String(Base64.encode(poop))).substring(0, 27);
         } catch(UnsupportedEncodingException ex) {
-            logger.log(Level.SEVERE, "UTF-8 encoding is not supported.", ex);
+            Logger.error(this, "UTF-8 encoding is not supported : "+ ex.toString());
         }
         return null;
     }
@@ -143,7 +143,7 @@ public final class FrostCrypt {
         try {
             chan = (new FileInputStream(file)).getChannel();
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Exception thrown in digest(File file)", e);
+            Logger.error(this, "Exception thrown in digest(File file): "+e.toString());
         }
         byte[] temp = new byte[4 * 1024];
         ByteBuffer _temp = ByteBuffer.wrap(temp);
@@ -161,7 +161,7 @@ public final class FrostCrypt {
             }
             chan.close();
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Exception thrown in digest(File file)", e);
+            Logger.error(this, "Exception thrown in digest(File file): "+ e.toString());
         }
         stomach.doFinal(poop, 0);
         return (new String(Base64.encode(poop))).substring(0, 27);
@@ -174,7 +174,7 @@ public final class FrostCrypt {
             String result = new String(Base64.encode(encryptedBytes), "ISO-8859-1");
             return result;
         } catch(UnsupportedEncodingException ex) {
-            logger.log(Level.SEVERE, "UTF-8 encoding is not supported.", ex);
+            Logger.error(this, "UTF-8 encoding is not supported: "+ex.toString());
         }
         return null;
     }
@@ -227,7 +227,7 @@ public final class FrostCrypt {
                 throw new Exception("block size invalid, inSize="+cipherRSAinSize+"; outSize="+cipherRSAoutSize);
             }
         } catch(Throwable t) {
-            logger.log(Level.SEVERE, "Error in encrypt, RSA preparation", t);
+            Logger.error(this, "Error in encrypt, RSA preparation : "+ t.toString());
             return null;
         }
 
@@ -247,7 +247,7 @@ public final class FrostCrypt {
                 throw new Exception("RSA out block size invalid: "+rsaEncData.length);
             }
         } catch (Throwable t) {
-            logger.log(Level.SEVERE, "Error in encrypt, RSA encryption", t);
+            Logger.error(this, "Error in encrypt, RSA encryption:"+ t.toString());
             return null;
         }
 
@@ -264,7 +264,7 @@ public final class FrostCrypt {
 
             cOut.close();
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Error in encrypt, AES encryption", e);
+            Logger.error(this, "Error in encrypt, AES encryption: "+ e.toString());
             return null;
         }
         return plainOut.toByteArray();
@@ -276,7 +276,7 @@ public final class FrostCrypt {
             byte[] decBytes = decrypt(encBytes, privateKey);
             return new String(decBytes, "UTF-8");
         } catch(UnsupportedEncodingException ex) {
-            logger.log(Level.SEVERE, "UTF-8 encoding is not supported.", ex);
+		Logger.error(this, "UTF-8 encoding is not supported : "+ex.toString());
         }
         return null;
     }
@@ -318,7 +318,7 @@ public final class FrostCrypt {
                 throw new Exception("RSA decryption block size invalid, inSize="+cipherRSAinSize+"; outSize="+cipherRSAoutSize);
             }
         } catch(Throwable e) {
-            logger.log(Level.SEVERE, "Error in decrypt, RSA preparation", e);
+            Logger.error(this, "Error in decrypt, RSA preparation: "+ e.toString());
             return null;
         }
 
@@ -337,7 +337,7 @@ public final class FrostCrypt {
             aesKeyBytes = new byte[16];
             System.arraycopy(sessionKeyBytes, 0, aesKeyBytes, 0, aesKeyBytes.length);
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, "Error in decrypt, RSA decryption", e);
+            Logger.debug(this, "Error in decrypt, RSA decryption: "+ e.toString());
             return null;
         }
 
@@ -364,7 +364,7 @@ public final class FrostCrypt {
             }
             cIn.close();
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, "Error in decrypt, AES decryption", e);
+            Logger.error(this, "Error in decrypt, AES decryption: "+ e.toString());
             return null;
         }
         return plainOut.toByteArray();
@@ -375,7 +375,7 @@ public final class FrostCrypt {
             byte[] msgBytes = message.getBytes("UTF-8");
             return detachedSign(msgBytes, key);
         } catch(UnsupportedEncodingException ex) {
-            logger.log(Level.SEVERE, "UTF-8 encoding is not supported.", ex);
+            Logger.error(this, "UTF-8 encoding is not supported: "+ex.toString());
         }
         return null;
     }
@@ -400,14 +400,14 @@ public final class FrostCrypt {
         try {
             signature = signer.generateSignature();
         } catch (CryptoException e) {
-            logger.log(Level.SEVERE, "Exception thrown in detachedSign(String message, String key)", e);
+            Logger.error(this, "Exception thrown in detachedSign(String message, String key): "+ e.toString());
         }
         signer.reset();
         try {
             String result = new String(Base64.encode(signature), "ISO-8859-1");
             return result;
         } catch(UnsupportedEncodingException ex) {
-            logger.log(Level.SEVERE, "ISO-8859-1 encoding is not supported.", ex);
+            Logger.error(this, "ISO-8859-1 encoding is not supported: "+ex.toString());
         }
         return null;
     }
@@ -417,7 +417,7 @@ public final class FrostCrypt {
             byte[] msgBytes = message.getBytes("UTF-8");
             return detachedVerify(msgBytes, key, sig);
         } catch(UnsupportedEncodingException ex) {
-            logger.log(Level.SEVERE, "UTF-8 encoding is not supported.", ex);
+            Logger.error(this, "UTF-8 encoding is not supported: "+ex.toString());
         }
         return false;
     }
@@ -436,7 +436,7 @@ public final class FrostCrypt {
             signer.reset();
             return result;
         } catch(UnsupportedEncodingException ex) {
-            logger.log(Level.SEVERE, "ISO-8859-1 encoding is not supported.", ex);
+            Logger.error(this, "ISO-8859-1 encoding is not supported: "+ex.toString());
         }
         return false;
     }
@@ -450,7 +450,7 @@ public final class FrostCrypt {
             byte[] whatBytes = what.getBytes("ISO-8859-1");
             return new String(Base64.decode(whatBytes), "UTF-8");
         } catch(UnsupportedEncodingException ex) {
-            logger.log(Level.SEVERE, "UTF-8 or ISO-8859-1 encoding is not supported.", ex);
+            Logger.error(this, "UTF-8 or ISO-8859-1 encoding is not supported: "+ex.toString());
         }
         return null;
     }
@@ -460,7 +460,7 @@ public final class FrostCrypt {
             byte[] whatBytes = what.getBytes("UTF-8");
             return new String(Base64.encode(whatBytes), "ISO-8859-1");
         } catch(UnsupportedEncodingException ex) {
-            logger.log(Level.SEVERE, "UTF-8 or ISO-8859-1 encoding is not supported.", ex);
+            Logger.error(this, "UTF-8 or ISO-8859-1 encoding is not supported: "+ex.toString());
         }
         return null;
     }
@@ -477,7 +477,7 @@ public final class FrostCrypt {
             try {
                 keyGeneratorAES = KeyGenerator.getInstance("AES");
             } catch (NoSuchAlgorithmException e) {
-                logger.log(Level.SEVERE, "Could not get a KeyGenerator for AES.", e);
+                Logger.error(this, "Could not get a KeyGenerator for AES: "+e.toString());
                 return null;
             }
             keyGeneratorAES.init(128); // 192 and 256 bits may not be available!
@@ -501,7 +501,7 @@ public final class FrostCrypt {
             cipherAES.init(mode, sessionKey);
 
         } catch(Throwable t) {
-            logger.log(Level.SEVERE, "Error in AES preparation", t);
+            Logger.error(this, "Error in AES preparation: "+ t.toString());
             return null;
         }
         return cipherAES;
@@ -515,7 +515,7 @@ public final class FrostCrypt {
             byte[] food = message.getBytes("UTF-8");
             return computeChecksumSHA256(food);
         } catch(UnsupportedEncodingException ex) {
-            logger.log(Level.SEVERE, "UTF-8 encoding is not supported.", ex);
+            Logger.error(this, "UTF-8 encoding is not supported: "+ex.toString());
         }
         return null;
     }
@@ -537,9 +537,9 @@ public final class FrostCrypt {
             }
             return sb.toString().toUpperCase();
         } catch (NoSuchAlgorithmException ex) {
-            logger.log(Level.SEVERE, "Algorithm SHA256 not supported.", ex);
+            Logger.error(this, "Algorithm SHA256 not supported: "+ex.toString());
         } catch (NoSuchProviderException ex) {
-            logger.log(Level.SEVERE, "Provider BC not supported.", ex);
+            Logger.error(this, "Provider BC not supported: "+ ex.toString());
         }
         return null;
     }
@@ -553,7 +553,7 @@ public final class FrostCrypt {
             try {
                 chan = (new FileInputStream(file)).getChannel();
             } catch (Throwable e) {
-                logger.log(Level.SEVERE, "Exception thrown 1", e);
+                Logger.error(this, "Exception thrown 1: "+e.toString());
                 return null;
             }
             
@@ -575,7 +575,7 @@ public final class FrostCrypt {
                 }
                 chan.close();
             } catch (Throwable e) {
-                logger.log(Level.SEVERE, "Exception thrown 2", e);
+                Logger.error(this, "Exception thrown 2 : "+e.toString());
             }
             
             byte[] poop = sha256.digest();
@@ -587,9 +587,9 @@ public final class FrostCrypt {
             return sb.toString().toUpperCase();
             
         } catch (NoSuchAlgorithmException ex) {
-            logger.log(Level.SEVERE, "Algorithm SHA256 not supported.", ex);
+            Logger.error(this, "Algorithm SHA256 not supported: "+ ex.toString());
         } catch (NoSuchProviderException ex) {
-            logger.log(Level.SEVERE, "Provider BC not supported.", ex);
+            Logger.error(this, "Provider BC not supported: "+ ex.toString());
         }
         return null;
     }

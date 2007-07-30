@@ -19,6 +19,8 @@ public interface Message /* extends TreeNode */ {
 	public boolean isArchived();
 	public boolean isRead();
 
+	public Identity encryptedFor();
+
 	public void setRead(boolean read);
 	public void setArchived(boolean archived);
 

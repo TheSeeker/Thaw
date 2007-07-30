@@ -247,8 +247,12 @@ public class KSKDraft
 				if (put.getPutFailedCode() != 9) { /* !Collision */
 					put.deleteObserver(this);
 
-					Logger.error(this, "Can't insert the message on the board '"+
-						     board.toString()+"' ; Code: "+Integer.toString(put.getPutFailedCode()));
+					if (put.getPutFailedCode() < 0)
+						Logger.warning(this, "message insertion on the board '"+
+							       board.toString()+"' cancelled");
+					else
+						Logger.error(this, "Can't insert the message on the board '"+
+							     board.toString()+"' ; Code: "+Integer.toString(put.getPutFailedCode()));
 					waiting = false;
 					posting = false;
 					notifyPlugin();

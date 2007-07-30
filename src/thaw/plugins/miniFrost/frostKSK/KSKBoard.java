@@ -156,6 +156,7 @@ public class KSKBoard
 					"       frostKSKMessages.read, "+
 					"       frostKSKMessages.archived, "+
 					"       frostKSKMessages.boardId, "+
+					"       frostKSKMessages.encryptedFor, "+
 					"       signatures.nickName, "+
 					"       signatures.publicKey, "+
 					"       signatures.privateKey, "+
@@ -190,6 +191,12 @@ public class KSKBoard
 				ResultSet set = st.executeQuery();
 
 				while(set.next()) {
+					Identity encryptedFor = null;
+
+					if (set.getInt("encryptedFor") > 0) {
+						encryptedFor = Identity.getIdentity(db, set.getInt("encryptedFor"));
+					}
+
 					KSKBoard daBoard = ((board != null) ?
 							    board :
 							    factory.getBoard(set.getInt("boardId")));
@@ -213,6 +220,7 @@ public class KSKBoard
 							     set.getInt("rev"),
 							     set.getBoolean("read"),
 							     set.getBoolean("archived"),
+							     encryptedFor,
 							     daBoard));
 				}
 			}
@@ -266,7 +274,14 @@ public class KSKBoard
 
 				ResultSet set = st.executeQuery();
 
+
 				if (set.next()) {
+					Identity encryptedFor = null;
+
+					if (set.getInt("encryptedFor") > 0) {
+						encryptedFor = Identity.getIdentity(db, set.getInt("encryptedFor"));
+					}
+
 					int sigId = set.getInt("sigId");
 
 					return new KSKMessage(set.getInt("id"),
@@ -284,6 +299,7 @@ public class KSKBoard
 							      set.getTimestamp("date"),
 							      set.getInt("rev"),
 							      false, false,
+							      encryptedFor,
 							      this);
 				}
 			}
@@ -546,7 +562,7 @@ public class KSKBoard
 				&& msg.isSuccessful();
 
 			if (successful) {
-				if (msg.isParsable())
+				if (msg.isParsable() && !msg.isRead())
 					newMsgs++;
 
 				if (msg.getRev() > lastSuccessfulRev)

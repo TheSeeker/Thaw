@@ -117,6 +117,8 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 	public void setDefaultRenderer() {
 		renderer = new DefaultRenderer();
 		setDefaultRenderer(getColumnClass(0), renderer);
+
+		((DefaultTableCellRenderer)getTableHeader().getDefaultRenderer()).setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 	}
 
 

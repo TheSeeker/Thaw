@@ -62,6 +62,8 @@ public class KSKBoardFactory
 
 		boolean firstStart = (core.getConfig().getValue("frostKSKDatabaseVersion") == null);
 
+		convertExistingTables();
+
 		createTables();
 
 		if (firstStart)
@@ -100,8 +102,32 @@ public class KSKBoardFactory
 	}
 
 
+	protected void convertExistingTables() {
+		if (core.getConfig().getValue("frostKSKDatabaseVersion") == null)
+			return;
+
+		if ("0".equals(core.getConfig().getValue("frostKSKDatabaseVersion"))) {
+			if (convertDatabase_0_to_1())
+				core.getConfig().setValue("frostKSKDatabaseVersion", "2");
+		}
+	}
+
+	protected boolean convertDatabase_0_to_1() {
+		if (!sendQuery("ALTER TABLE frostKSKMessages ADD COLUMN encryptedFor INTEGER DEFAULT NULL NULL")
+		    || !sendQuery("ALTER TABLE frostKSKMessages ADD FOREIGN KEY (encryptedFor) REFERENCES signatures (id)")) {
+
+			Logger.error(this, "Error while converting the board database from version 0 to 1");
+			return false;
+
+		}
+
+		return true;
+	}
+
+
 	protected void createTables() {
-		core.getConfig().setValue("frostKSKDatabaseVersion", "0");
+		if (core.getConfig().getValue("frostKSKDatabaseVersion") != null)
+			core.getConfig().setValue("frostKSKDatabaseVersion", "1");
 
 		sendQuery("CREATE CACHED TABLE frostKSKBoards ("
 			  + "id INTEGER IDENTITY NOT NULL, "
@@ -128,10 +154,12 @@ public class KSKBoardFactory
 			  + "rev INTEGER NOT NULL, "
 			  + "read BOOLEAN DEFAULT FALSE NOT NULL, "
 			  + "archived BOOLEAN DEFAULT FALSE NOT NULL, "
+			  + "encryptedFor INTEGER DEFAULT NULL NULL, "
 			  + "boardId INTEGER NOT NULL, "
 			  + "FOREIGN KEY (boardId) REFERENCES frostKSKBoards (id), "
 			  + "FOREIGN KEY (inReplyTo) REFERENCES frostKSKMessages (id), "
-			  + "FOREIGN KEY (sigId) REFERENCES signatures (id))");
+			  + "FOREIGN KEY (sigId) REFERENCES signatures (id), "
+			  + "FOREIGN KEY (encryptedFor) REFERENCES signatures (id))");
 
 		sendQuery("CREATE CACHED TABLE frostKSKAttachmentFiles ("
 			  + "id INTEGER IDENTITY NOT NULL, "
@@ -154,7 +182,7 @@ public class KSKBoardFactory
 
 	protected void addDefaultBoards() {
 		for (int i = 0 ; i < DEFAULT_BOARDS.length ; i++) {
-			createBoard(DEFAULT_BOARDS[i]);
+			createBoard(DEFAULT_BOARDS[i], false);
 		}
 	}
 
@@ -260,11 +288,15 @@ public class KSKBoardFactory
 	}
 
 	protected void createBoard(String name) {
+		createBoard(name, true);
+	}
+
+	protected void createBoard(String name, boolean warningIfExisting) {
 		try {
 			synchronized(db.dbLock) {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT frostKSKBoards.id, "+
+				st = db.getConnection().prepareStatement("SELECT frostKSKBoards.id "+
 									 "FROM frostKSKBoards LEFT OUTER JOIN frostSSKBoards "+
 									 "  ON frostKSKBoards.id = frostSSKBoards.kskBoardId "+
 									 "WHERE frostSSKBoards.id IS NULL "+
@@ -276,7 +308,8 @@ public class KSKBoardFactory
 				ResultSet set = st.executeQuery();
 
 				if (set.next()) {
-					Logger.warning(this, "Board already added");
+					if (warningIfExisting)
+						Logger.warning(this, "Board already added");
 					return;
 				}
 
@@ -292,10 +325,16 @@ public class KSKBoardFactory
 	}
 
 
+	protected void createBoard(String name, String publicKey, String privateKey) {
+		createBoard(name, publicKey, privateKey, true);
+	}
+
 	/**
 	 * Put here to make my life simpler with the KSKBoardAttachment.
 	 */
-	protected void createBoard(String name, String publicKey, String privateKey) {
+	protected void createBoard(String name, String publicKey, String privateKey,
+				   boolean warningIfExisting) {
+
 		if (!thaw.fcp.FreenetURIHelper.isAKey(publicKey)) {
 			Logger.error(this, "Invalid publicKey");
 			return;
@@ -316,7 +355,8 @@ public class KSKBoardFactory
 				ResultSet set = st.executeQuery();
 
 				if (set.next()) {
-					Logger.warning(this, "Board already added");
+					if (warningIfExisting)
+						Logger.warning(this, "Board already added");
 					return;
 				}
 

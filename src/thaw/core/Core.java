@@ -21,6 +21,7 @@ import thaw.fcp.FCPMessage;
 
 import thaw.gui.IconBox;
 
+
 /**
  * A "core" contains references to all the main parts of Thaw.
  * The Core has all the functions needed to initialize Thaw / stop Thaw.

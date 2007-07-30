@@ -51,7 +51,8 @@ import thaw.gui.IconBox;
  *
  * @author <a href="mailto:jflesch@nerim.net">Jerome Flesch</a>
  */
-public class MainWindow implements java.awt.event.ActionListener, WindowListener,
+public class MainWindow implements java.awt.event.ActionListener,
+				   WindowListener,
 				   java.util.Observer {
 
 	public final static int DEFAULT_SIZE_X = 790;
@@ -594,7 +595,9 @@ public class MainWindow implements java.awt.event.ActionListener, WindowListener
 			new JLabel(I18n.getMessage("thaw.about.l10")),
 			new JLabel(I18n.getMessage("thaw.about.l11")),
 			new JLabel(I18n.getMessage("thaw.about.l12")),
-			new JLabel(I18n.getMessage("thaw.about.l13"))
+			new JLabel(I18n.getMessage("thaw.about.l13")),
+			new JLabel(I18n.getMessage("thaw.about.l14")),
+			new JLabel(I18n.getMessage("thaw.about.l15"))
 		};
 
 

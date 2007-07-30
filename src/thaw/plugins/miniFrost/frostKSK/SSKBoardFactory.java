@@ -65,7 +65,8 @@ public class SSKBoardFactory extends KSKBoardFactory {
 		for (int i = 0 ; i < DEFAULT_BOARDS_NAME.length ; i++)
 			createBoard(DEFAULT_BOARDS_NAME[i],
 				    DEFAULT_BOARDS_PUBLICKEY[i],
-				    null);
+				    null,
+				    false /* warning */);
 	}
 
 	public Vector getBoards() {
