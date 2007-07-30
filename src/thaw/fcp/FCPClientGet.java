@@ -88,7 +88,9 @@ public class FCPClientGet extends Observable
 	/**
 	 * Used to resume query from persistent queue of the node.
 	 * Think of adding this FCPClientGet as a queryManager observer.
-	 * @param destinationDir if null, then a temporary file will be create (path determined only when the file is availabed ; this file will be deleted on jvm exit)
+	 * @param destinationDir if null, then a temporary file will be create
+	 *                       (path determined only when the file is availabed ;
+	 *                       this file will be deleted on jvm exit)
 	 */
 	public FCPClientGet(final String id, final String key, final int priority,
 			    final int persistence, final boolean globalQueue,

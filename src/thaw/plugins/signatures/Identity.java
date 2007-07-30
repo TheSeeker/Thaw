@@ -498,8 +498,13 @@ public class Identity {
 
 
 	public boolean check(String text, String sig) {
-		initFrostCrypt();
-		return frostCrypt.detachedVerify(text, publicKey, sig);
+		try {
+			initFrostCrypt();
+			return frostCrypt.detachedVerify(text, publicKey, sig);
+		} catch(Exception e) {
+			Logger.notice(this, "signature check failed because: "+e.toString());
+			return false;
+		}
 	}
 
 

@@ -35,9 +35,6 @@ public class KSKMessage
 						      */
 	public final static int FCP_MAX_SIZE    = 32*1024;
 
-	/* for example KSK@frost|message|news|2007.7.21-boards-47.xml */
-	public final static String KEY_HEADER = /* "KSK@" + */"frost|message|news|";
-
 
 	/* content is not kept in memory (at least not here) */
 	private int            id;
@@ -73,14 +70,7 @@ public class KSKMessage
 		java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("yyyy.M.d");
 		//formatter.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
 
-		StringBuffer keyBuf = new StringBuffer("KSK@"+KEY_HEADER);
-
-		keyBuf = formatter.format(date, keyBuf, new java.text.FieldPosition(0));
-		keyBuf.append("-"+board.getName()+"-");
-		keyBuf.append(Integer.toString(rev));
-		keyBuf.append(".xml");
-
-		key = keyBuf.toString();
+		key = board.getDownloadKey(date, rev);
 
 		Logger.info(this, "Fetching : "+key.toString());
 
@@ -108,7 +98,8 @@ public class KSKMessage
 			int code = get.getGetFailedCode();
 
 			if (code == 13 /* dnd */
-			    || code == 14 /* route not found */) {
+			    || code == 14 /* route not found */
+			    || code == 20 /* jflesch is stupid */) {
 				Logger.info(this, key+" not found");
 				successfullyDownloaded = false;
 			} else {
@@ -473,5 +464,28 @@ public class KSKMessage
 			return false;
 
 		return (((KSKMessage)o).getId() == id);
+	}
+
+
+	public static boolean destroy(KSKBoard board, Hsqldb db) {
+		if (!KSKFileAttachment.destroy(board, db)
+		    || !KSKBoardAttachment.destroy(board, db))
+			return false;
+
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("DELETE FROM frostKSKMessages "+
+									 "WHERE boardId = ?");
+				st.setInt(1, board.getId());
+				st.execute();
+			}
+		} catch(SQLException e) {
+			Logger.error(null, "Can't destroy the board messages because : "+e.toString());
+			return false;
+		}
+
+		return true;
 	}
 }

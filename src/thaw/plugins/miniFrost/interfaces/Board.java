@@ -5,7 +5,7 @@ import thaw.plugins.miniFrost.BoardFolder;
 import javax.swing.tree.MutableTreeNode;
 import java.util.Vector;
 
-public interface Board {
+public interface Board extends Comparable {
 
 	/**
 	 * @return folder db id
@@ -69,7 +69,7 @@ public interface Board {
 
 	public int getNewMessageNumber();
 
-	public void destroy();
+	public boolean destroy();
 
 	/**
 	 * Always return the board name,

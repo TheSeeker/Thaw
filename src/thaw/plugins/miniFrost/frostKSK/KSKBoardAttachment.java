@@ -31,6 +31,13 @@ public class KSKBoardAttachment
 				  String privateKey,
 				  String description) {
 		this.boardName = boardName;
+
+		if (publicKey.endsWith("/"))
+			publicKey.replaceAll("/", "");
+
+		if (privateKey != null && privateKey.endsWith("/"))
+			privateKey.replaceAll("/", "");
+
 		this.publicKey = publicKey;
 		this.privateKey = privateKey;
 		this.description = description;
@@ -158,8 +165,7 @@ public class KSKBoardAttachment
 	public void apply(Hsqldb db, FCPQueueManager queueManager, String action) {
 		if (action.equals(I18n.getMessage("thaw.common.add"))) {
 			if (publicKey != null) {
-				/* TODO */
-				Logger.error(this, "Signed board not supported atm");
+				boardFactory.createBoard(boardName, publicKey, privateKey);
 				return;
 			}
 			boardFactory.createBoard(boardName);
@@ -246,4 +252,31 @@ public class KSKBoardAttachment
 		return buf;
 	}
 
+
+	public static boolean destroy(KSKBoard board, Hsqldb db) {
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT id FROM frostKSKMessages "+
+									 "WHERE boardId = ?");
+				st.setInt(1, board.getId());
+
+				ResultSet set = st.executeQuery();
+
+				while(set.next()) {
+					int id = set.getInt("id");
+					st = db.getConnection().prepareStatement("DELETE FROM frostKSKAttachmentBoards "+
+										 "WHERE messageId = ?");
+					st.setInt(1, id);
+					st.execute();
+				}
+			}
+		} catch(SQLException e) {
+			Logger.error(null, "Can't destroy the board attachments of the board because : "+e.toString());
+			return false;
+		}
+
+		return true;
+	}
 }

@@ -76,7 +76,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	 * @param keyType : KEY_TYPE_CHK ; KEY_TYPE_KSK ; KEY_TYPE_SSK
 	 * @param rev  : ignored if key == CHK || rev == -1
 	 * @param name : ignored if key == CHK
-	 * @param privateKey : ignored if key == CHK/KSK ; can be null if it has to be generated ; USK@[...]/
+	 * @param privateKey : ignored if key == CHK/KSK ; can be null if it has to be generated ; USK@[...]/ (must ends with a '/'
 	 * @param persistence PERSISTENCE_FOREVER ; PERSISTENCE_UNTIL_NODE_REBOOT ; PERSISTENCE_UNTIL_DISCONNEC
 	 */
 	public FCPClientPut(final File file, final int keyType,
@@ -910,12 +910,18 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			else
 				key = "KSK@" + name;
 		}
-
-		else if (keyType == KEY_TYPE_SSK && privateKey.startsWith("SSK"))
-			key = privateKey + name+"-"+rev;
-
-		else if (keyType == KEY_TYPE_SSK && privateKey.startsWith("USK"))
-			key = privateKey + name + "/" + rev;
+		else if (keyType == KEY_TYPE_SSK && privateKey.startsWith("SSK")) {
+			if (rev >= 0)
+				key = privateKey + name+"-"+rev;
+			else
+				key = privateKey + name;
+		}
+		else if (keyType == KEY_TYPE_SSK && privateKey.startsWith("USK")) {
+			if (rev >= 0)
+				key = privateKey + name + "/" + rev;
+			else
+				key = privateKey + name;
+		}
 
 		if (key == null) {
 			Logger.warning(this, "Unknown key type ?! May result in a strange behavior !");

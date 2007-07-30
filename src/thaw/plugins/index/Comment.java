@@ -772,7 +772,7 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 		FCPClientGet get = new FCPClientGet(publicKey, 2 /* priority */,
 						    FCPClientGet.PERSISTENCE_UNTIL_DISCONNECT /* persistence */,
-						    false /* global queue */, 3 /* max retries */,
+						    false /* global queue */, 0 /* maxretries */,
 						    System.getProperty("java.io.tmpdir"),
 						    MAX_SIZE, true /* no DDA */);
 

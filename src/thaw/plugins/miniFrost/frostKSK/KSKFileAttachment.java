@@ -266,4 +266,31 @@ public class KSKFileAttachment
 		return buf;
 	}
 
+
+	public static boolean destroy(KSKBoard board, Hsqldb db) {
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT id FROM frostKSKMessages "+
+									 "WHERE boardId = ?");
+				st.setInt(1, board.getId());
+
+				ResultSet set = st.executeQuery();
+
+				while(set.next()) {
+					int id = set.getInt("id");
+					st = db.getConnection().prepareStatement("DELETE FROM frostKSKAttachmentFiles "+
+										 "WHERE messageId = ?");
+					st.setInt(1, id);
+					st.execute();
+				}
+			}
+		} catch(SQLException e) {
+			Logger.error(null, "Can't destroy the file attachments of the board because : "+e.toString());
+			return false;
+		}
+
+		return true;
+	}
 }

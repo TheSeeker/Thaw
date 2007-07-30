@@ -7,6 +7,7 @@ import java.sql.*;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Date;
 
 import thaw.core.Core;
 import thaw.core.Logger;
@@ -107,6 +108,13 @@ public class KSKBoardFactory
 			  + "name VARCHAR(128) NOT NULL, "
 			  + "lastUpdate DATE DEFAULT NULL NULL)");
 
+		sendQuery("CREATE CACHED TABLE frostSSKBoards ("
+			  + "id INTEGER IDENTITY NOT NULL, "
+			  + "publicKey VARCHAR(256) NOT NULL, "
+			  + "privateKey VARCHAR(256) NULL, "
+			  + "kskBoardId INTEGER NOT NULL, "
+			  + "FOREIGN KEY (kskBoardId) REFERENCES frostKSKBoards (id))");
+
 		sendQuery("CREATE CACHED TABLE frostKSKMessages ("
 			  + "id INTEGER IDENTITY NOT NULL, "
 			  + "subject VARCHAR(512) NULL, "
@@ -144,10 +152,31 @@ public class KSKBoardFactory
 	}
 
 
-	private void addDefaultBoards() {
+	protected void addDefaultBoards() {
 		for (int i = 0 ; i < DEFAULT_BOARDS.length ; i++) {
 			createBoard(DEFAULT_BOARDS[i]);
 		}
+	}
+
+	protected int countNewMessages(int boardId) {
+		int count = 0;
+		try {
+			PreparedStatement subSt
+				= db.getConnection().prepareStatement("SELECT count(id)"+
+								      "FROM frostKSKMessages "+
+								      "WHERE boardId = ? "+
+								      "AND read = FALSE AND archived = FALSE");
+			subSt.setInt(1, boardId);
+
+			ResultSet subRes = subSt.executeQuery();
+
+			if (subRes.next())
+				count = subRes.getInt(1);
+		} catch(SQLException e) {
+			Logger.error(this, "Can't count the number of new message on the board because : "+e.toString());
+		}
+
+		return count;
 	}
 
 
@@ -158,33 +187,24 @@ public class KSKBoardFactory
 		try {
 			synchronized(db.dbLock) {
 				PreparedStatement st
-					= db.getConnection().prepareStatement("SELECT id, name, lastUpdate "+
-									      "FROM frostKSKBoards "+
+					= db.getConnection().prepareStatement("SELECT frostKSKBoards.id, "+
+									      "       frostKSKBoards.name, "+
+									      "       frostKSKBoards.lastUpdate "+
+									      "FROM frostKSKBoards LEFT OUTER JOIN frostSSKBoards "+
+									      "  ON frostKSKBoards.id = frostSSKBoards.kskBoardId "+
+									      "WHERE frostSSKBoards.id IS NULL "+
 				                                              "ORDER BY LOWER(name)");
 				ResultSet set = st.executeQuery();
 
 				while(set.next()) {
 					int id = set.getInt("id");
 					String name = set.getString("name");
+					Date lastUpdate = set.getDate("lastUpdate");
 
 					if (boards.get(name) != null)
 						v.add(boards.get(name));
 					else {
-
-						int count = 0;
-						java.util.Date lastUpdate = set.getDate("lastUpdate");
-
-						PreparedStatement subSt
-							= st.getConnection().prepareStatement("SELECT count(id)"+
-											      "FROM frostKSKMessages "+
-											      "WHERE boardId = ? "+
-											      "AND read = FALSE AND archived = FALSE");
-						subSt.setInt(1, id);
-
-						ResultSet subRes = subSt.executeQuery();
-
-						if (subRes.next())
-							count = subRes.getInt(1);
+						int count = countNewMessages(id);
 
 						KSKBoard board = new KSKBoard(this,
 									      id, name, lastUpdate,
@@ -203,10 +223,6 @@ public class KSKBoardFactory
 	}
 
 
-	protected KSKBoard getBoard(String name) {
-		return (KSKBoard)boards.get(name);
-	}
-
 
 	protected KSKBoard getBoard(int id) {
 		for (Iterator it = boards.values().iterator();
@@ -219,6 +235,7 @@ public class KSKBoardFactory
 
 		return null;
 	}
+
 
 
 	public Vector getAllMessages(String[] keywords, int orderBy,
@@ -242,13 +259,18 @@ public class KSKBoardFactory
 		createBoard(name);
 	}
 
-	public void createBoard(String name) {
+	protected void createBoard(String name) {
 		try {
 			synchronized(db.dbLock) {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT id FROM frostKSKBoards "+
-									 "WHERE LOWER(name) = ?");
+				st = db.getConnection().prepareStatement("SELECT frostKSKBoards.id, "+
+									 "FROM frostKSKBoards LEFT OUTER JOIN frostSSKBoards "+
+									 "  ON frostKSKBoards.id = frostSSKBoards.kskBoardId "+
+									 "WHERE frostSSKBoards.id IS NULL "+
+									 "AND LOWER(frostKSKBoards.name) = ? "+
+									 "LIMIT 1");
+
 				st.setString(1, name.toLowerCase());
 
 				ResultSet set = st.executeQuery();
@@ -268,6 +290,77 @@ public class KSKBoardFactory
 		}
 
 	}
+
+
+	/**
+	 * Put here to make my life simpler with the KSKBoardAttachment.
+	 */
+	protected void createBoard(String name, String publicKey, String privateKey) {
+		if (!thaw.fcp.FreenetURIHelper.isAKey(publicKey)) {
+			Logger.error(this, "Invalid publicKey");
+			return;
+		}
+
+		if (privateKey != null && "".equals(privateKey))
+			privateKey = null;
+
+
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT id "+
+									 "FROM frostSSKBoards "+
+									 "WHERE publicKey = ?");
+				st.setString(1, publicKey);
+				ResultSet set = st.executeQuery();
+
+				if (set.next()) {
+					Logger.warning(this, "Board already added");
+					return;
+				}
+
+				/* we must get the id first, else we will mix up things */
+
+				int id = 0;
+
+				st = db.getConnection().prepareStatement("SELECT id FROM frostKSKBoards "+
+									 "ORDER by id DESC LIMIT 1");
+				set = st.executeQuery();
+
+				if (set.next())
+					id = set.getInt("id") + 1;
+
+
+				name = name.toLowerCase();
+
+				st = db.getConnection().prepareStatement("INSERT INTO frostKSKBoards "+
+									 "(id, name) VALUES (?, ?)");
+
+				st.setInt(1, id);
+				st.setString(2, name);
+
+				st.execute();
+
+
+				st = db.getConnection().prepareStatement("INSERT INTO frostSSKBoards "+
+									 "(publicKey, privateKey, kskBoardId) "+
+									 "VALUES (?, ?, ?)");
+				st.setString(1, publicKey);
+				if (privateKey != null)
+					st.setString(2, privateKey);
+				else
+					st.setNull(2, Types.VARCHAR);
+				st.setInt(3, id);
+
+				st.execute();
+
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Can't add the board because : "+e.toString());
+		}
+	}
+
 
 	public String toString() {
 		return I18n.getMessage("thaw.plugin.miniFrost.FrostKSK");

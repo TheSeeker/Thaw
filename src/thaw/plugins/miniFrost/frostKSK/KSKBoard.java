@@ -70,6 +70,7 @@ public class KSKBoard
 	}
 
 
+
 	public Vector getMessages(String[] keywords,
 				  int orderBy,
 				  boolean desc,
@@ -313,6 +314,49 @@ public class KSKBoard
 
 	protected Date getCurrentlyRefreshedDate() {
 		return lastDate;
+	}
+
+	/* for example KSK@frost|message|news|2007.7.21-boards-47.xml */
+	public final static String KEY_HEADER = /* "KSK@" + */"frost|message|news|";
+
+	/**
+	 * called by KSKMessage.download();
+	 */
+	protected String getDownloadKey(Date date, int rev) {
+		java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("yyyy.M.d");
+
+		StringBuffer keyBuf = new StringBuffer("KSK@"+KEY_HEADER);
+
+		keyBuf = formatter.format(date, keyBuf, new java.text.FieldPosition(0));
+		keyBuf.append("-"+getName()+"-");
+		keyBuf.append(Integer.toString(rev));
+		keyBuf.append(".xml");
+
+		return keyBuf.toString();
+	}
+
+	/**
+	 * called by KSKDraft
+	 */
+	protected String getPrivateKey() {
+		return null;
+	}
+
+	/**
+	 * called by KSKDraft
+	 */
+	protected String getNameForInsertion(Date date, int rev) {
+		java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("yyyy.M.d");
+		//formatter.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
+
+		StringBuffer keyBuf = new StringBuffer(KEY_HEADER);
+
+		keyBuf = formatter.format(date, keyBuf, new java.text.FieldPosition(0));
+		keyBuf.append("-"+getName()+"-");
+		keyBuf.append(Integer.toString(rev));
+		keyBuf.append(".xml");
+
+		return keyBuf.toString();
 	}
 
 
@@ -636,8 +680,11 @@ public class KSKBoard
 	}
 
 
-	public void destroy() {
+	public boolean destroy() {
 		Hsqldb db = factory.getDb();
+
+		if (!KSKMessage.destroy(this, db))
+			return false;
 
 		try {
 			synchronized(db.dbLock) {
@@ -650,7 +697,10 @@ public class KSKBoard
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Can't destroy the board because : "+e.toString());
+			return false;
 		}
+
+		return true;
 	}
 
 	public int getId() {
@@ -677,5 +727,9 @@ public class KSKBoard
 
 	public Draft getDraft(Message inReplyTo) {
 		return new KSKDraft(this, (KSKMessage)inReplyTo);
+	}
+
+	public int compareTo(Object o) {
+		return toString().compareToIgnoreCase(o.toString());
 	}
 }

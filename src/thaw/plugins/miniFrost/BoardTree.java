@@ -274,7 +274,7 @@ public class BoardTree extends Observable
 			}
 		}
 
-		/* TODO : Sort the vector */
+		java.util.Collections.sort(boards);
 
 		model.setBoardList(boards);
 	}

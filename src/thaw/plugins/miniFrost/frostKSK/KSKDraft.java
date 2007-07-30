@@ -154,34 +154,24 @@ public class KSKDraft
 	}
 
 
-	private String getKey(Date date, int rev) {
-		java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("yyyy.M.d");
-		//formatter.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
-
-		StringBuffer keyBuf = new StringBuffer(KSKMessage.KEY_HEADER);
-
-		keyBuf = formatter.format(date, keyBuf, new java.text.FieldPosition(0));
-		keyBuf.append("-"+board.getName()+"-");
-		keyBuf.append(Integer.toString(rev));
-		keyBuf.append(".xml");
-
-		return keyBuf.toString();
-	}
-
 	private void startInsertion() {
 		waiting = false;
 		posting = true;
 		notifyPlugin();
 
-		String key = getKey(date, revUsed);
+		String privateKey = board.getPrivateKey();
+		String name = board.getNameForInsertion(date, revUsed);
 
-		Logger.info(this, "Inserting : KSK@"+key);
+		if (privateKey == null)
+			Logger.info(this, "Inserting : KSK@"+name);
+		else
+			Logger.info(this, "Insertion : SSK@[...]/"+name);
 
 		FCPClientPut clientPut = new FCPClientPut(fileToInsert,
 							  FCPClientPut.KEY_TYPE_KSK,
 							  -1, /* rev : we specify it ouselves in the key name */
-							  key,
-							  null, /* privateKey */
+							  name,
+							  privateKey, /* privateKey */
 							  2, /* priority */
 							  false,
 							  FCPClientPut.PERSISTENCE_FOREVER);
