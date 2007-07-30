@@ -32,7 +32,7 @@ public class KSKBoardAttachment
 				  String description) {
 		this.boardName = boardName;
 
-		if (publicKey.endsWith("/"))
+		if (publicKey != null && publicKey.endsWith("/"))
 			publicKey.replaceAll("/", "");
 
 		if (privateKey != null && privateKey.endsWith("/"))
