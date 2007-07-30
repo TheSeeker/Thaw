@@ -69,18 +69,18 @@ public class KSKBoardAttachment
 
 	public String[] getProperties() {
 		/* DIRTY :p */
-		if (publicKey == null) {
+		if (publicKey == null && boardName != null) {
 			return new String[] {
 				"Name",
 				"description",
 			};
-		} else if (privateKey == null) {
+		} else if (privateKey == null && boardName != null) {
 			return new String[] {
 				"Name",
 				"pubKey",
 				"description"
 			};
-		} else {
+		} else { /* if this attachment is empty or if we have all the values */
 			return new String[] {
 				"Name",
 				"pubKey",
