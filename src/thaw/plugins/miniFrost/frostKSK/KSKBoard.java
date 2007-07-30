@@ -415,8 +415,45 @@ public class KSKBoard
 	}
 
 
+	protected int getLastDownloadedRev(Date daDate) {
+		daDate = getMidnight(daDate);
+
+		java.sql.Timestamp date = new java.sql.Timestamp(daDate.getTime());
+
+
+		try {
+			Hsqldb db = factory.getDb();
+
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT rev FROM frostKSKMessages "+
+									 "WHERE date >= ? AND date < ? "+
+									 "AND boardId = ? "+
+									 "ORDER by rev DESC "+
+									 "LIMIT 1");
+				st.setTimestamp(1, date);
+				st.setTimestamp(2, new java.sql.Timestamp(date.getTime() + 24*60*60*1000));
+				st.setInt(3, id);
+
+				ResultSet set = st.executeQuery();
+
+				if (set.next())
+					return set.getInt("rev");
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Can't get the next non-downloaded rev in the board because : "+e.toString());
+		}
+
+		return 0;
+	}
+
+
 	/* synchronize your self on runningDownloads */
-	protected void startNewMessageDownload() {
+	/**
+	 * @param initial true if one of the first downloads of the day
+	 */
+	protected void startNewMessageDownload(boolean initial) {
 		int slot;
 
 		/* we search an empty slot */
@@ -444,10 +481,15 @@ public class KSKBoard
 		runningDownloads[slot].addObserver(this);
 		runningDownloads[slot].download(factory.getCore().getQueueManager(),
 						factory.getDb());
-		if (lastRev < rev)
+
+		if (lastRev < rev) {
 			lastRev = rev;
+		}
 
 	}
+
+
+
 
 	protected void notifyChange() {
 		factory.getPlugin().getPanel().notifyChange(this);
@@ -504,7 +546,9 @@ public class KSKBoard
 					newMsgs++;
 
 				notifyChange();
-				lastSuccessfulRev = msg.getRev();
+
+				if (msg.getRev() > lastSuccessfulRev)
+					lastSuccessfulRev = msg.getRev();
 
 				int toRestart = 0;
 
@@ -523,7 +567,7 @@ public class KSKBoard
 				Logger.info(this, "One successful => Restarting "+Integer.toString(toRestart)+" transfers");
 
 				for (int i = 0 ; i < toRestart ; i++)
-					startNewMessageDownload();
+					startNewMessageDownload(false);
 
 				return;
 			} else {
@@ -571,7 +615,7 @@ public class KSKBoard
 					     && (lastLoadedRev+1+i) < (lastSuccessfulRev + MAX_FAILURES_IN_A_ROW);
 				     i++) {
 					Logger.info(this, "Continuing progression ...");
-					startNewMessageDownload();
+					startNewMessageDownload(false);
 					moveDay = false;
 				}
 
@@ -596,7 +640,6 @@ public class KSKBoard
 
 					lastDate = new Date(lastDate.getTime() - 24*60*60*1000);
 					lastRev = -1;
-					lastSuccessfulRev = 0;
 
 					Date maxInPast = new Date(new Date().getTime() - ((maxDaysInThePast+1) * 24*60*60*1000));
 					Date lastUpdatePast = ((lastUpdate == null) ? null :
@@ -606,12 +649,14 @@ public class KSKBoard
 					    && (lastUpdatePast == null || lastDate.getTime() >= lastUpdatePast.getTime())) {
 						/* the date is in the limits */
 
+						lastSuccessfulRev = getLastDownloadedRev(lastDate);
+
 						/* we start again */
 
 						for (int i = 0;
 						     i < MAX_DOWNLOADS_AT_THE_SAME_TIME;
 						     i++) {
-							startNewMessageDownload();
+							startNewMessageDownload(true);
 						}
 
 					} else {
@@ -649,18 +694,19 @@ public class KSKBoard
 	public void run() {
 
 		lastRev = -1;
-		lastSuccessfulRev = 0;
 
 		lastDate = new Date((new Date()).getTime()
 				    + (MIN_DAYS_IN_THE_FUTURE * (24 * 60 * 60 * 1000 /* 1 day */)));
 
 		synchronized(runningDownloads) {
+			lastSuccessfulRev = getLastDownloadedRev(lastDate);
+
 			for (int i = 0 ; i < MAX_DOWNLOADS_AT_THE_SAME_TIME ; i++) {
 				runningDownloads[i] = null;
 			}
 
 			for (int i = 0 ; i < MAX_DOWNLOADS_AT_THE_SAME_TIME ; i++) {
-				startNewMessageDownload();
+				startNewMessageDownload(true);
 			}
 		}
 
