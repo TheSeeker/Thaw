@@ -149,7 +149,6 @@ public class KSKDraft
 									  identity);
 
 			fileToInsert = generator.generateXML();
-			fileToInsert.deleteOnExit();
 		}
 	}
 
@@ -227,6 +226,8 @@ public class KSKDraft
 
 			} else if (put.isFinished() && !put.isSuccessful()) {
 				if (put.getPutFailedCode() != 9) { /* !Collision */
+					put.deleteObserver(this);
+
 					Logger.error(this, "Can't insert the message on the board '"+
 						     board.toString()+"' ; Code: "+Integer.toString(put.getPutFailedCode()));
 					waiting = false;
