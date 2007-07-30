@@ -41,4 +41,6 @@ public interface Draft {
 
 	public boolean isWaiting();
 	public boolean isPosting();
+
+	public Board getBoard();
 }

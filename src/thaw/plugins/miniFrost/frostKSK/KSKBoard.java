@@ -335,6 +335,10 @@ public class KSKBoard
 		return keyBuf.toString();
 	}
 
+	protected int getKeyType() {
+		return thaw.fcp.FCPClientPut.KEY_TYPE_KSK;
+	}
+
 	/**
 	 * called by KSKDraft
 	 */
@@ -753,13 +757,17 @@ public class KSKBoard
 		return id;
 	}
 
+
+	/**
+	 * @return the board name, as it
+	 */
 	public String getName() {
 		return name;
 	}
 
 	/**
-	 * Always return the board name,
-	 * without anything more
+	 * Return the board name,
+	 * with maybe some informations
 	 */
 	public String toString() {
 		return name;

@@ -160,14 +160,15 @@ public class KSKDraft
 
 		String privateKey = board.getPrivateKey();
 		String name = board.getNameForInsertion(date, revUsed);
+		int keyType = board.getKeyType();
 
-		if (privateKey == null)
+		if (keyType == FCPClientPut.KEY_TYPE_KSK)
 			Logger.info(this, "Inserting : KSK@"+name);
 		else
-			Logger.info(this, "Insertion : SSK@[...]/"+name);
+			Logger.info(this, "Insertion : SSK@"+privateKey+name);
 
 		FCPClientPut clientPut = new FCPClientPut(fileToInsert,
-							  FCPClientPut.KEY_TYPE_KSK,
+							  keyType,
 							  -1, /* rev : we specify it ouselves in the key name */
 							  name,
 							  privateKey, /* privateKey */
@@ -194,6 +195,7 @@ public class KSKDraft
 			synchronized(board) {
 				if (fileToInsert == null || !isBoardUpToDateForToday())
 					return;
+				board.deleteObserver(this);
 				revUsed = board.getNextNonDownloadedRev(date, -1);
 			}
 
@@ -245,5 +247,9 @@ public class KSKDraft
 			}
 		}
 
+	}
+
+	public Board getBoard() {
+		return board;
 	}
 }

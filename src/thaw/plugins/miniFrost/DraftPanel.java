@@ -35,6 +35,7 @@ public class DraftPanel implements ActionListener {
 
 	private MiniFrostPanel mainPanel;
 
+	private JLabel boardLabel;
 	private JComboBox authorBox;
 	private JTextField subjectField;
 	private JTextArea textArea;
@@ -62,14 +63,18 @@ public class DraftPanel implements ActionListener {
 		textArea.setLineWrap(true);
 		textArea.setWrapStyleWord(true);
 
+		boardLabel = new JLabel("");
+
 
 		JPanel northPanel = new JPanel(new BorderLayout(5, 5));
 
-		JPanel headersPanel = new JPanel(new GridLayout(2, 1));
+		JPanel headersPanel = new JPanel(new GridLayout(3, 1));
+		headersPanel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.board")+": "));
 		headersPanel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.author")+": "));
 		headersPanel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.subject")+": "));
 
-		JPanel valuesPanel = new JPanel(new GridLayout(2, 1));
+		JPanel valuesPanel = new JPanel(new GridLayout(3, 1));
+		valuesPanel.add(boardLabel);
 		valuesPanel.add(authorBox);
 		valuesPanel.add(subjectField);
 
@@ -95,7 +100,8 @@ public class DraftPanel implements ActionListener {
 
 	public void setDraft(Draft draft) {
 		this.draft = draft;
-		refresh();
+
+		boardLabel.setText(draft.getBoard().toString());
 
 		Vector ids = new Vector();
 		ids.add(I18n.getMessage("thaw.plugin.miniFrost.anonymous"));
@@ -111,6 +117,8 @@ public class DraftPanel implements ActionListener {
 		String txt = draft.getText();
 
 		textArea.setText(draft.getText());
+
+		refresh();
 	}
 
 

@@ -46,6 +46,11 @@ public class SSKBoard extends KSKBoard {
 		return keyBuf.toString();
 	}
 
+
+	protected int getKeyType() {
+		return thaw.fcp.FCPClientPut.KEY_TYPE_SSK;
+	}
+
 	/**
 	 * called by KSKDraft
 	 */
@@ -129,6 +134,14 @@ public class SSKBoard extends KSKBoard {
 		}
 
 		return super.getDraft(inReplyTo);
+	}
+
+
+	public String toString() {
+		if (privateKey == null)
+			return super.toString()+" (R)";
+		else
+			return super.toString()+" (R/W)";
 	}
 }
 
