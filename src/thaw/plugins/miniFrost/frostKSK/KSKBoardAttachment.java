@@ -166,6 +166,8 @@ public class KSKBoardAttachment
 		if (action.equals(I18n.getMessage("thaw.common.add"))) {
 			if (publicKey != null) {
 				boardFactory.createBoard(boardName, publicKey, privateKey);
+				boardFactory.getPlugin().getPanel().notifyChange();
+
 				return;
 			}
 			boardFactory.createBoard(boardName);
