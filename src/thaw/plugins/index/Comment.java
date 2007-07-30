@@ -768,6 +768,9 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 		String publicKey = index.getCommentPublicKey(); /* should be an SSK */
 
+		if (publicKey == null)
+			return false;
+
 		publicKey += "comment-"+Integer.toString(rev)+"/comment.xml";
 
 		FCPClientGet get = new FCPClientGet(publicKey, 2 /* priority */,

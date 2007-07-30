@@ -741,7 +741,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 								       final boolean leaf,
 								       final int row,
 								       final boolean hasFocus) {
-			setBackgroundNonSelectionColor(tree.getBackground());
+			setBackgroundNonSelectionColor(Color.WHITE);
 			setBackgroundSelectionColor(IndexTree.SELECTION_COLOR);
 			setTextNonSelectionColor(Color.BLACK);
 			setTextSelectionColor(Color.BLACK);
