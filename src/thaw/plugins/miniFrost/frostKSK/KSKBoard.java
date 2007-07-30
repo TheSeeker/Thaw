@@ -549,8 +549,6 @@ public class KSKBoard
 				if (msg.isParsable())
 					newMsgs++;
 
-				notifyChange();
-
 				if (msg.getRev() > lastSuccessfulRev)
 					lastSuccessfulRev = msg.getRev();
 
@@ -573,10 +571,7 @@ public class KSKBoard
 				for (int i = 0 ; i < toRestart ; i++)
 					startNewMessageDownload(false);
 
-				return;
 			} else {
-				/* we notify a change anyway because of KSKDraft */
-				notifyChange();
 
 				/* if not successful, we look if all the other failed */
 				/* we look first if we can restart some of the failed transfers
@@ -672,6 +667,9 @@ public class KSKBoard
 			}
 
 		}
+
+		/* we notify a change anyway because of KSKDraft */
+		notifyChange();
 
 	}
 

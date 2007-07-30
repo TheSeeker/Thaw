@@ -10,6 +10,7 @@ import javax.swing.JTextArea;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 
 import java.util.Iterator;
 import java.util.Vector;
@@ -42,6 +43,9 @@ public class DraftPanel implements ActionListener {
 	private JButton cancelButton;
 	private JButton sendButton;
 
+	private JButton extractButton;
+
+	private JDialog dialog;
 
 	public DraftPanel(MiniFrostPanel mainPanel) {
 		this.mainPanel = mainPanel;
@@ -62,9 +66,12 @@ public class DraftPanel implements ActionListener {
 		textArea.setEditable(true);
 		textArea.setLineWrap(true);
 		textArea.setWrapStyleWord(true);
+		textArea.setFont(textArea.getFont().deriveFont((float)13.5));
 
 		boardLabel = new JLabel("");
-
+		extractButton = new JButton(thaw.gui.IconBox.minWindowNew);
+		extractButton.setToolTipText(I18n.getMessage("thaw.plugin.miniFrost.newWindow"));
+		extractButton.addActionListener(this);
 
 		JPanel northPanel = new JPanel(new BorderLayout(5, 5));
 
@@ -74,7 +81,12 @@ public class DraftPanel implements ActionListener {
 		headersPanel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.subject")+": "));
 
 		JPanel valuesPanel = new JPanel(new GridLayout(3, 1));
-		valuesPanel.add(boardLabel);
+
+		JPanel topPanel = new JPanel(new BorderLayout(5, 5));
+		topPanel.add(boardLabel, BorderLayout.CENTER);
+		topPanel.add(extractButton, BorderLayout.EAST);
+
+		valuesPanel.add(topPanel);
 		valuesPanel.add(authorBox);
 		valuesPanel.add(subjectField);
 
@@ -97,12 +109,20 @@ public class DraftPanel implements ActionListener {
 		panel.add(southPanel,                BorderLayout.SOUTH );
 	}
 
+	public DraftPanel(MiniFrostPanel mainPanel, JDialog dialog) {
+		this(mainPanel);
+		this.dialog = dialog;
+		extractButton.setEnabled(false);
+	}
+
 
 	public void setDraft(Draft draft) {
 		this.draft = draft;
 
+		/* board */
 		boardLabel.setText(draft.getBoard().toString());
 
+		/* identity */
 		Vector ids = new Vector();
 		ids.add(I18n.getMessage("thaw.plugin.miniFrost.anonymous"));
 		ids.addAll(Identity.getYourIdentities(mainPanel.getDb()));
@@ -112,8 +132,15 @@ public class DraftPanel implements ActionListener {
 		for (Iterator it = ids.iterator(); it.hasNext();)
 			authorBox.addItem(it.next());
 
+		if (draft.getAuthorIdentity() != null)
+			authorBox.setSelectedItem(draft.getAuthorIdentity());
+		else if (draft.getAuthorNick() != null)
+			authorBox.setSelectedItem(draft.getAuthorNick());
+
+		/* subject */
 		subjectField.setText(draft.getSubject());
 
+		/* text */
 		String txt = draft.getText();
 
 		textArea.setText(draft.getText());
@@ -140,27 +167,57 @@ public class DraftPanel implements ActionListener {
 		return panel;
 	}
 
+	/**
+	 * Don't do the replacements in the text.
+	 * Don't call Draft.setDate()
+	 */
+	public void fillInDraft() {
+		/* author */
+
+		if (authorBox.getSelectedItem() instanceof Identity) {
+			draft.setAuthor(authorBox.getSelectedItem().toString(),
+					(Identity)authorBox.getSelectedItem());
+		} else {
+			String nick = authorBox.getSelectedItem().toString();
+			nick = nick.replaceAll("@", "_");
+
+			draft.setAuthor(nick, null);
+		}
+
+		/* subject */
+
+		draft.setSubject(subjectField.getText());
+
+		/* text */
+
+		String txt = textArea.getText();
+		draft.setText(txt);
+	}
+
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == sendButton) {
+		if (e.getSource() == extractButton) {
+			fillInDraft();
+
+			JDialog newDialog = new JDialog(mainPanel.getPluginCore().getCore().getMainWindow().getMainFrame(),
+						     I18n.getMessage("thaw.plugin.miniFrost.draft"));
+			newDialog.getContentPane().setLayout(new GridLayout(1, 1));
+
+			DraftPanel panel = new DraftPanel(mainPanel, newDialog);
+
+			panel.setDraft(draft);
+
+			newDialog.getContentPane().add(panel.getPanel());
+
+			newDialog.setSize(500, 500);
+
+			newDialog.setVisible(true);
+
+		} else if (e.getSource() == sendButton) {
+			fillInDraft();
+
 			Date date = new Date();
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd - HH:mm:ss");
-
-			/* author */
-
-			if (authorBox.getSelectedItem() instanceof Identity) {
-				draft.setAuthor(authorBox.getSelectedItem().toString(),
-						(Identity)authorBox.getSelectedItem());
-			} else {
-				String nick = authorBox.getSelectedItem().toString();
-				nick = nick.replaceAll("@", "_");
-
-				draft.setAuthor(nick, null);
-			}
-
-			/* subject */
-
-			draft.setSubject(subjectField.getText());
 
 			/* text */
 
@@ -185,6 +242,9 @@ public class DraftPanel implements ActionListener {
 
 		}
 
-		mainPanel.displayMessageTable();
+		if (dialog == null)
+			mainPanel.displayMessageTable();
+		else
+			dialog.setVisible(false);
 	}
 }

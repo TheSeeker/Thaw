@@ -1,5 +1,7 @@
 package thaw.plugins.miniFrost.interfaces;
 
+import java.util.Vector;
+
 import thaw.plugins.signatures.Identity;
 
 
@@ -13,6 +15,16 @@ public interface Draft {
 	 * @return a default value if setText() was never called
 	 */
 	public String getText();
+
+	/**
+	 * @return can return null if unknown
+	 */
+	public String getAuthorNick();
+
+	/**
+	 * @return can return null if unknown
+	 */
+	public Identity getAuthorIdentity();
 
 	public boolean allowUnsignedPost();
 
@@ -33,6 +45,8 @@ public interface Draft {
 	public boolean addAttachment(Board board);
 	public boolean removeAttachment(java.io.File file);
 	public boolean removeAttachment(Board board);
+
+	public Vector getAttachments();
 
 	/**
 	 * must notify thaw.plugins.MiniFrostPanel at each change

@@ -447,8 +447,7 @@ public class KSKMessageParser {
 
 		try {
 			tmpFile = File.createTempFile("thaw-", "-message.xml");
-			/* don't call deleteOnExit() ... seems to have non-wanted side effects */
-			//tmpFile.deleteOnExit();
+			tmpFile.deleteOnExit();
 		} catch(java.io.IOException e) {
 			Logger.error(this, "Can't create temporary file because : "+e.toString());
 			return null;

@@ -4,6 +4,8 @@ import java.util.Observer;
 import java.util.Observable;
 import java.util.Date;
 
+import java.util.Vector;
+
 import thaw.fcp.*;
 import thaw.plugins.signatures.Identity;
 
@@ -81,6 +83,14 @@ public class KSKDraft
 		this.identity = identity;
 	}
 
+	public Identity getAuthorIdentity() {
+		return identity;
+	}
+
+	public String getAuthorNick() {
+		return nick;
+	}
+
 	public void setDate(Date date) {
 		this.date = date;
 	}
@@ -99,6 +109,10 @@ public class KSKDraft
 
 	public boolean removeAttachment(Board board) {
 		return true;
+	}
+
+	public Vector getAttachments() {
+		return null;
 	}
 
 
@@ -150,6 +164,9 @@ public class KSKDraft
 
 			fileToInsert = generator.generateXML();
 		}
+
+		/* first check */
+		update(board, null);
 	}
 
 
