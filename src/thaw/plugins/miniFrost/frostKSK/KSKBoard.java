@@ -257,6 +257,7 @@ public class KSKBoard
 					"       frostKSKMessages.sigId AS sigId, "+
 					"       frostKSKMessages.date AS date, "+
 					"       frostKSKMessages.rev AS rev, "+
+					"       frostKSKMessages.encryptedFor AS encryptedFor, "+
 					"       signatures.nickName AS sigNick, "+
 					"       signatures.publicKey AS sigPublicKey, "+
 					"       signatures.privateKey AS sigPrivateKey, "+

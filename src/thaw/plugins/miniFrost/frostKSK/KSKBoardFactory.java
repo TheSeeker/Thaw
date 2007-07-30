@@ -113,8 +113,12 @@ public class KSKBoardFactory
 	}
 
 	protected boolean convertDatabase_0_to_1() {
-		if (!sendQuery("ALTER TABLE frostKSKMessages ADD COLUMN encryptedFor INTEGER DEFAULT NULL NULL")
-		    || !sendQuery("ALTER TABLE frostKSKMessages ADD FOREIGN KEY (encryptedFor) REFERENCES signatures (id)")) {
+		boolean b = sendQuery("ALTER TABLE frostKSKMessages ADD COLUMN encryptedFor INTEGER DEFAULT NULL NULL");
+
+		boolean c = sendQuery("ALTER TABLE frostKSKMessages ADD FOREIGN KEY (encryptedFor) REFERENCES signatures (id)");
+		b = b & c;
+
+		if (!b) {
 
 			Logger.error(this, "Error while converting the board database from version 0 to 1");
 			return false;
