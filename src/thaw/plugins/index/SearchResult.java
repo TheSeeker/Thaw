@@ -60,7 +60,7 @@ public class SearchResult implements FileAndLinkList {
 		}
 
 		for (j = 0 ; j < search.length ; j++) {
-			st.setString(i, "%" + search[j] + "%");
+			st.setString(i, "%" + search[j].toLowerCase() + "%");
 			i++;
 		}
 	}
