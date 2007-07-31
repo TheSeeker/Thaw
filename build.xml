@@ -36,7 +36,7 @@
 	message="You need to download the bouncycastle provider for the JDK 1.4 from http://bouncycastle.org/latest_releases.html and put it in lib/ with the name BouncyCastle.jar." />
 
 	<!-- ONE-JAR -->
-	<property name="one-jar.location" value="${lib.dir}/one-jar-boot.jar" />
+	<property name="one-jar.location" value="${lib.dir}/one-jar.jar" />
 	<available file="${one-jar.location}" property="one-jar_available" />
 	<fail unless="one-jar_available" status="1"
 	message="You need to download One-Jar-boot from http://prdownloads.sourceforge.net/one-jar/, put it in lib/, and rename it 'one-jar.jar'" />
