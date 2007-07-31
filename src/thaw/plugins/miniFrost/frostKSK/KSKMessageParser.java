@@ -24,6 +24,8 @@ import thaw.plugins.Hsqldb;
 import thaw.core.Logger;
 import thaw.core.I18n;
 
+import thaw.plugins.miniFrost.RegexpBlacklist;
+
 
 /**
  * Dirty parser reusing some Frost functions
@@ -262,6 +264,19 @@ public class KSKMessageParser {
 	}
 
 
+	public boolean filter(RegexpBlacklist blacklist) {
+		if (blacklist.isBlacklisted(subject)
+		    || blacklist.isBlacklisted(from)
+		    || blacklist.isBlacklisted(body)) {
+			read = true;
+			archived = true;
+		}
+
+		return true;
+	}
+
+
+
 	public final static char SIGNATURE_ELEMENTS_SEPARATOR = '|';
 
 	private String getSignedContent() {
@@ -314,6 +329,7 @@ public class KSKMessageParser {
 
 		return identity.check(getSignedContent(), signature);
 	}
+
 
 
 	protected boolean loadXMLElements(Element root) {

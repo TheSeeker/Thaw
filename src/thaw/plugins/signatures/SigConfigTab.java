@@ -120,7 +120,7 @@ public class SigConfigTab implements ActionListener {
 		if (i >= Identity.trustLevelStr.length)
 			return;
 
-		Logger.error(this, "Setting min trust level to : "+Integer.toString(Identity.trustLevelInt[i]));
+		Logger.info(this, "Setting min trust level to : "+Integer.toString(Identity.trustLevelInt[i]));
 
 		config.setValue("minTrustLevel", Integer.toString(Identity.trustLevelInt[i]));
 	}

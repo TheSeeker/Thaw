@@ -3,11 +3,16 @@ package thaw.plugins.miniFrost;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JComboBox;
+import javax.swing.JButton;
 
 import java.util.Observer;
 import java.util.Observable;
 
 import java.awt.GridLayout;
+import java.awt.BorderLayout;
+
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 import thaw.core.Config;
 import thaw.core.ConfigWindow;
@@ -16,10 +21,11 @@ import thaw.core.Logger;
 import thaw.gui.IconBox;
 
 
-public class MiniFrostConfigTab implements Observer {
+public class MiniFrostConfigTab implements Observer, ActionListener {
 
 	private Config config;
 	private ConfigWindow configWindow;
+	private RegexpBlacklist regexpBlacklist;
 
 	private JPanel panel;
 
@@ -27,11 +33,15 @@ public class MiniFrostConfigTab implements Observer {
 	public final static int MAX_BOARDS = 30;
 
 	private JComboBox maxBoards;
+	private JButton regexpButton;
+
 
 	public MiniFrostConfigTab(Config config,
-				  ConfigWindow configWindow) {
+				  ConfigWindow configWindow,
+				  RegexpBlacklist regexpBlacklist) {
 		this.config = config;
 		this.configWindow = configWindow;
+		this.regexpBlacklist = regexpBlacklist;
 
 		panel = new JPanel(new GridLayout(16, 1));
 
@@ -44,6 +54,15 @@ public class MiniFrostConfigTab implements Observer {
 
 		panel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.maxBoardsRefreshed")));
 		panel.add(maxBoards);
+
+		JPanel regexpPanel = new JPanel(new BorderLayout());
+		regexpPanel.add(new JLabel(""), BorderLayout.CENTER);
+		regexpButton = new JButton(I18n.getMessage("thaw.plugin.miniFrost.modifyRegexp"));
+		regexpButton.addActionListener(this);
+		regexpPanel.add(regexpButton, BorderLayout.EAST);
+
+		panel.add(new JLabel(""));
+		panel.add(regexpPanel);
 
 		configWindow.addObserver(this);
 	}
@@ -85,6 +104,12 @@ public class MiniFrostConfigTab implements Observer {
 
 			selectValue();
 
+		}
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == regexpButton) {
+			regexpBlacklist.displayTab(configWindow);
 		}
 	}
 }

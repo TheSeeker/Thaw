@@ -9,6 +9,7 @@ import thaw.plugins.miniFrost.interfaces.BoardFactory;
 
 import thaw.plugins.miniFrost.AutoRefresh;
 import thaw.plugins.miniFrost.MiniFrostConfigTab;
+import thaw.plugins.miniFrost.RegexpBlacklist;
 
 
 public class MiniFrost implements thaw.core.Plugin {
@@ -18,6 +19,8 @@ public class MiniFrost implements thaw.core.Plugin {
 	private MiniFrostPanel miniFrostPanel;
 	private MiniFrostConfigTab configTab;
 	private AutoRefresh autoRefresh;
+
+	private RegexpBlacklist regexpBlacklist;
 
 	private boolean firstStart;
 
@@ -38,11 +41,19 @@ public class MiniFrost implements thaw.core.Plugin {
 		    || !loadAutoRefresh())
 			return false;
 
+		regexpBlacklist = new RegexpBlacklist(hsqldb);
+
 		configTab = new MiniFrostConfigTab(core.getConfig(),
-						   core.getConfigWindow());
+						   core.getConfigWindow(),
+						   regexpBlacklist);
 		configTab.display();
 
 		return true;
+	}
+
+
+	public RegexpBlacklist getRegexpBlacklist() {
+		return regexpBlacklist;
 	}
 
 

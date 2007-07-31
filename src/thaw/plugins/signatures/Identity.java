@@ -63,6 +63,8 @@ public class Identity {
 		Color.RED
 	};
 
+	public final static Color trustLevelColorMe = new Color(0, 128, 0);
+
 
 	private Hsqldb db;
 
@@ -188,7 +190,7 @@ public class Identity {
 		int i;
 
 		if (privateKey != null)
-			return new java.awt.Color(0, 175, 0);
+			return trustLevelColorMe;
 
 		for (i = 0 ; i < trustLevelInt.length ; i++) {
 			if (trustLevelInt[i] == trustLevel)

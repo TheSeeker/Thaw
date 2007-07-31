@@ -40,7 +40,6 @@ You need also BouncyCastle:
 * Download the provider for the JDK 1.4
 * Rename the file to BouncyCastle.jar
 * Put this .jar in lib/
-* You will also need the "unrestricted policy files" for the JCE (see http://bouncycastle.org/fr/documentation.html )
 
 and jmDNS:
 * download the jar and put it in lib/

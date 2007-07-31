@@ -118,6 +118,7 @@ public class KSKMessage
 
 			if (parser.loadFile(new File(get.getPath()), db)
 			    && parser.checkSignature(db)
+			    && parser.filter(board.getFactory().getPlugin().getRegexpBlacklist())
 			    && parser.insert(db, board.getId(),
 					     date, rev, board.getName())) {
 

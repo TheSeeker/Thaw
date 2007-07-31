@@ -129,6 +129,11 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		return true;
 	}
 
+	public boolean setSelectedTab(java.awt.Component c) {
+		tabs.setSelectedComponent(c);
+		return true;
+	}
+
 	public boolean removeTab(final java.awt.Component panel) {
 		tabs.remove(panel);
 		return true;
