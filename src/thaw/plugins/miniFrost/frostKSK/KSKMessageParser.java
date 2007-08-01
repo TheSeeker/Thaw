@@ -162,9 +162,28 @@ public class KSKMessageParser {
 
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.M.d HH:mm:ss");
 
+		date = date.trim();
 		time = time.trim();
 
-		java.sql.Timestamp dateSql = new java.sql.Timestamp(boardDate.getTime());
+		date += " "+time;
+
+		java.util.Date dateUtil = dateFormat.parse(date, new java.text.ParsePosition(0));
+
+		if (dateUtil != null) {
+			long dateDiff = KSKBoard.getMidnight(dateUtil).getTime() - KSKBoard.getMidnight(boardDate).getTime();
+			/* we accept between -24h before and +24h after */
+
+			if (dateDiff < 24*60*60*1000 || dateDiff > 24*60*60*1000)
+				dateUtil = null;
+		}
+
+
+		java.sql.Timestamp dateSql;
+
+		if (dateUtil != null)
+			dateSql = new java.sql.Timestamp(dateUtil.getTime());
+		else
+			dateSql = new java.sql.Timestamp(boardDate.getTime());
 
 
 		int replyToId = -1;
