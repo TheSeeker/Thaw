@@ -161,13 +161,23 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 
 		private Color softGray;
 
+		private JLabel labelRenderer;
+		private TransferProgressBar transferProgressBarRenderer;
+		private JTextArea textAreaRenderer;
 
 		public DefaultRenderer() {
 			softGray = new Color(240,240,240);
+			labelRenderer = new JLabel();
+			transferProgressBarRenderer = new TransferProgressBar(null, statusInProgressBars);
+			textAreaRenderer = new JTextArea();
+			textAreaRenderer.setEditable(false);
+			textAreaRenderer.setLineWrap(true);
+			textAreaRenderer.setWrapStyleWord(true);
 		}
 
 		public void showStatusInProgressBars(boolean v) {
 			statusInProgressBars = v;
+			transferProgressBarRenderer.showStatusInProgressBar(v);
 		}
 
 		public void specifyColumnWithKeys(int c) {
@@ -183,15 +193,20 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 
 			if (value instanceof FCPTransferQuery) {
 				final FCPTransferQuery query = (FCPTransferQuery)value;
-				final JProgressBar bar = new TransferProgressBar(query, statusInProgressBars);
 
-				return bar;
+				//final JProgressBar bar = new TransferProgressBar(query, statusInProgressBars);
+
+				transferProgressBarRenderer.setQuery(query);
+				transferProgressBarRenderer.refresh();
+
+				return transferProgressBarRenderer;
 			}
 
 			Component cell;
 
 			if (value instanceof ImageIcon) {
-				return new JLabel(((ImageIcon)value));
+				labelRenderer.setIcon((ImageIcon)value);
+				return labelRenderer;
 			} if (value instanceof JPanel) {
 				cell = (Component)value;
 			} else if(value instanceof Long) {
@@ -201,15 +216,12 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 									   isSelected, hasFocus, row, column);
 
 			} else if (value instanceof String && ((String)value).indexOf("\n") >= 0) {
-				JTextArea area = new JTextArea((String)value);
-				area.setEditable(false);
-				area.setLineWrap(true);
-				area.setWrapStyleWord(true);
+				textAreaRenderer.setText((String)value);
 
-				if (table.getRowHeight(row) < area.getPreferredSize().getHeight())
-					table.setRowHeight((int)area.getPreferredSize().getHeight());
+				if (table.getRowHeight(row) < textAreaRenderer.getPreferredSize().getHeight())
+					table.setRowHeight((int)textAreaRenderer.getPreferredSize().getHeight());
 
-				cell = area;
+				cell = textAreaRenderer;
 
 			} else {
 				cell = super.getTableCellRendererComponent(table, value,

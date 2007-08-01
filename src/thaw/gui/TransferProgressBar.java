@@ -23,13 +23,20 @@ public class TransferProgressBar extends JProgressBar {
 		this.query = query;
 		this.statusInProgressBar = statusInProgressBar;
 		this.withBorder = withBorder;
-
-		refresh();
 	}
 
 	public TransferProgressBar(FCPTransferQuery query, boolean statusInProgressBar) {
 		this(query, statusInProgressBar, false);
 	}
+
+	public void setQuery(FCPTransferQuery query) {
+		this.query = query;
+	}
+
+	public void showStatusInProgressBar(boolean v) {
+		this.statusInProgressBar = v;
+	}
+
 
 	public void refresh() {
 

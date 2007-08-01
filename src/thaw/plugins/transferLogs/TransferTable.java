@@ -132,9 +132,18 @@ public class TransferTable implements MouseListener {
 		private Color softGray;
 		private Color lightBlue;
 
+		private JTextArea textAreaRenderer;
+		private JLabel labelRenderer;
+
 		public TransferTableRenderer() {
 			softGray = new Color(240,240,240);
 			lightBlue = new Color(220, 220, 255);
+
+			labelRenderer = new JLabel("", JLabel.CENTER);
+
+			textAreaRenderer = new JTextArea();
+			textAreaRenderer.setEditable(false);
+			textAreaRenderer.setLineWrap(false);
 		}
 
 		public Component getTableCellRendererComponent(final JTable table, Object value,
@@ -143,14 +152,12 @@ public class TransferTable implements MouseListener {
 			Component cell;
 
 			if (value instanceof String && ((String)value).indexOf("\n") >= 0) {
-				JTextArea area = new JTextArea((String)value);
-				area.setEditable(false);
-				area.setLineWrap(false);
-
-				cell = area;
+				textAreaRenderer.setText((String)value);
+				cell = textAreaRenderer;
 
 			} else if ((value instanceof String) && "X".equals((String)value) ) {
-				return new JLabel(IconBox.minClose);
+				labelRenderer.setIcon(IconBox.minClose);
+				return labelRenderer;
 			} else if (value instanceof Integer) {
 				int val = ((Integer)value).intValue();
 
@@ -168,7 +175,9 @@ public class TransferTable implements MouseListener {
 						icon = (val == TransferLogs.TRANSFER_TYPE_DOWNLOAD) ?
 							IconBox.minDownloads : IconBox.minInsertions;
 
-					return new JLabel(icon);
+					labelRenderer.setIcon(icon);
+
+					return labelRenderer;
 				}
 
 			} else {

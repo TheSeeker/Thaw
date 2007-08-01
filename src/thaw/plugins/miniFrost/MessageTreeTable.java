@@ -261,8 +261,11 @@ public class MessageTreeTable implements Observer,
 	}
 
 	protected class MessageTableRenderer extends Table.DefaultRenderer {
+		private JCheckBox checkBoxRenderer;
+
 		public MessageTableRenderer() {
 			super();
+			this.checkBoxRenderer = new JCheckBox();
 		}
 
 		public Component getTableCellRendererComponent(final JTable table, Object value,
@@ -273,11 +276,9 @@ public class MessageTreeTable implements Observer,
 			Author author = model.getMsg(row).getSender();
 
 			if (value instanceof Boolean) {
-				JCheckBox box = new JCheckBox();
+				checkBoxRenderer.setSelected(((Boolean)value).booleanValue());
 
-				box.setSelected(((Boolean)value).booleanValue());
-
-				return box;
+				return checkBoxRenderer;
 			}
 
 			Color color = Color.BLACK;
