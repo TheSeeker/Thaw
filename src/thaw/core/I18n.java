@@ -68,7 +68,7 @@ public class I18n {
 		try {
 			return I18n.getResourceBundle().getString(key);
 		} catch(final Exception e) {
-			Logger.warning(new I18n(),/* we need a ref -> random ref -> this is *bad* */
+			Logger.warning(new I18n(),
 				       "Unable to find translation for '"+key+"'");
 			e.printStackTrace();
 			return key;

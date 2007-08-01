@@ -394,12 +394,10 @@ public class Core implements Observer {
 		try {
 			javax.swing.SwingUtilities.invokeAndWait(s);
 		} catch(InterruptedException e) {
-			Logger.error(s, "Interrupted while setting theme '"+theme+"' !");
-			Logger.error(s, "Interrupted because: "+e.toString());
+			Logger.error(s, "Interrupted while setting theme '"+theme+"' because: "+e.toString());
 		} catch(java.lang.reflect.InvocationTargetException e) {
 			Logger.error(s, "Error while setting theme : "+e.toString());
-			e.printStackTrace();
-			Logger.error(s, "Original exception: "+e.getTargetException().toString());
+			Logger.notice(s, "Original exception: "+e.getTargetException().toString());
 			e.getTargetException().printStackTrace();
 		}
 	}

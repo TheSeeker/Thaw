@@ -540,11 +540,11 @@ public class Identity {
 										 "privateKey, isDup, trustLevel "+
 										 "FROM signatures "+
 										 "WHERE "+cond + " "+
-										 "ORDER BY nickName");
+										 "ORDER BY LOWER(nickName)");
 				else
 					st = db.getConnection().prepareStatement("SELECT id, nickName, publicKey, "+
 										 "privateKey, isDup, trustLevel "+
-										 "FROM signatures ORDER BY nickName");
+										 "FROM signatures ORDER BY LOWER(nickName)");
 
 				ResultSet set = st.executeQuery();
 

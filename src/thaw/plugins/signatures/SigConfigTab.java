@@ -480,6 +480,7 @@ public class SigConfigTab implements ActionListener {
 
 			if (e.getSource() == close) {
 				dialog.setVisible(false);
+				return;
 			}
 
 			int row = table.getSelectedRow();

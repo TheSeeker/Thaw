@@ -475,8 +475,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 					schedule();
 
 			} catch(final Exception e) {
-				Logger.error(this, "EXCEPTION FROM ORDONNANCOR : "+e.toString());
-				Logger.error(this, "ERROR : "+e.getMessage());
+				Logger.error(this, "EXCEPTION FROM ORDONNANCOR : "+e.toString()+ " ; "+e.getMessage());
 				e.printStackTrace();
 			}
 		}
