@@ -451,7 +451,7 @@ public class MessageTreeTable implements Observer,
 		}
 
 		public void registerChild(MessageNode node) {
-			children.add(node);
+			children.insertElementAt(node, 0);
 		}
 
 		public java.util.Enumeration children() {
