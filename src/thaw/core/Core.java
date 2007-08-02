@@ -146,7 +146,7 @@ public class Core implements Observer {
 
 		mainWindow.setVisible(true);
 
-		reallySetTheme(lookAndFeel);
+		setTheme(lookAndFeel);
 
 		return true;
 	}
@@ -412,6 +412,7 @@ public class Core implements Observer {
 		}
 
 		lookAndFeel = theme;
+
 
 		if (mainWindow.getMainFrame().isVisible())
 			reallySetTheme(lookAndFeel);

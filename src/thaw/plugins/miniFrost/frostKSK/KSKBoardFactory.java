@@ -288,6 +288,12 @@ public class KSKBoardFactory
 		if (name == null)
 			return;
 
+		try {
+			Thread.sleep(1500);
+		} catch(InterruptedException e) {
+			/* \_o< */
+		}
+
 		createBoard(name);
 	}
 
