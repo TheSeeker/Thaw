@@ -185,13 +185,23 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 		}
 
 
-		public void setBackground(Component c, int row, boolean isSelected) {
+		/**
+		 * @return null if default color
+		 */
+		public static Color setBackground(Component c, int row, boolean isSelected) {
 			if (!isSelected) {
-				if (row % 2 == 0)
-					c.setBackground(COLOR_ONE);
-				else
-					c.setBackground(COLOR_TWO);
+				if (row % 2 == 0) {
+					if (c != null)
+						c.setBackground(COLOR_ONE);
+					return COLOR_ONE;
+				} else {
+					if (c != null)
+						c.setBackground(COLOR_TWO);
+					return COLOR_TWO;
+				}
 			}
+
+			return null;
 		}
 
 		public Component getTableCellRendererComponent(final JTable table, Object value,

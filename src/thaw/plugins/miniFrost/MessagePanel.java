@@ -371,7 +371,8 @@ public class MessagePanel
 
 		JPanel iPanel = null;
 
-		subject.setText(I18n.getMessage("thaw.plugin.miniFrost.subject")+": "+msg.getSubject());
+		subject.setText(I18n.getMessage("thaw.plugin.miniFrost.subject")+": "+msg.getSubject()+
+				"    [r"+Integer.toString(msg.getRev())+"]");
 
 		Logger.info(this, "Displaying "+Integer.toString(subMsgs.size())+" sub-msgs");
 

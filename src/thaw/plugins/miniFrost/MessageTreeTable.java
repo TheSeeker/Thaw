@@ -292,11 +292,12 @@ public class MessageTreeTable implements Observer,
 
 
 	protected class MessageNodeTree extends JTree {
+		DefaultTreeCellRenderer cellRenderer;
 
 		public MessageNodeTree(TreeNode root) {
 			super(root);
 
-			DefaultTreeCellRenderer cellRenderer = (DefaultTreeCellRenderer)getCellRenderer();
+			cellRenderer = (DefaultTreeCellRenderer)getCellRenderer();
 			cellRenderer.setOpenIcon(cellRenderer.getDefaultLeafIcon());
 			cellRenderer.setClosedIcon(cellRenderer.getDefaultLeafIcon());
 		}
@@ -320,6 +321,8 @@ public class MessageTreeTable implements Observer,
 							       int row, int column) {
 			if (isSelected)
 				setSelectionRow(row+1); /* don't forget the root :) */
+
+			Color background = thaw.gui.Table.DefaultRenderer.setBackground(this, row, isSelected);
 
 			setRowHeight(table.getRowHeight());
 			rowHeight = table.getRowHeight();
@@ -346,8 +349,19 @@ public class MessageTreeTable implements Observer,
 
 			setFont(getFont().deriveFont(mod));
 
-			if (msg != null && msg.getSender().getIdentity() != null)
-				setForeground(msg.getSender().getIdentity().getTrustLevelColor());
+			if (msg != null && msg.getSender().getIdentity() != null) {
+				Color foreground = msg.getSender().getIdentity().getTrustLevelColor();
+				cellRenderer.setTextNonSelectionColor(foreground);
+				cellRenderer.setTextSelectionColor(foreground);
+			} else {
+				cellRenderer.setTextNonSelectionColor(Color.BLACK);
+				cellRenderer.setTextSelectionColor(Color.BLACK);
+			}
+
+			if (background != null) {
+				cellRenderer.setBackground(background);
+				cellRenderer.setBackgroundNonSelectionColor(background);
+			}
 
 			visibleRow = row;
 			return this;
