@@ -178,12 +178,14 @@ public class KSKMessageParser {
 		}
 
 
-		java.sql.Timestamp dateSql;
+		java.sql.Timestamp timestampSql;
 
 		if (dateUtil != null)
-			dateSql = new java.sql.Timestamp(dateUtil.getTime());
+			timestampSql = new java.sql.Timestamp(dateUtil.getTime());
 		else
-			dateSql = new java.sql.Timestamp(boardDate.getTime());
+			timestampSql = new java.sql.Timestamp(boardDate.getTime());
+
+		java.sql.Date dateSql = new java.sql.Date(boardDate.getTime());
 
 
 		int replyToId = -1;
@@ -213,10 +215,12 @@ public class KSKMessageParser {
 				st = db.getConnection().prepareStatement("INSERT INTO frostKSKMessages ("+
 									 "subject, nick, sigId, content, "+
 									 "date, msgId, inReplyTo, inReplyToId, "+
-									 "rev, read, archived, encryptedFor, boardId) VALUES ("+
+									 "rev, keyDate, read, archived, "+
+									 "encryptedFor, boardId) VALUES ("+
 									 "?, ?, ?, ?, "+
 									 "?, ?, ?, ?, "+
-									 "?, ?, ?, ?, ?)");
+									 "?, ?, ?, ?, "+
+									 "?, ?)");
 				st.setString(1, subject);
 				st.setString(2, from); /* nick */
 				if (identity != null)
@@ -224,7 +228,7 @@ public class KSKMessageParser {
 				else
 					st.setNull(3, Types.INTEGER);
 				st.setString(4, body); /* content */
-				st.setTimestamp(5, dateSql);
+				st.setTimestamp(5, timestampSql);
 				st.setString(6, messageId);
 
 				if (replyToId >= 0)
@@ -239,15 +243,17 @@ public class KSKMessageParser {
 
 				st.setInt(9, rev);
 
-				st.setBoolean(10, read);
-				st.setBoolean(11, archived);
+				st.setDate(10, dateSql);
+
+				st.setBoolean(11, read);
+				st.setBoolean(12, archived);
 
 				if (encryptedFor == null)
-					st.setNull(12, Types.INTEGER);
+					st.setNull(13, Types.INTEGER);
 				else
-					st.setInt(12, encryptedFor.getId());
+					st.setInt(13, encryptedFor.getId());
 
-				st.setInt(13, boardId);
+				st.setInt(14, boardId);
 
 				st.execute();
 

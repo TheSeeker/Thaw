@@ -137,6 +137,14 @@ public class KSKBoardFactory
 			if (convertDatabase_0_to_1())
 				core.getConfig().setValue("frostKSKDatabaseVersion", "2");
 		}
+
+		/* due to a stupid mistake, the rev 1 will never really exist */
+
+		if ("1".equals(core.getConfig().getValue("frostKSKDatabaseVersion"))
+		    || "2".equals(core.getConfig().getValue("frostKSKDatabaseVersion"))) {
+			if (convertDatabase_2_to_3())
+				core.getConfig().setValue("frostKSKDatabaseVersion", "3");
+		}
 	}
 
 	protected boolean convertDatabase_0_to_1() {
@@ -155,10 +163,43 @@ public class KSKBoardFactory
 		return true;
 	}
 
+	protected boolean convertDatabase_2_to_3() {
+		if (!sendQuery("ALTER TABLE frostKSKMessages ADD COLUMN keyDate DATE DEFAULT NULL NULL")) {
+			Logger.error(this, "Error while converting the board database from version 2 to 3");
+			return false;
+		}
+
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT id, date FROM frostKSKMessages");
+
+				ResultSet set = st.executeQuery();
+
+				st = db.getConnection().prepareStatement("UPDATE frostKSKMessages SET keyDate = ? WHERE id = ?");
+
+				while (set.next()) {
+					int id = set.getInt("id");
+					java.sql.Timestamp timestamp = set.getTimestamp("date");
+					java.sql.Date date = new java.sql.Date(timestamp.getTime());
+
+					st.setDate(1, date);
+					st.setInt(2, id);
+					st.execute();
+				}
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Error while converting the board database from version 2 to 3: "+e.toString());
+		}
+
+		return true;
+	}
+
 
 	protected void createTables() {
-		if (core.getConfig().getValue("frostKSKDatabaseVersion") != null)
-			core.getConfig().setValue("frostKSKDatabaseVersion", "1");
+		if (core.getConfig().getValue("frostKSKDatabaseVersion") == null)
+			core.getConfig().setValue("frostKSKDatabaseVersion", "3");
 
 		sendQuery("CREATE CACHED TABLE frostKSKBoards ("
 			  + "id INTEGER IDENTITY NOT NULL, "
@@ -178,6 +219,7 @@ public class KSKBoardFactory
 			  + "nick VARCHAR(128) NOT NULL, "
 			  + "sigId INTEGER NULL, "
 			  + "content VARCHAR(32768) NOT NULL, "
+			  + "keyDate DATE NOT NULL, "
 			  + "date TIMESTAMP NOT NULL, "
 			  + "msgId VARCHAR(128) NOT NULL, "
 			  + "inReplyToId VARCHAR(128) NULL, "

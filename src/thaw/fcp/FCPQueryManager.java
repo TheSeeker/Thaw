@@ -141,7 +141,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 
 			while (isRunning(th)) {
 				Logger.warning(this, "Notifier thread ('"+th.toString()+"') seems to be blocked !!");
-				try { Thread.sleep(1000); } catch(InterruptedException e) { /* \_o< */ }
+				try { Thread.sleep(TIMEOUT); } catch(InterruptedException e) { /* \_o< */ }
 			}
 		}
 

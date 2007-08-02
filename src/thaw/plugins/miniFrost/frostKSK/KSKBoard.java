@@ -403,7 +403,7 @@ public class KSKBoard
 	protected int getNextNonDownloadedRev(Date daDate, int rev) {
 		daDate = getMidnight(daDate);
 
-		java.sql.Timestamp date = new java.sql.Timestamp(daDate.getTime());
+		java.sql.Date date = new java.sql.Date(daDate.getTime());
 
 
 		try {
@@ -413,12 +413,11 @@ public class KSKBoard
 				PreparedStatement st;
 
 				st = db.getConnection().prepareStatement("SELECT rev FROM frostKSKMessages "+
-									 "WHERE date >= ? AND date < ? "+
+									 "WHERE keyDate = ? "+
 									 "AND rev > ? AND boardId = ? ORDER by rev");
-				st.setTimestamp(1, date);
-				st.setTimestamp(2, new java.sql.Timestamp(date.getTime() + 24*60*60*1000));
-				st.setInt( 3, rev);
-				st.setInt(4, id);
+				st.setDate(1, date);
+				st.setInt( 2, rev);
+				st.setInt(3, id);
 
 				ResultSet set = st.executeQuery();
 
@@ -447,7 +446,7 @@ public class KSKBoard
 	protected int getLastDownloadedRev(Date daDate) {
 		daDate = getMidnight(daDate);
 
-		java.sql.Timestamp date = new java.sql.Timestamp(daDate.getTime());
+		java.sql.Date date = new java.sql.Date(daDate.getTime());
 
 
 		try {
@@ -457,13 +456,12 @@ public class KSKBoard
 				PreparedStatement st;
 
 				st = db.getConnection().prepareStatement("SELECT rev FROM frostKSKMessages "+
-									 "WHERE date >= ? AND date < ? "+
+									 "WHERE keyDate = ? "+
 									 "AND boardId = ? "+
 									 "ORDER by rev DESC "+
 									 "LIMIT 1");
-				st.setTimestamp(1, date);
-				st.setTimestamp(2, new java.sql.Timestamp(date.getTime() + 24*60*60*1000));
-				st.setInt(3, id);
+				st.setDate(1, date);
+				st.setInt(2, id);
 
 				ResultSet set = st.executeQuery();
 
@@ -538,7 +536,7 @@ public class KSKBoard
 				st = db.getConnection().prepareStatement("UPDATE frostKSKBoards "+
 									 "SET lastUpdate = ? "+
 									 "WHERE id = ?");
-				st.setTimestamp(1, new java.sql.Timestamp(new java.util.Date().getTime()));
+				st.setDate(1, new java.sql.Date(new java.util.Date().getTime()));
 				st.setInt(2, id);
 				st.execute();
 			}
