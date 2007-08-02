@@ -289,6 +289,11 @@ public class KSKBoardFactory
 			return;
 
 		try {
+			/* ugly workaround to avoid a crash due to a Sun bug:
+			 * If you call JOptionPanel.showInputDialog() and just after
+			 * TrayIcon.displayMessage(), Swing will crash.
+			 * (Note: remember, TrayIcon.displayMessage() is called by Logger.warning())
+			 */
 			Thread.sleep(1500);
 		} catch(InterruptedException e) {
 			/* \_o< */

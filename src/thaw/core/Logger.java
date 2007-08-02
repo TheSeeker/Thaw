@@ -133,17 +133,21 @@ public class Logger {
 		if(Logger.logListeners == null)
 			Logger.logListeners = new Vector();
 
-		Logger.logListeners.add(logListener);
+		synchronized(logListeners) {
+			Logger.logListeners.add(logListener);
+		}
 	}
 
 	public static void removeLogListener(final LogListener logListener) {
 		if(Logger.logListeners == null)
 			return;
 
-		Logger.logListeners.remove(logListener);
+		synchronized(logListener) {
+			Logger.logListeners.remove(logListener);
 
-		if (logListeners.size() == 0)
-			logListeners = null;
+			if (logListeners.size() == 0)
+				logListeners = null;
+		}
 	}
 
 
@@ -154,11 +158,13 @@ public class Logger {
 		if(Logger.logListeners == null)
 			return;
 
-		for(final Iterator it = Logger.logListeners.iterator();
-		    it.hasNext(); ) {
-			final LogListener logListener = (LogListener)it.next();
+		synchronized(logListeners) {
+			for(final Iterator it = Logger.logListeners.iterator();
+			    it.hasNext(); ) {
+				final LogListener logListener = (LogListener)it.next();
 
-			logListener.newLogLine(level, src, line);
+				logListener.newLogLine(level, src, line);
+			}
 		}
 	}
 

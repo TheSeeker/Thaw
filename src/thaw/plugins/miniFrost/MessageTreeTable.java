@@ -715,19 +715,19 @@ public class MessageTreeTable implements Observer,
 	}
 
 
-	private boolean rebuildMsgList(Vector msgs, TreeNode node, int proof) {
+	private boolean rebuildMsgList(Vector msgs, TreeNode node, int depth) {
 		if (node instanceof MessageNode)
 			msgs.add(node);
 
-		if (proof >= 20) {
-			Logger.notice(this, "Too proof, sorry");
+		if (depth >= 15) {
+			Logger.notice(this, "Too much depths, sorry");
 			return false;
 		}
 
 		for(Enumeration e = node.children();
 		    e.hasMoreElements();) {
 			TreeNode sub = (TreeNode)e.nextElement();
-			if (!rebuildMsgList(msgs, sub, proof+1))
+			if (!rebuildMsgList(msgs, sub, depth+1))
 				return false;
 		}
 
