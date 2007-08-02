@@ -236,6 +236,7 @@ public class TrayIcon implements thaw.core.Plugin,
 		p.add(l);
 
 		TransferProgressBar bar = new TransferProgressBar(q, true, true);
+		bar.refresh();
 		progressBars.add(bar);
 		p.add(bar);
 

@@ -8,6 +8,9 @@ import thaw.plugins.signatures.Identity;
 
 public interface Message /* extends TreeNode */ {
 
+	public String getMsgId();
+	public String getInReplyToId();
+
 	//public int getParentId();
 
 	public String getSubject();

@@ -148,6 +148,8 @@ public class KSKBoard
 				PreparedStatement st;
 
 				String query = "SELECT frostKSKMessages.id, "+
+					"       frostKSKMessages.msgId, "+
+					"       frostKSKMessages.inReplyToId, "+
 					"       frostKSKMessages.subject, "+
 					"       frostKSKMessages.nick, "+
 					"       frostKSKMessages.sigId, "+
@@ -205,6 +207,8 @@ public class KSKBoard
 					String nick = set.getString("nickname");
 
 					v.add(new KSKMessage(set.getInt("id"),
+							     set.getString("msgId"),
+							     set.getString("inReplyToId"),
 							     set.getString("subject"),
 							     set.getString("nick"),
 							     sigId,
@@ -252,6 +256,8 @@ public class KSKBoard
 				PreparedStatement st;
 
 				String query = "SELECT frostKSKMessages.id AS id, "+
+					"       frostKSKMessages.msgId AS msgId, "+
+					"       frostKSKMessages.inReplyToId AS inReplyToId, "+
 					"       frostKSKMessages.subject AS subject, "+
 					"       frostKSKMessages.nick AS nick, "+
 					"       frostKSKMessages.sigId AS sigId, "+
@@ -286,6 +292,8 @@ public class KSKBoard
 					int sigId = set.getInt("sigId");
 
 					return new KSKMessage(set.getInt("id"),
+							      set.getString("msgId"),
+							      set.getString("inReplyToId"),
 							      set.getString("subject"),
 							      set.getString("nick"),
 							      sigId,

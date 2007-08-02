@@ -39,6 +39,9 @@ import thaw.fcp.FCPClientGet;
  */
 public class Table extends JTable implements TableColumnModelListener, Runnable {
 
+	public final static Color COLOR_ONE = Color.WHITE;
+	public final static Color COLOR_TWO = new Color(240, 240, 240);
+
 	private Config config;
 	private String configPrefix;
 
@@ -159,14 +162,11 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 		private boolean statusInProgressBars = true;
 		private int columnWithKeys = -1;
 
-		private Color softGray;
-
 		private JLabel labelRenderer;
 		private TransferProgressBar transferProgressBarRenderer;
 		private JTextArea textAreaRenderer;
 
 		public DefaultRenderer() {
-			softGray = new Color(240,240,240);
 			labelRenderer = new JLabel();
 			transferProgressBarRenderer = new TransferProgressBar(null, statusInProgressBars);
 			textAreaRenderer = new JTextArea();
@@ -182,6 +182,16 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 
 		public void specifyColumnWithKeys(int c) {
 			columnWithKeys = c;
+		}
+
+
+		public void setBackground(Component c, int row, boolean isSelected) {
+			if (!isSelected) {
+				if (row % 2 == 0)
+					c.setBackground(COLOR_ONE);
+				else
+					c.setBackground(COLOR_TWO);
+			}
 		}
 
 		public Component getTableCellRendererComponent(final JTable table, Object value,
@@ -230,12 +240,7 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 
 			}
 
-			if (!isSelected) {
-				if (row % 2 == 0)
-					cell.setBackground(Color.WHITE);
-				else
-					cell.setBackground(softGray);
-			}
+			setBackground(cell, row, isSelected);
 
 			cell.setForeground(Color.BLACK);
 

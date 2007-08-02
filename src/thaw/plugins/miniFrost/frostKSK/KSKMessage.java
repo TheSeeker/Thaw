@@ -38,6 +38,8 @@ public class KSKMessage
 
 	/* content is not kept in memory (at least not here) */
 	private int            id;
+	private String         idStr;
+	private String         inReplyToStr;
 	private String         subject;
 	private KSKAuthor      author;
 	private int            sigId;
@@ -165,24 +167,36 @@ public class KSKMessage
 	}
 
 
-	public KSKMessage(int id,
+	public String getMsgId() {
+		return idStr;
+	}
+
+	public String getInReplyToId() {
+		return inReplyToStr;
+	}
+
+
+	public KSKMessage(int id, String idStr,
+			  String inReplyToStr,
 			  String subject, String nick,
 			  int sigId, Identity identity,
 			  java.util.Date date, int rev,
 			  boolean read, boolean archived,
 			  Identity encryptedFor,
 			  KSKBoard board) {
-		this.id        = id;
-		this.subject   = subject;
+		this.id           = id;
+		this.idStr        = idStr;
+		this.inReplyToStr = inReplyToStr;
+		this.subject      = subject;
 
-		this.author    = new KSKAuthor(nick, identity);
+		this.author       = new KSKAuthor(nick, identity);
 
-		this.sigId     = sigId;
-		this.date      = date;
-		this.rev       = rev;
-		this.read      = read;
-		this.archived  = archived;
-		this.board     = board;
+		this.sigId        = sigId;
+		this.date         = date;
+		this.rev          = rev;
+		this.read         = read;
+		this.archived     = archived;
+		this.board        = board;
 		this.encryptedFor = encryptedFor;
 	}
 
@@ -334,33 +348,6 @@ public class KSKMessage
 		return v;
 	}
 
-
-	protected String getMsgId() {
-		try {
-			Hsqldb db = board.getFactory().getDb();
-
-			synchronized(db.dbLock) {
-
-				PreparedStatement st;
-
-				st = db.getConnection().prepareStatement("SELECT msgId "+
-									 "FROM frostKSKMessages "+
-									 "WHERE id = ? "+
-									 "LIMIT 1");
-				st.setInt(1, id);
-
-				ResultSet set = st.executeQuery();
-
-				if (!set.next())
-					return null;
-
-				return set.getString("msgId");
-			}
-		} catch(SQLException e) {
-			Logger.error(this, "Error while getting the messages : "+e.toString());
-			return null;
-		}
-	}
 
 
 	public String getRawMessage() {
