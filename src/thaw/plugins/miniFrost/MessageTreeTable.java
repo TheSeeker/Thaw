@@ -685,7 +685,8 @@ public class MessageTreeTable implements Observer,
 		}
 
 		public void refresh(MessageNode msgNode) {
-			refresh(msgs.indexOf(msgNode));
+			//refresh(msgs.indexOf(msgNode));
+			refresh();
 		}
 
 		public void refresh(int row) {
@@ -740,7 +741,7 @@ public class MessageTreeTable implements Observer,
 
 
 
-	public synchronized void refresh(String[] keywords, int orderBy, boolean desc, boolean allBoards) {
+	public void refresh(String[] keywords, int orderBy, boolean desc, boolean allBoards) {
 		Vector msgs = null;
 
 		if ((!allBoards) && targetBoard != null) {
