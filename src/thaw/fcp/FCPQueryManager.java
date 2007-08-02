@@ -13,12 +13,10 @@ public class FCPQueryManager extends Observable implements Runnable {
 	private Thread me;
 
 	private FCPConnection connection;
-	private FCPMessage latestMessage;
 
 
 	public FCPQueryManager(final FCPConnection connection) {
 		me = null;
-		latestMessage = null;
 		setConnection(connection);
 	}
 
@@ -94,25 +92,93 @@ public class FCPQueryManager extends Observable implements Runnable {
 	}
 
 
+	public class Notifier implements Runnable {
+		FCPMessage msg;
+
+		public Notifier(FCPMessage msg) {
+			this.msg = msg;
+		}
+
+		public void run() {
+			try {
+				setChanged();
+				notifyObservers(msg);
+			} catch(final Exception e) {
+				/* it's really bad ... because if data are waiting on the socket ... */
+				Logger.error(this, "EXCEPTION FROM ONE OF LISTENER : "+e.toString());
+				Logger.error(this, "ERROR : "+e.getMessage());
+				e.printStackTrace();
+			}
+		}
+	}
+
+
+
+	public class WatchDog implements Runnable {
+		public final static int TIMEOUT = 5000;
+
+		Runnable runnable;
+
+		public WatchDog(Runnable runnable) {
+			this.runnable = runnable;
+		}
+
+		private boolean isRunning(Thread th) {
+			return (th.getState() != Thread.State.TERMINATED);
+		}
+
+		public void run() {
+			Thread th = new Thread(runnable);
+			th.start();
+
+			for (int i = 0 ; i < TIMEOUT && isRunning(th) ; i += 300) {
+				try {
+					Thread.sleep(100);
+				} catch(InterruptedException e) {
+					/* \_o< */
+				}
+			}
+
+			if (isRunning(th)) {
+				Logger.warning(this, "Notifier thread seems to be blocked !!");
+				th.dumpStack();
+			}
+		}
+
+	}
+
+	/**
+	 * Multithreading allow the use of a watchdog
+	 */
+	public final static boolean MULTITHREADED = true;
+
 	/**
 	 * Will listen in loop for new incoming messages.
 	 */
 	public void run() {
-
 		while(true) {
-			latestMessage = readMessage();
+			FCPMessage latestMessage = readMessage();
 
 			Logger.verbose(this, "Message received. Notifying observers");
 
 			if(latestMessage != null) {
-				try {
-					setChanged();
-					this.notifyObservers(latestMessage);
-				} catch(final Exception e) {
-					/* it's really bad ... because if data are waiting on the socket ... */
-					Logger.error(this, "EXCEPTION FROM ONE OF LISTENER : "+e.toString());
-					Logger.error(this, "ERROR : "+e.getMessage());
-					e.printStackTrace();
+				/*
+				 * can't multithread if data are waiting
+				 */
+				if (MULTITHREADED && latestMessage.getAmountOfDataWaiting() == 0) {
+					Thread notifierTh = new Thread(new WatchDog(new Notifier(latestMessage)));
+					notifierTh.start();
+				} else {
+					try {
+						setChanged();
+						notifyObservers(latestMessage);
+					} catch(final Exception e) {
+						/* it's really bad ... because if data are waiting on the socket ... */
+						Logger.error(this, "EXCEPTION FROM ONE OF LISTENER : "+e.toString());
+						Logger.error(this, "ERROR : "+e.getMessage());
+						e.printStackTrace();
+					}
+
 				}
 			} else {
 				Logger.info(this, "Stopping listening");

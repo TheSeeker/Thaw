@@ -211,7 +211,7 @@ public class FCPConnection extends Observable {
 	/**
 	 * Doesn't check the lock state ! You have to manage it yourself.
 	 */
-	public boolean rawWrite(final byte[] data) {
+	public synchronized boolean rawWrite(final byte[] data) {
 		if(bufferedOut != null)
 			return bufferedOut.write(data);
 		else {
@@ -224,7 +224,7 @@ public class FCPConnection extends Observable {
 	/**
 	 * Should be call by FCPBufferedStream. Not you.
 	 */
-	public boolean realRawWrite(final byte[] data) {
+	public synchronized boolean realRawWrite(final byte[] data) {
 		if((out != null) && (socket != null) && socket.isConnected()) {
 			try {
 				lastWrite = System.currentTimeMillis();

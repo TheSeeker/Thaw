@@ -76,6 +76,11 @@ public class MessageTreeTable implements Observer,
 					 MouseListener,
 					 ActionListener
 {
+	/**
+	 * Just here to avoid an infinite recursion
+	 */
+	public final static int MAX_DEPTH = 30;
+
 
 	public final static String[] COLUMNS = {
 		"", /* checkboxes */
@@ -718,7 +723,7 @@ public class MessageTreeTable implements Observer,
 		if (node instanceof MessageNode)
 			msgs.add(node);
 
-		if (depth >= 15) {
+		if (depth >= MAX_DEPTH) {
 			Logger.notice(this, "Too much depths, sorry");
 			return false;
 		}
@@ -773,7 +778,7 @@ public class MessageTreeTable implements Observer,
 			msgs = new Vector();
 		}
 
-		Logger.info(this, "Nmb msgs in the tree : "+Integer.toString(msgs.size()));
+		Logger.info(this, "Nmb msgs in the tree (before) : "+Integer.toString(msgs.size()));
 
 		Vector rootNodes;
 
@@ -851,7 +856,7 @@ public class MessageTreeTable implements Observer,
 
 		rebuildMsgList(msgs, rootNode, 0);
 
-		Logger.info(this, "Nmb msgs in the tree : "+Integer.toString(msgs.size()));
+		Logger.info(this, "Nmb msgs in the tree (after) : "+Integer.toString(msgs.size()));
 
 		model.setMessages(msgs);
 
