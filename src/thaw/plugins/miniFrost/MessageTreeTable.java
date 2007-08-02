@@ -134,7 +134,6 @@ public class MessageTreeTable implements Observer,
 
 	/** for the thread tree **/
 	private MessageNodeTree messageNodeTree;
-	private Hashtable messageNodeHashtable;
 
 
 	public MessageTreeTable(MiniFrostPanel mainPanel) {
@@ -736,7 +735,7 @@ public class MessageTreeTable implements Observer,
 
 
 
-	public void refresh(String[] keywords, int orderBy, boolean desc, boolean allBoards) {
+	public synchronized void refresh(String[] keywords, int orderBy, boolean desc, boolean allBoards) {
 		Vector msgs = null;
 
 		if ((!allBoards) && targetBoard != null) {
@@ -781,7 +780,7 @@ public class MessageTreeTable implements Observer,
 		if (seeTree.isSelected()) {
 
 			/** Filling in messageNodeHashtable **/
-			messageNodeHashtable = new Hashtable(msgs.size());
+			Hashtable messageNodeHashtable = new Hashtable(msgs.size());
 
 			synchronized(messageNodeHashtable) {
 				for (Iterator it = msgs.iterator();
