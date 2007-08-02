@@ -55,7 +55,7 @@ import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeNode;
 
-import java.util.HashMap;
+import java.util.Hashtable;
 
 
 import thaw.gui.Table;
@@ -134,7 +134,7 @@ public class MessageTreeTable implements Observer,
 
 	/** for the thread tree **/
 	private MessageNodeTree messageNodeTree;
-	private HashMap messageNodeHashMap;
+	private Hashtable messageNodeHashtable;
 
 
 	public MessageTreeTable(MiniFrostPanel mainPanel) {
@@ -431,7 +431,7 @@ public class MessageTreeTable implements Observer,
 		/**
 		 * will register
 		 */
-		public void setParent(HashMap messageNodes) {
+		public void setParent(Hashtable messageNodes) {
 			String inReplyTo;
 
 			if (msg != null && (inReplyTo = msg.getInReplyToId()) != null) {
@@ -780,20 +780,22 @@ public class MessageTreeTable implements Observer,
 
 		if (seeTree.isSelected()) {
 
-			/** Filling in messageNodeHashMap **/
-			messageNodeHashMap = new HashMap(msgs.size());
+			/** Filling in messageNodeHashtable **/
+			messageNodeHashtable = new Hashtable(msgs.size());
 
-			for (Iterator it = msgs.iterator();
-			     it.hasNext();) {
-				MessageNode node = (MessageNode)it.next();
-				messageNodeHashMap.put(node.getMessage().getMsgId(), node);
-			}
+			synchronized(messageNodeHashtable) {
+				for (Iterator it = msgs.iterator();
+				     it.hasNext();) {
+					MessageNode node = (MessageNode)it.next();
+					messageNodeHashtable.put(node.getMessage().getMsgId(), node);
+				}
 
 
-			/** Building the tree **/
-			for (Iterator it = msgs.iterator();
-			     it.hasNext();) {
-				((MessageNode)it.next()).setParent(messageNodeHashMap);
+				/** Building the tree **/
+				for (Iterator it = msgs.iterator();
+				     it.hasNext();) {
+					((MessageNode)it.next()).setParent(messageNodeHashtable);
+				}
 			}
 
 			/** we search the nodes who should have a parent but haven't **/
