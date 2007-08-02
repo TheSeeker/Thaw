@@ -124,7 +124,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 		}
 
 		private boolean isRunning(Thread th) {
-			return (th.getState() != Thread.State.TERMINATED);
+			return (th.isAlive());
 		}
 
 		public void run() {
