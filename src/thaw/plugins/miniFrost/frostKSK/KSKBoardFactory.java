@@ -74,6 +74,33 @@ public class KSKBoardFactory
 		return true;
 	}
 
+
+	public boolean cleanUp(int archiveAfter, int deleteAfter) {
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				java.sql.Timestamp timestamp = new java.sql.Timestamp(new Date().getTime() - (deleteAfter * 24 * 60*60*1000));
+
+				st = db.getConnection().prepareStatement("DELETE from frostKSKMessages WHERE date < ?");
+				st.setTimestamp(1, timestamp);
+				st.execute();
+
+
+				timestamp = new java.sql.Timestamp(new Date().getTime() - (archiveAfter * 24 * 60*60*1000));
+
+				st = db.getConnection().prepareStatement("UPDATE frostKSKMessages SET archived = TRUE WHERE date < ?");
+				st.setTimestamp(1, timestamp);
+				st.execute();
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Can't cleanup the db because : "+e.toString());
+		}
+
+		return true;
+	}
+
+
 	public MiniFrost getPlugin() {
 		return plugin;
 	}

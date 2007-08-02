@@ -17,6 +17,8 @@ public interface BoardFactory {
 			    MiniFrost miniFrost);
 
 
+	public boolean cleanUp(int archiveAfter, int deleteAfter);
+
 	/**
 	 * @return all the boards managed by this factory
 	 */

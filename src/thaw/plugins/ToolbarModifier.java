@@ -40,6 +40,9 @@ public class ToolbarModifier {
 	 * @param position if == -1, then the button is put at the end
 	 */
 	public void addButtonToTheToolbar(final JButton button, int position) {
+		if (button != null)
+			button.setBorderPainted(false);
+
 		if (position < 0)
 			buttons.add(button);
 		else {

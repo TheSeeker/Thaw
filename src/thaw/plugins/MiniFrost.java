@@ -3,6 +3,7 @@ package thaw.plugins;
 import thaw.core.I18n;
 import thaw.core.Core;
 import thaw.core.Logger;
+import thaw.core.Config;
 
 import thaw.plugins.miniFrost.MiniFrostPanel;
 import thaw.plugins.miniFrost.interfaces.BoardFactory;
@@ -13,6 +14,9 @@ import thaw.plugins.miniFrost.RegexpBlacklist;
 
 
 public class MiniFrost implements thaw.core.Plugin {
+	public final static int DEFAULT_ARCHIVE_AFTER = 7; /* days */
+	public final static int DEFAULT_DELETE_AFTER  = 60; /* days */
+
 	private Core core;
 	private Hsqldb hsqldb;
 
@@ -37,6 +41,7 @@ public class MiniFrost implements thaw.core.Plugin {
 
 		if (!loadDeps()
 		    || !initFactories()
+		    || !cleanUp(core.getConfig())
 		    || !loadGUI()
 		    || !loadAutoRefresh())
 			return false;
@@ -87,6 +92,27 @@ public class MiniFrost implements thaw.core.Plugin {
 
 	public Core getCore() {
 		return core;
+	}
+
+
+	protected boolean cleanUp(Config config) {
+		int archiveAfter = DEFAULT_ARCHIVE_AFTER;
+		int deleteAfter = DEFAULT_DELETE_AFTER;
+
+		if (config.getValue("miniFrostArchiveAfter") != null)
+			archiveAfter = Integer.parseInt(config.getValue("miniFrostArchiveAfter"));
+
+		if (config.getValue("miniFrostDeleteAfter") != null)
+			deleteAfter = Integer.parseInt(config.getValue("miniFrostDeleteAfter"));
+
+		boolean b = true;
+
+		for (int i = 0 ; i < factories.length ; i++) {
+			if (!factories[i].cleanUp(archiveAfter, deleteAfter))
+				b = false;
+		}
+
+		return b;
 	}
 
 
