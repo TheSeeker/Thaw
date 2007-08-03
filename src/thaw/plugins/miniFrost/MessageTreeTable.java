@@ -381,7 +381,9 @@ public class MessageTreeTable implements Observer,
 		}
 
 		public Enumeration children() {
-			return children.elements();
+			synchronized(children) { /* yep, quite useless */
+				return children.elements();
+			}
 		}
 
 		public boolean getAllowsChildren() {
@@ -389,15 +391,21 @@ public class MessageTreeTable implements Observer,
 		}
 
 		public TreeNode getChildAt(int childIndex) {
-			return (MessageNode)children.get(childIndex);
+			synchronized(children) {
+				return (MessageNode)children.get(childIndex);
+			}
 		}
 
 		public int getChildCount() {
-			return children.size();
+			synchronized(children) {
+				return children.size();
+			}
 		}
 
 		public int getIndex(TreeNode node) {
-			return children.indexOf(node);
+			synchronized(children) {
+				return children.indexOf(node);
+			}
 		}
 
 		public TreeNode getParent() {
@@ -405,7 +413,9 @@ public class MessageTreeTable implements Observer,
 		}
 
 		public boolean isLeaf() {
-			return (children.size() == 0);
+			synchronized(children) {
+				return (children.size() == 0);
+			}
 		}
 	}
 
@@ -455,11 +465,15 @@ public class MessageTreeTable implements Observer,
 		}
 
 		public void registerChild(MessageNode node) {
-			children.insertElementAt(node, 0);
+			synchronized(children) {
+				children.insertElementAt(node, 0);
+			}
 		}
 
 		public java.util.Enumeration children() {
-			return children.elements();
+			synchronized(children) {
+				return children.elements();
+			}
 		}
 
 		public boolean getAllowsChildren() {
@@ -467,15 +481,21 @@ public class MessageTreeTable implements Observer,
 		}
 
 		public TreeNode getChildAt(int childIndex) {
-			return (MessageNode)children.get(childIndex);
+			synchronized(children) {
+				return (MessageNode)children.get(childIndex);
+			}
 		}
 
 		public int getChildCount() {
-			return children.size();
+			synchronized(children) {
+				return children.size();
+			}
 		}
 
 		public int getIndex(TreeNode node) {
-			return children.indexOf(node);
+			synchronized(children) {
+				return children.indexOf(node);
+			}
 		}
 
 		public TreeNode getParent() {
@@ -483,7 +503,9 @@ public class MessageTreeTable implements Observer,
 		}
 
 		public boolean isLeaf() {
-			return (children.size() == 0);
+			synchronized(children) {
+				return (children.size() == 0);
+			}
 		}
 
 		public String toString() {
@@ -591,7 +613,9 @@ public class MessageTreeTable implements Observer,
 
 		public int getRowCount() {
 			if (msgs == null) return 0;
-			return msgs.size();
+			synchronized(msgs) {
+				return msgs.size();
+			}
 		}
 
 		public int getColumnCount() {
@@ -603,7 +627,9 @@ public class MessageTreeTable implements Observer,
 		}
 
 		public Message getMsg(int row) {
-			return ((MessageNode)msgs.get(row)).getMessage();
+			synchronized(msgs) {
+				return ((MessageNode)msgs.get(row)).getMessage();
+			}
 		}
 
 		public Object getValueAt(int row, int column) {
@@ -612,10 +638,16 @@ public class MessageTreeTable implements Observer,
 			}
 
 			if (column == 1) {
-				return (MessageNode)msgs.get(row);
+				synchronized(msgs) {
+					return (MessageNode)msgs.get(row);
+				}
 			}
 
-			Message msg = ((MessageNode)msgs.get(row)).getMessage();
+			Message msg;
+
+			synchronized(msgs) {
+				msg = ((MessageNode)msgs.get(row)).getMessage();
+			}
 
 			if (msg == null)
 				return "(?)";
@@ -642,7 +674,11 @@ public class MessageTreeTable implements Observer,
 		public void setMessages(Vector msgs) {
 			this.msgs = msgs;
 
-			int lng = msgs.size();
+			int lng = 0;
+
+			synchronized(msgs) {
+				lng = msgs.size();
+			}
 
 			selection = new boolean[lng];
 
@@ -652,11 +688,13 @@ public class MessageTreeTable implements Observer,
 
 
 		public void setSelectedAll(boolean s) {
-			for (int i = 0 ; i < selection.length ; i++) {
-				Message msg = ((MessageNode)msgs.get(i)).getMessage();
+			synchronized(msgs) {
+				for (int i = 0 ; i < selection.length ; i++) {
+					Message msg = ((MessageNode)msgs.get(i)).getMessage();
 
-				if (msg != null)
-					selection[i] = s;
+					if (msg != null)
+						selection[i] = s;
+				}
 			}
 		}
 
@@ -667,7 +705,11 @@ public class MessageTreeTable implements Observer,
 
 
 		public void switchSelection(int row) {
-			Message msg = ((MessageNode)msgs.get(row)).getMessage();
+			Message msg = null;
+
+			synchronized(msgs) {
+				msg = ((MessageNode)msgs.get(row)).getMessage();
+			}
 
 			if (msg != null)
 				selection[row] = !selection[row];

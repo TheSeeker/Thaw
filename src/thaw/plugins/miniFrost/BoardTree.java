@@ -204,7 +204,9 @@ public class BoardTree extends Observable
 		}
 
 		public Vector getBoardList() {
-			return boardList;
+			synchronized(boardList) {
+				return boardList;
+			}
 		}
 
 		public void setBoardList(Vector l) {
@@ -216,17 +218,21 @@ public class BoardTree extends Observable
 
 			boardList = l;
 
-			if (boardList.size() < oldSize)
-				fireIntervalRemoved(this, boardList.size(), oldSize);
+			synchronized(boardList) {
+				if (boardList.size() < oldSize)
+					fireIntervalRemoved(this, boardList.size(), oldSize);
 
-			if (boardList.size() > oldSize)
-				fireIntervalAdded(this, oldSize, boardList.size());
+				if (boardList.size() > oldSize)
+					fireIntervalAdded(this, oldSize, boardList.size());
 
-			fireContentsChanged(this, 0, boardList.size());
+				fireContentsChanged(this, 0, boardList.size());
+			}
 		}
 
 		public void refresh(Board board) {
-			refresh(boardList.indexOf(board));
+			synchronized(boardList) {
+				refresh(boardList.indexOf(board));
+			}
 		}
 
 		public void refresh(int row) {
@@ -237,14 +243,18 @@ public class BoardTree extends Observable
 			if (boardList == null)
 				return null;
 
-			return boardList.get(index);
+			synchronized(boardList) {
+				return boardList.get(index);
+			}
 		}
 
 		public int getSize() {
 			if (boardList == null)
 				return 0;
 
-			return boardList.size();
+			synchronized(boardList) {
+				return boardList.size();
+			}
 		}
 	}
 
