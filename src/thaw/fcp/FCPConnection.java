@@ -238,7 +238,7 @@ public class FCPConnection extends Observable {
 				return false;
 			}
 		} else {
-			Logger.warning(this, "Cannot write if disconnected !");
+			Logger.notice(this, "Cannot write if disconnected !");
 			return false;
 		}
 
@@ -303,7 +303,7 @@ public class FCPConnection extends Observable {
 				bufferedOut.write(toWrite.getBytes());
 			}
 		} else {
-			Logger.warning(this, "Cannot write if disconnected !");
+			Logger.notice(this, "Cannot write if disconnected !");
 			if (checkLock)
 				removeFromWriterQueue();
 			return false;
@@ -451,7 +451,7 @@ public class FCPConnection extends Observable {
 				return null;
 			}
 		} else {
-			Logger.warning(this, "Cannot read if disconnected => null");
+			Logger.notice(this, "Cannot read if disconnected => null");
 		}
 
 		return null;
