@@ -1607,20 +1607,24 @@ public class IndexManagementHelper {
 			dialog = new JDialog(getIndexBrowserPanel().getMainWindow().getMainFrame(),
 					     I18n.getMessage("thaw.plugin.index.comment.add"));
 
+			/*
 			JLabel headerLabel = new JLabel(I18n.getMessage("thaw.plugin.index.comment.comment"),
 							IconBox.addComment,
 							JLabel.CENTER);
+			*/
 
 			JPanel authorPanel = new JPanel(new BorderLayout(5, 5));
-			authorPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.comment.author")),
+			authorPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.comment.author"),
+						   IconBox.addComment,
+						   JLabel.LEFT),
 					BorderLayout.WEST);
 
 			author = new JComboBox(Identity.getYourIdentities(getIndexBrowserPanel().getDb()));
 			authorPanel.add(author, BorderLayout.CENTER);
 
-			JPanel header = new JPanel(new GridLayout(2, 1));
+			JPanel header = new JPanel(new GridLayout(1, 1));
 
-			header.add(headerLabel);
+			//header.add(headerLabel);
 			header.add(authorPanel);
 
 

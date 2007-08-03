@@ -296,7 +296,7 @@ public class MessageTreeTable implements Observer,
 
 
 	protected class MessageNodeTree extends JTree {
-		DefaultTreeCellRenderer cellRenderer;
+		private DefaultTreeCellRenderer cellRenderer;
 
 		public MessageNodeTree(TreeNode root) {
 			super(root);
@@ -327,6 +327,7 @@ public class MessageTreeTable implements Observer,
 				setSelectionRow(row+1); /* don't forget the root :) */
 
 			Color background = thaw.gui.Table.DefaultRenderer.setBackground(this, row, isSelected);
+
 
 			setRowHeight(table.getRowHeight());
 			rowHeight = table.getRowHeight();
@@ -366,6 +367,11 @@ public class MessageTreeTable implements Observer,
 				cellRenderer.setBackground(background);
 				cellRenderer.setBackgroundNonSelectionColor(background);
 			}
+
+			if (isSelected)
+				this.setBackground(cellRenderer.getBackgroundSelectionColor());
+			else
+				this.setBackground(cellRenderer.getBackgroundNonSelectionColor());
 
 			visibleRow = row;
 			return this;
