@@ -13,7 +13,7 @@ import thaw.core.Plugin;
 import thaw.plugins.index.AutoRefresh;
 import thaw.plugins.index.DatabaseManager;
 import thaw.plugins.index.IndexBrowserPanel;
-import thaw.plugins.index.IndexConfigPanel;
+import thaw.plugins.index.IndexConfigTab;
 import thaw.plugins.index.IndexManagementHelper;
 
 
@@ -32,7 +32,7 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 	private IndexBrowserPanel browserPanel;
 	private Vector toolbarActions;
 
-	private IndexConfigPanel configPanel;
+	private IndexConfigTab configPanel;
 
 	private AutoRefresh autoRefresh = null;
 
@@ -93,7 +93,7 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 		stateChanged(null);
 
 
-		configPanel = new IndexConfigPanel(core.getConfigWindow(), core.getConfig(), browserPanel);
+		configPanel = new IndexConfigTab(core.getConfigWindow(), core.getConfig(), browserPanel);
 		configPanel.addTab();
 
 		autoRefresh = null;

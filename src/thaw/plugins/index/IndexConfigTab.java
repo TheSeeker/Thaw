@@ -18,7 +18,10 @@ import thaw.core.Logger;
 
 import thaw.gui.WarningWindow;
 
-public class IndexConfigPanel implements ActionListener {
+/**
+ * in the config window
+ */
+public class IndexConfigTab implements ActionListener {
 	private ConfigWindow configWindow;
 	private Config config;
 
@@ -38,7 +41,7 @@ public class IndexConfigPanel implements ActionListener {
 	private IndexBrowserPanel indexBrowser;
 
 
-	public IndexConfigPanel(ConfigWindow configWindow, Config config, IndexBrowserPanel indexBrowser) {
+	public IndexConfigTab(ConfigWindow configWindow, Config config, IndexBrowserPanel indexBrowser) {
 		this.configWindow = configWindow;
 		this.config = config;
 		this.indexBrowser = indexBrowser;
