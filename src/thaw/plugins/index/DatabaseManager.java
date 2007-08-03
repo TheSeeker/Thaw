@@ -527,7 +527,7 @@ public class DatabaseManager {
 		 * if null, then not in an index
 		 * else all the tag found will be sent to this handler
 		 */
-		private Index.IndexHandler indexHandler = null;
+		private IndexParser.IndexHandler indexHandler = null;
 
 
 		/**
@@ -575,7 +575,7 @@ public class DatabaseManager {
 				if (index != null) {
 					index.rename(attrs.getValue("displayName"));
 
-					indexHandler = index.getIndexHandler();
+					indexHandler = new IndexParser(index).getIndexHandler();
 
 					indexHandler.startDocument();
 				}

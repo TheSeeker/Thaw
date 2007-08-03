@@ -149,8 +149,7 @@ public class TrayIcon implements thaw.core.Plugin,
 
 
 	public String getNameForUser() {
-		return I18n.getMessage("thaw.plugin.trayIcon.pluginName")
-			+ " "+I18n.getMessage("thaw.common.unstable.linux");
+		return I18n.getMessage("thaw.plugin.trayIcon.pluginName");
 	}
 
 	public javax.swing.ImageIcon getIcon() {

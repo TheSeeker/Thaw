@@ -536,7 +536,7 @@ public class IndexManagementHelper {
 
 			final KeyAsker asker = KeyAsker.askKeys(index, getQueueManager(),
 								true, index.getPublicKey(),
-								index.getPrivateKey(), index.getPublishPrivateKey(),
+								index.getPrivateKey(), index.publishPrivateKey(),
 								index.canHaveComments(), true, getIndexBrowserPanel());
 
 			if (asker == null) {
@@ -1020,7 +1020,7 @@ public class IndexManagementHelper {
 				return;
 			}
 
-			((Index)getTarget()).generateXML(out);
+			new IndexParser(((Index)getTarget())).generateXML(out);
 		}
 	}
 
@@ -1049,7 +1049,7 @@ public class IndexManagementHelper {
 			if (newFile == null)
 				return;
 
-			((Index)getTarget()).loadXML(newFile.getPath());
+			new IndexParser(((Index)getTarget())).loadXML(newFile.getPath());
 		}
 	}
 

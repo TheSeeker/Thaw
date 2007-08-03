@@ -26,7 +26,7 @@ import thaw.fcp.FCPQuery;
 import thaw.plugins.Hsqldb;
 
 
-public class File implements Observer {
+public class File implements Observer, FileContainer {
 	private Hsqldb db = null;
 	private int id = -1; /* -1 = undefined */
 
@@ -173,6 +173,11 @@ public class File implements Observer {
 		}
 
 		return res;
+	}
+
+
+	public String getMime() {
+		return mime;
 	}
 
 	public long getSize() {

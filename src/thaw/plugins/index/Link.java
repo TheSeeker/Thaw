@@ -11,7 +11,7 @@ import thaw.fcp.FreenetURIHelper;
 import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
 
-public class Link extends java.util.Observable implements Comparable {
+public class Link extends java.util.Observable implements Comparable, LinkContainer {
 	private int id;
 	private final Hsqldb db;
 

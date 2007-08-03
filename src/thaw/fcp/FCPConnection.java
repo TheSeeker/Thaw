@@ -372,8 +372,7 @@ public class FCPConnection extends Observable {
 
 		/* SECURITY */
 		if(rawBytesWaiting > 0) {
-			Logger.error(this, "RAW BYTES STILL WAITING ON SOCKET. THIS IS ABNORMAL.");
-			Logger.error(this, "Will drop them.");
+			Logger.warning(this, "RAW BYTES STILL WAITING ON SOCKET. THIS IS ABNORMAL. : Will drop them.");
 
 			while(rawBytesWaiting > 0) {
 				int to_read = 1024;
