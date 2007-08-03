@@ -115,9 +115,11 @@ public class AutoRefresh implements Runnable {
 			if (!run)
 				return;
 
-			synchronized(boardTree.getBoards()) {
+			try {
 				if (canRefreshAnotherOne())
 					refreshAnotherOne();
+			} catch(Exception e) {
+				Logger.error(this, "Error while autorefreshing : "+e.toString());
 			}
 		}
 	}

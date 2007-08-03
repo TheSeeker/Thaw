@@ -14,7 +14,7 @@ import thaw.plugins.miniFrost.RegexpBlacklist;
 
 
 public class MiniFrost implements thaw.core.Plugin {
-	public final static int DEFAULT_ARCHIVE_AFTER = 7; /* days */
+	public final static int DEFAULT_ARCHIVE_AFTER = 15; /* days */
 	public final static int DEFAULT_DELETE_AFTER  = 60; /* days */
 
 	private Core core;
