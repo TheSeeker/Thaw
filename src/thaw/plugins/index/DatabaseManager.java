@@ -166,6 +166,11 @@ public class DatabaseManager {
 		//	  "SET IGNORECASE TRUE");
 
 		sendQuery(db,
+			  "CREATE CACHED TABLE categories ("
+			  + "id INTEGER IDENTITY NOT NULL,"
+			  + "name VARCHAR(255) NOT NULL)");
+
+		sendQuery(db,
 			  "CREATE CACHED TABLE indexFolders ("
 			  + "id INTEGER IDENTITY NOT NULL,"
 			  + "name VARCHAR(255) NOT NULL,"
@@ -210,13 +215,6 @@ public class DatabaseManager {
 		//+ "FOREIGN KEY (folderId) REFERENCES indexFolders (id)"
 		//+ "FOREIGN KEY (parentId) REFERENCES indexFolders (id))");
 
-
-		/* not used at the moment */
-		sendQuery(db,
-			  "CREATE CACHED TABLE categories ("
-			  + "id INTEGER IDENTITY NOT NULL,"
-			  + "name VARCHAR(255) NOT NULL)");
-
 		sendQuery(db,
 			  "CREATE CACHED TABLE files ("
 			  + "id INTEGER IDENTITY NOT NULL,"
@@ -225,7 +223,7 @@ public class DatabaseManager {
 			  + "localPath VARCHAR(500) NULL,"
 			  + "mime VARCHAR(50) NULL,"
 			  + "size BIGINT NOT NULL,"
-			  + "category INTEGER NULL,"
+			  + "category INTEGER NULL," // This field is a mistake.
 			  + "indexParent INTEGER NOT NULL,"
 			  + "toDelete BOOLEAN DEFAULT FALSE NOT NULL,"
 			  + "dontDelete BOOLEAN DEFAULT FALSE NOT NULL,"

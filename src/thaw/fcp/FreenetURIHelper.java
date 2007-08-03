@@ -20,10 +20,13 @@ public class FreenetURIHelper {
 		if (key == null)
 		    return false;
 
-		return (key.startsWith("CHK@")
-			|| key.startsWith("SSK@")
-			|| key.startsWith("USK@")
-			|| key.startsWith("KSK@"));
+		if (key.startsWith("CHK@")
+		    || key.startsWith("SSK@")
+		    || key.startsWith("USK@")) {
+			return (key.length() > 20);
+		}
+
+		return key.startsWith("KSK@");
 	}
 
 	public static String cleanURI(String uri) {

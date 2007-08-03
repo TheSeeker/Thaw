@@ -262,7 +262,9 @@ public class IndexManagementHelper {
 	}
 
 
-	public static void createIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, IndexFolder target, final String name) {
+	public static void createIndex(final FCPQueueManager queueManager,
+				       final IndexBrowserPanel indexBrowser,
+				       IndexFolder target, final String name) {
 
 		IndexCreator creator = new IndexCreator(queueManager, indexBrowser, null);
 		creator.setTarget(target);
@@ -270,252 +272,6 @@ public class IndexManagementHelper {
 
 	}
 
-
-
-	/**
-	 * In fact, this dialog allows to change various settings related to the index
-	 * THIS DIALOG BECOMES REALLY DIRTY ! TO REWRITE !
-	 */
-	public static class KeyAsker implements ActionListener, MouseListener {
-		private Index index;
-		private FCPQueueManager queueManager;
-
-		private JButton okButton;
-		private JButton cancelButton;
-		private int formState;
-
-		private JButton resetCommentsButton;
-
-		private JTextField publicKeyField       = null;
-		private JTextField privateKeyField      = null;
-		private JCheckBox  publishPrivateKeyBox = null;
-		private JCheckBox  allowCommentsBox     = null;
-
-		private JPopupMenu popupMenuA;
-		private JPopupMenu popupMenuB;
-
-		public KeyAsker() {
-
-		}
-
-		/**
-		 * @param index can be null
-		 * @param queueManager can be null if index is null
-		 */
-		public static KeyAsker askKeys(final Index index,
-					       final FCPQueueManager queueManager,
-					       final boolean askPrivateKey,
-					       final String defaultPublicKey,
-					       final String defaultPrivateKey,
-					       final boolean defaultPublishPrivateKey,
-					       final boolean defaultAllowComments,
-					       final boolean enablePublishPrivateKeyChoice,
-					       final IndexBrowserPanel indexBrowser) {
-			KeyAsker asker = new KeyAsker();
-			asker.askKeysBis(index, queueManager,
-					 askPrivateKey, defaultPublicKey,
-					 defaultPrivateKey, defaultPublishPrivateKey,
-					 defaultAllowComments,
-					 enablePublishPrivateKeyChoice,
-					 indexBrowser);
-			if (asker.getPublicKey() != null)
-				return asker;
-			else
-				return null;
-		}
-
-
-		private String publicKeyResult = null;
-		private String privateKeyResult = null;
-		private boolean publishPrivateKey = false;
-		private boolean allowComments = false;
-
-
-		public String getPublicKey() {
-			return publicKeyResult;
-		}
-
-		public String getPrivateKey() {
-			return privateKeyResult;
-		}
-
-		public boolean getPublishPrivateKey() {
-			return publishPrivateKey;
-		}
-
-		public boolean getAllowComments() {
-			return allowComments;
-		}
-
-		public synchronized void askKeysBis(Index index, FCPQueueManager queueManager,
-						    final boolean askPrivateKey,
-						    String defaultPublicKey,
-						    String defaultPrivateKey,
-						    boolean defaultPublishPrivateKey,
-						    boolean defaultAllowComments,
-						    final boolean enablePublishPrivateKeyChoice,
-						    final IndexBrowserPanel indexBrowser) {
-			this.index = index;
-			this.queueManager = queueManager;
-
-			formState = 0;
-
-			if (defaultPublicKey == null)
-				defaultPublicKey = "USK@";
-
-			if (defaultPrivateKey == null)
-				defaultPrivateKey = "SSK@";
-
-			final JDialog frame = new JDialog(indexBrowser.getMainWindow().getMainFrame(), I18n.getMessage("thaw.plugin.index.indexKey"));
-
-			frame.getContentPane().setLayout(new BorderLayout());
-
-			publicKeyField       = new JTextField(defaultPublicKey);
-			privateKeyField      = new JTextField(defaultPrivateKey);
-			publishPrivateKeyBox = new JCheckBox(I18n.getMessage("thaw.plugin.index.publishPrivateKey"),
-							     defaultPublishPrivateKey);
-			publishPrivateKeyBox.setEnabled(enablePublishPrivateKeyChoice);
-			allowCommentsBox     = new JCheckBox(I18n.getMessage("thaw.plugin.index.allowComments"),
-							     defaultAllowComments);
-			allowCommentsBox.setEnabled(enablePublishPrivateKeyChoice); /* if we can't publish the private key, we can't change comment setting */
-
-			resetCommentsButton = new JButton(I18n.getMessage("thaw.plugin.index.comment.reset"));
-			resetCommentsButton.addActionListener(this);
-
-			final JPanel subPanelA = new JPanel(); /* left  => labels */
-			final JPanel subPanelB = new JPanel(); /* right => textfield */
-
-			subPanelA.setLayout(new GridLayout(askPrivateKey ? 2 : 1, 1));
-			subPanelB.setLayout(new GridLayout(askPrivateKey ? 2 : 1, 1));
-
-			subPanelA.add(new JLabel(I18n.getMessage("thaw.plugin.index.indexKey")+ " "), BorderLayout.WEST);
-			subPanelB.add(publicKeyField, BorderLayout.CENTER);
-
-			popupMenuA = new JPopupMenu();
-			JMenuItem item = new JMenuItem(I18n.getMessage("thaw.common.paste"));
-			popupMenuA.add(item);
-			new thaw.gui.GUIHelper.PasteHelper(item, publicKeyField);
-			publicKeyField.addMouseListener(this);
-
-			if (askPrivateKey) {
-				subPanelA.add(new JLabel(I18n.getMessage("thaw.plugin.index.indexPrivateKey")+" "), BorderLayout.WEST);
-				subPanelB.add(privateKeyField, BorderLayout.CENTER);
-
-				popupMenuB = new JPopupMenu();
-				item = new JMenuItem(I18n.getMessage("thaw.common.paste"));
-				popupMenuB.add(item);
-				new thaw.gui.GUIHelper.PasteHelper(item, privateKeyField);
-				privateKeyField.addMouseListener(this);
-			}
-
-			frame.getContentPane().add(subPanelA, BorderLayout.WEST);
-			frame.getContentPane().add(subPanelB, BorderLayout.CENTER);
-
-			final JPanel subPanelC = new JPanel();
-			subPanelC.setLayout(new GridLayout(3, 1));
-
-			final JPanel subSubPanelC = new JPanel();
-			subSubPanelC.setLayout(new GridLayout(1, 2));
-
-			cancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
-			okButton = new JButton(I18n.getMessage("thaw.common.ok"));
-
-			cancelButton.addActionListener(this);
-			okButton.addActionListener(this);
-
-			subSubPanelC.add(okButton);
-			subSubPanelC.add(cancelButton);
-
-			JPanel commentPanel = new JPanel(new BorderLayout());
-			commentPanel.add(allowCommentsBox, BorderLayout.CENTER);
-
-			if (index != null && index.getPrivateKey() != null)
-				commentPanel.add(resetCommentsButton, BorderLayout.EAST);
-
-
-			subPanelC.add(publishPrivateKeyBox);
-			subPanelC.add(commentPanel);
-			subPanelC.add(subSubPanelC);
-
-			frame.getContentPane().add(subPanelC, BorderLayout.SOUTH);
-
-			frame.setSize(700, 140);
-			frame.setVisible(true);
-
-			try {
-				wait();
-			} catch(final java.lang.InterruptedException e) {
-				/* \_o< */
-			}
-
-			frame.setVisible(false);
-
-			if (formState == 2)
-				return;
-
-			publicKeyResult = publicKeyField.getText();
-
-			if (askPrivateKey)
-				privateKeyResult = privateKeyField.getText();
-
-			frame.dispose();
-
-			if ((publicKeyResult == null) || (publicKeyResult.length() < 20))
-				{
-					publicKeyResult = null;
-					privateKeyResult = null;
-				}
-
-			if ((privateKeyResult == null) || (privateKeyResult.length() < 20))
-				privateKeyResult = null;
-			else
-				publishPrivateKey = publishPrivateKeyBox.isSelected();
-
-			allowComments = allowCommentsBox.isSelected();
-
-			Logger.info(this, "public : "+publicKeyResult + " ; Private : "+privateKeyResult);
-		}
-
-		public synchronized void actionPerformed(final ActionEvent e) {
-			if (e.getSource() == okButton) {
-				formState = 1;
-				notifyAll();
-				return;
-			}
-
-			if (e.getSource() == cancelButton) {
-				formState = 2;
-				notifyAll();
-				return;
-			}
-
-			if (e.getSource() == resetCommentsButton) {
-				index.regenerateCommentKeys(queueManager);
-			}
-		}
-
-		public void mouseClicked(final MouseEvent e) { }
-		public void mouseEntered(final MouseEvent e) { }
-		public void mouseExited(final MouseEvent e) { }
-
-		public void mousePressed(final MouseEvent e) {
-			showPopupMenu(e);
-		}
-
-		public void mouseReleased(final MouseEvent e) {
-			showPopupMenu(e);
-		}
-
-		protected void showPopupMenu(final MouseEvent e) {
-			if(e.isPopupTrigger()) {
-				if (e.getComponent() == publicKeyField)
-					popupMenuA.show(e.getComponent(), e.getX(), e.getY());
-				if (e.getComponent() == privateKeyField)
-					popupMenuB.show(e.getComponent(), e.getX(), e.getY());
-			}
-		}
-
-	}
 
 
 	public static class IndexModifier extends BasicIndexAction implements Runnable {
@@ -534,33 +290,20 @@ public class IndexManagementHelper {
 		public void apply() {
 			final Index index = ((Index)getTarget());
 
-			final KeyAsker asker = KeyAsker.askKeys(index, getQueueManager(),
-								true, index.getPublicKey(),
-								index.getPrivateKey(), index.publishPrivateKey(),
-								index.canHaveComments(), true, getIndexBrowserPanel());
+			IndexConfigDialog dialog = new IndexConfigDialog(getIndexBrowserPanel(),
+									 getQueueManager(),
+									 index);
 
-			if (asker == null) {
+			if (!dialog.promptUser()) {
 				Logger.info(this, "Change cancelled");
 				return;
 			}
 
-			/* Could be done in one shot ... but this way is so easier .... :) */
-			index.setPrivateKey(asker.getPrivateKey());
-			index.setPublishPrivateKey(asker.getPublishPrivateKey());
-			index.setPublicKey(asker.getPublicKey());
-
-			if (index.canHaveComments() && !asker.getAllowComments()) {
-				Logger.notice(this, "Purging comments ...");
-				index.purgeCommentKeys();
-			} else if (!index.canHaveComments() && asker.getAllowComments()) {
-				Logger.notice(this, "Purging comments & regenerating keys ...");
-				index.regenerateCommentKeys(getQueueManager());
-			}
-
 			getIndexBrowserPanel().getIndexTree().refresh(index);
 
-			new WarningWindow(getIndexBrowserPanel().getMainWindow(),
-					  I18n.getMessage("thaw.plugin.index.mustReinsert"));
+			if (index.getPrivateKey() != null)
+				new WarningWindow(getIndexBrowserPanel().getMainWindow(),
+						  I18n.getMessage("thaw.plugin.index.mustReinsert"));
 		}
 	}
 
@@ -578,21 +321,18 @@ public class IndexManagementHelper {
 		}
 
 		public void apply() {
-			KeyAsker asker;
 			String publicKey = null;
 			String privateKey = null;
 			boolean publishPrivate = false;
 
-			asker = KeyAsker.askKeys(null, null,
-						 true, "USK@", "SSK@",
-						 false, false, false, getIndexBrowserPanel());
+			IndexConfigDialog dialog = new IndexConfigDialog(getIndexBrowserPanel(),
+									 getQueueManager());
 
-			if (asker == null)
+			if (!dialog.promptUser()) /* cancelled */
 				return;
 
-			publicKey = asker.getPublicKey();
-			privateKey = asker.getPrivateKey();
-			//publishPrivate = asker.getPublishPrivateKey(); /* useless ; will be reset when downloading */
+			publicKey = dialog.getPublicKey();
+			privateKey = dialog.getPrivateKey();
 
 			IndexManagementHelper.reuseIndex(getQueueManager(), getIndexBrowserPanel(), (IndexFolder)getTarget(), publicKey, privateKey);
 		}
