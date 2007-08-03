@@ -693,6 +693,31 @@ public class MessageTreeTable implements Observer,
 		}
 
 
+		public int getRow(Message msg) {
+			boolean found = false;
+			int i = 0;
+
+			synchronized(msgs) {
+				for (Iterator it = msgs.iterator();
+				     it.hasNext(); i++) {
+					MessageNode sNode = (MessageNode)it.next();
+
+					if (sNode.getMessage() != null && sNode.getMessage().equals(msg)) {
+						found = true;
+						break;
+					}
+				}
+			}
+
+			if (!found) {
+				Logger.notice(this, "Node not found");
+				return -1;
+			}
+
+			return i;
+		}
+
+
 		public void setSelectedAll(boolean s) {
 			synchronized(msgs) {
 				for (int i = 0 ; i < selection.length ; i++) {
@@ -750,6 +775,12 @@ public class MessageTreeTable implements Observer,
 			fireTableChanged(new TableModelEvent(this));
 		}
 	}
+
+
+	public int getRow(Message msg) {
+		return model.getRow(msg);
+	}
+
 
 	public void setBoard(Board board) {
 		this.targetBoard = board;
@@ -928,6 +959,22 @@ public class MessageTreeTable implements Observer,
 		}
 	}
 
+
+	public class LineSelecter implements Runnable {
+		private int line;
+
+		public LineSelecter(int line) {
+			this.line = line;
+		}
+
+		public void run() {
+			table.setRowSelectionInterval(line, line);
+			table.setColumnSelectionInterval(0, COLUMNS.length-1);
+			model.refresh(line);
+		}
+	}
+
+
 	public boolean nextUnread() {
 
 		if (targetBoard == null) {
@@ -939,6 +986,16 @@ public class MessageTreeTable implements Observer,
 								  minTrustLevelInt);
 
 		if (newMsg != null) {
+			/** hmm ... I'm starting to wonder if it wouldn't be more efficient to
+			 * search directly in the Vector msgs in the model */
+			int line = getRow(newMsg);
+
+			if (line >= 0) {
+				Logger.info(this, "Line: "+Integer.toString(line));
+
+				javax.swing.SwingUtilities.invokeLater(new LineSelecter(line));
+			}
+
 			mainPanel.getMessagePanel().setMessage(newMsg);
 			newMsg.setRead(true);
 			refresh();
