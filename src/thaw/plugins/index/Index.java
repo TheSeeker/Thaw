@@ -415,19 +415,20 @@ public class Index extends Observable implements MutableTreeNode,
 	public boolean publishPrivateKey() {
 		try {
 
-		PreparedStatement st
-				= db.getConnection().prepareStatement("SELECT publishPrivateKey FROM indexes WHERE id = ? LIMIT 1");
+			synchronized(db.dbLock) {
+				PreparedStatement st
+					= db.getConnection().prepareStatement("SELECT publishPrivateKey FROM indexes WHERE id = ? LIMIT 1");
 
-			st.setInt(1, id);
+				st.setInt(1, id);
 
-			ResultSet set = st.executeQuery();
+				ResultSet set = st.executeQuery();
 
-			if (!set.next()) {
-				Logger.error(this, "Unable to get publishPrivateKey value => not found !");
+				if (!set.next()) {
+					Logger.error(this, "Unable to get publishPrivateKey value => not found !");
+				}
+
+				return set.getBoolean("publishPrivateKey");
 			}
-
-			return set.getBoolean("publishPrivateKey");
-
 
 		} catch(SQLException e){
 			Logger.error(this, "Unable to get publishPrivateKey value because: "+e.toString());
@@ -438,13 +439,15 @@ public class Index extends Observable implements MutableTreeNode,
 
 	public void setPublishPrivateKey(boolean val) {
 		try {
-			PreparedStatement st =
-				db.getConnection().prepareStatement("UPDATE indexes "+
-								    "SET publishPrivateKey = ? "+
-								    "WHERE id = ?");
-			st.setBoolean(1, val);
-			st.setInt(2, id);
-			st.execute();
+			synchronized(db.dbLock) {
+				PreparedStatement st =
+					db.getConnection().prepareStatement("UPDATE indexes "+
+									    "SET publishPrivateKey = ? "+
+									    "WHERE id = ?");
+				st.setBoolean(1, val);
+				st.setInt(2, id);
+				st.execute();
+			}
 
 		} catch(SQLException e){
 			Logger.error(this, "Unable to set publishPrivateKey value because: "+e.toString());
@@ -736,36 +739,54 @@ public class Index extends Observable implements MutableTreeNode,
 	 */
 	private boolean rewriteKey = true;
 	private FCPQueueManager queueManager;
-
+	private boolean fetchingNegRev = false;
+	private boolean mustFetchNegRev = true;
+	private int specificRev = 0;
 
 	public int downloadFromFreenet(Observer o, IndexTree tree, FCPQueueManager queueManager, int specificRev) {
+		this.queueManager = queueManager;
+		indexTree = tree;
+		rewriteKey = true;
+
+		fetchingNegRev = false;
+		mustFetchNegRev = true;
+
+		if (config != null && config.getValue("indexFetchNegative") != null)
+			mustFetchNegRev = Boolean.valueOf(config.getValue("indexFetchNegative")).booleanValue();
+
+		boolean v = realDownloadFromFreenet(specificRev);
+
+		this.addObserver(o);
+
+		return (v ? 1 : 0);
+	}
+
+
+	protected boolean realDownloadFromFreenet(int specificRev) {
 		FCPClientGet clientGet;
 		String publicKey;
 
 		this.queueManager = queueManager;
+		this.specificRev = specificRev;
 
 		int rev = getRevision();
-
-		indexTree = tree;
-
-		rewriteKey = true;
 
 		publicKey = getPublicKey();
 		String privateKey = getPrivateKey();
 
 		if (rev <= 0 && privateKey != null) {
 			Logger.error(this, "Can't update an non-inserted index !");
-			return 0;
+			return false;
 		}
 
-		if (tree != null && tree.isIndexUpdating(this)) {
+		if (indexTree != null && indexTree.isIndexUpdating(this)) {
 			Logger.notice(this, "A transfer is already running !");
-			return 0;
+			return false;
 		}
 
 		if (publicKey == null) {
 			Logger.error(this, "No public key !! Can't get the index !");
-			return 0;
+			return false;
 		}
 
 		String key;
@@ -786,17 +807,12 @@ public class Index extends Observable implements MutableTreeNode,
 
 
 		if (key.startsWith("USK")) {
-			int negRev = FreenetURIHelper.getUSKRevision(key);
+			int daRev = FreenetURIHelper.getUSKRevision(key);
 
-			boolean fetchNeg = true;
-
-			if (config != null && config.getValue("indexFetchNegative") != null)
-				fetchNeg = Boolean.valueOf(config.getValue("indexFetchNegative")).booleanValue();
-
-			if ((fetchNeg && negRev > 0)
-			    || (!fetchNeg && negRev < 0)) {
-				negRev = -1 * negRev;
-				key = FreenetURIHelper.changeUSKRevision(key, negRev, 0);
+			if ((fetchingNegRev && daRev > 0)
+			    || (!fetchingNegRev && daRev < 0)) {
+				daRev = -1 * daRev;
+				key = FreenetURIHelper.changeUSKRevision(key, daRev, 0);
 			}
 		}
 
@@ -821,14 +837,12 @@ public class Index extends Observable implements MutableTreeNode,
 		 */
 		clientGet.start(queueManager);
 
-		if (tree != null)
-			tree.addUpdatingIndex(this);
+		if (indexTree != null)
+			indexTree.addUpdatingIndex(this);
 
 		clientGet.addObserver(this);
 
-		this.addObserver(o);
-
-		return 1;
+		return true;
 	}
 
 
@@ -851,6 +865,7 @@ public class Index extends Observable implements MutableTreeNode,
 			FCPClientGet get = (FCPClientGet)o;
 
 			if (get.isFinished() && get.isSuccessful()) {
+				get.deleteObserver(this);
 
 				String key = get.getFileKey();
 
@@ -873,6 +888,19 @@ public class Index extends Observable implements MutableTreeNode,
 
 					parser.loadXML(path);
 
+
+					if (!fetchingNegRev && mustFetchNegRev) {
+						final java.io.File fl = new java.io.File(path);
+						fl.delete();
+
+						setChanged();
+						notifyObservers();
+
+						fetchingNegRev = true;
+						realDownloadFromFreenet(-1);
+						return;
+					}
+
 					boolean loadComm = true;
 
 					if (config != null && config.getValue("indexFetchComments") != null)
@@ -890,6 +918,8 @@ public class Index extends Observable implements MutableTreeNode,
 		if (o instanceof FCPClientPut) {
 			/* TODO : check if it's successful, else merge if it's due to a collision */
 			if (((FCPClientPut)o).isFinished()) {
+				((FCPClientPut)o).deleteObserver(this);
+
 				if (indexTree != null)
 					indexTree.removeUpdatingIndex(this);
 
@@ -959,8 +989,6 @@ public class Index extends Observable implements MutableTreeNode,
 
 				final java.io.File fl = new java.io.File(path);
 				fl.delete();
-
-				((Observable)transfer).deleteObserver(this);
 
 				setChanged();
 				notifyObservers();

@@ -18,7 +18,6 @@ import thaw.core.Logger;
 
 import thaw.gui.WarningWindow;
 
-
 public class IndexConfigPanel implements ActionListener {
 	private ConfigWindow configWindow;
 	private Config config;

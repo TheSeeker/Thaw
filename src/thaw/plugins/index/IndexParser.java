@@ -299,7 +299,7 @@ public class IndexParser {
 		 * @see org.xml.sax.ContentHandler#startDocument()
 		 */
 		public void startDocument() throws SAXException {
-
+			index.purgeIndex();
 		}
 
 		/**
