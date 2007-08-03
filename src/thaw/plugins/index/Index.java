@@ -376,6 +376,9 @@ public class Index extends Observable implements MutableTreeNode,
 			loadData();
 		}
 
+		if (!publicKey.endsWith(".frdx"))
+			return publicKey+"/"+toString(false)+".frdx";
+
 		return publicKey;
 	}
 
