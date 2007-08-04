@@ -243,16 +243,16 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 				Toolkit.getDefaultToolkit().getScreenSize();
 
 			Dimension dialogSize = dialog.getSize();
-			dialog.setLocation(dialogSize.width/2 - (dialogSize.width/2),
-					   dialogSize.height/2 - (dialogSize.height/2));
+			dialog.setLocation(screenSize.width/2 - (dialogSize.width/2),
+					   screenSize.height/2 - (dialogSize.height/2));
 
 			dialog.setVisible(true);
 
 			dialog.setSize(150, 30);
 
 			dialogSize = dialog.getSize();
-			dialog.setLocation(dialogSize.width/2 - (dialogSize.width/2),
-					   dialogSize.height/2 - (dialogSize.height/2));
+			dialog.setLocation(screenSize.width/2 - (dialogSize.width/2),
+					   screenSize.height/2 - (dialogSize.height/2));
 
 
 			core.getPluginManager().stopPlugins();
