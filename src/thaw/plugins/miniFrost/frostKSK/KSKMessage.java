@@ -106,7 +106,7 @@ public class KSKMessage
 				Logger.info(this, key+" not found");
 				successfullyDownloaded = false;
 			} else {
-				Logger.notice(this, "Problem with "+key);
+				Logger.notice(this, "Problem with "+key + " ; code : "+Integer.toString(code));
 				successfullyDownloaded = true;
 			}
 

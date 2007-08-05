@@ -995,17 +995,21 @@ public class FCPClientGet extends Observable
 	}
 
 	public String getPath() {
+		String path = null;
+
 		if (finalPath != null)
-			return finalPath;
+			path = finalPath;
+		else if(destinationDir != null)
+			path = destinationDir + File.separator + filename;
 
-		if(destinationDir != null)
-			return destinationDir + File.separator + filename;
+		if (path != null)
+			path = path.replaceAll("\\|", "-");
 
-		return null;
+		return path;
 	}
 
 	public String getFilename() {
-		return filename;
+		return filename.replaceAll("\\|", "-");
 	}
 
 	public int getAttempt() {

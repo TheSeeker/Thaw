@@ -97,9 +97,9 @@ public class MessageTreeTable implements Observer,
 		I18n.getMessage("thaw.plugin.miniFrost.selectNone"),
 		I18n.getMessage("thaw.plugin.miniFrost.markAsRead"),
 		I18n.getMessage("thaw.plugin.miniFrost.markAsNonRead"),
+		I18n.getMessage("thaw.plugin.miniFrost.newMessage"),
 		I18n.getMessage("thaw.plugin.miniFrost.archivate"),
-		I18n.getMessage("thaw.plugin.miniFrost.unarchivate"),
-		I18n.getMessage("thaw.plugin.miniFrost.newMessage")
+		I18n.getMessage("thaw.plugin.miniFrost.unarchivate")
 	};
 
 
@@ -1055,8 +1055,8 @@ public class MessageTreeTable implements Observer,
 				}
 
 				mainPanel.getBoardTree().refresh(targetBoard);
-			} else if (sel == 5 || sel == 6) { /* (un)archive */
-				boolean archive = (sel == 5);
+			} else if (sel == 6 || sel == 7) { /* (un)archive */
+				boolean archive = (sel == 6);
 
 				for (int i = 0 ; i < selected.length ; i++) {
 					if (selected[i])
@@ -1069,10 +1069,12 @@ public class MessageTreeTable implements Observer,
 				boolean select = (sel == 1);
 				model.setSelectedAll(select);
 				model.refresh();
-			} else if (sel == 7) { /* new message */
-				Draft draft = targetBoard.getDraft(null);
-				mainPanel.getDraftPanel().setDraft(draft);
-				mainPanel.displayDraftPanel();
+			} else if (sel == 5) { /* new message */
+				if (targetBoard != null) {
+					Draft draft = targetBoard.getDraft(null);
+					mainPanel.getDraftPanel().setDraft(draft);
+					mainPanel.displayDraftPanel();
+				}
 			}
 
 			actions.setSelectedIndex(0);

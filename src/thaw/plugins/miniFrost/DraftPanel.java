@@ -101,8 +101,8 @@ public class DraftPanel implements ActionListener {
 		cancelButton.addActionListener(this);
 		sendButton.addActionListener(this);
 
-		southPanel.add(cancelButton);
 		southPanel.add(sendButton);
+		southPanel.add(cancelButton);
 
 		panel.add(northPanel,                BorderLayout.NORTH );
 		panel.add(new JScrollPane(textArea), BorderLayout.CENTER);

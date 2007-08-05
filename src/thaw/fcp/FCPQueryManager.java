@@ -115,7 +115,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 
 
 	public class WatchDog implements Runnable {
-		public final static int TIMEOUT = 5000;
+		public final static int TIMEOUT = 10000;
 
 		Runnable runnable;
 

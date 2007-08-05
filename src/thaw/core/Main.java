@@ -8,6 +8,17 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import java.util.Vector;
 import java.util.Iterator;
 
+import java.util.zip.ZipFile;
+import java.util.zip.ZipEntry;
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+
+
+
 /**
  * Main class. Only used to display some informations and init the core.
  *
@@ -38,6 +49,11 @@ public class Main {
 	private static String locale = null;
 
 
+	private Main() {
+
+	}
+
+
 	/**
 	 * Used to start the program
 	 *
@@ -45,6 +61,8 @@ public class Main {
 	 */
 	public static void main(final String[] args) {
 		Core core;
+
+		Main.extractDeps();
 
 		Main.parseCommandLine(args);
 
@@ -127,6 +145,65 @@ public class Main {
 		System.exit(0);
 	}
 
+
+	/**
+	 * need a non-static context
+	 */
+	public void extractFileFromJar(String src, String dst) {
+		try {
+			String realHome = this.getClass().getProtectionDomain().
+				getCodeSource().getLocation().toString();
+			String home = realHome.substring(5);
+
+			Logger.info(this, "Extracting : "+realHome+" ; "+src+" ; "+dst);
+
+			ZipFile jar = new ZipFile(home);
+			ZipEntry entry = jar.getEntry(src);
+
+			File jarFile = new File(dst);
+
+
+			InputStream in = new BufferedInputStream(jar.getInputStream(entry));
+			OutputStream out = new BufferedOutputStream(new FileOutputStream(jarFile));
+
+			byte[] buffer = new byte[2048];
+
+			int nBytes;
+
+			while( (nBytes = in.read(buffer)) > 0) {
+				out.write(buffer, 0, nBytes);
+			}
+
+			out.flush();
+			out.close();
+			in.close();
+
+			return;
+		} catch(java.io.IOException e) {
+			Logger.error(this, "Can't extract '"+src+"' because : "+e.toString());
+			if (e.getCause() != null)
+				Logger.error(this, "Cause : "+e.getCause().toString());
+			e.printStackTrace();
+		}
+
+		System.exit(1);
+	}
+
+
+	public final static String[] DEPS = new String[] {
+		"jmdns.jar",
+		"hsqldb.jar",
+		"BouncyCastle.jar"
+	};
+
+	public static void extractDeps() {
+		Main main = new Main();
+
+		/* we erase each time the files to be sure that they are always up to date */
+		for (int i = 0 ; i < DEPS.length ; i++) {
+			main.extractFileFromJar("lib/"+DEPS[i], DEPS[i]);
+		}
+	}
 
 }
 
