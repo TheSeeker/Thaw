@@ -573,6 +573,10 @@ public class MessageTreeTable implements Observer,
 					value = I18n.getMessage("thaw.plugin.signature.trustLevel.none");
 			}
 
+			if (value instanceof java.util.Date) {
+				value = java.text.DateFormat.getDateTimeInstance().format((java.util.Date)value);
+			}
+
 			if (author != null && author.getIdentity() != null)
 				color = author.getIdentity().getTrustLevelColor();
 

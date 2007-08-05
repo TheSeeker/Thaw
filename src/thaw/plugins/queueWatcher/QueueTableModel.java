@@ -163,13 +163,15 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	/**
 	 * Don't call notifyObservers !
 	 */
-	public synchronized void resetTable() {
+	public void resetTable() {
 
 		if(queries != null) {
-			for(final Iterator it = queries.iterator();
-			    it.hasNext();) {
-				final Observable query = (Observable)it.next();
-				query.deleteObserver(this);
+			synchronized(queries) {
+				for(final Iterator it = queries.iterator();
+				    it.hasNext();) {
+					final Observable query = (Observable)it.next();
+					query.deleteObserver(this);
+				}
 			}
 		}
 
@@ -177,7 +179,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 	}
 
-	public synchronized void reloadQueue() {
+	public void reloadQueue() {
 		resetTable();
 
 		addQueries(queueManager.getRunningQueue());
@@ -188,7 +190,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 			addQueries(pendings[i]);
 	}
 
-	public synchronized void addQueries(final Vector queries) {
+	public void addQueries(final Vector queries) {
 		synchronized(queries) {
 
 			for(final Iterator it = queries.iterator();
@@ -205,7 +207,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		}
 	}
 
-	public synchronized void addQuery(final FCPTransferQuery query) {
+	public void addQuery(final FCPTransferQuery query) {
 		if(queries.contains(query)) {
 			Logger.debug(this, "addQuery() : Already known");
 			return;
@@ -213,7 +215,9 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 		((Observable)query).addObserver(this);
 
-		queries.add(query);
+		synchronized(queries) {
+			queries.add(query);
+		}
 
 		sortTable();
 
@@ -222,14 +226,16 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		this.notifyObservers(new TableModelEvent(this, changedRow, changedRow, TableModelEvent.ALL_COLUMNS, TableModelEvent.INSERT));
 	}
 
-	public synchronized void removeQuery(final FCPTransferQuery query) {
+	public void removeQuery(final FCPTransferQuery query) {
 		((Observable)query).deleteObserver(this);
 
 		sortTable();
 
 		final int changedRow = queries.indexOf(query);
 
-		queries.remove(query);
+		synchronized(queries) {
+			queries.remove(query);
+		}
 
 		if(changedRow >= 0) {
 			this.notifyObservers(new TableModelEvent(this, changedRow, changedRow, TableModelEvent.ALL_COLUMNS, TableModelEvent.DELETE));
@@ -238,7 +244,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 
 
-	public synchronized FCPTransferQuery getQuery(final int row) {
+	public FCPTransferQuery getQuery(final int row) {
 		try {
 			return (FCPTransferQuery)queries.get(row);
 		} catch(final java.lang.ArrayIndexOutOfBoundsException e) {
@@ -250,12 +256,14 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	/**
 	 * returns a *copy*
 	 */
-	public synchronized Vector getQueries() {
+	public Vector getQueries() {
 		final Vector newVect = new Vector();
 
-		for(final Iterator queryIt = queries.iterator() ;
-		    queryIt.hasNext();) {
-			newVect.add(queryIt.next());
+		synchronized(queries) {
+			for(final Iterator queryIt = queries.iterator() ;
+			    queryIt.hasNext();) {
+				newVect.add(queryIt.next());
+			}
 		}
 
 		return newVect;
@@ -285,7 +293,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		*/
 	}
 
-	public synchronized void update(final Observable o, final Object arg) {
+	public void update(final Observable o, final Object arg) {
 		int oldPos = -1;
 		int i = 0;
 
@@ -339,7 +347,9 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		if((sortedColumn < 0) || (queries.size() <= 0))
 			return false;
 
-		Collections.sort(queries, new QueryComparator(isSortedAsc, sortedColumn, isForInsertions));
+		synchronized(queries) {
+			Collections.sort(queries, new QueryComparator(isSortedAsc, sortedColumn, isForInsertions));
+		}
 
 		return true;
 	}

@@ -171,9 +171,10 @@ public class KSKMessageParser {
 
 		if (dateUtil != null) {
 			long dateDiff = KSKBoard.getMidnight(dateUtil).getTime() - KSKBoard.getMidnight(boardDate).getTime();
-			/* we accept between -24h before and +24h after */
+			/* we accept between X days before and X days after */
 
-			if (dateDiff < (-1)*48*60*60*1000 || dateDiff > 48*60*60*1000)
+			if (dateDiff < (KSKBoard.MAX_DAYS_IN_THE_PAST+1)*(-1)*28*60*60*1000
+			    || dateDiff > (KSKBoard.MAX_DAYS_IN_THE_FUTURE+1)*24*60*60*1000)
 				dateUtil = null;
 		}
 

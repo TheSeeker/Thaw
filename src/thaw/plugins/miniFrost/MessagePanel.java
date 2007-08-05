@@ -205,6 +205,7 @@ public class MessagePanel
 
 			super(new BorderLayout(5,5));
 
+
 			this.retracted=retracted;
 			this.msg = msg;
 
@@ -214,7 +215,7 @@ public class MessagePanel
 			/* header */
 			JPanel headPanel = new JPanel(new BorderLayout(40, 40));
 
-			JLabel dateLabel = new JLabel(msg.getDate().toString());
+			JLabel dateLabel = new JLabel(java.text.DateFormat.getDateTimeInstance().format(msg.getDate()));
 			AuthorPanel authorLabel = new AuthorPanel(msg.getAuthor());
 			//authorLabel.setPreferredSize(new java.awt.Dimension(400, 15));
 
