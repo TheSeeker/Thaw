@@ -157,7 +157,18 @@ public class FCPQueryManager extends Observable implements Runnable {
 	 */
 	public void run() {
 		while(true) {
-			FCPMessage latestMessage = readMessage();
+			FCPMessage latestMessage;
+
+			/* note : if multithreaded, stop reading when a thread is writing,
+			 *        else reading, parsing and answering messages while a thread is 
+			 *        sending a big file may generate a lot of threads (and warnings because
+			 *        of a possible freeze)
+			 */
+			if (MULTITHREADED)
+				connection.addToWriterQueue();
+			latestMessage = readMessage();
+			if (MULTITHREADED)
+				connection.removeFromWriterQueue();
 
 			Logger.verbose(this, "Message received. Notifying observers");
 

@@ -408,7 +408,9 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 			}
 		}
 
-		peerList.setListData(peers);
+		/* can it happen ?! */
+		if (peerList != null && peers != null)
+			peerList.setListData(peers);
 	}
 
 	public synchronized void setNodeInfos(Hashtable infos) {

@@ -112,7 +112,8 @@ public class PeerMonitor implements thaw.core.Plugin, Observer, ActionListener
 		unfoldButton = new JButton("<");
 		unfoldButton.addActionListener(this);
 
-		peerPanel = new PeerMonitorPanel(this, core.getQueueManager(), core.getConfig(), core.getMainWindow());
+		peerPanel = new PeerMonitorPanel(this, core.getQueueManager(), core.getConfig(),
+						 core.getMainWindow());
 
 		peerPanel.addObserver(this);
 		peerPanel.getFoldButton().addActionListener(this);

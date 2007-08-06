@@ -443,6 +443,8 @@ public class TransferTable implements MouseListener {
 			if (model.getPage() > pageMax)
 				model.setPage(0);
 
+			pageSelecter.setSelectedItem("0");
+
 			pageSelecter.removeAllItems();
 
 			for (int i = 0 ; i <= pageMax ; i++)
