@@ -17,6 +17,7 @@ public class PluginManager {
 		"thaw.plugins.Hsqldb",
 		"thaw.plugins.IndexBrowser",
 		"thaw.plugins.IndexExporter",
+		"thaw.plugins.MiniFrost",
 		"thaw.plugins.TransferLogs"
 	};
 

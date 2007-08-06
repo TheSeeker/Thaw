@@ -334,17 +334,28 @@ public class IndexManagementHelper {
 			publicKey = dialog.getPublicKey();
 			privateKey = dialog.getPrivateKey();
 
-			IndexManagementHelper.reuseIndex(getQueueManager(), getIndexBrowserPanel(), (IndexFolder)getTarget(), publicKey, privateKey);
+			IndexManagementHelper.reuseIndex(getQueueManager(), getIndexBrowserPanel(),
+							 (IndexFolder)getTarget(), publicKey, privateKey);
 		}
 	}
 
 
-	public static Index addIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final IndexFolder target, final String publicKey) {
+	public static Index addIndex(final FCPQueueManager queueManager,
+				     final IndexBrowserPanel indexBrowser,
+				     final IndexFolder target,
+				     final String publicKey) {
+
 		return IndexManagementHelper.reuseIndex(queueManager, indexBrowser, target, publicKey, null);
+
 	}
 
-	public static Index reuseIndex(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final IndexFolder target, String publicKey, String privateKey) {
+	public static Index reuseIndex(final FCPQueueManager queueManager,
+				       final IndexBrowserPanel indexBrowser,
+				       final IndexFolder target, String publicKey,
+				       String privateKey) {
+
 		return reuseIndex(queueManager, indexBrowser, target, publicKey, privateKey, true);
+
 	}
 
 	/**
@@ -438,14 +449,14 @@ public class IndexManagementHelper {
 
 		}
 
-		if (load)
-			download(queueManager, indexBrowser, index);
-
 		((MutableTreeNode)parent).insert((index), 0);
 
 		indexBrowser.getIndexTree().refresh(parent);
 
 		indexBrowser.getUnknownIndexList().removeLink(index);
+
+		if (load)
+			download(queueManager, indexBrowser, index);
 
 		return index;
 	}
@@ -573,8 +584,12 @@ public class IndexManagementHelper {
 
 
 
-	public static boolean download(FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, IndexTreeNode target) {
-		IndexDownloader downloader = new IndexDownloader(queueManager, indexBrowser, null);
+	public static boolean download(FCPQueueManager queueManager,
+				       IndexBrowserPanel indexBrowser,
+				       IndexTreeNode target) {
+
+		IndexDownloader downloader = new IndexDownloader(queueManager, indexBrowser,
+								 null);
 		downloader.setTarget(target);
 
 		Thread th = new Thread(downloader);

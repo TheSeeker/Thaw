@@ -95,8 +95,10 @@ public class IndexRoot extends IndexFolder implements IndexTreeNode {
 		DatabaseManager.dropTables(indexBrowser.getDb());
 		DatabaseManager.createTables(indexBrowser.getDb());
 
-		IndexManagementHelper.addIndex(queueManager, indexBrowser, null,
-					       thaw.plugins.IndexBrowser.DEFAULT_INDEX);
+		for (int i = 0 ; i < thaw.plugins.IndexBrowser.DEFAULT_INDEXES.length ; i++) {
+			IndexManagementHelper.addIndex(queueManager, indexBrowser, null,
+						       thaw.plugins.IndexBrowser.DEFAULT_INDEXES[i]);
+		}
 
 		forceReload();
 

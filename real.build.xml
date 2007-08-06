@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+
+<project name="Thaw" default="jar">
+
+	<property name="src.dir" value="src" />
+	<property name="bin.dir" value="build" />
+	<property name="images.dir" value="images" />
+	<property name="lib.dir" value="lib" />
+	<property name="javadoc.dir" value="javadoc" />
+	<property name="javac.debug" value="false" />
+	<property name="svn.revision" value="@custom@"/>
+
+	<property name="licenses.dir" value="licenses" />
+
+	<property name="final.dir" value="bin" />
+
+	<!-- JMDNS -->
+	<property name="jmdns.location" value="${lib.dir}/jmdns.jar" />
+	<available file="${jmdns.location}" property="jmdns_available" />
+	<fail unless="jmdns_available" status="1"
+	message="You need to download jmdns.jar from http://sourceforge.net/projects/jmdns/ and to put it in lib/" />
+
+	<!-- HSQLDB -->
+	<property name="hsqldb.location" value="${lib.dir}/hsqldb.jar" />
+	<available file="${hsqldb.location}" property="hsqldb_available" />
+	<fail unless="hsqldb_available" status="1"
+	message="You need to download hsqldb.jar from http://sourceforge.net/projects/hsqldb/ and to put it in lib/" />
+
+	<!-- BOUNCYCASTLE -->
+	<property name="bouncycastle.location" value="${lib.dir}/BouncyCastle.jar" />
+	<available file="${bouncycastle.location}" property="bouncycastle_available" />
+	<fail unless="bouncycastle_available" status="1"
+	message="You need to download the bouncycastle provider for the JDK 1.4 from http://bouncycastle.org/latest_releases.html and put it in lib/ with the name BouncyCastle.jar." />
+
+
+	<target name="compile">
+		<mkdir dir="${bin.dir}" />
+
+		<replace file="${src.dir}/thaw/core/Main.java">
+			<replacefilter token="@custom@" value="${svn.revision}"/>
+		</replace>
+
+
+		<javac srcdir="${src.dir}" destdir="${bin.dir}" debug="true" optimize="true" encoding="UTF8">
+
+			<!-- <compilerarg value="-Xlint" /> -->
+			<classpath>
+				<pathelement location="${jmdns.location}"/>
+				<pathelement location="${hsqldb.location}"/>
+				<pathelement location="${bouncycastle.location}" />
+			</classpath>
+		</javac>
+
+		<copy todir="${bin.dir}">
+		        <fileset dir="licenses" />
+			<fileset file="readme.txt" />
+		        <fileset dir="${images.dir}" />
+
+			<fileset dir="${src.dir}">
+				<include name="**/*.properties" />
+				<include name="**/*.png" /><!-- for the liquid lnf -->
+			</fileset>
+		</copy>
+	</target>
+
+
+	<target name="run" depends="compile">
+		<java classname="thaw.core.Main" classpath="${jmdns.location}:${bouncycastle.location}:${hsqldb.location}:${bin.dir}" dir="${bin.dir}" fork="true" />
+	</target>
+
+
+	<target name="jar" depends="compile" description="Make the Jar" >
+		<mkdir dir="${final.dir}" />
+
+		<jar jarfile="${final.dir}/Thaw.jar" basedir="${bin.dir}">
+		        <manifest>
+			        <attribute name="Main-Class" value="thaw.core.Main" />
+				<attribute name="Class-Path" value=". Thaw.jar jmdns.jar hsqldb.jar BouncyCastle.jar" />
+			</manifest>
+
+			<fileset dir="build">
+			   <include name="**/*.class" />
+			</fileset>
+
+			<fileset dir=".">
+			    <include name="${lib.dir}/**/*.jar" />
+			    <include name="${licenses.dir}/**/*.txt" />
+			    <include name="${images.dir}/**/*.png" />
+			</fileset>
+		</jar>
+	</target>
+
+
+	<target name="javadoc">
+		<javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}">
+			<fileset dir="${src.dir}" includes="**/*.java" />
+		</javadoc>
+	</target>
+
+	<target name="clean">
+		<delete dir="${bin.dir}"/>
+		<delete file="${final.dir}/Thaw.jar"/>
+	</target>
+
+</project>
