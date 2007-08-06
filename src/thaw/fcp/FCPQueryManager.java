@@ -148,9 +148,10 @@ public class FCPQueryManager extends Observable implements Runnable {
 	}
 
 	/**
-	 * Multithreading allow the use of a watchdog
+	 * Multithreading allow the use of a watchdog. It's useful to debug,
+	 * but I recommand to desactivate it for a normal use.
 	 */
-	public final static boolean MULTITHREADED = true;
+	public final static boolean MULTITHREADED = false;
 
 	/**
 	 * Will listen in loop for new incoming messages.
@@ -164,11 +165,11 @@ public class FCPQueryManager extends Observable implements Runnable {
 			 *        sending a big file may generate a lot of threads (and warnings because
 			 *        of a possible freeze)
 			 */
-			if (MULTITHREADED)
-				connection.addToWriterQueue();
 			latestMessage = readMessage();
-			if (MULTITHREADED)
+			if (MULTITHREADED) {
+				connection.addToWriterQueue();
 				connection.removeFromWriterQueue();
+			}
 
 			Logger.verbose(this, "Message received. Notifying observers");
 

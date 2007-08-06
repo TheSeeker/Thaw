@@ -1,7 +1,7 @@
 <launch4jConfig>
   <headerType>0</headerType>
-  <outfile>lib/Thaw.exe</outfile>
-  <jar>lib/Thaw.jar</jar>
+  <outfile>bin/Thaw.exe</outfile>
+  <jar>bin/Thaw.jar</jar>
   <dontWrapJar>false</dontWrapJar>
 
   <errTitle>Thaw</errTitle>
