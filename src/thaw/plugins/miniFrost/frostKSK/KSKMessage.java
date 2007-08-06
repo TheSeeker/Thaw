@@ -464,9 +464,9 @@ public class KSKMessage
 	}
 
 
-	public static boolean destroy(KSKBoard board, Hsqldb db) {
-		if (!KSKFileAttachment.destroy(board, db)
-		    || !KSKBoardAttachment.destroy(board, db))
+	public static boolean destroyAll(KSKBoard board, Hsqldb db) {
+		if (!KSKFileAttachment.destroyAll(board, db)
+		    || !KSKBoardAttachment.destroyAll(board, db))
 			return false;
 
 		try {
@@ -480,6 +480,35 @@ public class KSKMessage
 			}
 		} catch(SQLException e) {
 			Logger.error(null, "Can't destroy the board messages because : "+e.toString());
+			return false;
+		}
+
+		return true;
+	}
+
+
+	public boolean destroy(Hsqldb db) {
+		if (!KSKFileAttachment.destroy(this, db)
+		    || !KSKBoardAttachment.destroy(this, db))
+			return false;
+
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				/* to avoid the integrity constraint violations */
+				st = db.getConnection().prepareStatement("UPDATE frostKSKMessages SET "+
+									 "inReplyTo = NULL WHERE inReplyTo = ?");
+				st.setInt(1, id);
+				st.execute();
+
+				st = db.getConnection().prepareStatement("DELETE FROM frostKSKMessages "+
+									 "WHERE id = ?");
+				st.setInt(1, id);
+				st.execute();
+			}
+		} catch(SQLException e) {
+			Logger.error(null, "Can't destroy the message "+Integer.toString(id)+" because : "+e.toString());
 			return false;
 		}
 

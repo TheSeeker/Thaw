@@ -255,7 +255,26 @@ public class KSKBoardAttachment
 	}
 
 
-	public static boolean destroy(KSKBoard board, Hsqldb db) {
+	public static boolean destroy(KSKMessage msg, Hsqldb db) {
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("DELETE FROM frostKSKAttachmentBoards "+
+									 "WHERE messageId = ?");
+				st.setInt(1, msg.getId());
+				st.execute();
+			}
+		} catch(SQLException e) {
+			Logger.error(null, "Can't destroy the message attachments of the board because : "+e.toString());
+			return false;
+		}
+
+		return true;
+	}
+
+
+	public static boolean destroyAll(KSKBoard board, Hsqldb db) {
 		try {
 			synchronized(db.dbLock) {
 				PreparedStatement st;

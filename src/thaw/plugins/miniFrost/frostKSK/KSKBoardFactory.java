@@ -82,9 +82,30 @@ public class KSKBoardFactory
 
 				java.sql.Timestamp timestamp = new java.sql.Timestamp(new Date().getTime() - (deleteAfter * 24 * 60*60*1000));
 
-				st = db.getConnection().prepareStatement("DELETE from frostKSKMessages WHERE date < ?");
+				st = db.getConnection().prepareStatement("SELECT "+
+									 " id, msgId, inReplyToId, subject, "+
+									 " nick, sigId, date, rev, read, "+
+									 " archived "+
+									 "FROM frostKSKMessages WHERE date < ?");
 				st.setTimestamp(1, timestamp);
-				st.execute();
+				ResultSet set = st.executeQuery();
+
+				while(set.next()) {
+					KSKMessage msg = new KSKMessage(set.getInt("id"),
+									set.getString("msgId"),
+									set.getString("inReplyToId"),
+									set.getString("subject"),
+									set.getString("nick"),
+									set.getInt("sigId"),
+									null, /* author Identity */
+									set.getTimestamp("date"),
+									set.getInt("rev"),
+									set.getBoolean("read"),
+									set.getBoolean("archived"),
+									null, /* encryptedFor */
+									null /* board */);
+					msg.destroy(db);
+				}
 
 
 				timestamp = new java.sql.Timestamp(new Date().getTime() - (archiveAfter * 24 * 60*60*1000));

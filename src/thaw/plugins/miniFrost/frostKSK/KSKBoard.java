@@ -754,7 +754,7 @@ public class KSKBoard
 	public boolean destroy() {
 		Hsqldb db = factory.getDb();
 
-		if (!KSKMessage.destroy(this, db))
+		if (!KSKMessage.destroyAll(this, db))
 			return false;
 
 		try {
