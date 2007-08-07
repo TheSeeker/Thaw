@@ -289,9 +289,9 @@ public class IconBox {
 		IconBox.mDns                = IconBox.loadIcon("images/mDns.png");
 		IconBox.minMDns             = IconBox.loadIcon("images/min-mDns.png");
 		IconBox.msgReply            = IconBox.loadIcon("images/mail-reply-sender.png");
-		IconBox.msgNew              = IconBox.loadIcon("images/mail-message-new.png");
+		IconBox.msgNew              = IconBox.loadIcon("images/new-message.png");
 		IconBox.minMsgReply         = IconBox.loadIcon("images/min-mail-reply-sender.png");
-		IconBox.minMsgNew           = IconBox.loadIcon("images/min-mail-message-new.png");
+		IconBox.minMsgNew           = IconBox.loadIcon("images/min-new-message.png");
 		IconBox.search              = IconBox.loadIcon("images/mDns.png");
 		IconBox.minSearch           = IconBox.loadIcon("images/min-mDns.png");
 		IconBox.nextUnread          = IconBox.loadIcon("images/mail-forward.png");

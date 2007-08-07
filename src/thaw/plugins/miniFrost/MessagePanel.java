@@ -69,6 +69,7 @@ public class MessagePanel
 	private JComboBox actions;
 	private JButton back;
 	private JButton nextUnread;
+	private JButton reply;
 
 	private Vector subPanels;
 
@@ -96,7 +97,7 @@ public class MessagePanel
 		actions = new JComboBox(ACTIONS);
 		actions.addActionListener(this);
 
-		JPanel buttonPanel = new JPanel(new GridLayout(1, 2));
+		JPanel buttonPanel = new JPanel(new GridLayout(1, 3));
 
 		back = new JButton("", IconBox.minLeft);
 		back.setToolTipText(I18n.getMessage("thaw.plugin.miniFrost.goBack"));
@@ -106,8 +107,12 @@ public class MessagePanel
 		nextUnread = new JButton("", IconBox.minNextUnread);
 		nextUnread.setToolTipText(I18n.getMessage("thaw.plugin.miniFrost.nextUnread"));
 		nextUnread.addActionListener(this);
-
 		buttonPanel.add(nextUnread);
+
+		reply = new JButton("", IconBox.minMsgReply);
+		reply.setToolTipText(I18n.getMessage("thaw.plugin.miniFrost.reply"));
+		reply.addActionListener(this);
+		buttonPanel.add(reply);
 
 		subject = new JLabel("");
 
@@ -490,6 +495,13 @@ public class MessagePanel
 		return mainPanel.getMessageTreeTable().nextUnread();
 	}
 
+
+	protected void reply() {
+		Draft draft = msg.getBoard().getDraft(msg);
+		mainPanel.getDraftPanel().setDraft(draft);
+		mainPanel.displayDraftPanel();
+	}
+
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == back) {
 
@@ -499,6 +511,10 @@ public class MessagePanel
 
 			if (!nextUnread())
 				mainPanel.displayMessageTable();
+
+		} else if (e.getSource() == reply) {
+
+			reply();
 
 		} else if (e.getSource() == actions) {
 
@@ -515,9 +531,7 @@ public class MessagePanel
 
 			} else if (sel == 1) { /* reply */
 
-				Draft draft = msg.getBoard().getDraft(msg);
-				mainPanel.getDraftPanel().setDraft(draft);
-				mainPanel.displayDraftPanel();
+				reply();
 
 			} else if (sel == 4 || sel == 5) { /* (un)fold */
 				boolean retracted = (sel == 5);

@@ -26,6 +26,7 @@ import thaw.core.Logger;
 import thaw.plugins.miniFrost.interfaces.Board;
 import thaw.plugins.miniFrost.interfaces.BoardFactory;
 import thaw.plugins.miniFrost.interfaces.Message;
+import thaw.plugins.miniFrost.interfaces.Draft;
 
 
 public class BoardManagementHelper {
@@ -154,6 +155,46 @@ public class BoardManagementHelper {
 
 			mainPanel.getMessageTreeTable().refresh();
 			mainPanel.getBoardTree().refresh();
+		}
+	}
+
+
+
+	public static class NewMessage extends BasicBoardAction {
+		private MiniFrostPanel mainPanel;
+		private AbstractButton source;
+
+		private Board target;
+
+
+		public NewMessage(MiniFrostPanel mainPanel, AbstractButton source) {
+			super();
+
+			this.mainPanel = mainPanel;
+			this.source = source;
+
+			if (source != null) {
+				source.addActionListener(this);
+				source.setEnabled(false);
+			}
+		}
+
+
+		public void setTarget(Board board) {
+			if (source != null)
+				source.setEnabled(board != null);
+			this.target = board;
+		}
+
+		public void apply() {
+			if (target == null) {
+				Logger.warning(this, "No target ?!");
+				return;
+			}
+
+			Draft draft = target.getDraft(null);
+			mainPanel.getDraftPanel().setDraft(draft);
+			mainPanel.displayDraftPanel();
 		}
 	}
 
