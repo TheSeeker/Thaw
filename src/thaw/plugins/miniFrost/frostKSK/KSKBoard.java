@@ -558,6 +558,39 @@ public class KSKBoard
 		notifyChange();
 	}
 
+
+	private Date getNextRefreshDate(Date originalDate) {
+		Date today = getMidnight(new Date());
+
+		if (originalDate == null)
+			return today;
+
+		/* if the last date was in the future */
+		if (getMidnight(originalDate).getTime() > today.getTime()) {
+			/* TODO : Take in consideration that we could have
+			 *        MIN_DAYS_IN_THE_FUTURE > 1
+			 */
+			/* we stop */
+			return null;
+		}
+
+
+		Date newDate = new Date(originalDate.getTime() - 24*60*60*1000);
+		Date maxInPast = new Date(new Date().getTime() - ((maxDaysInThePast+1) * 24*60*60*1000));
+		Date lastUpdatePast = ((lastUpdate == null) ? null :
+				       new Date(lastUpdate.getTime() - (DAYS_BEFORE_THE_LAST_REFRESH * 24*60*60*1000)));
+
+		if (newDate.getTime() >= maxInPast.getTime()
+		    && (lastUpdatePast == null || newDate.getTime() >= lastUpdatePast.getTime())) {
+			/* date in the limits */
+			return getMidnight(newDate);
+		} else {
+			/* no more in the limits => we do tomorrow and then we stop */
+			return getMidnight(new Date( (today.getTime()) + 24*60*60*1000));
+		}
+	}
+
+
 	/**
 	 * only called when a message has finished its download
 	 */
@@ -660,17 +693,10 @@ public class KSKBoard
 				if (moveDay) {
 					Logger.info(this, "no more message to fetch for this day => moving to another");
 
-					lastDate = new Date(lastDate.getTime() - 24*60*60*1000);
+					lastDate = getNextRefreshDate(lastDate);
 					lastRev = -1;
 
-					Date maxInPast = new Date(new Date().getTime() - ((maxDaysInThePast+1) * 24*60*60*1000));
-					Date lastUpdatePast = ((lastUpdate == null) ? null :
-							       new Date(lastUpdate.getTime() - (DAYS_BEFORE_THE_LAST_REFRESH * 24*60*60*1000)));
-
-					if (lastDate.getTime() >= maxInPast.getTime()
-					    && (lastUpdatePast == null || lastDate.getTime() >= lastUpdatePast.getTime())) {
-						/* the date is in the limits */
-
+					if (lastDate != null) {
 						lastSuccessfulRev = getLastDownloadedRev(lastDate);
 
 						/* we start again */
@@ -682,7 +708,6 @@ public class KSKBoard
 						}
 
 					} else {
-						/* the date is out of limits */
 						endOfRefresh();
 					}
 				}
@@ -718,10 +743,10 @@ public class KSKBoard
 
 	public void run() {
 
+		//lastDate = new Date((new Date()).getTime()
+		//		    + (MIN_DAYS_IN_THE_FUTURE * (24 * 60 * 60 * 1000 /* 1 day */)));
+		lastDate = getNextRefreshDate(null);
 		lastRev = -1;
-
-		lastDate = new Date((new Date()).getTime()
-				    + (MIN_DAYS_IN_THE_FUTURE * (24 * 60 * 60 * 1000 /* 1 day */)));
 
 		synchronized(runningDownloads) {
 			lastSuccessfulRev = getLastDownloadedRev(lastDate);
