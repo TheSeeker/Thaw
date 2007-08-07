@@ -118,11 +118,16 @@ public class BoardTree extends Observable
 		rightClickMenu.add(item);
 		actions.add(new BoardManagementHelper.BoardRefresher(mainPanel, item));
 
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.miniFrost.markAsRead"),
+				     IconBox.minMarkAsRead);
+		rightClickMenu.add(item);
+		actions.add(new BoardManagementHelper.MarkAllAsRead(mainPanel, item));
+
 		/* buttons */
 
 		JPanel southPanel = new JPanel(new BorderLayout());
 
-		JPanel buttonPanel = new JPanel(new GridLayout(1, 2));
+		JPanel buttonPanel = new JPanel(new GridLayout(2, 2));
 
 		JButton button;
 
@@ -139,6 +144,11 @@ public class BoardTree extends Observable
 		button = new JButton(IconBox.minRefreshAction);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.miniFrost.loadNewMessages"));
 		actions.add(new BoardManagementHelper.BoardRefresher(mainPanel, button));
+		buttonPanel.add(button);
+
+		button = new JButton(IconBox.minMarkAsRead);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.miniFrost.markAsRead"));
+		actions.add(new BoardManagementHelper.MarkAllAsRead(mainPanel, button));
 		buttonPanel.add(button);
 
 		/* drafts state */

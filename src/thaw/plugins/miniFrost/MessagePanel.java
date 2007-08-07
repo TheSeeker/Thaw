@@ -40,7 +40,7 @@ public class MessagePanel
 
 
 	public final static String[] ACTIONS = {
-		"",
+		I18n.getMessage("thaw.plugin.miniFrost.actions"),
 		I18n.getMessage("thaw.plugin.miniFrost.reply"),
 		I18n.getMessage("thaw.plugin.miniFrost.archivate"),
 		I18n.getMessage("thaw.plugin.miniFrost.unarchivate"),

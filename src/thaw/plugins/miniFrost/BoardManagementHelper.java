@@ -16,6 +16,7 @@ import javax.swing.AbstractButton;
 import javax.swing.JDialog;
 
 import java.util.Vector;
+import java.util.Iterator;
 
 import javax.swing.JOptionPane;
 
@@ -24,6 +25,7 @@ import thaw.core.Logger;
 
 import thaw.plugins.miniFrost.interfaces.Board;
 import thaw.plugins.miniFrost.interfaces.BoardFactory;
+import thaw.plugins.miniFrost.interfaces.Message;
 
 
 public class BoardManagementHelper {
@@ -91,7 +93,7 @@ public class BoardManagementHelper {
 
 
 		public void setTarget(Board board) {
-			this.target = target;
+			this.target = board;
 		}
 
 		public void apply() {
@@ -106,6 +108,55 @@ public class BoardManagementHelper {
 			mainPanel.getBoardTree().refresh();
 		}
 	}
+
+
+
+	public static class MarkAllAsRead extends BasicBoardAction {
+		private MiniFrostPanel mainPanel;
+		private AbstractButton source;
+
+		private Board target;
+
+
+		public MarkAllAsRead(MiniFrostPanel mainPanel, AbstractButton source) {
+			super();
+
+			this.mainPanel = mainPanel;
+			this.source = source;
+
+			if (source != null) {
+				source.addActionListener(this);
+				source.setEnabled(false);
+			}
+		}
+
+
+		public void setTarget(Board board) {
+			if (source != null)
+				source.setEnabled(board != null);
+			this.target = board;
+		}
+
+		public void apply() {
+			if (target == null) {
+				Logger.warning(this, "No target ?!");
+				return;
+			}
+
+			/* quick and dirty */
+			Vector msgs = target.getMessages(null, Board.ORDER_DATE, true,
+							 false, true, Integer.MIN_VALUE);
+
+			for (Iterator it = msgs.iterator();
+			     it.hasNext();) {
+				((Message)it.next()).setRead(true);
+			}
+
+			mainPanel.getMessageTreeTable().refresh();
+			mainPanel.getBoardTree().refresh();
+		}
+	}
+
 
 
 
@@ -143,6 +194,7 @@ public class BoardManagementHelper {
 			}
 		}
 	}
+
 
 
 	public static class BoardRefresher implements BoardAction {

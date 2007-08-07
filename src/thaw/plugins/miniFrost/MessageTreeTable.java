@@ -92,7 +92,7 @@ public class MessageTreeTable implements Observer,
 
 
 	public final static String[] ACTIONS = new String[] {
-		"",
+		I18n.getMessage("thaw.plugin.miniFrost.actions"),
 		I18n.getMessage("thaw.plugin.miniFrost.selectAll"),
 		I18n.getMessage("thaw.plugin.miniFrost.selectNone"),
 		I18n.getMessage("thaw.plugin.miniFrost.markAsRead"),

@@ -165,6 +165,9 @@ public class IconBox {
 	public static ImageIcon windowNew;
 	public static ImageIcon minWindowNew;
 
+	public static ImageIcon markAsRead;
+	public static ImageIcon minMarkAsRead;
+
 
 	/**
 	 * Not really used
@@ -275,6 +278,8 @@ public class IconBox {
 		IconBox.indexSettings       = IconBox.loadIcon("images/indexSettings.png");
 		IconBox.addComment          = IconBox.loadIcon("images/mail-message-new.png");
 		IconBox.minAddComment       = IconBox.loadIcon("images/min-mail-message-new.png");
+		IconBox.markAsRead          = IconBox.loadIcon("images/mail-message-new.png");
+		IconBox.minMarkAsRead       = IconBox.loadIcon("images/min-mail-message-new.png");
 		IconBox.readComments        = IconBox.loadIcon("images/readComments.png");
 		IconBox.minReadComments     = IconBox.loadIcon("images/min-readComments.png");
 		IconBox.minRed              = IconBox.loadIcon("images/min-red.png");
