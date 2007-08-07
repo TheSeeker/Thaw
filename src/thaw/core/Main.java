@@ -153,7 +153,8 @@ public class Main {
 		try {
 			String realHome = this.getClass().getProtectionDomain().
 				getCodeSource().getLocation().toString();
-			String home = realHome.substring(5);
+
+			String home = java.net.URLDecoder.decode(realHome.substring(5), "UTF-8");
 
 			Logger.info(this, "Extracting : "+realHome+" ; "+src+" ; "+dst);
 

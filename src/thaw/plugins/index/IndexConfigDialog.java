@@ -22,13 +22,18 @@ import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FreenetURIHelper;
 import thaw.core.I18n;
 import thaw.core.Logger;
+import thaw.plugins.Hsqldb;
 
 
 public class IndexConfigDialog implements ActionListener, MouseListener {
+	public final static int SIZE_X = 700;
+	public final static int SIZE_Y = 170;
+
 	private JDialog frame;
 
 	private IndexBrowserPanel indexBrowser;
 	private FCPQueueManager queueManager;
+	private Hsqldb db;
 	private Index index;
 
 
@@ -42,6 +47,8 @@ public class IndexConfigDialog implements ActionListener, MouseListener {
 	private JTextField privateKeyField      = null;
 	private JCheckBox  publishPrivateKeyBox = null;
 	private JCheckBox  allowCommentsBox     = null;
+
+	private JButton    changeCategory;
 
 	private JPopupMenu popupMenuA;
 	private JPopupMenu popupMenuB;
@@ -65,7 +72,8 @@ public class IndexConfigDialog implements ActionListener, MouseListener {
 				 Index index) {
 		this.indexBrowser = indexBrowser;
 		this.queueManager = queueManager;
-		this.index = index;
+		this.index        = index;
+		this.db           = indexBrowser.getDb();
 	}
 
 
@@ -145,7 +153,19 @@ public class IndexConfigDialog implements ActionListener, MouseListener {
 
 
 		resetCommentsButton = new JButton(I18n.getMessage("thaw.plugin.index.comment.reset"));
+		resetCommentsButton.setEnabled(index != null && index.getPrivateKey() != null);
 		resetCommentsButton.addActionListener(this);
+
+		String cat = (index == null ? null : index.getCategory());
+
+		if (cat == null)
+			cat = I18n.getMessage("thaw.plugin.index.categoryUnspecified");
+
+		JLabel categoryLabel = new JLabel(I18n.getMessage("thaw.plugin.index.category")
+						  +" "+cat);
+		changeCategory = new JButton(I18n.getMessage("thaw.plugin.index.changeCategory"));
+		changeCategory.setEnabled(index != null && index.getPrivateKey() != null);
+		changeCategory.addActionListener(this);
 
 
 		/* public & private keys */
@@ -184,7 +204,7 @@ public class IndexConfigDialog implements ActionListener, MouseListener {
 
 
 		final JPanel indexSettingsPanel = new JPanel();
-		indexSettingsPanel.setLayout(new GridLayout(3, 1));
+		indexSettingsPanel.setLayout(new GridLayout(4, 1));
 
 		final JPanel mainButtonPanel = new JPanel();
 		mainButtonPanel.setLayout(new GridLayout(1, 2));
@@ -200,13 +220,16 @@ public class IndexConfigDialog implements ActionListener, MouseListener {
 
 		JPanel commentPanel = new JPanel(new BorderLayout());
 		commentPanel.add(allowCommentsBox, BorderLayout.CENTER);
+		commentPanel.add(resetCommentsButton, BorderLayout.EAST);
 
-		if (index != null && index.getPrivateKey() != null)
-			commentPanel.add(resetCommentsButton, BorderLayout.EAST);
-
+		JPanel categoryPanel = new JPanel(new BorderLayout());
+		categoryPanel.add(categoryLabel, BorderLayout.CENTER);
+		categoryPanel.add(changeCategory, BorderLayout.EAST);
 
 		indexSettingsPanel.add(publishPrivateKeyBox);
 		indexSettingsPanel.add(commentPanel);
+		indexSettingsPanel.add(categoryPanel);
+
 		indexSettingsPanel.add(mainButtonPanel);
 
 		frame.getContentPane().add(indexSettingsPanel, BorderLayout.SOUTH);
@@ -217,7 +240,7 @@ public class IndexConfigDialog implements ActionListener, MouseListener {
 
 		/* let's rock'n'rool :p */
 
-		frame.setSize(700, 140);
+		frame.setSize(SIZE_X, SIZE_Y);
 		frame.setVisible(true);
 
 		try {
@@ -259,25 +282,30 @@ public class IndexConfigDialog implements ActionListener, MouseListener {
 	}
 
 
-	public synchronized void actionPerformed(final ActionEvent e) {
+	public void actionPerformed(final ActionEvent e) {
 		if (e.getSource() == okButton) {
 			formState = 1;
 			synchronized(this) {
 				notifyAll();
 			}
 			return;
-		}
 
-		if (e.getSource() == cancelButton) {
+		} else if (e.getSource() == cancelButton) {
+
 			formState = 2;
 			synchronized(this) {
 				notifyAll();
 			}
 			return;
-		}
 
-		if (e.getSource() == resetCommentsButton) {
+		} else if (e.getSource() == resetCommentsButton) {
+
 			index.regenerateCommentKeys(queueManager);
+
+		} else if (e.getSource() == changeCategory) {
+
+			/* TODO */
+
 		}
 	}
 

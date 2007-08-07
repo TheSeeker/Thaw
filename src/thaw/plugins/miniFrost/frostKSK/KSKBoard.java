@@ -567,7 +567,7 @@ public class KSKBoard
 
 		/* if the last date was in the future */
 		if (getMidnight(originalDate).getTime() > today.getTime()) {
-			/* TODO : Take in consideration that we could have
+			/* TODO : Take into consideration that we could have
 			 *        MIN_DAYS_IN_THE_FUTURE > 1
 			 */
 			/* we stop */

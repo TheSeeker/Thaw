@@ -59,7 +59,7 @@ import thaw.plugins.Hsqldb;
  *  |-- indexFolders (id, name, positionInTree)
  *  | |-- [...]
  *  |
- *  |-- indexes (id, realName, displayName, publicKey, [privateKey], positionInTree, ...)
+ *  |-- indexes (id, realName, displayName, publicKey, [privateKey], ...)
  *    |-- links (id, indexName, indexPublicKey)
  *    |-- files (id, filename, publicKey, mime, size)
  *      |-- metadatas (id, name, value)
@@ -91,7 +91,7 @@ public class DatabaseManager {
 
 		if (config.getValue("indexDatabaseVersion") == null) {
 			newDb = true;
-			config.setValue("indexDatabaseVersion", "8");
+			config.setValue("indexDatabaseVersion", "9");
 		} else {
 
 			/* CONVERTIONS */
@@ -148,6 +148,13 @@ public class DatabaseManager {
 					config.setValue("indexDatabaseVersion", "8");
 			}
 
+			if ("8".equals(config.getValue("indexDatabaseVersion"))) {
+				if (splashScreen != null)
+					splashScreen.setStatus("Converting database ...");
+				if (convertDatabase_8_to_9(db))
+					config.setValue("indexDatabaseVersion", "9");
+			}
+
 			/* ... */
 		}
 
@@ -165,6 +172,9 @@ public class DatabaseManager {
 		//sendQuery(db,
 		//	  "SET IGNORECASE TRUE");
 
+		/* category syntax:
+		 *  "folder[/subfolder[/subsubfolder]]"
+		 */
 		sendQuery(db,
 			  "CREATE CACHED TABLE categories ("
 			  + "id INTEGER IDENTITY NOT NULL,"
@@ -192,6 +202,7 @@ public class DatabaseManager {
 			  + "positionInTree INTEGER NOT NULL, "
 			  + "revision INTEGER NOT NULL, "
 			  + "insertionDate DATE DEFAULT NULL NULL, "
+			  + "categoryId INTEGER DEFAULT NULL NULL, "
 			  + "newRev BOOLEAN DEFAULT FALSE NOT NULL, "
 			  + "newComment BOOLEAN DEFAULT FALSE NOT NULL, "
 			  + "parent INTEGER NULL, " /* direct parent */
@@ -993,12 +1004,25 @@ public class DatabaseManager {
 		if (!sendQuery(db, "DELETE FROM indexComments")
 		    || !sendQuery(db, "ALTER TABLE indexComments DROP r")
 		    || !sendQuery(db, "ALTER TABLE indexComments DROP s")
-		    || !sendQuery(db, "ALTER TABLE indexComments ADD sig VARCHAR(400) NOT NULL")) {
+		    || !sendQuery(db, "ALTER TABLE indexComments ADD COLUMN sig VARCHAR(400) NOT NULL")) {
 
 			Logger.error(new DatabaseManager(), "Error while converting the database (7 to 8) !");
 			return false;
 		}
 
 		return true;
+	}
+
+
+	public static boolean convertDatabase_8_to_9(Hsqldb db) {
+		if (!sendQuery(db, "ALTER TABLE indexes ADD COLUMN categoryId INTEGER DEFAULT NULL NULL")
+		    || !sendQuery(db, "ALTER TABLE indexes ADD FOREIGN KEY (categoryId) REFERENCES categories (id)")) {
+
+			Logger.error(new DatabaseManager(), "Error while converting the database (8 to 9) !");
+			return false;
+		}
+
+		return true;
+
 	}
 }

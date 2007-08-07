@@ -78,6 +78,7 @@ public class Index extends Observable implements MutableTreeNode,
 	private int lastCommentRev = 0;
 	private int nmbFailedCommentFetching = 0;
 
+
 	private Config config;
 
 	/**
@@ -1813,5 +1814,79 @@ public class Index extends Observable implements MutableTreeNode,
 
 	public String getClientVersion() {
 		return ("Thaw "+Main.VERSION);
+	}
+
+
+	public String getCategory() {
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+				st = db.getConnection().prepareStatement("SELECT categories.name AS name "+
+									 "FROM categories INNER JOIN indexes "+
+									 " ON categories.id = indexes.categoryId "+
+									 "WHERE indexes.id = ? LIMIT 1");
+				st.setInt(1, id);
+
+				ResultSet set = st.executeQuery();
+
+				if (!set.next())
+					return null;
+
+				return set.getString("name").toLowerCase();
+			}
+		} catch(SQLException e) {
+			Logger.error(this,
+				     "Unable to get the category of the index because : "+
+				     e.toString());
+		}
+
+		return null;
+	}
+
+
+	/**
+	 * create it if it doesn't exist
+	 */
+	public void setCategory(String category) {
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+				ResultSet set;
+
+				int catId = 0;
+
+				while (catId == 0) {
+					/* localisation */
+					st = db.getConnection().prepareStatement("SELECT id FROM categories "+
+										 "WHERE name = ? LIMIT 1");
+					st.setString(1, category.toLowerCase());
+
+					set = st.executeQuery();
+
+					if (set.next())
+						catId = set.getInt("id");
+					else {
+						/* insertion */
+						st = db.getConnection().prepareStatement("INSERT INTO categories "+
+											 "(name) VALUES (?)");
+						st.setString(1, category.toLowerCase());
+						st.execute();
+					}
+				}
+
+
+				/* set the categoryId of the index */
+
+				st = db.getConnection().prepareStatement("UPDATE indexes SET categoryId = ? "+
+									 "WHERE id = ?");
+				st.setInt(1, catId);
+				st.setInt(2, id);
+				st.execute();
+
+			}
+
+		} catch(SQLException e) {
+			Logger.error(this, "Can't set the category because : "+e.toString());
+		}
 	}
 }
