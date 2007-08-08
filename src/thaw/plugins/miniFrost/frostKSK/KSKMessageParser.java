@@ -102,12 +102,12 @@ public class KSKMessageParser {
 			frostCrypt = new FrostCrypt();
 
 		/* frost wants a SHA256 hash, but can't check from what is comes :p */
-		this.messageId = frostCrypt.computeChecksumSHA256(getSignedContent());
+		this.messageId = frostCrypt.computeChecksumSHA256(getSignedContent(false));
 
 		if (identity == null)
 			signature = null;
 		else {
-			signature = identity.sign(getSignedContent());
+			signature = identity.sign(getSignedContent(true));
 		}
 	}
 
@@ -144,6 +144,11 @@ public class KSKMessageParser {
 	public boolean insert(Hsqldb db,
 			      int boardId, java.util.Date boardDate, int rev,
 			      String boardNameExpected) {
+		/*
+		 * we use OUR message id.
+		 */
+		messageId = frostCrypt.computeChecksumSHA256(getSignedContent(false));
+
 		if (boardNameExpected == null) {
 			Logger.notice(this, "Board name expected == null ?!");
 			return false;
@@ -157,7 +162,8 @@ public class KSKMessageParser {
 
 		if (alreadyInTheDb(db, messageId)) {
 			Logger.info(this, "We have already this id in the db ?!");
-			return false;
+			archived = true;
+			read = true;
 		}
 
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.M.d HH:mm:ss");
@@ -305,14 +311,18 @@ public class KSKMessageParser {
 
 	public final static char SIGNATURE_ELEMENTS_SEPARATOR = '|';
 
-	private String getSignedContent() {
+	/**
+	 * @param withMsgId require to check the signature
+	 */
+	private String getSignedContent(boolean withMsgId) {
 		final StringBuffer allContent = new StringBuffer();
 
 		allContent.append(date).append(SIGNATURE_ELEMENTS_SEPARATOR);
 		allContent.append(time+"GMT").append(SIGNATURE_ELEMENTS_SEPARATOR);
 		allContent.append(board).append(SIGNATURE_ELEMENTS_SEPARATOR);
 		allContent.append(from).append(SIGNATURE_ELEMENTS_SEPARATOR);
-		allContent.append(messageId).append(SIGNATURE_ELEMENTS_SEPARATOR);
+		if (withMsgId)
+			allContent.append(messageId).append(SIGNATURE_ELEMENTS_SEPARATOR);
 		if( inReplyTo != null && inReplyTo.length() > 0 ) {
 			allContent.append(inReplyTo).append(SIGNATURE_ELEMENTS_SEPARATOR);
 		}
@@ -353,7 +363,7 @@ public class KSKMessageParser {
 
 		identity = Identity.getIdentity(db, nick, publicKey);
 
-		return identity.check(getSignedContent(), signature);
+		return identity.check(getSignedContent(true), signature);
 	}
 
 
