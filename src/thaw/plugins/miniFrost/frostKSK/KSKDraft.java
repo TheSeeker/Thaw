@@ -259,6 +259,14 @@ public class KSKDraft
 					return;
 				}
 
+				String announce = I18n.getMessage("thaw.plugin.miniFrost.collision");
+				announce = announce.replaceAll("X", board.toString());
+
+				thaw.plugins.TrayIcon.popMessage(board.getFactory().getCore().getPluginManager(),
+								 "MiniFrost",
+								 announce,
+								 thaw.gui.SysTrayIcon.MSG_WARNING);
+
 				put.deleteObserver(this);
 				put.stop(queueManager);
 				queueManager.remove(put);

@@ -202,6 +202,8 @@ public class IndexManagementHelper {
 			FCPGenerateSSK sskGenerator = (FCPGenerateSSK)o;
 			Hsqldb db = getIndexBrowserPanel().getDb();
 
+			Index index;
+
 			synchronized(db.dbLock) {
 				try {
 					PreparedStatement st;
@@ -244,20 +246,26 @@ public class IndexManagementHelper {
 
 					st.execute();
 
-					Index index = new Index(db, getIndexBrowserPanel().getConfig(),
-								id, (TreeNode)getTarget(),
-								sskGenerator.getPublicKey(), 0, sskGenerator.getPrivateKey(),
-								name, null,
-								false, false);
+					index = new Index(db, getIndexBrowserPanel().getConfig(),
+							  id, (TreeNode)getTarget(),
+							  sskGenerator.getPublicKey(), 0, sskGenerator.getPrivateKey(),
+							  name, null,
+							  false, false);
 
-					((MutableTreeNode)getTarget()).insert((index), 0);
-
-
-					getIndexBrowserPanel().getIndexTree().refresh(getTarget());
 				} catch(SQLException e) {
 					Logger.error(new IndexManagementHelper(), "Error while creating index: "+e.toString());
+					return;
 				}
 			}
+
+			((MutableTreeNode)getTarget()).insert((index), 0);
+
+			getIndexBrowserPanel().getIndexTree().refresh(getTarget());
+
+			IndexConfigDialog dialog = new IndexConfigDialog(getIndexBrowserPanel(),
+									 getQueueManager(),
+									 index);
+			dialog.promptUser();
 		}
 	}
 
@@ -481,7 +489,8 @@ public class IndexManagementHelper {
 									   I18n.getMessage("thaw.plugin.index.categoryName"),
 									   I18n.getMessage("thaw.plugin.index.newCategory"));
 
-			IndexManagementHelper.addIndexFolder(getIndexBrowserPanel(), (IndexFolder)getTarget(), name);
+			if (name != null)
+				IndexManagementHelper.addIndexFolder(getIndexBrowserPanel(), (IndexFolder)getTarget(), name);
 		}
 	}
 

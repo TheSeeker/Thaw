@@ -1853,27 +1853,31 @@ public class Index extends Observable implements MutableTreeNode,
 				PreparedStatement st;
 				ResultSet set;
 
-				int catId = 0;
+				int catId = 1;
 
-				while (catId == 0) {
-					/* localisation */
+				st = db.getConnection().prepareStatement("SELECT id FROM categories "+
+									 "WHERE name = ? LIMIT 1");
+				st.setString(1, category.toLowerCase());
+
+				set = st.executeQuery();
+
+				if (!set.next()) {
+
 					st = db.getConnection().prepareStatement("SELECT id FROM categories "+
-										 "WHERE name = ? LIMIT 1");
-					st.setString(1, category.toLowerCase());
-
+										 "ORDER by id DESC LIMIT 1");
 					set = st.executeQuery();
-
 					if (set.next())
-						catId = set.getInt("id");
-					else {
-						/* insertion */
-						st = db.getConnection().prepareStatement("INSERT INTO categories "+
-											 "(name) VALUES (?)");
-						st.setString(1, category.toLowerCase());
-						st.execute();
-					}
-				}
+						catId = set.getInt("id")+1;
 
+					/* insertion */
+					st = db.getConnection().prepareStatement("INSERT INTO categories "+
+										 "(id, name) VALUES (?, ?)");
+					st.setInt(1, catId);
+					st.setString(2, category.toLowerCase());
+					st.execute();
+				} else {
+					catId = set.getInt("id");
+				}
 
 				/* set the categoryId of the index */
 

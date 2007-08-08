@@ -9,6 +9,8 @@ import javax.swing.JDialog;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
 
 import java.awt.GridLayout;
 import java.awt.BorderLayout;
@@ -18,6 +20,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
+
+import java.sql.*;
+
+import java.util.Vector;
+import java.util.Iterator;
+
+
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FreenetURIHelper;
 import thaw.core.I18n;
@@ -25,9 +36,13 @@ import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
 
 
-public class IndexConfigDialog implements ActionListener, MouseListener {
+public class IndexConfigDialog implements ActionListener, MouseListener,
+					  ListSelectionListener {
+
 	public final static int SIZE_X = 700;
 	public final static int SIZE_Y = 170;
+	public final static int CATEGORY_DIALOG_SIZE_X = 400;
+	public final static int CATEGORY_DIALOG_SIZE_Y = 400;
 
 	private JDialog frame;
 
@@ -47,8 +62,8 @@ public class IndexConfigDialog implements ActionListener, MouseListener {
 	private JTextField privateKeyField      = null;
 	private JCheckBox  publishPrivateKeyBox = null;
 	private JCheckBox  allowCommentsBox     = null;
-
-	private JButton    changeCategory;
+	private JLabel     categoryLabel        = null;
+	private JButton    changeCategory       = null;
 
 	private JPopupMenu popupMenuA;
 	private JPopupMenu popupMenuB;
@@ -151,18 +166,15 @@ public class IndexConfigDialog implements ActionListener, MouseListener {
 					    false :
 					    (index.getPrivateKey() != null));
 
+		categoryLabel = new JLabel("");
+
 
 		resetCommentsButton = new JButton(I18n.getMessage("thaw.plugin.index.comment.reset"));
 		resetCommentsButton.setEnabled(index != null && index.getPrivateKey() != null);
 		resetCommentsButton.addActionListener(this);
 
-		String cat = (index == null ? null : index.getCategory());
+		updateCategoryLabel();
 
-		if (cat == null)
-			cat = I18n.getMessage("thaw.plugin.index.categoryUnspecified");
-
-		JLabel categoryLabel = new JLabel(I18n.getMessage("thaw.plugin.index.category")
-						  +" "+cat);
 		changeCategory = new JButton(I18n.getMessage("thaw.plugin.index.changeCategory"));
 		changeCategory.setEnabled(index != null && index.getPrivateKey() != null);
 		changeCategory.addActionListener(this);
@@ -282,6 +294,101 @@ public class IndexConfigDialog implements ActionListener, MouseListener {
 	}
 
 
+
+	private JDialog categoryDialog;
+	private JList categoryList;
+	private JTextField categoryField;
+	private JButton categoryOkButton;
+	private JButton categoryCancelButton;
+
+
+	public void updateCategoryLabel() {
+		String cat = (index == null ? null : index.getCategory());
+
+		if (cat == null)
+			cat = I18n.getMessage("thaw.plugin.index.categoryUnspecified");
+
+		categoryLabel.setText(I18n.getMessage("thaw.plugin.index.category")
+				      +": "+cat);
+	}
+
+	public Vector getCategories() {
+		Vector v = new Vector();
+
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT id, name "+
+									 "FROM categories "+
+									 "ORDER BY name");
+
+				ResultSet set = st.executeQuery();
+
+				while(set.next()) {
+					v.add(set.getString("name"));
+				}
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Can't get index categories list because : "+e.toString());
+		}
+
+		return v;
+	}
+
+
+	public void showCategoryDialog() {
+		Vector cats = getCategories();
+
+		categoryDialog = new JDialog(frame,
+					     I18n.getMessage("thaw.plugin.index.category"));
+
+		categoryList = new JList(cats);
+		categoryOkButton = new JButton(I18n.getMessage("thaw.common.ok"));
+		categoryCancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
+		categoryField = new JTextField("");
+
+		categoryList.addListSelectionListener(this);
+		categoryOkButton.addActionListener(this);
+		categoryCancelButton.addActionListener(this);
+
+		String cat = index.getCategory();
+
+		if (cat != null) {
+			categoryList.setSelectedIndex(cats.indexOf(cat));
+			categoryField.setText(cat);
+		}
+
+
+		categoryDialog.getContentPane().setLayout(new BorderLayout(5, 5));
+
+
+		JPanel buttonPanel = new JPanel(new GridLayout(1, 2));
+		buttonPanel.add(categoryOkButton);
+		buttonPanel.add(categoryCancelButton);
+
+		JPanel southPanel = new JPanel(new GridLayout(2, 1));
+		southPanel.add(categoryField);
+		southPanel.add(buttonPanel);
+
+
+		categoryDialog.getContentPane().add(new JLabel(I18n.getMessage("thaw.plugin.index.categories")),
+						    BorderLayout.NORTH);
+		categoryDialog.getContentPane().add(new JScrollPane(categoryList),
+						    BorderLayout.CENTER);
+		categoryDialog.getContentPane().add(southPanel,
+						    BorderLayout.SOUTH);
+
+		categoryDialog.setSize(CATEGORY_DIALOG_SIZE_X, CATEGORY_DIALOG_SIZE_Y);
+		categoryDialog.setVisible(true);
+	}
+
+
+	public void valueChanged(ListSelectionEvent e) {
+		categoryField.setText((String)categoryList.getSelectedValue());
+	}
+
+
 	public void actionPerformed(final ActionEvent e) {
 		if (e.getSource() == okButton) {
 			formState = 1;
@@ -304,7 +411,17 @@ public class IndexConfigDialog implements ActionListener, MouseListener {
 
 		} else if (e.getSource() == changeCategory) {
 
-			/* TODO */
+			showCategoryDialog();
+
+		} else if (e.getSource() == categoryOkButton) {
+
+			index.setCategory(categoryField.getText());
+			categoryDialog.setVisible(false);
+			updateCategoryLabel();
+
+		} else if (e.getSource() == categoryCancelButton) {
+
+			categoryDialog.setVisible(false);
 
 		}
 	}

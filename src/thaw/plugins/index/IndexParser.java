@@ -172,6 +172,17 @@ public class IndexParser {
 
 		header.appendChild(date);
 
+		/* category */
+
+		String cat = index.getCategory();
+
+		if (cat != null) {
+			Element category = xmlDoc.createElement("category");
+			Text categoryText = xmlDoc.createTextNode(cat);
+			category.appendChild(categoryText);
+			header.appendChild(category);
+		}
+
 		/* TODO : Author */
 
 		return header;
@@ -326,10 +337,12 @@ public class IndexParser {
 		private boolean privateKeyTag = false;
 		private boolean dateTag = false;
 		private boolean commentsTag = false;
+		private boolean categoryTag = false;
 
 		private boolean hasCommentTag = false;
 
 		private String dateStr = null;
+		private String categoryStr = null;
 
 
 		/**
@@ -364,6 +377,11 @@ public class IndexParser {
 
 			if ("date".equals(rawName)) {
 				dateTag = true;
+				return;
+			}
+
+			if ("category".equals(rawName)) {
+				categoryTag = true;
 				return;
 			}
 
@@ -442,6 +460,11 @@ public class IndexParser {
 				return;
 			}
 
+			if ("category".equals(rawName)) {
+				categoryTag = false;
+				return;
+			}
+
 			if ("header".equals(rawName)) {
 				if (dateStr != null) {
 					java.text.SimpleDateFormat sdf =
@@ -450,6 +473,9 @@ public class IndexParser {
 
 					index.setInsertionDate(dateUtil);
 				}
+
+				if (categoryStr != null)
+					index.setCategory(categoryStr);
 			}
 
 			if ("comments".equals(rawName)) {
@@ -477,6 +503,10 @@ public class IndexParser {
 
 			if (dateTag) {
 				dateStr = txt;
+			}
+
+			if (categoryTag) {
+				categoryStr = txt;
 			}
 
 			if (privateKeyTag) {

@@ -70,4 +70,8 @@ public interface IndexContainer extends FileAndLinkList {
 
 	public void setPublishPrivateKey(boolean publish);
 	public void setPrivateKey(String key);
+
+
+	public void setCategory(String str);
+	public String getCategory();
 }
