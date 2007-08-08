@@ -37,6 +37,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 import javax.swing.JScrollPane;
 
 import java.awt.event.KeyEvent;
@@ -345,7 +346,8 @@ public class IndexManagementHelper {
 			privateKey = dialog.getPrivateKey();
 
 			IndexManagementHelper.reuseIndex(getQueueManager(), getIndexBrowserPanel(),
-							 (IndexFolder)getTarget(), publicKey, privateKey);
+							 (IndexFolder)getTarget(), publicKey, privateKey,
+							 false /* autosort */);
 		}
 	}
 
@@ -353,18 +355,24 @@ public class IndexManagementHelper {
 	public static Index addIndex(final FCPQueueManager queueManager,
 				     final IndexBrowserPanel indexBrowser,
 				     final IndexFolder target,
-				     final String publicKey) {
+				     final String publicKey,
+				     boolean autoSort) {
 
-		return IndexManagementHelper.reuseIndex(queueManager, indexBrowser, target, publicKey, null);
+		return IndexManagementHelper.reuseIndex(queueManager, indexBrowser,
+							target, publicKey, null,
+							autoSort);
 
 	}
 
 	public static Index reuseIndex(final FCPQueueManager queueManager,
 				       final IndexBrowserPanel indexBrowser,
 				       final IndexFolder target, String publicKey,
-				       String privateKey) {
+				       String privateKey,
+				       boolean autoSort) {
 
-		return reuseIndex(queueManager, indexBrowser, target, publicKey, privateKey, true);
+		return reuseIndex(queueManager, indexBrowser, target,
+				  publicKey, privateKey, true,
+				  autoSort);
 
 	}
 
@@ -376,7 +384,8 @@ public class IndexManagementHelper {
 				       final IndexBrowserPanel indexBrowser,
 				       final IndexFolder target,
 				       String publicKey, String privateKey,
-				       boolean load) {
+				       boolean load,
+				       boolean autoSort) {
 
 		publicKey = FreenetURIHelper.cleanURI(publicKey);
 		privateKey = FreenetURIHelper.cleanURI(privateKey);
@@ -469,7 +478,7 @@ public class IndexManagementHelper {
 		indexBrowser.getUnknownIndexList().removeLink(index);
 
 		if (load) {
-			download(queueManager, indexBrowser, index);
+			download(queueManager, indexBrowser, index, autoSort);
 		}
 
 		return index;
@@ -568,8 +577,20 @@ public class IndexManagementHelper {
 
 
 	public static class IndexDownloader extends BasicIndexAction implements Runnable, Observer {
-		public IndexDownloader(FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+		private boolean autoSort = false;
+
+		public IndexDownloader(FCPQueueManager queueManager,
+				       IndexBrowserPanel indexBrowser,
+				       final AbstractButton actionSource) {
 			super(queueManager, indexBrowser, actionSource);
+		}
+
+		public IndexDownloader(FCPQueueManager queueManager,
+				       IndexBrowserPanel indexBrowser,
+				       final AbstractButton actionSource,
+				       boolean autoSort) {
+			this(queueManager, indexBrowser, actionSource);
+			this.autoSort = autoSort;
 		}
 
 		public void setTarget(final IndexTreeNode node) {
@@ -577,7 +598,9 @@ public class IndexManagementHelper {
 		}
 
 		public void apply() {
-			getTarget().downloadFromFreenet(this, getIndexBrowserPanel().getIndexTree(), getQueueManager());
+			getTarget().downloadFromFreenet(this,
+							getIndexBrowserPanel().getIndexTree(),
+							getQueueManager());
 			getIndexBrowserPanel().getIndexTree().redraw(getTarget());
 		}
 
@@ -594,6 +617,20 @@ public class IndexManagementHelper {
 			}
 
 			getIndexBrowserPanel().getUnknownIndexList().addLinks((LinkList)o);
+
+			if (((Index)o).hasChanged() && autoSort) {
+				Index index = (Index)o;
+
+				String cat;
+
+				if ( (cat = index.getCategory()) == null) {
+					Logger.notice(this, "No category defined ; Can't autosort "+
+						      "the index '"+index.toString(false)+"'");
+					return;
+				}
+
+				autoSortIndex(getIndexBrowserPanel(), index, cat);
+			}
 		}
 	}
 
@@ -601,10 +638,13 @@ public class IndexManagementHelper {
 
 	public static boolean download(FCPQueueManager queueManager,
 				       IndexBrowserPanel indexBrowser,
-				       IndexTreeNode target) {
+				       IndexTreeNode target,
+				       boolean autoSort) {
 
-		IndexDownloader downloader = new IndexDownloader(queueManager, indexBrowser,
-								 null);
+		IndexDownloader downloader = new IndexDownloader(queueManager,
+								 indexBrowser,
+								 null,
+								 autoSort);
 		downloader.setTarget(target);
 
 		Thread th = new Thread(downloader);
@@ -614,8 +654,116 @@ public class IndexManagementHelper {
 	}
 
 
+	/**
+	 * @param cat Example: "Automatically sorted/freenet/thaw" (only folders !)
+	 * @return the path in the tree
+	 */
+	public static TreePath makeMyPath(IndexBrowserPanel indexBrowser, String cat) {
+		String[] split = cat.split("/");
+
+		if (split == null) return null;
+
+		IndexFolder currentFolder = indexBrowser.getIndexTree().getRoot();
+		TreePath path = new TreePath(currentFolder);
+		path = path.pathByAddingChild(currentFolder);
+
+		for (int i = 0 ; i < split.length ; i++) {
+			if (split[i] == null || "".equals(split[i].trim()))
+				continue;
+			String folder = split[i].trim().toLowerCase();
+
+			IndexFolder nextFolder = currentFolder.getFolder(folder);
+
+			if (nextFolder == null) {
+				nextFolder = addIndexFolder(indexBrowser,
+							    currentFolder,
+							    folder);
+			}
+
+			path = path.pathByAddingChild(nextFolder);
+
+			currentFolder = nextFolder;
+		}
+
+		return path;
+	}
+
+
+	public static boolean moveIndexTo(IndexBrowserPanel indexBrowser,
+					  Index index,
+					  IndexFolder dst) {
+		IndexFolder oldParent = (IndexFolder)index.getParent();
+
+		if (oldParent == dst) {
+			Logger.notice(new IndexManagementHelper(), "Index already sorted.");
+			return false;
+		}
+
+		index.removeFromParent();
+		dst.insert(index, 0);
+
+		if (oldParent != null) {
+			indexBrowser.getIndexTree().refresh(oldParent);
+		} else {
+			indexBrowser.getIndexTree().refresh();
+		}
+
+		indexBrowser.getIndexTree().refresh(dst);
+
+		return true;
+	}
+
+
+	public static boolean autoSortIndex(IndexBrowserPanel indexBrowser,
+					    Index index,
+					    String cat) {
+		if (cat == null) {
+			Logger.warning(new IndexManagementHelper(), "No category ; Can't sort the index");
+			return false;
+		}
+
+		cat = I18n.getMessage("thaw.plugin.index.automaticallySorted")+"/"+cat;
+
+		TreePath path = makeMyPath(indexBrowser, cat);
+
+		if (path == null) {
+			return false;
+		}
+
+		IndexFolder dst = (IndexFolder)path.getLastPathComponent();
+
+		return moveIndexTo(indexBrowser, index, dst);
+	}
+
+
+
+	public static class IndexSorter extends BasicIndexAction implements Runnable {
+		public IndexSorter(IndexBrowserPanel indexBrowser,
+				   final AbstractButton actionSource) {
+
+			super(null, indexBrowser, actionSource);
+		}
+
+		public void setTarget(final IndexTreeNode node) {
+			super.setTarget(node);
+
+			if (getActionSource() != null)
+				getActionSource().setEnabled((node != null) && node instanceof Index);
+		}
+
+		public void apply() {
+			autoSortIndex(getIndexBrowserPanel(),
+				      (Index)getTarget(),
+				      ((Index)getTarget()).getCategory());
+		}
+	}
+
+
 	public static class IndexUploader extends BasicIndexAction implements Runnable, Observer {
-		public IndexUploader(FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+		public IndexUploader(FCPQueueManager queueManager,
+				     IndexBrowserPanel indexBrowser,
+				     final AbstractButton actionSource) {
+
 			super(queueManager, indexBrowser, actionSource);
 		}
 

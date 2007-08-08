@@ -1883,6 +1883,23 @@ public class Index extends Observable implements MutableTreeNode,
 	 * create it if it doesn't exist
 	 */
 	public void setCategory(String category) {
+		if (category == null)
+			return;
+
+		category = category.trim();
+
+		if ("".equals(category))
+			return;
+
+		category = category.toLowerCase();
+
+		String oldCat;
+
+		do {
+			oldCat = category;
+			category = category.replaceAll("//", "/");
+		} while(!oldCat.equals(category));
+
 		try {
 			synchronized(db.dbLock) {
 				PreparedStatement st;
@@ -1892,7 +1909,7 @@ public class Index extends Observable implements MutableTreeNode,
 
 				st = db.getConnection().prepareStatement("SELECT id FROM categories "+
 									 "WHERE name = ? LIMIT 1");
-				st.setString(1, category.toLowerCase());
+				st.setString(1, category);
 
 				set = st.executeQuery();
 
@@ -1908,7 +1925,7 @@ public class Index extends Observable implements MutableTreeNode,
 					st = db.getConnection().prepareStatement("INSERT INTO categories "+
 										 "(id, name) VALUES (?, ?)");
 					st.setInt(1, catId);
-					st.setString(2, category.toLowerCase());
+					st.setString(2, category);
 					st.execute();
 				} else {
 					catId = set.getInt("id");

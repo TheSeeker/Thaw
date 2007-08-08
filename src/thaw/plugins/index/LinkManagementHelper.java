@@ -104,6 +104,8 @@ public class LinkManagementHelper {
 		private Vector t;
 
 		private boolean addToParent; /* (== add to the same parent folder) */
+		private boolean autoSorting;
+
 
 		public IndexAdder(final AbstractButton actionSource,
 				  final FCPQueueManager queueManager,
@@ -124,6 +126,9 @@ public class LinkManagementHelper {
 			src.setEnabled((targets != null) && (targets.size() > 0));
 		}
 
+		public void setAutoSorting(boolean b) {
+			autoSorting = b;
+		}
 
 		public void apply() {
 			for (final Iterator it = t.iterator();
@@ -131,9 +136,12 @@ public class LinkManagementHelper {
 				final Link link = (Link)it.next();
 				if (link != null) {
 					if (addToParent && link.getTreeParent() != null)
-						IndexManagementHelper.addIndex(queueManager, indexBrowser, ((IndexFolder)link.getTreeParent().getParent()), link.getPublicKey());
+						IndexManagementHelper.addIndex(queueManager, indexBrowser,
+									       ((IndexFolder)link.getTreeParent().getParent()),
+									       link.getPublicKey(), autoSorting);
 					else
-						IndexManagementHelper.addIndex(queueManager, indexBrowser, null, link.getPublicKey());
+						IndexManagementHelper.addIndex(queueManager, indexBrowser,
+									       null, link.getPublicKey(), autoSorting);
 				}
 			}
 		}

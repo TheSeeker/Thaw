@@ -8,6 +8,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Observer;
 import java.util.Vector;
+import java.util.HashMap;
 
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
@@ -39,6 +40,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 	private boolean loadOnTheFly = true;
 
+	private HashMap folders;
 
 
 	public IndexFolder(final Hsqldb db, Config config,
@@ -48,6 +50,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 		this.config = config;
 		this.db = db;
 		this.loadOnTheFly = loadOnTheFly;
+		folders = new HashMap();
 	}
 
 	/**
@@ -59,6 +62,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 		this.parentNode = parentNode;
 		this.name = name;
+		folders = new HashMap();
 	}
 
 
@@ -84,6 +88,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 						    set.getString("name"), loadOnTheFly);
 				if (!loadOnTheFly) /* => load immediatly */
 					((IndexFolder)n).loadChildren();
+				folders.put(set.getString("name").toLowerCase(), n); 
 			}
 			else
 				n = new Index(db, config,
@@ -105,6 +110,11 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				v.add(n);
 		}
 
+	}
+
+
+	public IndexFolder getFolder(String name) {
+		return (IndexFolder)folders.get(name.toLowerCase());
 	}
 
 
@@ -281,7 +291,12 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 	 * the target child must be in the database
 	 */
 	public void insert(MutableTreeNode child, int index) {
-		Logger.info(this, "Inserting node at "+Integer.toString(index)+" in node "+Integer.toString(id)+" ("+toString()+")");
+		Logger.info(this, "Inserting node at "+Integer.toString(index)+" in node "+
+			    Integer.toString(id)+" ("+toString()+")");
+
+		if (child instanceof IndexFolder && folders != null) {
+			folders.put( ((IndexFolder)child).toString(), child);
+		}
 
 		if (children != null) {
 

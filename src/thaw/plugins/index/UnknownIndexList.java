@@ -15,6 +15,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JCheckBox;
 
 import java.awt.event.MouseAdapter;
 import javax.swing.SwingConstants;
@@ -42,6 +43,8 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 	private JList list;
 
 	private JScrollPane scrollPane;
+
+	private JCheckBox autoSorting;
 
 	private JPopupMenu rightClickMenu = null;
 	private Vector rightClickActions = null;
@@ -74,8 +77,13 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 		panel = new JPanel(new BorderLayout());
 		panel.add(new JLabel(I18n.getMessage("thaw.plugin.index.unknownIndexes")),
 			  BorderLayout.NORTH);
+
 		scrollPane = new JScrollPane(list);
-		panel.add(scrollPane);
+		panel.add(scrollPane, BorderLayout.CENTER);
+
+		autoSorting = new JCheckBox(I18n.getMessage("thaw.plugin.index.autoSorting"));
+		autoSorting.addActionListener(this);
+		panel.add(autoSorting, BorderLayout.SOUTH);
 
 		JButton button;
 
@@ -88,6 +96,8 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 		toolbarModifier.addButtonToTheToolbar(button);
 
 		list.addMouseListener(this);
+
+		applyAutoSortingSetting();
 	}
 
 
@@ -232,7 +242,8 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 
 			item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addIndexesFromLink"), IconBox.minAdd);
 			rightClickMenu.add(item);
-			rightClickActions.add(new LinkManagementHelper.IndexAdder(item, queueManager, indexBrowser, false));
+			rightClickActions.add(new LinkManagementHelper.IndexAdder(item, queueManager,
+										  indexBrowser, false));
 
 			sortItem = new JMenuItem(I18n.getMessage("thaw.plugin.index.sortAlphabetically"));
 			rightClickMenu.add(sortItem);
@@ -296,6 +307,27 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 	}
 
 
+	public void applyAutoSortingSetting() {
+		LinkManagementHelper.LinkAction action;
+
+		if (rightClickActions != null) {
+			for (Iterator it = rightClickActions.iterator();
+			     it.hasNext();) {
+				action = (LinkManagementHelper.LinkAction)it.next();
+				if (action instanceof LinkManagementHelper.IndexAdder)
+					((LinkManagementHelper.IndexAdder)action).setAutoSorting(autoSorting.isSelected());
+			}
+		}
+
+		for(final Iterator it = toolbarActions.iterator();
+		    it.hasNext(); ) {
+			action = (LinkManagementHelper.LinkAction)it.next();
+			if (action instanceof LinkManagementHelper.IndexAdder)
+				((LinkManagementHelper.IndexAdder)action).setAutoSorting(autoSorting.isSelected());
+		}
+
+	}
+
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == sortItem) {
 
@@ -323,6 +355,11 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 				vList = v;
 
 			refresh();
+
+		} else if (e.getSource() == autoSorting) {
+
+			applyAutoSortingSetting();
+
 		}
 	}
 

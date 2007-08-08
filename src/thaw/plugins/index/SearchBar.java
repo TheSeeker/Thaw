@@ -28,7 +28,8 @@ public class SearchBar implements ActionListener {
 		panel.setLayout(new BorderLayout(0, 0));
 
 		userText = new JTextField("");
-		validationButton = new JButton("  "+I18n.getMessage("thaw.common.search")+"  ");
+		validationButton = new JButton(I18n.getMessage("thaw.common.search"),
+					       thaw.gui.IconBox.minSearch);
 
 		final JLabel label = new JLabel(I18n.getMessage("thaw.plugin.index.search.label"));
 

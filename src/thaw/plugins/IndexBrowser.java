@@ -95,8 +95,10 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 
 		if (newDb) {
 			for (int i = 0 ; i < DEFAULT_INDEXES.length ; i++) {
-				IndexManagementHelper.addIndex(core.getQueueManager(), browserPanel, null,
-							       DEFAULT_INDEXES[i]);
+				IndexManagementHelper.addIndex(core.getQueueManager(),
+							       browserPanel, null,
+							       DEFAULT_INDEXES[i],
+							       true);
 			}
 		}
 
