@@ -75,7 +75,7 @@ import thaw.plugins.Hsqldb;
  */
 public class DatabaseManager {
 
-	public DatabaseManager() {
+	private DatabaseManager() {
 
 	}
 
@@ -161,7 +161,44 @@ public class DatabaseManager {
 
 		createTables(db);
 
+		cleanUpCategories(db);
+
 		return newDb;
+	}
+
+
+	public static void cleanUpCategories(Hsqldb db) {
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+				PreparedStatement countSt;
+				PreparedStatement deleteSt;
+
+				st = db.getConnection().prepareStatement("SELECT id FROM categories");
+				countSt = db.getConnection().prepareStatement("SELECT count(id) FROM indexes "+
+									      "WHERE categoryId = ?");
+				deleteSt = db.getConnection().prepareStatement("DELETE FROM categories "+
+									       "WHERE id = ?");
+
+				ResultSet set = st.executeQuery();
+
+				while(set.next()) {
+					int id = set.getInt("id");
+
+					countSt.setInt(1, id);
+
+					ResultSet aSet = countSt.executeQuery();
+					aSet.next();
+
+					if (aSet.getInt(1) == 0) {
+						deleteSt.setInt(1, id);
+						deleteSt.execute();
+					}
+				}
+			}
+		} catch(SQLException e) {
+			Logger.error(new DatabaseManager(), "Can't cleanup the unused categories because: "+e.toString());
+		}
 	}
 
 
