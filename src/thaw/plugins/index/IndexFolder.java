@@ -89,6 +89,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				n = new Index(db, config,
 					      set.getInt("id"), this, set.getString("publicKey"),
 					      set.getInt("revision"), set.getString("privateKey"),
+					      set.getBoolean("publishPrivateKey"),
 					      set.getString("displayName"), set.getDate("insertionDate"),
 					      set.getBoolean("newRev"), set.getBoolean("newComment"));
 
@@ -131,26 +132,40 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				PreparedStatement st;
 
 				if (id >= 0) {
-					st = db.getConnection().prepareStatement("SELECT id, name, positionInTree FROM indexFolders "
-										 + "WHERE parent = ? "
-										 +"ORDER BY positionInTree");
+					st = db.getConnection().prepareStatement("SELECT id, name, positionInTree "+
+										 " FROM indexFolders "+
+										 "WHERE parent = ? "+
+										 "ORDER BY positionInTree");
 					st.setInt(1, id);
 				} else {
-					st = db.getConnection().prepareStatement("SELECT id, positionInTree, name FROM indexFolders "
-										 + "WHERE parent IS NULL "
-										 +"ORDER BY positionInTree");
+					st = db.getConnection().prepareStatement("SELECT id, positionInTree, name "+
+										 "FROM indexFolders "+
+										 "WHERE parent IS NULL "+
+										 "ORDER BY positionInTree");
 				}
 
 				addToVector(v, st.executeQuery(), true);
 
 
 				if (id >= 0) {
-					st = db.getConnection().prepareStatement("SELECT id, positionInTree, displayName, publicKey, privateKey, revision, newRev, newComment, insertionDate FROM indexes "
-										 + "WHERE parent = ? ORDER BY positionInTree");
+					st = db.getConnection().prepareStatement("SELECT id, positionInTree, "+
+										 " displayName, publicKey, "+
+										 " privateKey, publishPrivateKey, "+
+										 " revision, newRev, newComment, "+
+										 " insertionDate "+
+										 "FROM indexes "+
+										 "WHERE parent = ? "+
+										 "ORDER BY positionInTree");
 					st.setInt(1, id);
 				} else {
-					st = db.getConnection().prepareStatement("SELECT id, positionInTree, displayName, publicKey, privateKey, revision, newRev, newComment, insertionDate FROM indexes "
-										 + "WHERE parent IS NULL ORDER BY positionInTree");
+					st = db.getConnection().prepareStatement("SELECT id, positionInTree, "+
+										 " displayName, publicKey, "+
+										 " privateKey, publishPrivateKey, "+
+										 " revision, newRev, newComment, "+
+										 " insertionDate "+
+										 "FROM indexes "+
+										 "WHERE parent IS NULL "+
+										 "ORDER BY positionInTree");
 				}
 
 				addToVector(v, st.executeQuery(), false);
@@ -1441,4 +1456,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 		return null;
 	}
 
+	public boolean publishPrivateKey() {
+		return false;
+	}
 }

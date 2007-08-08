@@ -67,6 +67,7 @@ public class Index extends Observable implements MutableTreeNode,
 	private String displayName = null;
 	private boolean hasChanged = false;
 	private boolean newComment = false;
+	private boolean publishPrivateKey = false;
 	private java.sql.Date date = null;
 
 	/* loaded only if asked explictly */
@@ -101,12 +102,13 @@ public class Index extends Observable implements MutableTreeNode,
 	 * Use it when you can have these infos easily ; else let the index do the job
 	 */
 	public Index(Hsqldb db, Config config, int id, TreeNode parentNode,
-		     String publicKey, int rev, String privateKey, String displayName,
-		     java.sql.Date insertionDate,
+		     String publicKey, int rev, String privateKey, boolean publishPrivateKey,
+		     String displayName, java.sql.Date insertionDate,
 		     boolean hasChanged, boolean newComment) {
 		this(db, config, id);
 		this.parentNode = parentNode;
 		this.privateKey = privateKey;
+		this.publishPrivateKey = publishPrivateKey;
 		this.publicKey = publicKey;
 		this.rev = rev;
 		this.displayName = displayName;
@@ -352,7 +354,16 @@ public class Index extends Observable implements MutableTreeNode,
 		synchronized(db.dbLock) {
 			try {
 				PreparedStatement st =
-					db.getConnection().prepareStatement("SELECT publicKey, revision, privateKey, displayName, newRev, newComment, insertionDate FROM indexes WHERE id = ? LIMIT 1");
+					db.getConnection().prepareStatement("SELECT publicKey, "+
+									    "       revision, "+
+									    "       privateKey, "+
+									    "       publishPrivateKey, "+
+									    "       displayName, "+
+									    "       newRev, "+
+									    "       newComment, "+
+									    "       insertionDate "+
+									    "FROM indexes "+
+									    "WHERE id = ? LIMIT 1");
 
 				st.setInt(1, id);
 
@@ -361,6 +372,7 @@ public class Index extends Observable implements MutableTreeNode,
 				if (set.next()) {
 					publicKey = set.getString("publicKey");
 					privateKey = set.getString("privateKey");
+					publishPrivateKey = set.getBoolean("publishPrivateKey");
 					rev = set.getInt("revision");
 					displayName = set.getString("displayName");
 					hasChanged = set.getBoolean("newRev");
@@ -425,31 +437,16 @@ public class Index extends Observable implements MutableTreeNode,
 
 
 	public boolean publishPrivateKey() {
-		try {
-
-			synchronized(db.dbLock) {
-				PreparedStatement st
-					= db.getConnection().prepareStatement("SELECT publishPrivateKey FROM indexes WHERE id = ? LIMIT 1");
-
-				st.setInt(1, id);
-
-				ResultSet set = st.executeQuery();
-
-				if (!set.next()) {
-					Logger.error(this, "Unable to get publishPrivateKey value => not found !");
-				}
-
-				return set.getBoolean("publishPrivateKey");
-			}
-
-		} catch(SQLException e){
-			Logger.error(this, "Unable to get publishPrivateKey value because: "+e.toString());
+		if (publicKey == null) {
+			Logger.debug(this, "getPrivateKey() => loadData()");
+			loadData();
 		}
 
-		return false;
+		return publishPrivateKey;
 	}
 
 	public void setPublishPrivateKey(boolean val) {
+
 		try {
 			synchronized(db.dbLock) {
 				PreparedStatement st =
@@ -460,6 +457,8 @@ public class Index extends Observable implements MutableTreeNode,
 				st.setInt(2, id);
 				st.execute();
 			}
+
+			publishPrivateKey = val;
 
 		} catch(SQLException e){
 			Logger.error(this, "Unable to set publishPrivateKey value because: "+e.toString());

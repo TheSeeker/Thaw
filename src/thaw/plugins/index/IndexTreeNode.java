@@ -43,6 +43,7 @@ public interface IndexTreeNode {
 	public String getPrivateKey();
 
 	public boolean isModifiable();
+	public boolean publishPrivateKey();
 
 	public boolean hasChanged();
 	public boolean hasNewComment();

@@ -248,12 +248,14 @@ public class IndexManagementHelper {
 
 					index = new Index(db, getIndexBrowserPanel().getConfig(),
 							  id, (TreeNode)getTarget(),
-							  sskGenerator.getPublicKey(), 0, sskGenerator.getPrivateKey(),
+							  sskGenerator.getPublicKey(), 0,
+							  sskGenerator.getPrivateKey(), false,
 							  name, null,
 							  false, false);
 
 				} catch(SQLException e) {
-					Logger.error(new IndexManagementHelper(), "Error while creating index: "+e.toString());
+					Logger.error(new IndexManagementHelper(),
+						     "Error while creating index: "+ e.toString());
 					return;
 				}
 			}
@@ -447,7 +449,8 @@ public class IndexManagementHelper {
 
 				index = new Index(db, indexBrowser.getConfig(),
 						  id, parent,
-						  publicKey, revision, privateKey,
+						  publicKey, revision,
+						  privateKey, false,
 						  name, null, false, false);
 
 			} catch(SQLException e) {

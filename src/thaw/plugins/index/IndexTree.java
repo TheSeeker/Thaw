@@ -778,13 +778,13 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 				if (o instanceof IndexTreeNode) {
 					/* Remember that for the index category,
 					   this kind of query is recursive */
-					boolean modifiable = ((IndexTreeNode)o).isModifiable();
 					boolean hasChanged = ((IndexTreeNode)o).hasChanged();
 					boolean newComment = ((IndexTreeNode)o).hasNewComment();
+					boolean publishPrivateKey = ((IndexTreeNode)o).publishPrivateKey();
 
 					int style = Font.PLAIN;
 
-					if (modifiable)
+					if (publishPrivateKey)
 						style |= Font.ITALIC;
 					if (hasChanged)
 						style |= Font.BOLD;
