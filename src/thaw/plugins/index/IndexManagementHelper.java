@@ -1518,7 +1518,8 @@ public class IndexManagementHelper {
 		private void displayDialog(MainWindow mainWindow,
 					   int nmbFiles,
 					   int nmbLinks,
-					   java.sql.Date dateSql) {
+					   java.sql.Date dateSql,
+					   long totalSize) {
 
 			String dateStr = null;
 
@@ -1537,7 +1538,7 @@ public class IndexManagementHelper {
 
 			dialog.getContentPane().setLayout(new BorderLayout(5, 5));
 
-			JPanel statPanel = new JPanel(new GridLayout(3, 2));
+			JPanel statPanel = new JPanel(new GridLayout(4, 2));
 
 			statPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.numberOfFiles")));
 			statPanel.add(new JLabel(Integer.toString(nmbFiles), JLabel.RIGHT));
@@ -1547,6 +1548,9 @@ public class IndexManagementHelper {
 
 			statPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.insertionDate")));
 			statPanel.add(new JLabel(dateStr, JLabel.RIGHT));
+
+			statPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.totalSize")));
+			statPanel.add(new JLabel(thaw.gui.GUIHelper.getPrintableSize(totalSize), JLabel.RIGHT));
 
 			dialog.getContentPane().add(statPanel, BorderLayout.CENTER);
 
@@ -1581,6 +1585,7 @@ public class IndexManagementHelper {
 
 			int nmbFilesInt = 0;
 			int nmbLinksInt = 0;
+			long totalSize = 0;
 			java.sql.Date insertionDate = null;
 
 			synchronized(db.dbLock) {
@@ -1596,6 +1601,11 @@ public class IndexManagementHelper {
 							rs = st.executeQuery();
 							rs.next();
 							nmbLinksInt = rs.getInt(1);
+
+							st = db.getConnection().prepareStatement("SELECT sum(size) from files");
+							rs = st.executeQuery();
+							rs.next();
+							totalSize = rs.getLong(1);
 						} else {
 							st = db.getConnection().prepareStatement("SELECT count(id) "+
 												 "FROM files WHERE files.indexParent IN "+
@@ -1619,16 +1629,36 @@ public class IndexManagementHelper {
 							rs.next();
 							nmbLinksInt = rs.getInt(1);
 
+
+							st = db.getConnection().prepareStatement("SELECT sum(files.size) "+
+												 "FROM files WHERE files.indexParent IN "+
+												 "(SELECT indexParents.indexId "+
+												 " FROM indexParents "+
+												 " WHERE indexParents.folderId = ?)");
+
+							st.setInt(1, node.getId());
+							rs = st.executeQuery();
+							rs.next();
+							totalSize = rs.getLong(1);
+
 						}
 
 						insertionDate = null;
 
 
 					} else if (node instanceof Index) {
-						nmbFilesInt = ((Index)node).getFileList(null, true).size();
+						Vector files = ((Index)node).getFileList(null, true);
+
+						nmbFilesInt = files.size();
 						nmbLinksInt = ((Index)node).getLinkList(null, true).size();
 						insertionDate = ((Index)node).getDate();
 
+						totalSize = 0;
+
+						for (Iterator it = files.iterator();
+						     it.hasNext();) {
+							totalSize += ((thaw.plugins.index.File)it.next()).getSize();
+						}
 					}
 
 				} catch(SQLException e) {
@@ -1638,7 +1668,7 @@ public class IndexManagementHelper {
 			}
 
 			displayDialog(getIndexBrowserPanel().getMainWindow(),
-				      nmbFilesInt, nmbLinksInt, insertionDate);
+				      nmbFilesInt, nmbLinksInt, insertionDate, totalSize);
 		}
 	}
 
