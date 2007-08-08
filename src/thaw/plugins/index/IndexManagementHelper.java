@@ -714,6 +714,41 @@ public class IndexManagementHelper {
 	}
 
 
+	public static boolean autoSortIndexes(IndexBrowserPanel indexBrowser,
+					      IndexTreeNode node) {
+		if (node instanceof Index) {
+			String cat = ((Index)node).getCategory();
+
+			if (cat != null)
+				return autoSortIndex(indexBrowser, (Index)node, cat);
+			else
+				Logger.notice(indexBrowser, "No category ; can't sort");
+
+		} else if (node instanceof IndexFolder) {
+
+			IndexFolder folder = ((IndexFolder)node);
+
+			/**
+			 * to avoid the collision due to the vector in the IndexFolder
+			 */
+			if (I18n.getMessage("thaw.plugin.index.automaticallySorted").equals(folder.toString())) {
+				return false;
+			}
+
+			for (java.util.Enumeration children = folder.children();
+			     children.hasMoreElements();) {
+
+				/* dirty recursivity */
+				IndexTreeNode subNode = (IndexTreeNode)children.nextElement();
+				autoSortIndexes(indexBrowser, subNode);
+
+			}
+		}
+
+		return true;
+	}
+
+
 	public static boolean autoSortIndex(IndexBrowserPanel indexBrowser,
 					    Index index,
 					    String cat) {
@@ -748,13 +783,19 @@ public class IndexManagementHelper {
 			super.setTarget(node);
 
 			if (getActionSource() != null)
-				getActionSource().setEnabled((node != null) && node instanceof Index);
+				getActionSource().setEnabled(node != null);
 		}
 
 		public void apply() {
-			autoSortIndex(getIndexBrowserPanel(),
-				      (Index)getTarget(),
-				      ((Index)getTarget()).getCategory());
+			if (getTarget() instanceof Index) {
+				if (((Index)getTarget()).getCategory() == null) {
+					Logger.warning(this, "No category => can't sort !");
+					return;
+				}
+			}
+
+			autoSortIndexes(getIndexBrowserPanel(),
+					(IndexTreeNode)getTarget());
 		}
 	}
 

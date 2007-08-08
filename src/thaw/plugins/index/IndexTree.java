@@ -188,6 +188,10 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		indexFolderMenu.add(item);
 		indexFolderActions.add(new IndexManagementHelper.IndexHasChangedFlagReseter(indexBrowser, item));
 
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.autoSortFolderAction"));
+		indexFolderMenu.add(item);
+		indexFolderActions.add(new IndexManagementHelper.IndexSorter(indexBrowser, item));
+
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.sortAlphabetically"));
 		indexFolderMenu.add(item);
 		indexFolderActions.add(new IndexManagementHelper.IndexFolderReorderer(indexBrowser, item));
