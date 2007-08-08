@@ -1071,6 +1071,10 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		return publicKey;
 	}
 
+	public int getRevision() {
+		return rev;
+	}
+
 	/**
 	 * Do nothing.
 	 */

@@ -81,6 +81,9 @@ public class Index extends Observable implements MutableTreeNode,
 
 	private Config config;
 
+	private boolean isNew;
+
+
 	/**
 	 * @deprecated Just don't use it !
 	 */
@@ -110,6 +113,11 @@ public class Index extends Observable implements MutableTreeNode,
 		this.date = insertionDate;
 		this.hasChanged = hasChanged;
 		this.newComment = newComment;
+	}
+
+
+	public void setIsNewFlag() {
+		isNew = true;
 	}
 
 
@@ -645,6 +653,27 @@ public class Index extends Observable implements MutableTreeNode,
 					Logger.error(this, "Error while checking the link number before insertion : "+e.toString());
 				}
 			}
+
+
+
+			if (getCategory() == null) {
+				int ret =
+					JOptionPane.showOptionDialog(indexBrowser.getMainWindow().getMainFrame(),
+								     I18n.getMessage("thaw.plugin.index.noCategory").replaceAll("\\?", toString(false)),
+								     I18n.getMessage("thaw.warning.title"),
+								     JOptionPane.YES_NO_OPTION,
+								     JOptionPane.WARNING_MESSAGE,
+								     null,
+								     null,
+								     null);
+
+				if (ret == JOptionPane.CLOSED_OPTION
+				    || ret == JOptionPane.NO_OPTION) {
+					return 0;
+				}
+			}
+
+
 		}
 
 
@@ -880,10 +909,12 @@ public class Index extends Observable implements MutableTreeNode,
 					setPublicKey(key, newRev);
 				}
 
-				if (oldRev < newRev) {
+				if (oldRev < newRev || isNew) {
 					setHasChangedFlag(true);
 					useTrayIconToNotifyNewRev();
 				}
+
+				isNew = false;
 
 				String path = get.getPath();
 
@@ -920,32 +951,37 @@ public class Index extends Observable implements MutableTreeNode,
 		}
 
 		if (o instanceof FCPClientPut) {
+			FCPClientPut put = ((FCPClientPut)o);
+
 			/* TODO : check if it's successful, else merge if it's due to a collision */
-			if (((FCPClientPut)o).isFinished()) {
-				((FCPClientPut)o).deleteObserver(this);
+			if (put.isFinished()) {
+				put.deleteObserver(this);
 
 				if (indexTree != null)
 					indexTree.removeUpdatingIndex(this);
 
-				try {
-					synchronized(db.dbLock) {
-						/* TODO : Find a nicer way */
+				if (put.isSuccessful()) {
+					try {
+						synchronized(db.dbLock) {
+							PreparedStatement st;
 
-						PreparedStatement st;
+							Calendar cal= Calendar.getInstance();
+							java.sql.Date dateSql = new java.sql.Date(cal.getTime().getTime() );
 
-						Calendar cal= Calendar.getInstance();
-						java.sql.Date dateSql = new java.sql.Date(cal.getTime().getTime() );
+							st = db.getConnection().prepareStatement("UPDATE indexes "+
+												 "SET insertionDate = ? "+
+												 "WHERE id = ?");
+							st.setDate(1, dateSql);
+							st.setInt(2, id);
 
-						st = db.getConnection().prepareStatement("UPDATE indexes "+
-											 "SET insertionDate = ? "+
-											 "WHERE id = ?");
-						st.setDate(1, dateSql);
-						st.setInt(2, id);
-
-						st.execute();
+							st.execute();
+						}
+					} catch(SQLException e) {
+						Logger.error(this, "Error while updating the insertion date : "+e.toString());
 					}
-				} catch(SQLException e) {
-					Logger.error(this, "Error while updating the insertion date : "+e.toString());
+				} else {
+					if (put.getRevision() == rev)
+						setPublicKey(publicKey, rev-1);
 				}
 			}
 		}

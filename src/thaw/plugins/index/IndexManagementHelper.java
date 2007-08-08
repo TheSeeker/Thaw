@@ -457,14 +457,17 @@ public class IndexManagementHelper {
 
 		}
 
+		index.setIsNewFlag();
+
 		((MutableTreeNode)parent).insert((index), 0);
 
 		indexBrowser.getIndexTree().refresh(parent);
 
 		indexBrowser.getUnknownIndexList().removeLink(index);
 
-		if (load)
+		if (load) {
 			download(queueManager, indexBrowser, index);
+		}
 
 		return index;
 	}
