@@ -97,7 +97,10 @@ public class KSKFileAttachment
 		} else if ("key".equals(property)) {
 			key = value;
 
-			String possibleFilename = thaw.fcp.FreenetURIHelper.getFilenameFromKey(key).trim();
+			String possibleFilename = thaw.fcp.FreenetURIHelper.getFilenameFromKey(key);
+
+			if (possibleFilename != null)
+				possibleFilename = possibleFilename.trim();
 
 			if (possibleFilename != null
 			    && !("".equals(possibleFilename)))
