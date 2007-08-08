@@ -473,6 +473,11 @@ public class KSKMessage
 			synchronized(db.dbLock) {
 				PreparedStatement st;
 
+				/* to avoid the problems with the constraints */
+				st = db.getConnection().prepareStatement("UPDATE frostKSKMessages SET "+
+									 "inReplyTo = NULL");
+				st.execute();
+
 				st = db.getConnection().prepareStatement("DELETE FROM frostKSKMessages "+
 									 "WHERE boardId = ?");
 				st.setInt(1, board.getId());
