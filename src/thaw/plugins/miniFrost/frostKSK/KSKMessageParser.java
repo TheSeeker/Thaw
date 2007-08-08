@@ -144,10 +144,6 @@ public class KSKMessageParser {
 	public boolean insert(Hsqldb db,
 			      int boardId, java.util.Date boardDate, int rev,
 			      String boardNameExpected) {
-		/*
-		 * we use OUR message id.
-		 */
-		messageId = frostCrypt.computeChecksumSHA256(getSignedContent(false));
 
 		if (boardNameExpected == null) {
 			Logger.notice(this, "Board name expected == null ?!");
