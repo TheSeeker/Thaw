@@ -59,6 +59,7 @@ import java.util.Hashtable;
 
 
 import thaw.gui.Table;
+import thaw.gui.CheckBox;
 import thaw.gui.IconBox;
 import thaw.core.I18n;
 import thaw.core.Logger;
@@ -122,7 +123,7 @@ public class MessageTreeTable implements Observer,
 	private JButton searchButton;
 	private JButton nextUnread;
 
-	private JCheckBox seeArchived;
+	private CheckBox seeArchived;
 
 	private JComboBox actions;
 
@@ -130,8 +131,8 @@ public class MessageTreeTable implements Observer,
 	private int orderBy;
 	private boolean desc;
 
-	private JCheckBox seeTree;
-	private JCheckBox seeUnsigned;
+	private CheckBox seeTree;
+	private CheckBox seeUnsigned;
 	private JComboBox minTrustLevel;
 	private int minTrustLevelInt;
 
@@ -215,8 +216,10 @@ public class MessageTreeTable implements Observer,
 
 		/* archived */
 
-		seeArchived = new JCheckBox(I18n.getMessage("thaw.plugin.miniFrost.seeArchived"));
-		seeArchived.setSelected(false);
+		seeArchived = new CheckBox(mainPanel.getConfig(),
+					   "miniFrost_seeArchived",
+					   I18n.getMessage("thaw.plugin.miniFrost.seeArchived"),
+					   false);
 		seeArchived.addActionListener(this);
 
 		/* trust level */
@@ -235,11 +238,16 @@ public class MessageTreeTable implements Observer,
 		minTrustLevel.addActionListener(this);
 		minTrustLevelPanel.add(minTrustLevel, BorderLayout.CENTER);
 
-		seeUnsigned = new JCheckBox(I18n.getMessage("thaw.plugin.miniFrost.seeUnsigned"), true);
+		seeUnsigned = new CheckBox(mainPanel.getConfig(),
+					   "miniFrost_seeUnsigned",
+					   I18n.getMessage("thaw.plugin.miniFrost.seeUnsigned"),
+					   true);
 		seeUnsigned.addActionListener(this);
 
-		seeTree = new JCheckBox(I18n.getMessage("thaw.plugin.miniFrost.seeTree"));
-		seeTree.setSelected(true);
+		seeTree = new CheckBox(mainPanel.getConfig(),
+				       "miniFrost_seeTree",
+				       I18n.getMessage("thaw.plugin.miniFrost.seeTree"),
+				       true);
 		seeTree.addActionListener(this);
 
 		JPanel southWestPanel = new JPanel(new GridLayout(2, 1));

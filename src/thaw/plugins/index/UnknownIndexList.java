@@ -23,6 +23,8 @@ import javax.swing.TransferHandler;
 
 import javax.swing.JComponent;
 
+import thaw.gui.CheckBox;
+
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.gui.IconBox;
@@ -44,7 +46,7 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 
 	private JScrollPane scrollPane;
 
-	private JCheckBox autoSorting;
+	private CheckBox autoSorting;
 
 	private JPopupMenu rightClickMenu = null;
 	private Vector rightClickActions = null;
@@ -81,7 +83,10 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 		scrollPane = new JScrollPane(list);
 		panel.add(scrollPane, BorderLayout.CENTER);
 
-		autoSorting = new JCheckBox(I18n.getMessage("thaw.plugin.index.autoSorting"));
+		autoSorting = new CheckBox(indexBrowser.getConfig(),
+					   "autoSorting",
+					   I18n.getMessage("thaw.plugin.index.autoSorting"));
+
 		autoSorting.addActionListener(this);
 		panel.add(autoSorting, BorderLayout.SOUTH);
 
