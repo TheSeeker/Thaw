@@ -25,6 +25,7 @@ import thaw.plugins.Hsqldb;
 
 
 public class IndexFolder implements IndexTreeNode, MutableTreeNode {
+	public static final int MAX_AUTOSORTING_DEPTH = 6;
 
 	private static final long serialVersionUID = 2L;
 

@@ -658,7 +658,7 @@ public class IndexManagementHelper {
 	 * @param cat Example: "Automatically sorted/freenet/thaw" (only folders !)
 	 * @return the path in the tree
 	 */
-	public static TreePath makeMyPath(IndexBrowserPanel indexBrowser, String cat) {
+	public static TreePath makeMyPath(IndexBrowserPanel indexBrowser, String cat, int maxDepth) {
 		String[] split = cat.split("/");
 
 		if (split == null) return null;
@@ -667,7 +667,7 @@ public class IndexManagementHelper {
 		TreePath path = new TreePath(currentFolder);
 		path = path.pathByAddingChild(currentFolder);
 
-		for (int i = 0 ; i < split.length ; i++) {
+		for (int i = 0 ; i < split.length && i < maxDepth; i++) {
 			if (split[i] == null || "".equals(split[i].trim()))
 				continue;
 			String folder = split[i].trim().toLowerCase();
@@ -759,7 +759,8 @@ public class IndexManagementHelper {
 
 		cat = I18n.getMessage("thaw.plugin.index.automaticallySorted")+"/"+cat;
 
-		TreePath path = makeMyPath(indexBrowser, cat);
+		TreePath path = makeMyPath(indexBrowser, cat,
+					   IndexFolder.MAX_AUTOSORTING_DEPTH+1);
 
 		if (path == null) {
 			return false;
