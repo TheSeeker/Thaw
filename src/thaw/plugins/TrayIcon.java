@@ -47,8 +47,8 @@ public class TrayIcon implements thaw.core.Plugin,
 	private JDialog dialog;
 	private JButton closeDialog;
 
-	public final static int DIALOG_X = 300;
-	public final static int DIALOG_Y = 500;
+	public final static int DIALOG_X = 500;
+	public final static int DIALOG_Y = 800;
 
 
 	public TrayIcon() {
@@ -243,9 +243,9 @@ public class TrayIcon implements thaw.core.Plugin,
 	}
 
 
-	private void realDisplayFrame(int x, int y) {
+	private boolean realDisplayFrame(int x, int y) {
 		dialog = new JDialog((java.awt.Frame)null,
-					     I18n.getMessage("thaw.plugin.trayIcon.dialogTitle"));
+				     I18n.getMessage("thaw.plugin.trayIcon.dialogTitle"));
 		dialog.getContentPane().setLayout(new BorderLayout(5, 5));
 		dialog.setUndecorated(true);
 		dialog.setResizable(true);
@@ -264,6 +264,14 @@ public class TrayIcon implements thaw.core.Plugin,
 			     it.hasNext();) {
 				newQueries.add(it.next());
 			}
+		}
+
+		if (newQueries.size() == 0) {
+			popMessage("Thaw",
+				   I18n.getMessage("thaw.plugin.trayIcon.emptyQueue"),
+				   SysTrayIcon.MSG_WARNING);
+			dialog = null;
+			return false;
 		}
 
 		Collections.sort(newQueries, new QueryComparator());
@@ -297,13 +305,39 @@ public class TrayIcon implements thaw.core.Plugin,
 							    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
 					    BorderLayout.CENTER);
 
-		dialog.setLocation(x, y);
-
-		dialog.setSize(DIALOG_X, DIALOG_Y);
+		//dialog.setSize(DIALOG_X, DIALOG_Y);
 		dialog.validate();
+		dialog.pack();
+
+		java.awt.Dimension size = dialog.getSize();
+
+		double height = size.getHeight();
+		double width  = size.getWidth();
+
+		if (width > DIALOG_X)
+			width = DIALOG_X;
+		if (height > DIALOG_Y)
+			height = DIALOG_Y;
+
+		dialog.setSize((int)width, (int)height);
+
+
+		java.awt.Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+		int screen_x = (int)d.getWidth();
+		int screen_y = (int)d.getHeight();
+
+		if (x+width >= screen_x)
+			x -= width;
+		if (y+height >= screen_y)
+			y -= height;
+
+
+		dialog.setLocation(x, y);
 
 		dialog.setVisible(true);
 		dialog.toFront();
+
+		return true;
 	}
 
 
@@ -347,29 +381,23 @@ public class TrayIcon implements thaw.core.Plugin,
 
 
 	public void displayFrame(int x, int y) {
-		java.awt.Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-		int screen_x = (int)d.getWidth();
-		int screen_y = (int)d.getHeight();
+		if (realDisplayFrame(x, y) && dialog != null) {
 
-		if (x+DIALOG_X >= screen_x)
-			x -= DIALOG_X;
-		if (y+DIALOG_Y >= screen_y)
-			y -= DIALOG_Y;
-
-		realDisplayFrame(x, y);
-
-		/* progressBars vector is generated at the same time than the panels */
-		refresher = new ProgressBarRefresher(progressBars);
-		Thread th = new Thread(refresher);
-		th.start();
+			/* progressBars vector is generated at the same time than the panels */
+			refresher = new ProgressBarRefresher(progressBars);
+			Thread th = new Thread(refresher);
+			th.start();
+		}
 	}
 
 	public void hideFrame() {
-		dialog.setVisible(false);
-		dialog = null;
-		progressBars = null;
-		refresher.stop();
-		refresher = null;
+		if (dialog != null) {
+			dialog.setVisible(false);
+			dialog = null;
+			progressBars = null;
+			refresher.stop();
+			refresher = null;
+		}
 	}
 
 
