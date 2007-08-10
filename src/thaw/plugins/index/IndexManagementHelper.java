@@ -413,7 +413,7 @@ public class IndexManagementHelper {
 		if (target != null)
 			parent = target;
 		else
-			parent = indexBrowser.getIndexTree().getRoot();
+			parent = indexBrowser.getIndexTree().getRoot().getRecentlyAddedFolder();
 
 		int revision = FreenetURIHelper.getUSKRevision(publicKey);
 
@@ -655,7 +655,7 @@ public class IndexManagementHelper {
 
 
 	/**
-	 * @param cat Example: "Automatically sorted/freenet/thaw" (only folders !)
+	 * @param cat Example: "freenet/thaw" (only folders !)
 	 * @return the path in the tree
 	 */
 	public static TreePath makeMyPath(IndexBrowserPanel indexBrowser, String cat, int maxDepth) {
@@ -663,8 +663,9 @@ public class IndexManagementHelper {
 
 		if (split == null) return null;
 
-		IndexFolder currentFolder = indexBrowser.getIndexTree().getRoot();
-		TreePath path = new TreePath(currentFolder);
+		IndexFolder root = indexBrowser.getIndexTree().getRoot();
+		IndexFolder currentFolder = indexBrowser.getIndexTree().getRoot().getAutoSortedFolder();
+		TreePath path = new TreePath(root);
 		path = path.pathByAddingChild(currentFolder);
 
 		for (int i = 0 ; i < split.length && i < maxDepth; i++) {
@@ -731,7 +732,7 @@ public class IndexManagementHelper {
 			/**
 			 * to avoid the collision due to the vector in the IndexFolder
 			 */
-			if (I18n.getMessage("thaw.plugin.index.automaticallySorted").equals(folder.toString())) {
+			if (folder == null || "".equals(folder.toString())) {
 				return false;
 			}
 
@@ -756,8 +757,6 @@ public class IndexManagementHelper {
 			Logger.warning(new IndexManagementHelper(), "No category ; Can't sort the index");
 			return false;
 		}
-
-		cat = I18n.getMessage("thaw.plugin.index.automaticallySorted")+"/"+cat;
 
 		TreePath path = makeMyPath(indexBrowser, cat,
 					   IndexFolder.MAX_AUTOSORTING_DEPTH+1);

@@ -393,8 +393,9 @@ public class MessagePanel
 		for (Iterator it = subMsgs.iterator();
 		     it.hasNext();) {
 			SubMessage subMsg = (SubMessage)it.next();
-			SubMessagePanel panel = new SubMessagePanel(subMsg,
-								    (i + DEFAULT_UNFOLDED) < subMsgs.size());
+			//SubMessagePanel panel = new SubMessagePanel(subMsg,
+			//					    (i + DEFAULT_UNFOLDED) < subMsgs.size());
+			SubMessagePanel panel = new SubMessagePanel(subMsg, false);
 
 			subPanels.add(panel);
 

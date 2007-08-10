@@ -106,7 +106,10 @@ public class LinkManagementHelper {
 		private boolean addToParent; /* (== add to the same parent folder) */
 		private boolean autoSorting;
 
-
+		/**
+		 * @param addToParent Try to add the new index to the same folder than the
+		 *                    index from where comes the link
+		 */
 		public IndexAdder(final AbstractButton actionSource,
 				  final FCPQueueManager queueManager,
 				  final IndexBrowserPanel indexBrowser,

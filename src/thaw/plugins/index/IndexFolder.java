@@ -25,6 +25,7 @@ import thaw.plugins.Hsqldb;
 
 
 public class IndexFolder implements IndexTreeNode, MutableTreeNode {
+
 	public static final int MAX_AUTOSORTING_DEPTH = 6;
 
 	private static final long serialVersionUID = 2L;
@@ -113,7 +114,9 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 	}
 
-
+	/**
+	 * @param name case insensitive
+	 */
 	public IndexFolder getFolder(String name) {
 		return (IndexFolder)folders.get(name.toLowerCase());
 	}
@@ -296,7 +299,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 			    Integer.toString(id)+" ("+toString()+")");
 
 		if (child instanceof IndexFolder && folders != null) {
-			folders.put( ((IndexFolder)child).toString(), child);
+			folders.put( ((IndexFolder)child).toString().toLowerCase(), child);
 		}
 
 		if (children != null) {
@@ -1274,13 +1277,13 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 	public void forceFlagsReload() {
 		if (children != null) {
-			synchronized(children) {
-				for (Iterator it = children.iterator();
-				     it.hasNext();) {
-					IndexTreeNode child = (IndexTreeNode)it.next();
-					child.forceFlagsReload();
-				}
+			//synchronized(children) {
+			for (Iterator it = children.iterator();
+			     it.hasNext();) {
+				IndexTreeNode child = (IndexTreeNode)it.next();
+				child.forceFlagsReload();
 			}
+			//}
 		}
 
 		hasLastHasChangedValueBeenSet = false;

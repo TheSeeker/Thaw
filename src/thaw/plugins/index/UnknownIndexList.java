@@ -85,7 +85,8 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 
 		autoSorting = new CheckBox(indexBrowser.getConfig(),
 					   "autoSorting",
-					   I18n.getMessage("thaw.plugin.index.autoSorting"));
+					   I18n.getMessage("thaw.plugin.index.autoSorting"),
+					   true);
 
 		autoSorting.addActionListener(this);
 		panel.add(autoSorting, BorderLayout.SOUTH);
@@ -97,7 +98,8 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 
 		button = new JButton(IconBox.indexReuse);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addIndexesFromLink"));
-		toolbarActions.add(new LinkManagementHelper.IndexAdder(button, queueManager, indexBrowser, true));
+		toolbarActions.add(new LinkManagementHelper.IndexAdder(button, queueManager,
+								       indexBrowser, false));
 		toolbarModifier.addButtonToTheToolbar(button);
 
 		list.addMouseListener(this);

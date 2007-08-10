@@ -105,5 +105,32 @@ public class IndexRoot extends IndexFolder implements IndexTreeNode {
 
 		Logger.notice(this, "Destruction of the world done, have a nice day.");
 	}
+
+
+	public IndexFolder getOrCreateFolder(String folder) {
+		IndexFolder f = getFolder(folder);
+
+		if (f == null) {
+			f = IndexManagementHelper.addIndexFolder(indexBrowser,
+								 this,
+								 folder);
+		}
+
+		return f;
+	}
+
+	/**
+	 * create if it doesn't exist
+	 */
+	public IndexFolder getAutoSortedFolder() {
+		return getOrCreateFolder(I18n.getMessage("thaw.plugin.index.automaticallySorted"));
+	}
+
+	/**
+	 * create if it doesn't exist
+	 */
+	public IndexFolder getRecentlyAddedFolder() {
+		return getOrCreateFolder(I18n.getMessage("thaw.plugin.index.recentlyAdded"));
+	}
 }
 
