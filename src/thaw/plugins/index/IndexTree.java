@@ -806,7 +806,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 					setFont(new Font("Dialog", style, 12));
 
 					if (newComment)
-						value = o.toString() + " *";
+						value = "* "+o.toString();
 				}
 			}
 

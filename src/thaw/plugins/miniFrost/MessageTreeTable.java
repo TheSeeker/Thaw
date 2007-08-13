@@ -194,7 +194,7 @@ public class MessageTreeTable implements Observer,
 				  "table_minifrost_message_table",
 				  model);
 		table.setDefaultRenderer(table.getColumnClass(0), new MessageTableRenderer());
-		table.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+		//table.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 
 		table.getColumnModel().getColumn(0).setPreferredWidth(FIRST_COLUMN_SIZE);
 		table.getColumnModel().getColumn(0).setResizable(false);
@@ -758,6 +758,23 @@ public class MessageTreeTable implements Observer,
 				selection[row] = !selection[row];
 			else
 				selection[row] = false;
+
+			refresh(row);
+		}
+
+		public void switchSelection(int row, boolean val) {
+			Message msg = null;
+
+			synchronized(msgs) {
+				msg = ((MessageNode)msgs.get(row)).getMessage();
+			}
+
+			if (msg != null)
+				selection[row] = val;
+			else
+				selection[row] = false;
+
+			refresh(row);
 		}
 
 		public Vector getMessages(Vector msgs) {
@@ -1090,6 +1107,9 @@ public class MessageTreeTable implements Observer,
 	}
 
 
+	public int startRow = -1;
+	public int endRow = -1;
+
 
 	public void mouseClicked(MouseEvent e)  {
 		int row    = table.rowAtPoint(e.getPoint());
@@ -1101,16 +1121,60 @@ public class MessageTreeTable implements Observer,
 			model.switchSelection(row);
 			refresh(row);
 		} else {
-			Message msg = model.getMsg(row);
-			if (msg != null) {
-				mainPanel.getMessagePanel().setMessage(msg);
-				mainPanel.displayMessage();
+			if (endRow < 0)
+				endRow = row;
+
+			if ( (startRow < 0 || endRow >= 0 || startRow == endRow) ) {
+				/* only one selection */
+
+				Message msg = model.getMsg(row);
+				if (msg != null) {
+					mainPanel.getMessagePanel().setMessage(msg);
+					mainPanel.displayMessage();
+				}
+
 			}
 		}
+
+		startRow = -1;
+		endRow = -1;
 	}
 
 	public void mouseEntered(MouseEvent e)  { }
 	public void mouseExited(MouseEvent e)   { }
-	public void mousePressed(MouseEvent e)  { }
-	public void mouseReleased(MouseEvent e) { }
+
+	public void mousePressed(MouseEvent e)  {
+		int column = table.columnAtPoint(e.getPoint());
+
+		Logger.info(this, "mouse pressed");
+
+		startRow = -1;
+		endRow = -1;
+
+		if (column == 0) {
+			return;
+		}
+
+		startRow = table.rowAtPoint(e.getPoint());
+	}
+
+	public void mouseReleased(MouseEvent e) {
+		int column = table.columnAtPoint(e.getPoint());
+
+		Logger.info(this, "mouse released");
+
+		endRow = table.rowAtPoint(e.getPoint());
+
+		if (startRow >= 0 && endRow >= 0
+		    && startRow != endRow) {
+			/* many selections */
+
+			for (int i = startRow ; i <= endRow ; i++) {
+				model.switchSelection(i);
+			}
+
+			startRow = -1;
+			endRow = -1;
+		}
+	}
 }
