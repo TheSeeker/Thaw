@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import thaw.core.I18n;
+import thaw.core.Logger;
 
 import thaw.plugins.signatures.Identity;
 
@@ -167,6 +168,25 @@ public class DraftPanel implements ActionListener {
 		return panel;
 	}
 
+
+	public static Date getGMTDate() {
+		/* dirty way to obtain the GMT date */
+
+		SimpleDateFormat gmtFormat = new SimpleDateFormat("yyyy.M.d HH:mm:ss");
+		gmtFormat.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
+
+		String dateStr = gmtFormat.format(new Date());
+
+		SimpleDateFormat finalDate = new SimpleDateFormat("yyyy.M.d HH:mm:ss");
+
+		try {
+			return finalDate.parse(dateStr);
+		} catch(java.text.ParseException e) {
+			Logger.warning(null, "DraftPanel : Can't get the GMT date => will use the local time");
+			return new Date();
+		}
+	}
+
 	/**
 	 * Don't do the replacements in the text.
 	 * Don't call Draft.setDate()
@@ -232,7 +252,7 @@ public class DraftPanel implements ActionListener {
 
 
 			/* date */
-			draft.setDate(date);
+			draft.setDate(getGMTDate());
 
 
 			/* POST */

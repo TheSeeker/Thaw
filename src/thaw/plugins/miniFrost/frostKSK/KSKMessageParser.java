@@ -75,7 +75,8 @@ public class KSKMessageParser {
 				Identity identity) {
 
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.M.d HH:mm:ss");
-		dateFormat.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
+		// the date is already GMT-ized
+		//dateFormat.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
 
 		this.messageId = ""; /* will be generated from the SHA1 of the content */
 		this.inReplyTo = inReplyTo;
@@ -305,7 +306,7 @@ public class KSKMessageParser {
 
 
 
-	public final static String SIGNATURE_ELEMENTS_SEPARATOR = "|";
+	public final static char SIGNATURE_ELEMENTS_SEPARATOR = '|';
 
 	/**
 	 * @param withMsgId require to check the signature

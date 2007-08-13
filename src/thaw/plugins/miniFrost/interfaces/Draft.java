@@ -37,7 +37,7 @@ public interface Draft {
 	public void setAuthor(String nick, Identity identity);
 
 	/**
-	 * @param date don't forget to GMT-ize it when formatting it
+	 * @param date the date provided is already GMT-ized
 	 */
 	public void setDate(java.util.Date date);
 

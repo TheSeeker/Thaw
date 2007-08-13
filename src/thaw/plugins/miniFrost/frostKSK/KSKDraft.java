@@ -145,7 +145,7 @@ public class KSKDraft
 		/* we start immediatly a board refresh (we will need it) */
 		synchronized(board) {
 			board.addObserver(this);
-			board.refresh(1 /* until today */);
+			board.refresh(2 /* until yesterday ; just to be sure because of the GMT conversion etc */);
 
 			KSKMessageParser generator = new KSKMessageParser( ((inReplyTo != null) ?
 									    inReplyTo.getMsgId() :
@@ -199,6 +199,7 @@ public class KSKDraft
 
 	private boolean isBoardUpToDateForToday() {
 		if (!board.isRefreshing()
+		    || board.getCurrentlyRefreshedDate() == null
 		    || (KSKBoard.getMidnight(board.getCurrentlyRefreshedDate()).getTime()
 			< KSKBoard.getMidnight(date).getTime()) ) {
 			return true;
