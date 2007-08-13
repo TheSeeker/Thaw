@@ -42,7 +42,7 @@ public class KSKAttachmentFactory {
 
 	public KSKAttachment getAttachment(Element attachmentEl) {
 		if (attachmentEl.getAttribute("type").length() <= 0) {
-			Logger.warning(this, "No type specified in the attachment ("+
+			Logger.notice(this, "No type specified in the attachment ("+
 				       attachmentEl.toString()+")");
 			return null;
 		}
@@ -55,7 +55,7 @@ public class KSKAttachmentFactory {
 			a = new KSKBoardAttachment();
 
 		if (a == null) {
-			Logger.warning(this, "Unknown attachment type : "
+			Logger.notice(this, "Unknown attachment type : "
 				       +attachmentEl.getAttribute("type"));
 		}
 		else

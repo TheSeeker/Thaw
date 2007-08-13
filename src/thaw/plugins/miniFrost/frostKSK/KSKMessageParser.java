@@ -305,7 +305,7 @@ public class KSKMessageParser {
 
 
 
-	public final static char SIGNATURE_ELEMENTS_SEPARATOR = '|';
+	public final static String SIGNATURE_ELEMENTS_SEPARATOR = "|";
 
 	/**
 	 * @param withMsgId require to check the signature
@@ -362,7 +362,7 @@ public class KSKMessageParser {
 		boolean ret = identity.check(getSignedContent(true), signature);
 
 		if (!ret) {
-			Logger.warning(this, "Invalid signature !");
+			Logger.notice(this, "Invalid signature !");
 		}
 
 		return ret;

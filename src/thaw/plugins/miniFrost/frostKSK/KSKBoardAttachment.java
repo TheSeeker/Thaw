@@ -244,7 +244,7 @@ public class KSKBoardAttachment
 	public StringBuffer getSignedStr() {
 		StringBuffer buf = new StringBuffer();
 
-		buf.append(boardName).append(KSKMessageParser.SIGNATURE_ELEMENTS_SEPARATOR);
+		buf.append(boardName.toLowerCase()).append(KSKMessageParser.SIGNATURE_ELEMENTS_SEPARATOR);
 
 		if (publicKey != null)
 			buf.append(publicKey).append(KSKMessageParser.SIGNATURE_ELEMENTS_SEPARATOR);
