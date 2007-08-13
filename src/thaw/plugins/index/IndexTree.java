@@ -770,11 +770,14 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 						setBackgroundSelectionColor(IndexTree.LOADING_SELECTION_COLOR);
 					}
 
-					if (index.isModifiable()) {
-						setLeafIcon(IconBox.minIndex);
-					} else {
-						setLeafIcon(IconBox.minIndexReadOnly);
-					}
+					if (index.downloadSuccessful()) {
+						if (index.isModifiable()) {
+							setLeafIcon(IconBox.minIndex);
+						} else {
+							setLeafIcon(IconBox.minIndexReadOnly);
+						}
+					} else
+						setLeafIcon(IconBox.minStop);
 
 					if (index.isObsolete()) {
 						setTextNonSelectionColor(Color.RED);

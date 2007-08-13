@@ -83,6 +83,7 @@ public class Index extends Observable implements MutableTreeNode,
 	private Config config;
 
 	private boolean isNew;
+	private boolean successful = true;
 
 
 	/**
@@ -900,6 +901,7 @@ public class Index extends Observable implements MutableTreeNode,
 				get.deleteObserver(this);
 
 				if (get.isSuccessful()) {
+					successful = true;
 
 					String key = get.getFileKey();
 
@@ -949,6 +951,8 @@ public class Index extends Observable implements MutableTreeNode,
 					} else
 						Logger.error(this, "No path specified in transfer ?!");
 				} else { /* if not successful */
+					successful = false;
+
 					indexTree.removeUpdatingIndex(this);
 				}
 			}
@@ -1949,5 +1953,10 @@ public class Index extends Observable implements MutableTreeNode,
 		} catch(SQLException e) {
 			Logger.error(this, "Can't set the category because : "+e.toString());
 		}
+	}
+
+
+	public boolean downloadSuccessful() {
+		return successful;
 	}
 }
