@@ -33,8 +33,12 @@ import thaw.plugins.miniFrost.RegexpBlacklist;
  */
 public class KSKMessageParser {
 
-	public KSKMessageParser() {
+	private final static SimpleDateFormat simpleFormat = new SimpleDateFormat("yyyy.M.d HH:mm:ss");
+	private SimpleDateFormat gmtFormat;
 
+	public KSKMessageParser() {
+		gmtFormat = new SimpleDateFormat("yyyy.M.d HH:mm:ss");
+		gmtFormat.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
 	}
 
 	private String messageId;
@@ -73,17 +77,14 @@ public class KSKMessageParser {
 				String publicKey,
 				Vector attachments,
 				Identity identity) {
-
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.M.d HH:mm:ss");
-		// the date is already GMT-ized
-		//dateFormat.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
+		this();
 
 		this.messageId = ""; /* will be generated from the SHA1 of the content */
 		this.inReplyTo = inReplyTo;
 		this.from = from;
 		this.subject = subject;
 
-		String[] date = dateFormat.format(dateUtil).toString().split(" ");
+		String[] date = simpleFormat.format(dateUtil).toString().split(" ");
 		this.date = date[0];
 		this.time = date[1];
 
@@ -163,14 +164,19 @@ public class KSKMessageParser {
 			read = true;
 		}
 
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.M.d HH:mm:ss");
-
 		date = date.trim();
 		time = time.trim();
 
 		date += " "+time;
 
-		java.util.Date dateUtil = dateFormat.parse(date, new java.text.ParsePosition(0));
+		java.util.Date dateUtil = null;
+
+		try {
+			dateUtil = simpleFormat.parse(date);
+		} catch(java.text.ParseException e) {
+			Logger.notice(this, "Can't parse the date !");
+			return false;
+		}
 
 		if (dateUtil != null) {
 			long dateDiff = KSKBoard.getMidnight(dateUtil).getTime() - KSKBoard.getMidnight(boardDate).getTime();
@@ -489,14 +495,11 @@ public class KSKMessageParser {
 		 */
 		/* (I'm still thinking that mixing up Boards & private messages is a BAD idea) */
 
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.M.d HH:mm:ss");
-		dateFormat.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
-
 		inReplyTo = null;
 		from = "["+I18n.getMessage("thaw.plugin.miniFrost.encrypted")+"]";
 		subject = "["+I18n.getMessage("thaw.plugin.miniFrost.encryptedBody").replaceAll("X", recipient)+"]";
 
-		String[] date = dateFormat.format(new Date()).toString().split(" ");
+		String[] date = gmtFormat.format(new Date()).toString().split(" ");
 		this.date = date[0];
 		this.time = date[1];
 

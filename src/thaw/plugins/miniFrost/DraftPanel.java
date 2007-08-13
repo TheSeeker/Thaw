@@ -48,8 +48,18 @@ public class DraftPanel implements ActionListener {
 
 	private JDialog dialog;
 
+	private final SimpleDateFormat gmtConverter;
+	private final SimpleDateFormat dateParser;
+	private final SimpleDateFormat messageDateFormat;
+
+
 	public DraftPanel(MiniFrostPanel mainPanel) {
 		this.mainPanel = mainPanel;
+
+		gmtConverter = new SimpleDateFormat("yyyy.M.d HH:mm:ss");
+		gmtConverter.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
+		dateParser = new SimpleDateFormat("yyyy.M.d HH:mm:ss");
+		messageDateFormat = new SimpleDateFormat("yyyy.MM.dd - HH:mm:ss");
 
 		panel = new JPanel(new BorderLayout(5, 5));
 
@@ -169,18 +179,12 @@ public class DraftPanel implements ActionListener {
 	}
 
 
-	public static Date getGMTDate() {
+	public Date getGMTDate() {
 		/* dirty way to obtain the GMT date */
-
-		SimpleDateFormat gmtFormat = new SimpleDateFormat("yyyy.M.d HH:mm:ss");
-		gmtFormat.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
-
-		String dateStr = gmtFormat.format(new Date());
-
-		SimpleDateFormat finalDate = new SimpleDateFormat("yyyy.M.d HH:mm:ss");
+		String dateStr = gmtConverter.format(new Date());
 
 		try {
-			return finalDate.parse(dateStr);
+			return dateParser.parse(dateStr);
 		} catch(java.text.ParseException e) {
 			Logger.warning(null, "DraftPanel : Can't get the GMT date => will use the local time");
 			return new Date();
@@ -236,8 +240,7 @@ public class DraftPanel implements ActionListener {
 		} else if (e.getSource() == sendButton) {
 			fillInDraft();
 
-			Date date = new Date();
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd - HH:mm:ss");
+			Date date = getGMTDate();
 
 			/* text */
 
@@ -245,14 +248,14 @@ public class DraftPanel implements ActionListener {
 
 			txt = txt.replaceAll("\\$sender\\$", authorBox.getSelectedItem().toString());
 
-			String dateStr = dateFormat.format(date).toString();
+			String dateStr = messageDateFormat.format(date).toString();
 			txt = txt.replaceAll("\\$dateAndTime\\$", dateStr);
 
 			draft.setText(txt);
 
 
 			/* date */
-			draft.setDate(getGMTDate());
+			draft.setDate(date);
 
 
 			/* POST */
