@@ -472,6 +472,8 @@ public class MessagePanel
 
 		Runnable doScroll = new Runnable() {
 				public void run() {
+					scrollPane.getVerticalScrollBar().setUnitIncrement(15);
+
 					int max = scrollPane.getVerticalScrollBar().getMaximum();
 					int extent = scrollPane.getVerticalScrollBar().getVisibleAmount();
 					int min = scrollPane.getVerticalScrollBar().getMinimum();
