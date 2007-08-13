@@ -29,6 +29,7 @@ import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.gui.IconBox;
 import thaw.fcp.FCPQueueManager;
+import thaw.fcp.FreenetURIHelper;
 import thaw.plugins.ToolbarModifier;
 
 
@@ -189,7 +190,8 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 		if ((link == null)
 		    || link.isBlackListed()
 		    || Index.isAlreadyKnown(indexBrowser.getDb(), link.getPublicKey()) >= 0
-		    || isInList(link))
+		    || isInList(link)
+		    || FreenetURIHelper.isObsolete(link.getPublicKey()))
 			return false;
 
 		makePlace(0);
