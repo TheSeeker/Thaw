@@ -157,7 +157,7 @@ public class KSKMessageParser {
 		}
 
 		if (alreadyInTheDb(db, messageId)) {
-			Logger.info(this, "We have already this id in the db ?!");
+			Logger.notice(this, "We have already this id in the db ?!");
 			archived = true;
 			read = true;
 		}
@@ -359,7 +359,13 @@ public class KSKMessageParser {
 
 		identity = Identity.getIdentity(db, nick, publicKey);
 
-		return identity.check(getSignedContent(true), signature);
+		boolean ret = identity.check(getSignedContent(true), signature);
+
+		if (!ret) {
+			Logger.warning(this, "Invalid signature !");
+		}
+
+		return ret;
 	}
 
 

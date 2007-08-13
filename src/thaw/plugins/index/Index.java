@@ -896,56 +896,61 @@ public class Index extends Observable implements MutableTreeNode,
 		if (o instanceof FCPClientGet) {
 			FCPClientGet get = (FCPClientGet)o;
 
-			if (get.isFinished() && get.isSuccessful()) {
+			if (get.isFinished()) {
 				get.deleteObserver(this);
 
-				String key = get.getFileKey();
+				if (get.isSuccessful()) {
 
-				int oldRev = rev;
-				int newRev = FreenetURIHelper.getUSKRevision(key);
+					String key = get.getFileKey();
 
-				if (rewriteKey) {
-					setPublicKey(key, newRev);
-				}
+					int oldRev = rev;
+					int newRev = FreenetURIHelper.getUSKRevision(key);
 
-				if (oldRev < newRev || isNew) {
-					setHasChangedFlag(true);
-					useTrayIconToNotifyNewRev();
-				}
-
-				isNew = false;
-
-				String path = get.getPath();
-
-				if (path != null) {
-					IndexParser parser = new IndexParser(this);
-
-					parser.loadXML(path);
-
-
-					if (!fetchingNegRev && mustFetchNegRev) {
-						final java.io.File fl = new java.io.File(path);
-						fl.delete();
-
-						setChanged();
-						notifyObservers();
-
-						fetchingNegRev = true;
-						realDownloadFromFreenet(-1);
-						return;
+					if (rewriteKey) {
+						setPublicKey(key, newRev);
 					}
 
-					boolean loadComm = true;
+					if (oldRev < newRev || isNew) {
+						setHasChangedFlag(true);
+						useTrayIconToNotifyNewRev();
+					}
 
-					if (config != null && config.getValue("indexFetchComments") != null)
-						loadComm = Boolean.valueOf(config.getValue("indexFetchComments")).booleanValue();
+					isNew = false;
 
-					if (getCommentPublicKey() != null && loadComm) {
-						loadComments(queueManager);
-					} else if (indexTree != null)
-						indexTree.removeUpdatingIndex(this);
-				} else
-					Logger.error(this, "No path specified in transfer ?!");
+					String path = get.getPath();
+
+					if (path != null) {
+						IndexParser parser = new IndexParser(this);
+
+						parser.loadXML(path);
+
+
+						if (!fetchingNegRev && mustFetchNegRev) {
+							final java.io.File fl = new java.io.File(path);
+							fl.delete();
+
+							setChanged();
+							notifyObservers();
+
+							fetchingNegRev = true;
+							realDownloadFromFreenet(-1);
+							return;
+						}
+
+						boolean loadComm = true;
+
+						if (config != null && config.getValue("indexFetchComments") != null)
+							loadComm = Boolean.valueOf(config.getValue("indexFetchComments")).booleanValue();
+
+						if (getCommentPublicKey() != null && loadComm) {
+							loadComments(queueManager);
+						} else if (indexTree != null)
+							indexTree.removeUpdatingIndex(this);
+					} else
+						Logger.error(this, "No path specified in transfer ?!");
+				} else { /* if not successful */
+					indexTree.removeUpdatingIndex(this);
+				}
 			}
 		}
 

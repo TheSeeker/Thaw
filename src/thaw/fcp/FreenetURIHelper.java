@@ -42,10 +42,7 @@ public class FreenetURIHelper {
 			Logger.warning(new FreenetURIHelper(), "UnsupportedEncodingException (UTF-8): "+e.toString());
 		}
 
-		if ((uri.indexOf("CHK@") < 0)
-		    && (uri.indexOf("USK@") < 0)
-		    && (uri.indexOf("KSK@") < 0)
-		    && (uri.indexOf("SSK@") < 0)) {
+		if (!isAKey(uri)) {
 			Logger.notice(new FreenetURIHelper(), "Not a valid key: "+uri);
 			return null;
 		}
@@ -131,7 +128,7 @@ public class FreenetURIHelper {
 	}
 
 
-	public static String abs(final String val) {
+	private static String abs(final String val) {
 		try {
 			final java.math.BigDecimal bd = new java.math.BigDecimal(val);
 			return bd.abs().toString();
