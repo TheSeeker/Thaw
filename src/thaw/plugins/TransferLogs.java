@@ -408,6 +408,8 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 	public void actionPerformed(ActionEvent e) {
 
 		if (e.getSource() == purgeLogs) {
+			dropTables(db);
+
 			createTables();
 
 			table.refresh();
