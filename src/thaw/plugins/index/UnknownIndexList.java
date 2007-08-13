@@ -88,7 +88,6 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 					   "autoSorting",
 					   I18n.getMessage("thaw.plugin.index.autoSorting"),
 					   true);
-
 		autoSorting.addActionListener(this);
 		panel.add(autoSorting, BorderLayout.SOUTH);
 
@@ -270,6 +269,8 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 			item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addToBlackList"), IconBox.minStop);
 			rightClickMenu.add(item);
 			rightClickActions.add(new LinkManagementHelper.ToBlackListAdder(item, indexBrowser));
+
+			applyAutoSortingSetting();
 		}
 
 		LinkManagementHelper.LinkAction action;
