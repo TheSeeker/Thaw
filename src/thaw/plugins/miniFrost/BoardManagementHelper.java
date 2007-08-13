@@ -60,13 +60,32 @@ public class BoardManagementHelper {
 		private BoardFactory selection;
 
 		public BoardTypeAsker(MiniFrostPanel mainPanel) {
+			BoardFactory[] fs = mainPanel.getPluginCore().getFactories();
+
+			int toremove = 0;
+
+			for (int i = 0 ; i < fs.length ; i++)
+				if (fs[i].toString() == null)
+					toremove++;
+
+			BoardFactory[] factories = new BoardFactory[fs.length - toremove];
+
+			int removed = 0;
+
+			for (int i = 0 ; i < fs.length ; i++) {
+				if (fs[i].toString() != null)
+					factories[i-removed] = fs[i];
+				else
+					removed++;
+			}
+
 			selection = (BoardFactory)JOptionPane.showInputDialog(mainPanel.getPluginCore().getCore().getMainWindow().getMainFrame(),
 									      I18n.getMessage("thaw.plugin.miniFrost.selectType"),
 									      I18n.getMessage("thaw.plugin.miniFrost.selectType"),
 									      JOptionPane.QUESTION_MESSAGE,
 									      null, /* icon */
-									      mainPanel.getPluginCore().getFactories(),
-									      mainPanel.getPluginCore().getFactories()[0]);
+									      factories,
+									      factories[0]);
 		}
 
 		public BoardFactory getSelection() {

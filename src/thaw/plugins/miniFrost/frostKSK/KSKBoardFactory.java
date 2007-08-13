@@ -15,7 +15,9 @@ import thaw.core.I18n;
 
 import thaw.plugins.Hsqldb;
 import thaw.plugins.MiniFrost;
+import thaw.plugins.signatures.Identity;
 
+import thaw.plugins.miniFrost.interfaces.Board;
 
 
 public class KSKBoardFactory
@@ -48,7 +50,8 @@ public class KSKBoardFactory
 	private Core core;
 	private MiniFrost plugin;
 
-	private HashMap boards;
+	private HashMap boardsHashMap;
+	private Vector boards;
 
 	public KSKBoardFactory() {
 
@@ -69,7 +72,7 @@ public class KSKBoardFactory
 		if (firstStart)
 			addDefaultBoards();
 
-		boards = new HashMap();
+		boardsHashMap = new HashMap();
 
 		return true;
 	}
@@ -323,8 +326,8 @@ public class KSKBoardFactory
 					String name = set.getString("name");
 					Date lastUpdate = set.getDate("lastUpdate");
 
-					if (boards.get(name) != null)
-						v.add(boards.get(name));
+					if (boardsHashMap.get(name) != null)
+						v.add(boardsHashMap.get(name));
 					else {
 						int count = countNewMessages(id);
 
@@ -333,7 +336,7 @@ public class KSKBoardFactory
 									      count);
 
 						v.add(board);
-						boards.put(name, board);
+						boardsHashMap.put(name, board);
 					}
 				}
 			}
@@ -341,13 +344,18 @@ public class KSKBoardFactory
 			Logger.error(this, "Can't get the board list because : "+e.toString());
 		}
 
+		boards = v;
+
 		return v;
 	}
 
 
 
+	/**
+	 * A little bit inefficient function ...
+	 */
 	protected KSKBoard getBoard(int id) {
-		for (Iterator it = boards.values().iterator();
+		for (Iterator it = boards.iterator();
 		     it.hasNext();) {
 			KSKBoard board = (KSKBoard)it.next();
 
@@ -368,6 +376,67 @@ public class KSKBoardFactory
 					    unsigned, minTrustLevel, true);
 	}
 
+
+	public Vector getSentMessages() {
+		Vector v = new Vector();
+
+		try {
+			synchronized(db.dbLock) {
+				Vector identities = Identity.getYourIdentities(db);
+
+				PreparedStatement st;
+
+				st = db.getConnection().prepareStatement("SELECT "+
+									 " id, "+
+									 " subject, "+
+									 " nick, "+
+									 " keyDate, "+
+									 " date, "+
+									 " msgId, "+
+									 " rev, "+
+									 " read, "+
+									 " archived, "+
+									 " encryptedFor, "+
+									 " boardId "+
+									 "FROM frostKSKMessages "+
+									 "WHERE sigId = ? ORDER by DATE DESC");
+
+				for (Iterator it = identities.iterator();
+				     it.hasNext() ; ) {
+					Identity identity = (Identity)it.next();
+
+					st.setInt(1, identity.getId());
+
+					ResultSet set = st.executeQuery();
+
+					while (set.next()) {
+						KSKBoard board = getBoard(set.getInt("boardId"));
+						v.add(new KSKMessage(set.getInt("id"),
+								     set.getString("msgId"),
+								     null, /* in reply to => We don't want a tree to be built */
+								     set.getString("subject"),
+								     identity.toString(),
+								     identity.getId(),
+								     identity,
+								     set.getDate("date"),
+								     set.getInt("rev"),
+								     set.getBoolean("read"),
+								     set.getBoolean("archived"),
+								     null, /* TODO : encryptedFor */
+								     board));
+					}
+
+				}
+
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Can't get the sent messages because : "+
+				     e.toString());
+		}
+
+
+		return v;
+	}
 
 
 	public void createBoard(thaw.core.MainWindow mainWindow) {

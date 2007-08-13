@@ -18,15 +18,14 @@ import thaw.core.I18n;
 
 import thaw.plugins.Hsqldb;
 import thaw.plugins.signatures.Identity;
-
+import thaw.plugins.miniFrost.interfaces.Message;
 
 /**
  * only notify when the message has been fully parsed
  */
 public class KSKMessage
 	extends Observable
-	implements thaw.plugins.miniFrost.interfaces.Message,
-		   Observer {
+	implements Message, Observer {
 
 	public final static int FCP_PRIORITY    = 2; /* below 2, the node doesn't react ?! */
 
@@ -210,6 +209,21 @@ public class KSKMessage
 
 	public java.util.Date getDate() {
 		return date;
+	}
+
+	public int compareTo(Object o) {
+		if (getDate() == null && ((Message)o).getDate() != null)
+			return -1;
+
+		if (getDate() != null && ((Message)o).getDate() == null)
+			return 1;
+
+		if (getDate() == null && ((Message)o).getDate() == null)
+			return 0;
+
+		int c = getDate().compareTo( ((Message)o).getDate());
+
+		return c;
 	}
 
 

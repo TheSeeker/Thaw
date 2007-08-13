@@ -832,4 +832,10 @@ public class KSKBoard
 	public int compareTo(Object o) {
 		return toString().compareToIgnoreCase(o.toString());
 	}
+
+	public boolean equals(Object o) {
+		if (!(o instanceof KSKBoard))
+			return false;
+		return ( ((KSKBoard)o).getId() == getId() );
+	}
 }

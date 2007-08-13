@@ -7,28 +7,6 @@ import java.util.Vector;
 
 public interface Board extends Comparable {
 
-	/**
-	 * @return folder db id
-	 */
-	//public int getParentId();
-
-	/**
-	 * Called when the tree is being built.
-	 * This function must NOT modify/update the db !
-	 * It's just for the tree.
-	 * <br/>
-	 * setParent() must update the bdd
-	 */
-	//public void setParentFolder(BoardFolder b);
-
-
-	/**
-	 * just return what was given to setParentFolder().
-	 * getParent() must return the same thing !
-	 */
-	//public BoardFolder getParentFolder();
-
-
 	public final static int ORDER_SUBJECT = 0;
 	public final static int ORDER_SENDER  = 1;
 	public final static int ORDER_DATE    = 2;
@@ -76,4 +54,6 @@ public interface Board extends Comparable {
 	 * without anything more
 	 */
 	public String toString();
+
+	public boolean equals(Object o);
 }

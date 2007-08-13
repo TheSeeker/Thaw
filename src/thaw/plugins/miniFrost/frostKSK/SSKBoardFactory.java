@@ -137,6 +137,13 @@ public class SSKBoardFactory extends KSKBoardFactory {
 	}
 
 
+	/**
+	 * Already answered by KSKBoardFactory
+	 */
+	public Vector getSentMessages() {
+		return new Vector();
+	}
+
 
 	private class NewBoardDialog implements Observer, ActionListener {
 		private JDialog dialog;

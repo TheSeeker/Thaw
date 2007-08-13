@@ -6,7 +6,7 @@ import java.util.Vector;
 import thaw.plugins.signatures.Identity;
 
 
-public interface Message /* extends TreeNode */ {
+public interface Message extends Comparable {
 
 	public String getMsgId();
 	public String getInReplyToId();

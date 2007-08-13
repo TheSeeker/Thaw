@@ -32,7 +32,8 @@ public class MiniFrost implements thaw.core.Plugin {
 	public final static BoardFactory[] factories =
 		new BoardFactory[] {
 			new thaw.plugins.miniFrost.frostKSK.KSKBoardFactory(),
-			new thaw.plugins.miniFrost.frostKSK.SSKBoardFactory()
+			new thaw.plugins.miniFrost.frostKSK.SSKBoardFactory(),
+			new thaw.plugins.miniFrost.SpecialBoardFactory()
 		};
 
 

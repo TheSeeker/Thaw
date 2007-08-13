@@ -81,7 +81,7 @@ public class MessagePanel
 
 		insidePanel = null;
 
-		panel = new JPanel(new BorderLayout(5, 5));
+		panel = new JPanel(new BorderLayout(15, 15));
 
 		/* messages Panel */
 
@@ -115,6 +115,8 @@ public class MessagePanel
 		buttonPanel.add(reply);
 
 		subject = new JLabel("");
+		subject.setIcon(IconBox.minMail);
+		subject.setIconTextGap(15);
 
 		JPanel northPanel = new JPanel(new BorderLayout(5, 5));
 		JPanel northNorthPanel = new JPanel(new BorderLayout(5,5));

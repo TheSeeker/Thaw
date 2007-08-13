@@ -33,6 +33,8 @@ public interface BoardFactory {
 				     boolean desc, boolean archived,
 				     boolean unsigned, int minTrustLevel);
 
+	public Vector getSentMessages();
+
 	/**
 	 * display the dialog asking for a name, etc.
 	 * the tree will be reloaded after that
@@ -42,6 +44,7 @@ public interface BoardFactory {
 
 	/**
 	 * For example 'frost boards' ; Use I18n ...
+	 * @return null if the user can't create any board with this factory
 	 */
 	public String toString();
 }
