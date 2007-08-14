@@ -123,6 +123,7 @@ public class MessageTreeTable implements Observer,
 	private JButton searchButton;
 	private JButton nextUnread;
 
+	private CheckBox seeRead;
 	private CheckBox seeArchived;
 
 	private JComboBox actions;
@@ -214,6 +215,14 @@ public class MessageTreeTable implements Observer,
 
 		/** some filters **/
 
+		/* read */
+
+		seeRead = new CheckBox(mainPanel.getConfig(),
+				       "miniFrost_seeRead",
+				       I18n.getMessage("thaw.plugin.miniFrost.seeRead"),
+				       true);
+		seeRead.addActionListener(this);
+
 		/* archived */
 
 		seeArchived = new CheckBox(mainPanel.getConfig(),
@@ -257,9 +266,11 @@ public class MessageTreeTable implements Observer,
 
 		JPanel southEastPanel = new JPanel(new GridLayout(2, 1));
 
-		JPanel southEastPanelTop = new JPanel(new GridLayout(1, 2, 10, 10));
+		JPanel southEastPanelTop = new JPanel(new GridLayout(1, 3, 5, 5));
+		southEastPanelTop.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.seeMessages")));
 		southEastPanelTop.add(seeUnsigned);
 		southEastPanelTop.add(seeArchived);
+		southEastPanelTop.add(seeRead);
 
 		southEastPanel.add(southEastPanelTop);
 		southEastPanel.add(minTrustLevelPanel);
@@ -855,6 +866,7 @@ public class MessageTreeTable implements Observer,
 		if ((!allBoards) && targetBoard != null) {
 			Vector rawMsgs = targetBoard.getMessages(keywords, orderBy,
 								 desc, seeArchived.isSelected(),
+								 seeRead.isSelected(),
 								 seeUnsigned.isSelected(),
 								 minTrustLevelInt);
 
@@ -874,6 +886,7 @@ public class MessageTreeTable implements Observer,
 			for (int i = 0 ; i < factories.length ; i++) {
 				Vector boardMsgs = factories[i].getAllMessages(keywords, orderBy, desc,
 									       seeArchived.isSelected(),
+									       seeRead.isSelected(),
 									       seeUnsigned.isSelected(),
 									       minTrustLevelInt);
 				for (Iterator it = boardMsgs.iterator();
@@ -1042,7 +1055,8 @@ public class MessageTreeTable implements Observer,
 		if (e.getSource() == seeUnsigned
 		    || e.getSource() == minTrustLevel
 		    || e.getSource() == seeArchived
-		    || e.getSource() == seeTree) {
+		    || e.getSource() == seeTree
+		    || e.getSource() == seeRead) {
 
 			minTrustLevelInt = Identity.getTrustLevel((String)(minTrustLevel.getSelectedItem()));
 			refresh();

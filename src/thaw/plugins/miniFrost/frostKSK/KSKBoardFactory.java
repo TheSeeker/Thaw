@@ -369,10 +369,10 @@ public class KSKBoardFactory
 
 
 	public Vector getAllMessages(String[] keywords, int orderBy,
-				     boolean desc, boolean archived,
+				     boolean desc, boolean archived, boolean read,
 				     boolean unsigned, int minTrustLevel) {
 		return KSKBoard.getMessages(-1, this, null, keywords,
-					    orderBy, desc, archived,
+					    orderBy, desc, archived, read,
 					    unsigned, minTrustLevel, true);
 	}
 

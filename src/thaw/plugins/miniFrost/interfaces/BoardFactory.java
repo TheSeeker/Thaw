@@ -31,6 +31,7 @@ public interface BoardFactory {
 	 */
 	public Vector getAllMessages(String[] keywords, int orderBy,
 				     boolean desc, boolean archived,
+				     boolean read,
 				     boolean unsigned, int minTrustLevel);
 
 	public Vector getSentMessages();

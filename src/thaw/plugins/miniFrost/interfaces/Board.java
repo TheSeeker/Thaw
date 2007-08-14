@@ -25,6 +25,7 @@ public interface Board extends Comparable {
 				  int orderBy,
 				  boolean desc,
 				  boolean archived,
+				  boolean read,
 				  boolean unsigned,
 				  int minTrustLevel);
 

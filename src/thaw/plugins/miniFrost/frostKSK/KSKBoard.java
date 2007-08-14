@@ -75,10 +75,11 @@ public class KSKBoard
 				  int orderBy,
 				  boolean desc,
 				  boolean archived,
+				  boolean read,
 				  boolean unsigned,
 				  int minTrustLevel) {
 		return getMessages(id, factory, this, keywords,
-				   orderBy, desc, archived, unsigned,
+				   orderBy, desc, archived, read, unsigned,
 				   minTrustLevel, false);
 	}
 
@@ -90,6 +91,7 @@ public class KSKBoard
 					    int orderBy,
 					    boolean desc,
 					    boolean archived,
+					    boolean read,
 					    boolean unsigned,
 					    int minTrustLevel,
 					    boolean allBoards) {
@@ -118,6 +120,10 @@ public class KSKBoard
 		if (!archived)
 			archivedStr = "frostKSKMessages.archived = FALSE ";
 
+		String readStr = "";
+
+		if (!read)
+			readStr = " AND frostKSKMessages.read = FALSE ";
 
 		String keywordsStr = "";
 
@@ -168,6 +174,7 @@ public class KSKBoard
 					" ON frostKSKMessages.sigId = signatures.id "+
 					whereBase+
 					archivedStr+
+					readStr+
 					keywordsStr+
 					trustLvlStr+
 					"ORDER BY "+orderColumn;
