@@ -37,6 +37,7 @@ public class SentMessages
 				  int orderBy,
 				  boolean desc,
 				  boolean archived,
+				  boolean read,
 				  boolean unsigned,
 				  int minTrustLevel) {
 		BoardFactory[] factories = miniFrost.getFactories();

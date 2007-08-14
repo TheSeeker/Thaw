@@ -165,7 +165,7 @@ public class BoardManagementHelper {
 
 			/* quick and dirty */
 			Vector msgs = target.getMessages(null, Board.ORDER_DATE, true,
-							 false, true, Integer.MIN_VALUE);
+							 false, false, true, Integer.MIN_VALUE);
 
 			for (Iterator it = msgs.iterator();
 			     it.hasNext();) {

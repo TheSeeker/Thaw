@@ -51,6 +51,7 @@ public class SpecialBoardFactory
 
 	public Vector getAllMessages(String[] keywords, int orderBy,
 				     boolean desc, boolean archived,
+				     boolean read,
 				     boolean unsigned, int minTrustLevel) {
 		/* NADA */
 		return new Vector();
