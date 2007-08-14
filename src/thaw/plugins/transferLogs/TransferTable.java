@@ -59,8 +59,10 @@ import thaw.plugins.Hsqldb;
  * right click menu : copy key(s) to clipboard
  */
 public class TransferTable implements MouseListener {
-	public final static int NMB_ELEMENTS_PER_PAGE = 20;
+	public final static int NMB_ELEMENTS_PER_PAGE = 100;
+
 	public final static int DEFAULT_LINE_HEIGHT = 18;
+	public final static int MAX_LINE_HEIGHT = 100;
 
 	public final static String[] COLUMN_NAMES = {
 		I18n.getMessage("thaw.plugin.transferLogs.dates"),
@@ -195,13 +197,15 @@ public class TransferTable implements MouseListener {
 				cell.setBackground(lightBlue);
 			}
 
+			/*
 			if (isSelected) {
 				if (table.getRowHeight(row) < (cell.getPreferredSize().getHeight()+5))
 					table.setRowHeight((int)cell.getPreferredSize().getHeight()+5);
 			} else {
-				if (table.getRowHeight(row) != DEFAULT_LINE_HEIGHT)
+				if (table.getRowHeight(row) > DEFAULT_LINE_HEIGHT)
 					table.setRowHeight(row, DEFAULT_LINE_HEIGHT);
 			}
+			*/
 
 			return cell;
 		}
@@ -514,6 +518,16 @@ public class TransferTable implements MouseListener {
 	}
 
 
+	public void adjustRowHeights() {
+		for (int i = table.getRowCount()-1 ; i >= 0 ; i--) {
+			if (table.isRowSelected(i))
+				table.setRowHeight(i, MAX_LINE_HEIGHT);
+			else
+				table.setRowHeight(i, DEFAULT_LINE_HEIGHT);
+		}
+	}
+
+
 	public void mouseClicked(final MouseEvent e) {
 		Vector selection;
 
@@ -528,6 +542,7 @@ public class TransferTable implements MouseListener {
 			return;
 
 		if (e.getButton() == MouseEvent.BUTTON1) {
+			adjustRowHeights();
 			updateToolbar(selection);
 			remover.setTarget(selection);
 		}
@@ -544,7 +559,9 @@ public class TransferTable implements MouseListener {
 
 	public void mousePressed(final MouseEvent e) { }
 
-	public void mouseReleased(final MouseEvent e) { }
+	public void mouseReleased(final MouseEvent e) {
+		adjustRowHeights();
+	}
 
 
 }
