@@ -1208,10 +1208,17 @@ public class IndexManagementHelper {
 
 		synchronized(db.dbLock) {
 			try {
-				selectSt = db.getConnection().prepareStatement("SELECT id from files WHERE indexParent = ? AND LOWER(filename) LIKE ? LIMIT 1");
+				selectSt = db.getConnection().prepareStatement("SELECT id from files "+
+									       "WHERE indexParent = ? "+
+									       " AND LOWER(filename) LIKE ? "+
+									       "LIMIT 1");
 				st = db.getConnection().prepareStatement("INSERT INTO files "+
-									 "(id, filename, publicKey, localPath, mime, size, category, indexParent, dontDelete) "+
-									 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, TRUE)");
+									 "(id, filename, publicKey, "+
+									 " localPath, mime, size, "+
+									 " category, indexParent, dontDelete) "+
+									 "VALUES (?, ?, ?, "+
+									 " ?, ?, ?, "+
+									 " ?, ?, TRUE)");
 				nextId = DatabaseManager.getNextId(db, "files");
 
 				if (nextId < 0)
@@ -1399,8 +1406,8 @@ public class IndexManagementHelper {
 
 				st = db.getConnection().prepareStatement("INSERT INTO files "+
 									 "(id, filename, publicKey, localPath, "+
-									 " mime, size, category, indexParent) "+
-									 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+									 " mime, size, category, indexParent, dontDelete) "+
+									 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, TRUE)");
 				nextId = DatabaseManager.getNextId(db, "files");
 
 				if (nextId < 0)

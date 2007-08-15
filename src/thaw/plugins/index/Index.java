@@ -297,8 +297,8 @@ public class Index extends Observable implements MutableTreeNode,
 
 				PreparedStatement st;
 
-				purgeFileList();
-				purgeLinkList();
+				purgeFileList(false);
+				purgeLinkList(false);
 				purgeCommentKeys();
 
 				st = db.getConnection().prepareStatement("DELETE FROM indexParents "+
@@ -319,12 +319,26 @@ public class Index extends Observable implements MutableTreeNode,
 	}
 
 
+	/**
+	 * call purgeLinkList(false)
+	 */
 	public void purgeLinkList() {
+		purgeLinkList(false);
+	}
+
+	public void purgeLinkList(boolean useDontDelete) {
 		synchronized(db.dbLock) {
 
 			try {
 				final Connection c = db.getConnection();
-				final PreparedStatement st = c.prepareStatement("DELETE FROM links WHERE indexParent = ?");
+				final PreparedStatement st;
+
+				if (!useDontDelete)
+					st = c.prepareStatement("DELETE FROM links WHERE indexParent = ?");
+				else
+					st = c.prepareStatement("DELETE FROM links WHERE indexParent = ? "+
+								"AND dontDelete = FALSE");
+
 				st.setInt(1, getId());
 				st.execute();
 			} catch(final SQLException e) {
@@ -333,11 +347,23 @@ public class Index extends Observable implements MutableTreeNode,
 		}
 	}
 
+	/**
+	 * call purgeFileList(false)
+	 */
 	public void purgeFileList() {
+		purgeFileList(false);
+	}
+
+	public void purgeFileList(boolean useDontDelete) {
 		synchronized(db.dbLock) {
 			try {
 				final Connection c = db.getConnection();
-				final PreparedStatement st = c.prepareStatement("DELETE FROM files WHERE indexParent = ?");
+				final PreparedStatement st;
+
+				if (!useDontDelete)
+					st = c.prepareStatement("DELETE FROM files WHERE indexParent = ?");
+				else
+					st = c.prepareStatement("DELETE FROM files WHERE indexParent = ? AND dontDelete = FALSE");
 				st.setInt(1, getId());
 				st.execute();
 			} catch(final SQLException e) {
@@ -1045,10 +1071,16 @@ public class Index extends Observable implements MutableTreeNode,
 
 	}
 
-
+	/**
+	 * call purgeIndex(true)
+	 */
 	public void purgeIndex() {
-		purgeFileList();
-		purgeLinkList();
+		purgeIndex(true);
+	}
+
+	public void purgeIndex(boolean useDontDelete) {
+		purgeFileList(useDontDelete);
+		purgeLinkList(useDontDelete);
 		purgeCommentKeys();
 	}
 
