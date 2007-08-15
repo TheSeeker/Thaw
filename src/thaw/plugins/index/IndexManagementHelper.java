@@ -1400,7 +1400,7 @@ public class IndexManagementHelper {
 
 		synchronized(db.dbLock) {
 			try {
-				preSt = db.getConnection().prepareStatement("SELECT id FROM files "+
+				preSt = db.getConnection().prepareStatement("SELECT id, publicKey FROM files "+
 									    "WHERE indexParent = ? AND "+
 									    "LOWER(publicKey) LIKE ? LIMIT 1");
 
@@ -1428,7 +1428,16 @@ public class IndexManagementHelper {
 
 					ResultSet res = preSt.executeQuery();
 
-					if (!res.next()) {
+					boolean alreadyThere = false;
+
+					if (res.next()) {
+						String pubKey = res.getString("publicKey");
+
+						if (FreenetURIHelper.compareKeys(key, pubKey))
+							alreadyThere = true;
+					}
+
+					if (alreadyThere) {
 
 						st.setInt(1, nextId);
 						st.setString(2, FreenetURIHelper.getFilenameFromKey(key));
