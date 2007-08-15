@@ -128,9 +128,24 @@ public class KSKBoardAttachment
 		return null;
 	}
 
+
+	public static final char[] INVALID_CHARS = { '/', '\\', '?', '*', '<', '>',
+						     '\"', ':', '|', '#', '&' };
+
+	private void setBoardName(String name) {
+		if (name.startsWith("."))
+			name = name + "_";
+
+		for (int i = 0 ; i < INVALID_CHARS.length ; i++) {
+			name = name.replace(INVALID_CHARS[i], '_');
+		}
+
+		boardName = name;
+	}
+
 	public void setValue(String property, String value) {
 		if ("Name".equals(property)) {
-			boardName = value;
+			setBoardName(value);
 		} else if ("pubKey".equals(property)) {
 			publicKey = value;
 		} else if ("privKey".equals(property)) {
@@ -244,12 +259,17 @@ public class KSKBoardAttachment
 	public StringBuffer getSignedStr() {
 		StringBuffer buf = new StringBuffer();
 
+		Logger.info(this, "Board : "+boardName);
 		buf.append(boardName.toLowerCase()).append(KSKMessageParser.SIGNATURE_ELEMENTS_SEPARATOR);
 
-		if (publicKey != null)
-			buf.append(publicKey).append(KSKMessageParser.SIGNATURE_ELEMENTS_SEPARATOR);
-		if (privateKey != null)
-			buf.append(privateKey).append(KSKMessageParser.SIGNATURE_ELEMENTS_SEPARATOR);
+		if (publicKey != null) {
+			Logger.info(this, "public key for : "+boardName+" : '"+publicKey+"'");
+			buf.append(publicKey.trim()).append(KSKMessageParser.SIGNATURE_ELEMENTS_SEPARATOR);
+		}
+		if (privateKey != null) {
+			Logger.info(this, "private key for : "+boardName+" : '"+privateKey+"'");
+			buf.append(privateKey.trim()).append(KSKMessageParser.SIGNATURE_ELEMENTS_SEPARATOR);
+		}
 
 		return buf;
 	}
