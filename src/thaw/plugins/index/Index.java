@@ -1027,7 +1027,7 @@ public class Index extends Observable implements MutableTreeNode,
 			if (c.exists()) {
 				nmbFailedCommentFetching = 0;
 
-				if (c.isNew()) {
+				if (c.isNew() && c.isValid()) {
 					Logger.info(this, "New comment !");
 
 					setNewCommentFlag(true);
@@ -1081,7 +1081,8 @@ public class Index extends Observable implements MutableTreeNode,
 	public void purgeIndex(boolean useDontDelete) {
 		purgeFileList(useDontDelete);
 		purgeLinkList(useDontDelete);
-		purgeCommentKeys();
+		if (!useDontDelete)
+			purgeCommentKeys();
 	}
 
 
@@ -1447,6 +1448,12 @@ public class Index extends Observable implements MutableTreeNode,
 	}
 
 	public boolean setNewCommentFlagInMem(boolean flag) {
+		try {
+			throw new Exception("bleh");
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+
 		newComment = flag;
 		return true;
 	}

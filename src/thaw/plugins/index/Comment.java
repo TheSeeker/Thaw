@@ -111,7 +111,7 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 
 	private Comment() {
-
+		newComment = false;
 	}
 
 
@@ -126,6 +126,7 @@ public class Comment extends Observable implements Observer, ActionListener {
 		this.comment = comment;
 		this.index = index;
 		this.rev = rev;
+		newComment = false;
 	}
 
 
@@ -622,11 +623,21 @@ public class Comment extends Observable implements Observer, ActionListener {
 		 * @see org.xml.sax.ContentHandler#endDocument()
 		 */
 		public void endDocument() throws SAXException {
+			valid = false;
+
 			try {
 				if (comment != null && authorTxt != null
-				    && publicKey != null && sig != null) {
+				    && publicKey != null && sig != null
+				    && index != null) {
 
 					author = Identity.getIdentity(db, authorTxt, publicKey);
+
+					if (author == null) {
+						Logger.warning(this, "Can't find the identity in the DB ?! WTF ?!");
+						valid = false;
+						return;
+					}
+
 					valid = author.check(index.getCommentPublicKey()+"-"+
 							     author.getNick()+"-"+
 							     comment,
@@ -654,7 +665,7 @@ public class Comment extends Observable implements Observer, ActionListener {
 	public boolean parseComment(java.io.File xmlFile) {
 		newComment = false;
 
-		Logger.info(this, "Parsing comment ...");
+		Logger.info(this, "Parsing comment : "+index.getCommentPublicKey() + " : "+Integer.toString(rev));
 
 		FileInputStream in;
 
@@ -668,7 +679,6 @@ public class Comment extends Observable implements Observer, ActionListener {
 		CommentHandler handler = new CommentHandler();
 
 		try {
-			// Use the default (non-validating) parser
 			SAXParserFactory factory = SAXParserFactory.newInstance();
 
 			// Parse the input
@@ -690,6 +700,8 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 					if (existsInTheBdd()) {
 						Logger.debug(this, "Comment already in db");
+						newComment = false;
+						valid = false;
 						return false;
 					}
 
@@ -731,12 +743,21 @@ public class Comment extends Observable implements Observer, ActionListener {
 		return (comment != null && author != null);
 	}
 
+	public boolean isValid() {
+		return valid;
+	}
+
 
 	/**
 	 * r and s must be set
 	 * You have to do the synchronized(db.dbLock) !
 	 */
 	private boolean existsInTheBdd() {
+		if (sig == null) {
+			Logger.notice(this, "No sig, can't say if it's already in the bdd");
+			return true;
+		}
+
 		try {
 			PreparedStatement st;
 
