@@ -1273,6 +1273,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 
 	private boolean lastHasChangedValue = false;
+	private boolean lastNewCommentValue = false;
 	private boolean hasLastHasChangedValueBeenSet = false;
 
 	public void forceFlagsReload() {
@@ -1359,7 +1360,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 		/* It's dirty and will probably cause graphical bug :/ */
 		if (hasLastHasChangedValueBeenSet)
-			return lastHasChangedValue;
+			return lastNewCommentValue;
 
 		synchronized(db.dbLock) {
 			try {
@@ -1376,7 +1377,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 				ret = set.next();
 
-				lastHasChangedValue = ret;
+				lastNewCommentValue = ret;
 				hasLastHasChangedValueBeenSet = true;
 
 				return ret;
