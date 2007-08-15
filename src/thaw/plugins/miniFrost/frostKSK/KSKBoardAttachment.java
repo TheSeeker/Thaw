@@ -128,13 +128,12 @@ public class KSKBoardAttachment
 		return null;
 	}
 
-
 	public static final char[] INVALID_CHARS = { '/', '\\', '?', '*', '<', '>',
 						     '\"', ':', '|', '#', '&' };
 
 	private void setBoardName(String name) {
 		if (name.startsWith("."))
-			name = name + "_";
+			name = "_" + name;
 
 		for (int i = 0 ; i < INVALID_CHARS.length ; i++) {
 			name = name.replace(INVALID_CHARS[i], '_');
