@@ -24,25 +24,23 @@ Thaw specific
 =============
 
 Thaw method to fetch the messages:
--> Start with the date of tomorrow
+-> Start with the date of today
 -> Go back day by day, down to 5 days back
 -> For each day, it tries to fetch 5 revisions
 -> Each time a revision is successfully downloaded, it continues to go upper
+-> When finished, do the same for tomorrow (just to be sure ...)
 
 For the insertions:
--> Refresh the board
+-> Refresh the board until the day you wanna post
 -> Try to insert it at (lastRevision+1)
--> If it fails, go upper (the node seems to detect sometimes the collisions)
+-> If it fails, go upper (the node seems to detect the collisions)
 
 Security notes:
--> When fetching, don't accept the redirection as failed (Thaw only accept the DNDs and 'Route not found' as a failure)
+-> When fetching, don't accept the redirections as failed (Thaw only accept the DNDs, 'Route not found', the URI problems, and the protocol error as a failures)
 
 
 Message format
 ==============
-
-<!-- This format is UGLY. -->
-
 
 <?xml version="1.0" encoding="UTF-8"?>
 <FrostMessage>
@@ -59,9 +57,8 @@ Message format
 <InReplyTo><![CDATA[3677AC9EB291D5BDB9076FF27A66A9AD9ADE2A5C249C9A75781592310C1FA3F2,C6F339A701245E514379E9598927777BB300D2A8EF392C085964D693E1A5D108]]></InReplyTo>
 
 <!--
-	Only used by Frost for a display purpose.
-	No logical client would use that.
-	Put 0.
+	Only used by Frost for a display purpose (setting the scrollbar & the gray background on the sender name).
+	Thaw don't use it at all.
 -->
 <IdLinePos>404</IdLinePos>
 <IdLineLen>76</IdLineLen>
@@ -73,6 +70,8 @@ Message format
      Never take into consideration the hash of the publicKey (INSECURE)
      Take the nick only if the post is non-signed, or if it's the first
      time you see this public key
+
+     NB: If the post is unsigned, Thaw will replace all the '@' in the nick by '_'
 -->
 <From><![CDATA[bback@xgVRApPk+Yngy+jmtOeGzIbN_A0]]></From>
 
