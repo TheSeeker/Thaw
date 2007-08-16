@@ -35,8 +35,8 @@ For the insertions:
 -> Try to insert it at (lastRevision+1)
 -> If it fails, go upper (the node seems to detect the collisions)
 
-Security notes:
--> When fetching, don't accept the redirections as failed (Thaw only accept the DNDs, 'Route not found', the URI problems, and the protocol error as a failures)
+Security note:
+-> When fetching, don't accept the redirections as failed (Thaw only accept the DNDs, 'Route not found', the URI problems, and the protocol errors as a failures)
 
 
 Message format
@@ -45,6 +45,10 @@ Message format
 <?xml version="1.0" encoding="UTF-8"?>
 <FrostMessage>
 
+<!--
+  SHA1 of various stuffs (no real check on how it's made)
+  Used to avoid duplicated messages and to build a message tree
+-->
 <MessageId><![CDATA[2E01E431CBD655671B1A1FE1C919D899211CC1571AD020EC9D35AA09FF83EAA1]]></MessageId>
 
 <!--
@@ -52,13 +56,21 @@ Message format
 	The first ID is the initial message.
 	This message answer to the last ID.
 	IDs are comma separated (no space).
-	(Note : why not using xml tags instead of a comma ? :P)
--->
+	(Note : why not using xml tags instead of commas ?)
+
+	Atm, Thaw only provides the latest id (Frost seems to accept
+	it). Anyway, Thaw will only use the latest id (to avoid a
+	flooder sending messages with 20 false inReplyTo id per
+	message & because it's easier to implement :)
+ -->
 <InReplyTo><![CDATA[3677AC9EB291D5BDB9076FF27A66A9AD9ADE2A5C249C9A75781592310C1FA3F2,C6F339A701245E514379E9598927777BB300D2A8EF392C085964D693E1A5D108]]></InReplyTo>
 
 <!--
-	Only used by Frost for a display purpose (setting the scrollbar & the gray background on the sender name).
+	Only used by Frost for a display purpose
+	(setting the scrollbar & the gray background on the sender name).
 	Thaw don't use it at all.
+
+	Atm, Thaw set these two values to 0. Will be changed later.
 -->
 <IdLinePos>404</IdLinePos>
 <IdLineLen>76</IdLineLen>
@@ -67,9 +79,9 @@ Message format
 <!-- Unsigned post : nick
      Signed post : nick@hash(pubKey)
 
-     Never take into consideration the hash of the publicKey (INSECURE)
-     Take the nick only if the post is non-signed, or if it's the first
-     time you see this public key
+     - Never take into consideration the hash of the publicKey (INSECURE)
+     - Take the nick only if the post is non-signed, or if it's the first
+       time you see this public key
 
      NB: If the post is unsigned, Thaw will replace all the '@' in the nick by '_'
 -->
@@ -89,7 +101,8 @@ Message format
 	This format SUCKS. Really.
 	VVVVVVVVVVVVVVVVVVVVVVVVVV
 -->
-<Body><![CDATA[----- Calipsos@yQWKyAkB7sdl1Bw545Qn7COfV3M ----- 2007.07.20 - 21:51:30GMT -----
+<Body>
+<![CDATA[----- Calipsos@yQWKyAkB7sdl1Bw545Qn7COfV3M ----- 2007.07.20 - 21:51:30GMT -----
 
 Why must frost associate an ID with a file you are uploading?
 
@@ -105,10 +118,15 @@ rgds, bback.
 _-Frost aCtIVe DeVeLoPMeNT cREW-_
 
 Latest stable Frost release (19-Jul-2007):
-USK@QRZAI1nSm~dAY2hTdzVWXmEhkaI~dso0OadnppBR7kE,wq5rHGBI7kpChBe4yRmgBChIGDug7Xa5SG9vYGXdxR0,AQACAAE/frost/1]]></Body>
+USK@QRZAI1nSm~dAY2hTdzVWXmEhkaI~dso0OadnppBR7kE,wq5rHGBI7kpChBe4yRmgBChIGDug7Xa5SG9vYGXdxR0,AQACAAE/frost/1]]>
+</Body>
+
+
 
 <!-- What is the point of this field ?! -->
-<!-- Possible security issue => Ignore this field -->
+<!-- Possible security issue
+     => Ignore this field
+     => Use the board name used to download this message instead -->
 <Board><![CDATA[frost]]></Board>
 
 
@@ -119,10 +137,11 @@ USK@QRZAI1nSm~dAY2hTdzVWXmEhkaI~dso0OadnppBR7kE,wq5rHGBI7kpChBe4yRmgBChIGDug7Xa5
 <pubKey><![CDATA[CHwpbtSA+asXiF3s0xGX1hd3nA2scMMjSZbh:AKLw/y7/oDmXYYT0KWNeAfJPcVRgns+Nw9rJ0X/2JLt7o73Yt9PMkx5STJhlJekF36sf+l3vkTzPNHa2xmyjHms2biHl3jGy9dHdAduqNKs99PyW0Z19/QbZ1HEeeCXgllKE+z4aHgWK2CzeID6wPkzZLjFInKLb3gZtQLh5cm3n]]></pubKey>
 
 <!-- Obsolete -->
+<!-- Thaw doesn't specify this signature and doesn't check it. -->
 <Signature><![CDATA[oMQS9OuM1jjTQPvfjHbiGrNEkgrK8avqXlDXqZ6mjweEotZdnt4V2xvXYSMuUwQj3qwOfQejhub55Ii15NBI6J8xZ2sTJr0uiSwZ8ToJspHB+h5PwG9ROuvtsoRUt23rKT2gzjXOu/HMygwZ1j3+ilAd2Rua9x9WQ+KJgPvVSPQ=]]></Signature>
 
 
-<!-- Signature (see the public RSA key above)
+<!-- The real signature (see the public RSA key above)
      The signature is made from the elements:
 
 signedContent = date + '|'
@@ -153,6 +172,8 @@ filter() replace the following caracters by a '_':
 
 and if the specified string starts with a '.', it prefixes it with a '_'.
 
+NB: The board description is not added to the signature. It's a really minor issue, but it should be
+    added later if possible.
 -->
 <SignatureV2><![CDATA[clfW3OggCYIy2MIKAMXkreBPqMzpZR/AWguWfjlnuwGogj/HBJuRgWji0GPrbA4KmmYsakMgoMt3rQ4hwZLlyxEW7ncz2cCEiXZLfecfmDe/rQ/wFn/LSsVIxxZRDXVuWMWkuPLsLxpUGztAf7hWoax5h4KsMvzMiqHJzUZHQEI=]]></SignatureV2>
 
@@ -174,6 +195,9 @@ and if the specified string starts with a '.', it prefixes it with a '_'.
 	<Attachment type="file">
 		    <File>
 			<name><![CDATA[Frost.txt]]></name>
+			<!-- Why is there no more CDATA ?! -->
+			<!-- CDATAs make the parsing and the generation hard to do uselessly,
+			     but suddently removing them make it harder -->
 			<size>5017</size>
 			<key>CHK@eSoSUEygke4ZpnWjcTBPz7OJlQ0gqd3xVvSBTVoU8QM,qlWgXBHTBpZxVJu0ENoKgO6P2tI8xZUBB~yUVLw9d38,AAIC--8/Frost.txt</key>
 		    </File>
