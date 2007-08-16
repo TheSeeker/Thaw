@@ -402,6 +402,31 @@ public class KSKMessage
 	}
 
 
+	private void setAuthorAndDate(Vector subMsgs, KSKAuthor author,
+				      java.util.Date date) {
+
+		// we browse the vector by starting with the last element
+		// so we can't use an iterator
+		// the goal is to find the corresponding KSKAuthor
+		// and replace it by ours (ours has its identity set)
+		for (int i = subMsgs.size()-1; i >= 0 ; i--) {
+			KSKSubMessage sub = (KSKSubMessage)subMsgs.get(i);
+
+			if (author.toString().equals(sub.getAuthor().toString())) {
+				sub.setAuthor(author);
+				sub.setDate(date);
+				return;
+			}
+		}
+
+		// we didn't find it, so we force it on the last message
+		Logger.notice(this, "KSKAuthor forced on the last sub-messages");
+		KSKSubMessage lastMsg = (KSKSubMessage)subMsgs.get(subMsgs.size()-1);
+		lastMsg.setAuthor(author);
+		lastMsg.setDate(date);
+	}
+
+
 	/** no caching */
 	public Vector getSubMessages() {
 
@@ -439,14 +464,10 @@ public class KSKMessage
 		try {
 			v = parseMessage(content);
 
-			int size;
-
-			if (v == null || (size = v.size()) <= 0) {
+			if (v == null || (v.size()) <= 0) {
 				parsed = false;
 			} else {
-				KSKSubMessage lastMsg = (KSKSubMessage)v.get(size-1);
-				lastMsg.setAuthor((KSKAuthor)getSender());
-				lastMsg.setDate(getDate());
+				setAuthorAndDate(v, ((KSKAuthor)getSender()), getDate());
 			}
 
 		} catch(Exception e) { /* dirty, but should work */
