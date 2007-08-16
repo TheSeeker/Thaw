@@ -122,9 +122,38 @@ USK@QRZAI1nSm~dAY2hTdzVWXmEhkaI~dso0OadnppBR7kE,wq5rHGBI7kpChBe4yRmgBChIGDug7Xa5
 <!-- Obsolete -->
 <Signature><![CDATA[oMQS9OuM1jjTQPvfjHbiGrNEkgrK8avqXlDXqZ6mjweEotZdnt4V2xvXYSMuUwQj3qwOfQejhub55Ii15NBI6J8xZ2sTJr0uiSwZ8ToJspHB+h5PwG9ROuvtsoRUt23rKT2gzjXOu/HMygwZ1j3+ilAd2Rua9x9WQ+KJgPvVSPQ=]]></Signature>
 
+
 <!-- Signature (see the public RSA key above)
      The signature is made from the elements:
-     *TODO*
+
+signedContent = date + '|'
+              + time + '|'
+              + board + '|'
+              + from + '|'
+              + messageId + '|'
+              + ((inReplyTo != null) ? (inReplyTo + '|') : "")
+              + ((recipient != null) ? (recipient + '|') : "")
+              + idLinePos + '|'
+              + idLineLen + '|'
+              + subject + '|'
+              + body + '|';
+
+for (attachment in attachments) {
+    if (attachment instanceof Board)
+        signedContent += filter(attachment.name.toLowerCase()) + '|'
+                       + ((attachment.publicKey != null) ? (board.publicKey + '|') : "")
+		       + ((attachment.privateKey != null) ? (board.privateKey + '|') : "");
+    else if (attachment instanceof File)
+        signedContent += filename + '|'
+	               + publicKey + '|';
+}
+
+
+filter() replace the following caracters by a '_':
+'/', '\\', '?', '*', '<', '>', '\"', ':', '|', '#', '&'
+
+and if the specified string starts with a '.', it prefixes it with a '_'.
+
 -->
 <SignatureV2><![CDATA[clfW3OggCYIy2MIKAMXkreBPqMzpZR/AWguWfjlnuwGogj/HBJuRgWji0GPrbA4KmmYsakMgoMt3rQ4hwZLlyxEW7ncz2cCEiXZLfecfmDe/rQ/wFn/LSsVIxxZRDXVuWMWkuPLsLxpUGztAf7hWoax5h4KsMvzMiqHJzUZHQEI=]]></SignatureV2>
 

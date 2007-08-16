@@ -83,7 +83,7 @@ public class KSKAttachmentFactory {
 			try {
 				val = XMLTools.getChildElementsCDATAValue(rootEl, properties[i]);
 			} catch(java.lang.ClassCastException e) {
-				/* FROST XML SUCKS. IT SUCKS IT SUCKS IT SUCKS IT SUCKS. */
+				/* Dirty */
 				val = XMLTools.getChildElementsTextValue(rootEl, properties[i]);
 			}
 
