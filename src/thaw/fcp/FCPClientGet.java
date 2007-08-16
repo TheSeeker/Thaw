@@ -61,8 +61,8 @@ public class FCPClientGet extends Observable
 	/* used when redirected */
 	private boolean restartIfFailed = false;
 
-
-	private int getFailedCode = 0;
+	private int protocolErrorCode = -1;
+	private int getFailedCode = -1;
 
 
 	/**
@@ -397,12 +397,19 @@ public class FCPClientGet extends Observable
 		if("ProtocolError".equals( message.getMessageName() )) {
 			Logger.debug(this, "ProtocolError !");
 
+			if ("4".equals(message.getValue("Code"))) {
+				Logger.warning(this, "The node reported an invalid key. Please check the following key\n"+
+					       key);
+			}
+
 			if("15".equals( message.getValue("Code") )) {
 				Logger.debug(this, "Unknow URI ? was probably a stop order so no problem ...");
 				return;
 			}
 
 			Logger.error(this, "=== PROTOCOL ERROR === \n"+message.toString());
+
+			protocolErrorCode = Integer.parseInt(message.getValue("Code"));
 
 			status = "Protocol Error ("+message.getValue("CodeDescription")+")";
 			progress = 100;
@@ -1128,5 +1135,9 @@ public class FCPClientGet extends Observable
 
 	public int getGetFailedCode() {
 		return getFailedCode;
+	}
+
+	public int getProtocolErrorCode() {
+		return protocolErrorCode;
 	}
 }

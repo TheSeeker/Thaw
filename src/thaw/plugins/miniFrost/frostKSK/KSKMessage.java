@@ -97,9 +97,19 @@ public class KSKMessage
 			return;
 
 		if (!get.isSuccessful()) {
+
 			int code = get.getGetFailedCode();
 
-			if (code == 13 /* dnd */
+			if (get.getProtocolErrorCode() == 4
+			    || code == 20) {
+				Logger.warning(this, "MiniFrost: Invalid key: "+key);
+				successfullyDownloaded = true;
+			} else if (get.getProtocolErrorCode() >= 0) {
+				Logger.warning(this,
+					       "MiniFrost: Unknown protocol error (code="+
+					       Integer.toString(get.getProtocolErrorCode())+"). Please report.");
+				successfullyDownloaded = true;
+			} else if (code == 13 /* dnd */
 			    || code == 14 /* route not found */
 			    || code == 20 /* jflesch is stupid */) {
 				Logger.info(this, key+" not found");
