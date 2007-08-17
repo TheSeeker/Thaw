@@ -96,12 +96,9 @@ public class SSKBoardFactory extends KSKBoardFactory {
 						v.add(boards.get(name+publicKey));
 					else {
 
-						int count = countNewMessages(id);
-
 						SSKBoard board = new SSKBoard(this,
 									      id, name, lastUpdate,
-									      publicKey, privateKey,
-									      count);
+									      publicKey, privateKey);
 
 						v.add(board);
 						boards.put(name+publicKey, board);

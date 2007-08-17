@@ -47,11 +47,14 @@ public class MiniFrostPanel implements Observer {
 		this.db = db;
 		this.pluginCore = pluginCore;
 
-		boardTree = new BoardTree(this);
+		/* board tree use some settings provided by the message tree table
+		 * to count the unread messages => it must instanciated after */
 		messageTreeTable = new MessageTreeTable(this);
+		boardTree = new BoardTree(this);
 		messagePanel = new MessagePanel(this);
 		draftPanel = new DraftPanel(this);
 
+		boardTree.addObserver(messageTreeTable);
 		boardTree.addObserver(this);
 
 		/* so it will be vertical ... don't ask me why ... */

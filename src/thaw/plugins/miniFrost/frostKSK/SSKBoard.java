@@ -14,10 +14,9 @@ public class SSKBoard extends KSKBoard {
 
 	public SSKBoard(SSKBoardFactory factory,
 			int id, String name, Date lastUpdate,
-			String publicKey, String privateKey,
-			int newMessages) {
+			String publicKey, String privateKey) {
 
-		super(factory, id, name, lastUpdate, newMessages);
+		super(factory, id, name, lastUpdate);
 
 		if (!publicKey.endsWith("/"))
 			publicKey += "/";

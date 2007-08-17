@@ -263,11 +263,6 @@ public class KSKMessage
 
 		this.read = read;
 
-		if (read)
-			board.setNewMessageNumber(board.getNewMessageNumber() -1);
-		else
-			board.setNewMessageNumber(board.getNewMessageNumber() +1);
-
 		try {
 			Hsqldb db = board.getFactory().getDb();
 
@@ -292,13 +287,6 @@ public class KSKMessage
 			return;
 
 		this.archived = archived;
-
-		if (!read) {
-			if (archived)
-				board.setNewMessageNumber(board.getNewMessageNumber() -1);
-			else
-				board.setNewMessageNumber(board.getNewMessageNumber() +1);
-		}
 
 		try {
 			Hsqldb db = board.getFactory().getDb();

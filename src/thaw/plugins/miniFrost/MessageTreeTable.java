@@ -285,8 +285,6 @@ public class MessageTreeTable implements Observer,
 
 		panel.add(southPanel, BorderLayout.SOUTH);
 
-		mainPanel.getBoardTree().addObserver(this);
-
 		refresh();
 	}
 
@@ -1062,6 +1060,18 @@ public class MessageTreeTable implements Observer,
 	}
 
 
+	public int getMinTrustLevel() {
+		return minTrustLevelInt;
+	}
+
+	public boolean seeUnsigned() {
+		return seeUnsigned.isSelected();
+	}
+
+	public boolean seeArchived() {
+		return seeArchived.isSelected();
+	}
+
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == seeUnsigned
 		    || e.getSource() == minTrustLevel
@@ -1071,6 +1081,8 @@ public class MessageTreeTable implements Observer,
 
 			minTrustLevelInt = Identity.getTrustLevel((String)(minTrustLevel.getSelectedItem()));
 			refresh();
+
+			mainPanel.getBoardTree().refresh();
 
 		} else if (e.getSource() == searchButton
 		    || e.getSource() == searchField) {

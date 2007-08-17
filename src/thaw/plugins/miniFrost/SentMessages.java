@@ -79,7 +79,7 @@ public class SentMessages
 		return false;
 	}
 
-	public int getNewMessageNumber() {
+	public int getNewMessageNumber(boolean unsigned, boolean archived, int minTrustLevel) {
 		return 0;
 	}
 

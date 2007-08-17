@@ -46,7 +46,9 @@ public interface Board extends Comparable {
 
 	public boolean isRefreshing();
 
-	public int getNewMessageNumber();
+	public int getNewMessageNumber(boolean unsigned,
+				       boolean archived,
+				       int minTrustLevel);
 
 	public boolean destroy();
 

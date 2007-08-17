@@ -283,28 +283,6 @@ public class KSKBoardFactory
 		}
 	}
 
-	protected int countNewMessages(int boardId) {
-		int count = 0;
-		try {
-			PreparedStatement subSt
-				= db.getConnection().prepareStatement("SELECT count(id)"+
-								      "FROM frostKSKMessages "+
-								      "WHERE boardId = ? "+
-								      "AND read = FALSE AND archived = FALSE");
-			subSt.setInt(1, boardId);
-
-			ResultSet subRes = subSt.executeQuery();
-
-			if (subRes.next())
-				count = subRes.getInt(1);
-		} catch(SQLException e) {
-			Logger.error(this, "Can't count the number of new message on the board because : "+e.toString());
-		}
-
-		return count;
-	}
-
-
 
 	public Vector getBoards() {
 		Vector v = new Vector();
@@ -329,11 +307,8 @@ public class KSKBoardFactory
 					if (boardsHashMap.get(name) != null)
 						v.add(boardsHashMap.get(name));
 					else {
-						int count = countNewMessages(id);
-
 						KSKBoard board = new KSKBoard(this,
-									      id, name, lastUpdate,
-									      count);
+									      id, name, lastUpdate);
 
 						v.add(board);
 						boardsHashMap.put(name, board);

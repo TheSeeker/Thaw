@@ -48,8 +48,6 @@ public class KSKBoard
 
 	private boolean refreshing;
 
-	private int newMsgs;
-
 	private KSKBoard() {
 
 	}
@@ -57,14 +55,11 @@ public class KSKBoard
 
 	public KSKBoard(KSKBoardFactory factory,
 			int id, String name,
-			Date lastUpdate,
-			int newMessages) {
+			Date lastUpdate) {
 		this.id = id;
 		this.name = name;
 		this.factory = factory;
 		this.lastUpdate = lastUpdate;
-
-		newMsgs = newMessages;
 
 		refreshing = false;
 	}
@@ -551,6 +546,8 @@ public class KSKBoard
 			Logger.error(this, "Unable to update the lastUpdate date :"+e.toString());
 		}
 
+		int newMsgs = getNewMessageNumber();
+
 		if (newMsgs > 0) {
 			String announce = I18n.getMessage("thaw.plugin.miniFrost.newMsgAnnounce");
 			announce = announce.replaceAll("X", Integer.toString(newMsgs));
@@ -609,8 +606,8 @@ public class KSKBoard
 				&& msg.isSuccessful();
 
 			if (successful) {
-				if (msg.isParsable() && !msg.isRead())
-					newMsgs++;
+				//if (msg.isParsable() && !msg.isRead())
+				//	newMsgs++;
 
 				if (msg.getRev() > lastSuccessfulRev)
 					lastSuccessfulRev = msg.getRev();
@@ -774,12 +771,70 @@ public class KSKBoard
 		return refreshing;
 	}
 
-	public int getNewMessageNumber() {
-		return newMsgs;
+
+	protected static int countNewMessages(Hsqldb db, int boardId,
+					      boolean unsigned, boolean archived, int minTrustLevel) {
+		int count = -1;
+
+		String archivedStr = "";
+
+		if (!archived)
+			archivedStr = " AND frostKSKMessages.archived = FALSE";
+
+		String unsignedStr = " AND (frostKSKMessages.sigId IS NULL OR signatures.trustLevel >= ?)";
+
+		if (!unsigned)
+			unsignedStr = " AND frostKSKMessages.sigId IS NOT NULL AND signatures.trustLevel >= ?";
+
+		String query = "SELECT count(frostKSKMessages.id) "+
+			"FROM frostKSKMessages LEFT JOIN signatures "+
+			" ON frostKSKMessages.sigId = signatures.id "+
+			"WHERE frostKSKMessages.boardId = ? "+
+			"AND frostKSKMessages.read = FALSE"+
+			archivedStr+
+			unsignedStr;
+
+		try {
+			PreparedStatement subSt;
+
+			subSt = db.getConnection().prepareStatement(query);
+			subSt.setInt(1, boardId);
+			subSt.setInt(2, minTrustLevel);
+
+			ResultSet subRes = subSt.executeQuery();
+
+			if (subRes.next())
+				count = subRes.getInt(1);
+
+		} catch(SQLException e) {
+			Logger.error(db, "Can't count the number of new message on the board because : "+e.toString());
+		}
+
+		return count;
 	}
 
-	protected void setNewMessageNumber(int nmb) {
-		this.newMsgs = nmb;
+
+	boolean lastUnsignedSetting;
+	boolean	lastArchivedSetting;
+	int lastMinTrustLevelSetting;
+
+	/**
+	 * just for the announce through the trayicon;
+	 */
+	private int getNewMessageNumber() {
+		return getNewMessageNumber(lastUnsignedSetting,
+					   lastArchivedSetting,
+					   lastMinTrustLevelSetting);
+	}
+
+
+	public int getNewMessageNumber(boolean unsigned, boolean archived, int minTrustLevel) {
+		this.lastUnsignedSetting = unsigned;
+		this.lastArchivedSetting = archived;
+		this.lastMinTrustLevelSetting = minTrustLevel;
+
+		return countNewMessages(factory.getDb(), id,
+					unsigned, archived, minTrustLevel);
 	}
 
 

@@ -175,8 +175,10 @@ public class BoardTree extends Observable
 
 
 	protected class BoardListRenderer extends DefaultListCellRenderer {
-		public BoardListRenderer() {
+		private MessageTreeTable messageTreeTable;
 
+		public BoardListRenderer() {
+			messageTreeTable = mainPanel.getMessageTreeTable();
 		}
 
 		public java.awt.Component getListCellRendererComponent(JList list, Object value,
@@ -186,8 +188,12 @@ public class BoardTree extends Observable
 
 			String str = board.toString();
 
-			if (board.getNewMessageNumber() > 0)
-				str += " ("+Integer.toString(board.getNewMessageNumber())+")";
+			int unread = 0;
+
+			if ( (unread = board.getNewMessageNumber(messageTreeTable.seeUnsigned(),
+								 messageTreeTable.seeArchived(),
+								 messageTreeTable.getMinTrustLevel())) > 0)
+				str += " ("+Integer.toString(unread)+")";
 
 			java.awt.Component c = super.getListCellRendererComponent(list, str,
 										  index, isSelected,
@@ -195,7 +201,7 @@ public class BoardTree extends Observable
 
 			c.setFont(c.getFont().deriveFont((float)13.5));
 
-			if (board.getNewMessageNumber() > 0)
+			if (unread > 0)
 				c.setFont(c.getFont().deriveFont(Font.BOLD));
 			else
 				c.setFont(c.getFont().deriveFont(Font.PLAIN));
