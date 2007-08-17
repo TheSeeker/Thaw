@@ -58,6 +58,10 @@ public class SSKBoard extends KSKBoard {
 		return privateKey;
 	}
 
+	protected String getPublicKey() {
+		return publicKey;
+	}
+
 	/**
 	 * called by KSKDraft
 	 */

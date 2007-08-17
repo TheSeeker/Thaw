@@ -42,11 +42,25 @@ public abstract class KSKAttachment
 	public abstract void insert(Hsqldb db, int messageId);
 	public abstract StringBuffer getSignedStr();
 
+	/**
+	 * if isReady() return false, the draft will wait() on this attachment.
+	 * so don't forget to notify it !
+	 */
+	public abstract boolean isReady();
 
 	/* why ? nobody knows. */
 	public final static String[] CDATA_EXCEPTIONS = new String[] {
 		"key", "size"
 	};
+
+
+	private boolean isCDATAException(String name) {
+		for (int j = 0; j < CDATA_EXCEPTIONS.length ; j++)
+			if (CDATA_EXCEPTIONS[j].equals(name))
+				return true;
+
+		return false;
+	}
 
 
 	public Element getXML(org.w3c.dom.Document doc) {
@@ -67,11 +81,7 @@ public abstract class KSKAttachment
 		for (int i = 0 ; i < properties.length ; i++) {
 			Element el = doc.createElement(properties[i]);
 
-			boolean inCdata = true;
-
-			for (int j = 0; j < CDATA_EXCEPTIONS.length ; j++)
-				if (CDATA_EXCEPTIONS[j].equals(properties[i]))
-					inCdata = false;
+			boolean inCdata = isCDATAException(properties[i]);
 
 			if (inCdata) {
 				CDATASection cdata = doc.createCDATASection(values[i]);

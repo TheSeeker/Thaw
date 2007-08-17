@@ -115,11 +115,6 @@ public class KSKMessageParser {
 
 
 	private boolean alreadyInTheDb(Hsqldb db, String msgId) {
-		if (msgId == null) {
-			Logger.notice(this, "no message id => ignoring this message by supposing it "
-				      +"already in the db");
-			return true;
-		}
 
 		try {
 			synchronized(db.dbLock) {
@@ -155,6 +150,11 @@ public class KSKMessageParser {
 		if (board != null
 		    && !(boardNameExpected.toLowerCase().equals(board.toLowerCase()))) {
 			Logger.notice(this, "Board name doesn't match");
+			return false;
+		}
+
+		if (messageId == null) {
+			Logger.notice(this, "No message id, can't store.");
 			return false;
 		}
 

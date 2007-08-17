@@ -11,6 +11,7 @@ import thaw.plugins.signatures.Identity;
 
 import thaw.core.Logger;
 import thaw.plugins.miniFrost.interfaces.Board;
+import thaw.plugins.miniFrost.interfaces.Attachment;
 import thaw.core.I18n;
 
 
@@ -26,10 +27,13 @@ public class KSKDraft
 	private Identity identity;
 	private Date date;
 
+	private Vector attachments;
+
 
 	public KSKDraft(KSKBoard board, KSKMessage inReplyTo) {
 		this.board = board;
 		this.inReplyTo = inReplyTo;
+		attachments = null;
 	}
 
 	public String getSubject() {
@@ -95,26 +99,6 @@ public class KSKDraft
 		this.date = date;
 	}
 
-	public boolean addAttachment(java.io.File file) {
-		return true;
-	}
-
-	public boolean addAttachment(Board board) {
-		return true;
-	}
-
-	public boolean removeAttachment(java.io.File file) {
-		return true;
-	}
-
-	public boolean removeAttachment(Board board) {
-		return true;
-	}
-
-	public Vector getAttachments() {
-		return null;
-	}
-
 
 	private java.io.File fileToInsert;
 	private FCPQueueManager queueManager;
@@ -135,8 +119,13 @@ public class KSKDraft
 		return posting;
 	}
 
+
+	private static boolean initialInsertion = false;
+
 	public void post(FCPQueueManager queueManager) {
 		this.queueManager = queueManager;
+
+		initialInsertion = false;
 
 		waiting = true;
 		posting = false;
@@ -159,7 +148,7 @@ public class KSKDraft
 									  ((identity != null) ?
 									   identity.getPublicKey() :
 									   null),
-									  null,
+									  attachments,
 									  identity);
 
 			fileToInsert = generator.generateXML();
@@ -199,9 +188,11 @@ public class KSKDraft
 
 	private boolean isBoardUpToDateForToday() {
 		if (!board.isRefreshing()
-		    || board.getCurrentlyRefreshedDate() == null
-		    || (KSKBoard.getMidnight(board.getCurrentlyRefreshedDate()).getTime()
-			< KSKBoard.getMidnight(date).getTime()) ) {
+		    || (board.getCurrentlyRefreshedDate() != null
+			&& (KSKBoard.getMidnight(board.getCurrentlyRefreshedDate()).getTime()
+			    < KSKBoard.getMidnight(date).getTime()) )) {
+			Logger.info(this, "Board: "+Long.toString(KSKBoard.getMidnight(board.getCurrentlyRefreshedDate()).getTime()));
+			Logger.info(this, "Draft: "+KSKBoard.getMidnight(date).getTime());
 			return true;
 		}
 		return false;
@@ -211,13 +202,17 @@ public class KSKDraft
 	public void update(Observable o, Object param) {
 		if (o instanceof Board) {
 			synchronized(board) {
+				/* just to be sure we don't insert the message many times */
+				if (initialInsertion)
+					return;
+				initialInsertion = true;
+
 				if (fileToInsert == null || !isBoardUpToDateForToday())
 					return;
 				board.deleteObserver(this);
 				revUsed = board.getNextNonDownloadedRev(date, -1);
+				startInsertion();
 			}
-
-			startInsertion();
 		}
 
 		if (o instanceof FCPClientPut) {
@@ -281,5 +276,39 @@ public class KSKDraft
 
 	public Board getBoard() {
 		return board;
+	}
+
+	public Vector getAttachments() {
+		return attachments;
+	}
+
+	public boolean addAttachment(java.io.File file) {
+		return addAttachment(new KSKFileAttachment(board.getFactory().getCore().getQueueManager(),
+							   file));
+	}
+
+	public boolean addAttachment(Board board) {
+		return addAttachment(new KSKBoardAttachment(board));
+	}
+
+	public boolean addAttachment(thaw.plugins.index.Index index) {
+		return false;
+	}
+
+	protected boolean addAttachment(KSKAttachment attachment) {
+		if (attachments == null)
+			attachments = new Vector();
+		attachments.add(attachment);
+
+		return true;
+	}
+
+	public boolean removeAttachment(Attachment attachment) {
+		if (attachments == null)
+			return false;
+
+		attachments.remove(attachment);
+
+		return false;
 	}
 }

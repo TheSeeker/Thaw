@@ -17,6 +17,9 @@ public interface Message extends Comparable {
 	public Author getSender();
 	public java.util.Date getDate();
 
+	/**
+	 * @return < 0 if must not be displayed
+	 */
 	public int getRev();
 
 	public boolean isArchived();

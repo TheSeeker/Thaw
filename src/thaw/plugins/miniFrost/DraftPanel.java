@@ -11,6 +11,10 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 
 import java.util.Iterator;
 import java.util.Vector;
@@ -24,8 +28,9 @@ import java.util.Date;
 import thaw.core.I18n;
 import thaw.core.Logger;
 
-import thaw.plugins.signatures.Identity;
+import thaw.gui.IconBox;
 
+import thaw.plugins.signatures.Identity;
 import thaw.plugins.miniFrost.interfaces.Draft;
 
 
@@ -45,6 +50,9 @@ public class DraftPanel implements ActionListener {
 	private JButton sendButton;
 
 	private JButton extractButton;
+
+	private JButton addAttachment;
+	private JList attachmentList;
 
 	private JDialog dialog;
 
@@ -80,7 +88,7 @@ public class DraftPanel implements ActionListener {
 		textArea.setFont(textArea.getFont().deriveFont((float)13.5));
 
 		boardLabel = new JLabel("");
-		extractButton = new JButton(thaw.gui.IconBox.minWindowNew);
+		extractButton = new JButton(IconBox.minWindowNew);
 		extractButton.setToolTipText(I18n.getMessage("thaw.plugin.miniFrost.newWindow"));
 		extractButton.addActionListener(this);
 
@@ -115,9 +123,23 @@ public class DraftPanel implements ActionListener {
 		southPanel.add(sendButton);
 		southPanel.add(cancelButton);
 
-		panel.add(northPanel,                BorderLayout.NORTH );
-		panel.add(new JScrollPane(textArea), BorderLayout.CENTER);
-		panel.add(southPanel,                BorderLayout.SOUTH );
+
+		JPanel centerPanel = new JPanel(new BorderLayout(3, 3));
+
+		JPanel southCenterPanel = new JPanel(new BorderLayout(3, 3));
+		addAttachment = new JButton(IconBox.attachment);
+		addAttachment.addActionListener(this);
+		attachmentList = new JList();
+
+		southCenterPanel.add(addAttachment,  BorderLayout.WEST);
+		southCenterPanel.add(new JScrollPane(attachmentList), BorderLayout.CENTER);
+
+		centerPanel.add(new JScrollPane(textArea), BorderLayout.CENTER);
+		centerPanel.add(southCenterPanel, BorderLayout.SOUTH);
+
+		panel.add(northPanel,  BorderLayout.NORTH );
+		panel.add(centerPanel, BorderLayout.CENTER);
+		panel.add(southPanel,  BorderLayout.SOUTH );
 	}
 
 	public DraftPanel(MiniFrostPanel mainPanel, JDialog dialog) {
@@ -156,7 +178,23 @@ public class DraftPanel implements ActionListener {
 
 		textArea.setText(draft.getText());
 
+		/* attachments */
+		refreshAttachmentList();
+
 		refresh();
+	}
+
+
+	private void refreshAttachmentList() {
+		Vector v = null;
+
+		if (draft != null)
+			v = draft.getAttachments();
+
+		if (v == null)
+			v = new Vector();
+
+		attachmentList.setListData(v);
 	}
 
 
@@ -219,8 +257,35 @@ public class DraftPanel implements ActionListener {
 	}
 
 
+	private JMenuItem addBoard = null;
+	private JMenuItem addFile = null;
+
+
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == extractButton) {
+		if (e.getSource() == addAttachment) {
+
+			JPopupMenu menu = new JPopupMenu();
+
+			menu.add((addBoard = new JMenuItem(I18n.getMessage("thaw.plugin.miniFrost.attachBoards"))));
+			menu.add((addFile = new JMenuItem(I18n.getMessage("thaw.plugin.miniFrost.attachFiles"))));
+
+			addBoard.addActionListener(this);
+			addFile.addActionListener(this);
+
+			menu.show(addAttachment,
+				  addAttachment.getWidth()/2,
+				  addAttachment.getHeight()/2);
+			return;
+
+		} else if (e.getSource() == addBoard) {
+
+			refreshAttachmentList();
+
+		} else if (e.getSource() == addFile) {
+
+			refreshAttachmentList();
+
+		} else if (e.getSource() == extractButton) {
 			fillInDraft();
 
 			JDialog newDialog = new JDialog(mainPanel.getPluginCore().getCore().getMainWindow().getMainFrame(),

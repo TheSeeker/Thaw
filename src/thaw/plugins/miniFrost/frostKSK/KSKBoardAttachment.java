@@ -9,6 +9,8 @@ import thaw.plugins.Hsqldb;
 import thaw.core.Logger;
 import thaw.fcp.FCPQueueManager;
 
+import thaw.plugins.miniFrost.interfaces.Board;
+
 
 public class KSKBoardAttachment
 	extends KSKAttachment {
@@ -24,6 +26,17 @@ public class KSKBoardAttachment
 
 	public KSKBoardAttachment() {
 
+	}
+
+	public KSKBoardAttachment(Board board) {
+		if (board instanceof KSKBoard) {
+			boardName = ((KSKBoard)board).getName();
+		}
+
+		if (board instanceof SSKBoard) {
+			publicKey = ((SSKBoard)board).getPublicKey();
+			privateKey = ((SSKBoard)board).getPrivateKey();
+		}
 	}
 
 	public KSKBoardAttachment(String boardName,
@@ -317,6 +330,11 @@ public class KSKBoardAttachment
 			return false;
 		}
 
+		return true;
+	}
+
+
+	public boolean isReady() {
 		return true;
 	}
 }

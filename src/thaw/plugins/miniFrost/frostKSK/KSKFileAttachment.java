@@ -27,6 +27,13 @@ public class KSKFileAttachment
 
 	}
 
+	public KSKFileAttachment(FCPQueueManager queueManager, java.io.File file) {
+		this.filename = file.getName();
+		this.size = file.length();
+		this.key = null;
+		computeKey(queueManager, file);
+	}
+
 	public KSKFileAttachment(String filename,
 				 long size,
 				 String key) {
@@ -43,6 +50,16 @@ public class KSKFileAttachment
 		this(filename, size, key);
 		this.msg = msg;
 		this.queueManager = queueManager;
+	}
+
+
+	public void computeKey(FCPQueueManager queueManager, java.io.File file) {
+		/* TODO */
+	}
+
+	public boolean isReady() {
+		/* TODO */
+		return true;
 	}
 
 
@@ -111,7 +128,16 @@ public class KSKFileAttachment
 	}
 
 	public String toString() {
-		return filename;
+		String name = null;
+
+		if (key != null)
+			name = FreenetURIHelper.getFilenameFromKey(key);
+		if (name == null)
+			name = filename;
+		if (name == null)
+			name = "null";
+
+		return name + " ("+thaw.gui.GUIHelper.getPrintableSize(size)+")";
 	}
 
 	public String getContainer() {

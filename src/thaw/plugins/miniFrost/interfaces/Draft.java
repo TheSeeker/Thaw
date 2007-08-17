@@ -43,9 +43,14 @@ public interface Draft {
 
 	public boolean addAttachment(java.io.File file);
 	public boolean addAttachment(Board board);
-	public boolean removeAttachment(java.io.File file);
-	public boolean removeAttachment(Board board);
+	public boolean addAttachment(thaw.plugins.index.Index index);
 
+	public boolean removeAttachment(Attachment attachment);
+
+
+	/**
+	 * @return can return null if none
+	 */
 	public Vector getAttachments();
 
 	/**

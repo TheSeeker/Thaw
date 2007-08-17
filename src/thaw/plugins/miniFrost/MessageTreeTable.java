@@ -137,7 +137,7 @@ public class MessageTreeTable implements Observer,
 	private JComboBox minTrustLevel;
 	private int minTrustLevelInt;
 
-
+	private boolean advancedMode;
 
 	/** for the thread tree **/
 	private MessageNodeTree messageNodeTree;
@@ -150,6 +150,8 @@ public class MessageTreeTable implements Observer,
 		desc = true;
 
 		panel = new JPanel(new BorderLayout(5, 5));
+
+		advancedMode = Boolean.valueOf(mainPanel.getConfig().getValue("advancedMode")).booleanValue();
 
 
 		/* Actions */
@@ -594,6 +596,15 @@ public class MessageTreeTable implements Observer,
 
 			if (value instanceof java.util.Date) {
 				value = java.text.DateFormat.getDateTimeInstance().format((java.util.Date)value);
+
+				if (advancedMode) {
+					int rev = msg.getRev();
+
+					if (rev >= 0) {
+						value = ("("+Integer.toString(rev)+") "+
+							 ((String)value));
+					}
+				}
 			}
 
 			if (author != null && author.getIdentity() != null)
