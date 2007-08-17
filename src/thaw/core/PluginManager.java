@@ -73,7 +73,7 @@ public class PluginManager {
 	 * Load plugin from config or from default list.
 	 * Reload if already loaded.
 	 */
-	public synchronized boolean loadPlugins() {
+	public synchronized boolean loadAndRunPlugins() {
 		plugins = new LinkedHashMap();
 
 		Vector pluginNames;
@@ -90,7 +90,7 @@ public class PluginManager {
 
 		final Iterator pluginIt = pluginNames.iterator();
 
-		final int progressJump = 10 / pluginNames.size();
+		final int progressJump = (100-40) / (pluginNames.size()*2);
 		core.getSplashScreen().setProgression(40);
 
 		while(pluginIt.hasNext()) {
@@ -100,54 +100,9 @@ public class PluginManager {
 								       "Loading plugin '"+pluginName.replaceFirst("thaw.plugins.", "")+"' ...");
 
 			loadPlugin(pluginName);
-		}
-
-		return true;
-	}
-
-	/**
-	 * Start plugins.
-	 */
-	public synchronized boolean runPlugins() {
-		Iterator pluginIt;
-
-		if (plugins == null || plugins.size() == 0) {
-			Logger.error(this, "No plugin to run ?!");
-			return false;
-		}
-
-		pluginIt = (new Vector(plugins.values())).iterator();
-
-		final int progressJump = 50 / plugins.size();
-
-		core.getSplashScreen().setProgression(50);
-
-		while(pluginIt.hasNext()) {
-			final Plugin plugin = (Plugin)pluginIt.next();
-
-			try {
-				if (plugin != null) {
-					Logger.info(this, "Running plugin '"+plugin.getClass().getName()+"'");
-
-					core.getSplashScreen().setProgressionAndStatus(core.getSplashScreen().getProgression()+progressJump,
-											    "Starting plugin '"+plugin.getClass().getName().replaceFirst("thaw.plugins.", "")+"' ...");
-
-					javax.swing.ImageIcon icon = null;
-
-					if ((icon = plugin.getIcon()) != null)
-						core.getSplashScreen().addIcon(icon);
-					else
-						core.getSplashScreen().addIcon(thaw.gui.IconBox.add);
-
-					plugin.run(core);
-				}
-				else
-					Logger.notice(this, "Plugin == null ?");
-
-			} catch(final Exception e) {
-				Logger.error(this, "Unable to run the plugin '"+plugin.getClass().getName()+"' because: "+e+":");
-				e.printStackTrace();
-			}
+			core.getSplashScreen().setProgressionAndStatus(core.getSplashScreen().getProgression()+progressJump,
+											    "Starting plugin '"+pluginName.replaceFirst("thaw.plugins.", "")+"' ...");
+			runPlugin(pluginName);
 		}
 
 		return true;
@@ -200,11 +155,11 @@ public class PluginManager {
 
 		try {
 			if(plugins.get(className) != null) {
-				Logger.notice(this, "loadPlugin(): Plugin '"+className+"' already loaded");
+				Logger.debug(this, "loadPlugin(): Plugin '"+className+"' already loaded");
 				return null;
 			}
 
-			Logger.info(this, "Loading plugin '"+className+"'");
+			//Logger.info(this, "Loading plugin '"+className+"'");
 
 			plugin = (Plugin)Class.forName(className).newInstance();
 
@@ -227,7 +182,16 @@ public class PluginManager {
 		Logger.info(this, "Starting plugin: '"+className+"'");
 
 		try {
-			((Plugin)plugins.get(className)).run(core);
+			Plugin plugin = (Plugin)plugins.get(className);
+
+			javax.swing.ImageIcon icon;
+
+			if ((icon = plugin.getIcon()) != null)
+				core.getSplashScreen().addIcon(icon);
+			else
+				core.getSplashScreen().addIcon(thaw.gui.IconBox.add);
+
+			plugin.run(core);
 
 		} catch(final Exception e) {
 			Logger.error(this, "runPlugin('"+className+"'): Exception: "+e);

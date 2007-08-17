@@ -451,7 +451,7 @@ public class MainWindow implements java.awt.event.ActionListener,
 
 			core.getPluginManager().stopPlugins();
 			core.disconnect();
-			core.getPluginManager().runPlugins();
+			core.getPluginManager().loadAndRunPlugins();
 		}
 
 		if(e.getSource() == settingsButton) {

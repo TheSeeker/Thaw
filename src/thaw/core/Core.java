@@ -463,10 +463,7 @@ public class Core implements Observer {
 	public boolean initPluginManager() {
 		pluginManager = new PluginManager(this);
 
-		if(!pluginManager.loadPlugins())
-			return false;
-
-		if(!pluginManager.runPlugins())
+		if(!pluginManager.loadAndRunPlugins())
 			return false;
 
 		return true;
@@ -615,8 +612,7 @@ public class Core implements Observer {
 			}
 
 			if (running) {
-				getPluginManager().loadPlugins();
-				getPluginManager().runPlugins();
+				getPluginManager().loadAndRunPlugins();
 			}
 
 			reconnectionManager = null;

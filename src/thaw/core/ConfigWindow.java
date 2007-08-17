@@ -271,8 +271,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 			/* put back the config tab */
 			addTabs();
 
-			core.getPluginManager().loadPlugins();
-			core.getPluginManager().runPlugins();
+			core.getPluginManager().loadAndRunPlugins();
 
 			dialog.setVisible(false);
 		}
