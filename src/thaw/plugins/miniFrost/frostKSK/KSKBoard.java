@@ -240,6 +240,7 @@ public class KSKBoard
 
 
 	public Message getNextUnreadMessage(boolean unsigned,
+					    boolean archived,
 					    int minTrustLevel) {
 
 		String trustLvlStr;
@@ -249,6 +250,11 @@ public class KSKBoard
 				"  OR signatures.trustLevel >= "+Integer.toString(minTrustLevel)+") ";
 		else
 			trustLvlStr = " AND signatures.trustLevel >= "+Integer.toString(minTrustLevel)+" ";
+
+		String archivedStr = "";
+
+		if (!archived)
+			archivedStr = " AND frostKSKMessages.archived = FALSE ";
 
 
 		try {
@@ -273,8 +279,9 @@ public class KSKBoard
 					"       signatures.trustLevel AS sigTrustLevel "+
 					"FROM frostKSKMessages LEFT OUTER JOIN signatures "+
 					" ON frostKSKMessages.sigId = signatures.id "+
-					"WHERE frostKSKMessages.boardId = ? AND "+
-					"frostKSKMessages.archived = FALSE AND frostKSKMessages.read = FALSE "+
+					"WHERE frostKSKMessages.boardId = ? "+
+					"AND frostKSKMessages.read = FALSE "+
+					archivedStr+
 					trustLvlStr+
 					"ORDER BY frostKSKMessages.date LIMIT 1";
 
@@ -316,7 +323,7 @@ public class KSKBoard
 			}
 
 		} catch(SQLException e) {
-			Logger.error(this, "Can't get message list because : "+e.toString());
+			Logger.error(this, "Can't get the next unread message because : "+e.toString());
 		}
 
 		return null;

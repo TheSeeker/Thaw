@@ -1034,6 +1034,7 @@ public class MessageTreeTable implements Observer,
 		}
 
 		Message newMsg = targetBoard.getNextUnreadMessage(seeUnsigned.isSelected(),
+								  seeArchived.isSelected(),
 								  minTrustLevelInt);
 
 		if (newMsg != null) {

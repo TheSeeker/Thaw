@@ -61,7 +61,7 @@ public class SentMessages
 	/**
 	 * @return null if none
 	 */
-	public Message getNextUnreadMessage(boolean unsigned, int minTrustLevel) {
+	public Message getNextUnreadMessage(boolean unsigned, boolean archived, int minTrustLevel) {
 		return null;
 	}
 
