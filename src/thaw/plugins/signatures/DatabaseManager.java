@@ -44,6 +44,8 @@ public class DatabaseManager {
 
 		createTables(db);
 
+		addDevs(db);
+
 		return newDb;
 	}
 
@@ -69,6 +71,29 @@ public class DatabaseManager {
 			  + "trustLevel TINYINT DEFAULT 0 NOT NULL, " /* See Identity.java */
 			  + "PRIMARY KEY(id))");
 	}
+
+
+	public static void addDev(Hsqldb db,
+				  String nick,
+				  String publicKey) {
+		if (Identity.getIdentity(db, nick, publicKey, false /* dontCreate */) == null) {
+			Identity identity = new Identity(db, -1,
+							 nick, publicKey, null,
+							 false,
+							 Identity.trustLevelInt[0] /* dev */);
+			identity.insert();
+		}
+	}
+
+
+	public static void addDevs(Hsqldb db) {
+		String[][] devs = thaw.plugins.Signatures.DEVS;
+
+		for (int i = 0 ; i < devs.length ; i++) {
+			addDev(db, devs[i][0], devs[i][1]);
+		}
+	}
+
 
 	/* dropTables is not implements because signatures may be VERY important */
 	/* (anyway, because of the foreign key, it would probably fail */

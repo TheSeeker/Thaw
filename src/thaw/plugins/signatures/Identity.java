@@ -286,6 +286,13 @@ public class Identity {
 	public static Identity getIdentity(Hsqldb db,
 					   String nick,
 					   String publicKey) {
+		return getIdentity(db, nick, publicKey, true);
+	}
+
+	public static Identity getIdentity(Hsqldb db,
+					   String nick,
+					   String publicKey,
+					   boolean create) {
 		try {
 			synchronized(db.dbLock) {
 				PreparedStatement st;
@@ -305,6 +312,9 @@ public class Identity {
 					Logger.debug(i, "Identity found");
 					return i;
 				}
+
+				if (!create)
+					return null;
 
 				/* else we must add it, but first we need to know if it's a dup */
 

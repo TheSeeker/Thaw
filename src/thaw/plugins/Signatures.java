@@ -23,6 +23,38 @@ public class Signatures extends LibraryPlugin implements ActionListener {
 
 	public final static int DEFAULT_MIN_TRUST_LEVEL = -1; /* see Identity.trustLevelInt */
 
+	public final static String[][] DEVS = {
+		/* { nick, publicKey } */
+		{ "toad",
+		  "CHwpbtSA+asXiF3s0xGX1hd3nA2scMMjSZbh:"+
+		  "AKC/rtW2/X1DQH9VUzpunZgGXIlhFzFeDX4CT5nGjq7Fbkx9ipgekog5T4ElLVZ6nZDaf9t+t"+
+		  "XRbqdBBo4SI7+OnHHJ8MVgRm5doU6bWtMbtEQ5E3LQk8174TNoWKGJ2cuvEsmzgE4BQZPLErs"+
+		  "1rVfAfAziI0YPWFHKq2OzEOGW5" },
+		{ "nextgens",
+		  "CHwpbtSA+asXiF3s0xGX1hd3nA2scMMjSZbh:"+
+		  "AM8giqR7C4ND7RxQzByb/ZOLEPoNRd818proqkW5rvqpPd5ODZvJYLZgDC+fe01BU0MFnE7LP"+
+		  "tolulBNxiz4AaIyL51FnnzZt9Dp60h9lgawxttQ2DHx553hszZ6LQ5iAvzDivjmKGzWa6p17F"+
+		  "+qo2OaGRXL3SGk1fsS40qgdVsP" },
+		{ "Jflesch",
+		  "CHwpbtSA+asXiF3s0xGX1hd3nA2scMMjSZbh:"+
+		  "AIf5yXowXT/0Aa5UhwzOg/kZQnHar/dQl1lFqrcB6TKXf42LZecR1tNV9Hsxboa3Eo5JWdK9T"+
+		  "AnHCLBu2lkYUOtcqEH2U0DkAfR11AYn2sdazk/LSFicAq7Ic6ZO7An2RJJUtcHY7pB164GZ76"+
+		  "jpOn29iPagMq17n4zbZNqe03q1" },
+		{ "bback",
+		  "CHwpbtSA+asXiF3s0xGX1hd3nA2scMMjSZbh:"+
+		  "AKLw/y7/oDmXYYT0KWNeAfJPcVRgns+Nw9rJ0X/2JLt7o73Yt9PMkx5STJhlJekF36sf+l3vk"+
+		  "TzPNHa2xmyjHms2biHl3jGy9dHdAduqNKs99PyW0Z19/QbZ1HEeeCXgllKE+z4aHgWK2CzeID"+
+		  "6wPkzZLjFInKLb3gZtQLh5cm3n" }
+
+		/* TODO:
+		 * Missing:
+		 * - sanity
+		 * - zothar
+		 * - bombe
+		 */
+	};
+
+
 	/**
 	 * because we must be sure that we won't be used anymore when we will
 	 * unregister from the db
