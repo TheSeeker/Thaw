@@ -44,12 +44,16 @@ public class Signatures extends LibraryPlugin implements ActionListener {
 		  "CHwpbtSA+asXiF3s0xGX1hd3nA2scMMjSZbh:"+
 		  "AKLw/y7/oDmXYYT0KWNeAfJPcVRgns+Nw9rJ0X/2JLt7o73Yt9PMkx5STJhlJekF36sf+l3vk"+
 		  "TzPNHa2xmyjHms2biHl3jGy9dHdAduqNKs99PyW0Z19/QbZ1HEeeCXgllKE+z4aHgWK2CzeID"+
-		  "6wPkzZLjFInKLb3gZtQLh5cm3n" }
+		  "6wPkzZLjFInKLb3gZtQLh5cm3n" },
+		{ "Zothar",
+		  "CHwpbtSA+asXiF3s0xGX1hd3nA2scMMjSZbh:"+
+		  "AL81sQtHFj5QZl/6GoG1fP0lmdHQOtvVuuxN60MWx1kLqByk17XlnP/wxGZyffSRdnZSmZoN0"+
+		  "dprYrFJo9qj3mhsqmA8Gk50mkfX/gnkWzT2ChwkWIvk/+gPtOLXXx4yrGQlnNIQQ/V7y3YaN9"+
+		  "706zYgySMcW1cv8eqhPxNZ7yYB" }
 
 		/* TODO:
 		 * Missing:
 		 * - sanity
-		 * - zothar
 		 * - bombe
 		 */
 	};

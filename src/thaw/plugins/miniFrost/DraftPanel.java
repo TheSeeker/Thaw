@@ -279,11 +279,19 @@ public class DraftPanel implements ActionListener {
 
 		} else if (e.getSource() == addBoard) {
 
+			/* TODO */
+
 			refreshAttachmentList();
+
+			return;
 
 		} else if (e.getSource() == addFile) {
 
+			/* TODO */
+
 			refreshAttachmentList();
+
+			return;
 
 		} else if (e.getSource() == extractButton) {
 			fillInDraft();
