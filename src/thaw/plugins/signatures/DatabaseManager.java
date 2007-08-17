@@ -76,13 +76,20 @@ public class DatabaseManager {
 	public static void addDev(Hsqldb db,
 				  String nick,
 				  String publicKey) {
-		if (Identity.getIdentity(db, nick, publicKey, false /* dontCreate */) == null) {
-			Identity identity = new Identity(db, -1,
-							 nick, publicKey, null,
-							 false,
-							 Identity.trustLevelInt[0] /* dev */);
+		Identity identity;
+
+		if ( (identity = Identity.getIdentity(db, nick, publicKey, false /* dontCreate */)) == null) {
+			identity = new Identity(db, -1,
+						nick, publicKey, null,
+						false,
+						Identity.trustLevelInt[0] /* dev */);
 			identity.insert();
+			return;
 		}
+
+		/* TODO : Find a nicer way to update someone to the rank of developper */
+		if (identity.getTrustLevel() >= 0)
+			identity.setTrustLevel(Identity.trustLevelInt[0]);
 	}
 
 
