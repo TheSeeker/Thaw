@@ -45,6 +45,10 @@ Message format
 <?xml version="1.0" encoding="UTF-8"?>
 <FrostMessage>
 
+<!-- This tag is only here for a purely statistical use -->
+<!-- Frost doesn't set it ; It's not part of the signature -->
+<client>Thaw 0.7.10</client>
+
 <!--
   SHA1 of various stuffs (no real check on how it's made)
   Used to avoid duplicated messages and to build a message tree

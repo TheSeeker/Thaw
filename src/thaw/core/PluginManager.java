@@ -213,7 +213,7 @@ public class PluginManager {
 			((Plugin)plugins.get(className)).stop();
 
 		} catch(final Exception e) {
-			Logger.error(this, "runPlugin('"+className+"'): Exception: "+e);
+			Logger.error(this, "stopPlugin('"+className+"'): Exception: "+e);
 			e.printStackTrace();
 			return false;
 		}
