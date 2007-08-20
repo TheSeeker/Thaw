@@ -41,6 +41,18 @@ public interface Draft {
 	 */
 	public void setDate(java.util.Date date);
 
+	/**
+	 * @param i specify the position of the id line in the text
+	 */
+	public void setIdLinePos(int i);
+
+
+	/**
+	 * @param i specify the length of the id line in the text
+	 */
+	public void setIdLineLen(int i);
+
+
 	public boolean addAttachment(java.io.File file);
 	public boolean addAttachment(Board board);
 	public boolean addAttachment(thaw.plugins.index.Index index);

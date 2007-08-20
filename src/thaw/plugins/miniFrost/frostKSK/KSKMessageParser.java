@@ -76,7 +76,9 @@ public class KSKMessageParser {
 				String body,
 				String publicKey,
 				Vector attachments,
-				Identity identity) {
+				Identity identity,
+				int idLinePos,
+				int idLineLen) {
 		this();
 
 		this.messageId = ""; /* will be generated from the SHA1 of the content */
@@ -93,8 +95,8 @@ public class KSKMessageParser {
 		this.board = board;
 		this.body = body;
 		this.publicKey = publicKey;
-		this.idLinePos = "0";
-		this.idLineLen = "0";
+		this.idLinePos = Integer.toString(idLinePos);
+		this.idLineLen = Integer.toString(idLineLen);
 
 		this.attachments = attachments;
 

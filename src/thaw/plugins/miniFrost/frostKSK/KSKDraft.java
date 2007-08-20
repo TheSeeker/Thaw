@@ -27,6 +27,9 @@ public class KSKDraft
 	private Identity identity;
 	private Date date;
 
+	private int idLinePos = 0;
+	private int idLineLen = 0;
+
 	private Vector attachments;
 
 
@@ -120,6 +123,15 @@ public class KSKDraft
 	}
 
 
+	public void setIdLinePos(int i) {
+		idLinePos = i;
+	}
+
+	public void setIdLineLen(int i) {
+		idLineLen = i;
+	}
+
+
 	private static boolean initialInsertion = false;
 
 	public void post(FCPQueueManager queueManager) {
@@ -148,8 +160,10 @@ public class KSKDraft
 									  ((identity != null) ?
 									   identity.getPublicKey() :
 									   null),
-									  attachments,
-									  identity);
+									   attachments,
+									   identity,
+									   idLinePos,
+									   idLineLen);
 
 			fileToInsert = generator.generateXML();
 		}

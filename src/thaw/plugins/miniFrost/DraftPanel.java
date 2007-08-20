@@ -421,6 +421,17 @@ public class DraftPanel implements ActionListener, MouseListener {
 
 			String txt = textArea.getText();
 
+			int idLineLen = authorBox.getSelectedItem().toString().length();
+			int idLinePos = txt.indexOf("$sender$");
+
+			if (idLinePos <= -1) {
+				idLinePos = 0;
+				idLineLen = 0;
+			}
+
+			draft.setIdLinePos(idLinePos);
+			draft.setIdLineLen(idLineLen);
+
 			txt = txt.replaceAll("\\$sender\\$", authorBox.getSelectedItem().toString());
 
 			String dateStr = messageDateFormat.format(date).toString();
