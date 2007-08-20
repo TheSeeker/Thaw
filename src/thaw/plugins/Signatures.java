@@ -53,8 +53,11 @@ public class Signatures extends LibraryPlugin implements ActionListener {
 
 		/* TODO:
 		 * Missing:
-		 * - sanity
 		 * - bombe
+		 */
+
+		/* Can't do:
+		 * - sanity : no definitive key
 		 */
 	};
 

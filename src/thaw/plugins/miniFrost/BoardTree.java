@@ -301,11 +301,7 @@ public class BoardTree extends Observable
 				Vector v = factories[i].getBoards();
 
 				if (v != null) {
-					for (Iterator it = v.iterator();
-					     it.hasNext();) {
-						boards.add(it.next());
-					}
-
+					boards.addAll(v);
 				}
 			}
 		}

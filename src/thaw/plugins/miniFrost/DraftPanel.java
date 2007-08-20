@@ -15,27 +15,36 @@ import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JFileChooser;
 
 import java.util.Iterator;
 import java.util.Vector;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseEvent;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import java.io.File;
+
 
 import thaw.core.I18n;
 import thaw.core.Logger;
 
 import thaw.gui.IconBox;
+import thaw.gui.FileChooser;
 
 import thaw.plugins.signatures.Identity;
 import thaw.plugins.miniFrost.interfaces.Draft;
+import thaw.plugins.miniFrost.interfaces.Board;
+import thaw.plugins.miniFrost.interfaces.Attachment;
 
 
-
-public class DraftPanel implements ActionListener {
+public class DraftPanel implements ActionListener, MouseListener {
 
 	private Draft draft;
 	private JPanel panel;
@@ -54,6 +63,9 @@ public class DraftPanel implements ActionListener {
 	private JButton addAttachment;
 	private JList attachmentList;
 
+	private JPopupMenu attachmentRightClickMenu;
+	private JMenuItem attachmentRemove;
+
 	private JDialog dialog;
 
 	private final SimpleDateFormat gmtConverter;
@@ -70,10 +82,6 @@ public class DraftPanel implements ActionListener {
 		messageDateFormat = new SimpleDateFormat("yyyy.MM.dd - HH:mm:ss");
 
 		panel = new JPanel(new BorderLayout(5, 5));
-
-		Vector ids = new Vector();
-		ids.add(I18n.getMessage("thaw.plugin.miniFrost.anonymous"));
-		ids.addAll(Identity.getYourIdentities(mainPanel.getDb()));
 
 		authorBox = new JComboBox();
 		authorBox.setEditable(true);
@@ -130,6 +138,9 @@ public class DraftPanel implements ActionListener {
 		addAttachment = new JButton(IconBox.attachment);
 		addAttachment.addActionListener(this);
 		attachmentList = new JList();
+		attachmentList.setCellRenderer(new AttachmentRenderer());
+		attachmentList.addMouseListener(this);
+		attachmentList.setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
 		southCenterPanel.add(addAttachment,  BorderLayout.WEST);
 		southCenterPanel.add(new JScrollPane(attachmentList), BorderLayout.CENTER);
@@ -140,12 +151,37 @@ public class DraftPanel implements ActionListener {
 		panel.add(northPanel,  BorderLayout.NORTH );
 		panel.add(centerPanel, BorderLayout.CENTER);
 		panel.add(southPanel,  BorderLayout.SOUTH );
+
+
+		attachmentRightClickMenu = new JPopupMenu();
+		attachmentRemove = new JMenuItem(I18n.getMessage("thaw.common.remove"));
+		attachmentRemove.addActionListener(this);
+		attachmentRightClickMenu.add(attachmentRemove);
 	}
 
 	public DraftPanel(MiniFrostPanel mainPanel, JDialog dialog) {
 		this(mainPanel);
 		this.dialog = dialog;
 		extractButton.setEnabled(false);
+	}
+
+
+	protected class AttachmentRenderer extends DefaultListCellRenderer {
+		public AttachmentRenderer() {
+
+		}
+
+		public java.awt.Component getListCellRendererComponent(final JList list, Object value,
+								       final int index, final boolean isSelected,
+								       final boolean cellHasFocus) {
+			Attachment att = (Attachment)value;
+
+			value = att.getPrintableType() + " : "+att.toString();
+
+			return super.getListCellRendererComponent(list, value,
+								  index, isSelected,
+								  cellHasFocus);
+		}
 	}
 
 
@@ -261,6 +297,60 @@ public class DraftPanel implements ActionListener {
 	private JMenuItem addFile = null;
 
 
+	private class BoardAdder implements Runnable {
+		public BoardAdder() {
+
+		}
+
+		public void run() {
+			Vector boards = BoardSelecter.askBoardList(mainPanel,
+								   ((dialog != null) ?
+								    dialog :
+								    mainPanel.getPluginCore().getCore().getMainWindow().getMainFrame()));
+
+			if (boards == null) {
+				Logger.info(this, "Cancelled");
+				return;
+			}
+
+			for (Iterator it = boards.iterator();
+			     it.hasNext();) {
+				draft.addAttachment((Board)it.next());
+			}
+
+			refreshAttachmentList();
+		}
+	}
+
+	private class FileAdder implements Runnable {
+		public FileAdder() {
+
+		}
+
+		public void run() {
+			FileChooser chooser = new FileChooser();
+			chooser.setTitle(I18n.getMessage("thaw.plugin.transferLogs.chooseFile"));
+			chooser.setDirectoryOnly(false);
+			chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+
+			Vector files = chooser.askManyFiles();
+
+			if (files == null) {
+				Logger.info(this, "Cancelled");
+				return;
+			}
+
+			for (Iterator it = files.iterator();
+			     it.hasNext(); ) {
+				draft.addAttachment((File)it.next());
+			}
+
+			refreshAttachmentList();
+		}
+	}
+
+
+
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == addAttachment) {
 
@@ -279,15 +369,27 @@ public class DraftPanel implements ActionListener {
 
 		} else if (e.getSource() == addBoard) {
 
-			/* TODO */
+			Logger.info(this, "BoardAdder");
 
-			refreshAttachmentList();
+			(new Thread(new BoardAdder())).start();
 
 			return;
 
 		} else if (e.getSource() == addFile) {
 
-			/* TODO */
+			Logger.info(this, "FileAdder");
+
+			(new Thread(new FileAdder())).start();
+
+			return;
+
+		} else if (e.getSource() == attachmentRemove) {
+
+			Object[] selection = attachmentList.getSelectedValues();
+
+			for (int i = 0 ; i < selection.length ; i++) {
+				draft.removeAttachment((Attachment)selection[i]);
+			}
 
 			refreshAttachmentList();
 
@@ -342,5 +444,27 @@ public class DraftPanel implements ActionListener {
 			mainPanel.displayMessageTable();
 		else
 			dialog.setVisible(false);
+	}
+
+
+	public void mouseClicked(final MouseEvent e) {
+
+	}
+
+	public void mouseEntered(final MouseEvent e) { }
+	public void mouseExited(final MouseEvent e) { }
+
+	public void mousePressed(final MouseEvent e) {
+		showPopupMenu(e);
+	}
+
+	public void mouseReleased(final MouseEvent e) {
+		showPopupMenu(e);
+	}
+
+	protected void showPopupMenu(final MouseEvent e) {
+		if(e.isPopupTrigger()) {
+			attachmentRightClickMenu.show(e.getComponent(), e.getX(), e.getY());
+		}
 	}
 }

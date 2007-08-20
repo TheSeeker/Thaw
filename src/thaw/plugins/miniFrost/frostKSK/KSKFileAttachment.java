@@ -14,7 +14,7 @@ import thaw.fcp.*;
 
 
 public class KSKFileAttachment
-	extends KSKAttachment implements Runnable {
+	extends KSKAttachment implements Runnable, java.util.Observer {
 
 	private String filename;
 	private long size;
@@ -54,12 +54,43 @@ public class KSKFileAttachment
 
 
 	public void computeKey(FCPQueueManager queueManager, java.io.File file) {
-		/* TODO */
+		this.queueManager = queueManager;
+
+		FCPClientPut put = new FCPClientPut(file,
+						    FCPClientPut.KEY_TYPE_CHK,
+						    0 /* rev */,
+						    null /* name */,
+						    null /* private key */,
+						    FCPClientPut.DEFAULT_PRIORITY,
+						    true /* global */,
+						    FCPClientPut.PERSISTENCE_UNTIL_DISCONNECT,
+						    true /* getCHKOnly */);
+		put.addObserver(this);
+		queueManager.addQueryToTheRunningQueue(put);
+	}
+
+	public void update(java.util.Observable o, Object param) {
+		if (o instanceof FCPClientPut) {
+			FCPClientPut put = (FCPClientPut)o;
+			String possibleKey = put.getFileKey();
+
+			if (FreenetURIHelper.isAKey(possibleKey)) {
+				Logger.info(this, "Key computed: "+possibleKey);
+				key = possibleKey;
+			}
+
+			if (put.isFinished())
+				put.deleteObserver(this);
+
+			if (put.isFinished() && put.isSuccessful()) {
+				put.stop(queueManager);
+				queueManager.remove(put);
+			}
+		}
 	}
 
 	public boolean isReady() {
-		/* TODO */
-		return true;
+		return !(key == null);
 	}
 
 

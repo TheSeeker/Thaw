@@ -261,9 +261,14 @@ public class File implements Observer, FileContainer {
 			return null;
 		}
 
-		final FCPClientPut insertion = new FCPClientPut(localPath, 0, 0, null,
-								null, 4,
-								true, 2, true); /* getCHKOnly */
+		final FCPClientPut insertion = new FCPClientPut(localPath,
+								FCPClientPut.KEY_TYPE_CHK,
+								0 /* rev */,
+								null /* name */,
+								null /* private key */,
+								FCPClientPut.DEFAULT_PRIORITY,
+								true /* global */, FCPClientPut.PERSISTENCE_FOREVER,
+								true /* getCHKOnly */);
 
 
 		this.queueManager = queueManager; /* so the transfer will be removed when finished */

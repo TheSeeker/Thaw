@@ -142,8 +142,13 @@ public class MiniFrost implements thaw.core.Plugin {
 		if (autoRefresh != null)
 			autoRefresh.stop();
 
-		core.getMainWindow().removeTab(miniFrostPanel.getPanel());
-		configTab.hide();
+		if (miniFrostPanel != null)
+			core.getMainWindow().removeTab(miniFrostPanel.getPanel());
+		else
+			Logger.warning(this, "MiniFrost not started, can't stop.");
+
+		if (configTab != null)
+			configTab.hide();
 
 		if (hsqldb != null)
 			hsqldb.unregisterChild(this);

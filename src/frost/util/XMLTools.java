@@ -199,6 +199,7 @@ public class XMLTools {
 		    return true;
 	    } catch(final javax.xml.transform.TransformerException e) {
 		    Logger.error(e, "Unable to generate XML because: "+e.toString());
+		    e.printStackTrace();
 	    } catch(java.io.FileNotFoundException e) {
 		    Logger.error(e, "File not found exception ?!");
 	    } catch(final javax.xml.parsers.ParserConfigurationException e) {

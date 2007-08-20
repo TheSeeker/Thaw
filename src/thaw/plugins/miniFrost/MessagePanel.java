@@ -248,7 +248,7 @@ public class MessagePanel
 			/* text */
 
 			if (!retracted) {
-				area = getTextArea(msg.getMessage());
+				area = getTextArea(msg.getMessage().trim());
 
 				this.add(area, BorderLayout.CENTER);
 			}

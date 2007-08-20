@@ -3,7 +3,7 @@ package thaw.plugins.miniFrost.frostKSK;
 import java.util.Vector;
 import org.w3c.dom.*;
 
-
+import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
 
 
@@ -79,6 +79,21 @@ public abstract class KSKAttachment
 		String[] values = getValues();
 
 		for (int i = 0 ; i < properties.length ; i++) {
+			if (properties[i] == null && values[i] == null) {
+				Logger.warning(this, "Null property with null value ?!");
+				continue;
+			}
+
+			if (values[i] == null) {
+				Logger.notice(this, "Null value for property '"+properties[i]+"'");
+				values[i] = "";
+			}
+
+			if (properties[i] == null) {
+				Logger.warning(this, "Property name null (value '"+values[i]+"')");
+				continue;
+			}
+
 			Element el = doc.createElement(properties[i]);
 
 			boolean inCdata = isCDATAException(properties[i]);

@@ -198,8 +198,10 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 
 	protected void printHelp() {
 		addToConsole("Non-SQL commands:\n");
-		addToConsole(" - list_tables : List all the tables\n");
-		addToConsole(" - drop_tables : Drop all the known tables\n");
+		addToConsole(" - 'list_tables' : List all the tables\n");
+		addToConsole(" - 'drop_tables' : Drop all the known tables\n\n");
+		addToConsole("Some useful Hsqldb comments:\n");
+		addToConsole(" - 'checkpoint defrag' : Remove the empty spaces in the db on the disk\n");
 	}
 
 
