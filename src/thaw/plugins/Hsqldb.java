@@ -71,7 +71,7 @@ public class Hsqldb extends LibraryPlugin {
 			connection.commit();
 			executeQuery("SHUTDOWN COMPACT");
 			connection.close();
-			connection = null;
+			//connection = null;
 		}
 	}
 

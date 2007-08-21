@@ -58,12 +58,12 @@ Message format
 <!--
 	Message ID list.
 	The first ID is the initial message.
-	This message answer to the last ID.
+	This message answers to the last ID.
 	IDs are comma separated (no space).
 	(Note : why not using xml tags instead of commas ?)
 
 	Atm, Thaw only provides the latest id (Frost seems to accept
-	it). Anyway, Thaw will only use the latest id (to avoid a
+	it). In any case, Thaw will only use the latest id (to avoid a
 	flooder sending messages with 20 false inReplyTo id per
 	message & because it's easier to implement :)
  -->

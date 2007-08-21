@@ -132,7 +132,7 @@ public class KSKDraft
 	}
 
 
-	private static boolean initialInsertion = false;
+	private boolean initialInsertion = false;
 
 	public void post(FCPQueueManager queueManager) {
 		this.queueManager = queueManager;
