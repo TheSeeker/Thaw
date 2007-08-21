@@ -68,6 +68,8 @@ public class Hsqldb extends LibraryPlugin {
 
 	public void disconnect() throws java.sql.SQLException {
 		synchronized(dbLock) {
+			connection.commit();
+			executeQuery("SHUTDOWN COMPACT");
 			connection.close();
 			connection = null;
 		}
@@ -82,10 +84,7 @@ public class Hsqldb extends LibraryPlugin {
 		Logger.info(this, "Disconnecting from the database ...");
 
 		try {
-			connection.commit();
-			executeQuery("SHUTDOWN");
-
-			connection.close();
+			disconnect();
 		} catch(final java.sql.SQLException e) {
 			Logger.error(this, "SQLException while closing connection !");
 			e.printStackTrace();

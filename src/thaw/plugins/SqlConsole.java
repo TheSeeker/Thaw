@@ -237,85 +237,87 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 				return;
 			}
 
-			final java.sql.Statement st = hsqldb.getConnection().createStatement();
+			synchronized(hsqldb.dbLock) {
+				final java.sql.Statement st = hsqldb.getConnection().createStatement();
 
-			ResultSet result;
+				ResultSet result;
 
-			if(!"drop_tables".equals( cmd.toLowerCase() )) {
-				if(st.execute(cmd))
-					result = st.getResultSet();
-				else {
+				if(!"drop_tables".equals( cmd.toLowerCase() )) {
+					if(st.execute(cmd))
+						result = st.getResultSet();
+					else {
+						addToConsole("Ok\n");
+						return;
+					}
+				} else {
+					thaw.plugins.index.DatabaseManager.dropTables(hsqldb);
+					thaw.plugins.TransferLogs.dropTables(hsqldb);
 					addToConsole("Ok\n");
 					return;
 				}
-			} else {
-				thaw.plugins.index.DatabaseManager.dropTables(hsqldb);
-				thaw.plugins.TransferLogs.dropTables(hsqldb);
-				addToConsole("Ok\n");
-				return;
-			}
 
-			if(result == null) {
-				addToConsole("(null)\n");
-				return;
-			}
+				if(result == null) {
+					addToConsole("(null)\n");
+					return;
+				}
 
-			if(result.getFetchSize() == 0) {
-				addToConsole("(done)\n");
-				return;
-			}
+				if(result.getFetchSize() == 0) {
+					addToConsole("(done)\n");
+					return;
+				}
 
-			java.sql.SQLWarning warning = result.getWarnings();
+				java.sql.SQLWarning warning = result.getWarnings();
 
-			while(warning != null) {
-				addToConsole("Warning: "+warning.toString());
-				warning = warning.getNextWarning();
-			}
+				while(warning != null) {
+					addToConsole("Warning: "+warning.toString());
+					warning = warning.getNextWarning();
+				}
 
 
 
-			final ResultSetMetaData metadatas = result.getMetaData();
+				final ResultSetMetaData metadatas = result.getMetaData();
 
-			final int nmbCol = metadatas.getColumnCount();
+				final int nmbCol = metadatas.getColumnCount();
 
-			addToConsole("      ");
+				addToConsole("      ");
 
-			for(int i = 1; i <= nmbCol ; i++) {
-				display(metadatas.getColumnLabel(i), metadatas.getColumnDisplaySize(i));
-				addToConsole("  ");
-			}
-			addToConsole("\n");
-
-			addToConsole("      ");
-			for(int i = 1; i <= nmbCol ; i++) {
-			        display(metadatas.getColumnTypeName(i), metadatas.getColumnDisplaySize(i));
-				addToConsole("  ");
-			}
-			addToConsole("\n");
-
-			addToConsole("      ");
-			for(int i = 1; i <= nmbCol ; i++) {
-				display("----", metadatas.getColumnDisplaySize(i));
-				addToConsole("  ");
-			}
-			addToConsole("\n");
-
-			boolean ret = true;
-
-			while(ret) {
-				ret = result.next();
-
-				if(!ret)
-					break;
-
-				display(Integer.toString(result.getRow()), 4);
-				addToConsole("  ");
-
-				for(int i =1; i <= nmbCol ; i++) {
-					display(result.getString(i), metadatas.getColumnDisplaySize(i));
+				for(int i = 1; i <= nmbCol ; i++) {
+					display(metadatas.getColumnLabel(i), metadatas.getColumnDisplaySize(i));
 					addToConsole("  ");
 				}
 				addToConsole("\n");
+
+				addToConsole("      ");
+				for(int i = 1; i <= nmbCol ; i++) {
+					display(metadatas.getColumnTypeName(i), metadatas.getColumnDisplaySize(i));
+					addToConsole("  ");
+				}
+				addToConsole("\n");
+
+				addToConsole("      ");
+				for(int i = 1; i <= nmbCol ; i++) {
+					display("----", metadatas.getColumnDisplaySize(i));
+					addToConsole("  ");
+				}
+				addToConsole("\n");
+
+				boolean ret = true;
+
+				while(ret) {
+					ret = result.next();
+
+					if(!ret)
+						break;
+
+					display(Integer.toString(result.getRow()), 4);
+					addToConsole("  ");
+
+					for(int i =1; i <= nmbCol ; i++) {
+						display(result.getString(i), metadatas.getColumnDisplaySize(i));
+						addToConsole("  ");
+					}
+					addToConsole("\n");
+				}
 			}
 
 		} catch(final java.sql.SQLException e) {
