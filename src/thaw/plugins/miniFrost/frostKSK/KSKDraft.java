@@ -219,10 +219,12 @@ public class KSKDraft
 				/* just to be sure we don't insert the message many times */
 				if (initialInsertion)
 					return;
-				initialInsertion = true;
 
 				if (fileToInsert == null || !isBoardUpToDateForToday())
 					return;
+
+				initialInsertion = true;
+
 				board.deleteObserver(this);
 				revUsed = board.getNextNonDownloadedRev(date, -1);
 				startInsertion();
