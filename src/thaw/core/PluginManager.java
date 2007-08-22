@@ -86,7 +86,9 @@ public class PluginManager {
 			}
 		}
 
-		pluginNames = core.getConfig().getPluginNames();
+		/* we duplicate the vector to avoid collisions */
+		/* (remember : plugins can load other plugins */
+		pluginNames = new Vector(core.getConfig().getPluginNames());
 
 		final Iterator pluginIt = pluginNames.iterator();
 
@@ -99,10 +101,13 @@ public class PluginManager {
 			core.getSplashScreen().setProgressionAndStatus(core.getSplashScreen().getProgression()+progressJump,
 								       "Loading plugin '"+pluginName.replaceFirst("thaw.plugins.", "")+"' ...");
 
-			loadPlugin(pluginName);
-			core.getSplashScreen().setProgressionAndStatus(core.getSplashScreen().getProgression()+progressJump,
-											    "Starting plugin '"+pluginName.replaceFirst("thaw.plugins.", "")+"' ...");
-			runPlugin(pluginName);
+			if (loadPlugin(pluginName) == null) {
+				Logger.notice(this, "Plugin alread loaded");
+			} else {
+				core.getSplashScreen().setProgressionAndStatus(core.getSplashScreen().getProgression()+progressJump,
+									       "Starting plugin '"+pluginName.replaceFirst("thaw.plugins.", "")+"' ...");
+				runPlugin(pluginName);
+			}
 		}
 
 		return true;
@@ -154,7 +159,7 @@ public class PluginManager {
 		Logger.info(this, "Loading plugin: '"+className+"'");
 
 		try {
-			if(plugins.get(className) != null) {
+			if ( plugins.get(className) != null) {
 				Logger.debug(this, "loadPlugin(): Plugin '"+className+"' already loaded");
 				return null;
 			}

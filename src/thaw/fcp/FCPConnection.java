@@ -117,6 +117,9 @@ public class FCPConnection extends Observable {
 		    else {
 			    Logger.info(this, "Disconnect(): Already disconnected.");
 		    }
+		    synchronized(monitor) {
+			    monitor.notifyAll();
+		    }
 		} catch(final java.io.IOException e) {
 			Logger.warning(this, "Unable to close cleanly the connection : "
 				       +e.toString() +" ; "+e.getMessage());
