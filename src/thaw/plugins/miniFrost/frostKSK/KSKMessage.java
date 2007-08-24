@@ -233,7 +233,7 @@ public class KSKMessage
 
 		int c = getDate().compareTo( ((Message)o).getDate());
 
-		return c;
+		return -1 * c;
 	}
 
 
