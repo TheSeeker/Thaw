@@ -126,6 +126,7 @@ public class Node implements Comparable {
 	public final static double REPULSE_LIMIT           = 10000;
 	public final static double FACTOR_DECELERATION     = 1.1;
 	public final static double FACTOR_INITIAL_DISTANCE = 5.0;
+	public final static double MIN_KINETIC             = 1.0; /* will stop if < */
 
 	/**
 	 * attracted by its peers/neightbours
@@ -165,8 +166,9 @@ public class Node implements Comparable {
 
 	/**
 	 * see http://en.wikipedia.org/wiki/Force-based_algorithms
+	 * @return velocity
 	 */
-	public void computeVelocity(Vector nodeList) {
+	public double computeVelocity(Vector nodeList) {
 		double netForceX = 0.0;
 		double netForceY = 0.0;
 
@@ -220,6 +222,8 @@ public class Node implements Comparable {
 
 		velocityX += netForceX;
 		velocityY += netForceY;
+
+		return Math.sqrt( Math.pow(velocityX,2) + Math.pow(velocityY, 2));
 	}
 
 	/**

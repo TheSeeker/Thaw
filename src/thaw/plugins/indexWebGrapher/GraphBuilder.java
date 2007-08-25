@@ -194,6 +194,7 @@ public class GraphBuilder implements Runnable {
 		Thread refresherTh = null;
 
 		int lastStep = 4;
+		double totalKinetic = 0.0;
 
 		for (int i = 0 ; i < Node.NMB_STEPS && !stop ; i++) {
 			int currentStep = (6 * i) / Node.NMB_STEPS;
@@ -215,13 +216,22 @@ public class GraphBuilder implements Runnable {
 				}
 			}
 
-			if (i%100 == 0)
+			if (i%100 == 0) {
 				Logger.info(this, "- Step "+Integer.toString(i)+"/"+Node.NMB_STEPS);
+				Logger.info(this, "- Kinetic : "+Double.toString(totalKinetic));
+			}
+
+			totalKinetic = 0.0;
 
 			for (Iterator it = nodes.iterator();
 			     it.hasNext();) {
 				Node node = (Node)it.next();
-				node.computeVelocity(nodes);
+				totalKinetic += node.computeVelocity(nodes);
+			}
+
+			if (totalKinetic < Node.MIN_KINETIC) {
+				Logger.info(this, "Wow, seems optimized :)");
+				break;
 			}
 
 			boolean move = false;
