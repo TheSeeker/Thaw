@@ -38,6 +38,7 @@ public class IndexWebGrapher implements thaw.core.Plugin, ActionListener {
 	private JButton compute;
 	private JButton zoomIn;
 	private JButton zoomOut;
+	private JButton refresh;
 	private JProgressBar progressBar;
 
 	private Random random;
@@ -76,12 +77,14 @@ public class IndexWebGrapher implements thaw.core.Plugin, ActionListener {
 		progressBar.setString(I18n.getMessage("thaw.plugin.indexWebGrapher.waiting"));
 		progressBar.setStringPainted(true);
 
-		JPanel zoomPanel = new JPanel(new GridLayout(1, 2));
+		JPanel zoomPanel = new JPanel(new GridLayout(1, 3));
+		zoomPanel.add( (refresh = new JButton("", thaw.gui.IconBox.minRefreshAction)) );
 		zoomPanel.add( (zoomOut = new JButton("-")) );
 		zoomPanel.add( (zoomIn  = new JButton("+")) );
 
 		zoomOut.addActionListener(this);
 		zoomIn.addActionListener(this);
+		refresh.addActionListener(this);
 
 		southPanel.add(compute, BorderLayout.WEST);
 		southPanel.add(progressBar, BorderLayout.CENTER);
@@ -140,15 +143,26 @@ public class IndexWebGrapher implements thaw.core.Plugin, ActionListener {
 		return thaw.gui.IconBox.web;
 	}
 
+	private GraphBuilder lastBuilder = null;
+
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == compute) {
-			GraphBuilder builder = new GraphBuilder(this, graphPanel, db);
-			Thread th = new Thread(builder);
-			th.start();
+			if (lastBuilder == null || lastBuilder.isFinished()) {
+				lastBuilder = new GraphBuilder(this, graphPanel, db);
+				Thread th = new Thread(lastBuilder);
+				th.start();
+			} else {
+				if (!lastBuilder.fasterFlag())
+					lastBuilder.setFasterFlag(true);
+				else
+					lastBuilder.stop();
+			}
 		} else if (e.getSource() == zoomIn) {
 			graphPanel.zoomIn();
 		} else if (e.getSource() == zoomOut) {
 			graphPanel.zoomOut();
+		} else if (e.getSource() == refresh) {
+			graphPanel.refresh();
 		}
 	}
 }

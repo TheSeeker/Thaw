@@ -79,7 +79,7 @@ public class GraphPanel extends JComponent implements MouseListener {
 	private double maxY = 0;
 
 
-	public void guessZoom() {
+	public void recomputeMinMax() {
 		minX = 0;
 		maxX = 0;
 		minY = 0;
@@ -94,6 +94,10 @@ public class GraphPanel extends JComponent implements MouseListener {
 			if (node.getY() < minY) minY = node.getY();
 			if (node.getY() > maxY) maxY = node.getY();
 		}
+	}
+
+	public void guessZoom() {
+		recomputeMinMax();
 
 		Dimension size = plugin.getScrollPane().getSize();
 
@@ -137,6 +141,10 @@ public class GraphPanel extends JComponent implements MouseListener {
 
 		int zeroX = (-1 * (int)(minX * zoom)) + BORDER;
 		int zeroY = (-1 * (int)(minY * zoom)) + BORDER;
+
+		g.setColor(java.awt.Color.GRAY);
+		g.drawLine(zeroX, 0, zeroX, (int)d.getHeight());
+		g.drawLine(0, zeroY, (int)d.getWidth(), zeroY);
 
 		for (Iterator it = nodeList.iterator();
 		     it.hasNext();) {

@@ -19,13 +19,47 @@ public class GraphBuilder implements Runnable {
 	private GraphPanel graphPanel;
 	private Hsqldb db;
 
+	private boolean faster;
+	private boolean finish;
+	private boolean stop;
+
 	public GraphBuilder(IndexWebGrapher plugin,
 			    GraphPanel panel,
 			    Hsqldb db) {
 		this.plugin = plugin;
 		this.graphPanel = panel;
 		this.db = db;
+		this.faster = false;
+		this.finish = false;
+		this.stop = false;
 	}
+
+	private class Refresher implements Runnable {
+		public Refresher() {
+
+		}
+
+		public void run() {
+			run(true);
+		}
+
+		public void run(boolean loop) {
+			do {
+
+				graphPanel.recomputeMinMax();
+				graphPanel.refresh();
+
+				try {
+					Thread.sleep(faster /* == separate thread */ ? 5000 : 50 );
+				} catch(InterruptedException e) {
+					/* \_o< */
+				}
+
+			} while (loop && !stop && !finish);
+		}
+
+	}
+
 
 	public void run() {
 		Logger.info(this, "=== Starting ===");
@@ -49,11 +83,16 @@ public class GraphBuilder implements Runnable {
 				int nmb = 0;
 
 				while(set.next()) {
+					String key = set.getString("publicKey");
+
+					if (FreenetURIHelper.isObsolete(key))
+						continue;
+
 					/* will register itself in the graphPanel */
 					new Node(nmb,
 						 set.getInt("id") /* index id */,
 						 set.getString("displayName"),
-						 set.getString("publicKey"),
+						 key,
 						 graphPanel);
 					nmb++;
 				}
@@ -86,6 +125,9 @@ public class GraphBuilder implements Runnable {
 
 					while(set.next()) {
 						String lnk = set.getString("publicKey");
+
+						if (FreenetURIHelper.isObsolete(lnk))
+							continue;
 
 						Node target = graphPanel.getNode(lnk);
 
@@ -129,7 +171,7 @@ public class GraphBuilder implements Runnable {
 			if (!node.isPositionSet()) {
 				node.setPosition(x, 0.0);
 				node.setInitialNeightboorPositions();
-				x += (node.getLinkCount()+1);
+				x += ((Node.FACTOR_INITIAL_DISTANCE * node.getLinkCount())+1);
 			}
 		}
 
@@ -138,7 +180,34 @@ public class GraphBuilder implements Runnable {
 		plugin.setProgress(4);
 		Logger.info(this, "4) Optimizing placement ...");
 
-		for (int i = 0 ; i < 100 ; i++) {
+		Refresher refresher = new Refresher();
+		Thread refresherTh = null;
+
+		int lastStep = 4;
+
+		for (int i = 0 ; i < Node.NMB_STEPS && !stop ; i++) {
+			int currentStep = (6 * i) / Node.NMB_STEPS;
+
+			if (currentStep != lastStep) {
+				plugin.setProgress(currentStep+4);
+				lastStep = currentStep;
+			}
+
+			if (i == 0)
+				graphPanel.guessZoom();
+
+			if (!faster)
+				refresher.run(false);
+			else {
+				if (refresherTh == null) {
+					refresherTh = new Thread(refresher);
+					refresherTh.start();
+				}
+			}
+
+			if (i%100 == 0)
+				Logger.info(this, "- Step "+Integer.toString(i)+"/"+Node.NMB_STEPS);
+
 			for (Iterator it = nodes.iterator();
 			     it.hasNext();) {
 				Node node = (Node)it.next();
@@ -171,6 +240,30 @@ public class GraphBuilder implements Runnable {
 
 		plugin.setProgress(10);
 		Logger.info(this, "== Pouf, done ==");
+
+		for (Iterator it = nodes.iterator();
+		     it.hasNext();) {
+			Node node = (Node)it.next();
+			Logger.info(this, node.toString());
+		}
+
+		finish = true;
 	} /* /run */
 
+
+	public void setFasterFlag(boolean faster) {
+		this.faster = faster;
+	}
+
+	public boolean fasterFlag() {
+		return faster;
+	}
+
+	public void stop() {
+		stop = true;
+	}
+
+	public boolean isFinished() {
+		return finish;
+	}
 }

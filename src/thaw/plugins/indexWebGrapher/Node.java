@@ -119,14 +119,48 @@ public class Node implements Comparable {
 	private double velocityX = 0.0;
 	private double velocityY = 0.0;
 
-	public final static double TIMESTEP = 0.1;
+	public final static double TIMESTEP                = 0.001;
+	public final static int NMB_STEPS                  = 50000;
+	public final static double FACTOR_ATTRACTION       = 1;
+	public final static double FACTOR_REPULSION        = 1;
+	public final static double REPULSE_LIMIT           = 10000;
+	public final static double FACTOR_DECELERATION     = 1.1;
+	public final static double FACTOR_INITIAL_DISTANCE = 2.0;
 
+	/**
+	 * attracted by its peers/neightbours
+	 */
 	private double[] attraction(Node node) {
-		return new double[] {0, 0};
+		double attrX = 0.0;
+		double attrY = 0.0;
+
+		attrX = (node.getX() - x)*FACTOR_ATTRACTION;
+		attrY = (node.getY() - y)*FACTOR_ATTRACTION;
+
+		return new double[] {attrX, attrY};
 	}
 
+	/**
+	 * repulsed by all the node != peers / neightbours
+	 */
 	private double[] repulsion(Node node) {
-		return new double[] {0, 0};
+		double repX = 0.0;
+		double repY = 0.0;
+
+		if (x != node.getX())
+			repX = (1/(x-node.getX())*FACTOR_REPULSION);
+
+		if (y != node.getY())
+			repY = (1/(y-node.getY())*FACTOR_REPULSION);
+
+
+		if (repX > REPULSE_LIMIT) repX = REPULSE_LIMIT;
+		if (repY > REPULSE_LIMIT) repY = REPULSE_LIMIT;
+		if (repX < -REPULSE_LIMIT) repX = -REPULSE_LIMIT;
+		if (repY < -REPULSE_LIMIT) repY = -REPULSE_LIMIT;
+
+
+		return new double[] {repX, repY};
 	}
 
 	/**
@@ -141,9 +175,13 @@ public class Node implements Comparable {
 		     it.hasNext();) {
 			Node node = (Node)it.next();
 
-			if (node == this
+			/*
+			  if (node == this
 			    || linkTo.indexOf(node) >= 0
 			    || linkedFrom.indexOf(node) >= 0)
+				continue;
+			*/
+			if (node == this)
 				continue;
 
 			double[] repuls = repulsion(node);
@@ -176,6 +214,9 @@ public class Node implements Comparable {
 			netForceX += attr[0];
 			netForceY += attr[1];
 		}
+
+		velocityX = velocityX/FACTOR_DECELERATION;
+		velocityY = velocityY/FACTOR_DECELERATION;
 
 		velocityX += netForceX;
 		velocityY += netForceY;
@@ -221,8 +262,8 @@ public class Node implements Comparable {
 			Node node = (Node)it.next();
 
 			if (!node.isPositionSet()) {
-				double diffX = Math.cos(current) * (unplaced+1);
-				double diffY = Math.sin(current) * (unplaced+1);
+				double diffX = Math.cos(current) * ((FACTOR_INITIAL_DISTANCE*unplaced)+1);
+				double diffY = Math.sin(current) * ((FACTOR_INITIAL_DISTANCE*unplaced)+1);
 
 				node.setPosition(x + diffX,
 						 y + diffY);
@@ -296,6 +337,8 @@ public class Node implements Comparable {
 
 		if (selected)
 			g.setColor(Color.RED);
+		else if (getLinkCount() == 0)
+			g.setColor(Color.ORANGE);
 		else
 			g.setColor(Color.GREEN);
 
@@ -312,5 +355,9 @@ public class Node implements Comparable {
 				     realX + zeroX,
 				     realY + zeroY - 10);
 		}
+	}
+
+	public String toString() {
+		return Double.toString(x) + " - " + Double.toString(y) + " ; "+ indexName;
 	}
 }
