@@ -83,7 +83,7 @@ public class XMLTools {
             writeXmlFile(doc, tmp.getPath());
             result = FileAccess.readByteArray(tmp);
         } catch (Throwable t) {
-            Logger.error(t, "Exception thrown in getRawXMLDocument(XMLizable element): "+ t.toString());
+            Logger.notice(t, "Exception thrown in getRawXMLDocument(XMLizable element): "+ t.toString());
         }
         tmp.delete();
         return result;
@@ -101,7 +101,7 @@ public class XMLTools {
             FileAccess.writeFile(content, tmp);
             result = XMLTools.parseXmlFile(tmp, validating);
         } catch(Throwable t) {
-            Logger.error(t, "Exception thrown in parseXmlContent: "+ t.toString());
+            Logger.notice(t, "Exception thrown in parseXmlContent: "+ t.toString());
         }
         tmp.delete();
         return result;
@@ -139,17 +139,17 @@ public class XMLTools {
             return builder.parse(file);
         } catch (SAXException e) {
             // A parsing error occurred; the xml input is not valid
-		Logger.error(e,
+		Logger.notice(e,
 			     "Parsing of xml file failed (send badfile.xml to a dev for analysis) - " +
 			     "File name: '" + file.getName() + "': "+e.toString());
             file.renameTo(new File("badfile.xml"));
             throw new IllegalArgumentException();
         } catch (ParserConfigurationException e) {
-            Logger.error(e, "Exception thrown in parseXmlFile(File file, boolean validating) - " +
+            Logger.notice(e, "Exception thrown in parseXmlFile(File file, boolean validating) - " +
 			 "File name: '" + file.getName() + "': "+
 			 e.toString());
         } catch (IOException e) {
-            Logger.error(e,
+            Logger.notice(e,
 			 "Exception thrown in parseXmlFile(File file, boolean validating) - " +
 			 "File name: '" + file.getName() + "': "+e);
         }
@@ -198,12 +198,12 @@ public class XMLTools {
 
 		    return true;
 	    } catch(final javax.xml.transform.TransformerException e) {
-		    Logger.error(e, "Unable to generate XML because: "+e.toString());
+		    Logger.notice(e, "Unable to generate XML because: "+e.toString());
 		    e.printStackTrace();
 	    } catch(java.io.FileNotFoundException e) {
-		    Logger.error(e, "File not found exception ?!");
+		    Logger.notice(e, "File not found exception ?!");
 	    } catch(final javax.xml.parsers.ParserConfigurationException e) {
-		    Logger.error(e, "Unable to generate XML because : "+e.toString());
+		    Logger.notice(e, "Unable to generate XML because : "+e.toString());
 	    }
 
 	    return false;
@@ -219,7 +219,7 @@ public class XMLTools {
             Document doc = builder.newDocument();
             return doc;
         } catch (ParserConfigurationException e) {
-            Logger.error(e, "Exception thrown in createDomDocument(): "+e.toString());
+            Logger.notice(e, "Exception thrown in createDomDocument(): "+e.toString());
         }
         return null;
     }
