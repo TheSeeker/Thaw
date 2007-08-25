@@ -121,11 +121,11 @@ public class Node implements Comparable {
 
 	public final static double TIMESTEP                = 0.001;
 	public final static int NMB_STEPS                  = 50000;
-	public final static double FACTOR_ATTRACTION       = 1;
+	public final static double FACTOR_ATTRACTION       = 0.5;
 	public final static double FACTOR_REPULSION        = 1;
 	public final static double REPULSE_LIMIT           = 10000;
 	public final static double FACTOR_DECELERATION     = 1.1;
-	public final static double FACTOR_INITIAL_DISTANCE = 2.0;
+	public final static double FACTOR_INITIAL_DISTANCE = 5.0;
 
 	/**
 	 * attracted by its peers/neightbours
@@ -207,7 +207,7 @@ public class Node implements Comparable {
 		     it.hasNext();) {
 			Node node = (Node)it.next();
 
-			if (node == this)
+			if (node == this || linkTo.indexOf(node) >= 0)
 				continue;
 
 			double[] attr = attraction(node);

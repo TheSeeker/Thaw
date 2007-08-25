@@ -175,6 +175,16 @@ public class GraphBuilder implements Runnable {
 			}
 		}
 
+		graphPanel.guessZoom();
+		graphPanel.recomputeMinMax();
+		graphPanel.refresh();
+
+		try {
+			Thread.sleep(3000);
+		} catch(InterruptedException e) {
+			/* \_o< */
+		}
+
 		/* === */
 
 		plugin.setProgress(4);
