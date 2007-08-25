@@ -534,38 +534,41 @@ public class KSKBoard
 	}
 
 	protected void endOfRefresh() {
-		Logger.info(this, "End of refresh");
+		synchronized(this) {
+			Logger.info(this, "End of refresh");
 
-		try {
-			Hsqldb db = factory.getDb();
+			try {
+				Hsqldb db = factory.getDb();
 
-			synchronized(db.dbLock) {
-				PreparedStatement st;
+				synchronized(db.dbLock) {
+					PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("UPDATE frostKSKBoards "+
-									 "SET lastUpdate = ? "+
-									 "WHERE id = ?");
-				st.setDate(1, new java.sql.Date(new java.util.Date().getTime()));
-				st.setInt(2, id);
-				st.execute();
+					st = db.getConnection().prepareStatement("UPDATE frostKSKBoards "+
+										 "SET lastUpdate = ? "+
+										 "WHERE id = ?");
+					st.setDate(1, new java.sql.Date(new java.util.Date().getTime()));
+					st.setInt(2, id);
+					st.execute();
+				}
+			} catch(SQLException e) {
+				Logger.error(this, "Unable to update the lastUpdate date :"+e.toString());
 			}
-		} catch(SQLException e) {
-			Logger.error(this, "Unable to update the lastUpdate date :"+e.toString());
+
+			int newMsgs = getNewMessageNumber();
+
+			if (newMsgs > 0) {
+				String announce = I18n.getMessage("thaw.plugin.miniFrost.newMsgAnnounce");
+				announce = announce.replaceAll("X", Integer.toString(newMsgs));
+				announce = announce.replaceAll("Y", toString());
+
+				thaw.plugins.TrayIcon.popMessage(factory.getCore().getPluginManager(),
+								 "MiniFrost",
+								 announce);
+			}
+
+			refreshing = false;
 		}
 
-		int newMsgs = getNewMessageNumber();
-
-		if (newMsgs > 0) {
-			String announce = I18n.getMessage("thaw.plugin.miniFrost.newMsgAnnounce");
-			announce = announce.replaceAll("X", Integer.toString(newMsgs));
-			announce = announce.replaceAll("Y", toString());
-
-			thaw.plugins.TrayIcon.popMessage(factory.getCore().getPluginManager(),
-							 "MiniFrost",
-							 announce);
-		}
-
-		refreshing = false;
 		notifyChange();
 	}
 
@@ -744,7 +747,11 @@ public class KSKBoard
 
 		this.maxDaysInThePast = maxDaysInThePast;
 
-		refreshing = true;
+		synchronized(this) {
+			lastDate = getNextRefreshDate(null);
+			lastRev = -1;
+			refreshing = true;
+		}
 
 		notifyChange();
 
@@ -756,8 +763,6 @@ public class KSKBoard
 
 		//lastDate = new Date((new Date()).getTime()
 		//		    + (MIN_DAYS_IN_THE_FUTURE * (24 * 60 * 60 * 1000 /* 1 day */)));
-		lastDate = getNextRefreshDate(null);
-		lastRev = -1;
 
 		synchronized(runningDownloads) {
 			lastSuccessfulRev = getLastDownloadedRev(lastDate);

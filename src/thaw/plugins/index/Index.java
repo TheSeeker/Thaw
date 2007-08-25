@@ -1448,12 +1448,6 @@ public class Index extends Observable implements MutableTreeNode,
 	}
 
 	public boolean setNewCommentFlagInMem(boolean flag) {
-		try {
-			throw new Exception("bleh");
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-
 		newComment = flag;
 		return true;
 	}

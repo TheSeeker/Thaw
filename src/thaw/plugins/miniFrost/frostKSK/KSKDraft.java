@@ -205,7 +205,7 @@ public class KSKDraft
 		    || (board.getCurrentlyRefreshedDate() != null
 			&& (KSKBoard.getMidnight(board.getCurrentlyRefreshedDate()).getTime()
 			    < KSKBoard.getMidnight(date).getTime()) )) {
-			Logger.info(this, "Board: "+Long.toString(KSKBoard.getMidnight(board.getCurrentlyRefreshedDate()).getTime()));
+			//Logger.info(this, "Board: "+Long.toString(KSKBoard.getMidnight(board.getCurrentlyRefreshedDate()).getTime()));
 			Logger.info(this, "Draft: "+KSKBoard.getMidnight(date).getTime());
 			return true;
 		}
