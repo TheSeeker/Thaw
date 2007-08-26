@@ -50,7 +50,7 @@ public class GraphBuilder implements Runnable {
 				graphPanel.refresh();
 
 				try {
-					Thread.sleep(faster /* == separate thread */ ? 5000 : 50 );
+					Thread.sleep(50);
 				} catch(InterruptedException e) {
 					/* \_o< */
 				}
@@ -170,7 +170,7 @@ public class GraphBuilder implements Runnable {
 			Node node = (Node)it.next();
 			if (!node.isPositionSet()) {
 				node.setPosition(x, 0.0);
-				node.setInitialNeightboorPositions();
+				node.setInitialNeightbourPositions();
 				x += ((Node.FACTOR_INITIAL_DISTANCE * node.getLinkCount())+1);
 			}
 		}
@@ -195,6 +195,8 @@ public class GraphBuilder implements Runnable {
 
 		int lastStep = 4;
 		double totalKinetic = 0.0;
+		double sumKinetics = 0.0;
+		int nmbKinetics = 0;
 
 		for (int i = 0 ; i < Node.NMB_STEPS && !stop ; i++) {
 			int currentStep = (6 * i) / Node.NMB_STEPS;
@@ -216,9 +218,16 @@ public class GraphBuilder implements Runnable {
 				}
 			}
 
-			if (i%100 == 0) {
+			if (i != 0) {
+				sumKinetics += totalKinetic;
+				nmbKinetics++;
+			}
+
+			if (i != 0 && i%100 == 0) {
+				Logger.info(this, "================================");
 				Logger.info(this, "- Step "+Integer.toString(i)+"/"+Node.NMB_STEPS);
 				Logger.info(this, "- Kinetic : "+Double.toString(totalKinetic));
+				Logger.info(this, "- Average kinetic : "+Double.toString(sumKinetics/nmbKinetics));
 			}
 
 			totalKinetic = 0.0;
@@ -229,7 +238,7 @@ public class GraphBuilder implements Runnable {
 				totalKinetic += node.computeVelocity(nodes);
 			}
 
-			if (totalKinetic < Node.MIN_KINETIC) {
+			if (totalKinetic < (Node.MIN_KINETIC)) {
 				Logger.info(this, "Wow, seems optimized :)");
 				break;
 			}
@@ -268,6 +277,8 @@ public class GraphBuilder implements Runnable {
 		}
 
 		finish = true;
+
+		plugin.endOfProcess();
 	} /* /run */
 
 

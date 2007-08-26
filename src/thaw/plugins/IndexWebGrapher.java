@@ -148,14 +148,19 @@ public class IndexWebGrapher implements thaw.core.Plugin, ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == compute) {
 			if (lastBuilder == null || lastBuilder.isFinished()) {
+				compute.setText(I18n.getMessage("thaw.plugin.indexWebGrapher.faster"));
+
 				lastBuilder = new GraphBuilder(this, graphPanel, db);
 				Thread th = new Thread(lastBuilder);
 				th.start();
 			} else {
-				if (!lastBuilder.fasterFlag())
+				if (!lastBuilder.fasterFlag()) {
+					compute.setText(I18n.getMessage("thaw.plugin.indexWebGrapher.stop"));
 					lastBuilder.setFasterFlag(true);
-				else
+				} else {
+					compute.setText(I18n.getMessage("thaw.plugin.indexWebGrapher.compute"));
 					lastBuilder.stop();
+				}
 			}
 		} else if (e.getSource() == zoomIn) {
 			graphPanel.zoomIn();
@@ -164,5 +169,10 @@ public class IndexWebGrapher implements thaw.core.Plugin, ActionListener {
 		} else if (e.getSource() == refresh) {
 			graphPanel.refresh();
 		}
+	}
+
+
+	public void endOfProcess() {
+		compute.setText(I18n.getMessage("thaw.plugin.indexWebGrapher.compute"));
 	}
 }

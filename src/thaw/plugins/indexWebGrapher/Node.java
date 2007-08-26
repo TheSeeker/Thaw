@@ -125,8 +125,8 @@ public class Node implements Comparable {
 	public final static double FACTOR_REPULSION        = 1;
 	public final static double REPULSE_LIMIT           = 10000;
 	public final static double FACTOR_DECELERATION     = 1.1;
-	public final static double FACTOR_INITIAL_DISTANCE = 5.0;
-	public final static double MIN_KINETIC             = 1.0; /* will stop if < */
+	public final static double FACTOR_INITIAL_DISTANCE = 5;
+	public final static double MIN_KINETIC             = 0.1; /* will stop if < */
 
 	/**
 	 * attracted by its peers/neightbours
@@ -148,11 +148,13 @@ public class Node implements Comparable {
 		double repX = 0.0;
 		double repY = 0.0;
 
-		if (x != node.getX())
+		if (x != node.getX()) {
 			repX = (1/(x-node.getX())*FACTOR_REPULSION);
+		}
 
-		if (y != node.getY())
+		if (y != node.getY()) {
 			repY = (1/(y-node.getY())*FACTOR_REPULSION);
+		}
 
 
 		if (repX > REPULSE_LIMIT) repX = REPULSE_LIMIT;
@@ -192,6 +194,7 @@ public class Node implements Comparable {
 		}
 
 		/* attraction */
+
 		for (Iterator it = linkTo.iterator();
 		     it.hasNext();) {
 			Node node = (Node)it.next();
@@ -204,7 +207,9 @@ public class Node implements Comparable {
 			netForceY += attr[1];
 		}
 
+
 		/* attraction */
+
 		for (Iterator it = linkedFrom.iterator();
 		     it.hasNext();) {
 			Node node = (Node)it.next();
@@ -216,6 +221,7 @@ public class Node implements Comparable {
 			netForceX += attr[0];
 			netForceY += attr[1];
 		}
+
 
 		velocityX = velocityX/FACTOR_DECELERATION;
 		velocityY = velocityY/FACTOR_DECELERATION;
@@ -240,10 +246,7 @@ public class Node implements Comparable {
 	}
 
 
-	/**
-	 * Recursivity : Dirty, but easier :P
-	 */
-	public void setInitialNeightboorPositions() {
+	public int getNmbUnplacedNeightbours() {
 		int unplaced = 0;
 
 		for (Iterator it = linkTo.iterator();
@@ -254,7 +257,17 @@ public class Node implements Comparable {
 				unplaced++;
 		}
 
-		if (unplaced == 0)
+		return unplaced;
+	}
+
+
+	/**
+	 * Recursivity : Dirty, but easier :P
+	 */
+	public void setInitialNeightbourPositions() {
+		int unplaced = 0;
+
+		if ( (unplaced = getNmbUnplacedNeightbours()) == 0)
 			return;
 
 		double step = (2*Math.PI) / unplaced;
@@ -266,13 +279,15 @@ public class Node implements Comparable {
 			Node node = (Node)it.next();
 
 			if (!node.isPositionSet()) {
-				double diffX = Math.cos(current) * ((FACTOR_INITIAL_DISTANCE*unplaced)+1);
-				double diffY = Math.sin(current) * ((FACTOR_INITIAL_DISTANCE*unplaced)+1);
+				int i = unplaced + node.getNmbUnplacedNeightbours();
+
+				double diffX = Math.cos(current) * (FACTOR_INITIAL_DISTANCE*(i+1));
+				double diffY = Math.sin(current) * (FACTOR_INITIAL_DISTANCE*(i+1));
 
 				node.setPosition(x + diffX,
 						 y + diffY);
 
-				node.setInitialNeightboorPositions();
+				node.setInitialNeightbourPositions();
 
 				current += step;
 			}
