@@ -39,6 +39,8 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 
 		Logger.info(this, "Starting plugin \"FetchPlugin\" ...");
 
+		core.getConfig().addListener("advancedMode", this);
+
 		fetchPanel = new FetchPanel(core, this);
 
 		// Prepare the frame

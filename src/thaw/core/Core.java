@@ -157,7 +157,7 @@ public class Core implements Observer {
 	 * Init configuration. May re-set I18n.
 	 */
 	public boolean initConfig() {
-		config = new Config(Config.CONFIG_FILE_NAME);
+		config = new Config(this, Config.CONFIG_FILE_NAME);
 
 		if(!config.loadConfig()){
 			config.setDefaultValues();

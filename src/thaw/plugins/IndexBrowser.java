@@ -50,6 +50,14 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 	public boolean run(final Core core) {
 		this.core = core;
 
+		core.getConfig().addListener("advancedMode",                 this);
+		core.getConfig().addListener("indexAutoRefreshActivated",    this);
+		core.getConfig().addListener("indexRefreshInterval",         this);
+		core.getConfig().addListener("nmbIndexesPerRefreshInterval", this);
+		core.getConfig().addListener("loadIndexTreeOnTheFly",        this);
+		core.getConfig().addListener("indexFetchNegative",           this);
+		core.getConfig().addListener("indexFetchComments",           this);
+		core.getConfig().addListener("minTrustLevel",                this);
 
 		if(core.getPluginManager().getPlugin("thaw.plugins.Hsqldb") == null) {
 			Logger.info(this, "Loading Hsqldb plugin");

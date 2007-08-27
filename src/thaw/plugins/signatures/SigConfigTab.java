@@ -39,11 +39,15 @@ import thaw.gui.IconBox;
 import thaw.gui.FileChooser;
 import thaw.gui.Table;
 
+import java.util.Observer;
+import java.util.Observable;
+
+
 import thaw.plugins.Hsqldb;
 
 
 
-public class SigConfigTab implements ActionListener {
+public class SigConfigTab implements ActionListener, Observer {
 	private Hsqldb db;
 	private ConfigWindow configWindow;
 	private Config config;
@@ -96,6 +100,12 @@ public class SigConfigTab implements ActionListener {
 		middlePanel.add(minLevel);
 
 		configPanel.add(middlePanel, BorderLayout.CENTER);
+
+		configWindow.addObserver(this);
+	}
+
+	public void destroy() {
+		configWindow.deleteObserver(this);
 	}
 
 	public JPanel getPanel() {
@@ -140,6 +150,15 @@ public class SigConfigTab implements ActionListener {
 
 		minLevel.setSelectedItem(Identity.trustLevelStr[i]);
 	}
+
+
+	public void update(Observable o, Object param) {
+		if (param == configWindow.getOkButton())
+			apply();
+		else if (param == configWindow.getCancelButton())
+			reset();
+	}
+
 
 	protected class YourIdentitiesPanel implements ActionListener {
 		private JDialog dialog;

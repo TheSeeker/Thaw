@@ -1,10 +1,6 @@
 package thaw.plugins;
 
 
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-
-
 import thaw.core.I18n;
 import thaw.core.Core;
 import thaw.core.Logger;
@@ -16,7 +12,7 @@ import thaw.gui.IconBox;
 import thaw.plugins.signatures.*;
 
 
-public class Signatures extends LibraryPlugin implements ActionListener {
+public class Signatures extends LibraryPlugin {
 	private Core core;
 	private Hsqldb db;
 	private SigConfigTab configTab;
@@ -77,6 +73,8 @@ public class Signatures extends LibraryPlugin implements ActionListener {
 	public boolean run(Core core) {
 		this.core = core;
 
+		core.getConfig().addListener("minTrustLevel", this);
+
 		used++;
 
 		if(core.getPluginManager().getPlugin("thaw.plugins.Hsqldb") == null) {
@@ -104,9 +102,6 @@ public class Signatures extends LibraryPlugin implements ActionListener {
 					      thaw.gui.IconBox.minPeers,
 					      configTab.getPanel());
 
-		core.getConfigWindow().getOkButton().addActionListener(this);
-		core.getConfigWindow().getCancelButton().addActionListener(this);
-
 		return true;
 	}
 
@@ -117,8 +112,7 @@ public class Signatures extends LibraryPlugin implements ActionListener {
 
 
 	public boolean stop() {
-		core.getConfigWindow().getOkButton().removeActionListener(this);
-		core.getConfigWindow().getCancelButton().removeActionListener(this);
+		configTab.destroy();
 		core.getConfigWindow().removeTab(configTab.getPanel());
 
 		used--;
@@ -143,18 +137,5 @@ public class Signatures extends LibraryPlugin implements ActionListener {
 
 	public javax.swing.ImageIcon getIcon() {
 		return IconBox.identity;
-	}
-
-
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == core.getConfigWindow().getOkButton()) {
-			configTab.apply();
-			return;
-		}
-
-		if (e.getSource() == core.getConfigWindow().getCancelButton()) {
-			configTab.reset();
-			return;
-		}
 	}
 }

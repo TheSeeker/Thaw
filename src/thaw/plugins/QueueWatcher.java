@@ -56,6 +56,9 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 	public boolean run(final Core core) {
 		this.core = core;
 
+		core.getConfig().addListener("advancedMode", this);
+
+
 		Logger.info(this, "Starting plugin \"QueueWatcher\" ...");
 
 		detailPanel = new DetailPanel();

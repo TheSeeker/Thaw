@@ -197,6 +197,9 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		if(e.getSource() == okButton) {
 			close(false, true);
 
+			/** the reloader will apply the changes */
+			core.getConfig().startChanges();
+
 			setChanged();
 			notifyObservers(okButton);
 
@@ -255,23 +258,31 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 			dialog.setLocation(screenSize.width/2 - (dialogSize.width/2),
 					   screenSize.height/2 - (dialogSize.height/2));
 
+			/* Imply a whole reset => all the plugins will be reloaded
+			 */
+			if (resetConnection) {
+				core.getConfig().cancelChanges();
 
-			core.getPluginManager().stopPlugins();
+				core.getPluginManager().stopPlugins();
 
-			/* should reinit the whole connection correctly */
-			if (resetConnection && !core.initConnection()) {
-				new thaw.gui.WarningWindow(dialog,
-							   I18n.getMessage("thaw.warning.unableToConnectTo")+
-							   " "+core.getConfig().getValue("nodeAddress")+
-							   ":"+ core.getConfig().getValue("nodePort"));
+				/* should reinit the whole connection correctly */
+				if (resetConnection && !core.initConnection()) {
+					new thaw.gui.WarningWindow(dialog,
+								   I18n.getMessage("thaw.warning.unableToConnectTo")+
+								   " "+core.getConfig().getValue("nodeAddress")+
+								   ":"+ core.getConfig().getValue("nodePort"));
+				}
+
+				needConnectionReset = false;
+
+				/* put back the config tab */
+				addTabs();
+
+				core.getPluginManager().loadAndRunPlugins();
+
+			} else { /* !resetConnection */
+				core.getConfig().applyChanges();
 			}
-
-			needConnectionReset = false;
-
-			/* put back the config tab */
-			addTabs();
-
-			core.getPluginManager().loadAndRunPlugins();
 
 			dialog.setVisible(false);
 		}
@@ -286,7 +297,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	public void close(boolean notifyCancel, boolean hideWin) {
 		if (notifyCancel) {
 			setChanged();
-			this.notifyObservers(cancelButton); /* Equivalent to a click on the cancel button */
+			notifyObservers(cancelButton); /* Equivalent to a click on the cancel button */
 		}
 
 		core.getMainWindow().setEnabled(true);

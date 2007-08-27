@@ -87,12 +87,11 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 
 		panel.add(new JLabel(""));
 		panel.add(regexpPanel);
-
-		configWindow.addObserver(this);
 	}
 
 
 	public void display() {
+		configWindow.addObserver(this);
 		configWindow.addTab(I18n.getMessage("thaw.plugin.miniFrost"),
 				    thaw.gui.IconBox.minReadComments,
 				    panel);
@@ -100,6 +99,7 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 
 
 	public void hide() {
+		configWindow.deleteObserver(this);
 		configWindow.removeTab(panel);
 	}
 

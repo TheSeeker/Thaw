@@ -46,6 +46,9 @@ public class Restarter implements Observer, Runnable, Plugin {
 	public boolean run(final Core core) {
 		this.core = core;
 
+		core.getConfig().addListener("restartInterval", this);
+		core.getConfig().addListener("restartFatals",   this);
+
 		/* Reloading value from the configuration */
 		try {
 			if((core.getConfig().getValue("restartInterval") != null)

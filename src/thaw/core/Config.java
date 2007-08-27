@@ -33,13 +33,20 @@ public class Config {
 	private final File configFile;
 
 	private final HashMap parameters; /* String (param) -> String (value) */
+	private final HashMap listeners;  /* String (param) -> Vector -> Plugin */
 	private final Vector pluginNames; /* String (plugin names) */
 
-	public Config(final String filename) {
+	private final Core core;
+
+
+	public Config(Core core, final String filename) {
+		this.core = core;
+
 		configFile = new File(filename);
 
 		parameters = new HashMap();
 		pluginNames = new Vector();
+		listeners = new HashMap();
 	}
 
 	/**
@@ -49,12 +56,76 @@ public class Config {
 		return ((String)parameters.get(key));
 	}
 
+
+	private boolean listenChanges = false;
+	private Vector pluginsToReload = null;
+
+	/**
+	 * called when majors changed will be done to the config
+	 * and will imply some plugin reloading
+	 */
+	public void startChanges() {
+		listenChanges = true;
+		pluginsToReload = new Vector();
+	}
+
 	/**
 	 * Set the value in the config.
 	 */
 	public void setValue(final String key, final String value) {
 		Logger.debug(this, "Setting value '"+key+"' to '"+value+"'");
-		parameters.put(key, value);
+
+		String currentValue = getValue(key);
+
+		if ( (currentValue != null && !currentValue.equals(value))
+		     || (currentValue == null && value != null ) ) {
+
+			/* we get the plugin list to reload */
+			Vector pluginList = (Vector)listeners.get(key);
+
+			if (listenChanges && pluginList != null) {
+				for (Iterator it = pluginList.iterator();
+				     it.hasNext();) {
+					Plugin plugin = (Plugin)it.next();
+
+					/* if the plugin is not already in the plugin list to
+					 * reload, we add it */
+					if (pluginsToReload.indexOf(plugin) < 0) {
+						Logger.notice(this, "Will have to reload '"+plugin.getClass().getName()+"' "+
+							      "because '"+key+"' was changed from '"+currentValue+"' to '"+value+"'");
+						pluginsToReload.add(plugin);
+					}
+
+				}
+			}
+
+			/* and to finish, we set the value */
+			parameters.put(key, value);
+		}
+	}
+
+	/**
+	 * called after startChanges. Will reload the plugin listening for the changed
+	 * values
+	 */
+	public void applyChanges() {
+		for (Iterator it = pluginsToReload.iterator();
+		     it.hasNext();) {
+			Plugin plugin = (Plugin)it.next();
+			core.getPluginManager().stopPlugin(plugin.getClass().getName());
+			core.getPluginManager().runPlugin(plugin.getClass().getName());
+		}
+
+		cancelChanges();
+	}
+
+	/**
+	 * Will not undo the changes do to the values, but reset to 0 the plugin list to reload
+	 * Use it only if you know what you're doing !
+	 */
+	public void cancelChanges() {
+		listenChanges = false;
+		pluginsToReload = null;
 	}
 
 	/**
@@ -293,5 +364,19 @@ public class Config {
 		setDefaultValue("userNickname", "Another anonymous");
 		setDefaultValue("multipleSockets", "true");
 		setDefaultValue("sameComputer", "true");
+	}
+
+
+	public void addListener(String name, Plugin plugin) {
+
+		Vector pluginList = (Vector)listeners.get(name);
+
+		if (pluginList == null) {
+			pluginList = new Vector();
+			listeners.put(name, pluginList);
+		}
+
+		if (pluginList.indexOf(plugin) < 0)
+			pluginList.add(plugin);
 	}
 }

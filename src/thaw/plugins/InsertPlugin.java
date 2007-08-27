@@ -41,6 +41,8 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 	public boolean run(final Core core) {
 		this.core = core;
 
+		core.getConfig().addListener("advancedMode", this);
+
 		Logger.info(this, "Starting plugin \"InsertPlugin\" ...");
 
 		insertPanel = new InsertPanel(this,

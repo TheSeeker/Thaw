@@ -40,6 +40,11 @@ public class MiniFrost implements thaw.core.Plugin {
 	public boolean run(Core core) {
 		this.core = core;
 
+		core.getConfig().addListener("advancedMode",                  this);
+		core.getConfig().addListener("miniFrostAutoRefreshMaxBoards", this);
+		core.getConfig().addListener("miniFrostArchiveAfter",         this);
+		core.getConfig().addListener("miniFrostDeleteAfter",          this);
+
 		if (!loadDeps()
 		    || !initFactories()
 		    || !cleanUp(core.getConfig())

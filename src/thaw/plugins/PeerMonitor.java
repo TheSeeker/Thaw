@@ -107,6 +107,8 @@ public class PeerMonitor implements thaw.core.Plugin, Observer, ActionListener
 	public boolean run(Core core) {
 		this.core = core;
 
+		core.getConfig().addListener("advancedMode", this);
+
 		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 
 		unfoldButton = new JButton("<");

@@ -11,6 +11,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 
+import java.util.Observer;
+import java.util.Observable;
+
 import thaw.core.Config;
 import thaw.core.ConfigWindow;
 import thaw.core.I18n;
@@ -21,7 +24,7 @@ import thaw.gui.WarningWindow;
 /**
  * in the config window
  */
-public class IndexConfigTab implements ActionListener {
+public class IndexConfigTab implements ActionListener, Observer {
 	private ConfigWindow configWindow;
 	private Config config;
 
@@ -61,9 +64,6 @@ public class IndexConfigTab implements ActionListener {
 
 
 		autorefreshActivated.addActionListener(this);
-		configWindow.getOkButton().addActionListener(this);
-		configWindow.getCancelButton().addActionListener(this);
-
 
 		editBlackList = new JButton(I18n.getMessage("thaw.plugin.index.editBlackList")+ " ...");
 		editBlackList.addActionListener(this);
@@ -99,6 +99,7 @@ public class IndexConfigTab implements ActionListener {
 
 
 	public void addTab() {
+		configWindow.addObserver(this);
 		configWindow.addTab(I18n.getMessage("thaw.plugin.index.indexes"),
 				    thaw.gui.IconBox.minIndex,
 				    panel);
@@ -106,6 +107,7 @@ public class IndexConfigTab implements ActionListener {
 
 
 	public void removeTab() {
+		configWindow.deleteObserver(this);
 		saveValues();
 		configWindow.removeTab(panel);
 	}
@@ -179,19 +181,17 @@ public class IndexConfigTab implements ActionListener {
 				Boolean.toString(fetchComments.isSelected()));
 	}
 
+	public void update(Observable o, Object param) {
+		if (param == configWindow.getOkButton()) {
+			saveValues();
+		} else if (param == configWindow.getCancelButton()) {
+			resetValues();
+		}
+	}
+
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == autorefreshActivated) {
 			updateTextFieldState();
-			return;
-		}
-
-		if (e.getSource() == configWindow.getOkButton()) {
-			saveValues();
-			return;
-		}
-
-		if (e.getSource() == configWindow.getCancelButton()) {
-			resetValues();
 			return;
 		}
 
