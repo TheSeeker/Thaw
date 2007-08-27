@@ -338,8 +338,8 @@ public class IndexParser {
 		private boolean dateTag = false;
 		private boolean commentsTag = false;
 		private boolean categoryTag = false;
-
 		private boolean hasCommentTag = false;
+		private boolean clientTag = false;
 
 		private String dateStr = null;
 		private String categoryStr = null;
@@ -368,41 +368,28 @@ public class IndexParser {
 			if ("owner".equals(rawName)) {
 				ownerTag = true;
 				return;
-			}
-
-			if ("privateKey".equals(rawName)) {
+			} else if ("privateKey".equals(rawName)) {
 				privateKeyTag = true;
 				return;
-			}
-
-			if ("date".equals(rawName)) {
+			} else if ("date".equals(rawName)) {
 				dateTag = true;
 				return;
-			}
-
-			if ("category".equals(rawName)) {
+			} else if ("category".equals(rawName)) {
 				categoryTag = true;
 				return;
-			}
-
-			if ("link".equals(rawName)
-			    || "index".equals(rawName)) { /* links */
+			} else if ("link".equals(rawName)
+				   || "index".equals(rawName)) { /* links */
 
 				index.addLink(attrs.getValue("key"));
 
 				return;
-			}
-
-			if ("file".equals(rawName)) {
+			} else if ("file".equals(rawName)) {
 
 				index.addFile(attrs.getValue("key"),
 					      Long.parseLong(attrs.getValue("size")),
 					      attrs.getValue("mime"));
 
-			}
-
-
-			if ("comments".equals(rawName)) {
+			} else if ("comments".equals(rawName)) {
 				String pub = attrs.getValue("publicKey");
 				String priv = attrs.getValue("privateKey");
 
@@ -412,10 +399,13 @@ public class IndexParser {
 					Logger.debug(this, "Comment allowed in this index");
 					index.setCommentKeys(pub, priv);
 				}
-			}
 
+			} else if ("client".equals(rawName)) {
 
-			if ("blackListed".equals(rawName)) {
+				clientTag = true;
+				return;
+
+			} else if ("blackListed".equals(rawName)) {
 				int blRev;
 
 				blRev = Integer.parseInt(attrs.getValue("rev"));
@@ -448,24 +438,16 @@ public class IndexParser {
 			if ("owner".equals(rawName)) {
 				ownerTag = false;
 				return;
-			}
-
-			if ("privateKey".equals(rawName)) {
+			} else if ("privateKey".equals(rawName)) {
 				privateKeyTag = false;
 				return;
-			}
-
-			if ("date".equals(rawName)) {
+			} else if ("date".equals(rawName)) {
 				dateTag = false;
 				return;
-			}
-
-			if ("category".equals(rawName)) {
+			} else if ("category".equals(rawName)) {
 				categoryTag = false;
 				return;
-			}
-
-			if ("header".equals(rawName)) {
+			} else if ("header".equals(rawName)) {
 				if (dateStr != null) {
 					java.text.SimpleDateFormat sdf =
 						new java.text.SimpleDateFormat(DATE_FORMAT);
@@ -476,10 +458,11 @@ public class IndexParser {
 
 				if (categoryStr != null)
 					index.setCategory(categoryStr);
-			}
-
-			if ("comments".equals(rawName)) {
+			} else if ("comments".equals(rawName)) {
 				commentsTag = false;
+				return;
+			} else if ("client".equals(rawName)) {
+				clientTag = false;
 				return;
 			}
 		}
@@ -507,6 +490,10 @@ public class IndexParser {
 
 			if (categoryTag) {
 				categoryStr = txt;
+			}
+
+			if (clientTag) {
+				index.setClientVersion(txt);
 			}
 
 			if (privateKeyTag) {

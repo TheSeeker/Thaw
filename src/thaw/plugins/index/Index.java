@@ -815,7 +815,8 @@ public class Index extends Observable implements MutableTreeNode,
 
 		boolean v = realDownloadFromFreenet(specificRev);
 
-		this.addObserver(o);
+		if (o != null)
+			this.addObserver(o);
 
 		return (v ? 1 : 0);
 	}
@@ -1991,5 +1992,70 @@ public class Index extends Observable implements MutableTreeNode,
 
 	public boolean downloadSuccessful() {
 		return successful;
+	}
+
+
+	public void setClientVersion(String str) {
+		/* only used if it's the Thaw index who was updated */
+
+		final String thawIndexPart = FreenetURIHelper.getComparablePart(thaw.plugins.IndexBrowser.DEFAULT_INDEXES[0]);
+		final String thisIndexPart = FreenetURIHelper.getComparablePart(getPublicKey());
+
+
+		if (!thawIndexPart.equals(thisIndexPart))
+			return;
+
+		try {
+			if (!str.startsWith("Thaw ")) { /* not made with Thaw ?! */
+				Logger.notice(this, "Can't parse the Thaw version in the index '"+toString(false)+"' ?!");
+				return;
+			}
+
+			str = str.substring(5);
+
+			int spacePos = -1;
+
+			if ( (spacePos = str.indexOf(" ")) < 0) { /* hu ? */
+				Logger.notice(this, "Can't parse the Thaw version in the index '"+toString(false)+"' ?!");
+				return;
+			}
+
+			str = str.substring(0, spacePos);
+
+			String[] numbers = str.split("\\.");
+			int major  = Integer.parseInt(numbers[0]);
+			int minor  = Integer.parseInt(numbers[1]);
+			int update = Integer.parseInt(numbers[2]);
+
+			boolean mustPopup = false;
+
+			if (major > Main._major)
+				mustPopup = true;
+
+			else if (major == Main._major) {
+
+				if (minor > Main._minor)
+					mustPopup = true;
+				else if (update > Main._update)
+					mustPopup = true;
+
+			}
+
+
+			if (mustPopup) {
+				String newVersion =
+					Integer.toString(major)+"."+
+					Integer.toString(minor)+"."+
+					Integer.toString(update);
+
+				/* quick and dirty way to warn the user */
+				Logger.warning(this, I18n.getMessage("thaw.plugins.index.newThawVersion").replaceAll("X", newVersion));
+			}
+
+		} catch(Exception e) {
+			Logger.notice(this, "Unable to parse the client string of the index '"+toString(false)+
+				      "' because : "+e.toString());
+			e.printStackTrace();
+		}
 	}
 }

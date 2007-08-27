@@ -19,16 +19,19 @@ import thaw.plugins.index.IndexManagementHelper;
 
 public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListener {
 
+	/**
+	 * Thaw index is always specified first
+	 */
 	public static final String[] DEFAULT_INDEXES = new String[] {
-		/* publicly writable index */
-		"USK@61m2WMJEA9pyQQQ-hjGN8lIM2xToNJHyacJ8ZPB9JCQ,"+
-		"5aEPJBhwIV~HpGIG8YTpKSB39WCGgd0BUNWZ012745Y,AQACAAE"+
-		"/Publicly%20writable%20index/35/Publicly writable index.frdx",
-
 		/* Thaw index */
 		"USK@p-uFAWUomLm37MCQLu3r67-B8e6yF1kS4q2v0liM1Vk,"+
 		"h0MWqM~lF0Bec-AIv445PLn06ams9-RFbnwO6Cm2Snc,AQACAAE"+
-		"/Thaw/2/Thaw.frdx"
+		"/Thaw/2/Thaw.frdx",
+
+		/* publicly writable index */
+		"USK@61m2WMJEA9pyQQQ-hjGN8lIM2xToNJHyacJ8ZPB9JCQ,"+
+		"5aEPJBhwIV~HpGIG8YTpKSB39WCGgd0BUNWZ012745Y,AQACAAE"+
+		"/Publicly%20writable%20index/35/Publicly writable index.frdx"
 	};
 
 	private Core core;

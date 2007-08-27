@@ -74,4 +74,6 @@ public interface IndexContainer extends FileAndLinkList {
 
 	public void setCategory(String str);
 	public String getCategory();
+
+	public void setClientVersion(String str);
 }
