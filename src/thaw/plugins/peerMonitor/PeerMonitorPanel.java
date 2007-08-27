@@ -86,10 +86,6 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 	private JPanel tabPanel;
 	private JPanel mainPanel;
 
-	private JLabel refLabel;
-	private JTextArea refArea;
-	private JButton refCopyButton;
-
 	private JList peerList;
 	private JProgressBar thawMemBar;
 	private JProgressBar nodeMemBar;
@@ -205,27 +201,7 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 		peerPanel.setPreferredSize(new java.awt.Dimension(250, 200));
 
 
-		mainPanel = new JPanel(new GridLayout(2, 1, 10, 10));
-
-
-		JPanel refPanel = new JPanel(new BorderLayout());
-		JPanel refTitle = new JPanel(new BorderLayout());
-
-		refLabel = new JLabel(I18n.getMessage("thaw.plugin.peerMonitor.yourReference"));
-		refLabel.setIcon(IconBox.identity);
-
-		refCopyButton = new JButton(I18n.getMessage("thaw.plugin.peerMonitor.copyReference"));
-		refCopyButton.addActionListener(this);
-
-		refTitle.add(refLabel, BorderLayout.CENTER);
-		refTitle.add(refCopyButton, BorderLayout.EAST);
-
-		refArea = new JTextArea("*Put the node ref here*");
-		refArea.setEditable(false);
-		refArea.setBackground(new Color(240,240,240));
-
-		refPanel.add(refTitle, BorderLayout.NORTH);
-		refPanel.add(new JScrollPane(refArea), BorderLayout.CENTER);
+		mainPanel = new JPanel(new GridLayout(1, 1, 10, 10)); /* obsolete */
 
 		detailsLabel = new JLabel();
 		detailsPanel = new JPanel();
@@ -236,7 +212,6 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 		globalDetailsPanel.add(new JScrollPane(detailsPanel), BorderLayout.CENTER);
 
 		mainPanel.add(globalDetailsPanel);
-		mainPanel.add(refPanel);
 
 		tabPanel.add(mainPanel, BorderLayout.CENTER);
 
@@ -329,11 +304,6 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 				    + " : "+ Integer.toString(nmbNodeThreads));
 		thawThreads.setText(I18n.getMessage("thaw.plugin.peerMonitor.infos.thawThreads")
 				    + " : "+ Integer.toString(Thread.activeCount()));
-	}
-
-
-	public void setRef(String ref) {
-		refArea.setText(ref);
 	}
 
 
@@ -432,10 +402,6 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == refCopyButton) {
-			thaw.gui.GUIHelper.copyToClipboard(refArea.getText());
-		}
-
 		if (e.getSource() == closeTabButton) {
 			peerMonitor.hideTab();
 		}

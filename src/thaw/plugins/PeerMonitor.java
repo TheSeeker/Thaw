@@ -88,10 +88,6 @@ public class PeerMonitor implements thaw.core.Plugin, Observer, ActionListener
 				peerPanel.setNmbThreads(gN.getNmbThreads());
 				peerPanel.setNodeInfos(gN.getAllParameters());
 
-				if (!isRefSet) {
-					peerPanel.setRef(gN.getRef());
-					isRefSet = true;
-				}
 			}
 
 			if (o instanceof FCPListPeers) {
