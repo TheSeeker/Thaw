@@ -86,8 +86,6 @@ public class FCPGetNode extends Observable implements FCPQuery, Observer {
 			    || !msg.getMessageName().equals("NodeData"))
 				return;
 
-			Logger.info(this, msg.toString());
-
 			ref = "";
 
 			for (int i = 0 ; i < refElements.length ; i++) {

@@ -47,6 +47,7 @@ import thaw.core.Logger;
 import thaw.fcp.FCPQueueManager;
 
 import thaw.gui.IconBox;
+import thaw.gui.GUIHelper;
 
 /**
  * In fact, here is two panels : A panel with the peer list
@@ -271,9 +272,9 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 		pourcent = (int)((used * 100) / max);
 
 		nodeMemBar.setString(I18n.getMessage("thaw.plugin.peerMonitor.infos.nodeMemory")+ ": "
-				     + thaw.gui.GUIHelper.getPrintableSize(used)
+				     + GUIHelper.getPrintableSize(used)
 				     + " / "
-				     + thaw.gui.GUIHelper.getPrintableSize(max));
+				     + GUIHelper.getPrintableSize(max));
 
 		nodeMemBar.setValue(pourcent);
 
@@ -291,9 +292,9 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 		pourcent = (int)((used * 100) / max);
 
 		thawMemBar.setString(I18n.getMessage("thaw.plugin.peerMonitor.infos.thawMemory")+ ": "
-				     + thaw.gui.GUIHelper.getPrintableSize(used)
+				     + GUIHelper.getPrintableSize(used)
 				     + " / "
-				     + thaw.gui.GUIHelper.getPrintableSize(max));
+				     + GUIHelper.getPrintableSize(max));
 
 		thawMemBar.setValue(pourcent);
 	}
@@ -429,7 +430,7 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 				value + "%"
 			};
 
-		else if ("version".equals(key))
+		else if ("version".equals(key)) /* used also for the node */
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.version"),
 				value
@@ -448,13 +449,13 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 			};
 
 
-		else if ("physical.udp".equals(key))
+		else if ("physical.udp".equals(key)) /* used also for the node */
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.physical.udp"),
 				value
 			};
 
-		else if ("volatile.averagePingTime".equals(key))
+		else if ("volatile.averagePingTime".equals(key)) /* used also for the node */
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.averagePingTime"),
 				Integer.toString(new Float(value).intValue()) + " ms"
@@ -463,21 +464,42 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 		else if ("volatile.idle".equals(key))
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.idle"),
-				"~" + thaw.gui.GUIHelper.getPrintableTime(Long.parseLong(value) / 1000)
+				"~" + GUIHelper.getPrintableTime(Long.parseLong(value) / 1000)
 			};
+
+		else if ("volatile.totalBytesOut".equals(key)) {
+			result = new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.totalBytesOut"),
+				"~" + GUIHelper.getPrintableSize(Long.parseLong(value))
+			};
+		}
+
+		else if ("volatile.totalBytesIn".equals(key)) {
+			result = new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.totalBytesIn"),
+				"~" + GUIHelper.getPrintableSize(Long.parseLong(value))
+			};
+		}
+
+		else if ("volatile.overloadProbability".equals(key)) {
+			result = new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.overloadProbability"),
+				value
+			};
+		}
 
 		/* NODE */
 
 		else if ("volatile.overallSize".equals(key))
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.node.overallSize"),
-				"~" + thaw.gui.GUIHelper.getPrintableSize(Long.parseLong(value))
+				"~" + GUIHelper.getPrintableSize(Long.parseLong(value))
 			};
 
 		else if ("volatile.uptimeSeconds".equals(key)) {
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.node.uptimeSeconds"),
-				"~" + thaw.gui.GUIHelper.getPrintableTime(Long.parseLong(value))
+				"~" + GUIHelper.getPrintableTime(Long.parseLong(value))
 			};
 		}
 
@@ -501,6 +523,50 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 				value
 			};
 		}
+
+		else if ("volatile.totalInputBytes".equals(key)) {
+
+			result = new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.totalInputBytes"),
+				GUIHelper.getPrintableSize(Long.parseLong(value))
+			};
+		}
+
+		else if ("volatile.backedOffPercent".equals(key)) {
+
+			result = new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.backedOffPercent"),
+				value + "%"
+			};
+		}
+
+		else if ("volatile.totalOutputBytes".equals(key)) {
+
+			result = new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.totalOutputBytes"),
+				GUIHelper.getPrintableSize(Long.parseLong(value))
+			};
+
+		}
+
+		else if ("volatile.swapsPerMinute".equals(key)) {
+
+			result = new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.swapPerMinute"),
+			        value
+			};
+
+		}
+
+		else if ("volatile.locationChangePerMinute".equals(key)) {
+
+			result = new String[] {
+				I18n.getMessage("thaw.plugin.peerMonitor.infos.locationChangePerMinute"),
+			        value
+			};
+
+		}
+
 
 		/*
 		  if (advanced) {
