@@ -5,6 +5,8 @@ import java.util.Observer;
 
 import java.util.Hashtable;
 
+import thaw.core.Logger;
+
 
 public class FCPGetNode extends Observable implements FCPQuery, Observer {
 	public final static String[] refElements = {
@@ -84,6 +86,8 @@ public class FCPGetNode extends Observable implements FCPQuery, Observer {
 			    || !msg.getMessageName().equals("NodeData"))
 				return;
 
+			Logger.info(this, msg.toString());
+
 			ref = "";
 
 			for (int i = 0 ; i < refElements.length ; i++) {
@@ -114,6 +118,10 @@ public class FCPGetNode extends Observable implements FCPQuery, Observer {
 	}
 
 
+	/**
+	 * Darknet ref.
+	 * Not really maintained anymore. Please report if outdated
+	 */
 	public String getRef() {
 		return ref;
 	}

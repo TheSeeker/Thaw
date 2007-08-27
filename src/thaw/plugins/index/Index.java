@@ -1208,7 +1208,7 @@ public class Index extends Observable implements MutableTreeNode,
 	}
 
 
-	public void addFile(String key, long size, String mime) {
+	public boolean addFile(String key, long size, String mime) {
 		try {
 			synchronized(db.dbLock) {
 				PreparedStatement st;
@@ -1229,10 +1229,14 @@ public class Index extends Observable implements MutableTreeNode,
 				st.setInt(5, id);
 
 				st.execute();
+
+				return true;
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Error while adding file to index '"+toString()+"' : "+e.toString());
 		}
+
+		return false;
 	}
 
 
@@ -1292,13 +1296,12 @@ public class Index extends Observable implements MutableTreeNode,
 	}
 
 
-	public void addLink(String key) {
+	public boolean addLink(String key) {
 		try {
 			if (key == null) /* it was the beginning of the index */
-				return;
+				return true;
 
 			key = key.trim();
-
 
 			boolean blackListed = (BlackList.isBlackListed(db, key) >= 0);
 
@@ -1315,10 +1318,14 @@ public class Index extends Observable implements MutableTreeNode,
 				st.setBoolean(4, blackListed);
 
 				st.execute();
+
+				return true;
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Error while adding link to index '"+toString()+"' : "+e.toString());
 		}
+
+		return false;
 	}
 
 

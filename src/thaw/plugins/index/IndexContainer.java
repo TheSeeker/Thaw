@@ -63,8 +63,12 @@ public interface IndexContainer extends FileAndLinkList {
 
 	public void setInsertionDate(java.util.Date date);
 
-	public void addFile(String publicKey, long size, String mime);
-	public void addLink(String publicKey);
+	/**
+	 * return false if the parsing must be interrupted
+	 * (because of db errors or anything else)
+	 */
+	public boolean addFile(String publicKey, long size, String mime);
+	public boolean addLink(String publicKey);
 	public void setCommentKeys(String publicKey, String privateKey);
 	public void addBlackListedRev(int rev);
 

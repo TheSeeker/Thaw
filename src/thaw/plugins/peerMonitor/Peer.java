@@ -16,7 +16,12 @@ public class Peer {
 
 	public Peer(Hashtable parameters) {
 		this.parameters = parameters;
+
 		displayName = (String)parameters.get("myName");
+
+		if (displayName == null)
+			displayName = (String)parameters.get("physical.udp");
+
 		identity = (String)parameters.get("identity");
 
 		String status = (String)parameters.get("volatile.status");

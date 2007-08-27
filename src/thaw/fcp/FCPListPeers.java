@@ -6,6 +6,9 @@ import java.util.Observable;
 import java.util.Vector;
 import java.util.Hashtable;
 
+import thaw.core.Logger;
+
+
 public class FCPListPeers extends Observable implements FCPQuery, Observer {
 
 	private boolean withMetadata;

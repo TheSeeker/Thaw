@@ -380,14 +380,18 @@ public class IndexParser {
 			} else if ("link".equals(rawName)
 				   || "index".equals(rawName)) { /* links */
 
-				index.addLink(attrs.getValue("key"));
+				if (!index.addLink(attrs.getValue("key"))) {
+					throw new SAXException("Index parsing interrupted because of a backend error (did you delete the index while it was downloading ?)");
+				}
 
 				return;
 			} else if ("file".equals(rawName)) {
 
-				index.addFile(attrs.getValue("key"),
-					      Long.parseLong(attrs.getValue("size")),
-					      attrs.getValue("mime"));
+				if (!index.addFile(attrs.getValue("key"),
+						   Long.parseLong(attrs.getValue("size")),
+						   attrs.getValue("mime"))) {
+					throw new SAXException("Index parsing interrupted because of a backend error (did you delete the index while it was downloading ?)");
+				}
 
 			} else if ("comments".equals(rawName)) {
 				String pub = attrs.getValue("publicKey");
@@ -589,6 +593,8 @@ public class IndexParser {
 			Logger.error(this, "Error (2) while parsing index: "+e.toString());
 		} catch(java.io.IOException e) {
 			Logger.error(this, "Error (3) while parsing index: "+e.toString());
+		} catch(Exception e) {
+			Logger.error(this, "Error (4) while parsing index: "+e.toString());
 		}
 	}
 

@@ -451,50 +451,50 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 		/* PEERS */
 
-		if (result == null && "volatile.lastRoutingBackoffReason".equals(key))
+		if ("volatile.lastRoutingBackoffReason".equals(key))
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.lastRoutingBackoffReason"),
 				value
 			};
 
-		if (result == null && "volatile.routingBackoffPercent".equals(key))
+		else if ("volatile.routingBackoffPercent".equals(key))
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.routingBackoffPercent"),
 				value + "%"
 			};
 
-		if (result == null && "version".equals(key))
+		else if ("version".equals(key))
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.version"),
 				value
 			};
 
-		if (result == null && "volatile.status".equals(key))
+		else if ("volatile.status".equals(key))
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.status"),
 				value
 			};
 
-		if (result == null && "myName".equals(key))
+		else if ("myName".equals(key))
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.myName"),
 				value
 			};
 
 
-		if (result == null && "physical.udp".equals(key))
+		else if ("physical.udp".equals(key))
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.physical.udp"),
 				value
 			};
 
-		if (result == null && "volatile.averagePingTime".equals(key))
+		else if ("volatile.averagePingTime".equals(key))
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.averagePingTime"),
 				Integer.toString(new Float(value).intValue()) + " ms"
 			};
 
-		if (result == null && "volatile.idle".equals(key))
+		else if ("volatile.idle".equals(key))
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.peer.idle"),
 				"~" + thaw.gui.GUIHelper.getPrintableTime(Long.parseLong(value) / 1000)
@@ -502,34 +502,34 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 		/* NODE */
 
-		if (result == null && "volatile.overallSize".equals(key))
+		else if ("volatile.overallSize".equals(key))
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.node.overallSize"),
 				"~" + thaw.gui.GUIHelper.getPrintableSize(Long.parseLong(value))
 			};
 
-		if (result == null && "volatile.uptimeSeconds".equals(key)) {
+		else if ("volatile.uptimeSeconds".equals(key)) {
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.node.uptimeSeconds"),
 				"~" + thaw.gui.GUIHelper.getPrintableTime(Long.parseLong(value))
 			};
 		}
 
-		if (result == null && "volatile.networkSizeEstimateSession".equals(key)) {
+		else if ("volatile.networkSizeEstimateSession".equals(key)) {
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.node.networkSizeEstimateSession"),
 				value
 			};
 		}
 
-		if (result == null && "volatile.runningThreadCount".equals(key)) {
+		else if ("volatile.runningThreadCount".equals(key)) {
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.node.runningThreads"),
 				value
 			};
 		}
 
-		if (result == null && "myName".equals(key)) {
+		else if ("myName".equals(key)) {
 			result = new String[] {
 				I18n.getMessage("thaw.plugin.peerMonitor.infos.node.myName"),
 				value

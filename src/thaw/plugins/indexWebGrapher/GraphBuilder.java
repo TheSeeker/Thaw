@@ -262,7 +262,6 @@ public class GraphBuilder implements Runnable {
 		plugin.setProgress(9);
 		Logger.info(this, "Drawing ...");
 
-		graphPanel.guessZoom();
 		graphPanel.refresh();
 
 		/* === */

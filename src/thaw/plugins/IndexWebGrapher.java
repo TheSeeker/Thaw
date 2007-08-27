@@ -162,10 +162,21 @@ public class IndexWebGrapher implements thaw.core.Plugin, ActionListener {
 					lastBuilder.stop();
 				}
 			}
+
 		} else if (e.getSource() == zoomIn) {
+
 			graphPanel.zoomIn();
+
+			scrollPane.getHorizontalScrollBar().setValue(scrollPane.getHorizontalScrollBar().getValue()*2);
+			scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getValue()*2);
+
 		} else if (e.getSource() == zoomOut) {
+
+			scrollPane.getHorizontalScrollBar().setValue(scrollPane.getHorizontalScrollBar().getValue()/2);
+			scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getValue()/2);
+
 			graphPanel.zoomOut();
+
 		} else if (e.getSource() == refresh) {
 			graphPanel.refresh();
 		}
