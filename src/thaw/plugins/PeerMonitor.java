@@ -207,4 +207,16 @@ public class PeerMonitor implements thaw.core.Plugin, Observer, ActionListener
 		else if (e.getSource() == unfoldButton)
 			unfoldPanel();
 	}
+
+
+	public void setNodeVersion(String version) {
+
+	}
+
+	/**
+	 * check if it's not more recent than the node version
+	 */
+	public void checkPeerVersion(String version) {
+
+	}
 }

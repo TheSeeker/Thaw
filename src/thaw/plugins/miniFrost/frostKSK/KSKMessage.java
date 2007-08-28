@@ -142,7 +142,10 @@ public class KSKMessage
 				read = parser.mustBeDisplayedAsRead();
 
 			} else {
-				Logger.notice(this, "Unable to parse. File not deleted");
+
+				new File(get.getPath()).delete();
+
+				Logger.notice(this, "Unable to parse.");
 				successfullyDownloaded = true;
 				downloading            = false;
 				successfullyParsed     = false;
