@@ -93,7 +93,7 @@ public class PluginManager {
 
 		final Iterator pluginIt = pluginNames.iterator();
 
-		final int progressJump = (100-40) / (pluginNames.size()*2);
+		final int progressJump = (100-40) / pluginNames.size();
 		core.getSplashScreen().setProgression(40);
 
 		while(pluginIt.hasNext()) {
@@ -105,8 +105,6 @@ public class PluginManager {
 			if (loadPlugin(pluginName) == null) {
 				Logger.notice(this, "Plugin alread loaded");
 			} else {
-				core.getSplashScreen().setProgressionAndStatus(core.getSplashScreen().getProgression()+progressJump,
-									       "Starting plugin '"+pluginName.replaceFirst("thaw.plugins.", "")+"' ...");
 				runPlugin(pluginName);
 			}
 		}

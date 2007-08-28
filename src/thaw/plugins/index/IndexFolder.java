@@ -1462,6 +1462,9 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 		if (children == null && loadChildren)
 			loadChildren();
 
+		if (children == null)
+			return null;
+
 		for (Iterator it = children.iterator() ;
 		     it.hasNext(); ) {
 		        Object child = it.next();
