@@ -985,8 +985,8 @@ public class IndexManagementHelper {
 
 
 	public static class IndexImporter extends BasicIndexAction {
-		public IndexImporter(final AbstractButton actionSource) {
-			super(null, null, actionSource);
+		public IndexImporter(final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
+			super(null, indexBrowser, actionSource);
 		}
 
 		public void setTarget(final IndexTreeNode node) {
@@ -1008,7 +1008,10 @@ public class IndexManagementHelper {
 			if (newFile == null)
 				return;
 
-			new IndexParser(((Index)getTarget())).loadXML(newFile.getPath());
+			new IndexParser(((Index)getTarget())).loadXML(newFile.getPath(), false);
+
+			getIndexBrowserPanel().getTables().getFileTable().refresh();
+			getIndexBrowserPanel().getTables().getLinkTable().refresh();
 		}
 	}
 

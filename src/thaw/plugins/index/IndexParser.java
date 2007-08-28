@@ -294,8 +294,14 @@ public class IndexParser {
 	public class IndexHandler extends DefaultHandler {
 		private Locator locator = null;
 
-		public IndexHandler() {
+		private boolean clean = true;
 
+		public IndexHandler() {
+			this(true);
+		}
+
+		public IndexHandler(boolean clean) {
+			this.clean = clean;
 		}
 
 		/**
@@ -310,7 +316,8 @@ public class IndexParser {
 		 * @see org.xml.sax.ContentHandler#startDocument()
 		 */
 		public void startDocument() throws SAXException {
-			index.purgeIndex();
+			if (clean)
+				index.purgeIndex();
 		}
 
 		/**
@@ -571,12 +578,16 @@ public class IndexParser {
 	 * see import functionnality
 	 */
 	public IndexHandler getIndexHandler() {
-		return new IndexHandler();
+		return getIndexHandler(true);
+	}
+
+	public IndexHandler getIndexHandler(boolean clean) {
+		return new IndexHandler(clean);
 	}
 
 
 	public synchronized void loadXML(final java.io.InputStream input, boolean clean) {
-		IndexHandler handler = new IndexHandler();
+		IndexHandler handler = new IndexHandler(clean);
 
 		try {
 			// Use the default (non-validating) parser
@@ -584,9 +595,11 @@ public class IndexParser {
 
 			// Parse the input
 			SAXParser saxParser = factory.newSAXParser();
+
 			Logger.info(this, "Parsing index ...");
 			saxParser.parse(input, handler );
 			Logger.info(this, "Parsing done");
+
 		} catch(javax.xml.parsers.ParserConfigurationException e) {
 			Logger.error(this, "Error (1) while parsing index: "+e.toString());
 		} catch(org.xml.sax.SAXException e) {
