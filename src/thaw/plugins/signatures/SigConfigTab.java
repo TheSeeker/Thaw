@@ -417,6 +417,37 @@ public class SigConfigTab implements ActionListener, Observer {
 	}
 
 
+	protected class OtherIdentitiesRenderer extends thaw.gui.Table.DefaultRenderer {
+
+		private IdentityModel model;
+
+		public OtherIdentitiesRenderer(IdentityModel model) {
+			super();
+			this.model = model;
+		}
+
+		public java.awt.Component getTableCellRendererComponent(final JTable table, Object value,
+									final boolean isSelected, final boolean hasFocus,
+									final int row, final int column) {
+
+			if (value instanceof String
+			    && "X".equals(value)) {
+				value = thaw.gui.IconBox.minClose;
+			}
+
+			java.awt.Component c = super.getTableCellRendererComponent(table, value,
+										   isSelected, hasFocus,
+										   row, column);
+			Identity i = model.getIdentity(row);
+
+			c.setForeground(i.getTrustLevelColor());
+
+			return c;
+		}
+
+	}
+
+
 	protected class OtherIdentitiesPanel implements ActionListener {
 		private JDialog dialog;
 		private IdentityModel model;
@@ -442,7 +473,10 @@ public class SigConfigTab implements ActionListener, Observer {
 
 			model = new IdentityModel();
 
+			OtherIdentitiesRenderer renderer = new OtherIdentitiesRenderer(model);
+
 			table = new Table(config, "other_identities_table", model);
+			table.setDefaultRenderer(table.getColumnClass(0), renderer);
 
 			dialog.getContentPane().add(new JScrollPane(table),
 						    BorderLayout.CENTER);
