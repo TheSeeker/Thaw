@@ -49,6 +49,7 @@ public class FCPConnection extends Observable {
 
 	private boolean duplicationAllowed = true;
 	private boolean localSocket = false;
+	private boolean autoDownload = true;
 
 	private FCPClientHello clientHello;
 
@@ -58,12 +59,15 @@ public class FCPConnection extends Observable {
 	 * @param maxUploadSpeed in KB: -1 means no limit
 	 * @param duplicationAllowed FCPClientGet and FCPClientPut will be allowed to
 	 *                           open a separate socket to transfer the files
+	 * @param autoDownload If !localSocket and if autoDownload, then files are automatically downloaded
+	 *                     when the transfer ends
 	 */
 	public FCPConnection(final String nodeAddress,
 			     final int port,
 			     int maxUploadSpeed,
 			     boolean duplicationAllowed,
-			     final boolean localSocket)
+			     final boolean localSocket,
+			     final boolean autoDownload)
 	{
 		if (localSocket)
 			duplicationAllowed = false;
@@ -81,6 +85,7 @@ public class FCPConnection extends Observable {
 		setMaxUploadSpeed(maxUploadSpeed);
 		setDuplicationAllowed(duplicationAllowed);
 		setLocalSocket(localSocket);
+		setAutoDownload(autoDownload);
 
 		writersWaiting = 0;
 	}
@@ -104,6 +109,14 @@ public class FCPConnection extends Observable {
 
 	public void setLocalSocket(final boolean local) {
 		localSocket = local;
+	}
+
+	public void setAutoDownload(final boolean autoDownload) {
+		this.autoDownload = autoDownload;
+	}
+
+	public boolean getAutoDownload() {
+		return autoDownload;
 	}
 
 	public boolean isLocalSocket() {
@@ -477,7 +490,8 @@ public class FCPConnection extends Observable {
 		/* upload limit is useless here, since we can't do a global limit
 		 * on all the connections */
 		newConnection = new FCPConnection(nodeAddress, port, -1,
-						  duplicationAllowed, localSocket);
+						  duplicationAllowed, localSocket,
+						  autoDownload);
 
 		if (!newConnection.connect()) {
 			Logger.warning(this, "Unable to duplicate socket !");

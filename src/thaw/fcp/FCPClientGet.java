@@ -352,8 +352,9 @@ public class FCPClientGet extends Observable
 					if(isPersistent()
 					   || (queueManager.getQueryManager().getConnection().isLocalSocket() && !noDDA)) {
 						if(destinationDir != null) {
-							if(!fileExists()
-							   && !(queueManager.getQueryManager().getConnection().isLocalSocket() && !noDDA)) {
+							if (!fileExists()
+							    && !(queueManager.getQueryManager().getConnection().isLocalSocket() && !noDDA)
+							    && queueManager.getQueryManager().getConnection().getAutoDownload()) {
 								status = "Requesting file from the node";
 								progress = 99;
 								running = true;

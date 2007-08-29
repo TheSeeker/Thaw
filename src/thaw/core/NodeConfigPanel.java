@@ -11,11 +11,15 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
 /**
  * NodeConfigPanel. Creates and manages the panel containing all the things to configure
  *  the settings to access the node.
  */
-public class NodeConfigPanel implements Observer {
+public class NodeConfigPanel implements Observer, ActionListener {
+
 	private Core core;
 	private JPanel nodeConfigPanel = null;
 
@@ -52,6 +56,7 @@ public class NodeConfigPanel implements Observer {
 	private ConfigWindow configWindow = null;
 
 	private JCheckBox multipleSockets = null;
+	private JCheckBox downloadLocally = null;
 	private JCheckBox sameComputer = null; /* if thaw and the node are on the same computer */
 
 
@@ -63,9 +68,10 @@ public class NodeConfigPanel implements Observer {
 					     I18n.getMessage("thaw.config.desactivateIfTroubles"),
 					     Boolean.valueOf(core.getConfig().getValue("sameComputer")).booleanValue());
 		sameComputer.setVisible(true);
+		sameComputer.addActionListener(this);
 
 		nodeConfigPanel = new JPanel();
-		nodeConfigPanel.setLayout(new GridLayout(16, 1));
+		nodeConfigPanel.setLayout(new GridLayout(17, 1));
 
 		for(int i=0; i < NodeConfigPanel.paramNames.length ; i++) {
 			String value;
@@ -102,8 +108,11 @@ public class NodeConfigPanel implements Observer {
 
 		multipleSockets = new JCheckBox(I18n.getMessage("thaw.config.multipleSockets"),
 						Boolean.valueOf(core.getConfig().getValue("multipleSockets")).booleanValue());
+		downloadLocally = new JCheckBox(I18n.getMessage("thaw.config.downloadLocally"),
+						Boolean.valueOf(core.getConfig().getValue("downloadLocally")).booleanValue());
 
 		nodeConfigPanel.add(new JLabel(" "));
+		nodeConfigPanel.add(downloadLocally);
 		nodeConfigPanel.add(multipleSockets);
 
 		setVisibility(Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
@@ -127,6 +136,7 @@ public class NodeConfigPanel implements Observer {
 			paramFields[i].setVisible(advancedMode);
 		}
 
+		downloadLocally.setVisible(advancedMode);
 		multipleSockets.setVisible(advancedMode);
 	}
 
@@ -143,6 +153,10 @@ public class NodeConfigPanel implements Observer {
 
 		if ((core.getConfig().getValue("sameComputer") == null)
 		    || !core.getConfig().getValue("sameComputer").equals(Boolean.toString(sameComputer.isSelected())))
+			return true;
+
+		if ((core.getConfig().getValue("downloadLocally") == null)
+		    || !core.getConfig().getValue("downloadLocally").equals(Boolean.toString(downloadLocally.isSelected())))
 			return true;
 
 		return false;
@@ -172,6 +186,7 @@ public class NodeConfigPanel implements Observer {
 
 			core.getConfig().setValue("multipleSockets", Boolean.toString(multipleSockets.isSelected()));
 			core.getConfig().setValue("sameComputer", Boolean.toString(sameComputer.isSelected()));
+			core.getConfig().setValue("downloadLocally", Boolean.toString(downloadLocally.isSelected()));
 
 			setVisibility(Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
 		}
@@ -195,6 +210,11 @@ public class NodeConfigPanel implements Observer {
 
 		multipleSockets.setSelected(Boolean.valueOf(core.getConfig().getValue("multipleSockets")).booleanValue());
 		sameComputer.setSelected(Boolean.valueOf(core.getConfig().getValue("sameComputer")).booleanValue());
+		downloadLocally.setSelected(Boolean.valueOf(core.getConfig().getValue("downloadLocally")).booleanValue());
 	}
 
+
+	public void actionPerformed(ActionEvent e) {
+		downloadLocally.setEnabled(!sameComputer.isSelected());
+	}
 }

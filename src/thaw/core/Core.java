@@ -159,9 +159,9 @@ public class Core implements Observer {
 	public boolean initConfig() {
 		config = new Config(this, Config.CONFIG_FILE_NAME);
 
-		if(!config.loadConfig()){
-			config.setDefaultValues();
-		}
+		config.loadConfig();
+
+		config.setDefaultValues();
 
 		if (config.getValue("tmpDir") != null)
 			System.setProperty("java.io.tmpdir", config.getValue("tmpDir"));
@@ -270,7 +270,8 @@ public class Core implements Observer {
 							       Integer.parseInt(config.getValue("nodePort")),
 							       Integer.parseInt(config.getValue("maxUploadSpeed")),
 							       Boolean.valueOf(config.getValue("multipleSockets")).booleanValue(),
-							       Boolean.valueOf(config.getValue("sameComputer")).booleanValue());
+							       Boolean.valueOf(config.getValue("sameComputer")).booleanValue(),
+							       Boolean.valueOf(config.getValue("downloadLocally")).booleanValue());
 			} else { /* connection is not recreate to avoid troubles with possible observers etc */
 				connection.deleteObserver(this);
 				connection.setNodeAddress(config.getValue("nodeAddress"));
@@ -278,6 +279,7 @@ public class Core implements Observer {
 				connection.setMaxUploadSpeed(Integer.parseInt(config.getValue("maxUploadSpeed")));
 				connection.setDuplicationAllowed(Boolean.valueOf(config.getValue("multipleSockets")).booleanValue());
 				connection.setLocalSocket(Boolean.valueOf(config.getValue("sameComputer")).booleanValue());
+				connection.setAutoDownload(Boolean.valueOf(config.getValue("downloadLocally")).booleanValue());
 			}
 
 			if(!connection.connect()) {

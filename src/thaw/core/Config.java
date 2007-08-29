@@ -353,6 +353,9 @@ public class Config {
 			setValue(name, val);
 	}
 
+	/**
+	 * don't override the values if already existing
+	 */
 	public void setDefaultValues() {
 		setDefaultValue("nodeAddress", "127.0.0.1");
 		setDefaultValue("nodePort", "9481");
@@ -363,6 +366,7 @@ public class Config {
 		setDefaultValue("advancedMode", "false");
 		setDefaultValue("userNickname", "Another anonymous");
 		setDefaultValue("multipleSockets", "true");
+		setDefaultValue("downloadLocally", "true");
 		setDefaultValue("sameComputer", "true");
 	}
 
