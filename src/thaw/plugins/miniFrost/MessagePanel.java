@@ -18,6 +18,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -33,6 +35,10 @@ import thaw.plugins.miniFrost.interfaces.Message;
 import thaw.plugins.miniFrost.interfaces.SubMessage;
 import thaw.plugins.miniFrost.interfaces.Attachment;
 import thaw.plugins.miniFrost.interfaces.Draft;
+
+import thaw.fcp.*;
+import thaw.plugins.IndexBrowser;
+import thaw.plugins.index.IndexManagementHelper;
 
 
 public class MessagePanel
@@ -426,5 +432,218 @@ public class MessagePanel
 			actions.setSelectedIndex(0);
 
 		}
+	}
+
+
+	public final static JMenuItem[] chkActions = {
+		new JMenuItem(I18n.getMessage("thaw.plugin.miniFrost.downloadThisKey")),
+		new JMenuItem(I18n.getMessage("thaw.plugin.miniFrost.downloadAllKeys")),
+		null,
+		new JMenuItem(I18n.getMessage("thaw.plugin.miniFrost.copyThisKey")),
+		new JMenuItem(I18n.getMessage("thaw.plugin.miniFrost.copyAllKeys"))
+	};
+
+	public final static JMenuItem[] indexActions = {
+		new JMenuItem(I18n.getMessage("thaw.plugin.miniFrost.addThisIndex")),
+		new JMenuItem(I18n.getMessage("thaw.plugin.miniFrost.addAllIndexes")),
+		null,
+		new JMenuItem(I18n.getMessage("thaw.plugin.miniFrost.copyThisKey")),
+		new JMenuItem(I18n.getMessage("thaw.plugin.miniFrost.copyAllKeys"))
+	};
+
+
+
+	protected MiniFrostPanel getMainPanel() {
+		return mainPanel;
+	}
+
+	public Vector getAllKeys() {
+		Vector v = new Vector();
+
+		for (Iterator it = subPanels.iterator();
+		     it.hasNext();) {
+			v.addAll( ((SubMessagePanel)it.next()).getKeys() );
+		}
+
+		return v;
+	}
+
+	public Vector getCHKKeys() {
+		Vector v = new Vector();
+
+		Vector keys = getAllKeys();
+
+		for (Iterator it = keys.iterator();
+		     it.hasNext();) {
+			String key = (String)it.next();
+
+			if (key.startsWith("CHK@"))
+				v.add(key);
+		}
+
+		return v;
+	}
+
+
+	public Vector getIndexKeys() {
+		Vector v = new Vector();
+
+		Vector keys = getAllKeys();
+
+		for (Iterator it = keys.iterator();
+		     it.hasNext();) {
+			String key = (String)it.next();
+
+			if (key.endsWith(".frdx"))
+				v.add(key);
+		}
+
+		return v;
+	}
+
+
+	protected static class KeyActionMenu extends JPopupMenu implements ActionListener {
+		private String key;
+		private JMenuItem[] chkActions;
+		private JMenuItem[] indexActions;
+		private MessagePanel messagePanel;
+
+		public KeyActionMenu(JMenuItem[] chkActions, JMenuItem[] indexActions) {
+			super();
+
+			this.chkActions = chkActions;
+			this.indexActions = indexActions;
+
+			for (int i = 0 ; i < indexActions.length;i++) {
+				if (indexActions[i] != null)
+					indexActions[i].addActionListener(this);
+			}
+
+			for (int i = 0 ; i < indexActions.length;i++) {
+				if (chkActions[i] != null)
+					chkActions[i].addActionListener(this);
+			}
+		}
+
+
+		public void setKeys(MessagePanel panel, String key) {
+			this.key = key;
+			this.messagePanel = panel;
+
+			removeAll();
+
+			boolean index = key.endsWith(".frdx");
+
+			JMenuItem[] items = (index ? indexActions : chkActions);
+
+			for (int i = 0 ; i < items.length ;i++) {
+				if (items[i] != null)
+					add(items[i]);
+				else
+					addSeparator();
+			}
+		}
+
+		public void download(String key) {
+			FCPQueueManager queueManager = messagePanel.getMainPanel().getPluginCore().getCore().getQueueManager();
+
+			thaw.gui.FileChooser chooser = new thaw.gui.FileChooser();
+
+			chooser.setTitle(I18n.getMessage("thaw.plugin.fetch.chooseDestination"));
+			chooser.setDirectoryOnly(true);
+			chooser.setDialogType(javax.swing.JFileChooser.OPEN_DIALOG);
+
+			java.io.File file = chooser.askOneFile();
+
+			if (file == null)
+				return;
+
+			FCPClientGet get = new FCPClientGet(key, FCPClientGet.DEFAULT_PRIORITY,
+							    FCPClientGet.PERSISTENCE_FOREVER,
+							    true /* global queue */,
+							    FCPClientGet.DEFAULT_MAX_RETRIES /* max retries */,
+							    file.getPath());
+
+			queueManager.addQueryToThePendingQueue(get);
+		}
+
+
+		public void addIndex(String key) {
+			FCPQueueManager queueManager = messagePanel.getMainPanel().getPluginCore().getCore().getQueueManager();
+			IndexBrowser browser = (IndexBrowser)messagePanel.getMainPanel().getPluginCore().getCore().getPluginManager().getPlugin("thaw.plugins.IndexBrowser");
+
+			if (browser == null) {
+				Logger.error(this, "The index browser is not running. Can't add an index");
+				return;
+			}
+
+			IndexManagementHelper.addIndex(queueManager,
+						       browser.getIndexBrowserPanel(),
+						       null,
+						       key,
+						       true);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+
+			if (e.getSource() == chkActions[2]
+			    || e.getSource() == indexActions[2]) { /* copy this key */
+
+				thaw.gui.GUIHelper.copyToClipboard(key);
+
+			} else if (e.getSource() == chkActions[3]
+				   || e.getSource() == indexActions[3]) { /* copy all keys */
+
+				Vector v = ( (e.getSource() == indexActions[3]) ?
+					     messagePanel.getIndexKeys() :
+					     messagePanel.getCHKKeys() );
+
+				String str = "";
+
+				for (Iterator it = v.iterator();
+				     it.hasNext();) {
+					str += ((String)it.next())+"\n";
+				}
+
+				thaw.gui.GUIHelper.copyToClipboard(str);
+
+			} else if (e.getSource() == chkActions[0]) { /* download this key */
+
+				download(key);
+
+			} else if (e.getSource() == chkActions[1]) { /* download all the keys */
+
+				Vector v = messagePanel.getCHKKeys();
+
+				for (Iterator it = v.iterator();
+				     it.hasNext();) {
+					download((String)it.next());
+				}
+
+			} else if (e.getSource() == indexActions[0]) { /* add this index */
+
+				addIndex(key);
+
+			} else if (e.getSource() == indexActions[1]) { /* add all the indexes */
+
+				Vector v = messagePanel.getIndexKeys();
+
+				for (Iterator it = v.iterator();
+				     it.hasNext();) {
+					addIndex((String)it.next());
+				}
+
+			}
+
+		}
+	}
+
+
+	public final static KeyActionMenu keyActionMenu = new KeyActionMenu(chkActions, indexActions);
+
+
+	public void popMenuOnKey(MouseEvent e, String key) {
+		keyActionMenu.setKeys(this, key);
+		keyActionMenu.show(e.getComponent(), e.getX(), e.getY());
 	}
 }

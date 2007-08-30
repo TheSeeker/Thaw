@@ -885,7 +885,7 @@ public class Index extends Observable implements MutableTreeNode,
 					     2, /* <= priority */
 					     FCPClientGet.PERSISTENCE_UNTIL_DISCONNECT,
 					     false, /* <= globalQueue */
-					     5, /* maxRetries */
+					     10, /* maxRetries */
 					     System.getProperty("java.io.tmpdir"), /* destination directory */
 					     MAX_SIZE, /* max size */
 					     true /* <= noDDA */);
