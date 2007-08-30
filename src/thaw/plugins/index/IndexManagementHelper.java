@@ -379,6 +379,7 @@ public class IndexManagementHelper {
 	/**
 	 * @param privateKey Can be null
 	 * @param queueManager only needed if load == true
+	 * @param target is obsolete
 	 */
 	public static Index reuseIndex(final FCPQueueManager queueManager,
 				       final IndexBrowserPanel indexBrowser,
@@ -410,10 +411,17 @@ public class IndexManagementHelper {
 
 		IndexFolder parent;
 
+		/* https://bugs.freenetproject.org/view.php?id=1625:
+		 *  --- 0001625: Added index not in the correct category
+		 *  If you add an index from the link list instead of the unknown index list,
+		 *  it's added in the same folder than the index instead of "recently added".
+		 */
+		/*
 		if (target != null)
 			parent = target;
 		else
-			parent = indexBrowser.getIndexTree().getRoot().getRecentlyAddedFolder();
+		*/
+		parent = indexBrowser.getIndexTree().getRoot().getRecentlyAddedFolder();
 
 		int revision = FreenetURIHelper.getUSKRevision(publicKey);
 
