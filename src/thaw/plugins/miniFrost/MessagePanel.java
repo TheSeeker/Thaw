@@ -88,7 +88,9 @@ public class MessagePanel
 		msgsPanel = new JPanel(new BorderLayout(0, 20));
 		msgsPanel.add(new JLabel(""), BorderLayout.CENTER);
 
-		scrollPane = new JScrollPane(msgsPanel);
+		scrollPane = new JScrollPane(msgsPanel,
+					     JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+					     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		panel.add(scrollPane, BorderLayout.CENTER);
 
 
@@ -132,6 +134,15 @@ public class MessagePanel
 		panel.add(northPanel, BorderLayout.NORTH);
 	}
 
+
+	public MiniFrostPanel getMiniFrostPanel() {
+		return mainPanel;
+	}
+
+	public void revalidate() {
+		panel.revalidate();
+	}
+
 	public void hided() {
 		nextUnread.setMnemonic(KeyEvent.VK_Z);
 	}
@@ -153,152 +164,6 @@ public class MessagePanel
 		return msg;
 	}
 
-
-	protected class AuthorPanel extends JPanel implements ActionListener {
-		private JComboBox box = null;
-		private JLabel nick;
-		private Author author;
-
-		public AuthorPanel(Author author) {
-			super(new BorderLayout(5, 5));
-
-			this.author = author;
-
-			nick = new JLabel(" "+author.toString(false));
-
-			add(nick, BorderLayout.CENTER);
-
-			if (author.getIdentity() != null
-			    && author.getIdentity().getPrivateKey() == null) {
-
-				if (author.getIdentity().getTrustLevel()
-				    == Identity.trustLevelInt[0]) /* if dev */
-					box = new JComboBox(Identity.trustLevelStr);
-				else
-					box = new JComboBox(Identity.trustLevelUserStr);
-
-				nick.setForeground(author.getIdentity().getTrustLevelColor());
-
-				box.setSelectedItem(author.getIdentity().getTrustLevelStr());
-				box.setForeground(author.getIdentity().getTrustLevelColor());
-				box.addActionListener(this);
-
-				add(box, BorderLayout.EAST);
-
-			} else if (author.getIdentity() != null) {
-
-				JLabel status = new JLabel(I18n.getMessage("thaw.plugin.signature.trustLevel.me"));
-				status.setForeground(author.getIdentity().getTrustLevelColor());
-				add(status, BorderLayout.EAST);
-
-			}
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			author.getIdentity().setTrustLevel((String)box.getSelectedItem());
-			box.setForeground(author.getIdentity().getTrustLevelColor());
-			nick.setForeground(author.getIdentity().getTrustLevelColor());
-
-			/* we just refresh, because if now the trust level is below what must be
-			 * displayed ... */
-			mainPanel.getMessageTreeTable().refresh();
-		}
-	}
-
-	protected class SubMessagePanel extends JPanel implements ActionListener {
-		private JButton upDownButton;
-		private boolean retracted;
-		private SubMessage msg;
-
-		private JTextArea area;
-
-
-		public SubMessagePanel(SubMessage msg, boolean retracted) {
-
-			super(new BorderLayout(5,5));
-
-
-			this.retracted=retracted;
-			this.msg = msg;
-
-			setBorder(BorderFactory.createLineBorder(Color.BLACK));
-
-
-			/* header */
-			JPanel headPanel = new JPanel(new BorderLayout(40, 40));
-
-			JLabel dateLabel = new JLabel(java.text.DateFormat.getDateTimeInstance().format(msg.getDate()));
-			AuthorPanel authorLabel = new AuthorPanel(msg.getAuthor());
-			//authorLabel.setPreferredSize(new java.awt.Dimension(400, 15));
-
-
-			upDownButton = new JButton("", (retracted ? IconBox.minDown : IconBox.minUp));
-			upDownButton.addActionListener(this);
-
-			JPanel rightPanel = new JPanel(new BorderLayout(10, 10));
-			rightPanel.add(dateLabel, BorderLayout.CENTER);
-			rightPanel.add(upDownButton,BorderLayout.EAST);
-
-			headPanel.add(authorLabel, BorderLayout.CENTER);
-			headPanel.add(rightPanel, BorderLayout.EAST);
-
-			this.add(headPanel, BorderLayout.NORTH);
-
-
-			/* text */
-
-			if (!retracted) {
-				area = getTextArea(msg.getMessage().trim());
-
-				this.add(area, BorderLayout.CENTER);
-			}
-
-		}
-
-		private JTextArea getTextArea(String txt) {
-			JTextArea a = new JTextArea(txt);
-
-			a.setLineWrap(true);
-			a.setWrapStyleWord(true);
-			a.setFont(a.getFont().deriveFont((float)13.5));
-			a.setEditable(false);
-
-			return a;
-		}
-
-
-		public void forceDot() {
-			area.getCaret().setDot(msg.getMessage().length());
-		}
-
-		public void setRetracted(boolean retracted) {
-			if (!retracted) {
-				area = getTextArea(msg.getMessage());
-				this.add(area, BorderLayout.CENTER);
-
-				upDownButton.setIcon(IconBox.minUp);
-			} else {
-				if (area != null)
-					this.remove(area);
-				area = null;
-				upDownButton.setIcon(IconBox.minDown);
-			}
-
-			this.retracted = retracted;
-
-			this.revalidate();
-			panel.revalidate();
-			msgsPanel.revalidate();
-		}
-
-
-		public void actionPerformed(ActionEvent e) {
-			if (e.getSource() == upDownButton) {
-				setRetracted(!retracted);
-			}
-		}
-
-	}
 
 
 	protected class AttachmentAction extends JMenuItem
@@ -402,7 +267,7 @@ public class MessagePanel
 			SubMessage subMsg = (SubMessage)it.next();
 			//SubMessagePanel panel = new SubMessagePanel(subMsg,
 			//					    (i + DEFAULT_UNFOLDED) < subMsgs.size());
-			SubMessagePanel panel = new SubMessagePanel(subMsg, false);
+			SubMessagePanel panel = new SubMessagePanel(this, subMsg, false);
 
 			subPanels.add(panel);
 
@@ -463,6 +328,11 @@ public class MessagePanel
 		panel.repaint();
 
 		putScrollBarAtBottom();
+	}
+
+
+	public JScrollPane getScrollPane() {
+		return scrollPane;
 	}
 
 

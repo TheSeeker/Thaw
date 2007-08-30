@@ -20,12 +20,11 @@ import thaw.plugins.miniFrost.interfaces.Draft;
 
 /**
  * Some explanations :<br/>
- * At the beginning, I wanted to the UI like Frost, with a board tree, a message tree,
- * etc. In the end, I will do like Gmail : Smart. :) <br/>
+ * At the beginning, I wanted to the UI like Frost, with a board tree,
+ * etc. In the end, a board list is enought <br/>
  * So:
  * <ul>
  * <li>BoardTree => Board list</li>
- * <li>MessageTreeTable => message table</li>
  * </ul>
  */
 public class MiniFrostPanel implements Observer {

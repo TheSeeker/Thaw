@@ -1017,7 +1017,9 @@ public class FCPClientGet extends Observable
 	}
 
 	public String getFilename() {
-		return filename.replaceAll("\\|", "-");
+		if (filename != null)
+			return filename.replaceAll("\\|", "-");
+		return key;
 	}
 
 	public int getAttempt() {
