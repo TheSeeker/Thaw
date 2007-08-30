@@ -398,7 +398,11 @@ public class IndexManagementHelper {
 			privateKey = null;
 
 		if (Index.isAlreadyKnown(indexBrowser.getDb(), publicKey, true) >= 0) {
-			Logger.notice(new IndexManagementHelper(), "Index already added !");
+			String name = FreenetURIHelper.getFilenameFromKey(publicKey);
+
+			if (name != null)
+				Logger.warning(new IndexManagementHelper(), "Index '"+name+"' already added");
+
 			return null;
 		}
 

@@ -544,25 +544,14 @@ public class MessagePanel
 			}
 		}
 
-		public void download(String key) {
+		public void download(String key, java.io.File destDir) {
 			FCPQueueManager queueManager = messagePanel.getMainPanel().getPluginCore().getCore().getQueueManager();
-
-			thaw.gui.FileChooser chooser = new thaw.gui.FileChooser();
-
-			chooser.setTitle(I18n.getMessage("thaw.plugin.fetch.chooseDestination"));
-			chooser.setDirectoryOnly(true);
-			chooser.setDialogType(javax.swing.JFileChooser.OPEN_DIALOG);
-
-			java.io.File file = chooser.askOneFile();
-
-			if (file == null)
-				return;
 
 			FCPClientGet get = new FCPClientGet(key, FCPClientGet.DEFAULT_PRIORITY,
 							    FCPClientGet.PERSISTENCE_FOREVER,
 							    true /* global queue */,
 							    FCPClientGet.DEFAULT_MAX_RETRIES /* max retries */,
-							    file.getPath());
+							    destDir.getPath());
 
 			queueManager.addQueryToThePendingQueue(get);
 		}
@@ -609,15 +598,37 @@ public class MessagePanel
 
 			} else if (e.getSource() == chkActions[0]) { /* download this key */
 
-				download(key);
+				thaw.gui.FileChooser chooser = new thaw.gui.FileChooser();
+
+				chooser.setTitle(I18n.getMessage("thaw.plugin.fetch.chooseDestination"));
+				chooser.setDirectoryOnly(true);
+				chooser.setDialogType(javax.swing.JFileChooser.OPEN_DIALOG);
+
+				java.io.File file = chooser.askOneFile();
+
+				if (file == null)
+					return;
+
+				download(key, file);
 
 			} else if (e.getSource() == chkActions[1]) { /* download all the keys */
+
+				thaw.gui.FileChooser chooser = new thaw.gui.FileChooser();
+
+				chooser.setTitle(I18n.getMessage("thaw.plugin.fetch.chooseDestination"));
+				chooser.setDirectoryOnly(true);
+				chooser.setDialogType(javax.swing.JFileChooser.OPEN_DIALOG);
+
+				java.io.File file = chooser.askOneFile();
+
+				if (file == null)
+					return;
 
 				Vector v = messagePanel.getCHKKeys();
 
 				for (Iterator it = v.iterator();
 				     it.hasNext();) {
-					download((String)it.next());
+					download((String)it.next(), file);
 				}
 
 			} else if (e.getSource() == indexActions[0]) { /* add this index */
