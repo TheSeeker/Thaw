@@ -108,6 +108,24 @@ public class Link extends java.util.Observable implements Comparable, LinkContai
 		return (key_a.equals(key_b));
 	}
 
+	public boolean equals(final Object o) {
+		if (o == this)
+			return true;
+
+		if (o instanceof Link) {
+
+			final Link link = (Link)o;
+			return compare(link);
+
+		} else if (o instanceof Index) {
+
+			final Index index = (Index)o;
+			return compare(index);
+		}
+
+		return false;
+	}
+
 	public boolean compare(final Index l) {
 		String key_a;
 		String key_b;
@@ -251,7 +269,7 @@ public class Link extends java.util.Observable implements Comparable, LinkContai
 
 	public int compareTo(Object o) {
 		if (o instanceof Link) {
-			return getIndexName().compareTo(((Link)o).getIndexName());
+			return getIndexName().toLowerCase().compareTo(((Link)o).getIndexName().toLowerCase());
 		}
 
 		return 0;

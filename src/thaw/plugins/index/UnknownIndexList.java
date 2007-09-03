@@ -34,13 +34,7 @@ import thaw.plugins.ToolbarModifier;
 
 
 public class UnknownIndexList implements MouseListener, ActionListener {
-	public final static int MAX_INDEXES = 50;
-
-	private int offset;
-
-	private Link[] linkList;
-	private boolean full;
-	private Vector vList; /* only when < MAX_INDEXES */
+	private Vector linkList; /* only when < MAX_INDEXES */
 
 	private JPanel panel;
 	private JList list;
@@ -51,8 +45,6 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 
 	private JPopupMenu rightClickMenu = null;
 	private Vector rightClickActions = null;
-
-	private JMenuItem sortItem = null;
 
 	private ToolbarModifier toolbarModifier;
 	private Vector toolbarActions;
@@ -65,15 +57,9 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 		this.queueManager = queueManager;
 		this.indexBrowser = indexBrowser;
 
-		offset = 0;
-		full = false;
-		vList = new Vector();
-		linkList = new Link[UnknownIndexList.MAX_INDEXES+1];
+		linkList = new Vector();
 
-		for(int i = 0 ; i < linkList.length ; i++)
-			linkList[i] = null;
-
-		list = new JList(vList);
+		list = new JList(linkList);
 
 		list.setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
@@ -117,36 +103,20 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 	}
 
 	public boolean isInList(final Link l) {
-		if (l == null)
-			return false;
-
-		for (int i = 0 ; i < linkList.length ; i++) {
-			if (linkList[i] == null)
-				continue;
-
-			if (l.compare(linkList[i]))
-				return true;
-		}
-
-		return false;
+		return (linkList.indexOf(l) >= 0);
 	}
 
-	public void erase(int i) {
-		linkList[linkList.length-1] = null;
-		for (int j = i ; j < linkList.length-1; j++) {
-			linkList[j] = linkList[j+1];
-		}
-	}
 
 	public boolean removeLink(final Index index) {
 		boolean ret = false;
 
-		for (int i = 0 ; i < linkList.length ; i++) {
-			if ((linkList[i] != null) && linkList[i].compare(index)) {
-				if (!full)
-					vList.remove(linkList[i]);
-				erase(i);
+		/* to avoid iterator collisions */
+
+		for (int i = 0 ; i < linkList.size() ; i++) {
+			Link l = (Link)linkList.get(i);
+			if (l.compare(index)) {
 				ret = true;
+				linkList.remove(l);
 			}
 		}
 
@@ -159,13 +129,8 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 	public boolean removeLink(final Link link) {
 		boolean ret = false;
 
-		for (int i = 0 ; i < linkList.length ; i++) {
-			if ((linkList[i] != null) && linkList[i].compare(link)) {
-				if (!full)
-					vList.remove(linkList[i]);
-				erase(i);
-				ret = true;
-			}
+		while (linkList.remove(link)) {
+			ret = true;
 		}
 
 		refresh();
@@ -174,18 +139,14 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 	}
 
 
-	public void makePlace(int i) {
-		int j;
-		for (j = linkList.length - 1; j > i ; j--) {
-			linkList[j] = linkList[j-1];
-		}
-		linkList[j] = null;
+	public boolean addLink(Link link) {
+		return addLink(link, true);
 	}
 
 	/**
 	 * will check that the link link to an unknown index before adding
 	 */
-	public boolean addLink(final Link link) {
+	public boolean addLink(final Link link, boolean refresh) {
 		if ((link == null)
 		    || link.isBlackListed()
 		    || Index.isAlreadyKnown(indexBrowser.getDb(), link.getPublicKey()) >= 0
@@ -193,24 +154,10 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 		    || FreenetURIHelper.isObsolete(link.getPublicKey()))
 			return false;
 
-		makePlace(0);
-		linkList[0] = link;
+		linkList.add(link);
 
-		if (!full) {
-			vList.add(0, link);
-			list.setListData(vList);
-		} else {
-			list.setListData(linkList);
-		}
-
-		offset++;
-
-		if (offset >= UnknownIndexList.MAX_INDEXES) {
-			offset = 0;
-			full = true;
-		}
-
-		refresh();
+		if (refresh)
+			refresh();
 
 		return true;
 	}
@@ -231,9 +178,12 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 
 		for (final Iterator it = ll.iterator();
 		     it.hasNext();) {
-			if (addLink(((Link)it.next())))
+			if (addLink(((Link)it.next()), false))
 				ret = true;
 		}
+
+		if (ret)
+			refresh();
 
 		return ret;
 	}
@@ -252,10 +202,6 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 			rightClickMenu.add(item);
 			rightClickActions.add(new LinkManagementHelper.IndexAdder(item, queueManager,
 										  indexBrowser, false));
-
-			sortItem = new JMenuItem(I18n.getMessage("thaw.plugin.index.sortAlphabetically"));
-			rightClickMenu.add(sortItem);
-			sortItem.addActionListener(this);
 
 
 			item = new JMenuItem(I18n.getMessage("thaw.plugin.index.copyKeys"));
@@ -312,6 +258,10 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 
 
 	public void refresh() {
+		java.util.Collections.sort(linkList);
+
+		list.setListData(linkList);
+
 		list.revalidate();
 		list.repaint();
 	}
@@ -338,35 +288,9 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 
 	}
 
+
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == sortItem) {
-
-			Vector v;
-
-			if (full) {
-				v = new Vector(linkList.length);
-
-				for (int i = 0 ; i < linkList.length ; i++) {
-					if (linkList[i] != null)
-						v.add(linkList[i]);
-				}
-			} else
-				v = vList;
-
-			java.util.Collections.sort(v);
-
-			if (full) {
-				for (int i = 0 ; i < linkList.length ; i++) {
-					linkList[i] = null;
-				}
-
-				v.toArray(linkList);
-			} else
-				vList = v;
-
-			refresh();
-
-		} else if (e.getSource() == autoSorting) {
+		if (e.getSource() == autoSorting) {
 
 			applyAutoSortingSetting();
 

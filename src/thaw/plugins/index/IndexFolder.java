@@ -386,9 +386,11 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 				if (index)
 					node = new Index(db, config, target_id);
-				else
+				else {
 					node = new IndexFolder(db, config,
 							       target_id, false);
+					folders.remove(((IndexFolder)node).getName());
+				}
 
 				children.remove(node);
 			}
@@ -1073,6 +1075,11 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				Logger.error(this, "Error while reordering: "+e.toString());
 			}
 		}
+	}
+
+
+	public String getName() {
+		return toString();
 	}
 
 
