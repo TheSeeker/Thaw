@@ -131,6 +131,7 @@ public class IndexWebGrapher implements thaw.core.Plugin, ActionListener {
 
 	public boolean stop() {
 		core.getMainWindow().removeTab(tabPanel);
+		db.unregisterChild(this);
 
 		return true;
 	}
