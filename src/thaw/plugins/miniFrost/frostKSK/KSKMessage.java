@@ -529,6 +529,7 @@ public class KSKMessage
 
 
 	public boolean destroy(Hsqldb db) {
+
 		if (!KSKFileAttachment.destroy(this, db)
 		    || !KSKBoardAttachment.destroy(this, db))
 			return false;

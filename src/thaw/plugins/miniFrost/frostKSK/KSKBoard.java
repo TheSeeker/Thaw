@@ -490,6 +490,9 @@ public class KSKBoard
 	 * @param initial true if one of the first downloads of the day
 	 */
 	protected void startNewMessageDownload(boolean initial) {
+		if (!refreshing)
+			return;
+
 		int slot;
 
 		/* we search an empty slot */
@@ -851,6 +854,7 @@ public class KSKBoard
 
 
 	public boolean destroy() {
+		refreshing = false;
 		Hsqldb db = factory.getDb();
 
 		if (!KSKMessage.destroyAll(this, db))

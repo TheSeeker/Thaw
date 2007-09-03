@@ -115,6 +115,9 @@ public class KSKBoardFactory
 									set.getBoolean("archived"),
 									null, /* encryptedFor */
 									null /* board */);
+					Logger.info(this, "Destroying a message from "+
+						    set.getTimestamp("date"));
+
 					msg.destroy(db);
 				}
 
