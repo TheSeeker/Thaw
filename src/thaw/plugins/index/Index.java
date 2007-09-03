@@ -954,7 +954,8 @@ public class Index extends Observable implements MutableTreeNode,
 						parser.loadXML(path);
 
 
-						if (!fetchingNegRev && mustFetchNegRev) {
+						if (!fetchingNegRev && mustFetchNegRev
+						    && getCommentPublicKey() != null) {
 							final java.io.File fl = new java.io.File(path);
 							fl.delete();
 

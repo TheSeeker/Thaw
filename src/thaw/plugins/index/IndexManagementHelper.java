@@ -400,8 +400,10 @@ public class IndexManagementHelper {
 		if (Index.isAlreadyKnown(indexBrowser.getDb(), publicKey, true) >= 0) {
 			String name = FreenetURIHelper.getFilenameFromKey(publicKey);
 
-			if (name != null)
+			if (name != null) {
+				name = name.replaceAll(".frdx", "");
 				Logger.warning(new IndexManagementHelper(), "Index '"+name+"' already added");
+			}
 
 			return null;
 		}

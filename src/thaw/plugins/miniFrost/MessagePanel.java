@@ -330,7 +330,7 @@ public class MessagePanel
 		insidePanel = iPanel;
 
 		panel.revalidate();
-
+		revalidate();
 		panel.repaint();
 
 		putScrollBarAtBottom();
@@ -342,26 +342,44 @@ public class MessagePanel
 	}
 
 
+	private class ScrollBarSetter implements Runnable {
+		public ScrollBarSetter() { }
+
+		public void run() {
+			try {
+				/* dirty way to have the expected result */
+				Thread.sleep(100);
+			} catch(InterruptedException e) {
+
+			}
+
+			scrollPane.getVerticalScrollBar().setUnitIncrement(15);
+
+			int max = scrollPane.getVerticalScrollBar().getMaximum();
+			int extent = scrollPane.getVerticalScrollBar().getVisibleAmount();
+			int min = scrollPane.getVerticalScrollBar().getMinimum();
+			int value = scrollPane.getVerticalScrollBar().getValue();
+
+			Logger.debug(this, "ScrollBar: "
+				     +"min : "+Integer.toString(min)
+				     +" ; max : "+Integer.toString(max)
+				     +" ; extent : "+Integer.toString(extent)
+				     +" ; value : "+Integer.toString(value));
+
+			scrollPane.getVerticalScrollBar().setValue(max);
+		}
+	}
+
+
 	private void putScrollBarAtBottom() {
 		int max = scrollPane.getVerticalScrollBar().getMaximum();
 		scrollPane.getVerticalScrollBar().setValue(max);
 
 		Runnable doScroll = new Runnable() {
 				public void run() {
-					scrollPane.getVerticalScrollBar().setUnitIncrement(15);
 
-					int max = scrollPane.getVerticalScrollBar().getMaximum();
-					int extent = scrollPane.getVerticalScrollBar().getVisibleAmount();
-					int min = scrollPane.getVerticalScrollBar().getMinimum();
-					int value = scrollPane.getVerticalScrollBar().getValue();
-
-					Logger.debug(this, "ScrollBar: "
-						    +"min : "+Integer.toString(min)
-						    +" ; max : "+Integer.toString(max)
-						    +" ; extent : "+Integer.toString(extent)
-						    +" ; value : "+Integer.toString(value));
-
-					scrollPane.getVerticalScrollBar().setValue(max);
+					Thread th = new Thread(new ScrollBarSetter());
+					th.start();
 				}
 			};
 
@@ -575,15 +593,15 @@ public class MessagePanel
 
 		public void actionPerformed(ActionEvent e) {
 
-			if (e.getSource() == chkActions[2]
-			    || e.getSource() == indexActions[2]) { /* copy this key */
+			if (e.getSource() == chkActions[3]
+			    || e.getSource() == indexActions[3]) { /* copy this key */
 
 				thaw.gui.GUIHelper.copyToClipboard(key);
 
-			} else if (e.getSource() == chkActions[3]
-				   || e.getSource() == indexActions[3]) { /* copy all keys */
+			} else if (e.getSource() == chkActions[4]
+				   || e.getSource() == indexActions[4]) { /* copy all keys */
 
-				Vector v = ( (e.getSource() == indexActions[3]) ?
+				Vector v = ( (e.getSource() == indexActions[4]) ?
 					     messagePanel.getIndexKeys() :
 					     messagePanel.getCHKKeys() );
 

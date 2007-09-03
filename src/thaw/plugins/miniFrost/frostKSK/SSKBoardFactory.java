@@ -58,7 +58,7 @@ public class SSKBoardFactory extends KSKBoardFactory {
 		this.db = db;
 		this.core = core;
 		this.boards = new HashMap();
-		return super.init(db, core, plugin);
+		return super.init(db, core, plugin, "frostSSKInitialized");
 	}
 
 	protected void addDefaultBoards() {

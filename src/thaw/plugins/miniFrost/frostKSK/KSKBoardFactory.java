@@ -59,18 +59,26 @@ public class KSKBoardFactory
 
 
 	public boolean init(Hsqldb db, Core core, MiniFrost plugin) {
+		return init(db, core, plugin, "frostKSKDatabaseVersion");
+	}
+
+	public boolean init(Hsqldb db, Core core, MiniFrost plugin, String configOption) {
 		this.db = db;
 		this.core = core;
 		this.plugin = plugin;
 
-		boolean firstStart = (core.getConfig().getValue("frostKSKDatabaseVersion") == null);
+		boolean firstStart = (core.getConfig().getValue(configOption) == null);
 
 		convertExistingTables();
 
 		createTables();
 
-		if (firstStart)
+		if (firstStart) {
 			addDefaultBoards();
+
+			if (core.getConfig().getValue(configOption) == null)
+				core.getConfig().setValue(configOption, "true");
+		}
 
 		boardsHashMap = new HashMap();
 
@@ -222,9 +230,6 @@ public class KSKBoardFactory
 
 
 	protected void createTables() {
-		if (core.getConfig().getValue("frostKSKDatabaseVersion") == null)
-			core.getConfig().setValue("frostKSKDatabaseVersion", "3");
-
 		sendQuery("CREATE CACHED TABLE frostKSKBoards ("
 			  + "id INTEGER IDENTITY NOT NULL, "
 			  + "name VARCHAR(128) NOT NULL, "
@@ -274,6 +279,9 @@ public class KSKBoardFactory
 			  + "description VARCHAR(512) NULL, "
 			  + "messageId INTEGER NOT NULL, "
 			  + "FOREIGN KEY (messageId) REFERENCES frostKSKMessages (id))");
+
+		if (core.getConfig().getValue("frostKSKDatabaseVersion") == null)
+			core.getConfig().setValue("frostKSKDatabaseVersion", "3");
 	}
 
 
