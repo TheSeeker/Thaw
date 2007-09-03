@@ -273,7 +273,7 @@ public class MessageTreeTable implements Observer,
 		JPanel southEastPanel = new JPanel(new GridLayout(2, 1));
 
 		JPanel southEastPanelTop = new JPanel(new GridLayout(1, 3, 5, 5));
-		southEastPanelTop.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.seeMessages")));
+		//southEastPanelTop.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.seeMessages")));
 		southEastPanelTop.add(seeUnsigned);
 		southEastPanelTop.add(seeArchived);
 		southEastPanelTop.add(seeRead);
