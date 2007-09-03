@@ -2,6 +2,7 @@ package thaw.plugins.miniFrost;
 
 import javax.swing.JSplitPane;
 import javax.swing.JLabel;
+import javax.swing.JComponent;
 
 import java.util.Observer;
 import java.util.Observable;
@@ -28,6 +29,8 @@ import thaw.plugins.miniFrost.interfaces.Draft;
  * </ul>
  */
 public class MiniFrostPanel implements Observer {
+	public final static int DEFAULT_VIEW = 0; /* 0 = Gmail ; 1 = Outlook */
+
 	private Config config;
 	private Hsqldb db;
 	private BoardTree boardTree;
@@ -38,13 +41,21 @@ public class MiniFrostPanel implements Observer {
 
 	private MiniFrost pluginCore;
 
-	private JSplitPane mainSplit;
+	private boolean gmailView = true;
+	private JSplitPane mainSplit = null;
+	private JSplitPane rightSplit = null;
 
 
 	public MiniFrostPanel(Config config, Hsqldb db, MiniFrost pluginCore) {
 		this.config = config;
 		this.db = db;
 		this.pluginCore = pluginCore;
+
+		gmailView = true;
+
+		if (config.getValue("miniFrostView") == null
+		    || "1".equals(config.getValue("miniFrostView")))
+			gmailView = false;
 
 		/* board tree use some settings provided by the message tree table
 		 * to count the unread messages => it must instanciated after */
@@ -56,10 +67,22 @@ public class MiniFrostPanel implements Observer {
 		boardTree.addObserver(messageTreeTable);
 		boardTree.addObserver(this);
 
-		/* so it will be vertical ... don't ask me why ... */
+
+		JComponent mainComponent;
+
+		if (gmailView) {
+			mainComponent = messageTreeTable.getPanel();
+			rightSplit = null;
+		} else {
+			rightSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+						    messageTreeTable.getPanel(),
+						    messagePanel.getPanel());
+			mainComponent = rightSplit;
+		}
+
 		mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
 					   boardTree.getPanel(),
-					   messageTreeTable.getPanel());
+					   mainComponent);
 	}
 
 
@@ -69,7 +92,11 @@ public class MiniFrostPanel implements Observer {
 		messagePanel.hided();
 		messageTreeTable.hided();
 
-		mainSplit.setRightComponent(draftPanel.getPanel());
+		if (gmailView)
+			mainSplit.setRightComponent(draftPanel.getPanel());
+		else
+			rightSplit.setRightComponent(draftPanel.getPanel());
+
 		mainSplit.validate();
 
 		draftPanel.redisplayed();
@@ -84,7 +111,11 @@ public class MiniFrostPanel implements Observer {
 		messagePanel.hided();
 		draftPanel.hided();
 
-		mainSplit.setRightComponent(messageTreeTable.getPanel());
+		if (gmailView)
+			mainSplit.setRightComponent(messageTreeTable.getPanel());
+		else
+			rightSplit.setLeftComponent(messageTreeTable.getPanel());
+
 		mainSplit.validate();
 
 		messageTreeTable.redisplayed();
@@ -98,7 +129,11 @@ public class MiniFrostPanel implements Observer {
 		messageTreeTable.hided();
 		draftPanel.hided();
 
-		mainSplit.setRightComponent(messagePanel.getPanel());
+		if (gmailView)
+			mainSplit.setRightComponent(messagePanel.getPanel());
+		else
+			rightSplit.setRightComponent(messagePanel.getPanel());
+
 		messagePanel.redisplayed();
 		mainSplit.validate();
 
@@ -177,6 +212,13 @@ public class MiniFrostPanel implements Observer {
 		else
 			mainSplit.setDividerLocation(150);
 
+		rightSplit.setResizeWeight(0.5);
+
+		if ((val = config.getValue("miniFrostRightSplitPosition")) != null)
+			rightSplit.setDividerLocation(Integer.parseInt(val));
+		else
+			rightSplit.setDividerLocation(150);
+
 		boardTree.loadState();
 	}
 
@@ -184,6 +226,8 @@ public class MiniFrostPanel implements Observer {
 	public void saveState() {
 		config.setValue("miniFrostMainSplitPosition",
 				Integer.toString(mainSplit.getDividerLocation()));
+		config.setValue("miniFrostRightSplitPosition",
+				Integer.toString(rightSplit.getDividerLocation()));
 		boardTree.saveState();
 	}
 
@@ -218,5 +262,9 @@ public class MiniFrostPanel implements Observer {
 		}
 
 		boardTree.updateDraftValues(waitings, postings);
+	}
+
+	public boolean isInGmailView() {
+		return gmailView;
 	}
 }

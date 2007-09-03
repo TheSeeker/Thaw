@@ -4,6 +4,8 @@ import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
+import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
 
 import java.util.Observer;
 import java.util.Observable;
@@ -29,7 +31,7 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 	private ConfigWindow configWindow;
 	private RegexpBlacklist regexpBlacklist;
 
-	private JPanel panel;
+	private JPanel globalPanel;
 
 	public final static int MIN_BOARDS = 0;
 	public final static int MAX_BOARDS = 30;
@@ -45,6 +47,9 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 
 	private JButton regexpButton;
 
+	private JRadioButton gmailView;
+	private JRadioButton outlookView;
+
 
 	public MiniFrostConfigTab(Config config,
 				  ConfigWindow configWindow,
@@ -53,7 +58,9 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 		this.configWindow = configWindow;
 		this.regexpBlacklist = regexpBlacklist;
 
-		panel = new JPanel(new GridLayout(16, 1));
+		globalPanel = new JPanel(new BorderLayout(10, 10));
+
+		JPanel panel = new JPanel(new GridLayout(10, 1));
 
 		maxBoards = new JComboBox();
 
@@ -67,8 +74,6 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 			archiveAfter.addItem(Integer.toString(i)+ " "+I18n.getMessage("thaw.plugin.miniFrost.days"));
 			deleteAfter.addItem( Integer.toString(i)+ " "+I18n.getMessage("thaw.plugin.miniFrost.days"));
 		}
-
-		selectValue();
 
 		panel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.maxBoardsRefreshed")));
 		panel.add(maxBoards);
@@ -87,6 +92,48 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 
 		panel.add(new JLabel(""));
 		panel.add(regexpPanel);
+
+
+		globalPanel.add(panel, BorderLayout.CENTER);
+
+		JPanel southPanel = new JPanel(new BorderLayout());
+
+		southPanel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.views")),
+			       BorderLayout.NORTH);
+
+		ButtonGroup buttonGroup = new ButtonGroup();
+
+		JPanel viewPanel = new JPanel(new GridLayout(1, 2));
+
+		JPanel gmailPanel = new JPanel(new BorderLayout(3, 3));
+		JPanel outlookPanel = new JPanel(new BorderLayout(3, 3));
+
+		gmailView   = new JRadioButton(I18n.getMessage("thaw.plugin.miniFrost.views.gmail"));
+		outlookView = new JRadioButton(I18n.getMessage("thaw.plugin.miniFrost.views.outlook"));
+
+		gmailPanel.add(gmailView, BorderLayout.NORTH);
+		gmailPanel.add(new JLabel(IconBox.miniFrostGmailView,
+					  JLabel.LEFT),
+			       BorderLayout.CENTER);
+
+		outlookPanel.add(outlookView, BorderLayout.NORTH);
+		outlookPanel.add(new JLabel(IconBox.miniFrostOutlookView,
+					    JLabel.LEFT),
+				 BorderLayout.CENTER);
+
+
+		buttonGroup.add(gmailView);
+		buttonGroup.add(outlookView);
+
+
+		viewPanel.add(gmailPanel);
+		viewPanel.add(outlookPanel);
+
+		southPanel.add(viewPanel, BorderLayout.CENTER);
+
+		globalPanel.add(southPanel, BorderLayout.SOUTH);
+
+		selectValues();
 	}
 
 
@@ -94,16 +141,16 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 		configWindow.addObserver(this);
 		configWindow.addTab(I18n.getMessage("thaw.plugin.miniFrost"),
 				    thaw.gui.IconBox.minReadComments,
-				    panel);
+				    globalPanel);
 	}
 
 
 	public void hide() {
 		configWindow.deleteObserver(this);
-		configWindow.removeTab(panel);
+		configWindow.removeTab(globalPanel);
 	}
 
-	private void selectValue() {
+	private void selectValues() {
 
 		int max;
 
@@ -135,6 +182,22 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 		}
 
 		deleteAfter.setSelectedIndex(max-MIN_DAYS);
+
+
+		int view = MiniFrostPanel.DEFAULT_VIEW;
+
+		if (config.getValue("miniFrostView") != null) {
+			view = Integer.parseInt(config.getValue("miniFrostView"));
+			Logger.info(this, "View : "+Integer.toString(view));
+		}
+
+		if (view == 0) {
+			outlookView.setSelected(false);
+			gmailView.setSelected(true);
+		} else {
+			gmailView.setSelected(false);
+			outlookView.setSelected(true);
+		}
 	}
 
 
@@ -156,9 +219,12 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 			config.setValue("miniFrostDeleteAfter",
 					extractNumber(deleteAfter));
 
+			config.setValue("miniFrostView",
+					(gmailView.isSelected() ? "0" : "1"));
+
 		} else if (param == configWindow.getCancelButton()) {
 
-			selectValue();
+			selectValues();
 
 		}
 	}

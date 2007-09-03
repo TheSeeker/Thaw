@@ -111,12 +111,15 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	 * Make [dis]appear the config window.
 	 */
 	public void setVisible(final boolean v) {
-		if(v == true) {
+		if (v) {
 			setChanged();
 			this.notifyObservers(null);
 		}
 
 		configWin.setVisible(v);
+
+		if (v)
+			configWin.repaint();
 	}
 
 	public boolean addTab(final String name, final java.awt.Component panel) {
@@ -231,32 +234,36 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		}
 
 		public void run() {
-			JDialog dialog = new JDialog(core.getMainWindow().getMainFrame(),
-						     " "+I18n.getMessage("thaw.common.pleaseWait"));
+			JDialog dialog = null;
 
-			dialog.getContentPane().setLayout(new GridLayout(1, 1));
-			dialog.getContentPane().add(new JLabel(I18n.getMessage("thaw.common.pleaseWait"),
-							       JLabel.CENTER));
+			if (resetConnection) {
+				dialog = new JDialog(core.getMainWindow().getMainFrame(),
+							     " "+I18n.getMessage("thaw.common.pleaseWait"));
 
-			dialog.setUndecorated(true);
-			dialog.setResizable(false);
+				dialog.getContentPane().setLayout(new GridLayout(1, 1));
+				dialog.getContentPane().add(new JLabel(I18n.getMessage("thaw.common.pleaseWait"),
+								       JLabel.CENTER));
 
-			dialog.setSize(150, 30);
+				dialog.setUndecorated(true);
+				dialog.setResizable(false);
 
-			Dimension screenSize =
-				Toolkit.getDefaultToolkit().getScreenSize();
+				dialog.setSize(150, 30);
 
-			Dimension dialogSize = dialog.getSize();
-			dialog.setLocation(screenSize.width/2 - (dialogSize.width/2),
-					   screenSize.height/2 - (dialogSize.height/2));
+				Dimension screenSize =
+					Toolkit.getDefaultToolkit().getScreenSize();
 
-			dialog.setVisible(true);
+				Dimension dialogSize = dialog.getSize();
+				dialog.setLocation(screenSize.width/2 - (dialogSize.width/2),
+						   screenSize.height/2 - (dialogSize.height/2));
 
-			dialog.setSize(150, 30);
+				dialog.setVisible(true);
 
-			dialogSize = dialog.getSize();
-			dialog.setLocation(screenSize.width/2 - (dialogSize.width/2),
-					   screenSize.height/2 - (dialogSize.height/2));
+				dialog.setSize(150, 30);
+
+				dialogSize = dialog.getSize();
+				dialog.setLocation(screenSize.width/2 - (dialogSize.width/2),
+						   screenSize.height/2 - (dialogSize.height/2));
+			}
 
 			/* Imply a whole reset => all the plugins will be reloaded
 			 */
@@ -267,10 +274,16 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 				/* should reinit the whole connection correctly */
 				if (resetConnection && !core.initConnection()) {
-					new thaw.gui.WarningWindow(dialog,
-								   I18n.getMessage("thaw.warning.unableToConnectTo")+
-								   " "+core.getConfig().getValue("nodeAddress")+
-								   ":"+ core.getConfig().getValue("nodePort"));
+					if (dialog == null)
+						new thaw.gui.WarningWindow(core.getMainWindow().getMainFrame(),
+									   I18n.getMessage("thaw.warning.unableToConnectTo")+
+									   " "+core.getConfig().getValue("nodeAddress")+
+									   ":"+ core.getConfig().getValue("nodePort"));
+					else
+						new thaw.gui.WarningWindow(dialog,
+									   I18n.getMessage("thaw.warning.unableToConnectTo")+
+									   " "+core.getConfig().getValue("nodeAddress")+
+									   ":"+ core.getConfig().getValue("nodePort"));
 				}
 
 				needConnectionReset = false;
@@ -284,7 +297,8 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 				core.getConfig().applyChanges();
 			}
 
-			dialog.setVisible(false);
+			if (resetConnection)
+				dialog.setVisible(false);
 		}
 	}
 

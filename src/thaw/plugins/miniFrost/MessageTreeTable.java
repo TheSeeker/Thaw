@@ -128,6 +128,8 @@ public class MessageTreeTable implements Observer,
 
 	private JComboBox actions;
 
+	private JScrollPane tableScrollPane;
+
 	private String[] keywords;
 	private int orderBy;
 	private boolean desc;
@@ -211,8 +213,10 @@ public class MessageTreeTable implements Observer,
 
 		setBoard(null);
 
+		tableScrollPane = new JScrollPane(table);
+
 		panel.add(northPanel, BorderLayout.NORTH);
-		panel.add(new JScrollPane(table), BorderLayout.CENTER);
+		panel.add(tableScrollPane, BorderLayout.CENTER);
 
 
 		/** some filters **/
@@ -1022,6 +1026,15 @@ public class MessageTreeTable implements Observer,
 			table.setRowSelectionInterval(line, line);
 			table.setColumnSelectionInterval(0, COLUMNS.length-1);
 			model.refresh(line);
+
+			int max = tableScrollPane.getVerticalScrollBar().getMaximum();
+			int min = tableScrollPane.getVerticalScrollBar().getMinimum();
+			int value = (((max-min) * (line-5)) / model.getRowCount()) + min;
+
+			if (value < min)
+				value = min;
+
+			tableScrollPane.getVerticalScrollBar().setValue(value);
 		}
 	}
 
@@ -1044,7 +1057,8 @@ public class MessageTreeTable implements Observer,
 
 			if (line >= 0) {
 				Logger.info(this, "Line: "+Integer.toString(line));
-
+				model.setSelectedAll(false);
+				model.switchSelection(line, true);
 				javax.swing.SwingUtilities.invokeLater(new LineSelecter(line));
 			}
 
@@ -1167,6 +1181,8 @@ public class MessageTreeTable implements Observer,
 
 				Message msg = model.getMsg(row);
 				if (msg != null) {
+					model.setSelectedAll(false);
+					model.switchSelection(row, true);
 					mainPanel.getMessagePanel().setMessage(msg);
 					mainPanel.displayMessage();
 				}

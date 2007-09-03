@@ -173,6 +173,9 @@ public class IconBox {
 
 	public static ImageIcon web;
 
+	public static ImageIcon miniFrostGmailView;
+	public static ImageIcon miniFrostOutlookView;
+
 
 	/**
 	 * Not really used
@@ -316,6 +319,8 @@ public class IconBox {
 		IconBox.mail                = IconBox.loadIcon("images/mail.png");
 		IconBox.minMail             = IconBox.loadIcon("images/min-mail.png");
 		IconBox.web                 = IconBox.loadIcon("images/web.png");
+		IconBox.miniFrostGmailView  = IconBox.loadIcon("images/miniFrost-view-gmail.png");
+		IconBox.miniFrostOutlookView = IconBox.loadIcon("images/miniFrost-view-outlook.png");
 	}
 
 }

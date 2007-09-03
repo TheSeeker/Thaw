@@ -110,12 +110,16 @@ public class MessagePanel
 		back = new JButton("", IconBox.minLeft);
 		back.setToolTipText(I18n.getMessage("thaw.plugin.miniFrost.goBack"));
 		back.addActionListener(this);
-		buttonPanel.add(back);
+
+		if (mainPanel.isInGmailView())
+			buttonPanel.add(back);
 
 		nextUnread = new JButton("", IconBox.minNextUnread);
 		nextUnread.setToolTipText(I18n.getMessage("thaw.plugin.miniFrost.nextUnread"));
 		nextUnread.addActionListener(this);
-		buttonPanel.add(nextUnread);
+
+		if (mainPanel.isInGmailView())
+			buttonPanel.add(nextUnread);
 
 		reply = new JButton("", IconBox.minMsgReply);
 		reply.setToolTipText(I18n.getMessage("thaw.plugin.miniFrost.reply"));
@@ -407,6 +411,9 @@ public class MessagePanel
 	}
 
 	public void actionPerformed(ActionEvent e) {
+		if (msg == null)
+			return;
+
 		if (e.getSource() == back) {
 
 			mainPanel.displayMessageTable();

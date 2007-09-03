@@ -44,6 +44,7 @@ public class MiniFrost implements thaw.core.Plugin {
 		core.getConfig().addListener("miniFrostAutoRefreshMaxBoards", this);
 		core.getConfig().addListener("miniFrostArchiveAfter",         this);
 		core.getConfig().addListener("miniFrostDeleteAfter",          this);
+		core.getConfig().addListener("miniFrostView",                 this);
 
 		if (!loadDeps()
 		    || !initFactories()
