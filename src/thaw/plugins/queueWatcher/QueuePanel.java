@@ -103,7 +103,9 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		this.core = core;
 		this.detailPanel = detailPanel;
 
-		tableModel = new QueueTableModel(isForInsertionQueue, core.getQueueManager());
+		tableModel = new QueueTableModel(isForInsertionQueue,
+						 core.getPluginManager(),
+						 core.getQueueManager());
 
 		table = new Table(core.getConfig(),
 				  isForInsertionQueue ? "table_insertions" : "table_downloads",

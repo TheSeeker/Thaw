@@ -20,8 +20,9 @@ import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
 import thaw.fcp.FCPClientGet;
 import thaw.fcp.FCPClientPut;
-
 import thaw.gui.IconBox;
+import thaw.core.PluginManager;
+import thaw.plugins.TrayIcon;
 
 
 public class QueueTableModel extends javax.swing.table.AbstractTableModel implements Observer {
@@ -38,11 +39,14 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	private int sortedColumn = -1;
 
 	private FCPQueueManager queueManager;
+	private PluginManager pluginManager;
 
-
-	public QueueTableModel(boolean isForInsertions, final FCPQueueManager queueManager) {
+	public QueueTableModel(boolean isForInsertions,
+			       PluginManager pluginManager,
+			       final FCPQueueManager queueManager) {
 		super();
 
+		this.pluginManager = pluginManager;
 		this.queueManager = queueManager;
 		this.isForInsertions = isForInsertions;
 
@@ -294,6 +298,31 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 
 	public void update(final Observable o, final Object arg) {
+		if (o instanceof FCPTransferQuery
+		    && ((FCPTransferQuery)o).isFinished()) {
+
+			String str = null;
+
+			boolean success = ((FCPTransferQuery)o).isSuccessful();
+
+			if (o instanceof FCPClientGet) {
+				str = (success ?
+				       I18n.getMessage("thaw.plugin.queueWatcher.downloadSuccessful") :
+				       I18n.getMessage("thaw.plugin.queueWatcher.downloadFailed"));
+			} else if (o instanceof FCPClientPut) {
+				str = (success ?
+				       I18n.getMessage("thaw.plugin.queueWatcher.insertionSuccessful") :
+				       I18n.getMessage("thaw.plugin.queueWatcher.insertionFailed"));
+			}
+
+			if (str != null) {
+				str = str.replaceAll("X", ((FCPTransferQuery)o).getFilename());
+				TrayIcon.popMessage(pluginManager, "Thaw",
+						    str, thaw.gui.SysTrayIcon.MSG_INFO);
+			}
+		}
+
+
 		int oldPos = -1;
 		int i = 0;
 
