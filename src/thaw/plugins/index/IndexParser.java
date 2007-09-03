@@ -388,7 +388,7 @@ public class IndexParser {
 				   || "index".equals(rawName)) { /* links */
 
 				if (!index.addLink(attrs.getValue("key"))) {
-					throw new SAXException("Index parsing interrupted because of a backend error (did you delete the index while it was downloading ?)");
+					throw new SAXException("Index parsing interrupted because of a backend error");
 				}
 
 				return;
@@ -397,7 +397,7 @@ public class IndexParser {
 				if (!index.addFile(attrs.getValue("key"),
 						   Long.parseLong(attrs.getValue("size")),
 						   attrs.getValue("mime"))) {
-					throw new SAXException("Index parsing interrupted because of a backend error (did you delete the index while it was downloading ?)");
+					throw new SAXException("Index parsing interrupted because of a backend error");
 				}
 
 			} else if ("comments".equals(rawName)) {
@@ -601,13 +601,13 @@ public class IndexParser {
 			Logger.info(this, "Parsing done");
 
 		} catch(javax.xml.parsers.ParserConfigurationException e) {
-			Logger.error(this, "Error (1) while parsing index: "+e.toString());
+			Logger.notice(this, "Error (1) while parsing index: "+e.toString());
 		} catch(org.xml.sax.SAXException e) {
-			Logger.error(this, "Error (2) while parsing index: "+e.toString());
+			Logger.notice(this, "Error (2) while parsing index: "+e.toString());
 		} catch(java.io.IOException e) {
-			Logger.error(this, "Error (3) while parsing index: "+e.toString());
+			Logger.notice(this, "Error (3) while parsing index: "+e.toString());
 		} catch(Exception e) {
-			Logger.error(this, "Error (4) while parsing index: "+e.toString());
+			Logger.notice(this, "Error (4) while parsing index: "+e.toString());
 		}
 	}
 
