@@ -133,12 +133,20 @@ public class MessagePanel
 		JPanel northPanel = new JPanel(new BorderLayout(5, 5));
 		JPanel northNorthPanel = new JPanel(new BorderLayout(5,5));
 
-		northNorthPanel.add(new JLabel(""), BorderLayout.CENTER);
+		boolean gmailView = mainPanel.isInGmailView();
+
+		if (gmailView)
+			northNorthPanel.add(new JLabel(""), BorderLayout.CENTER);
+		else
+			northNorthPanel.add(new JScrollPane(subject), BorderLayout.CENTER);
+
 		northNorthPanel.add(actions, BorderLayout.EAST);
 		northNorthPanel.add(buttonPanel, BorderLayout.WEST);
 
 		northPanel.add(northNorthPanel, BorderLayout.CENTER);
-		northPanel.add(new JScrollPane(subject), BorderLayout.SOUTH);
+
+		if (gmailView)
+			northPanel.add(new JScrollPane(subject), BorderLayout.SOUTH);
 
 
 		panel.add(northPanel, BorderLayout.NORTH);
