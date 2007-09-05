@@ -91,7 +91,13 @@ public class KSKBoardFactory
 			synchronized(db.dbLock) {
 				PreparedStatement st;
 
-				java.sql.Timestamp timestamp = new java.sql.Timestamp(new Date().getTime() - (deleteAfter * 24 * 60*60*1000));
+				java.sql.Timestamp timestamp = new java.sql.Timestamp(new Date().getTime()
+										      - ( ((long)deleteAfter) * 24 * 60*60*1000));
+
+				Logger.info(this, "Cleaning:");
+				Logger.info(this, "Now: "+new Date().toString());
+				Logger.info(this, "Delete older than: "+timestamp.toString()
+					    + " ("+Integer.toString(deleteAfter)+")");
 
 				st = db.getConnection().prepareStatement("SELECT "+
 									 " id, msgId, inReplyToId, subject, "+
@@ -122,7 +128,10 @@ public class KSKBoardFactory
 				}
 
 
-				timestamp = new java.sql.Timestamp(new Date().getTime() - (archiveAfter * 24 * 60*60*1000));
+				timestamp = new java.sql.Timestamp(new Date().getTime()
+								   - ( ((long)archiveAfter) * 24 * 60*60*1000));
+				Logger.info(this, "Archive older than: "+timestamp.toString()+
+					    " ("+Integer.toString(archiveAfter)+")");
 
 				st = db.getConnection().prepareStatement("UPDATE frostKSKMessages SET archived = TRUE WHERE date < ?");
 				st.setTimestamp(1, timestamp);
