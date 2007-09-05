@@ -228,8 +228,10 @@ public class MiniFrostPanel implements Observer {
 	public void saveState() {
 		config.setValue("miniFrostMainSplitPosition",
 				Integer.toString(mainSplit.getDividerLocation()));
-		config.setValue("miniFrostRightSplitPosition",
-				Integer.toString(rightSplit.getDividerLocation()));
+		if (rightSplit != null) {
+			config.setValue("miniFrostRightSplitPosition",
+					Integer.toString(rightSplit.getDividerLocation()));
+		}
 		boardTree.saveState();
 	}
 
