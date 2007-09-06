@@ -729,6 +729,15 @@ public class MessageTreeTable implements Observer,
 		}
 
 
+		public MessageNode getNode(Message msg) {
+			int i;
+
+			if ( (i = getRow(msg)) < 0 )
+				return null;
+
+			return (MessageNode)msgs.get(i);
+		}
+
 		public int getRow(Message msg) {
 			boolean found = false;
 			int i = 0;
@@ -1039,14 +1048,64 @@ public class MessageTreeTable implements Observer,
 	}
 
 
+	public Message getNextMessageInThread(Message currentMsg) {
+		MessageNode node = model.getNode(currentMsg);
+
+		if (node == null) {
+			Logger.notice(this, "Can't find back the message in the tree ?!");
+			return null;
+		}
+
+		/* we first check if it has a child */
+
+		if (node.getChildCount() > 0) {
+			return ((MessageNode)node.getChildAt(0)).getMessage();
+		}
+
+		/* if it has no child, we check if it has a brother (or if its parents
+		 * have brothers, etc)
+		 */
+		for (;
+		     node != null;
+		     node = (MessageNode)node.getParent()) {
+
+			TreeNode treeParent = (TreeNode)node.getParent();
+
+			/* if it has no parent, we return null to let the calling function
+			 * search a new thread in the database (ORDER BY date, etc)
+			 */
+			if (treeParent == null || treeParent instanceof RootMessageNode)
+				return null;
+
+			MessageNode parent = (MessageNode)treeParent;
+
+			int i = parent.getIndex(node);
+
+			if (i < parent.getChildCount()-1) {
+				/* then it has a brother */
+				return ((MessageNode)parent.getChildAt(i+1)).getMessage();
+			}
+
+		}
+
+		return null;
+	}
+
+
 	public boolean nextUnread() {
 
 		if (targetBoard == null) {
-			Logger.warning(this, "No message selected atm ; can't get the next unread message");
+			Logger.warning(this, "No board selected atm ; can't get the next unread message");
 			return false;
 		}
 
-		Message newMsg = targetBoard.getNextUnreadMessage(seeUnsigned.isSelected(),
+		Message newMsg = null;
+
+		if (mainPanel.getMessagePanel().getMessage() != null)
+			newMsg = getNextMessageInThread(mainPanel.getMessagePanel().getMessage());
+
+		if (newMsg == null)
+			newMsg = targetBoard.getNextUnreadMessage(seeUnsigned.isSelected(),
 								  seeArchived.isSelected(),
 								  minTrustLevelInt);
 

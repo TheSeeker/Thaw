@@ -138,15 +138,18 @@ public class DraftPanel implements ActionListener, MouseListener {
 		JPanel southCenterPanel = new JPanel(new BorderLayout(3, 3));
 		addAttachment = new JButton(IconBox.attachment);
 		addAttachment.addActionListener(this);
-		addAttachment.setPreferredSize(new java.awt.Dimension(ATTACHMENT_LIST_HEIGHT, ATTACHMENT_LIST_HEIGHT));
+		addAttachment.setPreferredSize(new java.awt.Dimension(ATTACHMENT_LIST_HEIGHT,
+								      ATTACHMENT_LIST_HEIGHT));
 		attachmentList = new JList();
 		attachmentList.setCellRenderer(new AttachmentRenderer());
 		attachmentList.addMouseListener(this);
 		attachmentList.setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		attachmentList.setPreferredSize(new java.awt.Dimension(ATTACHMENT_LIST_HEIGHT, ATTACHMENT_LIST_HEIGHT));
+		attachmentList.setPreferredSize(new java.awt.Dimension(ATTACHMENT_LIST_HEIGHT,
+								       ATTACHMENT_LIST_HEIGHT));
 
 		JScrollPane attListScrollPanel = new JScrollPane(attachmentList);
-		attListScrollPanel.setPreferredSize(new java.awt.Dimension(ATTACHMENT_LIST_HEIGHT, ATTACHMENT_LIST_HEIGHT));
+		attListScrollPanel.setPreferredSize(new java.awt.Dimension(ATTACHMENT_LIST_HEIGHT,
+									   ATTACHMENT_LIST_HEIGHT));
 
 		southCenterPanel.add(addAttachment,  BorderLayout.WEST);
 		southCenterPanel.add(attListScrollPanel, BorderLayout.CENTER);
