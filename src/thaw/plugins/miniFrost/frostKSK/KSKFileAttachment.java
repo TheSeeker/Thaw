@@ -190,8 +190,11 @@ public class KSKFileAttachment
 
 	public void apply(Hsqldb db, FCPQueueManager queueManager, String action) {
 		if (action.equals(I18n.getMessage("thaw.common.copyKeyToClipboard"))) {
+
 			thaw.gui.GUIHelper.copyToClipboard(key);
+
 		} else if (action.equals(I18n.getMessage("thaw.plugin.miniFrost.copyAllKeys"))) {
+
 			String keys = "";
 
 			Vector a = msg.getAttachments();
@@ -207,12 +210,15 @@ public class KSKFileAttachment
 			thaw.gui.GUIHelper.copyToClipboard(keys);
 
 		} else if (action.equals(I18n.getMessage("thaw.common.action.download"))) {
+
 			keysToDownload = new Vector();
 			keysToDownload.add(key);
 
 			Thread th = new Thread(this);
 			th.start();
+
 		} else if (action.equals(I18n.getMessage("thaw.plugin.miniFrost.downloadAll"))) {
+
 			keysToDownload = new Vector();
 
 			Vector a = msg.getAttachments();
@@ -227,6 +233,7 @@ public class KSKFileAttachment
 
 			Thread th = new Thread(this);
 			th.start();
+
 		}
 	}
 
@@ -235,7 +242,10 @@ public class KSKFileAttachment
 		/* yeah, I didn't realize that I may need the config here :/ */
 		Config config = ((KSKBoard)msg.getBoard()).getFactory().getCore().getConfig();
 
-		FileChooser ch = new FileChooser(config.getValue("lastDestinationDirectory"));
+		String lastPath = config.getValue("lastDestinationDirectory");
+
+		FileChooser ch = ((lastPath != null) ? new FileChooser(lastPath) : new FileChooser());
+
 		ch.setTitle(I18n.getMessage("thaw.plugin.fetch.chooseDestination"));
 		ch.setDirectoryOnly(true);
 		ch.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);

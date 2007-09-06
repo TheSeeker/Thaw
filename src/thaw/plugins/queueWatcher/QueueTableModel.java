@@ -298,6 +298,34 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 
 	public void update(final Observable o, final Object arg) {
+		if (o == queueManager && arg == null) {
+			/* unclear change */
+			reloadQueue();
+			return;
+		}
+
+
+		if (o == queueManager) {
+			final FCPTransferQuery query = (FCPTransferQuery)arg;
+
+			if((query.getQueryType() == 1) && isForInsertions)
+				return;
+
+			if((query.getQueryType() == 2) && !isForInsertions)
+				return;
+
+			if(queueManager.isInTheQueues(query)) { // then it's an adding
+				addQuery(query);
+				return;
+			}
+
+			if(queries.contains(query)) { // then it's a removing
+				removeQuery(query);
+				return;
+			}
+		}
+
+
 		if (o instanceof FCPTransferQuery
 		    && queries.indexOf(o) >= 0
 		    && ((FCPTransferQuery)o).isFinished()) {
@@ -340,30 +368,6 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 			return;
 		}
 
-		if (o == queueManager && arg == null) {
-			reloadQueue();
-			return;
-		}
-
-		if (o == queueManager) {
-			final FCPTransferQuery query = (FCPTransferQuery)arg;
-
-			if((query.getQueryType() == 1) && isForInsertions)
-				return;
-
-			if((query.getQueryType() == 2) && !isForInsertions)
-				return;
-
-			if(queueManager.isInTheQueues(query)) { // then it's an adding
-				addQuery(query);
-				return;
-			}
-
-			if(queries.contains(query)) { // then it's a removing
-				removeQuery(query);
-				return;
-			}
-		}
 
 		Logger.debug(this, "update(): unknow change");
 		reloadQueue();
