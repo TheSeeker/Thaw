@@ -499,7 +499,7 @@ public class MessageTreeTable implements Observer,
 			}
 		}
 
-		public java.util.Enumeration children() {
+		public Enumeration children() {
 			synchronized(children) {
 				return children.elements();
 			}
@@ -1056,11 +1056,15 @@ public class MessageTreeTable implements Observer,
 			return null;
 		}
 
-		/* we first check if it has a child */
+		/* we first check if it has an unread child */
 
-		if (node.getChildCount() > 0) {
-			return ((MessageNode)node.getChildAt(0)).getMessage();
+		for (Enumeration e = node.children();
+		     e.hasMoreElements();) {
+			MessageNode child = (MessageNode)e.nextElement();
+			if (!child.getMessage().isRead())
+				return child.getMessage();
 		}
+
 
 		/* if it has no child, we check if it has a brother (or if its parents
 		 * have brothers, etc)
@@ -1081,11 +1085,12 @@ public class MessageTreeTable implements Observer,
 
 			int i = parent.getIndex(node);
 
-			if (i < parent.getChildCount()-1) {
-				/* then it has a brother */
-				return ((MessageNode)parent.getChildAt(i+1)).getMessage();
-			}
+			for (i++ ; i < parent.getChildCount() ; i++) {
+				MessageNode child = (MessageNode)parent.getChildAt(i);
 
+				if (!child.getMessage().isRead())
+					return child.getMessage();
+			}
 		}
 
 		return null;
