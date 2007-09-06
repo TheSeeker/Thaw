@@ -337,7 +337,12 @@ public class DraftPanel implements ActionListener, MouseListener {
 		}
 
 		public void run() {
-			FileChooser chooser = new FileChooser();
+			String initialPath = mainPanel.getConfig().getValue("lastSourceDirectory");
+
+			FileChooser chooser;
+
+			chooser = ((initialPath != null) ? new FileChooser(initialPath) : new FileChooser());
+
 			chooser.setTitle(I18n.getMessage("thaw.plugin.transferLogs.chooseFile"));
 			chooser.setDirectoryOnly(false);
 			chooser.setDialogType(JFileChooser.OPEN_DIALOG);
@@ -347,6 +352,10 @@ public class DraftPanel implements ActionListener, MouseListener {
 			if (files == null) {
 				Logger.info(this, "Cancelled");
 				return;
+			}
+
+			if (files.size() > 0) {
+				mainPanel.getConfig().setValue("lastSourceDirectory", chooser.getFinalDirectory());
 			}
 
 			for (Iterator it = files.iterator();

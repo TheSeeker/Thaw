@@ -81,9 +81,16 @@ public class MessagePanel
 
 	private JLabel subject;
 
+	private KeyActionMenu keyActionMenu;
 
 	public MessagePanel(MiniFrostPanel mainPanel) {
 		this.mainPanel = mainPanel;
+
+
+		/* keyActionMenu == Right click menu when you click on an highlighted key
+		 */
+		keyActionMenu = new KeyActionMenu(chkActions, indexActions);
+
 
 		insidePanel = null;
 
@@ -535,7 +542,7 @@ public class MessagePanel
 	}
 
 
-	protected static class KeyActionMenu extends JPopupMenu implements ActionListener {
+	protected class KeyActionMenu extends JPopupMenu implements ActionListener {
 		private String key;
 		private JMenuItem[] chkActions;
 		private JMenuItem[] indexActions;
@@ -631,31 +638,43 @@ public class MessagePanel
 
 			} else if (e.getSource() == chkActions[0]) { /* download this key */
 
-				thaw.gui.FileChooser chooser = new thaw.gui.FileChooser();
+				String lastPath = mainPanel.getConfig().getValue("lastDestinationDirectory");
+
+				thaw.gui.FileChooser chooser = (lastPath != null ?
+								new thaw.gui.FileChooser(lastPath) :
+								new thaw.gui.FileChooser());
 
 				chooser.setTitle(I18n.getMessage("thaw.plugin.fetch.chooseDestination"));
 				chooser.setDirectoryOnly(true);
-				chooser.setDialogType(javax.swing.JFileChooser.OPEN_DIALOG);
+				chooser.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
 
 				java.io.File file = chooser.askOneFile();
 
 				if (file == null)
 					return;
+
+				mainPanel.getConfig().setValue("lastDestinationDirectory", file.getPath());
 
 				download(key, file);
 
 			} else if (e.getSource() == chkActions[1]) { /* download all the keys */
 
-				thaw.gui.FileChooser chooser = new thaw.gui.FileChooser();
+				String lastPath = mainPanel.getConfig().getValue("lastDestinationDirectory");
+
+				thaw.gui.FileChooser chooser = (lastPath != null ?
+								new thaw.gui.FileChooser(lastPath) :
+								new thaw.gui.FileChooser());
 
 				chooser.setTitle(I18n.getMessage("thaw.plugin.fetch.chooseDestination"));
 				chooser.setDirectoryOnly(true);
-				chooser.setDialogType(javax.swing.JFileChooser.OPEN_DIALOG);
+				chooser.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
 
 				java.io.File file = chooser.askOneFile();
 
 				if (file == null)
 					return;
+
+				mainPanel.getConfig().setValue("lastDestinationDirectory", file.getPath());
 
 				Vector v = messagePanel.getCHKKeys();
 
@@ -682,8 +701,6 @@ public class MessagePanel
 		}
 	}
 
-
-	public final static KeyActionMenu keyActionMenu = new KeyActionMenu(chkActions, indexActions);
 
 
 	public void popMenuOnKey(MouseEvent e, String key) {
