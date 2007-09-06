@@ -45,6 +45,7 @@ import thaw.plugins.miniFrost.interfaces.Attachment;
 
 
 public class DraftPanel implements ActionListener, MouseListener {
+	public final static int ATTACHMENT_LIST_HEIGHT = 50;
 
 	private Draft draft;
 	private JPanel panel;
@@ -137,13 +138,18 @@ public class DraftPanel implements ActionListener, MouseListener {
 		JPanel southCenterPanel = new JPanel(new BorderLayout(3, 3));
 		addAttachment = new JButton(IconBox.attachment);
 		addAttachment.addActionListener(this);
+		addAttachment.setPreferredSize(new java.awt.Dimension(ATTACHMENT_LIST_HEIGHT, ATTACHMENT_LIST_HEIGHT));
 		attachmentList = new JList();
 		attachmentList.setCellRenderer(new AttachmentRenderer());
 		attachmentList.addMouseListener(this);
 		attachmentList.setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		attachmentList.setPreferredSize(new java.awt.Dimension(ATTACHMENT_LIST_HEIGHT, ATTACHMENT_LIST_HEIGHT));
+
+		JScrollPane attListScrollPanel = new JScrollPane(attachmentList);
+		attListScrollPanel.setPreferredSize(new java.awt.Dimension(ATTACHMENT_LIST_HEIGHT, ATTACHMENT_LIST_HEIGHT));
 
 		southCenterPanel.add(addAttachment,  BorderLayout.WEST);
-		southCenterPanel.add(new JScrollPane(attachmentList), BorderLayout.CENTER);
+		southCenterPanel.add(attListScrollPanel, BorderLayout.CENTER);
 
 		centerPanel.add(new JScrollPane(textArea), BorderLayout.CENTER);
 		centerPanel.add(southCenterPanel, BorderLayout.SOUTH);

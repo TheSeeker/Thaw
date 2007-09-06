@@ -113,8 +113,10 @@ public class MiniFrostPanel implements Observer {
 
 		if (gmailView)
 			mainSplit.setRightComponent(messageTreeTable.getPanel());
-		else
+		else {
 			rightSplit.setLeftComponent(messageTreeTable.getPanel());
+			rightSplit.setRightComponent(messagePanel.getPanel());
+		}
 
 		mainSplit.validate();
 

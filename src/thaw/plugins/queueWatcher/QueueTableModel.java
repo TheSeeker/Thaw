@@ -299,6 +299,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 	public void update(final Observable o, final Object arg) {
 		if (o instanceof FCPTransferQuery
+		    && queries.indexOf(o) >= 0
 		    && ((FCPTransferQuery)o).isFinished()) {
 
 			String str = null;
@@ -332,19 +333,19 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 		sortTable();
 
-		if( queries != null && (i = queries.indexOf(o)) >= 0) {
+		if (queries != null && (i = queries.indexOf(o)) >= 0) {
 			if (oldPos != i)
 				this.notifyObservers(oldPos);
 			this.notifyObservers(i);
 			return;
 		}
 
-		if(arg == null) {
+		if (o == queueManager && arg == null) {
 			reloadQueue();
 			return;
 		}
 
-		if(o == queueManager) {
+		if (o == queueManager) {
 			final FCPTransferQuery query = (FCPTransferQuery)arg;
 
 			if((query.getQueryType() == 1) && isForInsertions)
