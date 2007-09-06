@@ -906,6 +906,8 @@ public class FCPClientGet extends Observable
 		if(!removeRequest())
 			return false;
 
+		boolean wasFinished = isFinished();
+
 		if (progress < 100)
 			successful = false;
 
@@ -914,7 +916,7 @@ public class FCPClientGet extends Observable
 		fatal = true;
 		status = "Stopped";
 
-		if (!restartIfFailed) {
+		if (!restartIfFailed && !wasFinished) {
 			setChanged();
 			this.notifyObservers();
 		}
