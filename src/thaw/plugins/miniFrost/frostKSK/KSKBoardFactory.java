@@ -413,7 +413,7 @@ public class KSKBoardFactory
 								     identity.toString(),
 								     identity.getId(),
 								     identity,
-								     set.getDate("date"),
+								     set.getTimestamp("date"),
 								     set.getInt("rev"),
 								     set.getBoolean("read"),
 								     set.getBoolean("archived"),
