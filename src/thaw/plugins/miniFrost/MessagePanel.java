@@ -101,12 +101,6 @@ public class MessagePanel
 		msgsPanel = new JPanel(new BorderLayout(0, 20));
 		msgsPanel.add(new JLabel(""), BorderLayout.CENTER);
 
-		scrollPane = new JScrollPane(msgsPanel,
-					     JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-					     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		panel.add(scrollPane, BorderLayout.CENTER);
-
-
 		/* actions */
 
 		actions = new JComboBox(ACTIONS);
@@ -142,21 +136,31 @@ public class MessagePanel
 
 		boolean gmailView = mainPanel.isInGmailView();
 
-		if (gmailView)
+		if (gmailView) {
 			northNorthPanel.add(new JLabel(""), BorderLayout.CENTER);
-		else
-			northNorthPanel.add(new JScrollPane(subject), BorderLayout.CENTER);
-
-		northNorthPanel.add(actions, BorderLayout.EAST);
-		northNorthPanel.add(buttonPanel, BorderLayout.WEST);
-
-		northPanel.add(northNorthPanel, BorderLayout.CENTER);
-
-		if (gmailView)
+			northNorthPanel.add(actions, BorderLayout.EAST);
+			northNorthPanel.add(buttonPanel, BorderLayout.WEST);
+			northPanel.add(northNorthPanel, BorderLayout.CENTER);
 			northPanel.add(new JScrollPane(subject), BorderLayout.SOUTH);
 
+			panel.add(northPanel, BorderLayout.NORTH);
 
-		panel.add(northPanel, BorderLayout.NORTH);
+			scrollPane = new JScrollPane(msgsPanel,
+						     JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+						     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+		} else { /* => if outlook layout */
+
+			JPanel globalPanel = new JPanel(new BorderLayout(10, 10));
+			globalPanel.add(subject, BorderLayout.NORTH);
+			globalPanel.add(msgsPanel, BorderLayout.CENTER);
+
+			scrollPane = new JScrollPane(globalPanel,
+						     JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+						     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		}
+
+		panel.add(scrollPane, BorderLayout.CENTER);
 	}
 
 

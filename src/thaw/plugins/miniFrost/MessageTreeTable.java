@@ -92,8 +92,20 @@ public class MessageTreeTable implements Observer,
 	};
 
 
-	public final static String[] ACTIONS = new String[] {
+	public final static String[] GMAIL_ACTIONS = new String[] {
 		I18n.getMessage("thaw.plugin.miniFrost.actions"),
+		I18n.getMessage("thaw.plugin.miniFrost.selectAll"),
+		I18n.getMessage("thaw.plugin.miniFrost.selectNone"),
+		I18n.getMessage("thaw.plugin.miniFrost.markAsRead"),
+		I18n.getMessage("thaw.plugin.miniFrost.markAsNonRead"),
+		I18n.getMessage("thaw.plugin.miniFrost.newMessage"),
+		I18n.getMessage("thaw.plugin.miniFrost.archivate"),
+		I18n.getMessage("thaw.plugin.miniFrost.unarchivate")
+	};
+
+	public final static String[] OUTLOOK_ACTIONS = new String[] {
+		I18n.getMessage("thaw.plugin.miniFrost.actions"),
+		I18n.getMessage("thaw.plugin.miniFrost.reply"),
 		I18n.getMessage("thaw.plugin.miniFrost.selectAll"),
 		I18n.getMessage("thaw.plugin.miniFrost.selectNone"),
 		I18n.getMessage("thaw.plugin.miniFrost.markAsRead"),
@@ -140,6 +152,7 @@ public class MessageTreeTable implements Observer,
 	private int minTrustLevelInt;
 
 	private boolean advancedMode;
+	private boolean gmailView;
 
 	/** for the thread tree **/
 	private MessageNodeTree messageNodeTree;
@@ -147,6 +160,7 @@ public class MessageTreeTable implements Observer,
 
 	public MessageTreeTable(MiniFrostPanel mainPanel) {
 		this.mainPanel = mainPanel;
+		this.gmailView = mainPanel.isInGmailView();
 
 		orderBy = Board.ORDER_DATE;
 		desc = true;
@@ -186,7 +200,11 @@ public class MessageTreeTable implements Observer,
 
 		northPanel.add(searchPanel, BorderLayout.CENTER);
 
-		actions = new JComboBox(ACTIONS);
+		if (gmailView)
+			actions = new JComboBox(GMAIL_ACTIONS);
+		else
+			actions = new JComboBox(OUTLOOK_ACTIONS);
+
 		actions.addActionListener(this);
 
 		northPanel.add(actions, BorderLayout.EAST);
@@ -1189,8 +1207,15 @@ public class MessageTreeTable implements Observer,
 			if (sel <= 0)
 				return;
 
-			if (sel == 3 || sel == 4) { /* mark as (non-)read */
-				boolean markAsRead = (sel == 3);
+			if (gmailView)
+				sel += 1;
+
+			if (sel == 1) { /* reply */
+
+				mainPanel.getMessagePanel().reply();
+
+			} else if (sel == 4 || sel == 5) { /* mark as (non-)read */
+				boolean markAsRead = (sel == 4);
 
 				for (int i = 0 ; i < selected.length ; i++) {
 					if (selected[i]) {
@@ -1200,8 +1225,8 @@ public class MessageTreeTable implements Observer,
 				}
 
 				mainPanel.getBoardTree().refresh(targetBoard);
-			} else if (sel == 6 || sel == 7) { /* (un)archive */
-				boolean archive = (sel == 6);
+			} else if (sel == 7 || sel == 8) { /* (un)archive */
+				boolean archive = (sel == 7);
 
 				for (int i = 0 ; i < selected.length ; i++) {
 					if (selected[i])
@@ -1210,11 +1235,11 @@ public class MessageTreeTable implements Observer,
 				refresh();
 
 				mainPanel.getBoardTree().refresh(targetBoard);
-			} else if (sel == 1 || sel == 2) { /* (un)select all */
-				boolean select = (sel == 1);
+			} else if (sel == 2 || sel == 3) { /* (un)select all */
+				boolean select = (sel == 2);
 				model.setSelectedAll(select);
 				model.refresh();
-			} else if (sel == 5) { /* new message */
+			} else if (sel == 6) { /* new message */
 				if (targetBoard != null) {
 					Draft draft = targetBoard.getDraft(null);
 					mainPanel.getDraftPanel().setDraft(draft);
