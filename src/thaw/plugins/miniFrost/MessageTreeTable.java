@@ -1042,8 +1042,12 @@ public class MessageTreeTable implements Observer,
 
 			if (value < min)
 				value = min;
+			if (value > max)
+				value = max;
 
 			tableScrollPane.getVerticalScrollBar().setValue(value);
+			model.setSelectedAll(false);
+			model.switchSelection(line, true);
 		}
 	}
 
