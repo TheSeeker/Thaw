@@ -143,6 +143,7 @@ public class Transfer implements Observer {
 
 				if (entryFound) { /* we check if we must update the entry */
 					boolean mustUpdateKey = false;
+					boolean mustUpdateDateStart = false;
 					boolean mustUpdateDateEnd = false;
 					boolean mustUpdateSize = false;
 
@@ -156,6 +157,9 @@ public class Transfer implements Observer {
 					    && !qKey.equals(this.key)) /* the key has changed ? can it happen ? */
 						mustUpdateKey = true;
 
+					if((query.getStartupTime() != dateStart.getTime()) && (query.getStartupTime() != -1))
+						mustUpdateDateStart = true;
+					
 					if (query.isFinished() && this.dateEnd == null)
 						mustUpdateDateEnd = true;
 
@@ -163,14 +167,16 @@ public class Transfer implements Observer {
 					    && query.getFileSize() >= size)
 						mustUpdateSize = true;
 
-
 					if (mustUpdateKey) {
 						updateKey(qKey);
 					}
 
-
+					if (mustUpdateDateStart) {
+						updateDateStart();
+					}
+				
 					if (mustUpdateDateEnd) {
-						updateDateEnd(query.isSuccessful());
+						updateDateEnd();
 					}
 
 					if (mustUpdateSize) {
@@ -197,12 +203,8 @@ public class Transfer implements Observer {
 										 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 					st.setTimestamp(1, now);
 
-					long tstamp = query.getStartupTime();
-					if(tstamp != -1)
-						st.setTimestamp(1, new Timestamp(tstamp));
-					tstamp = query.getCompletionTime();
-					if (tstamp != -1)
-						st.setTimestamp(2, new Timestamp(tstamp));
+					if (query.isFinished())
+						st.setTimestamp(2, now);
 					else
 						st.setNull(2, Types.TIMESTAMP);
 
@@ -268,16 +270,32 @@ public class Transfer implements Observer {
 	}
 
 
-	private void updateDateEnd(boolean success) {
+	private void updateDateEnd() {
 		Logger.info(this, "Updating end date in logs");
 
 		try {
 			PreparedStatement st = db.getConnection().prepareStatement("UPDATE transferLogs SET "+
-										   "dateEnd = ?, isSuccess = ? "+
+										   "dateEnd = ?"+
 										   "WHERE id = ?");
-			st.setTimestamp(1, TransferLogs.getNow());
-			st.setBoolean(2, success);
-			st.setInt(3, this.id);
+			dateEnd = new Timestamp(query.getCompletionTime());
+			st.setTimestamp(1, dateEnd);
+			st.setInt(2, this.id);
+			st.execute();
+		} catch(SQLException e) {
+			Logger.error(this, "Unable to update dateEnd in transfer logs because : "+e.toString());
+		}
+	}
+	
+	private void updateDateStart() {
+		Logger.info(this, "Updating start date in logs");
+
+		try {
+			PreparedStatement st = db.getConnection().prepareStatement("UPDATE transferLogs SET "+
+										   "dateStart = ?"+
+										   "WHERE id = ?");
+			dateStart = new Timestamp(query.getStartupTime());
+			st.setTimestamp(1, dateStart);
+			st.setInt(2, this.id);
 			st.execute();
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to update dateEnd in transfer logs because : "+e.toString());
@@ -405,7 +423,7 @@ public class Transfer implements Observer {
 
 		if (query.isFinished()) {
 			o.deleteObserver(this);
-			updateDateEnd(query.isSuccessful());
+			updateDateEnd();
 			hasChanged = true;
 		}
 
