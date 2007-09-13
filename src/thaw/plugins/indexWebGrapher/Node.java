@@ -119,7 +119,7 @@ public class Node implements Comparable {
 	private double velocityX = 0.0;
 	private double velocityY = 0.0;
 
-	public final static double TIMESTEP                = 0.001;
+	public final static double TIMESTEP                = 0.01;
 	public final static int NMB_STEPS                  = 50000;
 	public final static double FACTOR_ATTRACTION       = 0.5;
 	public final static double FACTOR_REPULSION        = 1;
@@ -129,105 +129,44 @@ public class Node implements Comparable {
 	public final static double MIN_KINETIC             = 0.1; /* will stop if < */
 
 	/**
-	 * attracted by its peers/neightbours
-	 */
-	private double[] attraction(Node node) {
-		double attrX = 0.0;
-		double attrY = 0.0;
-
-		attrX = (node.getX() - x)*FACTOR_ATTRACTION;
-		attrY = (node.getY() - y)*FACTOR_ATTRACTION;
-
-		return new double[] {attrX, attrY};
-	}
-
-	/**
-	 * repulsed by all the node != peers / neightbours
-	 */
-	private double[] repulsion(Node node) {
-		double repX = 0.0;
-		double repY = 0.0;
-
-		if (x != node.getX()) {
-			repX = (1/(x-node.getX())*FACTOR_REPULSION);
-		}
-
-		if (y != node.getY()) {
-			repY = (1/(y-node.getY())*FACTOR_REPULSION);
-		}
-
-
-		if (repX > REPULSE_LIMIT) repX = REPULSE_LIMIT;
-		if (repY > REPULSE_LIMIT) repY = REPULSE_LIMIT;
-		if (repX < -REPULSE_LIMIT) repX = -REPULSE_LIMIT;
-		if (repY < -REPULSE_LIMIT) repY = -REPULSE_LIMIT;
-
-
-		return new double[] {repX, repY};
-	}
-
-	/**
-	 * see http://en.wikipedia.org/wiki/Force-based_algorithms
-	 * @return velocity
+	 * see http://en.wikipedia.org/wiki/Force-based_algorithms	 * @return velocity
 	 */
 	public double computeVelocity(Vector nodeList) {
 		double netForceX = 0.0;
 		double netForceY = 0.0;
 
-		/* repulsion */
-		for (Iterator it = nodeList.iterator();
-		     it.hasNext();) {
-			Node node = (Node)it.next();
+		if ( ((linkTo.size() + linkedFrom.size()) > 1)
+		     && (linkTo.size() > 1 || linkedFrom.size() > 1) )
+		{
+			double sumX = 0.0;
+			double sumY = 0.0;
 
-			/*
-			  if (node == this
-			    || linkTo.indexOf(node) >= 0
-			    || linkedFrom.indexOf(node) >= 0)
-				continue;
-			*/
-			if (node == this)
-				continue;
+			for (Iterator it = linkTo.iterator();
+			     it.hasNext();) {
+				Node node = (Node)it.next();
+				sumX += node.getX();
+				sumY += node.getY();
+			}
 
-			double[] repuls = repulsion(node);
-			netForceX += repuls[0];
-			netForceY += repuls[1];
+			for (Iterator it = linkedFrom.iterator();
+			     it.hasNext();) {
+				Node node = (Node)it.next();
+				sumX += node.getX();
+				sumY += node.getY();
+			}
+
+			double centerX = sumX / (linkedFrom.size() + linkTo.size());
+			double centerY = sumY / (linkedFrom.size() + linkTo.size());
+
+			netForceX = centerX - x;
+			netForceY = centerY - y;
 		}
 
-		/* attraction */
+		//velocityX = velocityX/FACTOR_DECELERATION;
+		//velocityY = velocityY/FACTOR_DECELERATION;
 
-		for (Iterator it = linkTo.iterator();
-		     it.hasNext();) {
-			Node node = (Node)it.next();
-
-			if (node == this)
-				continue;
-
-			double[] attr = attraction(node);
-			netForceX += attr[0];
-			netForceY += attr[1];
-		}
-
-
-		/* attraction */
-
-		for (Iterator it = linkedFrom.iterator();
-		     it.hasNext();) {
-			Node node = (Node)it.next();
-
-			if (node == this || linkTo.indexOf(node) >= 0)
-				continue;
-
-			double[] attr = attraction(node);
-			netForceX += attr[0];
-			netForceY += attr[1];
-		}
-
-
-		velocityX = velocityX/FACTOR_DECELERATION;
-		velocityY = velocityY/FACTOR_DECELERATION;
-
-		velocityX += netForceX;
-		velocityY += netForceY;
+		velocityX = netForceX;
+		velocityY = netForceY;
 
 		return Math.sqrt( Math.pow(velocityX,2) + Math.pow(velocityY, 2));
 	}
@@ -241,7 +180,6 @@ public class Node implements Comparable {
 
 		x += velocityX * TIMESTEP;
 		y += velocityY * TIMESTEP;
-
 		return true;
 	}
 

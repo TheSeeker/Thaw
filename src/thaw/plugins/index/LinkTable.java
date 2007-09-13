@@ -171,11 +171,11 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 	protected Vector getSelectedLinks(final int[] selectedRows) {
 		//final Vector srcList = linkList.getLinkList(null, false);
-		final Vector srcList = linkListModel.getLinks();
+		final Link[] srcList = linkListModel.getLinks();
 		final Vector links = new Vector();
 
 		for(int i = 0 ; i < selectedRows.length ; i++) {
-			final Link link = (Link)srcList.get(selectedRows[i]);
+			final Link link = (Link)srcList[selectedRows[i]];
 			links.add(link);
 		}
 
@@ -268,7 +268,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 		public Vector columnNames;
 
-		public Vector links = null; /* thaw.plugins.index.Link Vector */
+		public Link[] links = null; /* thaw.plugins.index.Link Vector */
 
 		public LinkList linkList;
 
@@ -290,7 +290,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 		}
 
-		public Vector getLinks() {
+		public Link[] getLinks() {
 			return links;
 		}
 
@@ -298,7 +298,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 			if (links == null)
 				return 0;
 
-			return links.size();
+			return links.length;
 		}
 
 		public int getColumnCount() {
@@ -310,7 +310,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		}
 
 		public Object getValueAt(final int row, final int column) {
-			final thaw.plugins.index.Link link = (thaw.plugins.index.Link)links.get(row);
+			final thaw.plugins.index.Link link = (thaw.plugins.index.Link)links[row];
 
 			switch(column) {
 			case(0): return link.getIndexName();

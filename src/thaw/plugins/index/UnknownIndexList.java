@@ -34,7 +34,7 @@ import thaw.plugins.ToolbarModifier;
 
 
 public class UnknownIndexList implements MouseListener, ActionListener {
-	private Vector linkList; /* only when < MAX_INDEXES */
+	private Vector linkList;
 
 	private JPanel panel;
 	private JList list;
@@ -162,30 +162,55 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 		return true;
 	}
 
+	private class LinkAdder implements Runnable {
+		private LinkList index;
+		private boolean running;
+
+		public LinkAdder(LinkList index) {
+			this.index = index;
+			this.running = true;
+		}
+
+		public void run() {
+			boolean ret = false;
+
+			final Link[] ll = index.getLinkList(null, false);
+
+			if ((ll == null) || (ll.length == 0))
+				return;
+
+			for (int i = 0 ; i < ll.length && running ; i++) {
+				if (addLink(ll[i], false))
+					ret = true;
+			}
+
+			if (ret)
+				refresh();
+
+			return;
+		}
+
+		public void stop() {
+			running = false;
+		}
+	}
+
+	private LinkAdder lastLinkAdder = null;
+
+
 	/**
 	 * will add the link from that index (if links link to unknown indexes)
 	 */
-	public boolean addLinks(final LinkList index) {
-		boolean ret = false;
-
+	public void addLinks(final LinkList index) {
 		if (index == null)
-			return false;
+			return;
 
-		final Vector ll = index.getLinkList(null, false);
+		if (lastLinkAdder != null)
+			lastLinkAdder.stop();
 
-		if ((ll == null) || (ll.size() == 0))
-			return false;
-
-		for (final Iterator it = ll.iterator();
-		     it.hasNext();) {
-			if (addLink(((Link)it.next()), false))
-				ret = true;
-		}
-
-		if (ret)
-			refresh();
-
-		return ret;
+		lastLinkAdder = new LinkAdder(index);
+		Thread th = new Thread(lastLinkAdder);
+		th.start();
 	}
 
 

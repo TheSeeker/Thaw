@@ -7,5 +7,5 @@ import java.util.Vector;
  */
 public interface FileList {
 
-	public Vector getFileList(String columnToSort, boolean asc);
+	public File[] getFileList(String columnToSort, boolean asc);
 }

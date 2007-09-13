@@ -4,6 +4,6 @@ import java.util.Vector;
 
 public interface LinkList {
 
-	public Vector getLinkList(String columnToSort, boolean asc);
+	public Link[] getLinkList(String columnToSort, boolean asc);
 
 }

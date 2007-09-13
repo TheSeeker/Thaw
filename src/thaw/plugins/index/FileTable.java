@@ -206,11 +206,11 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 
 	protected Vector getSelectedFiles(final int[] selectedRows) {
 		//final Vector srcList = fileList.getFileList(fileListModel.getColumnNameInDb(columnToSort), sortAsc);
-		final Vector srcList = fileListModel.getFiles();
+		final File[] srcList = fileListModel.getFiles();
 		final Vector files = new Vector();
 
 		for(int i = 0 ; i < selectedRows.length ; i++) {
-			files.add(srcList.get(selectedRows[i]));
+			files.add(srcList[selectedRows[i]]);
 		}
 
 		return files;
@@ -310,7 +310,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		};
 
 
-		public Vector files = null; /* thaw.plugins.index.File Vector */
+		public File[] files = null;
 
 		public FileList fileList;
 
@@ -324,7 +324,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			refresh();
 		}
 
-		public Vector getFiles() {
+		public File[] getFiles() {
 			return files;
 		}
 
@@ -332,7 +332,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			if (files == null)
 				return 0;
 
-			return files.size();
+			return files.length;
 		}
 
 		public int getColumnCount() {
@@ -363,10 +363,10 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 			if (files == null)
 				return null;
 
-			if (row >= files.size())
+			if (row >= files.length)
 				return null;
 
-			final thaw.plugins.index.File file = (thaw.plugins.index.File)files.get(row);
+			final thaw.plugins.index.File file = (thaw.plugins.index.File)files[row];
 
 			if(column == 0)
 				return file.getFilename();
@@ -428,7 +428,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		}
 
 		public void run() {
-			int i, max;
+			int max;
 
 			while(running) {
 				try {
@@ -443,13 +443,10 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 				if (fileListModel.getFiles() == null)
 					continue;
 
-				i = 0;
+				File[] files = fileListModel.getFiles();
 
-				Vector files = fileListModel.getFiles();
-
-				for (Iterator it = files.iterator() ;
-				     it.hasNext(); i++) {
-					thaw.plugins.index.File file = (thaw.plugins.index.File)it.next();
+				for (int i = 0 ; i < files.length ; i++) {
+					thaw.plugins.index.File file = (thaw.plugins.index.File)files[i];
 
 					if (file.getPublicKey() == null
 					    || !FreenetURIHelper.isAKey(file.getPublicKey())) {

@@ -65,12 +65,12 @@ public class SearchResult implements FileAndLinkList {
 		}
 	}
 
-	public Vector getFileList(String col, boolean asc) {
+	public File[] getFileList(String col, boolean asc) {
 
 		if (col == null)
 			col = "filename";
 
-		Vector v = new Vector();
+		java.util.LinkedList v = new java.util.LinkedList();
 
 		synchronized(db.dbLock) {
 			try {
@@ -100,11 +100,11 @@ public class SearchResult implements FileAndLinkList {
 			}
 		}
 
-		return v;
+		return (File[])v.toArray(new File[0]);
 	}
 
-	public Vector getLinkList(String col, boolean asc) {
-		Vector v = new Vector();
+	public Link[] getLinkList(String col, boolean asc) {
+		java.util.LinkedList v = new java.util.LinkedList();
 
 		synchronized(db.dbLock) {
 			try {
@@ -131,7 +131,7 @@ public class SearchResult implements FileAndLinkList {
 			}
 		}
 
-		return v;
+		return (Link[])v.toArray(new Link[0]);
 	}
 
 }

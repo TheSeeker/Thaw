@@ -1,7 +1,6 @@
 package thaw.plugins.index;
 
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -44,7 +43,7 @@ import thaw.fcp.FCPGenerateSSK;
 import thaw.plugins.Hsqldb;
 import thaw.plugins.insertPlugin.DefaultMIMETypes;
 import thaw.plugins.signatures.Identity;
-
+import thaw.plugins.index.File;
 
 
 public class Index extends Observable implements MutableTreeNode,
@@ -726,7 +725,7 @@ public class Index extends Observable implements MutableTreeNode,
 		else
 			tmpdir = tmpdir + java.io.File.separator;
 
-		File targetFile = new java.io.File(tmpdir + getRealName() +".frdx");
+		java.io.File targetFile = new java.io.File(tmpdir + getRealName() +".frdx");
 
 
 		Logger.info(this, "Generating index ...");
@@ -1159,15 +1158,15 @@ public class Index extends Observable implements MutableTreeNode,
 
 	////// FILE LIST ////////
 
-	public Vector getFileList() {
+	public File[] getFileList() {
 		return getFileList(null, false);
 	}
 
-	public Vector getFileList(String columnToSort, boolean asc) {
+	public File[] getFileList(String columnToSort, boolean asc) {
 		synchronized(db.dbLock) {
 
 			try {
-				Vector files = new Vector();
+				java.util.LinkedList files = new java.util.LinkedList();
 
 				PreparedStatement st;
 
@@ -1199,7 +1198,7 @@ public class Index extends Observable implements MutableTreeNode,
 					files.add(file);
 				}
 
-				return files;
+				return (File[])files.toArray(new File[0]);
 
 			} catch(SQLException e) {
 				Logger.error(this, "SQLException while getting file list: "+e.toString());
@@ -1244,15 +1243,15 @@ public class Index extends Observable implements MutableTreeNode,
 
 	//// LINKS ////
 
-	public Vector getLinkList() {
+	public Link[] getLinkList() {
 		return getLinkList(null, false);
 	}
 
-	public Vector getLinkList(String columnToSort, boolean asc) {
+	public Link[] getLinkList(String columnToSort, boolean asc) {
 		synchronized(db.dbLock) {
 
 			try {
-				Vector links = new Vector();
+				java.util.LinkedList links = new java.util.LinkedList();
 
 				PreparedStatement st;
 
@@ -1270,7 +1269,7 @@ public class Index extends Observable implements MutableTreeNode,
 					links.add(l);
 				}
 
-				return links;
+				return (Link[])links.toArray(new Link[0]);
 
 			} catch(SQLException e) {
 				Logger.error(this, "SQLException while getting link list: "+e.toString());

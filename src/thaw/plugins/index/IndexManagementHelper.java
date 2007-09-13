@@ -1869,17 +1869,16 @@ public class IndexManagementHelper {
 
 
 					} else if (node instanceof Index) {
-						Vector files = ((Index)node).getFileList(null, true);
+						thaw.plugins.index.File[] files = ((Index)node).getFileList(null, true);
 
-						nmbFilesInt = files.size();
-						nmbLinksInt = ((Index)node).getLinkList(null, true).size();
+						nmbFilesInt = files.length;
+						nmbLinksInt = ((Index)node).getLinkList(null, true).length;
 						insertionDate = ((Index)node).getDate();
 
 						totalSize = 0;
 
-						for (Iterator it = files.iterator();
-						     it.hasNext();) {
-							totalSize += ((thaw.plugins.index.File)it.next()).getSize();
+						for (int i = 0 ; i < files.length ; i++) {
+							totalSize += ((thaw.plugins.index.File)files[i]).getSize();
 						}
 					}
 

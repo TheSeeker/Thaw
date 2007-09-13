@@ -1,7 +1,7 @@
 package thaw.plugins.index;
 
 import java.util.Vector;
-
+import thaw.plugins.index.File;
 
 /**
  * This is what you need to implements to use IndexParser.
@@ -11,12 +11,12 @@ public interface IndexContainer extends FileAndLinkList {
 	/**
 	 * @return a vector of FileContainer
 	 */
-	public Vector getFileList();
+	public File[] getFileList();
 
 	/**
 	 * @return a vector of LinkContainer
 	 */
-	public Vector getLinkList();
+	public Link[] getLinkList();
 
 
 	/**

@@ -192,10 +192,10 @@ public class IndexParser {
 	public Element getXMLLinks(final Document xmlDoc) {
 		final Element linksEl = xmlDoc.createElement("indexes");
 
-		Vector links = index.getLinkList();
+		LinkContainer[] links = index.getLinkList();
 
-		for(Iterator it = links.iterator(); it.hasNext() ; ) {
-			LinkContainer link = (LinkContainer)it.next();
+		for(int i = 0 ; i < links.length ; i++) {
+			LinkContainer link = links[i];
 
 			String key = index.findTheLatestKey(link.getPublicKey());
 
@@ -213,11 +213,11 @@ public class IndexParser {
 	public Element getXMLFileList(final Document xmlDoc) {
 		final Element filesEl = xmlDoc.createElement("files");
 
-		Vector files = index.getFileList();
+		FileContainer[] files = index.getFileList();
 
-		for(Iterator it = files.iterator(); it.hasNext();) {
+		for(int i = 0 ; i < files.length ; i++) {
 
-			FileContainer file = (FileContainer)it.next();
+			FileContainer file = (FileContainer)files[i];
 
 			String pubKey = file.getPublicKey();
 
