@@ -10,7 +10,6 @@ import thaw.core.Logger;
 
 import thaw.fcp.FCPTransferQuery;
 import thaw.fcp.FCPClientPut;
-import thaw.fcp.FCPClientGet;
 import thaw.fcp.FreenetURIHelper;
 
 import thaw.plugins.Hsqldb;
@@ -198,8 +197,12 @@ public class Transfer implements Observer {
 										 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 					st.setTimestamp(1, now);
 
-					if (query.isFinished())
-						st.setTimestamp(2, now);
+					long tstamp = query.getStartupTime();
+					if(tstamp != -1)
+						st.setTimestamp(1, new Timestamp(tstamp));
+					tstamp = query.getCompletionTime();
+					if (tstamp != -1)
+						st.setTimestamp(2, new Timestamp(tstamp));
 					else
 						st.setNull(2, Types.TIMESTAMP);
 

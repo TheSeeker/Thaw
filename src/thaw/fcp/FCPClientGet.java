@@ -30,6 +30,8 @@ public class FCPClientGet extends Observable
 	private String filename = null; /* Extract from the key */
 	private int priority = DEFAULT_PRIORITY;
 	private int persistence = PERSISTENCE_FOREVER;
+	private long startupTime = -1;
+	private long completionTime = -1;
 	private boolean globalQueue = true;
 	private String destinationDir = null;
 	private String finalPath = null;
@@ -559,6 +561,8 @@ public class FCPClientGet extends Observable
 			running = true;
 			successful = true;
 			progress = 99;
+			startupTime = Long.valueOf(message.getValue("StartupTime")).longValue();
+			completionTime = Long.valueOf(message.getValue("CompletionTime")).longValue();
 			status = "Writing to disk";
 			Logger.info(this, "Receiving file ...");
 
@@ -1144,5 +1148,15 @@ public class FCPClientGet extends Observable
 
 	public int getProtocolErrorCode() {
 		return protocolErrorCode;
+	}
+
+
+	public long getCompletionTime() {
+		return completionTime;
+	}
+
+
+	public long getStartupTime() {
+		return startupTime;
 	}
 }

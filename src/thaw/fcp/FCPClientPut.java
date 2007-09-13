@@ -34,6 +34,8 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	private String privateKey; /* must finish by '/' (cf SSKKeypair) */
 	private String publicKey; /* publicKey contains the filename etc */
 	private int priority = DEFAULT_PRIORITY;
+	private long startupTime = -1;
+	private long completionTime = -1;
 	private boolean global = true;
 	private int persistence = PERSISTENCE_FOREVER;
 	private boolean getCHKOnly = false;
@@ -588,11 +590,13 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				return;
 			}
 
-			if("PutSuccessful".equals( msg.getMessageName() )) {
+			if("PutSuccessful".equals(msg.getMessageName())) {
 				successful = true;
 				finished = true;
 				running = false;
-
+				
+				startupTime = Long.valueOf(msg.getValue("StartupTime")).longValue();
+				completionTime = Long.valueOf(msg.getValue("CompletionTime")).longValue();
 				publicKey = msg.getValue("URI");
 
 				if (publicKey == null) {
@@ -1117,5 +1121,13 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	 */
 	public int getPutFailedCode() {
 		return putFailedCode;
+	}
+
+	public long getStartupTime() {
+		return startupTime;
+	}
+
+	public long getCompletionTime() {
+		return completionTime;
 	}
 }
