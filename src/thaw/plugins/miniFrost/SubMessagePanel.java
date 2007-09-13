@@ -202,7 +202,6 @@ public class SubMessagePanel extends JPanel implements ActionListener {
 		{ "USK@", ".frdx" },
 	};
 
-
 	public final static String KEY_ATTRIBUTE = "key";
 
 
