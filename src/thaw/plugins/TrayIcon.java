@@ -70,7 +70,8 @@ public class TrayIcon implements thaw.core.Plugin,
 			return false;
 		}
 
-		config.setValue("disableTrayIconPopups", "false");
+		if (config.getValue("disableTrayIconPopups") == null)
+			config.setValue("disableTrayIconPopups", "false");
 
 		icon = new SysTrayIcon(thaw.gui.IconBox.blueBunny);
 		icon.setToolTip("Thaw "+thaw.core.Main.VERSION);

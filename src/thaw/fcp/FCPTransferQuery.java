@@ -41,13 +41,13 @@ public interface FCPTransferQuery extends FCPQuery {
 	 *  When did the request start ?
 	 */
 	public long getStartupTime();
-	
+
 	/**
 	 * When did the request finish ?
 	 * @return -1 if not finished
 	 */
 	public long getCompletionTime();
-	
+
 	/**
 	 * call updatePersistentRequest() after to apply the change (Please note that the change
 	 * will be visible even if you don't call it).
