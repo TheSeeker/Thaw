@@ -184,7 +184,8 @@ public class Transfer implements Observer {
 					}
 
 				} else { /* we insert a new one */
-					/* except if this query has already ended, because it means we weren't
+					/* except if this query has already ended,
+					 * because it means we weren't
 					 * used for this job, so we won't move :P */
 					if (query.isFinished())
 						return false;

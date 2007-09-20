@@ -25,6 +25,7 @@ import java.awt.GridLayout;
 import java.awt.BorderLayout;
 
 import thaw.core.Core;
+import thaw.core.Config;
 import thaw.core.Logger;
 import thaw.core.I18n;
 
@@ -35,6 +36,7 @@ import thaw.gui.TransferProgressBar;
 import thaw.gui.IconBox;
 import thaw.gui.WarningWindow;
 
+
 public class TrayIcon implements thaw.core.Plugin,
 				 MouseListener,
 				 WindowListener,
@@ -42,6 +44,8 @@ public class TrayIcon implements thaw.core.Plugin,
 				 thaw.core.LogListener {
 
 	private Core core;
+	private Config config;
+
 	private SysTrayIcon icon;
 
 	private JDialog dialog;
@@ -58,12 +62,15 @@ public class TrayIcon implements thaw.core.Plugin,
 
 	public boolean run(Core core) {
 		this.core = core;
+		this.config = core.getConfig();
 
 		if (!Core.checkJavaVersion(1, 6)) {
 			new WarningWindow(core,
 					  I18n.getMessage("thaw.plugin.trayIcon.java1.6"));
 			return false;
 		}
+
+		config.setValue("disableTrayIconPopups", "false");
 
 		icon = new SysTrayIcon(thaw.gui.IconBox.blueBunny);
 		icon.setToolTip("Thaw "+thaw.core.Main.VERSION);
@@ -131,6 +138,12 @@ public class TrayIcon implements thaw.core.Plugin,
 	public boolean popMessage(String title, String message, int msgType) {
 		if (icon == null || !icon.canWork())
 			return false;
+
+		String cfg;
+
+		if ( (cfg = config.getValue("disableTrayIconPopups")) != null )
+			if (Boolean.TRUE.equals(cfg))
+				return false;
 
 		icon.popMessage(title, message, msgType);
 
