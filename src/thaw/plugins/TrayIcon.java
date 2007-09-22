@@ -161,6 +161,8 @@ public class TrayIcon implements thaw.core.Plugin,
 		popMessage("Thaw : "+Logger.PREFIXES[level], line, msgType);
 	}
 
+	public void logLevelChanged(int oldLevel, int newLevel) { }
+
 
 	public String getNameForUser() {
 		return I18n.getMessage("thaw.plugin.trayIcon.pluginName");

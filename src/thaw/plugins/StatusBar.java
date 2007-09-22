@@ -79,6 +79,8 @@ public class StatusBar implements Runnable, Plugin, LogListener {
 		}
 	}
 
+	public void logLevelChanged(int oldLevel, int newLevel) { }
+
 
 	public void updateStatusBar() {
 

@@ -195,7 +195,7 @@ public class Core implements Observer {
 			clientHello = new FCPClientHello(queryManager, config.getValue("thawId"));
 
 			if(!clientHello.start(null)) {
-				Logger.warning(this, "Id already used !");
+				Logger.warning(this, "Id already used or timeout !");
 				subDisconnect();
 				ret = false;
 			} else {

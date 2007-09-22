@@ -44,7 +44,6 @@ public class FCPMessage {
 		}
 
 		setMessageName(lines[i]);
-		Logger.info(this, "Message (Node >> Thaw): "+lines[i]);
 
 		for(i++; i < lines.length ; i++) {
 			/* Empty lines are ignored. */
@@ -62,9 +61,14 @@ public class FCPMessage {
 			setValue(affectation[0], affectation[1]);
 		}
 
-		if("ProtocolError".equals( getMessageName() )) {
+
+		if("ProtocolError".equals( getMessageName() ))
 			Logger.warning(this, "PROTOCOL ERROR:\n"+toString());
-		}
+		else if (Logger.getLogLevel() <= 3)
+			Logger.info(this, "Message (Node >> Thaw): "+lines[i]);
+		else
+			Logger.debug(this, "Message (Node >> Thaw): "+toString());
+
 
 		return true;
 	}

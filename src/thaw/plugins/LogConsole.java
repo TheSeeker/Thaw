@@ -11,6 +11,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JComboBox;
 
 import thaw.core.Core;
 import thaw.gui.FileChooser;
@@ -37,8 +38,21 @@ public class LogConsole implements Plugin, LogListener, ActionListener, Runnable
 	private JScrollPane logAreaScrollPane;
 	private JButton saveToFile;
 
+	private JComboBox logLevel;
+
 	private boolean threadRunning;
 	private boolean hasChanged;
+
+
+	public final static String[] LOG_LEVEL_NAMES = new String[] {
+		"Errors only",
+		"Errors and warnings",
+		"Errors to notices",
+		"Errors to infos",
+		"Errors to debugs",
+		"Errors to verboses"
+	};
+
 
 	public LogConsole() {
 
@@ -58,14 +72,26 @@ public class LogConsole implements Plugin, LogListener, ActionListener, Runnable
 
 		logArea = new JTextArea();
 		logArea.setEditable(false);
-		saveToFile = new JButton(I18n.getMessage("thaw.plugin.console.saveToFile"));
 
+
+		JPanel southPanel = new JPanel(new BorderLayout(5, 5));
+
+
+		logLevel = new JComboBox(LOG_LEVEL_NAMES);
+		updateLogLevel();
+		logLevel.addActionListener(this);
+		southPanel.add(logLevel, BorderLayout.WEST);
+
+		saveToFile = new JButton(I18n.getMessage("thaw.plugin.console.saveToFile"));
 		saveToFile.addActionListener(this);
+		southPanel.add(saveToFile, BorderLayout.CENTER);
+
 
 		logAreaScrollPane = new JScrollPane(logArea);
 
 		consolePanel.add(logAreaScrollPane, BorderLayout.CENTER);
-		consolePanel.add(saveToFile, BorderLayout.SOUTH);
+		consolePanel.add(southPanel, BorderLayout.SOUTH);
+
 
 		core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.console.console"),
 					    thaw.gui.IconBox.terminal, consolePanel);
@@ -91,8 +117,18 @@ public class LogConsole implements Plugin, LogListener, ActionListener, Runnable
 	}
 
 
+	public void updateLogLevel() {
+		logLevel.setSelectedIndex(Logger.getLogLevel());
+	}
+
+
 	public void actionPerformed(final ActionEvent e) {
-		if(e.getSource() == saveToFile) {
+		if (e.getSource() == logLevel) {
+
+			if (Logger.getLogLevel() != logLevel.getSelectedIndex()) /* to avoid loops */
+				Logger.setLogLevel(logLevel.getSelectedIndex());
+
+		} else if(e.getSource() == saveToFile) {
 			final FileChooser fileChooser = new FileChooser();
 
 			fileChooser.setTitle(I18n.getMessage("thaw.plugin.console.console"));
@@ -146,6 +182,10 @@ public class LogConsole implements Plugin, LogListener, ActionListener, Runnable
 			addLine(Logger.PREFIXES[level] + " "+line+"\n");
 	}
 
+	public void logLevelChanged(int oldLevel, int newLevel) {
+		updateLogLevel();
+	}
+
 
 	public void addLine(String line) {
 		buffer[writeOffset] = line;
@@ -190,8 +230,6 @@ public class LogConsole implements Plugin, LogListener, ActionListener, Runnable
 				}
 
 			});
-
-		//logAreaScrollPane.getVerticalScrollBar().setValue(logAreaScrollPane.getVerticalScrollBar().getMaximum());
 	}
 
 

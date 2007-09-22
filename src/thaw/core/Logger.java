@@ -9,20 +9,7 @@ import java.util.Vector;
  */
 public class Logger {
 
-
-	/*
-	 * 0 = Errors only
-	 * 1 = Errors + warnings
-	 * 2 = Errors + warnings + notices
-	 * 3 = Errors + warnings + notices + infos
-	 * 4 = Errors + warnings + notices + infos + debug
-	 * 5 = [...] + horrible things that only God could understand easily.
-	 *             (or maybe someone with the FCPv2 specs :)
-	 *
-	 * 2 or more is recommanded.
-	 * 4 or more is unhealthy
-	 */
-	public final static int LOG_LEVEL = 3;
+	private static int LOG_LEVEL = 2;
 
 
 	public final static String[] PREFIXES = new String[] {
@@ -34,6 +21,27 @@ public class Logger {
 		"[VERBOSE]"
 	};
 
+
+	/**
+	 * 0 = Errors only
+	 * 1 = Errors + warnings
+	 * 2 = Errors + warnings + notices
+	 * 3 = Errors + warnings + notices + infos
+	 * 4 = Errors + warnings + notices + infos + debug
+	 * 5 = [...] + horrible things that only God could understand easily.
+	 *             (or maybe someone with the FCPv2 specs :)
+	 *
+	 * 2 or more is recommended.
+	 * 4 or more is unhealthy
+	 */
+	public static void setLogLevel(int logLevel) {
+		Logger.notice(null, "Setting verbosity to "+Integer.toString(logLevel));
+		LOG_LEVEL = logLevel;
+	}
+
+	public static int getLogLevel() {
+		return LOG_LEVEL;
+	}
 
 	private static Vector logListeners = null;
 
