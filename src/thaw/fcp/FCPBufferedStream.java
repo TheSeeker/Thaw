@@ -2,14 +2,14 @@ package thaw.fcp;
 
 import thaw.core.Logger;
 import thaw.core.ThawThread;
-
+import thaw.core.ThawRunnable;
 
 /**
  * Only used by FCPConnection. Except special situation, you shouldn't have to use it directly.
  * Currently only used for output. (shouldn't be really usefull for input).
  * Some data are sent each 'INTERVAL' (in ms).
  */
-public class FCPBufferedStream implements Runnable {
+public class FCPBufferedStream implements ThawRunnable {
 	private FCPConnection connection;
 	private int maxUploadSpeed;
 
@@ -125,6 +125,11 @@ public class FCPBufferedStream implements Runnable {
 			sleep(FCPBufferedStream.INTERVAL);
 		}
 	}
+
+	public void stop() {
+		running = false;
+	}
+
 
 	/**
 	 * Start the thread sending data from the buffer to the OutputStream (socket).

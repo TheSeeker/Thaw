@@ -49,6 +49,7 @@ import thaw.gui.IconBox;
 
 import thaw.core.Config;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 import thaw.gui.FileChooser;
 import thaw.core.MainWindow;
 import thaw.fcp.FreenetURIHelper;
@@ -85,7 +86,7 @@ public class IndexManagementHelper {
 
 
 	public static abstract class BasicIndexAction
-		implements IndexAction, Runnable {
+		implements IndexAction, ThawRunnable {
 
 		private FCPQueueManager queueManager;
 		private AbstractButton actionSource;
@@ -144,6 +145,10 @@ public class IndexManagementHelper {
 
 		public void run() {
 			apply();
+		}
+
+		public void stop() {
+			/* \_o< */
 		}
 
 		public abstract void apply();
@@ -286,7 +291,7 @@ public class IndexManagementHelper {
 
 
 
-	public static class IndexModifier extends BasicIndexAction implements Runnable {
+	public static class IndexModifier extends BasicIndexAction implements ThawRunnable {
 
 		public IndexModifier(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(queueManager, indexBrowser, actionSource);
@@ -320,7 +325,7 @@ public class IndexManagementHelper {
 	}
 
 
-	public static class IndexReuser extends BasicIndexAction implements Runnable {
+	public static class IndexReuser extends BasicIndexAction implements ThawRunnable {
 		public IndexReuser(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(queueManager, indexBrowser, actionSource);
 		}
@@ -574,7 +579,7 @@ public class IndexManagementHelper {
 	}
 
 
-	public static class IndexHasChangedFlagReseter extends BasicIndexAction implements Runnable {
+	public static class IndexHasChangedFlagReseter extends BasicIndexAction implements ThawRunnable {
 		public IndexHasChangedFlagReseter(IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(null, indexBrowser, actionSource);
 		}
@@ -591,7 +596,7 @@ public class IndexManagementHelper {
 	}
 
 
-	public static class IndexDownloader extends BasicIndexAction implements Runnable, Observer {
+	public static class IndexDownloader extends BasicIndexAction implements ThawRunnable, Observer {
 		private boolean autoSort = false;
 
 		public IndexDownloader(FCPQueueManager queueManager,
@@ -787,7 +792,7 @@ public class IndexManagementHelper {
 
 
 
-	public static class IndexSorter extends BasicIndexAction implements Runnable {
+	public static class IndexSorter extends BasicIndexAction implements ThawRunnable {
 		public IndexSorter(IndexBrowserPanel indexBrowser,
 				   final AbstractButton actionSource) {
 
@@ -815,7 +820,7 @@ public class IndexManagementHelper {
 	}
 
 
-	public static class IndexUploader extends BasicIndexAction implements Runnable, Observer {
+	public static class IndexUploader extends BasicIndexAction implements ThawRunnable, Observer {
 		public IndexUploader(FCPQueueManager queueManager,
 				     IndexBrowserPanel indexBrowser,
 				     final AbstractButton actionSource) {
@@ -1297,7 +1302,7 @@ public class IndexManagementHelper {
 
 
 
-	public static class KeyAdder extends BasicIndexAction implements Runnable, MouseListener {
+	public static class KeyAdder extends BasicIndexAction implements ThawRunnable, MouseListener {
 		private JButton cancelButton = null;
 		private JButton okButton = null;
 		private JTextArea textArea = null;
@@ -1483,7 +1488,7 @@ public class IndexManagementHelper {
 
 
 
-	public static class LinkAdder extends BasicIndexAction implements Runnable {
+	public static class LinkAdder extends BasicIndexAction implements ThawRunnable {
 		public LinkAdder(IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(null, indexBrowser, actionSource);
 		}
@@ -1538,7 +1543,7 @@ public class IndexManagementHelper {
 
 
 
-	public static class IndexFolderReorderer extends BasicIndexAction implements Runnable {
+	public static class IndexFolderReorderer extends BasicIndexAction implements ThawRunnable {
 		public IndexFolderReorderer(IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(null, indexBrowser, actionSource);
 		}
@@ -1562,7 +1567,7 @@ public class IndexManagementHelper {
 
 
 
-	public static class IndexCommentAdder extends BasicIndexAction implements Runnable, ActionListener {
+	public static class IndexCommentAdder extends BasicIndexAction implements ThawRunnable, ActionListener {
 		private JDialog dialog;
 
 		private JComboBox author;
@@ -1691,7 +1696,7 @@ public class IndexManagementHelper {
 	}
 
 
-	public static class IndexCommentViewer extends BasicIndexAction implements Runnable {
+	public static class IndexCommentViewer extends BasicIndexAction implements ThawRunnable {
 		public IndexCommentViewer(IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(null, indexBrowser, actionSource);
 
@@ -1715,7 +1720,7 @@ public class IndexManagementHelper {
 	}
 
 
-	public static class IndexDetailsViewer extends BasicIndexAction implements Runnable, ActionListener {
+	public static class IndexDetailsViewer extends BasicIndexAction implements ThawRunnable, ActionListener {
 		private DateFormat dateFormat;
 
 		public IndexDetailsViewer(IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {

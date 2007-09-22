@@ -28,6 +28,7 @@ import thaw.gui.CheckBox;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 import thaw.gui.IconBox;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FreenetURIHelper;
@@ -163,7 +164,7 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 		return true;
 	}
 
-	private class LinkAdder implements Runnable {
+	private class LinkAdder implements ThawRunnable {
 		private LinkList index;
 		private boolean running;
 

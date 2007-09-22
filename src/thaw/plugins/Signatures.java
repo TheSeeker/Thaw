@@ -111,7 +111,7 @@ public class Signatures extends LibraryPlugin {
 	}
 
 
-	public boolean stop() {
+	public void stop() {
 		configTab.destroy();
 		core.getConfigWindow().removeTab(configTab.getPanel());
 
@@ -119,8 +119,6 @@ public class Signatures extends LibraryPlugin {
 
 		if (used == 0)
 			db.unregisterChild(this);
-
-		return true;
 	}
 
 

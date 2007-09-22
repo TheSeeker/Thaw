@@ -8,13 +8,14 @@ import java.util.Observable;
 
 import thaw.core.Logger;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 
 /**
  * Manage a running and a pending queue of FCPTransferQuery.
  * Please notice that runningQueue contains too finished queries.
  * Notify when: a query is added and when a query change to one queue to another.
  */
-public class FCPQueueManager extends java.util.Observable implements Runnable, java.util.Observer {
+public class FCPQueueManager extends java.util.Observable implements ThawRunnable, java.util.Observer {
 
 	private final static int PRIORITY_MIN = 6; /* So 0 to 6 */
 
@@ -455,32 +456,37 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 		try {
 			Thread.sleep(5000);
 		} catch(final java.lang.InterruptedException e) {
-			// I'm stupid. I'm stupid. I'm stupid. (r9654)
+			/* \_o< */
 		}
 
-		while(true) {
+		while(!stopThread) {
 			try {
 				Thread.sleep(500);
 			} catch(final java.lang.InterruptedException e) {
 				/* We don't care */
 			}
 
-			if(stopThread)
-				return;
+			if(!stopThread) {
 
-			try {
+				try {
 
-				if(queryManager.getConnection().isConnected()
-				   && !queryManager.getConnection().isWriting()
-				   && queueCompleted)
-					schedule();
+					if(queryManager.getConnection().isConnected()
+					   && !queryManager.getConnection().isWriting()
+					   && queueCompleted)
+						schedule();
 
-			} catch(final Exception e) {
-				Logger.error(this, "EXCEPTION FROM ORDONNANCOR : "+e.toString()+ " ; "+e.getMessage());
-				e.printStackTrace();
+				} catch(final Exception e) {
+					Logger.error(this, "EXCEPTION FROM FCP SCHEDULER : "+e.toString()+ " ; "+e.getMessage());
+					e.printStackTrace();
+				}
+
 			}
 		}
 
+	}
+
+	public void stop() {
+		stopThread = true;
 	}
 
 	public void startScheduler() {

@@ -26,6 +26,7 @@ import javax.swing.JButton;
 
 import thaw.core.Logger;
 import thaw.core.I18n;
+import thaw.core.ThawRunnable;
 import thaw.plugins.MDns;
 
 
@@ -45,7 +46,9 @@ import thaw.plugins.MDns;
  * TODO: implement the "Manual" mode
  * TODO: maybe we should have a small progressbar shown in a new popup to introduce a "delay" at startup
  */
-public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runnable {
+public class MDNSDiscoveryPanel extends JDialog
+	implements ActionListener, ThawRunnable {
+
 	public interface MDNSDiscoveryPanelCallback {
 		/**
 		 * Called upon exit from MDNSDiscoveryPanelCallback
@@ -220,4 +223,7 @@ public class MDNSDiscoveryPanel extends JDialog implements ActionListener, Runna
 	}
 
 
+	public void stop() {
+		cancelledByUser = true;
+	}
 }

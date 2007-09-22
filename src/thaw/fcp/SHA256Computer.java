@@ -12,13 +12,14 @@ import freenet.crypt.SHA256;
 import freenet.support.Base64;
 
 import thaw.core.Logger;
+import thaw.core.ThawRunnable;
 
 
 /**
  * Automatically used by FCPClientPut.
  * You shouldn't have to bother about it
  */
-public class SHA256Computer extends Observable implements Runnable {
+public class SHA256Computer extends Observable implements ThawRunnable {
 	private MessageDigest md;
 
 	private String hash;
@@ -30,26 +31,29 @@ public class SHA256Computer extends Observable implements Runnable {
 
 	public final static int BLOCK_SIZE = 32768; /* 32 Ko */
 
+	public boolean running = true;
+
 	public SHA256Computer(String header, String fileToHash) {
 		this.file = fileToHash;
 		this.headers = header;
+		this.running = true;
 	}
 
 
 	public void run() {
 		File realFile = new File(file);
 		long realFileSize = realFile.length();
-		
+
 		try {
 			FileInputStream in = new FileInputStream(realFile);
 			BufferedInputStream bis = new BufferedInputStream(in);
 			md = SHA256.getMessageDigest();
 			md.reset();
 			md.update(headers.getBytes("UTF-8"));
-			
+
 			byte[] buf = new byte[4096];
 			int readBytes = bis.read(buf);
-			while(readBytes > -1) {
+			while(readBytes > -1 && running) {
 				md.update(buf, 0, readBytes);
 				readBytes = bis.read(buf);
 				progress = (short) Math.round(readBytes * 100 / realFileSize);
@@ -59,6 +63,12 @@ public class SHA256Computer extends Observable implements Runnable {
 
 			bis.close();
 			in.close();
+
+			if (!running) {
+				setChanged();
+				notifyObservers();
+				return;
+			}
 
 			synchronized (hashLock) {
 				hash = Base64.encode(md.digest());
@@ -76,6 +86,10 @@ public class SHA256Computer extends Observable implements Runnable {
 		notifyObservers();
 	}
 
+	public void stop() {
+		running = false;
+	}
+
 
 	/**
 	 * In %
@@ -85,7 +99,7 @@ public class SHA256Computer extends Observable implements Runnable {
 			return 100;
 		else if(progress > 99)
 			return 99;
-		else 
+		else
 			return progress;
 	}
 
@@ -94,10 +108,10 @@ public class SHA256Computer extends Observable implements Runnable {
 	 */
 	public String getHash() {
 		synchronized (hashLock) {
-			return hash;	
+			return hash;
 		}
 	}
-	
+
 	public boolean isFinished() {
 		return isFinished;
 	}

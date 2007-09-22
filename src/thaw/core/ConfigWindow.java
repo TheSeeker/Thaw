@@ -226,11 +226,13 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	/**
 	 * We reload the change in another thread to avoid UI freeze
 	 */
-	public class Reloader implements Runnable {
+	public class Reloader implements ThawRunnable {
 		private boolean resetConnection;
+		private boolean running;
 
 		public Reloader(boolean resetConnection) {
 			this.resetConnection = resetConnection;
+			this.running = true;
 		}
 
 		public void run() {
@@ -238,7 +240,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 			if (resetConnection) {
 				dialog = new JDialog(core.getMainWindow().getMainFrame(),
-							     " "+I18n.getMessage("thaw.common.pleaseWait"));
+						     " "+I18n.getMessage("thaw.common.pleaseWait"));
 
 				dialog.getContentPane().setLayout(new GridLayout(1, 1));
 				dialog.getContentPane().add(new JLabel(I18n.getMessage("thaw.common.pleaseWait"),
@@ -270,10 +272,11 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 			if (resetConnection) {
 				core.getConfig().cancelChanges();
 
-				core.getPluginManager().stopPlugins();
+				if (running)
+					core.getPluginManager().stopPlugins();
 
 				/* should reinit the whole connection correctly */
-				if (resetConnection && !core.initConnection()) {
+				if (running && resetConnection && !core.initConnection()) {
 					if (dialog == null)
 						new thaw.gui.WarningWindow(core.getMainWindow().getMainFrame(),
 									   I18n.getMessage("thaw.warning.unableToConnectTo")+
@@ -289,16 +292,23 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 				needConnectionReset = false;
 
 				/* put back the config tab */
-				addTabs();
+				if (running)
+					addTabs();
 
-				core.getPluginManager().loadAndRunPlugins();
+				if (running)
+					core.getPluginManager().loadAndRunPlugins();
 
 			} else { /* !resetConnection */
-				core.getConfig().applyChanges();
+				if (running)
+					core.getConfig().applyChanges();
 			}
 
 			if (resetConnection)
 				dialog.setVisible(false);
+		}
+
+		public void stop() {
+			running = false;
 		}
 	}
 

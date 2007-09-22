@@ -12,9 +12,10 @@ import thaw.plugins.Hsqldb;
 import thaw.fcp.FreenetURIHelper;
 import thaw.core.Logger;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 
 
-public class GraphBuilder implements Runnable {
+public class GraphBuilder implements ThawRunnable {
 
 	private IndexWebGrapher plugin;
 	private GraphPanel graphPanel;
@@ -35,7 +36,7 @@ public class GraphBuilder implements Runnable {
 		this.stop = false;
 	}
 
-	private class Refresher implements Runnable {
+	private class Refresher implements ThawRunnable {
 		public Refresher() {
 
 		}
@@ -59,6 +60,9 @@ public class GraphBuilder implements Runnable {
 			} while (loop && !stop && !finish);
 		}
 
+		public void stop() {
+			/* \_o< */
+		}
 	}
 
 

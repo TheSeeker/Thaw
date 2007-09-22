@@ -40,6 +40,7 @@ import thaw.fcp.*;
 import thaw.plugins.IndexBrowser;
 import thaw.plugins.index.IndexManagementHelper;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 
 public class MessagePanel
 	implements ActionListener {
@@ -365,7 +366,7 @@ public class MessagePanel
 	}
 
 
-	private class ScrollBarSetter implements Runnable {
+	private class ScrollBarSetter implements ThawRunnable {
 		public ScrollBarSetter() { }
 
 		public void run() {
@@ -390,6 +391,10 @@ public class MessagePanel
 				     +" ; value : "+Integer.toString(value));
 
 			scrollPane.getVerticalScrollBar().setValue(max);
+		}
+
+		public void stop() {
+			/* \_o< */
 		}
 	}
 

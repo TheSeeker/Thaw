@@ -7,10 +7,11 @@ import java.sql.ResultSet;
 import thaw.core.Config;
 import thaw.core.Logger;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 import thaw.fcp.FCPQueueManager;
 import thaw.plugins.Hsqldb;
 
-public class AutoRefresh implements Runnable, java.util.Observer {
+public class AutoRefresh implements ThawRunnable, java.util.Observer {
 
 	public final static boolean DEFAULT_ACTIVATED = true;
 	public final static int DEFAULT_INTERVAL = 150;

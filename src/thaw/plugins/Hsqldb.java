@@ -77,8 +77,8 @@ public class Hsqldb extends LibraryPlugin {
 	}
 
 
-	public boolean stop() {
-		return true;
+	public void stop() {
+		/* \_o< */
 	}
 
 	public void realStop() {

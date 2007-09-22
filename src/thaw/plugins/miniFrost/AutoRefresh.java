@@ -9,8 +9,9 @@ import thaw.plugins.miniFrost.interfaces.Board;
 import thaw.core.Logger;
 import thaw.core.Config;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 
-public class AutoRefresh implements Runnable {
+public class AutoRefresh implements ThawRunnable {
 
 	public static final int DEFAULT_MAX_BOARDS_REFRESHING = 7;
 	public static final int DEFAULT_INTERVAL = 10; /* s */

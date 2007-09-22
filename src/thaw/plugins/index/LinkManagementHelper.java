@@ -12,6 +12,7 @@ import javax.swing.AbstractButton;
 
 import thaw.core.Logger;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 import thaw.plugins.Hsqldb;
 import thaw.fcp.FCPQueueManager;
 
@@ -27,7 +28,7 @@ public class LinkManagementHelper {
 	}
 
 
-	public static abstract class BasicLinkAction implements LinkAction, Runnable {
+	public static abstract class BasicLinkAction implements LinkAction, ThawRunnable {
 		private AbstractButton src;
 
 		public BasicLinkAction(AbstractButton src) {
@@ -43,6 +44,10 @@ public class LinkManagementHelper {
 
 		public void run() {
 			apply();
+		}
+
+		public void stop() {
+			/* \_o< */
 		}
 
 		public abstract void setTarget(Vector files);

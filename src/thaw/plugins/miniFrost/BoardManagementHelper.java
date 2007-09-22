@@ -23,6 +23,7 @@ import javax.swing.JOptionPane;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 import thaw.plugins.miniFrost.interfaces.Board;
 import thaw.plugins.miniFrost.interfaces.BoardFactory;
 import thaw.plugins.miniFrost.interfaces.Message;
@@ -35,7 +36,7 @@ public class BoardManagementHelper {
 		public void setTarget(Board board);
 	}
 
-	public static abstract class BasicBoardAction implements BoardAction, Runnable {
+	public static abstract class BasicBoardAction implements BoardAction, ThawRunnable {
 
 		public BasicBoardAction() {
 
@@ -43,6 +44,10 @@ public class BoardManagementHelper {
 
 		public void run() {
 			apply();
+		}
+
+		public void stop() {
+			/* \_o< */
 		}
 
 		public void actionPerformed(ActionEvent e) {

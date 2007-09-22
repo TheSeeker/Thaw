@@ -35,6 +35,7 @@ import thaw.core.ConfigWindow;
 import thaw.core.Config;
 import thaw.core.Logger;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 
 import thaw.gui.IconBox;
 import thaw.gui.FileChooser;
@@ -238,7 +239,7 @@ public class SigConfigTab implements ActionListener, Observer {
 		}
 
 
-		private class IdentityAdder implements Runnable {
+		private class IdentityAdder implements ThawRunnable {
 
 
 			public void run() {
@@ -255,10 +256,14 @@ public class SigConfigTab implements ActionListener, Observer {
 					updateList();
 				}
 			}
+
+			public void stop() {
+				/* \_o< */
+			}
 		}
 
 
-		private class IdentityImporter implements Runnable {
+		private class IdentityImporter implements ThawRunnable {
 			public IdentityImporter() { }
 
 			public void run() {
@@ -274,10 +279,14 @@ public class SigConfigTab implements ActionListener, Observer {
 					updateList();
 				}
 			}
+
+			public void stop() {
+				/* \_o< */
+			}
 		}
 
 
-		private class IdentityExporter implements Runnable {
+		private class IdentityExporter implements ThawRunnable {
 			private Identity i;
 
 			public IdentityExporter(Identity i) {
@@ -297,10 +306,14 @@ public class SigConfigTab implements ActionListener, Observer {
 					updateList();
 				}
 			}
+
+			public void stop() {
+				/* \_o< */
+			}
 		}
 
 
-		private class IdentityDeleter implements Runnable {
+		private class IdentityDeleter implements ThawRunnable {
 			private Identity i;
 
 			public IdentityDeleter(Identity i) {
@@ -319,6 +332,10 @@ public class SigConfigTab implements ActionListener, Observer {
 
 				i.delete();
 				updateList();
+			}
+
+			public void stop() {
+				/* \_o< */
 			}
 		}
 

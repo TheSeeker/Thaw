@@ -144,14 +144,16 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 		return browserPanel;
 	}
 
-	public boolean stop() {
+	public void stop() {
 		if (autoRefresh != null)
 			autoRefresh.stop();
 
-		browserPanel.getCommentTab().hideTab();
-		browserPanel.getBlackList().hidePanel();
+		if (browserPanel != null) {
+			browserPanel.getCommentTab().hideTab();
+			browserPanel.getBlackList().hidePanel();
 
-		browserPanel.stopAllThreads();
+			browserPanel.stopAllThreads();
+		}
 
 		core.getMainWindow().getTabbedPane().removeChangeListener(this);
 
@@ -160,13 +162,13 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 			browserPanel.saveState();
 		}
 
-		hsqldb.unregisterChild(this);
-		signatures.unregisterChild(this);
+		if (hsqldb != null)
+			hsqldb.unregisterChild(this);
+		if (signatures != null)
+			signatures.unregisterChild(this);
 
 		if (configPanel != null)
 			configPanel.removeTab();
-
-		return true;
 	}
 
 	public String getNameForUser() {

@@ -14,20 +14,23 @@ import javax.swing.JTextArea;
 import javax.swing.JComboBox;
 
 import thaw.core.Core;
+import thaw.core.Config;
 import thaw.gui.FileChooser;
 import thaw.core.I18n;
 import thaw.core.LogListener;
 import thaw.core.Logger;
 import thaw.core.Plugin;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 
 /**
  * Quick and dirty console showing Thaw logs, and allowing to save them.
  */
-public class LogConsole implements Plugin, LogListener, ActionListener, Runnable {
+public class LogConsole implements Plugin, LogListener, ActionListener, ThawRunnable {
 	public final static int MAX_LINE = 512;
 
 	private Core core;
+	private Config config;
 
 	private String[] buffer;
 	private int readOffset;
@@ -60,6 +63,8 @@ public class LogConsole implements Plugin, LogListener, ActionListener, Runnable
 
 	public boolean run(final Core core) {
 		this.core = core;
+		this.config = core.getConfig();
+
 		threadRunning = true;
 		hasChanged = false;
 
@@ -105,15 +110,12 @@ public class LogConsole implements Plugin, LogListener, ActionListener, Runnable
 
 	}
 
-
-	public boolean stop() {
+	public void stop() {
 		threadRunning = false;
 
 		Logger.removeLogListener(this);
 
 		core.getMainWindow().removeTab(consolePanel);
-
-		return true;
 	}
 
 
@@ -125,8 +127,10 @@ public class LogConsole implements Plugin, LogListener, ActionListener, Runnable
 	public void actionPerformed(final ActionEvent e) {
 		if (e.getSource() == logLevel) {
 
-			if (Logger.getLogLevel() != logLevel.getSelectedIndex()) /* to avoid loops */
+			if (Logger.getLogLevel() != logLevel.getSelectedIndex()) {/* to avoid loops */
 				Logger.setLogLevel(logLevel.getSelectedIndex());
+				config.setValue("logLevel", Integer.toString(logLevel.getSelectedIndex()));
+			}
 
 		} else if(e.getSource() == saveToFile) {
 			final FileChooser fileChooser = new FileChooser();

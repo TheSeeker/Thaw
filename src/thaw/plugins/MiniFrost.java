@@ -144,7 +144,7 @@ public class MiniFrost implements thaw.core.Plugin {
 		return true;
 	}
 
-	public boolean stop() {
+	public void stop() {
 		if (autoRefresh != null)
 			autoRefresh.stop();
 
@@ -158,8 +158,6 @@ public class MiniFrost implements thaw.core.Plugin {
 
 		if (hsqldb != null)
 			hsqldb.unregisterChild(this);
-
-		return true;
 	}
 
 	public BoardFactory[] getFactories() {

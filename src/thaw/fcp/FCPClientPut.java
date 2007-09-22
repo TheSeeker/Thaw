@@ -10,6 +10,7 @@ import java.util.Observer;
 
 import thaw.core.Logger;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 
 
 /**
@@ -271,7 +272,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 
 
-	private class UnlockWaiter implements Runnable {
+	private class UnlockWaiter implements ThawRunnable {
 		FCPClientPut clientPut;
 		FCPConnection c;
 
@@ -280,13 +281,43 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			this.c = c;
 		}
 
+		private Thread th;
+		private boolean waiting = false;
+
 		public void run() {
+			synchronized(this) {
+				waiting = true;
+			}
+
 			c.addToWriterQueue();
+
+			synchronized(this) {
+				waiting = false;
+
+				if (th.interrupted()) {
+					c.removeFromWriterQueue();
+					return;
+				}
+			}
 
 			lockOwner = true;
 
 			clientPut.continueInsert();
 			return;
+		}
+
+		public void setThread(Thread th) {
+			synchronized(this) {
+				this.th = th;
+			}
+		}
+
+		/* race-conditions may happen but "shits happen" */
+		public void stop() {
+			synchronized(this) {
+				if (waiting)
+					th.interrupt();
+			}
 		}
 	}
 
@@ -301,10 +332,12 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 		Logger.info(this, "Waiting for socket availability ...");
 
-		final Thread fork = new ThawThread(new UnlockWaiter(this, connection),
+		UnlockWaiter uw = new UnlockWaiter(this, connection);
+
+		final Thread fork = new ThawThread(uw,
 						   "Unlock waiter",
 						   this);
-
+		uw.setThread(fork);
 		fork.start();
 
 		return true;

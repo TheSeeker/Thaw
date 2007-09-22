@@ -53,13 +53,11 @@ public class MDns implements thaw.core.Plugin, ActionListener, MDNSDiscoveryPane
 		return core.getConfig();
 	}
 
-	public boolean stop() {
+	public void stop() {
 		discovery.stop();
 
 		core.getConfigWindow().getNodeConfigPanel().getAutodetectButton().removeActionListener(this);
 		core.getConfigWindow().getNodeConfigPanel().getAutodetectButton().setEnabled(false);
-
-		return false;
 	}
 
 

@@ -15,7 +15,7 @@ import thaw.core.I18n;
 import thaw.core.Core;
 import thaw.core.Logger;
 import thaw.core.ThawThread;
-
+import thaw.core.ThawRunnable;
 
 import thaw.plugins.peerMonitor.*;
 import thaw.fcp.*;
@@ -42,7 +42,7 @@ public class PeerMonitor implements thaw.core.Plugin, Observer, ActionListener
 	}
 
 
-	protected class DisplayRefresher implements Observer, Runnable{
+	protected class DisplayRefresher implements Observer, ThawRunnable{
 		private FCPGetNode getNode = null;
 		private FCPListPeers listPeers = null;
 
@@ -99,6 +99,10 @@ public class PeerMonitor implements thaw.core.Plugin, Observer, ActionListener
 				peerPanel.setPeerList(lP.getPeers());
 			}
 		}
+
+		public void stop() {
+			running = false;
+		}
 	}
 
 
@@ -137,7 +141,7 @@ public class PeerMonitor implements thaw.core.Plugin, Observer, ActionListener
 	}
 
 
-	public boolean stop() {
+	public void stop() {
 		hideTab();
 		if (!folded)
 			core.getMainWindow().removeComponent(peerPanel.getPeerListPanel());
@@ -147,7 +151,6 @@ public class PeerMonitor implements thaw.core.Plugin, Observer, ActionListener
 		core.getConfig().setValue("peerMonitorFolded", Boolean.toString(folded));
 
 		running = false;
-		return false;
 	}
 
 

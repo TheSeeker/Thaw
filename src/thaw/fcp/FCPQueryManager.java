@@ -4,21 +4,24 @@ import java.util.Observable;
 
 import thaw.core.Logger;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
+
 
 /**
  * Manage all fcp messages (see corresponding object of each kind of query).
  * Call observers each type a new message is received. The given object is
  * the message.
  */
-public class FCPQueryManager extends Observable implements Runnable {
+public class FCPQueryManager extends Observable implements ThawRunnable {
 	private Thread me;
 
 	private FCPConnection connection;
-
+	private boolean running;
 
 	public FCPQueryManager(final FCPConnection connection) {
 		me = null;
 		setConnection(connection);
+		running = true;
 	}
 
 	/**
@@ -93,7 +96,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 	}
 
 
-	public class Notifier implements Runnable {
+	public class Notifier implements ThawRunnable {
 		FCPMessage msg;
 
 		public Notifier(FCPMessage msg) {
@@ -111,16 +114,20 @@ public class FCPQueryManager extends Observable implements Runnable {
 				e.printStackTrace();
 			}
 		}
+
+		public void stop() {
+			/* can't stop */
+		}
 	}
 
 
 
-	public class WatchDog implements Runnable {
+	public class WatchDog implements ThawRunnable {
 		public final static int TIMEOUT = 10000;
 
-		Runnable runnable;
+		ThawRunnable runnable;
 
-		public WatchDog(Runnable runnable) {
+		public WatchDog(ThawRunnable runnable) {
 			this.runnable = runnable;
 		}
 
@@ -146,6 +153,10 @@ public class FCPQueryManager extends Observable implements Runnable {
 			}
 		}
 
+		public void stop() {
+			/* will stop by itself when the child thread will stop */
+		}
+
 	}
 
 	/**
@@ -158,7 +169,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 	 * Will listen in loop for new incoming messages.
 	 */
 	public void run() {
-		while(true) {
+		while(running) {
 			FCPMessage latestMessage;
 
 			/* note : if multithreaded, stop reading when a thread is writing,
@@ -197,10 +208,16 @@ public class FCPQueryManager extends Observable implements Runnable {
 				}
 			} else {
 				Logger.info(this, "Stopping listening");
-				return;
+				running = false;
 			}
 		}
 
+	}
+
+
+	public void stop() {
+		Logger.info(this, "stop() : Stopping listening");
+		running = false;
 	}
 
 

@@ -17,6 +17,7 @@ import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.Plugin;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 import thaw.fcp.FCPTransferQuery;
 
 /**
@@ -24,7 +25,7 @@ import thaw.fcp.FCPTransferQuery;
  * A not too bad example to show how to make plugins.
  * @deprecated When this plugin was created, MaxRetries was stupidly set to 0 instead of -1 => now this plugin is useless.
  */
-public class Restarter implements Observer, Runnable, Plugin {
+public class Restarter implements Observer, ThawRunnable, Plugin {
 
 	private int interval = 180; /* in s */
 	private boolean restartFatals = false;
@@ -88,12 +89,10 @@ public class Restarter implements Observer, Runnable, Plugin {
 	}
 
 
-	public boolean stop() {
+	public void stop() {
 		core.getConfigWindow().removeTab(configPanel);
 		core.getConfigWindow().deleteObserver(this);
 		running = false;
-
-		return true;
 	}
 
 

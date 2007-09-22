@@ -26,6 +26,7 @@ import thaw.core.Logger;
 import thaw.core.Config;
 import thaw.core.I18n;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 
 import thaw.fcp.FreenetURIHelper;
 import thaw.fcp.FCPTransferQuery;
@@ -38,7 +39,7 @@ import thaw.fcp.FCPClientGet;
  *  Just add to usual JTable the capacity to store the columns sizes
  * in the thaw configuration
  */
-public class Table extends JTable implements TableColumnModelListener, Runnable {
+public class Table extends JTable implements TableColumnModelListener, ThawRunnable {
 
 	public final static Color COLOR_ONE = Color.WHITE;
 	public final static Color COLOR_TWO = new Color(240, 240, 240);
@@ -342,6 +343,10 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 			}
 		} while(hasChanged);
 
+	}
+
+	public void stop() {
+		/* can't stop */
 	}
 
 

@@ -35,6 +35,7 @@ import java.io.File;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 
 import thaw.gui.IconBox;
 import thaw.gui.FileChooser;
@@ -307,7 +308,7 @@ public class DraftPanel implements ActionListener, MouseListener {
 	private JMenuItem addFile = null;
 
 
-	private class BoardAdder implements Runnable {
+	private class BoardAdder implements ThawRunnable {
 		public BoardAdder() {
 
 		}
@@ -330,9 +331,11 @@ public class DraftPanel implements ActionListener, MouseListener {
 
 			refreshAttachmentList();
 		}
+
+		public void stop() { /* \_o< */ }
 	}
 
-	private class FileAdder implements Runnable {
+	private class FileAdder implements ThawRunnable {
 		public FileAdder() {
 
 		}
@@ -366,6 +369,8 @@ public class DraftPanel implements ActionListener, MouseListener {
 
 			refreshAttachmentList();
 		}
+
+		public void stop() { /* \_o< */ }
 	}
 
 

@@ -29,6 +29,7 @@ import thaw.core.Config;
 import thaw.core.Logger;
 import thaw.core.I18n;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 
 import thaw.fcp.FCPTransferQuery;
 
@@ -88,9 +89,9 @@ public class TrayIcon implements thaw.core.Plugin,
 	}
 
 
-	public boolean stop() {
+	public void stop() {
 		if (icon == null)
-			return false;
+			return;
 
 		Logger.removeLogListener(this);
 
@@ -105,8 +106,6 @@ public class TrayIcon implements thaw.core.Plugin,
 		}
 
 		Logger.addLogListener(this);
-
-		return true;
 	}
 
 
@@ -358,7 +357,7 @@ public class TrayIcon implements thaw.core.Plugin,
 	}
 
 
-	private class ProgressBarRefresher implements Runnable {
+	private class ProgressBarRefresher implements ThawRunnable {
 		private Vector bars;
 		private boolean stop;
 

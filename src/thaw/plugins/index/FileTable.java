@@ -29,6 +29,7 @@ import javax.swing.table.TableColumnModel;
 
 import thaw.core.Config;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 import thaw.fcp.FreenetURIHelper;
 import thaw.core.I18n;
 import thaw.gui.IconBox;
@@ -421,7 +422,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 	}
 
 
-	private class TransferRefresher implements Runnable {
+	private class TransferRefresher implements ThawRunnable {
 		private boolean running;
 
 		public TransferRefresher() {

@@ -41,6 +41,7 @@ import thaw.gui.GUIHelper;
 import thaw.core.I18n;
 import thaw.core.Plugin;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
@@ -145,7 +146,7 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 	}
 
 
-	public boolean stop() {
+	public void stop() {
 		core.getMainWindow().removeTab(tab);
 		core.getQueueManager().deleteObserver(this);
 
@@ -154,8 +155,6 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 		/* Others observers will just keep data sync ? */
 
 		db.unregisterChild(this);
-
-		return false;
 	}
 
 
@@ -291,7 +290,7 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 	}
 
 
-	private class KeyImporter implements Runnable {
+	private class KeyImporter implements ThawRunnable {
 		public KeyImporter() { }
 
 		public void run() {
@@ -356,10 +355,12 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 
 			table.refresh();
 		}
+
+		public void stop() { /* \_o< */ }
 	}
 
 
-	private class KeyExporter implements Runnable {
+	private class KeyExporter implements ThawRunnable {
 		public KeyExporter() { }
 
 		public void run() {
@@ -397,6 +398,8 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 			}
 
 		}
+
+		public void stop() { /* \_o< */ }
 	}
 
 

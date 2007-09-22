@@ -36,6 +36,7 @@ import javax.swing.table.JTableHeader;
 
 import thaw.core.Core;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 import thaw.gui.FileChooser;
 import thaw.core.I18n;
 import thaw.gui.IconBox;
@@ -325,7 +326,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	}
 
 
-	public class ActionReplier implements Runnable {
+	public class ActionReplier implements ThawRunnable {
 		private int action;
 		private int new_priority;
 		private Vector queries;
@@ -445,6 +446,10 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 		}
 
+
+		public void stop() {
+			/* \_o< */
+		}
 	}
 
 

@@ -9,6 +9,7 @@ import java.util.Observer;
 
 import thaw.core.Logger;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 
 
 public class FCPClientGet extends Observable
@@ -622,7 +623,7 @@ public class FCPClientGet extends Observable
 	}
 
 
-	private class UnlockWaiter implements Runnable {
+	private class UnlockWaiter implements ThawRunnable {
 		FCPClientGet clientGet;
 		FCPConnection c;
 		String dir;
@@ -633,8 +634,25 @@ public class FCPClientGet extends Observable
 			this.c = c;
 		}
 
+		private Thread th;
+		private boolean waiting = false;
+
 		public void run() {
+			synchronized(this) {
+				waiting = true;
+			}
+
 			c.addToWriterQueue();
+
+			synchronized(this) {
+				waiting = false;
+
+				if (th.interrupted()) {
+					c.removeFromWriterQueue();
+					return;
+				}
+			}
+
 			isLockOwner = true;
 
 			Logger.debug(this, "I take the lock !");
@@ -645,6 +663,21 @@ public class FCPClientGet extends Observable
 
 			clientGet.continueSaveFileTo(dir);
 			return;
+		}
+
+
+		public void setThread(Thread th) {
+			synchronized(this) {
+				this.th = th;
+			}
+		}
+
+		/* race-conditions may happen but "shits happen" */
+		public void stop() {
+			synchronized(this) {
+				if (waiting)
+					th.interrupt();
+			}
 		}
 	}
 
@@ -692,10 +725,13 @@ public class FCPClientGet extends Observable
 		setChanged();
 		this.notifyObservers();
 
+		UnlockWaiter uw = new UnlockWaiter(this, duplicatedQueryManager.getConnection(), dir);
 
-		final Thread fork = new ThawThread(new UnlockWaiter(this, duplicatedQueryManager.getConnection(), dir),
+		final Thread fork = new ThawThread(uw,
 						   "Unlock waiter",
 						   this);
+		uw.setThread(fork);
+
 		fork.start();
 
 		return true;

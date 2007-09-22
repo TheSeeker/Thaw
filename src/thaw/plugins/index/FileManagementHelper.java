@@ -16,6 +16,7 @@ import thaw.gui.FileChooser;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
 
@@ -35,7 +36,7 @@ public class FileManagementHelper {
 
 
 
-	public static abstract class BasicFileAction implements FileAction, Runnable {
+	public static abstract class BasicFileAction implements FileAction, ThawRunnable {
 		private AbstractButton src;
 
 		public BasicFileAction(AbstractButton src) {
@@ -51,6 +52,10 @@ public class FileManagementHelper {
 
 		public void run() {
 			apply();
+		}
+
+		public void stop() {
+			/* \_o< */
 		}
 
 		public abstract void setTarget(Vector files);

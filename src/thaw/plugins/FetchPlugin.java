@@ -79,13 +79,12 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 	}
 
 
-	public boolean stop() {
+	public void stop() {
 		Logger.info(this, "Stopping plugin \"FetchPlugin\" ...");
 
 		if (queueWatcher != null)
 			queueWatcher.removeButtonFromTheToolbar(buttonInToolBar);
 
-		return true;
 	}
 
 	public String getNameForUser() {

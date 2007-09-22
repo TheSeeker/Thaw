@@ -19,6 +19,7 @@ import thaw.core.Core;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 
 import thaw.plugins.indexWebGrapher.*;
 
@@ -130,11 +131,9 @@ public class IndexWebGrapher implements thaw.core.Plugin, ActionListener {
 	}
 
 
-	public boolean stop() {
+	public void stop() {
 		core.getMainWindow().removeTab(tabPanel);
 		db.unregisterChild(this);
-
-		return true;
 	}
 
 	public String getNameForUser() {

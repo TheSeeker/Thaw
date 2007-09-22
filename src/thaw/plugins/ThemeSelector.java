@@ -21,6 +21,7 @@ import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.Core;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 
 
 public class ThemeSelector implements thaw.core.Plugin, Observer, ListSelectionListener {
@@ -90,11 +91,9 @@ public class ThemeSelector implements thaw.core.Plugin, Observer, ListSelectionL
 	}
 
 
-	public boolean stop() {
+	public void stop() {
 		core.getConfigWindow().deleteObserver(this);
 		core.getConfigWindow().removeTab(panel);
-
-		return false;
 	}
 
 	public String getNameForUser() {
@@ -145,7 +144,7 @@ public class ThemeSelector implements thaw.core.Plugin, Observer, ListSelectionL
 	}
 
 
-	private class ThemeSetter implements Runnable {
+	private class ThemeSetter implements ThawRunnable {
 		private String theme;
 
 		public ThemeSetter(String t) {
@@ -155,6 +154,8 @@ public class ThemeSelector implements thaw.core.Plugin, Observer, ListSelectionL
 		public void run() {
 			core.setTheme(theme);
 		}
+
+		public void stop() { /* \_o< */ }
 	}
 
 

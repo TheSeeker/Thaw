@@ -13,6 +13,7 @@ import java.util.Calendar;
 import thaw.core.Logger;
 import thaw.core.I18n;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 import thaw.plugins.Hsqldb;
 
 import thaw.plugins.signatures.Identity;
@@ -24,7 +25,7 @@ import thaw.plugins.miniFrost.interfaces.Draft;
 
 public class KSKBoard
 	extends Observable
-	implements Board, Runnable, Observer {
+	implements Board, ThawRunnable, Observer {
 
 	public final static int MAX_DOWNLOADS_AT_THE_SAME_TIME = 5;
 	public final static int MAX_FAILURES_IN_A_ROW          = 5;
@@ -780,6 +781,13 @@ public class KSKBoard
 			}
 		}
 
+	}
+
+	public void stop() {
+		/* startNewMessageDownload() won't start any new message download
+		 * if this variable is set to false
+		 */
+		refreshing = false;
 	}
 
 

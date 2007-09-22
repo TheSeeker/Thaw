@@ -90,13 +90,11 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 	}
 
 
-	public boolean stop() {
+	public void stop() {
 		Logger.info(this, "Stopping plugin \"InsertPlugin\" ...");
 
 		if (queueWatcher != null)
 			queueWatcher.removeButtonFromTheToolbar(buttonInToolBar);
-
-		return true;
 	}
 
 

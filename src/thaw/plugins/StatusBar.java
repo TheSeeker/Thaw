@@ -13,11 +13,12 @@ import thaw.core.Main;
 import thaw.core.Plugin;
 import thaw.core.LogListener;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 
 import thaw.gui.IconBox;
 import thaw.fcp.FCPTransferQuery;
 
-public class StatusBar implements Runnable, Plugin, LogListener {
+public class StatusBar implements ThawRunnable, Plugin, LogListener {
 	public final static int INTERVAL = 3000; /* in ms */
 	public final static String SEPARATOR = "     ";
 
@@ -171,12 +172,10 @@ public class StatusBar implements Runnable, Plugin, LogListener {
 	}
 
 
-	public boolean stop() {
+	public void stop() {
 		running = false;
 
 		core.getMainWindow().setStatus(IconBox.blueBunny, "Thaw "+Main.VERSION);
-
-		return true;
 	}
 
 

@@ -71,12 +71,11 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 	}
 
 
-	public boolean stop() {
+	public void stop() {
 		core.getMainWindow().removeTab(panel);
 
-		hsqldb.unregisterChild(this);
-
-		return true;
+		if (hsqldb != null)
+			hsqldb.unregisterChild(this);
 	}
 
 	public String getNameForUser() {

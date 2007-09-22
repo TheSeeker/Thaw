@@ -163,6 +163,9 @@ public class Core implements Observer {
 
 		config.setDefaultValues();
 
+		if (config.getValue("logLevel") != null)
+			Logger.setLogLevel(Integer.parseInt(config.getValue("logLevel")));
+
 		if (config.getValue("tmpDir") != null)
 			System.setProperty("java.io.tmpdir", config.getValue("tmpDir"));
 
@@ -177,16 +180,22 @@ public class Core implements Observer {
 	/**
 	 * My node takes too much time to answer. So now the connection process is partially threaded.
 	 */
-	protected class ConnectionProcess implements Runnable {
+	protected class ConnectionProcess implements ThawRunnable {
 		private Core c;
+		private boolean running;
 
 		public ConnectionProcess(Core c) {
 			this.c = c;
+			this.running = true;
 		}
 
 		public void run() {
 			process();
 			connectionProcess = null;
+		}
+
+		public void stop() {
+			running = false;
 		}
 
 		public boolean process() {
@@ -204,22 +213,35 @@ public class Core implements Observer {
 				Logger.debug(this, "FCP  version : "+clientHello.getNodeFCPVersion());
 				Logger.debug(this, "Node version : "+clientHello.getNodeVersion());
 
-				queueManager.startScheduler();
+				if (ret)
+					queueManager.startScheduler();
 
-				queueManager.restartNonPersistent();
+				if (!running) ret = false;
 
-				final FCPWatchGlobal watchGlobal = new FCPWatchGlobal(true);
-				watchGlobal.start(queueManager);
+				if (ret)
+					queueManager.restartNonPersistent();
 
-				final FCPQueueLoader queueLoader = new FCPQueueLoader(config.getValue("thawId"));
-				queueLoader.start(queueManager);
+				if (!running) ret = false;
 
+				if (ret) {
+					final FCPWatchGlobal watchGlobal = new FCPWatchGlobal(true);
+					watchGlobal.start(queueManager);
+				}
+
+				if (!running) ret = false;
+
+				if (ret) {
+					final FCPQueueLoader queueLoader = new FCPQueueLoader(config.getValue("thawId"));
+					queueLoader.start(queueManager);
+				}
+
+				if (!running) ret = false;
 			}
 
 			if(ret && connection.isConnected())
 				connection.addObserver(c);
 
-			if(getMainWindow() != null) {
+			if(getMainWindow() != null && running) {
 				if (ret)
 					getMainWindow().setStatus(IconBox.minConnectAction,
 								  I18n.getMessage("thaw.statusBar.ready"));
@@ -552,8 +574,13 @@ public class Core implements Observer {
 			Logger.error(this, "Config was not saved correctly !");
 		}
 
-		Logger.info(this, "Exiting");
-		System.exit(0);
+		ThawThread.setAllowFullStop(true);
+
+		Logger.info(this, "Threads remaining:");
+		ThawThread.listThreads();
+
+		Logger.info(this, "Stopping all the remaining threads ...");
+		ThawThread.stopAll();
 	}
 
 
@@ -575,7 +602,7 @@ public class Core implements Observer {
 	}
 
 
-	protected class ReconnectionManager implements Runnable {
+	protected class ReconnectionManager implements ThawRunnable {
 		private boolean running = true;
 
 		public ReconnectionManager() {

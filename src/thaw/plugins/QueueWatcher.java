@@ -139,7 +139,7 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 	}
 
 
-	public boolean stop() {
+	public void stop() {
 		Logger.info(this, "Stopping plugin \"QueueWatcher\" ...");
 
 		int splitLocation;
@@ -156,8 +156,6 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 		core.getMainWindow().removeTab(panelAdded);
 
 		purgeButtonList();
-
-		return true;
 	}
 
 

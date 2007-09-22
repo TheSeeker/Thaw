@@ -8,6 +8,7 @@ import java.util.Iterator;
 import thaw.core.I18n;
 import thaw.core.Config;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 import thaw.plugins.Hsqldb;
 import thaw.core.Logger;
 import thaw.gui.FileChooser;
@@ -15,7 +16,7 @@ import thaw.fcp.*;
 
 
 public class KSKFileAttachment
-	extends KSKAttachment implements Runnable, java.util.Observer {
+	extends KSKAttachment implements ThawRunnable, java.util.Observer {
 
 	private String filename;
 	private long size;
@@ -269,6 +270,9 @@ public class KSKFileAttachment
 		}
 	}
 
+	public void stop() {
+
+	}
 
 	public void insert(Hsqldb db, int messageId) {
 		if (filename == null

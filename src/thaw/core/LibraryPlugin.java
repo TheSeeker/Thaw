@@ -16,7 +16,7 @@ public abstract class LibraryPlugin implements Plugin {
 	private Vector registered = null;
 
 	public abstract boolean run(Core core);
-	public abstract boolean stop();
+	public abstract void stop();
 
 
 	public void registerChild(final Plugin child) {

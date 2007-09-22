@@ -14,6 +14,7 @@ import thaw.gui.IconBox;
 import thaw.core.Logger;
 import thaw.core.Plugin;
 import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 import thaw.plugins.index.DatabaseManager;
 
 public class IndexExporter implements Plugin, ActionListener {
@@ -72,10 +73,8 @@ public class IndexExporter implements Plugin, ActionListener {
 	}
 
 
-	public boolean stop() {
+	public void stop() {
 		core.getMainWindow().removeFromFileMenu(menu);
-
-		return true;
 	}
 
 	public String getNameForUser() {
@@ -126,7 +125,7 @@ public class IndexExporter implements Plugin, ActionListener {
 
 	}
 
-	private class Worker implements Runnable {
+	private class Worker implements ThawRunnable {
 		private boolean impor;
 		private boolean content;
 		private java.io.File file;
@@ -150,5 +149,8 @@ public class IndexExporter implements Plugin, ActionListener {
 			}
 		}
 
+		public void stop() {
+			/* \_o< */
+		}
 	}
 }

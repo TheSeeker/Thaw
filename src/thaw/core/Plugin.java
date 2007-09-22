@@ -16,9 +16,8 @@ public interface Plugin {
 
 	/**
 	 * Called when the plugin is stopped (often at the end of the program).
-	 * @return false means that plugin has troubles and should not be unload.
 	 */
-	public boolean stop();
+	public void stop();
 
 
 	/**
