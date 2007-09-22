@@ -210,7 +210,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 
 			Reloader reloader = new Reloader(needConnectionReset);
-			Thread reload = new Thread(reloader);
+			Thread reload = new ThawThread(reloader, "Config reloader", this);
 			reload.start();
 
 			needConnectionReset = false;

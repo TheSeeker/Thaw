@@ -12,6 +12,7 @@ import thaw.core.Logger;
 import thaw.core.Main;
 import thaw.core.Plugin;
 import thaw.core.LogListener;
+import thaw.core.ThawThread;
 
 import thaw.gui.IconBox;
 import thaw.fcp.FCPTransferQuery;
@@ -38,7 +39,7 @@ public class StatusBar implements Runnable, Plugin, LogListener {
 		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 
 		running = true;
-		refresher = new Thread(this);
+		refresher = new ThawThread(this, "Status bar refresh", this);
 
 		refresher.start();
 

@@ -25,6 +25,7 @@ import javax.swing.DefaultCellEditor;
 import thaw.core.Logger;
 import thaw.core.Config;
 import thaw.core.I18n;
+import thaw.core.ThawThread;
 
 import thaw.fcp.FreenetURIHelper;
 import thaw.fcp.FCPTransferQuery;
@@ -318,7 +319,7 @@ public class Table extends JTable implements TableColumnModelListener, Runnable 
 		hasChanged = true;
 
 		if (savingThread == null) {
-			savingThread = new Thread(this);
+			savingThread = new ThawThread(this, "Table state saver", this);
 			savingThread.start();
 		}
 	}

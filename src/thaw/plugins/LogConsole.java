@@ -19,7 +19,7 @@ import thaw.core.I18n;
 import thaw.core.LogListener;
 import thaw.core.Logger;
 import thaw.core.Plugin;
-
+import thaw.core.ThawThread;
 
 /**
  * Quick and dirty console showing Thaw logs, and allowing to save them.
@@ -98,7 +98,7 @@ public class LogConsole implements Plugin, LogListener, ActionListener, Runnable
 
 		Logger.addLogListener(this);
 
-		Thread dispThread = new Thread(this);
+		Thread dispThread = new ThawThread(this, "Log console refresh", this);
 		dispThread.start();
 
 		return true;

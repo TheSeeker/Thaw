@@ -1,6 +1,8 @@
 package thaw.fcp;
 
 import thaw.core.Logger;
+import thaw.core.ThawThread;
+
 
 /**
  * Only used by FCPConnection. Except special situation, you shouldn't have to use it directly.
@@ -136,7 +138,7 @@ public class FCPBufferedStream implements Runnable {
 		}
 
 		if(tractopelle == null) {
-			tractopelle = new Thread(this);
+			tractopelle = new ThawThread(this, "Upload limiter", this);
 			tractopelle.start();
 			return true;
 		} else {

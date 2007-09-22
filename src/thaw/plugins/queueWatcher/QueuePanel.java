@@ -35,6 +35,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 
 import thaw.core.Core;
+import thaw.core.ThawThread;
 import thaw.gui.FileChooser;
 import thaw.core.I18n;
 import thaw.gui.IconBox;
@@ -449,13 +450,15 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 
 	public void removeSelectedTransfers() {
 		reloadSelections();
-		Thread th = new Thread(new ActionReplier(ACTION_REMOVE_SELECTED, -1));
+		Thread th = new ThawThread(new ActionReplier(ACTION_REMOVE_SELECTED, -1),
+					   "Action replier : Remove selected", this);
 		th.start();
 	}
 
 	public void removeAllFinishedTransfers() {
 		reloadSelections();
-		Thread th = new Thread(new ActionReplier(ACTION_REMOVE_FINISHED, -1));
+		Thread th = new ThawThread(new ActionReplier(ACTION_REMOVE_FINISHED, -1),
+					   "Action replier : Remove finished", this);
 		th.start();
 	}
 
@@ -490,7 +493,9 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 			}
 		}
 
-		final Thread actionTh = new Thread(new ActionReplier(action, prioritySelected));
+		final Thread actionTh = new ThawThread(new ActionReplier(action, prioritySelected),
+						       "Action replier : "+Integer.toString(action),
+						       this);
 		actionTh.start();
 	}
 

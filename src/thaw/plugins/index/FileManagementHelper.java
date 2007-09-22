@@ -15,6 +15,7 @@ import thaw.core.Config;
 import thaw.gui.FileChooser;
 import thaw.core.I18n;
 import thaw.core.Logger;
+import thaw.core.ThawThread;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
 
@@ -43,7 +44,7 @@ public class FileManagementHelper {
 
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == src) {
-				Thread th = new Thread(this);
+				Thread th = new ThawThread(this, "Action replier", this);
 				th.start();
 			}
 		}

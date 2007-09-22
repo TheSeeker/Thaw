@@ -9,6 +9,8 @@ import java.util.Observable;
 import java.util.Observer;
 
 import thaw.core.Logger;
+import thaw.core.ThawThread;
+
 
 /**
  * Allow to insert a simple file.
@@ -230,7 +232,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			sha = new SHA256Computer(salt, localFile.getPath());
 			sha.addObserver(this);
 
-			Thread th = new Thread(sha);
+			Thread th = new ThawThread(sha, "Hash computer", this);
 			th.start();
 		} else {
 			return startProcess();
@@ -299,7 +301,9 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 
 		Logger.info(this, "Waiting for socket availability ...");
 
-		final Thread fork = new Thread(new UnlockWaiter(this, connection));
+		final Thread fork = new ThawThread(new UnlockWaiter(this, connection),
+						   "Unlock waiter",
+						   this);
 
 		fork.start();
 

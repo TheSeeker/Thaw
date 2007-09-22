@@ -28,6 +28,7 @@ import thaw.core.Core;
 import thaw.core.Config;
 import thaw.core.Logger;
 import thaw.core.I18n;
+import thaw.core.ThawThread;
 
 import thaw.fcp.FCPTransferQuery;
 
@@ -401,7 +402,7 @@ public class TrayIcon implements thaw.core.Plugin,
 
 			/* progressBars vector is generated at the same time than the panels */
 			refresher = new ProgressBarRefresher(progressBars);
-			Thread th = new Thread(refresher);
+			Thread th = new ThawThread(refresher, "Trayicon transfer list refresher", this);
 			th.start();
 		}
 	}

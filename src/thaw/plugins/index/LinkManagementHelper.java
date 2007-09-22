@@ -11,6 +11,7 @@ import java.util.Vector;
 import javax.swing.AbstractButton;
 
 import thaw.core.Logger;
+import thaw.core.ThawThread;
 import thaw.plugins.Hsqldb;
 import thaw.fcp.FCPQueueManager;
 
@@ -35,7 +36,7 @@ public class LinkManagementHelper {
 
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == src) {
-				Thread th = new Thread(this);
+				Thread th = new ThawThread(this, "Action replier", this);
 				th.start();
 			}
 		}

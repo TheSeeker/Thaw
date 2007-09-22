@@ -7,6 +7,7 @@ import java.util.Iterator;
 
 import thaw.core.I18n;
 import thaw.core.Config;
+import thaw.core.ThawThread;
 import thaw.plugins.Hsqldb;
 import thaw.core.Logger;
 import thaw.gui.FileChooser;
@@ -214,7 +215,7 @@ public class KSKFileAttachment
 			keysToDownload = new Vector();
 			keysToDownload.add(key);
 
-			Thread th = new Thread(this);
+			Thread th = new ThawThread(this, "File downloading : path asker", this);
 			th.start();
 
 		} else if (action.equals(I18n.getMessage("thaw.plugin.miniFrost.downloadAll"))) {
@@ -231,7 +232,7 @@ public class KSKFileAttachment
 					keysToDownload.add(((KSKFileAttachment)o).getValue("key"));
 			}
 
-			Thread th = new Thread(this);
+			Thread th = new ThawThread(this, "File downloading : path asker", this);
 			th.start();
 
 		}

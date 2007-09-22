@@ -14,6 +14,8 @@ import javax.swing.JButton;
 import thaw.core.I18n;
 import thaw.core.Core;
 import thaw.core.Logger;
+import thaw.core.ThawThread;
+
 
 import thaw.plugins.peerMonitor.*;
 import thaw.fcp.*;
@@ -121,7 +123,9 @@ public class PeerMonitor implements thaw.core.Plugin, Observer, ActionListener
 
 		running = true;
 		isRefSet = false;
-		Thread th = new Thread(new DisplayRefresher());
+		Thread th = new ThawThread(new DisplayRefresher(),
+					   "Peer monitor refresh",
+					   this);
 		th.start();
 
 		if (core.getConfig().getValue("peerMonitorFolded") != null) {

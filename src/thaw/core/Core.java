@@ -314,7 +314,7 @@ public class Core implements Observer {
 
 
 				connectionProcess = new ConnectionProcess(this);
-				Thread th = new Thread(connectionProcess);
+				Thread th = new ThawThread(connectionProcess, "Connection process", this);
 				th.start();
 			}
 
@@ -634,7 +634,8 @@ public class Core implements Observer {
 	public void reconnect() {
 		if (reconnectionManager == null) {
 			reconnectionManager = new ReconnectionManager();
-			final Thread th = new Thread(reconnectionManager);
+			final Thread th = new ThawThread(reconnectionManager,
+							 "Reconnection manager", this);
 			th.start();
 		} else {
 			Logger.warning(this, "Already trying to reconnect !");

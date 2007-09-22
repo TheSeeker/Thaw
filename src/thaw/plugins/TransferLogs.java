@@ -40,6 +40,7 @@ import thaw.gui.FileChooser;
 import thaw.gui.GUIHelper;
 import thaw.core.I18n;
 import thaw.core.Plugin;
+import thaw.core.ThawThread;
 
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
@@ -419,13 +420,13 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 
 
 		if (e.getSource() == importKeys) {
-			Thread th = new Thread(new KeyImporter());
+			Thread th = new ThawThread(new KeyImporter(), "Key importer", this);
 			th.start();
 			return;
 		}
 
 		if (e.getSource() == exportKeys) {
-			Thread th = new Thread(new KeyExporter());
+			Thread th = new ThawThread(new KeyExporter(), "Key exporter", this);
 			th.start();
 			return;
 		}

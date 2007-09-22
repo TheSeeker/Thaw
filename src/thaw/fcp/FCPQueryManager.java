@@ -3,6 +3,7 @@ package thaw.fcp;
 import java.util.Observable;
 
 import thaw.core.Logger;
+import thaw.core.ThawThread;
 
 /**
  * Manage all fcp messages (see corresponding object of each kind of query).
@@ -128,7 +129,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 		}
 
 		public void run() {
-			Thread th = new Thread(runnable);
+			Thread th = new ThawThread(runnable, "FCP message processing", this);
 			th.start();
 
 			for (int i = 0 ; i < TIMEOUT && isRunning(th) ; i += 300) {
@@ -178,7 +179,9 @@ public class FCPQueryManager extends Observable implements Runnable {
 				 * can't multithread if data are waiting
 				 */
 				if (MULTITHREADED && latestMessage.getAmountOfDataWaiting() == 0) {
-					Thread notifierTh = new Thread(new WatchDog(new Notifier(latestMessage)));
+					Thread notifierTh = new ThawThread(new WatchDog(new Notifier(latestMessage)),
+								       "FCP message processing watchdog",
+								       this);
 					notifierTh.start();
 				} else {
 					try {
@@ -206,7 +209,7 @@ public class FCPQueryManager extends Observable implements Runnable {
 	 */
 	public void startListening() {
 		if(connection.isConnected()) {
-			me = new Thread(this);
+			me = new ThawThread(this, "FCP socket listener", this);
 			me.start();
 		} else {
 			Logger.warning(this, "Not connected, so not listening on the socket");

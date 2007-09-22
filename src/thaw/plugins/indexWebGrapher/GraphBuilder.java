@@ -11,6 +11,7 @@ import thaw.plugins.Hsqldb;
 
 import thaw.fcp.FreenetURIHelper;
 import thaw.core.Logger;
+import thaw.core.ThawThread;
 
 
 public class GraphBuilder implements Runnable {
@@ -213,7 +214,7 @@ public class GraphBuilder implements Runnable {
 				refresher.run(false);
 			else {
 				if (refresherTh == null) {
-					refresherTh = new Thread(refresher);
+					refresherTh = new ThawThread(refresher, "Index web display refresh", this);
 					refresherTh.start();
 				}
 			}

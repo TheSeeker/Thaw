@@ -8,6 +8,8 @@ import java.util.Observable;
 import java.util.Observer;
 
 import thaw.core.Logger;
+import thaw.core.ThawThread;
+
 
 public class FCPClientGet extends Observable
 	implements Observer, FCPTransferQuery {
@@ -691,7 +693,9 @@ public class FCPClientGet extends Observable
 		this.notifyObservers();
 
 
-		final Thread fork = new Thread(new UnlockWaiter(this, duplicatedQueryManager.getConnection(), dir));
+		final Thread fork = new ThawThread(new UnlockWaiter(this, duplicatedQueryManager.getConnection(), dir),
+						   "Unlock waiter",
+						   this);
 		fork.start();
 
 		return true;

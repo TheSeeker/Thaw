@@ -27,6 +27,7 @@ import thaw.gui.CheckBox;
 
 import thaw.core.I18n;
 import thaw.core.Logger;
+import thaw.core.ThawThread;
 import thaw.gui.IconBox;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FreenetURIHelper;
@@ -209,7 +210,7 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 			lastLinkAdder.stop();
 
 		lastLinkAdder = new LinkAdder(index);
-		Thread th = new Thread(lastLinkAdder);
+		Thread th = new ThawThread(lastLinkAdder, "Unknown index list computer", this);
 		th.start();
 	}
 

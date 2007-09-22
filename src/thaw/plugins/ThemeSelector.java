@@ -20,6 +20,7 @@ import java.util.Vector;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.Core;
+import thaw.core.ThawThread;
 
 
 public class ThemeSelector implements thaw.core.Plugin, Observer, ListSelectionListener {
@@ -126,7 +127,7 @@ public class ThemeSelector implements thaw.core.Plugin, Observer, ListSelectionL
 		if (theme == null)
 			theme = UIManager.getSystemLookAndFeelClassName();
 
-		Thread th = new Thread(new ThemeSetter(theme));
+		Thread th = new ThawThread(new ThemeSetter(theme), "Theme setter", this);
 		th.start();
 	}
 
@@ -161,7 +162,7 @@ public class ThemeSelector implements thaw.core.Plugin, Observer, ListSelectionL
 		if (e.getFirstIndex() >= 0
 		    && themes.get(e.getFirstIndex()) != null) {
 			String[] str = ((String)themeList.getSelectedValue()).split(" ");
-			Thread th = new Thread(new ThemeSetter(str[0]));
+			Thread th = new ThawThread(new ThemeSetter(str[0]), "Theme setter", this);
 			th.start();
 		}
 	}

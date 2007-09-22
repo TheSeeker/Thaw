@@ -12,6 +12,7 @@ import java.util.Calendar;
 
 import thaw.core.Logger;
 import thaw.core.I18n;
+import thaw.core.ThawThread;
 import thaw.plugins.Hsqldb;
 
 import thaw.plugins.signatures.Identity;
@@ -758,7 +759,7 @@ public class KSKBoard
 
 		notifyChange();
 
-		Thread th = new Thread(this);
+		Thread th = new ThawThread(this, "Board refreshment", this);
 		th.start();
 	}
 

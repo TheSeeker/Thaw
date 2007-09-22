@@ -63,6 +63,7 @@ import thaw.gui.CheckBox;
 import thaw.gui.IconBox;
 import thaw.core.I18n;
 import thaw.core.Logger;
+import thaw.core.ThawThread;
 
 import thaw.plugins.signatures.Identity;
 

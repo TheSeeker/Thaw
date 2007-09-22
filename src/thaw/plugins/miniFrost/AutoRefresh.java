@@ -8,7 +8,7 @@ import thaw.plugins.miniFrost.interfaces.Board;
 
 import thaw.core.Logger;
 import thaw.core.Config;
-
+import thaw.core.ThawThread;
 
 public class AutoRefresh implements Runnable {
 
@@ -41,7 +41,7 @@ public class AutoRefresh implements Runnable {
 		if (config.getValue("miniFrostAutoRefreshInterval") != null)
 			interval = Integer.parseInt(config.getValue("miniFrostAutoRefreshInterval"));
 
-		Thread th = new Thread(this);
+		Thread th = new ThawThread(this, "Board autorefresh", this);
 		th.start();
 	}
 

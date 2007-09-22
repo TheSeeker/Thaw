@@ -48,6 +48,7 @@ import java.text.DateFormat;
 import thaw.gui.IconBox;
 
 import thaw.core.Config;
+import thaw.core.ThawThread;
 import thaw.gui.FileChooser;
 import thaw.core.MainWindow;
 import thaw.fcp.FreenetURIHelper;
@@ -136,7 +137,7 @@ public class IndexManagementHelper {
 
 
 		protected void startThread() {
-			Thread th = new Thread(this);
+			Thread th = new ThawThread(this, "Action replier", this);
 			th.start();
 		}
 
@@ -661,7 +662,7 @@ public class IndexManagementHelper {
 								 autoSort);
 		downloader.setTarget(target);
 
-		Thread th = new Thread(downloader);
+		Thread th = new ThawThread(downloader, "Index downloader");
 		th.start();
 
 		return true;
@@ -846,7 +847,7 @@ public class IndexManagementHelper {
 		IndexUploader uploader = new IndexUploader(queueManager, indexBrowser, null);
 		uploader.setTarget(target);
 
-		Thread th = new Thread(uploader);
+		Thread th = new ThawThread(uploader, "Index inserter");
 		th.start();
 
 		return true;

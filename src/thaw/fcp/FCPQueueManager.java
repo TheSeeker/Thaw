@@ -7,6 +7,7 @@ import java.util.Vector;
 import java.util.Observable;
 
 import thaw.core.Logger;
+import thaw.core.ThawThread;
 
 /**
  * Manage a running and a pending queue of FCPTransferQuery.
@@ -483,7 +484,7 @@ public class FCPQueueManager extends java.util.Observable implements Runnable, j
 	}
 
 	public void startScheduler() {
-		scheduler = new Thread(this);
+		scheduler = new ThawThread(this, "FCP queue scheduler", this);
 		stopThread = false;
 		scheduler.start();
 	}

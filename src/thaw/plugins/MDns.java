@@ -9,6 +9,7 @@ import thaw.plugins.mDns.MDNSDiscoveryPanel.MDNSDiscoveryPanelCallback;
 
 import thaw.core.I18n;
 import thaw.core.Core;
+import thaw.core.ThawThread;
 
 public class MDns implements thaw.core.Plugin, ActionListener, MDNSDiscoveryPanelCallback {
 	private Core core;
@@ -72,7 +73,7 @@ public class MDns implements thaw.core.Plugin, ActionListener, MDNSDiscoveryPane
 				isMDNSPanerShown = true;
 			}
 			core.getConfigWindow().getNodeConfigPanel().getAutodetectButton().setEnabled(false);
-			new Thread(mdnsPanel).start();
+			new ThawThread(mdnsPanel, "MDns host list refresher", this).start();
 
 		}
 	}

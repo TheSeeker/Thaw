@@ -16,6 +16,7 @@ import thaw.core.Core;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.Plugin;
+import thaw.core.ThawThread;
 import thaw.fcp.FCPTransferQuery;
 
 /**
@@ -80,7 +81,7 @@ public class Restarter implements Observer, Runnable, Plugin {
 		core.getConfigWindow().addObserver(this);
 
 		running = true;
-		restarter = new Thread(this);
+		restarter = new ThawThread(this, "Restarter", this);
 		restarter.start();
 
 		return true;

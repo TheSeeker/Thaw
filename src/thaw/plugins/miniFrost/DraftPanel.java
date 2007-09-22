@@ -34,6 +34,7 @@ import java.io.File;
 
 import thaw.core.I18n;
 import thaw.core.Logger;
+import thaw.core.ThawThread;
 
 import thaw.gui.IconBox;
 import thaw.gui.FileChooser;
@@ -389,7 +390,7 @@ public class DraftPanel implements ActionListener, MouseListener {
 
 			Logger.info(this, "BoardAdder");
 
-			(new Thread(new BoardAdder())).start();
+			(new ThawThread(new BoardAdder(), "Board attachment adder", this)).start();
 
 			return;
 
@@ -397,7 +398,7 @@ public class DraftPanel implements ActionListener, MouseListener {
 
 			Logger.info(this, "FileAdder");
 
-			(new Thread(new FileAdder())).start();
+			(new ThawThread(new FileAdder(), "File attachment adder", this)).start();
 
 			return;
 

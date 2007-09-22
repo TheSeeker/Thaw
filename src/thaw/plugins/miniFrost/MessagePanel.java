@@ -39,7 +39,7 @@ import thaw.plugins.miniFrost.interfaces.Draft;
 import thaw.fcp.*;
 import thaw.plugins.IndexBrowser;
 import thaw.plugins.index.IndexManagementHelper;
-
+import thaw.core.ThawThread;
 
 public class MessagePanel
 	implements ActionListener {
@@ -401,7 +401,8 @@ public class MessagePanel
 		Runnable doScroll = new Runnable() {
 				public void run() {
 
-					Thread th = new Thread(new ScrollBarSetter());
+					Thread th = new ThawThread(new ScrollBarSetter(),
+								   "Scrollbar setter", this);
 					th.start();
 				}
 			};

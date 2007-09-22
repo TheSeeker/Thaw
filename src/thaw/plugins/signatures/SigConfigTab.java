@@ -34,6 +34,7 @@ import thaw.core.I18n;
 import thaw.core.ConfigWindow;
 import thaw.core.Config;
 import thaw.core.Logger;
+import thaw.core.ThawThread;
 
 import thaw.gui.IconBox;
 import thaw.gui.FileChooser;
@@ -324,20 +325,20 @@ public class SigConfigTab implements ActionListener, Observer {
 
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == addIdentity) {
-				Thread th = new Thread(new IdentityAdder());
+				Thread th = new ThawThread(new IdentityAdder(), "Identity adder", this);
 				th.start();
 			}
 
 			if (e.getSource() == removeIdentity) {
 				Identity i = (Identity)list.getSelectedValue();
 				if (i != null) {
-					Thread th = new Thread(new IdentityDeleter(i));
+					Thread th = new ThawThread(new IdentityDeleter(i), "Identity deleter", this);
 					th.start();
 				}
 			}
 
 			if (e.getSource() == importIdentity) {
-				Thread th = new Thread(new IdentityImporter());
+				Thread th = new ThawThread(new IdentityImporter(), "Identity importer", this);
 				th.start();
 			}
 
@@ -345,7 +346,7 @@ public class SigConfigTab implements ActionListener, Observer {
 				Identity i = (Identity)list.getSelectedValue();
 
 				if (i != null) {
-					Thread th = new Thread(new IdentityExporter(i));
+					Thread th = new ThawThread(new IdentityExporter(i), "Identity exporter", this);
 					th.start();
 				}
 			}

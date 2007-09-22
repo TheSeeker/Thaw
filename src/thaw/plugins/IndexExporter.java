@@ -13,6 +13,7 @@ import thaw.core.I18n;
 import thaw.gui.IconBox;
 import thaw.core.Logger;
 import thaw.core.Plugin;
+import thaw.core.ThawThread;
 import thaw.plugins.index.DatabaseManager;
 
 public class IndexExporter implements Plugin, ActionListener {
@@ -120,7 +121,7 @@ public class IndexExporter implements Plugin, ActionListener {
 
 
 		Worker k = new Worker(in, content, file);
-		Thread th = new Thread(k);
+		Thread th = new ThawThread(k, "Index exporter", this);
 		th.start();
 
 	}

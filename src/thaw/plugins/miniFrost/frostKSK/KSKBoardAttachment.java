@@ -8,6 +8,7 @@ import thaw.core.I18n;
 import thaw.plugins.Hsqldb;
 import thaw.core.Logger;
 import thaw.fcp.FCPQueueManager;
+import thaw.core.ThawThread;
 
 import thaw.plugins.miniFrost.interfaces.Board;
 

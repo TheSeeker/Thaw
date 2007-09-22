@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 
 import thaw.core.Config;
 import thaw.core.Logger;
+import thaw.core.ThawThread;
 import thaw.fcp.FCPQueueManager;
 import thaw.plugins.Hsqldb;
 
@@ -75,7 +76,7 @@ public class AutoRefresh implements Runnable, java.util.Observer {
 	public void start() {
 		if (!threadRunning) {
 			threadRunning = true;
-			Thread th = new Thread(this);
+			Thread th = new ThawThread(this, "Index tree auto-refresher", this);
 			th.start();
 		}
 	}

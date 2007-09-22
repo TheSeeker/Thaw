@@ -28,6 +28,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import thaw.core.Config;
+import thaw.core.ThawThread;
 import thaw.fcp.FreenetURIHelper;
 import thaw.core.I18n;
 import thaw.gui.IconBox;
@@ -162,7 +163,7 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		updateRightClickMenu(null);
 
 		refresher = new TransferRefresher();
-		Thread th = new Thread(refresher);
+		Thread th = new ThawThread(refresher, "File list refresher", this);
 		th.start();
 	}
 

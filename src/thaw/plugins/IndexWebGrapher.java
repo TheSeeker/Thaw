@@ -18,6 +18,7 @@ import java.util.Random;
 import thaw.core.Core;
 import thaw.core.I18n;
 import thaw.core.Logger;
+import thaw.core.ThawThread;
 
 import thaw.plugins.indexWebGrapher.*;
 
@@ -152,7 +153,7 @@ public class IndexWebGrapher implements thaw.core.Plugin, ActionListener {
 				compute.setText(I18n.getMessage("thaw.plugin.indexWebGrapher.faster"));
 
 				lastBuilder = new GraphBuilder(this, graphPanel, db);
-				Thread th = new Thread(lastBuilder);
+				Thread th = new ThawThread(lastBuilder, "Web graph optimizer", this);
 				th.start();
 			} else {
 				if (!lastBuilder.fasterFlag()) {
