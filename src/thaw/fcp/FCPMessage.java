@@ -65,7 +65,7 @@ public class FCPMessage {
 		if("ProtocolError".equals( getMessageName() ))
 			Logger.warning(this, "PROTOCOL ERROR:\n"+toString());
 		else if (Logger.getLogLevel() <= 3)
-			Logger.info(this, "Message (Node >> Thaw): "+lines[i]);
+			Logger.info(this, "Message (Node >> Thaw): "+getMessageName());
 		else
 			Logger.debug(this, "Message (Node >> Thaw): "+toString());
 
