@@ -182,7 +182,16 @@ public class LogConsole implements Plugin, LogListener, ActionListener, Runnable
 		}
 
 		logArea.setText(res);
-		logAreaScrollPane.getVerticalScrollBar().setValue(logAreaScrollPane.getVerticalScrollBar().getMaximum());
+
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+
+				public void run() {
+					logAreaScrollPane.getVerticalScrollBar().setValue(logAreaScrollPane.getVerticalScrollBar().getMaximum());
+				}
+
+			});
+
+		//logAreaScrollPane.getVerticalScrollBar().setValue(logAreaScrollPane.getVerticalScrollBar().getMaximum());
 	}
 
 
