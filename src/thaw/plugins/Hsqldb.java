@@ -70,6 +70,7 @@ public class Hsqldb extends LibraryPlugin {
 		synchronized(dbLock) {
 			connection.commit();
 			//executeQuery("SHUTDOWN COMPACT");
+			executeQuery("SHUTDOWN");
 			connection.close();
 			//connection = null;
 		}
