@@ -97,7 +97,7 @@ public class MiniFrostPanel implements Observer {
 		else
 			rightSplit.setRightComponent(draftPanel.getPanel());
 
-		mainSplit.validate();
+		//mainSplit.validate();
 
 		draftPanel.redisplayed();
 
@@ -118,7 +118,7 @@ public class MiniFrostPanel implements Observer {
 			rightSplit.setRightComponent(messagePanel.getPanel());
 		}
 
-		mainSplit.validate();
+		//mainSplit.validate();
 
 		messageTreeTable.redisplayed();
 
@@ -137,13 +137,21 @@ public class MiniFrostPanel implements Observer {
 			rightSplit.setRightComponent(messagePanel.getPanel());
 
 		messagePanel.redisplayed();
-		mainSplit.validate();
+		//mainSplit.validate();
 
 		if (messagePanel.getMessage() != null
 		    && !messagePanel.getMessage().isRead()) {
 			messagePanel.getMessage().setRead(true);
-			messageTreeTable.refresh(messagePanel.getMessage());
+
+			int row = messageTreeTable.getRow(messagePanel.getMessage());
+
+			if (row >= 0)
+				messageTreeTable.refresh(row);
+			else
+				messageTreeTable.refresh();
+
 			boardTree.refresh(messagePanel.getMessage().getBoard());
+
 		}
 
 		messagePanel.redisplayed();

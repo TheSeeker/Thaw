@@ -316,6 +316,9 @@ public class MessageTreeTable implements Observer,
 		nextUnread.setMnemonic(KeyEvent.VK_Z);
 	}
 
+	/**
+	 * will revalidate
+	 */
 	public void redisplayed() {
 		/**
 		 * due to a swing bug ?
@@ -328,6 +331,8 @@ public class MessageTreeTable implements Observer,
 
 		nextUnread.setMnemonic(KeyEvent.VK_N);
 		nextUnread.requestFocus();
+
+		panel.revalidate();
 	}
 
 	public JPanel getPanel() {
@@ -859,6 +864,9 @@ public class MessageTreeTable implements Observer,
 
 
 	public int getRow(Message msg) {
+		if (msg == null)
+			return -1;
+
 		return model.getRow(msg);
 	}
 
@@ -1138,8 +1146,6 @@ public class MessageTreeTable implements Observer,
 								  minTrustLevelInt);
 
 		if (newMsg != null) {
-			/** hmm ... I'm starting to wonder if it wouldn't be more efficient to
-			 * search directly in the Vector msgs in the model */
 			int line = getRow(newMsg);
 
 			if (line >= 0) {
@@ -1149,10 +1155,10 @@ public class MessageTreeTable implements Observer,
 				javax.swing.SwingUtilities.invokeLater(new LineSelecter(line));
 			}
 
-			mainPanel.getMessagePanel().setMessage(newMsg);
 			newMsg.setRead(true);
-			refresh();
-			mainPanel.getBoardTree().refresh(targetBoard);
+			mainPanel.getMessagePanel().setMessage(newMsg);
+
+			/* will do all the refresh display required */
 			mainPanel.displayMessage();
 
 			return true;

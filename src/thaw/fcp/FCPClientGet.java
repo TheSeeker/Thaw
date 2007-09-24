@@ -495,7 +495,7 @@ public class FCPClientGet extends Observable
 				return;
 			}
 
-			Logger.notice(this, "==== GET FAILED ===\n"+message.toString());
+			Logger.notice(this, "GetFailed : "+message.getValue("CodeDescription"));
 
 
 			if(!isRunning()) { /* Must be a "GetFailed: cancelled by caller", so we simply ignore */

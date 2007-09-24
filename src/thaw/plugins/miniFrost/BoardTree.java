@@ -341,8 +341,19 @@ public class BoardTree extends Observable
 		draftsState.setText(str);
 	}
 
+	private Board currentlySelected = null;
+
+	/**
+	 * seems to be called twice
+	 */
 	public void valueChanged(javax.swing.event.ListSelectionEvent e) {
+
 		Board b = ((Board)list.getSelectedValue());
+
+		if (b == currentlySelected)
+			return;
+
+		currentlySelected = b;
 
 		for (Iterator it = actions.iterator();
 		     it.hasNext();) {

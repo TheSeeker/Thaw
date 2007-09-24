@@ -272,6 +272,7 @@ public class MessagePanel
 
 
 	public void refresh() {
+
 		subPanels = new Vector();
 
 		/* will imbricate BorderLayout */
