@@ -33,6 +33,7 @@ public class PluginManager {
 		"thaw.plugins.Signatures",
 		"thaw.plugins.IndexBrowser",
 		"thaw.plugins.IndexExporter",
+		"thaw.plugins.IndexTreeRebuilder",
 		"thaw.plugins.MiniFrost",
 		"thaw.plugins.Restarter",
 		"thaw.plugins.TransferLogs",
