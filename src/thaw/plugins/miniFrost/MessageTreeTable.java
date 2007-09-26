@@ -331,8 +331,6 @@ public class MessageTreeTable implements Observer,
 
 		nextUnread.setMnemonic(KeyEvent.VK_N);
 		nextUnread.requestFocus();
-
-		panel.revalidate();
 	}
 
 	public JPanel getPanel() {
@@ -1155,7 +1153,14 @@ public class MessageTreeTable implements Observer,
 				javax.swing.SwingUtilities.invokeLater(new LineSelecter(line));
 			}
 
-			newMsg.setRead(true);
+			if (line >= 0) {
+				model.getMsg(line).setRead(true);
+				model.refresh(line);
+			} else {
+				newMsg.setRead(true);
+				refresh();
+			}
+
 			mainPanel.getMessagePanel().setMessage(newMsg);
 
 			/* will do all the refresh display required */
