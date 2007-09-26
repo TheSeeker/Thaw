@@ -343,8 +343,6 @@ public class MessagePanel
 
 		if (insidePanel != null) {
 			msgsPanel.remove(insidePanel);
-			msgsPanel.revalidate();
-			panel.revalidate();
 		}
 
 		if (iPanel != null) {
@@ -354,9 +352,7 @@ public class MessagePanel
 
 		insidePanel = iPanel;
 
-		panel.revalidate();
 		revalidate();
-		panel.repaint();
 
 		putScrollBarAtBottom();
 	}
