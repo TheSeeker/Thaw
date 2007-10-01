@@ -54,7 +54,6 @@ import thaw.core.Logger;
 import java.util.regex.Pattern;
 
 
-
 public class SubMessagePanel extends JPanel implements ActionListener {
 
 	private JButton upDownButton;
@@ -371,6 +370,7 @@ public class SubMessagePanel extends JPanel implements ActionListener {
 
 		a.setFont(a.getFont().deriveFont((float)13.5));
 		a.setEditable(false);
+		a.setBackground(Color.WHITE);
 
 		StyledDocument doc = parseText(txt);
 
