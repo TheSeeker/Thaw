@@ -137,7 +137,7 @@ public class PluginManager {
 				if (plugin != null)
 					plugin.stop();
 				else
-					Logger.notice(this, "Plugin == null ?!!");
+					Logger.error(this, "Plugin == null !?");
 			} catch(final Exception e) {
 				Logger.error(this, "Unable to stop the plugin "+
 					     "'"+plugin.getClass().getName()+"'"+

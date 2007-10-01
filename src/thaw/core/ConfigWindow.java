@@ -149,6 +149,10 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		return configWin;
 	}
 
+	public PluginConfigPanel getPluginConfigPanel() {
+		return pluginConfigPanel;
+	}
+
 	/**
 	 * Used to update the MDNSPanel
 	 */

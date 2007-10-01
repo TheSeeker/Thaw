@@ -597,7 +597,7 @@ public class MessageTreeTable implements Observer,
 				return checkBoxRenderer;
 			}
 
-			if (value instanceof MessageNode) {
+			if (value instanceof MessageNode && seeTree.isSelected()) {
 				return messageNodeTree.getTableCellRendererComponent(table,
 										     value,
 										     isSelected,
