@@ -51,10 +51,10 @@ public class MiniFrostPanel implements Observer {
 		this.db = db;
 		this.pluginCore = pluginCore;
 
-		gmailView = true;
+		gmailView = (DEFAULT_VIEW == 0);
 
-		if (config.getValue("miniFrostView") == null
-		    || "1".equals(config.getValue("miniFrostView")))
+		if (config.getValue("miniFrostView") != null
+		    && "1".equals(config.getValue("miniFrostView")))
 			gmailView = false;
 
 		/* board tree use some settings provided by the message tree table
