@@ -5,6 +5,8 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JOptionPane;
 
+import java.util.Vector;
+import java.util.Iterator;
 
 import thaw.core.Core;
 import thaw.core.Logger;
@@ -16,6 +18,7 @@ import thaw.gui.IconBox;
 import thaw.gui.WarningWindow;
 
 import thaw.plugins.Hsqldb;
+
 
 import java.sql.*;
 
@@ -37,11 +40,115 @@ public class IndexTreeRebuilder implements Plugin {
 			this.parent = parent;
 		}
 
-		public void rebuild() throws SQLException {
+		private void rebuildIndex(Vector parents, int indexId) throws SQLException {
 
-			/* TODO */
+			PreparedStatement st =
+				db.getConnection().prepareStatement("INSERT INTO indexParents "+
+								    "(indexId, folderId) "+
+								    "VALUES (?, ?)");
+
+			for (Iterator it = parents.iterator();
+			     it.hasNext();) {
+				st.setInt(1, indexId);
+
+				int parent = ((Integer)it.next()).intValue();
+
+				if (parent >= 0)
+					st.setInt(2, parent);
+				else
+					st.setNull(2, Types.INTEGER);
+
+				st.execute();
+			}
 
 		}
+
+
+		/**
+		 * rebuild == rebuild the content of indexParents and folderParents
+		 * @param parents Integer vector (id of the parent folders)
+		 */
+		private void rebuild(Vector parents, int folderId) throws SQLException {
+
+			Vector newParentsVector = new Vector(parents);
+			newParentsVector.add(new Integer(folderId));
+
+			PreparedStatement st;
+
+			/* rebuild all the indexes in the subfolders */
+
+			String where = ((folderId >= 0) ?
+					"WHERE parent = ?" :
+					"WHERE parent IS NULL");
+
+			st = db.getConnection().prepareStatement("SELECT id FROM indexFolders "+where);
+
+			if (folderId >= 0)
+				st.setInt(1, folderId);
+
+			ResultSet set = st.executeQuery();
+
+			while(set.next()) {
+				rebuild(newParentsVector, set.getInt("id"));
+			}
+
+
+			/* rebuild all the indexes in this folder */
+
+			st = db.getConnection().prepareStatement("SELECT id FROM indexes "+where);
+
+			if (folderId >= 0)
+				st.setInt(1, folderId);
+
+			set = st.executeQuery();
+
+			while(set.next()) {
+				rebuildIndex(newParentsVector, set.getInt("id"));
+			}
+
+
+			/* rebuild this folder */
+
+			st = db.getConnection().prepareStatement("INSERT INTO folderParents "+
+								 "(folderId, parentId) "+
+								 "VALUES (?, ?)");
+
+			for (Iterator it = parents.iterator();
+			     it.hasNext();) {
+				if (folderId >= 0)
+					st.setInt(1, folderId);
+				else
+					st.setNull(1, Types.INTEGER);
+
+				int parent = ((Integer)it.next()).intValue();
+
+				if (parent >= 0)
+					st.setInt(2, parent);
+				else
+					st.setNull(2, Types.INTEGER);
+
+				st.execute();
+			}
+
+		}
+
+		/**
+		 * Take the db lock before calling this function !
+		 */
+		public void rebuild() throws SQLException {
+
+			/* quick & dirty, as usual */
+			PreparedStatement st =
+				db.getConnection().prepareStatement("DELETE FROM indexParents");
+			st.execute();
+
+			st = db.getConnection().prepareStatement("DELETE FROM folderParents");
+			st.execute();
+
+			rebuild(new Vector(), -1);
+
+		}
+
 
 		public void run() {
 
@@ -68,7 +175,9 @@ public class IndexTreeRebuilder implements Plugin {
 
 				if (running) {
 					try {
-						rebuild();
+						synchronized(db.dbLock) {
+							rebuild();
+						}
 					} catch(SQLException e) {
 						/* wow, getting creepy */
 						Logger.error(this, "Index tree rebuild failed : "+e.toString());
@@ -78,14 +187,14 @@ public class IndexTreeRebuilder implements Plugin {
 				}
 
 				if (running)
+				new WarningWindow(core,
+						  I18n.getMessage("thaw.plugin.index.treeRebuilder.finished"));
+
+				if (running)
 					core.getPluginManager().runPlugin("thaw.plugins.IndexBrowser");
 
 				db.unregisterChild(parent);
 			}
-
-			if (running)
-				new WarningWindow(core,
-						  I18n.getMessage("thaw.plugin.index.treeRebuilder.finished"));
 
 			core.getPluginManager().stopPlugin("thaw.plugins.IndexTreeRebuilder");
 			core.getPluginManager().unloadPlugin("thaw.plugins.IndexTreeRebuilder");

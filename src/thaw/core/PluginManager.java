@@ -238,6 +238,7 @@ public class PluginManager {
 			}
 
 			plugins.remove(className);
+			core.getConfig().removePlugin(className);
 
 		} catch(final Exception e) {
 			Logger.error(this, "unloadPlugin('"+className+"'): Exception: "+e);

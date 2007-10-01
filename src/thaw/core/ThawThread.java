@@ -83,9 +83,12 @@ public class ThawThread extends Thread {
 			for (Iterator it = threads.iterator();
 			     it.hasNext();) {
 				ThawThread th = (ThawThread)it.next();
-				Logger.info(null,
-					    "'"+th.getName()+"' "+
-					    "(parent: '"+th.getParent().getClass().getName()+"')");
+
+				if (th != null) {
+					Logger.info(null,
+						    "'"+th.getName()+"' "+
+						    "(parent: '"+th.getParent().getClass().getName()+"')");
+				}
 			}
 		}
 	}

@@ -238,7 +238,7 @@ public class Config {
 
 	/**
 	 * Save the configuration.
-	 * 
+	 *
 	 * @return true if success, else false.
 	 */
 	public boolean saveConfig() {
