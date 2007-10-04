@@ -23,7 +23,7 @@ public class FCPClientGet extends Observable
 
 
 	private int maxRetries = -1;
-	private final static int PACKET_SIZE = 1024;
+	private final static int PACKET_SIZE = 65536;
 	private final static int BLOCK_SIZE = 16384;
 
 	private FCPQueueManager queueManager;
