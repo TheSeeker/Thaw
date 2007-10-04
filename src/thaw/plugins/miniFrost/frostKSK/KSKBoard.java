@@ -796,7 +796,7 @@ public class KSKBoard
 	}
 
 
-	protected static int countNewMessages(Hsqldb db, int boardId,
+        protected static int countNewMessages(Hsqldb db, int boardId, String boardName,
 					      boolean unsigned, boolean archived, int minTrustLevel) {
 		int count = -1;
 
@@ -831,7 +831,8 @@ public class KSKBoard
 				count = subRes.getInt(1);
 
 		} catch(SQLException e) {
-			Logger.error(db, "Can't count the number of new message on the board because : "+e.toString());
+			Logger.error(db, "Can't count the number of new message on the board "+
+				     "'"+boardName+"'because : "+e.toString());
 		}
 
 		return count;
@@ -857,7 +858,7 @@ public class KSKBoard
 		this.lastArchivedSetting = archived;
 		this.lastMinTrustLevelSetting = minTrustLevel;
 
-		return countNewMessages(factory.getDb(), id,
+		return countNewMessages(factory.getDb(), id, name,
 					unsigned, archived, minTrustLevel);
 	}
 

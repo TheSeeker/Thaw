@@ -269,6 +269,11 @@ public class KSKMessageParser {
 
 				st.execute();
 
+				Logger.notice(this, "Last inserted message in the db : "+
+					      board + " (" + Integer.toString(boardId) + ") - " +
+					      timestampSql.toString() + " - " +
+					      Integer.toString(rev));
+
 
 				/* we need the id of the message */
 
