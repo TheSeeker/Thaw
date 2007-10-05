@@ -1460,7 +1460,7 @@ public class IndexManagementHelper {
 							alreadyThere = true;
 					}
 
-					if (alreadyThere) {
+					if (!alreadyThere) {
 
 						st.setInt(1, nextId);
 						st.setString(2, FreenetURIHelper.getFilenameFromKey(key));

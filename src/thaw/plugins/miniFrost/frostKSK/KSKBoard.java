@@ -833,6 +833,11 @@ public class KSKBoard
 		} catch(SQLException e) {
 			Logger.error(db, "Can't count the number of new message on the board "+
 				     "'"+boardName+"'because : "+e.toString());
+
+			/* usually, this exception come from hsqldb itself (Out of Memory exception)
+			 * so a stack trace may be interresting here
+			 */
+			e.printStackTrace();
 		}
 
 		return count;
