@@ -798,7 +798,7 @@ public class Index extends Observable implements MutableTreeNode,
 	private boolean rewriteKey = true;
 	private FCPQueueManager queueManager;
 	private boolean fetchingNegRev = false;
-	private boolean mustFetchNegRev = true;
+	private boolean mustFetchNegRev = false;
 	private int specificRev = 0;
 
 	public int downloadFromFreenet(Observer o, IndexTree tree, FCPQueueManager queueManager, int specificRev) {
@@ -807,7 +807,7 @@ public class Index extends Observable implements MutableTreeNode,
 		rewriteKey = true;
 
 		fetchingNegRev = false;
-		mustFetchNegRev = true;
+		mustFetchNegRev = false;
 
 		if (config != null && config.getValue("indexFetchNegative") != null)
 			mustFetchNegRev = Boolean.valueOf(config.getValue("indexFetchNegative")).booleanValue();
@@ -1426,7 +1426,7 @@ public class Index extends Observable implements MutableTreeNode,
 
 
 	public void forceFlagsReload() {
-		Logger.debug(this, "forceReload() => loadData()");
+		Logger.verbose(this, "forceReload() => loadData()");
 		loadData();
 	}
 

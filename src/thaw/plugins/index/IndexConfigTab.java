@@ -123,7 +123,7 @@ public class IndexConfigTab implements ActionListener, Observer {
 		int refreshIntervalInt = AutoRefresh.DEFAULT_INTERVAL;
 		int nmbIndexInt = AutoRefresh.DEFAULT_INDEX_NUMBER;
 		boolean loadOnTheFlyBoolean = false;
-		boolean fetchNegativeBoolean = true;
+		boolean fetchNegativeBoolean = false;
 		boolean fetchCommentsBoolean = true;
 
 		try {
@@ -196,19 +196,23 @@ public class IndexConfigTab implements ActionListener, Observer {
 		}
 
 		if (e.getSource() == editBlackList) {
-			indexBrowser.getBlackList().displayPanel();
-			configWindow.close();
-			return;
+		        indexBrowser.getBlackList().displayPanel();
+		        configWindow.close();
+		        return;
 		}
 
 		if (e.getSource() == fetchComments
 		    || e.getSource() == fetchNegative) {
+
+			/*
 			if (!fetchNegative.isSelected()
 			    && fetchComments.isSelected()) {
 				new WarningWindow(configWindow.getFrame(),
 						  I18n.getMessage("thaw.plugin.index.warningNonNegative"));
 			}
-			return;
+			*/
+
+		        return;
 		}
 	}
 

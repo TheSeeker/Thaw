@@ -631,7 +631,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 				successful = true;
 				finished = true;
 				running = false;
-				
+
 				startupTime = Long.valueOf(msg.getValue("StartupTime")).longValue();
 				completionTime = Long.valueOf(msg.getValue("CompletionTime")).longValue();
 				publicKey = msg.getValue("URI");

@@ -811,12 +811,12 @@ public class KSKBoard
 			unsignedStr = " AND frostKSKMessages.sigId IS NOT NULL AND signatures.trustLevel >= ?";
 
 		String query = "SELECT count(frostKSKMessages.id) "+
-			"FROM frostKSKMessages LEFT JOIN signatures "+
-			" ON frostKSKMessages.sigId = signatures.id "+
-			"WHERE frostKSKMessages.boardId = ? "+
-			"AND frostKSKMessages.read = FALSE"+
-			archivedStr+
-			unsignedStr;
+		    "FROM frostKSKMessages LEFT JOIN signatures "+
+		    " ON frostKSKMessages.sigId = signatures.id "+
+		    "WHERE frostKSKMessages.boardId = ? "+
+		    "AND frostKSKMessages.read = FALSE"+
+		    archivedStr+
+		    unsignedStr;
 
 		try {
 			PreparedStatement subSt;
@@ -833,11 +833,7 @@ public class KSKBoard
 		} catch(SQLException e) {
 			Logger.error(db, "Can't count the number of new message on the board "+
 				     "'"+boardName+"'because : "+e.toString());
-
-			/* usually, this exception come from hsqldb itself (Out of Memory exception)
-			 * so a stack trace may be interresting here
-			 */
-			e.printStackTrace();
+			Logger.error(db, "The query was: "+query);
 		}
 
 		return count;
