@@ -132,7 +132,6 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 	private CommentTab tab;
 	private JComboBox trust;
-	private JButton changeTrust;
 
 	private JButton changeBlackListState;
 
@@ -194,14 +193,12 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 		trust = new JComboBox(trustLevels);
 		trust.setSelectedItem(author.getTrustLevelStr());
-		changeTrust = new JButton(I18n.getMessage("thaw.common.apply"));
-		changeTrust.addActionListener(this);
+		trust.addActionListener(this);
 
 		JPanel trustPanel = new JPanel(new BorderLayout(5, 5));
 
 		if (author.getPrivateKey() == null) {
 			trustPanel.add(trust, BorderLayout.CENTER);
-			trustPanel.add(changeTrust, BorderLayout.EAST);
 		}
 
 		JPanel bottomRightPanel = new JPanel(new BorderLayout(5, 5));
@@ -299,7 +296,7 @@ public class Comment extends Observable implements Observer, ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == changeTrust) {
+		if (e.getSource() == trust) {
 			if (author == null)
 				return;
 			author.setTrustLevel((String)trust.getSelectedItem());
