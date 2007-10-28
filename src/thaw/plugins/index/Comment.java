@@ -143,6 +143,7 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 		blackListed = isBlackListed();
 		boolean hasPrivateKey = (index.getPrivateKey() != null);
+		boolean isPrivateKeyPublished = index.publishPrivateKey();
 
 		/**
 		 * we don't display if it is blacklisted and we don't have the private key
@@ -205,7 +206,8 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 		bottomRightPanel.add(trustPanel, BorderLayout.CENTER);
 
-		if (hasPrivateKey && (author.getPrivateKey() == null || blackListed) ) {
+		if ( (hasPrivateKey && (author.getPrivateKey() == null || blackListed) )
+			&& (!isPrivateKeyPublished) ) {
 			changeBlackListState = new JButton(blackListed ?
 							   I18n.getMessage("thaw.plugin.index.comment.unmoderate") :
 							   I18n.getMessage("thaw.plugin.index.comment.moderate"));
