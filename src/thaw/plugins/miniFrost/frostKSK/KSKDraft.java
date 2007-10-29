@@ -263,7 +263,7 @@ public class KSKDraft
 				if (initialInsertion)
 					return;
 
-				if (fileToInsert == null || !isBoardUpToDateForToday())
+				if (!isBoardUpToDateForToday())
 					return;
 
 				initialInsertion = true;
