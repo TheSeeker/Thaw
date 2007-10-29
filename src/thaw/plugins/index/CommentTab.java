@@ -162,9 +162,7 @@ public class CommentTab implements ActionListener {
 						   +" '"+index.toString()+"'"
 						   +" :");
 			else
-				titleLabel.setText(I18n.getMessage("thaw.plugin.index.comment.commentListTitle")
-						   +" (null)"
-						   +" :");
+				hideTab();
 		}
 
 		for (Iterator it = buttonActions.iterator();

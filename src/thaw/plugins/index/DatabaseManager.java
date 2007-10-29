@@ -502,6 +502,12 @@ public class DatabaseManager {
 			return;
 		}
 
+		try {
+			outputStream.close();
+		} catch(IOException e) {
+			Logger.warning(new DatabaseManager(), "Can't close the export file cleanly");	
+		}
+		
 		Logger.info(new DatabaseManager(), "Export done");
 	}
 
@@ -734,6 +740,11 @@ public class DatabaseManager {
 			}
 		}
 
+		try {
+			input.close();
+		} catch(java.io.IOException e) {
+			Logger.warning(new DatabaseManager(), "Unable to close cleanly the xml file");
+		}
 
 		indexBrowser.getIndexTree().getRoot().forceReload();
 		indexBrowser.getIndexTree().refresh();

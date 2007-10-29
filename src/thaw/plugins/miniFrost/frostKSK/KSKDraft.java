@@ -5,6 +5,7 @@ import java.util.Observable;
 import java.util.Date;
 
 import java.util.Vector;
+import java.util.Iterator;
 
 import thaw.fcp.*;
 import thaw.plugins.signatures.Identity;
@@ -14,6 +15,8 @@ import thaw.plugins.miniFrost.interfaces.Board;
 import thaw.plugins.miniFrost.interfaces.Attachment;
 import thaw.core.I18n;
 
+import thaw.core.ThawRunnable;
+import thaw.core.ThawThread;
 
 public class KSKDraft
 	implements thaw.plugins.miniFrost.interfaces.Draft, Observer {
@@ -147,8 +150,54 @@ public class KSKDraft
 		synchronized(board) {
 			board.addObserver(this);
 			board.refresh(2 /* until yesterday ; just to be sure because of the GMT conversion etc */);
+		}
 
-			KSKMessageParser generator = new KSKMessageParser( ((inReplyTo != null) ?
+		/* first check */
+		update(board, null);
+	}
+
+
+	private class InsertionStarter implements ThawRunnable {
+		private boolean forceStop;
+
+		public InsertionStarter() {
+			forceStop = false;
+		}
+
+		public void run() {
+			boolean ready = false;
+			
+			while(!ready && attachments != null && !forceStop) {
+				ready = true;
+
+				for (Iterator it = attachments.iterator();
+					it.hasNext();) {
+					KSKAttachment a = (KSKAttachment)it.next();
+					if (!a.isReady())
+						ready = false;
+				}
+				
+				if (!ready) {
+					try {
+						Thread.sleep(500);
+					} catch(InterruptedException e) {
+						/* \_o< */
+					}
+				}
+			}
+			
+			if (!forceStop)
+				startInsertion();
+		}
+		
+		public void stop() {
+			forceStop = true;
+		}
+	}
+
+	private void startInsertion() {
+		/* we generate first the XML message */
+		KSKMessageParser generator = new KSKMessageParser( ((inReplyTo != null) ?
 									    inReplyTo.getMsgId() :
 									    null),
 									  nick,
@@ -165,15 +214,9 @@ public class KSKDraft
 									   idLinePos,
 									   idLineLen);
 
-			fileToInsert = generator.generateXML();
-		}
-
-		/* first check */
-		update(board, null);
-	}
-
-
-	private void startInsertion() {
+		fileToInsert = generator.generateXML();
+		
+		
 		waiting = false;
 		posting = true;
 		notifyPlugin();
@@ -227,7 +270,9 @@ public class KSKDraft
 
 				board.deleteObserver(this);
 				revUsed = board.getNextNonDownloadedRev(date, -1);
-				startInsertion();
+				
+				ThawThread th = new ThawThread(new InsertionStarter(), "Frost message insertion starter");
+				th.start();
 			}
 		}
 

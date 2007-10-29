@@ -749,9 +749,6 @@ public class IndexManagementHelper {
 
 			IndexFolder folder = ((IndexFolder)node);
 
-			/**
-			 * to avoid the collision due to the vector in the IndexFolder
-			 */
 			if (folder == null || "".equals(folder.toString())) {
 				return false;
 			}
@@ -1000,6 +997,12 @@ public class IndexManagementHelper {
 			}
 
 			new IndexParser(((Index)getTarget())).generateXML(out);
+			
+			try {
+				out.close();
+			} catch(java.io.IOException e) {
+				Logger.warning(this, "Can't close the export file cleanly");	
+			}
 		}
 	}
 

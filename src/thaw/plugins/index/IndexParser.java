@@ -60,10 +60,14 @@ public class IndexParser {
 
 	public boolean generateXML(String path) {
 		try {
-			generateXML(new FileOutputStream(new File(path)));
+			FileOutputStream stream = new FileOutputStream(new File(path));
+			generateXML(stream);
+			stream.close();
 			return true;
 		} catch(java.io.FileNotFoundException e) {
 			Logger.error(this, "File not found exception ?!");
+		} catch(java.io.IOException e) {
+			Logger.error(this, "IOException while generating the index: "+e.toString());
 		}
 		return false;
 	}
@@ -284,9 +288,13 @@ public class IndexParser {
 	 */
 	public void loadXML(final String filePath, boolean clean) {
 		try {
-			loadXML(new FileInputStream(filePath), clean);
+			FileInputStream stream = new FileInputStream(filePath);
+			loadXML(stream, clean);
+			stream.close();
 		} catch(final java.io.FileNotFoundException e) {
 			Logger.error(this, "Unable to load XML: FileNotFoundException ('"+filePath+"') ! : "+e.toString());
+		} catch(java.io.IOException e) {
+			Logger.error(this, "IOException while parsing the index: "+e.toString());
 		}
 	}
 

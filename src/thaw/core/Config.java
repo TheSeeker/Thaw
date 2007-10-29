@@ -334,6 +334,11 @@ public class Config {
 			return false;
 		}
 
+		try {
+			configOut.getWriter().close();
+		} catch(java.io.IOException e) {
+			Logger.warning(this, "Can't close cleanly the config file");
+		}
 
 		return true;
 	}
