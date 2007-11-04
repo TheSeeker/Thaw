@@ -237,6 +237,7 @@ public class Identity {
 
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to change trust level because: "+e.toString());
+			e.printStackTrace();
 		}
 	}
 
@@ -266,6 +267,7 @@ public class Identity {
 			Logger.error(this,
 				     "SQLException while setting the identity as original : "
 				     +e.toString());
+			e.printStackTrace();
 		}
 	}
 
@@ -360,6 +362,7 @@ public class Identity {
 			}
 		} catch(SQLException e) {
 			Logger.error(new Identity(), "Error while getting identity (2) : "+e.toString());
+			e.printStackTrace();
 		}
 
 		return null;
@@ -394,6 +397,7 @@ public class Identity {
 			}
 		} catch(SQLException e) {
 			Logger.error(new Identity(), "Error while getting identity (1) : "+e.toString());
+			e.printStackTrace();
 		}
 
 		return i;
@@ -471,6 +475,7 @@ public class Identity {
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Exception while adding the identity to the bdd: "+e.toString());
+			e.printStackTrace();
 		}
 	}
 
@@ -488,6 +493,7 @@ public class Identity {
 			}
 		} catch(SQLException e) {
 			Logger.warning(this, "Exception while deleting the identity from the bdd: "+e.toString());
+			e.printStackTrace();
 			new thaw.gui.WarningWindow((thaw.core.MainWindow)null,
 						   I18n.getMessage("thaw.plugin.signature.delete.cant"));
 		}
@@ -515,6 +521,7 @@ public class Identity {
 			return frostCrypt.detachedVerify(text, publicKey, sig);
 		} catch(Exception e) {
 			Logger.notice(this, "signature check failed because: "+e.toString());
+			e.printStackTrace();
 			return false;
 		}
 	}
@@ -572,6 +579,7 @@ public class Identity {
 			}
 		} catch(SQLException e) {
 			Logger.error(new Identity(), "Error while getting identities (1): "+e.toString());
+			e.printStackTrace();
 		}
 
 		return null;
@@ -628,6 +636,7 @@ public class Identity {
 			return frostCrypt.decrypt(input, privateKey);
 		} catch(Exception e) {
 			Logger.info(this, "hm, '"+e.toString()+"' => probably not for us ("+toString()+")");
+			e.printStackTrace();
 		}
 
 		return null;
