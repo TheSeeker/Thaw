@@ -10,17 +10,10 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 import javax.swing.JComboBox;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-
-import java.awt.event.WindowEvent;
-
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -378,6 +371,11 @@ public class SigConfigTab implements ActionListener, Observer {
 
 
 	protected class IdentityModel extends javax.swing.table.AbstractTableModel {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -7614528570324908651L;
+
 		public String[] columnNames = {
 			I18n.getMessage("thaw.plugin.signature.nickname"),
 			I18n.getMessage("thaw.plugin.signature.trustLevel"),
@@ -437,6 +435,10 @@ public class SigConfigTab implements ActionListener, Observer {
 
 	protected class OtherIdentitiesRenderer extends thaw.gui.Table.DefaultRenderer {
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 5405210731032136559L;
 		private IdentityModel model;
 
 		public OtherIdentitiesRenderer(IdentityModel model) {

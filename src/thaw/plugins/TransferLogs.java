@@ -1,26 +1,17 @@
 package thaw.plugins;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JButton;
-import javax.swing.JTable;
-import javax.swing.JScrollPane;
-
-import javax.swing.event.TableModelEvent;
-
 import java.util.Observer;
 import java.util.Observable;
 
 import java.util.Vector;
 import java.util.Iterator;
-
-import java.text.DateFormat;
 
 import java.sql.*;
 
@@ -35,9 +26,7 @@ import java.io.BufferedReader;
 import thaw.core.Core;
 import thaw.core.Logger;
 import thaw.gui.IconBox;
-import thaw.gui.Table;
 import thaw.gui.FileChooser;
-import thaw.gui.GUIHelper;
 import thaw.core.I18n;
 import thaw.core.Plugin;
 import thaw.core.ThawThread;
@@ -257,8 +246,6 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 	public void update(Observable o, Object param) {
 
 		if (o instanceof FCPQueueManager) {
-			FCPQueueManager queue = (FCPQueueManager)o;
-
 			if (param == null)
 				return;
 

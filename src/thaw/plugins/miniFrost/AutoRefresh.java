@@ -1,6 +1,5 @@
 package thaw.plugins.miniFrost;
 
-import java.util.Vector;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -21,13 +20,11 @@ public class AutoRefresh implements ThawRunnable {
 	private int maxBoardRefreshing;
 	private int interval;
 
-	private Config config;
 	private BoardTree boardTree;
 
 	private Random random;
 
 	public AutoRefresh(Config config, BoardTree boardTree) {
-		this.config = config;
 		this.boardTree = boardTree;
 
 		run = true;

@@ -9,6 +9,10 @@ import thaw.fcp.FCPClientGet;
 import thaw.core.I18n;
 
 public class TransferProgressBar extends JProgressBar {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4726613087699822787L;
 	private FCPTransferQuery query;
 	private boolean statusInProgressBar;
 	private boolean withBorder;

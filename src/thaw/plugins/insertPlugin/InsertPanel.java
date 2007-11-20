@@ -79,19 +79,16 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 	private int keyType;
 	private FCPClientPut lastInsert = null;
 
-	private boolean advancedMode = false;
-
 	private Config config; /* keep a ref to the config for the "lastSourceDirectory" option */
 	private MainWindow mainWindow;
 
 	public InsertPanel(final InsertPlugin insertPlugin,
 			   final Config config, final MainWindow mainWindow,
 			   final boolean advancedMode) {
+
 		this.insertPlugin = insertPlugin;
 		this.config = config;
 		this.mainWindow = mainWindow;
-
-		this.advancedMode = advancedMode;
 
 		globalPanel = new JPanel();
 

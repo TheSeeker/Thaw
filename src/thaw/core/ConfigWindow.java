@@ -40,16 +40,12 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 	private Core core;
 
-	private boolean advancedMode = false;
-
 	private boolean needConnectionReset = false;
 
 
 	public ConfigWindow(final Core core) {
 		this.core = core;
 		needConnectionReset = false;
-
-		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
 
 		configWin = new JDialog(core.getMainWindow().getMainFrame(), I18n.getMessage("thaw.config.windowName"));
 
@@ -209,9 +205,6 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 			setChanged();
 			notifyObservers(okButton);
-
-			advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
-
 
 			Reloader reloader = new Reloader(needConnectionReset);
 			Thread reload = new ThawThread(reloader, "Config reloader", this);

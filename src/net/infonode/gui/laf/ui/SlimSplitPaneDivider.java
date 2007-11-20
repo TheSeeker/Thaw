@@ -36,7 +36,12 @@ import java.awt.*;
  * @version $Revision: 1.3 $
  */
 public class SlimSplitPaneDivider extends BasicSplitPaneDivider {
-  public SlimSplitPaneDivider(BasicSplitPaneUI ui) {
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 5007505596211569843L;
+
+public SlimSplitPaneDivider(BasicSplitPaneUI ui) {
     super(ui);
   }
 

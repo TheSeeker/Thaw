@@ -69,9 +69,6 @@ public class KSKMessage
 		this.db = db;
 		downloading = true;
 
-		java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("yyyy.M.d");
-		//formatter.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
-
 		key = board.getDownloadKey(date, rev);
 
 		Logger.info(this, "Fetching : "+key.toString());
@@ -421,7 +418,7 @@ public class KSKMessage
 	/** no caching */
 	public Vector getSubMessages() {
 
-		String content, nick;
+		String content;
 
 		try {
 			Hsqldb db = board.getFactory().getDb();
@@ -430,7 +427,7 @@ public class KSKMessage
 
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT content, nick "+
+				st = db.getConnection().prepareStatement("SELECT content "+
 									 "FROM frostKSKMessages "+
 									 "WHERE id = ? "+
 									 "LIMIT 1");
@@ -442,7 +439,6 @@ public class KSKMessage
 					return null;
 
 				content = set.getString("content");
-				nick = set.getString("nick");
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Error while getting the messages : "+e.toString());

@@ -20,8 +20,6 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.image.BufferedImage;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
 import javax.swing.JComponent;
@@ -733,7 +731,12 @@ public class LiquidTabbedPaneUI extends BasicTabbedPaneUI {
     }
 
     private class LiquidScrollableTabButton extends LiquidScrollButton implements UIResource {
-        public LiquidScrollableTabButton(int direction) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 6492193300750411071L;
+
+		public LiquidScrollableTabButton(int direction) {
             super(direction, 10, true);
             this.setEnabled(false);
         }

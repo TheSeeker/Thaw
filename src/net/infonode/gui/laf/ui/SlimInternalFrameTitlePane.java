@@ -34,7 +34,12 @@ import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
  * @version $Revision: 1.4 $
  */
 public class SlimInternalFrameTitlePane extends BasicInternalFrameTitlePane {
-  public SlimInternalFrameTitlePane(JInternalFrame f) {
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 6355647638966917979L;
+
+public SlimInternalFrameTitlePane(JInternalFrame f) {
     super(f);
     setBorder(new EdgeBorder(UIManager.getColor("controlDkShadow"), false, true, false, false));
   }

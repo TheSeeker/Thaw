@@ -11,7 +11,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.JTable;
-import javax.swing.JProgressBar;
 import javax.swing.JTextArea;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -20,18 +19,12 @@ import java.awt.Component;
 import javax.swing.ImageIcon;
 import java.util.Vector;
 
-import javax.swing.DefaultCellEditor;
-
-import thaw.core.Logger;
 import thaw.core.Config;
-import thaw.core.I18n;
 import thaw.core.ThawThread;
 import thaw.core.ThawRunnable;
 
 import thaw.fcp.FreenetURIHelper;
 import thaw.fcp.FCPTransferQuery;
-import thaw.fcp.FCPClientPut;
-import thaw.fcp.FCPClientGet;
 
 
 /**
@@ -41,6 +34,10 @@ import thaw.fcp.FCPClientGet;
  */
 public class Table extends JTable implements TableColumnModelListener, ThawRunnable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3653294061426267455L;
 	public final static Color COLOR_ONE = Color.WHITE;
 	public final static Color COLOR_TWO = new Color(240, 240, 240);
 
@@ -50,8 +47,6 @@ public class Table extends JTable implements TableColumnModelListener, ThawRunna
 	public final static int TIME_BEFORE_SAVING = 500; /* in ms */
 	private boolean hasChanged = false;
 	private Thread savingThread;
-
-	private boolean statusInProgressBars = true;
 
 	public Table(Config config, String prefix) {
 		super();

@@ -294,7 +294,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 			synchronized(this) {
 				waiting = false;
 
-				if (th.interrupted()) {
+				if (Thread.interrupted()) {
 					c.removeFromWriterQueue();
 					return;
 				}

@@ -2,9 +2,6 @@ package thaw.plugins;
 
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Vector;
-import java.util.HashMap;
-
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -29,10 +26,6 @@ public class PeerMonitor implements thaw.core.Plugin, Observer, ActionListener
 	private Core core;
 
 	private boolean running = false;
-
-	private boolean isRefSet = false;
-
-	private boolean advancedMode;
 
 	private JButton unfoldButton;
 	private boolean folded = false;
@@ -111,8 +104,6 @@ public class PeerMonitor implements thaw.core.Plugin, Observer, ActionListener
 
 		core.getConfig().addListener("advancedMode", this);
 
-		advancedMode = Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue();
-
 		unfoldButton = new JButton("<");
 		unfoldButton.addActionListener(this);
 
@@ -126,7 +117,6 @@ public class PeerMonitor implements thaw.core.Plugin, Observer, ActionListener
 						  BorderLayout.EAST);
 
 		running = true;
-		isRefSet = false;
 		Thread th = new ThawThread(new DisplayRefresher(),
 					   "Peer monitor refresh",
 					   this);

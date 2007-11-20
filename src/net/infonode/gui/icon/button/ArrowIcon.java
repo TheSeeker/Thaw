@@ -28,7 +28,11 @@ import net.infonode.util.Direction;
 import java.awt.*;
 
 public class ArrowIcon extends AbstractButtonIcon {
-  private Direction direction;
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 2077616022753720146L;
+private Direction direction;
 
   public ArrowIcon(Direction direction) {
     this.direction = direction;

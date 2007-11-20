@@ -51,7 +51,12 @@ public class ReleaseInfoDialog {
     JScrollPane scrollPane = new JScrollPane(message,
                                              JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                                              JScrollPane.HORIZONTAL_SCROLLBAR_NEVER) {
-      public Dimension getPreferredSize() {
+      /**
+												 * 
+												 */
+												private static final long serialVersionUID = -5737937093458309890L;
+
+	public Dimension getPreferredSize() {
         Dimension d = message.getPreferredSize();
         int height = (int) d.getHeight();
         return new Dimension((int) d.getWidth() + 50, height < 300 ? (int) super.getPreferredSize().getHeight() : 400);

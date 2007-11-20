@@ -67,7 +67,7 @@ public class PluginConfigPanel implements Observer, ActionListener {
 
 		pluginCheckBoxes = new Vector();
 
-		String[] knownPlugins = pluginManager.getKnownPlugins();
+		String[] knownPlugins = PluginManager.getKnownPlugins();
 
 		for (int i = 0 ; i < knownPlugins.length ; i++) {
 			JCheckBox c = new JCheckBox(knownPlugins[i].replaceFirst("thaw.plugins.", ""));

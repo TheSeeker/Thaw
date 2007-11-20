@@ -5,8 +5,6 @@ import java.util.Observer;
 
 import java.util.Hashtable;
 
-import thaw.core.Logger;
-
 
 public class FCPGetNode extends Observable implements FCPQuery, Observer {
 	public final static String[] refElements = {

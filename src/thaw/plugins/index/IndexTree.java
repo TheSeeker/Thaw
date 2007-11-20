@@ -93,7 +93,6 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 	private DefaultTreeModel treeModel;
 
-	private FCPQueueManager queueManager;
 	private IndexBrowserPanel indexBrowser;
 
 	private ToolbarModifier toolbarModifier;
@@ -115,7 +114,6 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		updatingIndexes = new Vector();
 
-		this.queueManager = queueManager;
 		this.selectionOnly = selectionOnly;
 
 		panel = new JPanel();

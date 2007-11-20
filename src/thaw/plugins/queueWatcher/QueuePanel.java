@@ -1,13 +1,7 @@
 package thaw.plugins.queueWatcher;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.ClipboardOwner;
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -26,12 +20,10 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JProgressBar;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 
 import thaw.core.Core;
@@ -88,7 +80,6 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	private final int MIN_PRIORITY = 6;
 
 	private int[] selectedRows;
-	private Vector queries;
 
 	private boolean insertionQueue = false;
 
@@ -507,7 +498,6 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	public void mouseClicked(final MouseEvent e) {
 		if(e.getButton() == MouseEvent.BUTTON3) {
 			reloadSelections();
-			queries = tableModel.getQueries();
 			rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
 		}
 

@@ -21,8 +21,6 @@ package frost.util;
 import java.io.*;
 import java.util.*;
 import thaw.core.Logger;
-import java.util.logging.*;
-
 import javax.xml.parsers.*;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.dom.DOMSource;
@@ -30,9 +28,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.OutputKeys;
 
-
-
-import org.apache.xml.serialize.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
@@ -175,13 +170,6 @@ public class XMLTools {
 		    streamResult = new StreamResult(out);
 
 
-		    final DocumentBuilderFactory xmlFactory = DocumentBuilderFactory.newInstance();
-		    DocumentBuilder xmlBuilder;
-
-		    xmlBuilder = xmlFactory.newDocumentBuilder();
-
-		    final DOMImplementation impl = xmlBuilder.getDOMImplementation();
-
 		    /* Serialization */
 		    final DOMSource domSource = new DOMSource(doc);
 		    final TransformerFactory transformFactory = TransformerFactory.newInstance();
@@ -202,10 +190,8 @@ public class XMLTools {
 		    e.printStackTrace();
 	    } catch(java.io.FileNotFoundException e) {
 		    Logger.notice(e, "File not found exception ?!");
-	    } catch(final javax.xml.parsers.ParserConfigurationException e) {
-		    Logger.notice(e, "Unable to generate XML because : "+e.toString());
 	    }
-
+    
 	    return false;
     }
 

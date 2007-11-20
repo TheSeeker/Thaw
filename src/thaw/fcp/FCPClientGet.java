@@ -647,7 +647,7 @@ public class FCPClientGet extends Observable
 			synchronized(this) {
 				waiting = false;
 
-				if (th.interrupted()) {
+				if (Thread.interrupted()) {
 					c.removeFromWriterQueue();
 					return;
 				}

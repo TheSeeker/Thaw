@@ -26,9 +26,6 @@ public class MiniFrost implements thaw.core.Plugin {
 
 	private RegexpBlacklist regexpBlacklist;
 
-	private boolean firstStart;
-
-
 	public final static BoardFactory[] factories =
 		new BoardFactory[] {
 			new thaw.plugins.miniFrost.frostKSK.KSKBoardFactory(),

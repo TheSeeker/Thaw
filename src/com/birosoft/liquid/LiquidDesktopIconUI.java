@@ -14,8 +14,6 @@ import javax.swing.event.*;
 import javax.swing.border.*;
 import javax.swing.plaf.*;
 import java.beans.*;
-import java.util.EventListener;
-import java.io.Serializable;
 import javax.swing.plaf.basic.BasicDesktopIconUI;
 
 

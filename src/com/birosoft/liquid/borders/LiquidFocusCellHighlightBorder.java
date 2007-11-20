@@ -24,7 +24,11 @@ import javax.swing.plaf.UIResource;
  */
 public class LiquidFocusCellHighlightBorder extends LineBorder implements UIResource
 {
-    final static float dash1[] = {1.0f};
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -8331596271951558914L;
+	final static float dash1[] = {1.0f};
     final static BasicStroke dashed = new BasicStroke(1.0f,
                                                     BasicStroke.CAP_BUTT,
                                                     BasicStroke.JOIN_MITER,

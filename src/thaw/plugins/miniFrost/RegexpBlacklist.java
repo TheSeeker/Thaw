@@ -9,7 +9,6 @@ import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.JButton;
-import javax.swing.JScrollPane;
 import javax.swing.JOptionPane;
 
 import java.util.Observer;

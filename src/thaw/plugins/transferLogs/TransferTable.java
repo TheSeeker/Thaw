@@ -2,7 +2,6 @@ package thaw.plugins.transferLogs;
 
 import javax.swing.event.TableModelEvent;
 
-import java.awt.GridLayout;
 import java.awt.BorderLayout;
 
 import java.awt.event.ActionListener;
@@ -15,11 +14,8 @@ import javax.swing.JComboBox;
 import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
-import javax.swing.JTextField;
 import javax.swing.JTextArea;
 import javax.swing.ImageIcon;
-import javax.swing.JComboBox;
-
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
 
@@ -29,8 +25,6 @@ import java.text.DateFormat;
 
 import java.awt.Component;
 import java.awt.Color;
-import javax.swing.JComponent;
-
 import java.sql.*;
 
 import java.awt.event.MouseEvent;
@@ -92,7 +86,6 @@ public class TransferTable implements MouseListener {
 		rightClickMenu = new JPopupMenu();
 		rightClickActions = new Vector();
 
-		JButton button;
 		JMenuItem item;
 
 		item = new JMenuItem(I18n.getMessage("thaw.common.remove"), IconBox.minDelete);
@@ -131,6 +124,10 @@ public class TransferTable implements MouseListener {
 
 
 	protected class TransferTableRenderer extends DefaultTableCellRenderer {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 4227879912938245537L;
 		private Color softGray;
 		private Color lightBlue;
 
@@ -216,6 +213,11 @@ public class TransferTable implements MouseListener {
 
 	protected class TransferTableModel
 		extends javax.swing.table.AbstractTableModel {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -4078889047070552383L;
 
 		private int page;
 

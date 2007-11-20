@@ -6,8 +6,6 @@ import java.util.Iterator;
 import java.awt.Graphics;
 import java.awt.Color;
 
-import thaw.core.Logger;
-
 
 public class Node implements Comparable {
 
@@ -17,7 +15,6 @@ public class Node implements Comparable {
 	private int indexId;
 	private String indexName;
 	private String indexKey;
-	private GraphPanel graphPanel;
 
 	private Vector linkTo;
 	private Vector linkedFrom;
@@ -34,7 +31,6 @@ public class Node implements Comparable {
 		this.indexId = indexId;
 		this.indexName = indexName;
 		this.indexKey = indexKey;
-		this.graphPanel = graphPanel;
 
 		linkTo = new Vector();
 		linkedFrom = new Vector();

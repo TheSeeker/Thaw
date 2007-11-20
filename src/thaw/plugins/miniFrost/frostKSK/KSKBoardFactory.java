@@ -17,8 +17,6 @@ import thaw.plugins.Hsqldb;
 import thaw.plugins.MiniFrost;
 import thaw.plugins.signatures.Identity;
 
-import thaw.plugins.miniFrost.interfaces.Board;
-
 
 public class KSKBoardFactory
 	implements thaw.plugins.miniFrost.interfaces.BoardFactory {

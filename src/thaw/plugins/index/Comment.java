@@ -1,7 +1,6 @@
 package thaw.plugins.index;
 
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -20,10 +19,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.BorderFactory;
-import javax.swing.JScrollPane;
 import javax.swing.JOptionPane;
 
-import java.awt.GridLayout;
 import java.awt.BorderLayout;
 
 import java.awt.event.ActionListener;
@@ -42,23 +39,15 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 
 /* SAX */
 
 import org.xml.sax.*;
-import org.xml.sax.helpers.LocatorImpl;
-
-import java.io.IOException;
-
-import org.xml.sax.helpers.XMLReaderFactory;
 import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 
 
@@ -470,7 +459,6 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 
 	protected class CommentHandler extends DefaultHandler {
-		private Locator locator = null;
 
 		public CommentHandler() {
 
@@ -480,7 +468,7 @@ public class Comment extends Observable implements Observer, ActionListener {
 		 * @see org.xml.sax.ContentHandler#setDocumentLocator(org.xml.sax.Locator)
 		 */
 		public void setDocumentLocator(Locator value) {
-			locator =  value;
+
 		}
 
 

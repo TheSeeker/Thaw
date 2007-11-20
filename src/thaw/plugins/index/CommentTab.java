@@ -2,19 +2,13 @@ package thaw.plugins.index;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
-import javax.swing.JTextArea;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
-import javax.swing.BorderFactory;
-
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-
-import java.sql.*; /* I'm lazy */
-
 
 import java.util.Vector;
 import java.util.Iterator;
@@ -25,8 +19,6 @@ import thaw.core.Config;
 import thaw.fcp.FCPQueueManager;
 import thaw.gui.IconBox;
 import thaw.core.I18n;
-
-import thaw.plugins.Hsqldb;
 
 public class CommentTab implements ActionListener {
 	private boolean visible;

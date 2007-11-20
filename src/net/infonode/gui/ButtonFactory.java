@@ -217,7 +217,12 @@ public class ButtonFactory {
   public static final JButton createFlatHighlightButton(Icon icon, String tooltipText, int padding,
                                                         ActionListener action) {
     final JButton b = new JButton(icon) {
-      public void setUI(ButtonUI ui) {
+      /**
+		 * 
+		 */
+		private static final long serialVersionUID = -4343274754121281653L;
+
+	public void setUI(ButtonUI ui) {
         super.setUI(new FlatIconButtonUI());
       }
     };
@@ -269,7 +274,12 @@ public class ButtonFactory {
 
   public static final JButton createFlatIconHoverButton(Icon icon, Icon hovered, Icon pressed) {
     final JButton b = new JButton(icon) {
-      public void setUI(ButtonUI ui) {
+      /**
+		 * 
+		 */
+		private static final long serialVersionUID = -4004531041608648L;
+
+	public void setUI(ButtonUI ui) {
         super.setUI(new FlatIconButtonUI());
       }
     };

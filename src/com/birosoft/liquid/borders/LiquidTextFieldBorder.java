@@ -22,7 +22,11 @@ import javax.swing.plaf.UIResource;
  * The border for a Textfield.
  */
 public class LiquidTextFieldBorder extends AbstractBorder implements UIResource {
-    private static final Insets defaultInsets = new Insets(3, 5, 3, 5);
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -1128841407808527L;
+	private static final Insets defaultInsets = new Insets(3, 5, 3, 5);
     static Skin skin;
     private Insets insets;
 

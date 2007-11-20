@@ -12,7 +12,6 @@ import java.awt.event.WindowEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-import javax.swing.JProgressBar;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JDialog;

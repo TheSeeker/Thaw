@@ -49,7 +49,11 @@ import javax.swing.plaf.*;
  * @author Miroslav Lazarević
  */
 class LiquidTitlePane extends JComponent {
-    private static final Border handyEmptyBorder = new EmptyBorder(0, 0, 0, 0);
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -1424746354108457746L;
+	private static final Border handyEmptyBorder = new EmptyBorder(0, 0, 0, 0);
     private static final int IMAGE_HEIGHT = 16;
     private static final int IMAGE_WIDTH = 16;
     private static LiquidWindowButtonUI iconButtonUI;
@@ -1054,7 +1058,12 @@ class LiquidTitlePane extends JComponent {
      * Actions used to <code>close</code> the <code>Window</code>.
      */
     private class CloseAction extends AbstractAction {
-        public CloseAction() {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1650870353459807265L;
+
+		public CloseAction() {
             super("Close");
         }
 
@@ -1067,7 +1076,12 @@ class LiquidTitlePane extends JComponent {
      * Actions used to <code>iconfiy</code> the <code>Frame</code>.
      */
     private class IconifyAction extends AbstractAction {
-        public IconifyAction() {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -1568241802569872804L;
+
+		public IconifyAction() {
             super("Minimize");
         }
 
@@ -1080,7 +1094,12 @@ class LiquidTitlePane extends JComponent {
      * Actions used to <code>restore</code> the <code>Frame</code>.
      */
     private class RestoreAction extends AbstractAction {
-        public RestoreAction() {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -8278229416441409721L;
+
+		public RestoreAction() {
             super("Restore");
         }
 
@@ -1093,7 +1112,12 @@ class LiquidTitlePane extends JComponent {
      * Actions used to <code>restore</code> the <code>Frame</code>.
      */
     private class MaximizeAction extends AbstractAction {
-        public MaximizeAction() {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -483155396622664537L;
+
+		public MaximizeAction() {
             super("Maximize");
         }
 
@@ -1103,7 +1127,12 @@ class LiquidTitlePane extends JComponent {
     }
 
     private class MenuAction extends AbstractAction {
-        public MenuAction() {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -9191861525972000095L;
+
+		public MenuAction() {
             super("Menu");
         }
 
@@ -1118,7 +1147,11 @@ class LiquidTitlePane extends JComponent {
      * <code>JRootPane</code>.
      */
     private class SystemMenuBar extends JMenuBar implements MouseListener {
-        private JPopupMenu systemMenu;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 3248211542099676445L;
+		private JPopupMenu systemMenu;
         private boolean isShowed = false;
 
         public SystemMenuBar(JPopupMenu menu) {

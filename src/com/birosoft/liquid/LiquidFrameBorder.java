@@ -23,7 +23,11 @@ import javax.swing.plaf.UIResource;
  * @author Miroslav Lazarević
  */
 public class LiquidFrameBorder extends AbstractBorder implements UIResource {
-    private static LiquidFrameBorder onlyInstance;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 8570979060763637626L;
+	private static LiquidFrameBorder onlyInstance;
 //    private static Robot robot;
 //    private static boolean robotsSupported = true;
     private static final Insets insets = new Insets(0, 4, 4, 4);

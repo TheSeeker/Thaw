@@ -30,8 +30,6 @@ public class StatusBar implements ThawRunnable, Plugin, LogListener {
 
 	private boolean dropNextRefresh = false;
 
-	private Object barLock = new Object();
-
 	public final static Color ORANGE = new Color(240, 160, 0);
 
 	public boolean run(final Core core) {
@@ -153,9 +151,6 @@ public class StatusBar implements ThawRunnable, Plugin, LogListener {
 				+ StatusBar.SEPARATOR + I18n.getMessage("thaw.plugin.statistics.globalProgression") + " "
 				+ Integer.toString(progressDone) + "/" + Integer.toString(progressTotal);
 		}
-
-
-		int nmbThread = Thread.activeCount();
 
 
 		status = status

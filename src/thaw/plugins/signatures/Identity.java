@@ -11,14 +11,7 @@ import java.util.List;
 import frost.crypt.FrostCrypt;
 import frost.util.XMLTools;
 import org.w3c.dom.*;
-import org.xml.sax.*;
-
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-
-
-import thaw.core.Core;
 import thaw.core.Logger;
 import thaw.core.I18n;
 import thaw.plugins.Hsqldb;

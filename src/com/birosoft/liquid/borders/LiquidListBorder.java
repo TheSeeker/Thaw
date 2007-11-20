@@ -24,7 +24,12 @@ import javax.swing.plaf.UIResource;
 public class LiquidListBorder extends AbstractBorder implements UIResource
 {
     
-    private static final Insets defaultInsets = new Insets(1, 1, 1, 1);
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 8984901426646378939L;
+
+	private static final Insets defaultInsets = new Insets(1, 1, 1, 1);
     
     private Insets insets;
     

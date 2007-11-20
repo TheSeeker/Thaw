@@ -1,19 +1,9 @@
 package thaw.plugins.miniFrost;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JDialog;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-
-import java.awt.event.WindowEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.AbstractButton;
-import javax.swing.JDialog;
 
 import java.util.Vector;
 import java.util.Iterator;
@@ -101,16 +91,11 @@ public class BoardManagementHelper {
 
 	public static class BoardAdder extends BasicBoardAction {
 		private MiniFrostPanel mainPanel;
-		private AbstractButton source;
-
-		private Board target;
-
 
 		public BoardAdder(MiniFrostPanel mainPanel, AbstractButton source) {
 			super();
 
 			this.mainPanel = mainPanel;
-			this.source = source;
 
 			if (source != null)
 				source.addActionListener(this);
@@ -118,7 +103,7 @@ public class BoardManagementHelper {
 
 
 		public void setTarget(Board board) {
-			this.target = board;
+
 		}
 
 		public void apply() {

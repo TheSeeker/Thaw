@@ -1,8 +1,6 @@
 package thaw.plugins.index;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-
 import javax.swing.JScrollPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -16,8 +14,6 @@ import java.awt.event.ActionEvent;
 import java.sql.*; /* I'm lazy */
 
 import java.util.Vector;
-import java.util.Iterator;
-
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.Core;

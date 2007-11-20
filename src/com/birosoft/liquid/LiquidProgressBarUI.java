@@ -17,21 +17,13 @@ import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Paint;
 import java.awt.Rectangle;
-import java.awt.TexturePaint;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
 import javax.swing.JComponent;
 import javax.swing.JProgressBar;
-import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicProgressBarUI;
 
 import com.birosoft.liquid.skin.Skin;
-import com.birosoft.liquid.skin.SkinImageCache;
 
 /**
  * This class represents the UI delegate for the JProgressBar component.

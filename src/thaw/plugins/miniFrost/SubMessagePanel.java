@@ -1,20 +1,13 @@
 package thaw.plugins.miniFrost;
 
 import javax.swing.JButton;
-import javax.swing.JEditorPane;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.JLabel;
-import javax.swing.JEditorPane;
 import javax.swing.JTextPane;
-import javax.swing.JScrollPane;
-
 import javax.swing.BorderFactory;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-
 import java.awt.Rectangle;
 import java.awt.Dimension;
 
@@ -25,8 +18,6 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyledDocument;
-import javax.swing.text.Document;
-
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.AttributeSet;
@@ -36,26 +27,24 @@ import thaw.plugins.miniFrost.interfaces.Author;
 import thaw.plugins.miniFrost.interfaces.SubMessage;
 
 import javax.swing.JComponent;
-import javax.swing.AbstractAction;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.event.MouseInputAdapter;
 
 import java.awt.Cursor;
 import java.util.Vector;
-import java.util.Iterator;
-
-
 import thaw.gui.IconBox;
 import thaw.plugins.signatures.Identity;
 import thaw.core.I18n;
 import thaw.core.Logger;
 
-import java.util.regex.Pattern;
-
 
 public class SubMessagePanel extends JPanel implements ActionListener {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6169263783555144522L;
 	private JButton upDownButton;
 	private boolean retracted;
 	private SubMessage msg;
@@ -107,6 +96,10 @@ public class SubMessagePanel extends JPanel implements ActionListener {
 
 
 	protected class AuthorPanel extends JPanel implements ActionListener {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -2716998589145595737L;
 		private JComboBox box = null;
 		private JLabel nick;
 		private Author author;
@@ -160,6 +153,12 @@ public class SubMessagePanel extends JPanel implements ActionListener {
 
 
 	private class TextPanel extends JTextPane {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 560297574100382846L;
+
 
 		public TextPanel() {
 			super();

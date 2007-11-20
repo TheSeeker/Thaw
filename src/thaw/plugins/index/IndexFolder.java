@@ -15,9 +15,6 @@ import javax.swing.tree.TreeNode;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import thaw.core.Logger;
 import thaw.core.Config;
 import thaw.fcp.FCPQueueManager;
@@ -455,7 +452,6 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 		synchronized(db.dbLock) {
 			try {
 				PreparedStatement st;
-				int id;
 
 				st = db.getConnection().prepareStatement("SELECT positionInTree FROM "+
 									 ((n instanceof Index) ? "indexes" : "indexFolders")+

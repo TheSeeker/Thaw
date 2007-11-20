@@ -4,8 +4,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.sql.PreparedStatement;
-
 import thaw.core.Core;
 import thaw.core.I18n;
 import thaw.core.LibraryPlugin;

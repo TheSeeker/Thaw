@@ -13,7 +13,6 @@ import javax.swing.AbstractButton;
 import thaw.core.Logger;
 import thaw.core.ThawThread;
 import thaw.core.ThawRunnable;
-import thaw.plugins.Hsqldb;
 import thaw.fcp.FCPQueueManager;
 
 

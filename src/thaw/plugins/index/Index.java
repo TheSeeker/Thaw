@@ -1,9 +1,6 @@
 package thaw.plugins.index;
 
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -41,7 +38,6 @@ import thaw.fcp.FCPTransferQuery;
 import thaw.fcp.FCPGenerateSSK;
 
 import thaw.plugins.Hsqldb;
-import thaw.plugins.insertPlugin.DefaultMIMETypes;
 import thaw.plugins.signatures.Identity;
 import thaw.plugins.index.File;
 
@@ -799,7 +795,6 @@ public class Index extends Observable implements MutableTreeNode,
 	private FCPQueueManager queueManager;
 	private boolean fetchingNegRev = false;
 	private boolean mustFetchNegRev = false;
-	private int specificRev = 0;
 
 	public int downloadFromFreenet(Observer o, IndexTree tree, FCPQueueManager queueManager, int specificRev) {
 		this.queueManager = queueManager;
@@ -824,9 +819,6 @@ public class Index extends Observable implements MutableTreeNode,
 	protected boolean realDownloadFromFreenet(int specificRev) {
 		FCPClientGet clientGet;
 		String publicKey;
-
-		this.queueManager = queueManager;
-		this.specificRev = specificRev;
 
 		int rev = getRevision();
 
@@ -910,12 +902,19 @@ public class Index extends Observable implements MutableTreeNode,
 			return;
 
 		String announcement = I18n.getMessage("thaw.plugin.index.newRev");
-		announcement = announcement.replaceAll("X", toString(false));
-		announcement = announcement.replaceAll("Y", Integer.toString(getRevision()));
+		
+		try {
+			announcement = announcement.replaceAll("X", toString(false));
+			announcement = announcement.replaceAll("Y", Integer.toString(getRevision()));
 
-		thaw.plugins.TrayIcon.popMessage(indexTree.getIndexBrowserPanel().getCore().getPluginManager(),
+			thaw.plugins.TrayIcon.popMessage(indexTree.getIndexBrowserPanel().getCore().getPluginManager(),
 						 I18n.getMessage("thaw.plugin.index.browser"),
 						 announcement);
+		} catch (Exception e) {
+			/* it can happen with some index name (probably because
+			   of characters like '$' */
+			Logger.notice(this, "Can't popup to notify an index update because : "+e.toString());
+		}
 	}
 
 
@@ -1687,9 +1686,7 @@ public class Index extends Observable implements MutableTreeNode,
 
 
 	public boolean postComment(FCPQueueManager queueManager, MainWindow mainWindow, Identity author, String msg) {
-		String privKey;
-
-		if ((privKey = getCommentPrivateKey()) == null) {
+		if (getCommentPrivateKey() == null) {
 			return false;
 		}
 
@@ -1700,9 +1697,7 @@ public class Index extends Observable implements MutableTreeNode,
 
 
 	public void loadComments(FCPQueueManager queueManager) {
-		String pubKey;
-
-		if ((pubKey = getCommentPublicKey()) == null)
+		if (getCommentPublicKey() == null)
 			return;
 
 		if (queueManager == null) {

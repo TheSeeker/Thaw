@@ -12,10 +12,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JTextField;
-import javax.swing.JTextField;
 import javax.swing.JComboBox;
 
-import java.util.Vector;
 import java.util.Locale;
 
 import thaw.gui.FileChooser;

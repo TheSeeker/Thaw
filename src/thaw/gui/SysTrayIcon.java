@@ -1,6 +1,5 @@
 package thaw.gui;
 
-import java.lang.reflect.Method;
 import javax.swing.ImageIcon;
 import java.awt.Image;
 import java.awt.event.MouseListener;

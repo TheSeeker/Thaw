@@ -47,6 +47,12 @@ public class XMLParseException
 {
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = -4142559579553061221L;
+
+
+	/**
      * Indicates that no line number has been associated with this exception.
      */
     public static final int NO_LINE = -1;

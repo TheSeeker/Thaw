@@ -11,8 +11,6 @@ package com.birosoft.liquid;
 
 import com.birosoft.liquid.skin.Skin;
 import com.birosoft.liquid.skin.SkinToggleButtonIndexModel;
-import com.birosoft.liquid.util.OpaquePropertyChangeListener;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;

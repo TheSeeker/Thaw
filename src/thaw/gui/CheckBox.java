@@ -8,6 +8,11 @@ import thaw.core.Config;
 
 
 public class CheckBox extends JCheckBox implements ActionListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7815009734483702831L;
+
 	public final static String PREFIX = "checkbox_";
 
 	private Config config;

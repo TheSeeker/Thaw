@@ -13,6 +13,10 @@ import thaw.core.Logger;
 
 
 public class TabbedPane extends JTabbedPane implements ChangeListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8453293567552928389L;
 	private Vector tabNames;
 
 	public TabbedPane() {

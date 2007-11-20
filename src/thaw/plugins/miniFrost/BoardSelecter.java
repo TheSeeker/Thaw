@@ -2,7 +2,6 @@ package thaw.plugins.miniFrost;
 
 import javax.swing.JDialog;
 import javax.swing.JPanel;
-import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JScrollPane;

@@ -19,17 +19,11 @@
 
 package frost.util;
 
-import java.awt.*;
 import java.io.*;
 import java.nio.channels.*;
 import java.util.*;
 import java.util.List;
-import java.util.logging.*;
 import java.util.zip.*;
-
-import javax.swing.*;
-
-import frost.*;
 
 import thaw.core.Logger;
 

@@ -25,7 +25,11 @@ import com.birosoft.liquid.skin.SkinSimpleButtonIndexModel;
  */
 public class LiquidScrollButton extends BasicArrowButton
 {
-    private boolean isFreeStanding = false;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -7314095928302353987L;
+	private boolean isFreeStanding = false;
     private int buttonWidth;
     
     /** one of the four skins for the button */

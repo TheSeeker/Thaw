@@ -12,9 +12,6 @@ import java.util.Vector;
 import java.util.Iterator;
 
 
-import thaw.gui.GUIHelper;
-
-
 public class TransferManagementHelper {
 
 	public interface TransferAction extends ActionListener {

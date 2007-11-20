@@ -1,8 +1,5 @@
 package thaw.plugins.miniFrost.interfaces;
 
-import thaw.plugins.miniFrost.BoardFolder;
-
-import javax.swing.tree.MutableTreeNode;
 import java.util.Vector;
 
 public interface Board extends Comparable {

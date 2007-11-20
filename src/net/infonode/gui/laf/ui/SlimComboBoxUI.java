@@ -47,7 +47,12 @@ public class SlimComboBoxUI extends MetalComboBoxUI {
 
   protected ListCellRenderer createRenderer() {
     return new BasicComboBoxRenderer() {
-      public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
+      /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1329194194512577549L;
+
+	public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
                                                     boolean cellHasFocus) {
         JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         label.setBorder(index == -1 ? noFocusBorder : cellHasFocus ? FOCUS_BORDER : NORMAL_BORDER);

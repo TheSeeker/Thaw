@@ -28,15 +28,11 @@ import org.w3c.dom.Element;
 /* SAX */
 
 import org.xml.sax.*;
-import org.xml.sax.helpers.LocatorImpl;
-
 import java.io.IOException;
 
-import org.xml.sax.helpers.XMLReaderFactory;
 import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 
 
@@ -441,7 +437,7 @@ public class DatabaseManager {
 
 
 	public static void exportDatabase(java.io.File dest, Hsqldb db, IndexTree indexTree, boolean withContent) {
-		int nmbIndexes = getNmbIndexes(db);
+		//int nmbIndexes = getNmbIndexes(db);
 
 
 		Logger.info(new DatabaseManager(), "Generating export ...");
@@ -514,8 +510,6 @@ public class DatabaseManager {
 
 
 	protected static class DatabaseHandler extends DefaultHandler {
-		private Locator locator = null;
-
 		private Hsqldb db;
 		private IndexBrowserPanel indexBrowser;
 
@@ -534,7 +528,7 @@ public class DatabaseManager {
 		 * @see org.xml.sax.ContentHandler#setDocumentLocator(org.xml.sax.Locator)
 		 */
 		public void setDocumentLocator(Locator value) {
-			locator =  value;
+
 		}
 
 		/**
@@ -679,8 +673,6 @@ public class DatabaseManager {
 		 * @see org.xml.sax.ContentHandler#characters(char[], int, int)
 		 */
 		public void characters(char[] ch, int start, int end) throws SAXException {
-			String txt = new String(ch, start, end);
-
 			if (indexHandler != null)
 				indexHandler.characters(ch, start, end);
 

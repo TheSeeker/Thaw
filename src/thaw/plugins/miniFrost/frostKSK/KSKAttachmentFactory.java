@@ -1,16 +1,11 @@
 package thaw.plugins.miniFrost.frostKSK;
 
-import java.sql.*;
-
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
-
 import java.util.Vector;
 
 import frost.util.XMLTools;
 
 import thaw.plugins.Hsqldb;
-import thaw.plugins.miniFrost.interfaces.Attachment;
 import thaw.core.Logger;
 
 

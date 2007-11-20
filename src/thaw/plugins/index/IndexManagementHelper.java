@@ -19,22 +19,17 @@ import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
-import java.util.Calendar;
-
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JComboBox;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -57,7 +52,6 @@ import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.fcp.FCPGenerateSSK;
 import thaw.fcp.FCPQueueManager;
-import thaw.fcp.FCPTransferQuery;
 import thaw.plugins.Hsqldb;
 import thaw.plugins.signatures.Identity;
 import thaw.gui.WarningWindow;
@@ -340,10 +334,9 @@ public class IndexManagementHelper {
 		public void apply() {
 			String publicKey = null;
 			String privateKey = null;
-			boolean publishPrivate = false;
 
 			IndexConfigDialog dialog = new IndexConfigDialog(getIndexBrowserPanel(),
-									 getQueueManager());
+															getQueueManager());
 
 			if (!dialog.promptUser()) /* cancelled */
 				return;
@@ -1271,8 +1264,6 @@ public class IndexManagementHelper {
 						continue;
 					}
 
-
-					FCPTransferQuery insertion = null;
 
 					st.setInt(1, nextId);
 					st.setString(2, ioFile.getName());

@@ -1,7 +1,5 @@
 package thaw.plugins;
 
-import java.util.Vector;
-
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -40,7 +38,6 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 
 
 	private IndexBrowserPanel browserPanel;
-	private Vector toolbarActions;
 
 	private IndexConfigTab configPanel;
 

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.Vector;
 import java.util.Iterator;
 
 /* DOM */
@@ -20,30 +19,20 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 
 /* SAX */
 
 import org.xml.sax.*;
-import org.xml.sax.helpers.LocatorImpl;
-
-import java.io.IOException;
-
-import org.xml.sax.helpers.XMLReaderFactory;
 import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 
 
 
-import thaw.core.Main;
 import thaw.core.Logger;
-import thaw.plugins.Hsqldb;
 import thaw.fcp.FreenetURIHelper;
 import thaw.plugins.insertPlugin.DefaultMIMETypes;
 
@@ -300,8 +289,6 @@ public class IndexParser {
 
 
 	public class IndexHandler extends DefaultHandler {
-		private Locator locator = null;
-
 		private boolean clean = true;
 
 		public IndexHandler() {
@@ -316,7 +303,6 @@ public class IndexParser {
 		 * @see org.xml.sax.ContentHandler#setDocumentLocator(org.xml.sax.Locator)
 		 */
 		public void setDocumentLocator(Locator value) {
-			locator =  value;
 		}
 
 		/**

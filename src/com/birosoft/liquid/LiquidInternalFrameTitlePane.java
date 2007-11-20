@@ -29,8 +29,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
-import java.awt.geom.Rectangle2D;
-
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -46,7 +44,11 @@ import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
  */
 public class LiquidInternalFrameTitlePane extends BasicInternalFrameTitlePane
     implements LayoutManager {
-    static LiquidWindowButtonUI iconButtonUI;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 2216160519095598985L;
+	static LiquidWindowButtonUI iconButtonUI;
     static LiquidWindowButtonUI maxButtonUI;
     static LiquidWindowButtonUI closeButtonUI;
     protected boolean isPalette = false;

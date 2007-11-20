@@ -10,20 +10,10 @@ import javax.swing.JButton;
 import java.util.Vector;
 import java.util.Iterator;
 
-import java.sql.*;
-
-import java.text.DateFormat;
-
-
 import thaw.core.I18n;
-import thaw.core.Logger;
-import thaw.core.Config;
-
 import thaw.gui.IconBox;
 
 import thaw.fcp.FCPQueueManager;
-
-import thaw.plugins.Hsqldb;
 
 
 /**
@@ -32,8 +22,6 @@ import thaw.plugins.Hsqldb;
  * be used for the comments
  */
 public class DetailPanel {
-	private IndexBrowserPanel indexBrowser;
-
 	private JPanel panel;
 
 	private JButton viewCommentButton;
@@ -41,16 +29,7 @@ public class DetailPanel {
 
 	private Vector buttonActions;
 
-	private JLabel nmbFilesLabel;
-	private JLabel nmbLinksLabel;
-	private JLabel insertionDateLabel;
-
-	private DateFormat dateFormat;
-
-
 	public DetailPanel(FCPQueueManager queueManager, IndexBrowserPanel indexBrowser) {
-		this.dateFormat = DateFormat.getDateInstance();
-		this.indexBrowser = indexBrowser;
 
 		panel = new JPanel(new BorderLayout());
 
@@ -58,7 +37,6 @@ public class DetailPanel {
 
 		JPanel buttonPanel = new JPanel(new GridLayout(1, 1));
 		buttonActions = new Vector(2);
-		JButton button;
 
 		detailsButton = new JButton(I18n.getMessage("thaw.plugin.index.details"),
 					    IconBox.minDetails);

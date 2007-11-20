@@ -3,8 +3,6 @@ package thaw.plugins.index;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Vector;
-
 import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
 

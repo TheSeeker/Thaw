@@ -27,6 +27,10 @@ public class LiquidPopupMenuBorder extends AbstractBorder implements UIResource
 {
     
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 4639346458047202199L;
+	/**
      * The border insets.
      */
     protected static Insets insets = new Insets(2, 2, 2, 2);

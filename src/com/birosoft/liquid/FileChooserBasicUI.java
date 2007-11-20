@@ -37,7 +37,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import java.text.DateFormat;
@@ -402,7 +401,12 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
         fileNamePanel.add(fileNameLabel);
 
         fileNameTextField = new JTextField() {
-                    public Dimension getMaximumSize() {
+                    /**
+			 * 
+			 */
+			private static final long serialVersionUID = -6092176024017698660L;
+
+					public Dimension getMaximumSize() {
                         return new Dimension(Short.MAX_VALUE,
                             super.getPreferredSize().height);
                     }
@@ -548,7 +552,12 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
 
     protected ActionMap createActionMap() {
         AbstractAction escAction = new AbstractAction() {
-                public void actionPerformed(ActionEvent e) {
+                /**
+			 * 
+			 */
+			private static final long serialVersionUID = -425601186607161693L;
+
+				public void actionPerformed(ActionEvent e) {
                     if (editFile != null) {
                         cancelEdit();
                     } else {
@@ -573,7 +582,12 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
         JPanel p = new JPanel(new BorderLayout());
         final JFileChooser fileChooser = fc;
         list = new JList() {
-                    public int getNextMatch(String prefix, int startIndex,
+                    /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1853643352475041216L;
+
+					public int getNextMatch(String prefix, int startIndex,
                         Position.Bias bias) {
                         ListModel model = getModel();
                         int max = model.getSize();
@@ -642,7 +656,12 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
         DetailsTableModel detailsTableModel = new DetailsTableModel(chooser);
 
         detailsTable = new JTable(detailsTableModel) {
-                    // Handle Escape key events here
+                    /**
+			 * 
+			 */
+			private static final long serialVersionUID = 3408464557951619468L;
+
+					// Handle Escape key events here
                     protected boolean processKeyBinding(KeyStroke ks,
                         KeyEvent e, int condition, boolean pressed) {
                         if ((e.getKeyCode() == KeyEvent.VK_ESCAPE) &&
@@ -688,7 +707,12 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
         final JTextField tf = new JTextField();
         tf.addFocusListener(editorFocusListener);
         columns[COLUMN_FILENAME].setCellEditor(new DefaultCellEditor(tf) {
-                public boolean isCellEditable(EventObject e) {
+                /**
+			 * 
+			 */
+			private static final long serialVersionUID = 6894096829016914386L;
+
+				public boolean isCellEditable(EventObject e) {
                     if (e instanceof MouseEvent) {
                         MouseEvent me = (MouseEvent) e;
                         int index = detailsTable.rowAtPoint(me.getPoint());
@@ -716,7 +740,11 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
             });
 
         JList fakeList = new JList(detailsTableModel.listModel) {
-                JTable table = detailsTable;
+                /**
+			 * 
+			 */
+			private static final long serialVersionUID = 3049782428421377475L;
+				JTable table = detailsTable;
 
                 public int locationToIndex(Point location) {
                     return table.rowAtPoint(location);
@@ -841,7 +869,7 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
                                         ((File) objects[0]).isDirectory() &&
                                         chooser.isTraversable(
                                             ((File) objects[0])) &&
-                                        ((chooser.getFileSelectionMode() == chooser.FILES_ONLY) ||
+                                        ((chooser.getFileSelectionMode() == JFileChooser.FILES_ONLY) ||
                                         !fsv.isFileSystem(((File) objects[0])))) {
                                     setDirectorySelected(true);
                                     setDirectory(((File) objects[0]));
@@ -881,7 +909,7 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
 
                             if ((file != null) && file.isDirectory() &&
                                     chooser.isTraversable(file) &&
-                                    ((chooser.getFileSelectionMode() == chooser.FILES_ONLY) ||
+                                    ((chooser.getFileSelectionMode() == JFileChooser.FILES_ONLY) ||
                                     !fsv.isFileSystem(file))) {
                                 setDirectorySelected(true);
                                 setDirectory(file);
@@ -1490,7 +1518,11 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
 
     class DetailsTableModel extends AbstractTableModel
         implements ListDataListener {
-        String[] columnNames = {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 8010892178238595874L;
+		String[] columnNames = {
             fileNameHeaderText, fileSizeHeaderText, fileTypeHeaderText,
             fileDateHeaderText, fileAttrHeaderText
         };
@@ -1671,7 +1703,11 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
     }
 
     class DetailsTableCellRenderer extends DefaultTableCellRenderer {
-        JFileChooser chooser;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -4228039959280057495L;
+		JFileChooser chooser;
         DateFormat df;
 
         DetailsTableCellRenderer(JFileChooser chooser) {
@@ -1762,7 +1798,12 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
     }
 
     protected class FileRenderer extends DefaultListCellRenderer {
-        public Component getListCellRendererComponent(JList list, Object value,
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -7337412919779359737L;
+
+		public Component getListCellRendererComponent(JList list, Object value,
             int index, boolean isSelected, boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected,
                 cellHasFocus);
@@ -1787,7 +1828,11 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
     // Renderer for DirectoryComboBox
     //
     class DirectoryComboBoxRenderer extends DefaultListCellRenderer {
-        IndentIcon ii = new IndentIcon();
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -7069287102309322771L;
+		IndentIcon ii = new IndentIcon();
 
         public Component getListCellRendererComponent(JList list, Object value,
             int index, boolean isSelected, boolean cellHasFocus) {
@@ -1838,7 +1883,11 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
      */
     protected class DirectoryComboBoxModel extends AbstractListModel
         implements ComboBoxModel {
-        Vector directories = new Vector();
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 5048281389001445539L;
+		Vector directories = new Vector();
         int[] depths = null;
         File selectedDirectory = null;
         JFileChooser chooser = getFileChooser();
@@ -1934,7 +1983,12 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
      * Render different type sizes and styles.
      */
     public class FilterComboBoxRenderer extends DefaultListCellRenderer {
-        public Component getListCellRendererComponent(JList list, Object value,
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -1217799056576273444L;
+
+		public Component getListCellRendererComponent(JList list, Object value,
             int index, boolean isSelected, boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected,
                 cellHasFocus);
@@ -1952,7 +2006,11 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
      */
     protected class FilterComboBoxModel extends AbstractListModel
         implements ComboBoxModel, PropertyChangeListener {
-        protected FileFilter[] filters;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -8674443283071780282L;
+		protected FileFilter[] filters;
 
         protected FilterComboBoxModel() {
             super();
@@ -2028,7 +2086,12 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
      * Acts when DirectoryComboBox has changed the selected item.
      */
     protected class DirectoryComboBoxAction extends AbstractAction {
-        protected DirectoryComboBoxAction() {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -3356351701163441877L;
+
+		protected DirectoryComboBoxAction() {
             super("DirectoryComboBoxAction");
         }
 
@@ -2121,7 +2184,11 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
     }
 
     private class AlignedLabel extends JLabel {
-        private AlignedLabel[] group;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 7553937505525995668L;
+		private AlignedLabel[] group;
         private int maxWidth = 0;
 
         AlignedLabel(String text) {

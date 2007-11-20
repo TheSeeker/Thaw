@@ -1,6 +1,5 @@
 package thaw.plugins.miniFrost.frostKSK;
 
-import java.util.Vector;
 import org.w3c.dom.*;
 
 import thaw.core.Logger;

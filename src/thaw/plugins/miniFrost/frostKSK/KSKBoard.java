@@ -338,7 +338,6 @@ public class KSKBoard
 	private Date lastDate;
 
 	private int lastSuccessfulRev;
-	private int failed;
 
 	private int maxDaysInThePast;
 

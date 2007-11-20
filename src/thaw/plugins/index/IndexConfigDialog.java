@@ -26,9 +26,6 @@ import javax.swing.event.ListSelectionEvent;
 import java.sql.*;
 
 import java.util.Vector;
-import java.util.Iterator;
-
-
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FreenetURIHelper;
 import thaw.core.I18n;

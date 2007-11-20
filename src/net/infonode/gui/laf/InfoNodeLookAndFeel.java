@@ -42,7 +42,6 @@ import javax.swing.plaf.metal.MetalBorders;
 import javax.swing.plaf.metal.MetalLookAndFeel;
 import javax.swing.plaf.metal.MetalTheme;
 import java.awt.*;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * A Look and Feel that's based on Metal. It's slimmer and use other colors than the standard Metal Look and Feel.
@@ -66,7 +65,12 @@ import java.lang.reflect.InvocationTargetException;
  * @version $Revision: 1.22 $
  */
 public class InfoNodeLookAndFeel extends MetalLookAndFeel {
-  public static final UIManager.LookAndFeelInfo LOOK_AND_FEEL_INFO =
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1333155204751553645L;
+
+public static final UIManager.LookAndFeelInfo LOOK_AND_FEEL_INFO =
       new UIManager.LookAndFeelInfo("InfoNode", InfoNodeLookAndFeel.class.getName());
 
   private static MetalTheme oldMetalTheme;
@@ -302,7 +306,11 @@ public class InfoNodeLookAndFeel extends MetalLookAndFeel {
   }
 
   private static class MyListCellRenderer extends DefaultListCellRenderer {
-    private Border normalBorder;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -4686589215440055032L;
+	private Border normalBorder;
     private Border focusBorder;
 
     MyListCellRenderer(Border normalBorder, Border focusBorder) {
@@ -319,7 +327,12 @@ public class InfoNodeLookAndFeel extends MetalLookAndFeel {
     }
 
     public static class UIResource extends MyListCellRenderer implements javax.swing.plaf.UIResource {
-      public UIResource(Border normalBorder, Border focusBorder) {
+      /**
+		 * 
+		 */
+		private static final long serialVersionUID = 5326463933712427348L;
+
+	public UIResource(Border normalBorder, Border focusBorder) {
         super(normalBorder, focusBorder);
       }
     }
@@ -330,7 +343,12 @@ public class InfoNodeLookAndFeel extends MetalLookAndFeel {
 
     Class iconClass = MetalLookAndFeel.class;
     UIResource menuItemBorder = new MetalBorders.MenuItemBorder() {
-      public Insets getBorderInsets(Component c) {
+      /**
+		 * 
+		 */
+		private static final long serialVersionUID = 9120736718394539610L;
+
+	public Insets getBorderInsets(Component c) {
         return new Insets(2, 0, 2, 0);
       }
     };

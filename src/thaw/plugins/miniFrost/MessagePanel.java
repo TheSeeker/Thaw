@@ -6,13 +6,10 @@ import java.awt.GridLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
-import javax.swing.BorderFactory;
 
 import java.util.Vector;
 import java.util.Iterator;
-import java.awt.Color;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -30,7 +27,6 @@ import thaw.gui.IconBox;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.plugins.signatures.Identity;
-import thaw.plugins.miniFrost.interfaces.Author;
 import thaw.plugins.miniFrost.interfaces.Message;
 import thaw.plugins.miniFrost.interfaces.SubMessage;
 import thaw.plugins.miniFrost.interfaces.Attachment;
@@ -199,6 +195,10 @@ public class MessagePanel
 	protected class AttachmentAction extends JMenuItem
 		implements ActionListener {
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 3518533179205885687L;
 		private Attachment a;
 		private String action;
 
@@ -222,6 +222,10 @@ public class MessagePanel
 	protected class AttachmentPanel extends JPanel
 		implements ActionListener {
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 367756847110840408L;
 		private JButton button;
 		private Vector attachments;
 
@@ -550,6 +554,10 @@ public class MessagePanel
 
 
 	protected class KeyActionMenu extends JPopupMenu implements ActionListener {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 7604690757405586814L;
 		private String key;
 		private JMenuItem[] chkActions;
 		private JMenuItem[] indexActions;

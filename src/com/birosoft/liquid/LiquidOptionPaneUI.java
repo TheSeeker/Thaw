@@ -316,9 +316,19 @@ public class LiquidOptionPaneUI extends OptionPaneUI {
 
         /* Fill the body. */
         Container body = new JPanel() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -2888288151331662646L;
             };
 
         Container realBody = new JPanel() {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 2171542694254536095L;
             };
 
         realBody.setLayout(new BorderLayout());
@@ -330,7 +340,12 @@ public class LiquidOptionPaneUI extends OptionPaneUI {
 
         if (getIcon() != null) {
             Container sep = new JPanel() {
-                    public Dimension getPreferredSize() {
+                    /**
+				 * 
+				 */
+				private static final long serialVersionUID = 1180894900467202887L;
+
+					public Dimension getPreferredSize() {
                         return new Dimension(15, 1);
                     }
                 };
@@ -436,7 +451,12 @@ public class LiquidOptionPaneUI extends OptionPaneUI {
                 if (nl == 0) {
                     addMessageComponents(container, cons,
                         new Component() {
-                            public Dimension getPreferredSize() {
+                            /**
+							 * 
+							 */
+							private static final long serialVersionUID = -7844151348404521594L;
+
+							public Dimension getPreferredSize() {
                                 Font f = getFont();
 
                                 if (f != null) {
@@ -1406,7 +1426,11 @@ public class LiquidOptionPaneUI extends OptionPaneUI {
      * (those of the JRootPane) to be processed as well.
      */
     private static class MultiplexingTextField extends JTextField {
-        private KeyStroke[] strokes;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -430479675345747405L;
+		private KeyStroke[] strokes;
 
         MultiplexingTextField(int cols) {
             super(cols);
@@ -1450,7 +1474,12 @@ public class LiquidOptionPaneUI extends OptionPaneUI {
      * to <code>JOptionPane.CLOSED_OPTION</code>.
      */
     private static class CloseAction extends AbstractAction {
-        public void actionPerformed(ActionEvent e) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 9198767681682828759L;
+
+		public void actionPerformed(ActionEvent e) {
             JOptionPane optionPane = (JOptionPane) e.getSource();
 
             optionPane.setValue(new Integer(JOptionPane.CLOSED_OPTION));

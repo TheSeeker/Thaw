@@ -2,7 +2,6 @@ package thaw.plugins.miniFrost;
 
 import javax.swing.JPanel;
 import java.util.Observable;
-import java.util.Observer;
 import java.awt.GridLayout;
 import java.awt.BorderLayout;
 
@@ -28,7 +27,6 @@ import java.awt.Color;
 
 import java.awt.Font;
 
-import thaw.gui.JDragTree;
 import thaw.gui.IconBox;
 import thaw.core.I18n;
 
@@ -175,6 +173,10 @@ public class BoardTree extends Observable
 
 
 	protected class BoardListRenderer extends DefaultListCellRenderer {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 6021183532695159257L;
 		private MessageTreeTable messageTreeTable;
 
 		public BoardListRenderer() {
@@ -222,6 +224,10 @@ public class BoardTree extends Observable
 
 
 	protected class BoardListModel extends AbstractListModel {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 7295609643591087950L;
 		private Vector boardList;
 
 		public BoardListModel() {

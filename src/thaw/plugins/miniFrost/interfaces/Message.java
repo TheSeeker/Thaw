@@ -1,6 +1,5 @@
 package thaw.plugins.miniFrost.interfaces;
 
-import javax.swing.tree.TreeNode;
 import java.util.Vector;
 
 import thaw.plugins.signatures.Identity;

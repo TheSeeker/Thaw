@@ -12,7 +12,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JList;
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.DefaultListCellRenderer;
@@ -178,6 +177,11 @@ public class DraftPanel implements ActionListener, MouseListener {
 
 
 	protected class AttachmentRenderer extends DefaultListCellRenderer {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -3102106806638714133L;
+
 		public AttachmentRenderer() {
 
 		}
@@ -223,7 +227,7 @@ public class DraftPanel implements ActionListener, MouseListener {
 		/* text */
 		String txt = draft.getText();
 
-		textArea.setText(draft.getText());
+		textArea.setText(txt);
 
 		/* attachments */
 		refreshAttachmentList();

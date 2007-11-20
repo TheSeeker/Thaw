@@ -1,13 +1,9 @@
 package thaw.plugins.miniFrost;
 
 import java.util.Vector;
-import java.util.Iterator;
-
 import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
 import thaw.plugins.MiniFrost;
-import thaw.core.Core;
-
 import thaw.plugins.miniFrost.interfaces.BoardFactory;
 
 

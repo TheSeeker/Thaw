@@ -10,7 +10,6 @@
 package com.birosoft.liquid;
 
 import com.birosoft.liquid.skin.Skin;
-import com.birosoft.liquid.util.OpaquePropertyChangeListener;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.ComponentOrientation;
@@ -419,7 +418,12 @@ public class LiquidComboBoxUI extends BasicComboBoxUI {
      * @deprecated As of Java 2 platform v1.4.
      */
     public class LiquidComboPopup extends BasicComboPopup {
-        public LiquidComboPopup(JComboBox cBox) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 2072608971254412076L;
+
+		public LiquidComboPopup(JComboBox cBox) {
             super(cBox);
         }
 

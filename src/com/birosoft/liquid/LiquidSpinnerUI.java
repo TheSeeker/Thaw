@@ -132,7 +132,11 @@ public class LiquidSpinnerUI extends BasicSpinnerUI {
      */
     private static class ArrowButtonHandler extends AbstractAction
         implements MouseListener {
-        final javax.swing.Timer autoRepeatTimer;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1151070756396883763L;
+		final javax.swing.Timer autoRepeatTimer;
         final boolean isNext;
         JSpinner spinner = null;
 

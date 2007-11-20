@@ -1,10 +1,5 @@
 package thaw.plugins;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JOptionPane;
-
 import java.util.Vector;
 import java.util.Iterator;
 
@@ -14,7 +9,6 @@ import thaw.core.Plugin;
 import thaw.core.ThawThread;
 import thaw.core.ThawRunnable;
 import thaw.core.I18n;
-import thaw.gui.IconBox;
 import thaw.gui.WarningWindow;
 
 import thaw.plugins.Hsqldb;

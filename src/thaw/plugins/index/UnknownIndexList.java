@@ -15,18 +15,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.JCheckBox;
-
-import java.awt.event.MouseAdapter;
-import javax.swing.SwingConstants;
-import javax.swing.TransferHandler;
-
-import javax.swing.JComponent;
-
 import thaw.gui.CheckBox;
 
 import thaw.core.I18n;
-import thaw.core.Logger;
 import thaw.core.ThawThread;
 import thaw.core.ThawRunnable;
 import thaw.gui.IconBox;

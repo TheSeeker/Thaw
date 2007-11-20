@@ -4,8 +4,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
 
-import java.util.Observable;
-
 import thaw.core.Logger;
 import thaw.core.ThawThread;
 import thaw.core.ThawRunnable;

@@ -15,7 +15,11 @@ import java.awt.geom.Rectangle2D;
  * @author  mikeai
  */
 public class Panel extends javax.swing.JPanel {
-    Image image;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -6486746209584612751L;
+	Image image;
     static Color buttonBg = new Color(215, 231, 249);
     static Color bg = new Color(246, 245, 244);
     

@@ -272,7 +272,11 @@ public class LiquidMenuUI extends LiquidMenuItemUI
     
     private static class PostAction extends AbstractAction
     {
-        JMenu menu;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -6468833677203159985L;
+		JMenu menu;
         boolean force = false;
         
         PostAction(JMenu menu, boolean shouldForce)

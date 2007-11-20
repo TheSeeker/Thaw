@@ -30,7 +30,12 @@ import java.awt.*;
  * @version $Revision: 1.4 $
  */
 public class WindowIcon extends AbstractButtonIcon {
-  public WindowIcon() {
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = -6231060189380981040L;
+
+public WindowIcon() {
   }
 
   public WindowIcon(Color color) {

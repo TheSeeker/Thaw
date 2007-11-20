@@ -19,8 +19,6 @@ public class SearchBar implements ActionListener {
 
 	private IndexBrowserPanel indexBrowser;
 
-	private Tables tables;
-
 	public SearchBar(IndexBrowserPanel indexBrowser) {
 		this.indexBrowser = indexBrowser;
 

@@ -50,11 +50,6 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Toolkit;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.security.AccessController;
-
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -73,13 +68,6 @@ import javax.swing.plaf.basic.BasicLookAndFeel;
 import javax.swing.text.DefaultEditorKit;
 import org.jvnet.lafplugin.ComponentPluginManager;
 
-import org.jvnet.lafplugin.PluginManager;
-import java.util.Set;
-import java.util.Map;
-import org.jvnet.lafplugin.LafPlugin;
-import java.util.Iterator;
-import java.util.Collections;
-
 
 /**
  * The Liquid look and feel. There's a special property to switch the support for
@@ -97,7 +85,11 @@ import java.util.Collections;
  */
 public class LiquidLookAndFeel extends BasicLookAndFeel {
 
-// *Start LAF-PLUGIN SUPPORT*
+/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4305694493780865441L;
+	// *Start LAF-PLUGIN SUPPORT*
     public static final String PLUGIN_XML = "META-INF/liquid-plugin.xml";
     protected static ComponentPluginManager pluginManager = new ComponentPluginManager(PLUGIN_XML);
 // *End LAF-PLUGIN SUPPORT*

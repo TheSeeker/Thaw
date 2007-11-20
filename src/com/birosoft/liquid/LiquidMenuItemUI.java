@@ -1304,7 +1304,12 @@ public class LiquidMenuItemUI extends MenuItemUI {
     }
 
     private static class ClickAction extends AbstractAction {
-        public void actionPerformed(ActionEvent e) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -8035267599286800485L;
+
+		public void actionPerformed(ActionEvent e) {
             JMenuItem mi = (JMenuItem) e.getSource();
             MenuSelectionManager.defaultManager().clearSelectedPath();
             mi.doClick();

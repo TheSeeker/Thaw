@@ -33,7 +33,6 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 	private final QueuePanel[] queuePanels = new QueuePanel[2];
 
 	private DetailPanel detailPanel;
-	private DragAndDropManager dnd;
 
 	private JSplitPane split;
 
@@ -117,8 +116,6 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 		}
 
 		split.setResizeWeight(0.5);
-
-		dnd = new DragAndDropManager(core, queuePanels);
 
 		stateChanged(null);
 

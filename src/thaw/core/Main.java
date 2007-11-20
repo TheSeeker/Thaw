@@ -3,8 +3,6 @@ package thaw.core;
 import java.util.Locale;
 
 import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
-
 import java.util.Vector;
 import java.util.Iterator;
 

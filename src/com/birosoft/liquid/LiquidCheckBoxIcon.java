@@ -28,7 +28,11 @@ import javax.swing.plaf.UIResource;
  * @author Taoufik Romdhane
  */
 public class LiquidCheckBoxIcon implements Icon, UIResource, Serializable {
-    protected static Skin skin;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 8944297130224501778L;
+	protected static Skin skin;
     private SkinToggleButtonIndexModel indexModel = new SkinToggleButtonIndexModel();
 
     /**

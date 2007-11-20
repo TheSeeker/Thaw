@@ -21,7 +21,11 @@ import javax.swing.plaf.ButtonUI;
  */
 public class SpecialUIButton extends JButton {
     
-    ButtonUI myUI;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 8433259594156203146L;
+	ButtonUI myUI;
     JInternalFrame frame;
     Window window;
     

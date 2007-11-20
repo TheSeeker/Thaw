@@ -19,8 +19,6 @@ import thaw.core.ConfigWindow;
 import thaw.core.I18n;
 import thaw.core.Logger;
 
-import thaw.gui.WarningWindow;
-
 /**
  * in the config window
  */

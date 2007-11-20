@@ -1,7 +1,6 @@
 package thaw.plugins;
 
 import javax.swing.JPanel;
-import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
@@ -19,8 +18,6 @@ import thaw.core.Core;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.core.ThawThread;
-import thaw.core.ThawRunnable;
-
 import thaw.plugins.indexWebGrapher.*;
 
 

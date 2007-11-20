@@ -1,7 +1,6 @@
 package thaw.plugins.peerMonitor;
 
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 import javax.swing.JList;
 import javax.swing.JLabel;
@@ -10,13 +9,9 @@ import javax.swing.JButton;
 import javax.swing.ListCellRenderer;
 import javax.swing.BorderFactory;
 
-import javax.swing.JButton;
-import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
 
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -33,17 +28,12 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 import java.util.Observable;
-import java.util.Observer;
-
-
 import thaw.plugins.PeerMonitor;
 
 import thaw.plugins.ToolbarModifier;
 
 import thaw.core.Config;
 import thaw.core.I18n;
-import thaw.core.Logger;
-
 import thaw.fcp.FCPQueueManager;
 
 import thaw.gui.IconBox;
@@ -80,8 +70,6 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 	public final static int STR_INFO_MAX_LNG = 55;
 	public final static int STR_NODENAME_MAX_LNG = 15;
 
-	private JPanel refPanel;
-
 	private JPanel peerPanel;
 
 	private JPanel tabPanel;
@@ -103,7 +91,6 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 	private JButton closeTabButton;
 
-	private boolean advanced;
 
 	private PeerMonitor peerMonitor;
 
@@ -121,8 +108,6 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 		this.peerMonitor = peerMonitor;
 
 		toolbarModifier = new ToolbarModifier(mainWindow);
-
-		advanced = Boolean.valueOf(config.getValue("advancedMode")).booleanValue();
 
 		tabPanel = new JPanel(new BorderLayout(10, 10));
 
@@ -310,6 +295,11 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 
 	protected class PeerCellRenderer extends JLabel implements ListCellRenderer {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 2631236843498183587L;
 
 		public PeerCellRenderer() {
 			setOpaque(true);

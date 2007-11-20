@@ -1,6 +1,5 @@
 package thaw.plugins.indexWebGrapher;
 
-import javax.swing.JPanel;
 import javax.swing.JComponent;
 import java.awt.Graphics;
 import java.awt.Dimension;
@@ -16,6 +15,11 @@ import thaw.plugins.IndexWebGrapher;
 
 
 public class GraphPanel extends JComponent implements MouseListener {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5478870004197620690L;
 
 	public final static int BORDER = 50;
 

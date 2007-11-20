@@ -9,10 +9,7 @@ import java.util.Observer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.Vector;
 import java.util.Iterator;
-
-import thaw.plugins.insertPlugin.DefaultMIMETypes;
 
 import thaw.fcp.FreenetURIHelper;
 import thaw.core.Logger;
@@ -21,8 +18,6 @@ import thaw.fcp.FCPClientGet;
 import thaw.fcp.FCPClientPut;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
-import thaw.fcp.FCPQuery;
-
 import thaw.plugins.Hsqldb;
 
 
@@ -233,8 +228,6 @@ public class File implements Observer, FileContainer {
 
 
 	public void setSize(final long size) {
-		this.publicKey = publicKey;
-
 		try {
 			PreparedStatement st;
 

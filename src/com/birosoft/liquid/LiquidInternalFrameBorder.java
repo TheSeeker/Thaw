@@ -26,7 +26,12 @@ import javax.swing.plaf.UIResource;
 public class LiquidInternalFrameBorder extends AbstractBorder implements UIResource
 {
     
-    /** indicates whether the internal frame is active */
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 527236686631130345L;
+
+	/** indicates whether the internal frame is active */
     boolean isActive;
     
     boolean  isPalette = false;

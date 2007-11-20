@@ -1,7 +1,5 @@
 package thaw.plugins.index;
 
-import java.util.Vector;
-
 /**
  * List files
  */

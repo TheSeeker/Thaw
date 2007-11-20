@@ -4,7 +4,6 @@ package thaw.plugins;
 import thaw.core.I18n;
 import thaw.core.Core;
 import thaw.core.Logger;
-import thaw.core.PluginManager;
 import thaw.core.LibraryPlugin;
 
 import thaw.gui.IconBox;

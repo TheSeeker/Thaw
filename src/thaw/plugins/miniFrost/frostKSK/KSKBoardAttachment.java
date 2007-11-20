@@ -8,8 +8,6 @@ import thaw.core.I18n;
 import thaw.plugins.Hsqldb;
 import thaw.core.Logger;
 import thaw.fcp.FCPQueueManager;
-import thaw.core.ThawThread;
-
 import thaw.plugins.miniFrost.interfaces.Board;
 
 
@@ -21,7 +19,6 @@ public class KSKBoardAttachment
 	private String privateKey;
 	private String description;
 
-	private KSKMessage msg;
 	private KSKBoardFactory boardFactory;
 
 
@@ -68,7 +65,6 @@ public class KSKBoardAttachment
 				  KSKMessage msg,
 				  KSKBoardFactory boardFactory) {
 		this(boardName, publicKey, privateKey, description);
-		this.msg = msg;
 		this.boardFactory = boardFactory;
 	}
 

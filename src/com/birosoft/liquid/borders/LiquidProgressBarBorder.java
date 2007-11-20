@@ -9,8 +9,6 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 package com.birosoft.liquid.borders;
 
-import com.birosoft.liquid.skin.Skin;
-
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Insets;
@@ -23,7 +21,11 @@ import javax.swing.plaf.UIResource;
  * The border for a Textfield.
  */
 public class LiquidProgressBarBorder extends AbstractBorder implements UIResource {
-    private static final Insets defaultInsets = new Insets(3, 5, 3, 5);
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 8303421127815168517L;
+	private static final Insets defaultInsets = new Insets(3, 5, 3, 5);
 //    static Skin skin;
     private Insets insets;
 

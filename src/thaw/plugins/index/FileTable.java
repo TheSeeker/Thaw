@@ -1,8 +1,6 @@
 package thaw.plugins.index;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -18,11 +16,9 @@ import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -34,8 +30,6 @@ import thaw.fcp.FreenetURIHelper;
 import thaw.core.I18n;
 import thaw.gui.IconBox;
 import thaw.core.Logger;
-import thaw.fcp.FCPClientGet;
-import thaw.fcp.FCPClientPut;
 import thaw.fcp.FCPQueueManager;
 import thaw.fcp.FCPTransferQuery;
 import thaw.plugins.ToolbarModifier;
@@ -50,9 +44,6 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 	private FileListModel fileListModel;
 
 	private FileList fileList;
-
-	private String sortColumn;
-	private final boolean ascOrder = false;
 
 	private final JPopupMenu rightClickMenu;
 	private final Vector rightClickActions;
@@ -430,8 +421,6 @@ public class FileTable implements MouseListener, KeyListener, ActionListener {
 		}
 
 		public void run() {
-			int max;
-
 			while(running) {
 				try {
 					Thread.sleep(500);

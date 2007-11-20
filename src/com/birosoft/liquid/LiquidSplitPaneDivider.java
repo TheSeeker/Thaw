@@ -46,7 +46,12 @@ import com.birosoft.liquid.skin.Skin;
  */
 class LiquidSplitPaneDivider extends BasicSplitPaneDivider
 {
-    private int inset = 0;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 4058298927908826880L;
+
+	private int inset = 0;
     
     Skin skinVertSplitter = null;
     Skin skinHorzSplitter = null;
@@ -112,7 +117,11 @@ class LiquidSplitPaneDivider extends BasicSplitPaneDivider
     {
         JButton b = new JButton()
         {
-            // Sprite buffer for the arrow image of the left button
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = -2808135928573217861L;
+			// Sprite buffer for the arrow image of the left button
             int[][] buffer = {
                 { 0, 0, 0, 2, 2, 0, 0, 0, 0 },
                 { 0, 0, 2, 1, 1, 1, 0, 0, 0 },
@@ -222,7 +231,11 @@ class LiquidSplitPaneDivider extends BasicSplitPaneDivider
     {
         JButton b = new JButton()
         {
-            // Sprite buffer for the arrow image of the right button
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = -4522647393919107295L;
+			// Sprite buffer for the arrow image of the right button
             int[][] buffer = {
                 { 2, 2, 2, 2, 2, 2, 2, 2 },
                 { 0, 1, 1, 1, 1, 1, 1, 3 },
@@ -412,12 +425,12 @@ class LiquidSplitPaneDivider extends BasicSplitPaneDivider
     
     int getOneTouchSizeFromSuper()
     {
-        return super.ONE_TOUCH_SIZE;
+        return ONE_TOUCH_SIZE;
     }
     
     int getOneTouchOffsetFromSuper()
     {
-        return super.ONE_TOUCH_OFFSET;
+        return ONE_TOUCH_OFFSET;
     }
     
     int getOrientationFromSuper()

@@ -1,7 +1,6 @@
 package thaw.plugins.miniFrost;
 
 import javax.swing.JSplitPane;
-import javax.swing.JLabel;
 import javax.swing.JComponent;
 
 import java.util.Observer;

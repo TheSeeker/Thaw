@@ -10,17 +10,14 @@
 
 package com.birosoft.liquid;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import java.awt.TexturePaint;
 import java.awt.image.BufferedImage;
 
-import javax.swing.ButtonModel;
 import javax.swing.CellRendererPane;
 import javax.swing.DefaultButtonModel;
 import javax.swing.Icon;
@@ -38,7 +35,11 @@ import com.birosoft.liquid.skin.SkinSimpleButtonIndexModel;
 
 public class LiquidComboBoxButton extends JButton
 {
-    protected JComboBox comboBox;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -6789853021299588728L;
+	protected JComboBox comboBox;
     protected JList listBox;
     protected CellRendererPane rendererPane;
     protected Icon comboIcon;
@@ -77,7 +78,12 @@ public class LiquidComboBoxButton extends JButton
         super("");
         DefaultButtonModel model = new DefaultButtonModel()
         {
-            public void setArmed(boolean armed)
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 6111648526845996402L;
+
+			public void setArmed(boolean armed)
             {
                 super.setArmed(isPressed() ? true : armed);
             }

@@ -18,7 +18,6 @@ import java.util.Observable;
 import java.util.Vector;
 
 import thaw.core.I18n;
-import thaw.core.Logger;
 import thaw.core.Core;
 import thaw.core.ThawThread;
 import thaw.core.ThawRunnable;

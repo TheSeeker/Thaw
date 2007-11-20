@@ -12,14 +12,8 @@ import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
 
-import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
-
 import java.awt.Color;
 
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.DefaultCellEditor;
 import javax.swing.event.TableModelEvent;
 
 
@@ -31,27 +25,18 @@ import java.awt.Component;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import javax.swing.AbstractCellEditor;
-import javax.swing.table.TableCellEditor;
-import javax.swing.event.CellEditorListener;
-
-
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
 
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 
-import java.util.EventObject;
-
-import javax.swing.JComboBox;
 import javax.swing.JCheckBox;
 
 import java.awt.Font;
 
 import java.awt.event.KeyEvent;
 import javax.swing.JTree;
-import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeNode;
 
@@ -63,8 +48,6 @@ import thaw.gui.CheckBox;
 import thaw.gui.IconBox;
 import thaw.core.I18n;
 import thaw.core.Logger;
-import thaw.core.ThawThread;
-
 import thaw.plugins.signatures.Identity;
 
 import thaw.plugins.miniFrost.interfaces.Author;
@@ -341,6 +324,10 @@ public class MessageTreeTable implements Observer,
 
 
 	protected class MessageNodeTree extends JTree {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 6110558336513763649L;
 		private DefaultTreeCellRenderer cellRenderer;
 
 		public MessageNodeTree(TreeNode root) {
@@ -570,6 +557,10 @@ public class MessageTreeTable implements Observer,
 
 
 	protected class MessageTableRenderer extends Table.DefaultRenderer {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -2689945423474352988L;
 		private JCheckBox checkBoxRenderer;
 
 		public MessageTableRenderer() {
@@ -667,6 +658,10 @@ public class MessageTreeTable implements Observer,
 		extends javax.swing.table.AbstractTableModel {
 
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 6796753954357075844L;
 		private Vector msgs;
 		private boolean[] selection;
 
@@ -1318,8 +1313,6 @@ public class MessageTreeTable implements Observer,
 	}
 
 	public void mouseReleased(MouseEvent e) {
-		int column = table.columnAtPoint(e.getPoint());
-
 		Logger.info(this, "mouse released");
 
 		endRow = table.rowAtPoint(e.getPoint());

@@ -1,6 +1,5 @@
 package thaw.plugins.miniFrost.interfaces;
 
-import thaw.plugins.miniFrost.BoardFolder;
 import thaw.plugins.MiniFrost;
 
 import java.util.Vector;
