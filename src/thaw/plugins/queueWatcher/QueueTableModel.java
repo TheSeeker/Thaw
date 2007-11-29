@@ -544,8 +544,10 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 					result = 1;
 				else if (q1.getETA() <= 0 && q2.getETA() > 0)
 					result = -1;				
-
-				result = (new Long(q1.getETA())).compareTo(new Long(q2.getETA()));
+				else {
+					result = (new Long(q1.getETA())).compareTo(new Long(q2.getETA()));
+					result = -result;
+				}
 
 			}
 
