@@ -24,7 +24,7 @@ public class FCPClientGet extends Observable
 
 	private int maxRetries = -1;
 	private final static int PACKET_SIZE = 65536;
-	private final static int BLOCK_SIZE = 16384;
+	public final static int BLOCK_SIZE = 16384;
 
 	private FCPQueueManager queueManager;
 	private FCPQueryManager duplicatedQueryManager;
@@ -44,7 +44,8 @@ public class FCPClientGet extends Observable
 
 	private String identifier;
 
-	private int progress; /* in pourcent */
+	private int progress = 0; /* in pourcent */
+	private long transferedBlocks = 0;
 	private int fromTheNodeProgress = 0;
 	private boolean progressReliable = false;
 	private long fileSize;
@@ -56,6 +57,11 @@ public class FCPClientGet extends Observable
 	private boolean fatal = true;
 	private boolean isLockOwner = false;
 
+	private long initialStart = -1; /* set at first SimpleProgress message */
+	private long initialBlockNumber = -1;
+	private long averageSpeed = 0; /* computed at each SimpleProgress message */
+	private long eta = 0;
+	
 	private boolean alreadySaved = false;
 
 	private boolean noDDA = false;
@@ -110,6 +116,7 @@ public class FCPClientGet extends Observable
 		this.queueManager = queueManager;
 
 		this.progress = progress;
+		this.transferedBlocks = 0;
 		this.status = status;
 
 		if(status == null) {
@@ -186,6 +193,7 @@ public class FCPClientGet extends Observable
 		this.destinationDir = destinationDir;
 
 		progress = 0;
+		transferedBlocks = 0;
 		fileSize = 0;
 		attempt  = 0;
 
@@ -241,6 +249,7 @@ public class FCPClientGet extends Observable
 		attempt++;
 		running = true;
 		progress = 0;
+		transferedBlocks = 0;
 
 		this.queueManager = queueManager;
 
@@ -531,13 +540,16 @@ public class FCPClientGet extends Observable
 
 			progress = 0;
 
-			if((message.getValue("Total") != null)
-			   && (message.getValue("Succeeded") != null)) {
+			if (message.getValue("Total") != null
+					&& message.getValue("Required") != null
+					&& message.getValue("Succeeded") != null) {
 				fileSize = Long.parseLong(message.getValue("Total"))*FCPClientGet.BLOCK_SIZE;
-				final long required = Long.parseLong(message.getValue("Total"));
+				final long total = Long.parseLong(message.getValue("Total"));
+				final long required = Long.parseLong(message.getValue("Required"));
 				final long succeeded = Long.parseLong(message.getValue("Succeeded"));
 
-				progress = (int) ((long)((succeeded * 98) / required));
+				progress = (int) ((long)((succeeded * 98) / total));
+				transferedBlocks = succeeded;
 
 				status = "Fetching";
 
@@ -548,6 +560,33 @@ public class FCPClientGet extends Observable
 
 				successful = true;
 				running = true;
+				
+				/* computing average speed & ETA */
+				long timeElapsed = 0;
+				long blocks = 0;
+				
+				if (initialStart < 0) {
+					/* first simple progress message */ 
+					initialStart = (new java.util.Date()).getTime();
+					initialBlockNumber = transferedBlocks;
+				}
+				
+				if (initialStart > 0) {
+					timeElapsed = (new java.util.Date()).getTime() - initialStart;
+					blocks = transferedBlocks - initialBlockNumber;
+				}
+				
+				if (blocks != 0 && timeElapsed != 0) {
+					averageSpeed = (blocks * FCPClientGet.BLOCK_SIZE * 1000) / timeElapsed;
+				} else {
+					averageSpeed = 0; /* == unknown */
+				}
+				
+				if (succeeded >= required || averageSpeed <= 0)
+					eta = 0; /* unknown */
+				else {
+					eta = ((required - succeeded) * BLOCK_SIZE) / averageSpeed;
+				}
 			}
 
 			setChanged();
@@ -1015,6 +1054,15 @@ public class FCPClientGet extends Observable
 
 	public int getProgression() {
 		return progress;
+	}
+	
+	
+	public long getAverageSpeed() {
+		return averageSpeed;
+	}
+	
+	public long getETA() {
+		return eta;
 	}
 
 	public boolean isProgressionReliable() {

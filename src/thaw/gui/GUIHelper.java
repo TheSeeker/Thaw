@@ -80,7 +80,7 @@ public class GUIHelper {
 
 		if (seconds < 3600) {
 			final long min = seconds / 60;
-			return ((new Long(min)).toString() + " min");
+			return ((new Long(min)).toString() + " m");
 		}
 
 		if (seconds < 86400) {

@@ -44,6 +44,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	private boolean getCHKOnly = false;
 
 	private int progress = 0;
+	private long transferedBlocks = 0;
 	private int toTheNodeProgress = 0;
 	private String status;
 
@@ -56,6 +57,11 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	private boolean fatal = true;
 	private boolean sending = false;
 
+	private long initialStart = -1; /* set at the first SimpleProgress message */
+	private long initialBlockNumber = -1;
+	private long averageSpeed = 0; /* recomputed at each simple progress message */
+	private long eta = 0;
+	
 	private FCPGenerateSSK sskGenerator;
 	private boolean lockOwner = false;
 
@@ -64,7 +70,6 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 	private final static int PACKET_SIZE = 1024;
 
 	private SHA256Computer sha;
-
 
 	private int putFailedCode = -1;
 
@@ -128,6 +133,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		this.persistence = persistence;
 		status = "Waiting";
 		progress = 0;
+		transferedBlocks = 0;
 		attempt = 0;
 
 		identifier = null;
@@ -180,6 +186,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		this.persistence = persistence;
 
 		this.progress = progress;
+		this.transferedBlocks = 0;
 
 		this.status = status;
 		running = true;
@@ -214,6 +221,7 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		queueManager.getQueryManager().addObserver(this);
 
 		progress = 0;
+		transferedBlocks = 0;
 		finished = false;
 		successful = false;
 		running = true;
@@ -433,11 +441,13 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		lockOwner = false;
 		sending = false;
 
+		progress = 0;
+		transferedBlocks = 0;
+		
 		if(ret == true) {
 			successful = false;
 			fatal = true;
 			finished = false;
-			progress = 0;
 			running = true;
 
 			if (!getCHKOnly)
@@ -452,7 +462,6 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		} else {
 			successful = false;
 			finished = true;
-			progress = 0;
 			running = false;
 
 			status = "Unable to send the file to the node";
@@ -799,13 +808,38 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 					final long succeeded = (new Long(msg.getValue("Succeeded"))).longValue();
 
 					progress = (int)((succeeded * 99) / total);
+					transferedBlocks = succeeded;
 
 					running = true;
 					finished = false;
 					successful = false;
+					
+					/* computing average speed & ETA */
+					long timeElapsed = 0;
+					long blocks = 0;
+					
+					if (initialStart < 0) {
+						/* first simple progress message */ 
+						initialStart = (new java.util.Date()).getTime();
+						initialBlockNumber = transferedBlocks;
+					}
+					
+					if (initialStart > 0) {
+						timeElapsed = (new java.util.Date()).getTime() - initialStart;
+						blocks = transferedBlocks - initialBlockNumber;
+					}
+					
+					if (blocks != 0 && timeElapsed != 0) {
+						averageSpeed = (blocks * FCPClientGet.BLOCK_SIZE * 1000) / timeElapsed;
+					} else {
+						averageSpeed = 0; /* == unknown */
+					}
 
-					//if(fileSize == 0)
-					//	fileSize = BLOCK_SIZE * required; // NOT RELIABLE
+					if (succeeded >= total || averageSpeed <= 0)
+						eta = 0; /* unknown */
+					else {
+						eta = ((total - succeeded) * FCPClientGet.BLOCK_SIZE) / averageSpeed;
+					}
 
 					if (!getCHKOnly)
 						status = "Inserting";
@@ -925,6 +959,14 @@ public class FCPClientPut extends Observable implements FCPTransferQuery, Observ
 		return progress;
 	}
 
+	public long getAverageSpeed() {
+		return averageSpeed;
+	}
+	
+	public long getETA() {
+		return eta;
+	}
+	
 	public boolean isProgressionReliable() {
 		return true;
 	}

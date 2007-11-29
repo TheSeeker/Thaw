@@ -21,6 +21,7 @@ import thaw.fcp.FCPTransferQuery;
 import thaw.fcp.FCPClientGet;
 import thaw.fcp.FCPClientPut;
 import thaw.gui.IconBox;
+import thaw.gui.GUIHelper;
 import thaw.core.PluginManager;
 import thaw.plugins.TrayIcon;
 
@@ -61,6 +62,8 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 		columnNames.add(I18n.getMessage("thaw.common.status"));
 		columnNames.add(I18n.getMessage("thaw.common.progress"));
+		columnNames.add(I18n.getMessage("thaw.common.speed"));
+		columnNames.add(I18n.getMessage("thaw.common.eta"));
 
 		resetTable();
 
@@ -107,6 +110,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		final FCPTransferQuery query = (FCPTransferQuery)queries.get(row);
 
 		if (column == 0) {
+
 			if(query == null)
 				return null;
 
@@ -125,36 +129,61 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 				return IconBox.minOrange;
 
 			return " ";
-		}
 
+		} else if(column == 1) {
 
-		if(column == 1) {
 			String filename = query.getFilename();
 
 			if (filename == null)
 				return "(null)";
 
 			return filename;
-		}
 
-		if(column == 2)
+		} else if(column == 2) {
+
 			return thaw.gui.GUIHelper.getPrintableSize(query.getFileSize());
 
-		if(!isForInsertions && (column == 3)) {
+		} else if(!isForInsertions && (column == 3)) {
 			if(query.getPath() != null)
 				return query.getPath();
 			else
 				return I18n.getMessage("thaw.common.unspecified");
-		}
 
-		if( (isForInsertions && (column == 3))
-		    || (!isForInsertions && (column == 4)) )
+		} else if( (isForInsertions && (column == 3))
+		    || (!isForInsertions && (column == 4)) ) {
+
 			return query.getStatus();
-
-		if( ((isForInsertions && (column == 4))
-		     || (!isForInsertions && (column == 5)) ) ) {
+			
+		} else if( ((isForInsertions && (column == 4))
+				|| (!isForInsertions && (column == 5)) ) ) {
 
 			return query;
+
+		} else if( ((isForInsertions && (column == 5))
+			     || (!isForInsertions && (column == 6)) ) ) {
+
+			if (query.isFinished())
+				return ""; 
+			
+			long averageSpeed = query.getAverageSpeed();
+		
+			if (averageSpeed <= 0)
+				return ""; 
+
+			return GUIHelper.getPrintableSize(averageSpeed) + "/s";
+
+		} else if( ((isForInsertions && (column == 6))
+			     || (!isForInsertions && (column == 7)) ) ) {
+
+			if (query.isFinished() || !query.isProgressionReliable())
+				return "";
+
+			long remaining = query.getETA();
+			
+			if (remaining <= 0)
+				return "";
+			
+			return GUIHelper.getPrintableTime(remaining);
 		}
 
 		return null;
@@ -451,54 +480,74 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 			if(column == 0) { /* File name */
 				if(q1.getFilename() == null)
-					return -1;
+					result = -1;
+				else if(q2.getFilename() == null)
+					result = 1;
+				else 
+					result = q1.getFilename().compareTo(q2.getFilename());
 
-				if(q2.getFilename() == null)
-					return 1;
+			} else if(column == 1) { /* Size */
 
-				result = q1.getFilename().compareTo(q2.getFilename());
-			}
-
-			if(column == 1) { /* Size */
 				result = (new Long(q1.getFileSize())).compareTo(new Long(q2.getFileSize()));
-			}
 
-			if( ((column == 2) && !isForInsertionTable) ) { /* localPath */
+			} else if( ((column == 2) && !isForInsertionTable) ) { /* localPath */
+
 				if(q1.getPath() == null)
-					return -1;
+					result = -1;
+				else if(q2.getPath() == null)
+					result = 1;
+				else
+					result = q1.getPath().compareTo(q2.getPath());
 
-				if(q2.getPath() == null)
-					return 1;
-
-				result = q1.getPath().compareTo(q2.getPath());
-			}
-
-			if( ((column == 2) && isForInsertionTable)
-			    || ((column == 3) && !isForInsertionTable) ) { /* status */
+			} else if( ((column == 2) && isForInsertionTable)
+						|| ((column == 3) && !isForInsertionTable) ) { /* status */
 
 				if(q1.getStatus() == null)
-					return -1;
+					result = -1;
+				else if(q2.getStatus() == null)
+					result = 1;
+				else
+					result = q1.getStatus().compareTo(q2.getStatus());
 
-				if(q2.getStatus() == null)
-					return 1;
-
-				result = q1.getStatus().compareTo(q2.getStatus());
-			}
-
-			if( ((column == 3) && isForInsertionTable)
-			    || ((column == 4) && !isForInsertionTable) ) { /* progress */
+			} else if( ((column == 3) && isForInsertionTable)
+						|| ((column == 4) && !isForInsertionTable) ) { /* progress */
+				boolean b = false;
+				
 				if((q1.getProgression() <= 0)
 				   && (q2.getProgression() <= 0)) {
-					if(q1.isRunning() && !q2.isRunning())
-						return 1;
-
-					if(q2.isRunning() && !q1.isRunning())
-						return -1;
+					
+					if(q1.isRunning() && !q2.isRunning()) {
+						result = 1;
+						b = true;
+					} else if(q2.isRunning() && !q1.isRunning()) {
+						result = -1;
+						b = true;
+					}
 				}
 
-				result = (new Integer(q1.getProgression())).compareTo(new Integer(q2.getProgression()));
-			}
+				if (!b)
+					result = (new Integer(q1.getProgression())).compareTo(new Integer(q2.getProgression()));
 
+			} else if( ((column == 4) && isForInsertionTable)
+						|| ((column == 5) && !isForInsertionTable) ) { /* progress */
+
+				result = (new Long(q1.getAverageSpeed())).compareTo(new Long(q2.getAverageSpeed()));
+
+			} else if( ((column == 5) && isForInsertionTable)
+						|| ((column == 6) && !isForInsertionTable) ) { /* progress */
+				
+				if (q1.isFinished() && !q2.isFinished())
+					result = 1;
+				else if (!q1.isFinished() && q2.isFinished())
+					result = -1;
+				else if (q1.getETA() > 0 && q2.getETA() <= 0)
+					result = 1;
+				else if (q1.getETA() <= 0 && q2.getETA() > 0)
+					result = -1;				
+
+				result = (new Long(q1.getETA())).compareTo(new Long(q2.getETA()));
+
+			}
 
 			if (!isSortedAsc)
 				result = -result;

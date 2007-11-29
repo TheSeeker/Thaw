@@ -89,6 +89,15 @@ public interface FCPTransferQuery extends FCPQuery {
 	 */
 	public int getTransferWithTheNodeProgression();
 
+	/**
+	 * @return in bytes / s (0 = unknown)
+	 */
+	public long getAverageSpeed();
+	
+	/**
+	 * @return in second
+	 */
+	public long getETA();
 
 	/**
 	 * Informal.
