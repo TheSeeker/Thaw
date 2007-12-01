@@ -241,11 +241,7 @@ public class LiquidDesktopIconUI extends BasicDesktopIconUI {
 
          public void mouseDragged(MouseEvent e) {   
             Point p; 
-	    int newX, newY, newW, newH;
-            int deltaX;
-            int deltaY;
-	    Dimension min;
-	    Dimension max;
+	    int newX, newY;
             p = SwingUtilities.convertPoint((Component)e.getSource(), 
                                         e.getX(), e.getY(), null);
         

@@ -19,7 +19,6 @@ import thaw.core.Logger;
 import thaw.core.MainWindow;
 import thaw.fcp.FCPTransferQuery;
 import thaw.plugins.queueWatcher.DetailPanel;
-import thaw.plugins.queueWatcher.DragAndDropManager;
 import thaw.plugins.queueWatcher.QueuePanel;
 
 public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, PropertyChangeListener, ChangeListener, ActionListener {

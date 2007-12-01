@@ -23,8 +23,6 @@ public class SkinMenuItem extends SkinElement
     
     private int hsize, vsize;
     private int roundedSize;
-    private boolean useDefaultButton = false;
-    private boolean useSelectedButton = false;
     private boolean doneAllCalculations = false;
     
     public SkinMenuItem(String fileName, int leftOffset, int leftRolloverOffset, int rightOffset, int rightRolloverOffset, int roundedSize)

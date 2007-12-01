@@ -42,11 +42,6 @@ public class LiquidToolBarUI extends BasicToolBarUI {
     private Skin hbarHandler = new Skin("htoolbarhandler.png", 1, 3, 8, 3, 8);
 
     /**
-     * These insets are forced inner margin for the toolbar buttons.
-     */
-    private Insets insets = new Insets(2, 2, 2, 2);
-
-    /**
      * Creates the UI delegate for the given component.
      *
      * @param c The component to create its UI delegate.

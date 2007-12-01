@@ -17,10 +17,7 @@ import java.awt.font.LineMetrics;
 
 import java.beans.*;
 
-import java.util.Locale;
-
 import javax.swing.*;
-import javax.swing.border.*;
 import javax.swing.plaf.*;
 
 
@@ -53,7 +50,6 @@ class LiquidTitlePane extends JComponent {
 	 * 
 	 */
 	private static final long serialVersionUID = -1424746354108457746L;
-	private static final Border handyEmptyBorder = new EmptyBorder(0, 0, 0, 0);
     private static final int IMAGE_HEIGHT = 16;
     private static final int IMAGE_WIDTH = 16;
     private static LiquidWindowButtonUI iconButtonUI;
@@ -143,40 +139,19 @@ class LiquidTitlePane extends JComponent {
     private JRootPane rootPane;
 
     /**
-     * Room remaining in title for bumps.
-     */
-    private int buttonsWidth;
-
-    /**
      * Buffered Frame.state property. As state isn't bound, this is kept
      * to determine when to avoid updating widgets.
      */
     private int state;
 
-    /**
-     * RootPaneUI that created us.
-     */
-    private LiquidRootPaneUI rootPaneUI;
-
     public LiquidTitlePane(JRootPane root, LiquidRootPaneUI ui) {
         rootPane = root;
-        rootPaneUI = ui;
-
         state = -1;
 
         installSubcomponents();
         installDefaults();
 
         setLayout(createLayout());
-    }
-
-    /**
-     * Uninstalls the necessary state.
-     */
-    private void uninstall() {
-        uninstallListeners();
-        window = null;
-        removeAll();
     }
 
     /**
@@ -324,12 +299,6 @@ class LiquidTitlePane extends JComponent {
     }
 
     /**
-     * Uninstalls any previously installed UI values.
-     */
-    private void uninstallDefaults() {
-    }
-
-    /**
      * Returns the <code>JMenuBar</code> displaying the appropriate
      * system menu items.
      */
@@ -463,7 +432,6 @@ class LiquidTitlePane extends JComponent {
      * Adds the necessary <code>JMenuItem</code>s to the passed in menu.
      */
     private void addMenuItems(JPopupMenu menu) {
-        Locale locale = getRootPane().getLocale();
         JMenuItem mi = menu.add(restoreAction);
         mi.setMnemonic('r');
 
@@ -728,7 +696,6 @@ class LiquidTitlePane extends JComponent {
         int width = getWidth();
         int height = getHeight();
 
-        Color foreground = LiquidLookAndFeel.getWindowTitleInactiveForeground();
         Graphics2D g2 = (Graphics2D) g;
 
         Object oldAntiAliasingValue = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
@@ -1008,53 +975,6 @@ class LiquidTitlePane extends JComponent {
     }
 
     /**
-     * Convenience method to clip the passed in text to the specified
-     * size.
-     */
-    private String clippedText(String text, FontMetrics fm, int availTextWidth) {
-        if ((text == null) || (text.equals(""))) {
-            return "";
-        }
-
-        int textWidth = SwingUtilities.computeStringWidth(fm, text);
-        String clipString = "...";
-
-        if (textWidth > availTextWidth) {
-            int totalWidth = SwingUtilities.computeStringWidth(fm, clipString);
-            int nChars;
-
-            for (nChars = 0; nChars < text.length(); nChars++) {
-                totalWidth += fm.charWidth(text.charAt(nChars));
-
-                if (totalWidth > availTextWidth) {
-                    break;
-                }
-            }
-
-            text = text.substring(0, nChars) + clipString;
-        }
-
-        return text;
-    }
-
-    private int getInt(Object key, int defaultValue) {
-        Object value = UIManager.get(key);
-
-        if (value instanceof Integer) {
-            return ((Integer) value).intValue();
-        }
-
-        if (value instanceof String) {
-            try {
-                return Integer.parseInt((String) value);
-            } catch (NumberFormatException nfe) {
-            }
-        }
-
-        return defaultValue;
-    }
-
-    /**
      * Actions used to <code>close</code> the <code>Window</code>.
      */
     private class CloseAction extends AbstractAction {
@@ -1268,8 +1188,6 @@ class LiquidTitlePane extends JComponent {
 
         public void layoutContainer(Container c) {
             if (getWindowDecorationStyle() == JRootPane.NONE) {
-                buttonsWidth = 0;
-
                 return;
             }
 
@@ -1368,8 +1286,6 @@ class LiquidTitlePane extends JComponent {
                     }
                 }
             }
-            
-            buttonsWidth = leftToRight ? (w - x) : x;
         }
     }
 

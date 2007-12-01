@@ -10,7 +10,6 @@
 
 package com.birosoft.liquid;
 
-import java.awt.Color;
 import java.awt.Insets;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -33,29 +32,8 @@ import com.birosoft.liquid.skin.SkinSimpleButtonIndexModel;
 public class LiquidScrollBarUI extends BasicScrollBarUI
 {
     private int orientation = -1;
-    private int minExtent, minValue;
     private final int MIN_THUMB_SIZE = 14;
     public static final String FREE_STANDING_PROP = "JScrollBar.isFreeStanding";
-    
-    /**
-     * The scrollbar's highlight color.
-     */
-    private static Color highlightColor;
-    
-    /**
-     * The scrollbar's dark shadow color.
-     */
-    private static Color darkShadowColor;
-    
-    /**
-     * The thumb's shadow color.
-     */
-    private static Color thumbShadow;
-    
-    /**
-     * The thumb's highlight color.
-     */
-    private static Color thumbHighlightColor;
     
     /** true if thumb is in rollover state */
     protected boolean isRollover=false;

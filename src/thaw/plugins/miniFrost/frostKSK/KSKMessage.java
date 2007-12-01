@@ -41,7 +41,6 @@ public class KSKMessage
 	private String         inReplyToStr;
 	private String         subject;
 	private KSKAuthor      author;
-	private int            sigId;
 	private java.util.Date date;
 	private int            rev;
 	private boolean        read;
@@ -200,7 +199,6 @@ public class KSKMessage
 
 		this.author       = new KSKAuthor(nick, identity);
 
-		this.sigId        = sigId;
 		this.date         = date;
 		this.rev          = rev;
 		this.read         = read;

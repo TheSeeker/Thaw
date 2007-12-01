@@ -264,16 +264,11 @@ public class LiquidLookAndFeel extends BasicLookAndFeel {
                 "reset-field-edit", "UP", "increment", "KP_UP", "increment",
                 "DOWN", "decrement", "KP_DOWN", "decrement",
             });
-    private boolean windowslfforfilechooser = false;
-
-
     /**
      * This constructor installs the Liquid Look and Feel with the default color
      * theme.
      */
     public LiquidLookAndFeel() {
-        windowslfforfilechooser = false;
-
         if (!isInstalled) {
             isInstalled = true;
 

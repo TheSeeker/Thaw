@@ -293,17 +293,6 @@ public final class Rijndael_Algorithm // implicit no-argument constructor
 //	...........................................................................
 
 	/**
-	 * Convenience method to expand a user-supplied key material into a
-	 * session key, assuming Rijndael's default block size (128-bit).
-	 *
-	 * @param k The 128/192/256-bit user-key to use.
-	 * @exception  InvalidKeyException  If the key is invalid.
-	 */
-	private static final Object makeKey (byte[] k) throws InvalidKeyException {
-		return makeKey(k, BLOCK_SIZE);
-	}
-
-	/**
 	 * Convenience method to encrypt exactly one block of plaintext, assuming
 	 * Rijndael's default block size (128-bit).
 	 *

@@ -30,11 +30,8 @@ public class LiquidFrameBorder extends AbstractBorder implements UIResource {
 	private static LiquidFrameBorder onlyInstance;
 //    private static Robot robot;
 //    private static boolean robotsSupported = true;
-    private static final Insets insets = new Insets(0, 4, 4, 4);
     private boolean prevState = false;
     private Window window;
-    private int titleHeight;
-
     /** indicates whether the internal frame is active */
     private boolean isActive = true;
 
@@ -91,8 +88,6 @@ public class LiquidFrameBorder extends AbstractBorder implements UIResource {
 
         int frameTitleHeight = UIManager.getInt(
                 "InternalFrame.frameTitleHeight");
-
-        int index = isActive ? 0 : 1;
 
         drawLeftTop(g, isActive, 4, frameTitleHeight);
 

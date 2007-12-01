@@ -33,9 +33,6 @@ public class FCPGetNode extends Observable implements FCPQuery, Observer {
 	public final static String usedMemElement = "volatile.usedJavaMemory";
 	private long usedMem = 0;
 
-	public final static String netSizeSessionElement = "volatile.networkSizeEstimateSession";
-	private int netSizeSession = 0;
-
 	public final static String nmbThreadsElement = "volatile.runningThreadCount";
 	private int nmbThreads = 0;
 

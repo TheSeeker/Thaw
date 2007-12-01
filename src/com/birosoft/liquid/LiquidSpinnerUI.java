@@ -56,7 +56,6 @@ public class LiquidSpinnerUI extends BasicSpinnerUI {
             true);
     private static final ArrowButtonHandler previousButtonHandler = new ArrowButtonHandler("decrement",
             false);
-    private static final Dimension zeroSize = new Dimension(0, 0);
 
     public static ComponentUI createUI(JComponent c) {
         return new LiquidSpinnerUI();

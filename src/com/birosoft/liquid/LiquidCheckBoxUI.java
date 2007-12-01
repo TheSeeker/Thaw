@@ -94,9 +94,6 @@ public class LiquidCheckBoxUI extends BasicCheckBoxUI {
         textRect.x = textRect.y = textRect.width = textRect.height = 0;
 
         Icon altIcon = b.getIcon();
-        Icon selectedIcon = null;
-        Icon disabledIcon = null;
-
         String text = SwingUtilities.layoutCompoundLabel(c, fm, b.getText(),
                 (altIcon != null) ? altIcon : getDefaultIcon(),
                 b.getVerticalAlignment(), b.getHorizontalAlignment(),

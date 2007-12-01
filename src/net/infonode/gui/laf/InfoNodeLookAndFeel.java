@@ -305,41 +305,31 @@ public static final UIManager.LookAndFeelInfo LOOK_AND_FEEL_INFO =
     }
   }
 
-  private static class MyListCellRenderer extends DefaultListCellRenderer {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = -4686589215440055032L;
-	private Border normalBorder;
-    private Border focusBorder;
-
-    MyListCellRenderer(Border normalBorder, Border focusBorder) {
-      this.normalBorder = normalBorder;
-      this.focusBorder = focusBorder;
-    }
-
-    public Component getListCellRendererComponent(JList list, Object value, int index,
-                                                  boolean isSelected,
-                                                  boolean cellHasFocus) {
-      JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-      label.setBorder(cellHasFocus ? focusBorder : normalBorder);
-      return label;
-    }
-
-    public static class UIResource extends MyListCellRenderer implements javax.swing.plaf.UIResource {
-      /**
-		 * 
-		 */
+    public static class MyListCellRendererUIResource extends DefaultListCellRenderer implements javax.swing.plaf.UIResource {
 		private static final long serialVersionUID = 5326463933712427348L;
+		
+		private Border normalBorder;
+	    private Border focusBorder;
 
-	public UIResource(Border normalBorder, Border focusBorder) {
-        super(normalBorder, focusBorder);
-      }
+
+	    public MyListCellRendererUIResource(Border normalBorder, Border focusBorder) {
+	    	this.normalBorder = normalBorder;
+	    	this.focusBorder = focusBorder;
+	    }
+
+	    public Component getListCellRendererComponent(JList list, Object value, int index,
+	    											boolean isSelected,
+	    											boolean cellHasFocus) {
+	    	JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+	    	label.setBorder(cellHasFocus ? focusBorder : normalBorder);
+	    	return label;
+	    }
+
+	
     }
-  }
 
-  protected void initComponentDefaults(UIDefaults table) {
-    super.initComponentDefaults(table);
+    protected void initComponentDefaults(UIDefaults table) {
+    	super.initComponentDefaults(table);
 
     Class iconClass = MetalLookAndFeel.class;
     UIResource menuItemBorder = new MetalBorders.MenuItemBorder() {
@@ -370,7 +360,7 @@ public static final UIManager.LookAndFeelInfo LOOK_AND_FEEL_INFO =
 
       "List.cellRenderer", new UIDefaults.ActiveValue() {
         public Object createValue(UIDefaults table) {
-          return new MyListCellRenderer.UIResource(theme.getListItemBorder(), theme.getListFocusedItemBorder());
+          return new MyListCellRendererUIResource(theme.getListItemBorder(), theme.getListFocusedItemBorder());
         }
       },
 

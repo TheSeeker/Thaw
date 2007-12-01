@@ -42,12 +42,10 @@ public class SkinImageCache {
     }
 
     private HashMap map;
-    private HashMap iconMap;
     private HashMap bufferedMap;
 
     protected SkinImageCache() {
         map = new HashMap();
-        iconMap = new HashMap();
         bufferedMap = new HashMap();
     }
 

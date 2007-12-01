@@ -37,7 +37,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import java.io.File;
-import java.io.IOException;
 
 import java.text.DateFormat;
 
@@ -97,7 +96,6 @@ import javax.swing.text.Position;
 
 public class FileChooserBasicUI extends BasicFileChooserUI {
     private static final Dimension hstrut5 = new Dimension(5, 1);
-    private static final Dimension hstrut11 = new Dimension(11, 1);
     private static final Dimension vstrut5 = new Dimension(1, 5);
     private static final Insets shrinkwrap = new Insets(2, 2, 2, 2);
 
@@ -144,7 +142,6 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
             }
         };
 
-    private boolean useShellFolder;
     private ListSelectionModel listSelectionModel;
     private JList list;
     private JTable detailsTable;
@@ -361,7 +358,6 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
         // FileSystemView.getRoots() returns one folder and that is
         // the same as the first item in the ShellFolder combobox list.
         {
-            useShellFolder = false;
         }
 
         // ************************************** //
@@ -542,17 +538,16 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
     protected void installListeners(JFileChooser fc) {
         super.installListeners(fc);
 
-        ActionMap actionMap = getActionMap();
+        ActionMap actionMap = getActionMapSub();
         SwingUtilities.replaceUIActionMap(fc, actionMap);
     }
 
-    protected ActionMap getActionMap() {
-        return createActionMap();
+    protected ActionMap getActionMapSub() {
+        return createActionMapSub();
     }
-
-    protected ActionMap createActionMap() {
+    protected ActionMap createActionMapSub() {
         AbstractAction escAction = new AbstractAction() {
-                /**
+            /**
 			 * 
 			 */
 			private static final long serialVersionUID = -425601186607161693L;
@@ -965,7 +960,7 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
                 editCell = new JTextField();
                 editCell.addActionListener(new EditActionListener());
                 editCell.addFocusListener(editorFocusListener);
-                editCell.setNextFocusableComponent(list);
+                //editCell.setNextFocusableComponent(list);
             }
 
             list.add(editCell);
@@ -1917,23 +1912,12 @@ public class FileChooserBasicUI extends BasicFileChooserUI {
 
             File[] baseFolders;
 
-	    baseFolders = fsv.getRoots();
+            baseFolders = fsv.getRoots();
 
             directories.addAll(Arrays.asList(baseFolders));
 
-            // Get the canonical (full) path. This has the side
-            // benefit of removing extraneous chars from the path,
-            // for example /foo/bar/ becomes /foo/bar
-            File canonical = null;
 
-            try {
-                canonical = directory.getCanonicalFile();
-            } catch (IOException e) {
-                // Maybe drive is not ready. Can't abort here.
-                canonical = directory;
-            }
-
-	    calculateDepths();
+            calculateDepths();
         }
 
         private void calculateDepths() {

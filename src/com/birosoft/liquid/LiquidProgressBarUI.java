@@ -135,8 +135,6 @@ public class LiquidProgressBarUI extends BasicProgressBarUI {
         if (!(g instanceof Graphics2D)) {
             return;
         }
-        Graphics2D g2 = (Graphics2D) g;
-
         int index = 0;//progressBar.isEnabled() ? 0 : 1;
 
         Insets b = progressBar.getInsets(); // area for border

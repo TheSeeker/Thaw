@@ -458,7 +458,6 @@ public class LiquidRootPaneUI extends BasicRootPaneUI {
             int mbWidth = 0;
             int mbHeight = 0;
             int tpWidth = 0;
-            int tpHeight = 0;
             Insets i = parent.getInsets();
             JRootPane root = (JRootPane) parent;
 
@@ -491,7 +490,6 @@ public class LiquidRootPaneUI extends BasicRootPaneUI {
 
                     if (tpd != null) {
                         tpWidth = tpd.width;
-                        tpHeight = tpd.height;
                     }
                 }
             }
@@ -516,7 +514,6 @@ public class LiquidRootPaneUI extends BasicRootPaneUI {
             int mbWidth = 0;
             int mbHeight = 0;
             int tpWidth = 0;
-            int tpHeight = 0;
             Insets i = parent.getInsets();
             JRootPane root = (JRootPane) parent;
 
@@ -549,7 +546,6 @@ public class LiquidRootPaneUI extends BasicRootPaneUI {
 
                     if (tpd != null) {
                         tpWidth = tpd.width;
-                        tpHeight = tpd.height;
                     }
                 }
             }
@@ -674,7 +670,6 @@ public class LiquidRootPaneUI extends BasicRootPaneUI {
             }
 
             if (root.getContentPane() != null) {
-                Dimension cpd = root.getContentPane().getPreferredSize();
                 root.getContentPane().setBounds(0, nextY, w,
                     (h < nextY) ? 0 : (h - nextY));
             }

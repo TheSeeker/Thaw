@@ -153,7 +153,6 @@ public class LiquidComboBoxButton extends JButton
         Insets insets = new Insets(0, 12, 2, 2);
         
         int width = getWidth() - (insets.left + insets.right);
-        int widthFocus = width; //- (skin.getHsize()-skin.getOffset());
         int height = getHeight() - (insets.top + insets.bottom);
         
         if (height <= 0 || width <= 0)
@@ -163,12 +162,7 @@ public class LiquidComboBoxButton extends JButton
         
         int left = insets.left;
         int top = insets.top;
-        int right = left + (width - 1);
-        int bottom = top + (height - 1);
-        
         int iconWidth = LiquidComboBoxUI.comboBoxButtonSize;
-        int iconLeft = (leftToRight) ? right : left;
-        
         // Let the renderer paint
         Component c = null;
         boolean mustResetOpaque = false;

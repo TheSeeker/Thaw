@@ -34,7 +34,6 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
 public class LiquidInternalFrameUI extends BasicInternalFrameUI {
     protected static String IS_PALETTE = "JInternalFrame.isPalette";
     private static String FRAME_TYPE = "JInternalFrame.frameType";
-    private static String NORMAL_FRAME = "normal";
     private static String PALETTE_FRAME = "palette";
     private static String OPTION_DIALOG = "optionDialog";
     private static final PropertyChangeListener liquidPropertyChangeListener = new LiquidPropertyChangeHandler();

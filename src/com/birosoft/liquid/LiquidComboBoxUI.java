@@ -308,10 +308,6 @@ public class LiquidComboBoxUI extends BasicComboBoxUI {
             Insets margin = arrowButton.getMargin();
             Insets insets = comboBox.getInsets();
 
-            if (editor instanceof JComponent) {
-                Insets editorInsets = ((JComponent) editor).getInsets();
-            }
-
             size.height += (margin.top + margin.bottom);
             size.height += (insets.top + insets.bottom);
 
@@ -368,14 +364,10 @@ public class LiquidComboBoxUI extends BasicComboBoxUI {
         }
 
         public Dimension preferredLayoutSize(Container parent) {
-            JComboBox cb = (JComboBox) parent;
-
             return parent.getPreferredSize();
         }
 
         public Dimension minimumLayoutSize(Container parent) {
-            JComboBox cb = (JComboBox) parent;
-
             return parent.getMinimumSize();
         }
 

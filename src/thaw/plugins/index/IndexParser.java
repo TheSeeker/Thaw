@@ -337,7 +337,6 @@ public class IndexParser {
 		private boolean ownerTag = false;
 		private boolean privateKeyTag = false;
 		private boolean dateTag = false;
-		private boolean commentsTag = false;
 		private boolean categoryTag = false;
 		private boolean hasCommentTag = false;
 		private boolean clientTag = false;
@@ -400,7 +399,6 @@ public class IndexParser {
 
 				if (pub != null) {
 					hasCommentTag = true;
-					commentsTag = true;
 					Logger.debug(this, "Comment allowed in this index");
 					index.setCommentKeys(pub, priv);
 				}
@@ -464,7 +462,6 @@ public class IndexParser {
 				if (categoryStr != null)
 					index.setCategory(categoryStr);
 			} else if ("comments".equals(rawName)) {
-				commentsTag = false;
 				return;
 			} else if ("client".equals(rawName)) {
 				clientTag = false;

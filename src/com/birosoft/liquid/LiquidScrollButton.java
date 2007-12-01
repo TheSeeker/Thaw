@@ -30,8 +30,6 @@ public class LiquidScrollButton extends BasicArrowButton
 	 */
 	private static final long serialVersionUID = -7314095928302353987L;
 	private boolean isFreeStanding = false;
-    private int buttonWidth;
-    
     /** one of the four skins for the button */
     private static Skin skinUp= new Skin("scrollbuttonsup.png", 4, 0);
     /** one of the four skins for the button */
@@ -53,7 +51,6 @@ public class LiquidScrollButton extends BasicArrowButton
     public LiquidScrollButton(int orientation,int width, boolean freeStanding)
     {
         super(orientation);
-        buttonWidth = width;
         isFreeStanding = freeStanding;
         this.putClientProperty(LiquidScrollBarUI.FREE_STANDING_PROP, isFreeStanding ? Boolean.TRUE : Boolean.FALSE);
 

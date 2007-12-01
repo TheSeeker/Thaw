@@ -51,8 +51,6 @@ public class LiquidInternalFrameBorder extends AbstractBorder implements UIResou
     {
         int frameTitleHeight = isPalette ? UIManager.getInt("InternalFrame.paletteTitleHeight") : UIManager.getInt("InternalFrame.frameTitleHeight");
 
-        int index=isActive ? 0 : 1;
-        
         drawLeftTop(g, isActive, 4, frameTitleHeight);
         
         g.translate(0, frameTitleHeight);

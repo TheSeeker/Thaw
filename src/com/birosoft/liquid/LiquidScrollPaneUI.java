@@ -110,7 +110,7 @@ public class LiquidScrollPaneUI extends BasicScrollPaneUI
             if (scrollpane.isWheelScrollingEnabled() &&
                     (e.getScrollAmount() != 0)) {
                 JScrollBar toScroll = scrollpane.getVerticalScrollBar();
-                int direction = 0;
+
                 int length = toScroll.getHeight();
 
                 // find which scrollbar to scroll, or return if none
@@ -124,8 +124,6 @@ public class LiquidScrollPaneUI extends BasicScrollPaneUI
 
                     length = toScroll.getWidth();
                 }
-
-                direction = (e.getWheelRotation() < 0) ? (-1) : 1;
 
                 if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
                     int newValue = toScroll.getValue() +

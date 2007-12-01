@@ -537,17 +537,8 @@ public class LiquidTabbedPaneUI extends BasicTabbedPaneUI {
     }
 
     public void paint(Graphics g, JComponent c) {
-        int width = tabPane.getWidth();
-        int height = tabPane.getHeight();
-        Insets insets = tabPane.getInsets();
-
-        int x = insets.left;
-        int y = insets.top;
-        int w = width - insets.right - insets.left;
-        int h = height - insets.top - insets.bottom;
 
         int tabPlacement = tabPane.getTabPlacement();
-        Insets contentInsets = getContentBorderInsets(tabPlacement);
 
         if (tabPlacement == BOTTOM) {
             Color oldColor = g.getColor();
@@ -578,7 +569,6 @@ public class LiquidTabbedPaneUI extends BasicTabbedPaneUI {
 
     protected int getTabLabelShiftX(int tabPlacement, int tabIndex,
         boolean isSelected) {
-        Rectangle tabRect = rects[tabIndex];
         int nudge = 0;
 
         switch (tabPlacement) {

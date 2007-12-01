@@ -76,12 +76,6 @@ public class LiquidInternalFrameTitlePane extends BasicInternalFrameTitlePane
     protected int frameTitleHeight;
 
     /**
-     * The buttons width, calculated at runtime.
-     */
-    private int buttonsWidth;
-
-    
-    /**
      * This constructor creates a title pane for the given internal frame
      * instance.
      *
@@ -142,8 +136,6 @@ public class LiquidInternalFrameTitlePane extends BasicInternalFrameTitlePane
         Insets insets = frame.getInsets();
         int width = getWidth();
         int height = getHeight();
-
-        Color foreground = LiquidLookAndFeel.getWindowTitleInactiveForeground();
 
         Graphics2D g2 = (Graphics2D) g;
         Object oldAntiAliasingValue = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
@@ -647,8 +639,6 @@ public class LiquidInternalFrameTitlePane extends BasicInternalFrameTitlePane
                 }
             }
         }
-        
-        buttonsWidth = leftToRight ? (w - x) : x;
     }
 
     public void activate() {

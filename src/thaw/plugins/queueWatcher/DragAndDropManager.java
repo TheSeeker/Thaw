@@ -16,25 +16,25 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Vector;
 
-import javax.swing.JComponent;
-import javax.swing.TransferHandler;
-
 import thaw.core.Core;
 import thaw.core.Logger;
 import thaw.fcp.FCPTransferQuery;
 
-
+/**
+ * TODO : WIP !
+ * @author jflesch
+ */
 public class DragAndDropManager implements DragGestureListener, DragSourceListener {
 	private QueuePanel[] queuePanels;
 
-	private DragSource dragSource;
+	//	private DragSource dragSource;
 
 	private final String tmpDir = System.getProperty("java.io.tmpdir");
 
 	public DragAndDropManager(final Core core, final QueuePanel[] queuePanels) {
 		this.queuePanels = queuePanels;
 
-		dragSource = DragSource.getDefaultDragSource();
+		//dragSource = DragSource.getDefaultDragSource();
 
 		//for(int i = 0 ; i < queuePanels.length ; i++) {
 			//dragSource.createDefaultDragGestureRecognizer(queuePanels[i].getTable(),
@@ -48,7 +48,7 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 		//}
 	}
 
-	private class FileTransferHandler extends TransferHandler {
+	/*private class FileTransferHandler extends TransferHandler {
 		private static final long serialVersionUID = 1L;
 
 		protected  Transferable createTransferable(final JComponent c) {
@@ -65,7 +65,7 @@ public class DragAndDropManager implements DragGestureListener, DragSourceListen
 			return null;
 		}
 
-	}
+	}*/
 
 	public void dragGestureRecognized(final DragGestureEvent dge) {
 		try {

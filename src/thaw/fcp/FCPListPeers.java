@@ -11,8 +11,6 @@ public class FCPListPeers extends Observable implements FCPQuery, Observer {
 	private boolean withMetadata;
 	private boolean withVolatile;
 
-	private FCPQueueManager queueManager;
-
 	private Hashtable peers; /* key : peer name -> hashtable : key : parameter name -> parameter value */
 
 	private boolean endList;

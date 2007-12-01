@@ -51,9 +51,7 @@ class LiquidSplitPaneDivider extends BasicSplitPaneDivider
 	 */
 	private static final long serialVersionUID = 4058298927908826880L;
 
-	private int inset = 0;
-    
-    Skin skinVertSplitter = null;
+	Skin skinVertSplitter = null;
     Skin skinHorzSplitter = null;
     
     public LiquidSplitPaneDivider(BasicSplitPaneUI ui)
@@ -80,7 +78,6 @@ class LiquidSplitPaneDivider extends BasicSplitPaneDivider
     {
         Dimension size = getSize();
         Rectangle clip = new Rectangle(size.width, size.height);
-        Insets insets = getInsets();
         if (orientation == JSplitPane.HORIZONTAL_SPLIT)
         {
             int xOffset = (clip.width - 5) / 2;

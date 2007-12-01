@@ -268,7 +268,6 @@ public class XTraScrollBarUI extends BasicScrollBarUI {
 	
 	    BoundedRangeModel model = XTraScrollBarUI.this.scrollbar().getModel();
 	    Rectangle thumbR = XTraScrollBarUI.this.getThumbBounds();
-	    float trackLength;
 	    int thumbMin, thumbMax, thumbPos;
 
             if (XTraScrollBarUI.this.scrollbar().getOrientation() == JScrollBar.VERTICAL) {
@@ -276,14 +275,12 @@ public class XTraScrollBarUI extends BasicScrollBarUI {
 		thumbMax = XTraScrollBarUI.this.decrButton().getY() /*incrButton.getY()*/ - XTraScrollBarUI.this.getThumbBounds().height;
 		thumbPos = Math.min(thumbMax, Math.max(thumbMin, (e.getY() - offset)));
 		XTraScrollBarUI.this.setThumbBounds(thumbR.x, thumbPos, thumbR.width, thumbR.height);
-		trackLength = XTraScrollBarUI.this.getTrackBounds().height;
 	    }
 	    else {
 		thumbMin = sbInsets.left; //decrButton.getX() + decrButton.getWidth();
 		thumbMax = XTraScrollBarUI.this.decrButton().getX() /*incrButton.getX()*/ - XTraScrollBarUI.this.getThumbBounds().width;
 		thumbPos = Math.min(thumbMax, Math.max(thumbMin, (e.getX() - offset)));
 		XTraScrollBarUI.this.setThumbBounds(thumbPos, thumbR.y, thumbR.width, thumbR.height);
-		trackLength = XTraScrollBarUI.this.getTrackBounds().width;
 	    }
 
 	    /* Set the scrollbars value.  If the thumb has reached the end of
