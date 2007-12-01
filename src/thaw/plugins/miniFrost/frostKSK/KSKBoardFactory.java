@@ -500,10 +500,15 @@ public class KSKBoardFactory
 	 * Put here to make my life simpler with the KSKBoardAttachment.
 	 */
 	protected void createBoard(String name, String publicKey, String privateKey,
-				   boolean warningIfExisting) {
+				   				boolean warningIfExisting) {
 
 		if (!thaw.fcp.FreenetURIHelper.isAKey(publicKey)) {
 			Logger.error(this, "Invalid publicKey");
+			return;
+		}
+		
+		if (thaw.fcp.FreenetURIHelper.isObsolete(publicKey)) {
+			new thaw.gui.WarningWindow(core, I18n.getMessage("thaw.error.obsolete"));
 			return;
 		}
 

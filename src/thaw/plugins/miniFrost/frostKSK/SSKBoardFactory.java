@@ -196,8 +196,8 @@ public class SSKBoardFactory extends KSKBoardFactory {
 				return;
 			} else if (e.getSource() == ok) {
 				createBoard(name.getText(),
-					    publicKey.getText(),
-					    privateKey.getText());
+					    	publicKey.getText(),
+					    	privateKey.getText());
 			}
 
 			synchronized(this) {
