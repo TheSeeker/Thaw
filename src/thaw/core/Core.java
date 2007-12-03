@@ -610,43 +610,45 @@ public class Core implements Observer {
 		}
 
 		public void run() {
-			Logger.notice(this, "Starting reconnection process !");
-
-			getMainWindow().setStatus(IconBox.blueBunny,
-						  I18n.getMessage("thaw.statusBar.connecting"), java.awt.Color.RED);
-			getPluginManager().stopPlugins(); /* don't forget there is the status bar plugin */
-			getMainWindow().setStatus(IconBox.blueBunny,
-						  I18n.getMessage("thaw.statusBar.connecting"), java.awt.Color.RED);
-
-			subDisconnect();
-
-			while(running) {
-				try {
-					Thread.sleep(Core.TIME_BETWEEN_EACH_TRY);
-				} catch(final java.lang.InterruptedException e) {
-					// brouzouf
+			synchronized(PluginManager.pluginLock) {
+				Logger.notice(this, "Starting reconnection process !");
+	
+				getMainWindow().setStatus(IconBox.blueBunny,
+							  I18n.getMessage("thaw.statusBar.connecting"), java.awt.Color.RED);
+				getPluginManager().stopPlugins(); /* don't forget there is the status bar plugin */
+				getMainWindow().setStatus(IconBox.blueBunny,
+							  I18n.getMessage("thaw.statusBar.connecting"), java.awt.Color.RED);
+	
+				subDisconnect();
+	
+				while(running) {
+					try {
+						Thread.sleep(Core.TIME_BETWEEN_EACH_TRY);
+					} catch(final java.lang.InterruptedException e) {
+						// brouzouf
+					}
+	
+					Logger.notice(this, "Trying to reconnect ...");
+					if(initConnection())
+						break;
 				}
-
-				Logger.notice(this, "Trying to reconnect ...");
-				if(initConnection())
-					break;
+	
+				if (running) {
+					getMainWindow().setStatus(IconBox.minConnectAction,
+								  I18n.getMessage("thaw.statusBar.ready"));
+				} else {
+					getMainWindow().setStatus(IconBox.minDisconnectAction,
+								  I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
+				}
+	
+				if (running) {
+					getPluginManager().loadAndRunPlugins();
+				}
+	
+				reconnectionManager = null;
+	
+				getMainWindow().connectionHasChanged();
 			}
-
-			if (running) {
-				getMainWindow().setStatus(IconBox.minConnectAction,
-							  I18n.getMessage("thaw.statusBar.ready"));
-			} else {
-				getMainWindow().setStatus(IconBox.minDisconnectAction,
-							  I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
-			}
-
-			if (running) {
-				getPluginManager().loadAndRunPlugins();
-			}
-
-			reconnectionManager = null;
-
-			getMainWindow().connectionHasChanged();
 		}
 
 		public void stop() {
@@ -659,13 +661,15 @@ public class Core implements Observer {
 	 * use Thread => will also do all the work related to the plugins
 	 */
 	public void reconnect() {
-		if (reconnectionManager == null) {
-			reconnectionManager = new ReconnectionManager();
-			final Thread th = new ThawThread(reconnectionManager,
-							 "Reconnection manager", this);
-			th.start();
-		} else {
-			Logger.warning(this, "Already trying to reconnect !");
+		synchronized(this) {
+			if (reconnectionManager == null) {
+				reconnectionManager = new ReconnectionManager();
+				final Thread th = new ThawThread(reconnectionManager,
+								 "Reconnection manager", this);
+				th.start();
+			} else {
+				Logger.warning(this, "Already trying to reconnect !");
+			}
 		}
 	}
 

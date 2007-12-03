@@ -206,9 +206,11 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 			setChanged();
 			notifyObservers(okButton);
 
-			Reloader reloader = new Reloader(needConnectionReset);
-			Thread reload = new ThawThread(reloader, "Config reloader", this);
-			reload.start();
+			synchronized(PluginManager.pluginLock) {
+				Reloader reloader = new Reloader(needConnectionReset);
+				Thread reload = new ThawThread(reloader, "Config reloader", this);
+				reload.start();
+			}
 
 			needConnectionReset = false;
 		}
@@ -232,7 +234,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 			this.running = true;
 		}
 
-		public void run() {
+		public void apply() {
 			JDialog dialog = null;
 
 			if (resetConnection) {
@@ -302,6 +304,12 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 			if (resetConnection)
 				dialog.setVisible(false);
+		}
+		
+		public void run() {
+			synchronized(PluginManager.pluginLock) {
+				apply();
+			}
 		}
 
 		public void stop() {
