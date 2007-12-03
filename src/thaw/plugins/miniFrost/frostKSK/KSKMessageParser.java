@@ -532,7 +532,46 @@ public class KSKMessageParser {
 		/* because we have date to store: */
 		return true;
 	}
+	
+	private boolean invalidMessage(String reason) {
+		/* Invalid message -> Will use default value */
+		/* the goal is to not download this message again */
+		
+		inReplyTo = null;
+		from = "["+I18n.getMessage("thaw.plugin.miniFrost.invalidMessage")+"]";
+		subject = "["+I18n.getMessage("thaw.plugin.miniFrost.invalidMessage")+"]";
 
+		String[] date = gmtFormat.format(new Date()).toString().split(" ");
+		this.date = date[0];
+		this.time = date[1];
+
+		/* not really used */
+		this.recipient = null;
+
+		/* will be ignored by the checks */
+		this.board = null;
+
+		this.body = I18n.getMessage("thaw.plugin.miniFrost.invalidMessage")+
+			((reason != null) ? "\n"+reason : "");
+
+		this.publicKey = null;
+		this.signature = null;
+		this.idLinePos = "0";
+		this.idLineLen = "0";
+		attachments = null;
+
+		identity = null;
+
+		if (frostCrypt == null)
+			frostCrypt = new FrostCrypt();
+		this.messageId = frostCrypt.computeChecksumSHA256(date[0] + date[1]);
+
+		read = true;
+		archived = true;
+		
+		return true;
+	}
+	
 
 	/**
 	 * This function has been imported from FROST.
@@ -546,14 +585,14 @@ public class KSKMessageParser {
 				doc = XMLTools.parseXmlFile(file, false);
 			} catch(Exception ex) {  // xml format error
 				Logger.notice(this, "Invalid Xml");
-				return false;
+				return invalidMessage("XML parser error:\n"+ex.toString());
 			}
 
 			if( doc == null ) {
 				Logger.notice(this,
 					       "Error: couldn't parse XML Document - " +
 					       "File name: '" + file.getName() + "'");
-				return false;
+				return invalidMessage("Nothing parsed ?!");
 			}
 
 			Element rootNode = doc.getDocumentElement();
@@ -574,7 +613,7 @@ public class KSKMessageParser {
 			/* XMLTools throws runtime exception sometimes ... */
 			Logger.notice(this, "Unable to parse XML message because : "+e.toString());
 			e.printStackTrace();
-			return false;
+			return invalidMessage("Unable to parse XML message because : "+e.toString());
 		}
 	}
 
