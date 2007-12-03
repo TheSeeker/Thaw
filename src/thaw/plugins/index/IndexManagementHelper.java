@@ -344,8 +344,14 @@ public class IndexManagementHelper {
 			publicKey = dialog.getPublicKey();
 			privateKey = dialog.getPrivateKey();
 
+			/* https://bugs.freenetproject.org/view.php?id=1625:
+			 *  --- 0001625: Added index not in the correct category
+			 *  If you add an index from the link list instead of the unknown index list,
+			 *  it's added in the same folder than the index instead of "recently added".
+			 *  ==> Target == null
+			 */
 			IndexManagementHelper.reuseIndex(getQueueManager(), getIndexBrowserPanel(),
-							 (IndexFolder)getTarget(), publicKey, privateKey,
+							 null, publicKey, privateKey,
 							 false /* autosort */);
 		}
 	}
@@ -416,17 +422,10 @@ public class IndexManagementHelper {
 
 		IndexFolder parent;
 
-		/* https://bugs.freenetproject.org/view.php?id=1625:
-		 *  --- 0001625: Added index not in the correct category
-		 *  If you add an index from the link list instead of the unknown index list,
-		 *  it's added in the same folder than the index instead of "recently added".
-		 */
-		/*
 		if (target != null)
 			parent = target;
 		else
-		*/
-		parent = indexBrowser.getIndexTree().getRoot().getRecentlyAddedFolder();
+			parent = indexBrowser.getIndexTree().getRoot().getRecentlyAddedFolder();
 
 		int revision = FreenetURIHelper.getUSKRevision(publicKey);
 

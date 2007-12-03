@@ -617,7 +617,7 @@ public class DatabaseManager {
 									       folders[folderLevel],
 									       attrs.getValue("publicKey"),
 									       attrs.getValue("privateKey"),
-									       false);
+									       false, false);
 				if (index != null) {
 					index.rename(attrs.getValue("displayName"));
 

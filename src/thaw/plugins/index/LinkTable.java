@@ -76,11 +76,17 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		JMenuItem item;
 		JButton button;
 
+		/* https://bugs.freenetproject.org/view.php?id=1625:
+		 *  --- 0001625: Added index not in the correct category
+		 *  If you add an index from the link list instead of the unknown index list,
+		 *  it's added in the same folder than the index instead of "recently added".
+		 *  ==> addToParent == false
+		 */	
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addIndexesFromLink"), IconBox.minAdd);
 		button = new JButton(IconBox.indexReuse);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addIndexesFromLink"));
 		toolbarActions.add(new LinkManagementHelper.IndexAdder(button, queueManager,
-								       indexBrowser, true));
+								       indexBrowser, false));
 
 		toolbarModifier.addButtonToTheToolbar(button);
 		rightClickMenu.add(item);
