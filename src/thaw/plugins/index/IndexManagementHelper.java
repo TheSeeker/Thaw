@@ -432,6 +432,7 @@ public class IndexManagementHelper {
 		Hsqldb db = indexBrowser.getDb();
 
 		Index index = null;
+		int pos = parent.getChildCount();
 
 		synchronized(db.dbLock) {
 			try {
@@ -457,7 +458,7 @@ public class IndexManagementHelper {
 				st.setString(4, publicKey);
 				st.setString(5, privateKey);
 				st.setNull(6, Types.VARCHAR);
-				st.setInt(7, 0 /* positionInTree */);
+				st.setInt(7, pos /* positionInTree */);
 				st.setInt(8, revision);
 				st.setBoolean(9, false);
 
@@ -483,7 +484,7 @@ public class IndexManagementHelper {
 
 		index.setIsNewFlag();
 
-		((MutableTreeNode)parent).insert((index), 0);
+		((MutableTreeNode)parent).insert((index), pos);
 
 		indexBrowser.getIndexTree().refresh(parent);
 
