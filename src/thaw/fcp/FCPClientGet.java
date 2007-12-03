@@ -252,6 +252,12 @@ public class FCPClientGet extends Observable
 		transferedBlocks = 0;
 
 		this.queueManager = queueManager;
+		
+		/* TODO : seems to be true sometimes => find why */ 
+		if (queueManager == null
+				|| queueManager.getQueryManager() == null
+				|| queueManager.getQueryManager().getConnection() == null)
+			return false;
 
 		if (queueManager.getQueryManager().getConnection().isLocalSocket()
 		    && !noDDA

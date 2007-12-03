@@ -183,7 +183,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 	 * Called when apply button is pressed.
 	 */
 	public void actionPerformed(final ActionEvent e) {
-		if((e.getSource() == okButton) && !core.canDisconnect()) {
+		if((e.getSource() == okButton) && !core.canDisconnect() && needConnectionReset) {
 			final int ret = JOptionPane.showOptionDialog((java.awt.Component)null,
 								       I18n.getMessage("thaw.warning.isWritingSoApplyLater"),
 								       I18n.getMessage("thaw.warning.title"),

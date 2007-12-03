@@ -267,7 +267,7 @@ public class DatabaseManager {
 			  + "localPath VARCHAR(500) NULL,"
 			  + "mime VARCHAR(50) NULL,"
 			  + "size BIGINT NOT NULL,"
-			  + "category INTEGER NULL," // This field is a mistake.
+			  + "category INTEGER NULL," // TODO : This field is unused, to remove ?
 			  + "indexParent INTEGER NOT NULL,"
 			  + "toDelete BOOLEAN DEFAULT FALSE NOT NULL,"
 			  + "dontDelete BOOLEAN DEFAULT FALSE NOT NULL,"
@@ -624,6 +624,23 @@ public class DatabaseManager {
 					indexHandler = new IndexParser(index).getIndexHandler();
 
 					indexHandler.startDocument();
+				} else {
+					/* returned null because it already exists in the db ? */
+					/* if yes, we will just update the private key */
+
+					String publicKey = attrs.getValue("publicKey");
+					String privateKey = attrs.getValue("privateKey");
+					
+					if (privateKey == null || "".equals(privateKey)) {
+						return;
+					}
+					
+					int id = Index.isAlreadyKnown(db, publicKey, true);
+					
+					if (id < 0)
+						return;
+					else
+						Index.setPrivateKey(db, id, privateKey);
 				}
 
 				return;

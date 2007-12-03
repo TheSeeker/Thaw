@@ -81,10 +81,7 @@ public class Index extends Observable implements MutableTreeNode,
 	private boolean successful = true;
 
 
-	/**
-	 * @deprecated Just don't use it !
-	 */
-	public Index() {
+	private Index() {
 		db = null;
 	}
 
@@ -548,12 +545,14 @@ public class Index extends Observable implements MutableTreeNode,
 		}
 	}
 
-
 	public void setPrivateKey(String privateKey) {
+		this.privateKey = privateKey;
+		setPrivateKey(db, id, privateKey);
+	}
+
+	public static void setPrivateKey(Hsqldb db, int indexId, String privateKey) {
 		if (privateKey != null && !FreenetURIHelper.isAKey(privateKey))
 			privateKey = null;
-
-		this.privateKey = privateKey;
 
 		synchronized(db.dbLock) {
 			try {
@@ -566,11 +565,11 @@ public class Index extends Observable implements MutableTreeNode,
 					st.setString(1, privateKey);
 				else
 					st.setNull(1, Types.VARCHAR);
-				st.setInt(2, id);
+				st.setInt(2, indexId);
 
 				st.execute();
 			} catch(SQLException e) {
-				Logger.error(this, "Unable to set private Key because: "+e.toString());
+				Logger.error(new Index(), "Unable to set private Key because: "+e.toString());
 			}
 		}
 	}
