@@ -193,7 +193,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.sortAlphabetically"));
 		indexFolderMenu.add(item);
 		indexFolderActions.add(new IndexManagementHelper.IndexFolderReorderer(indexBrowser, item));
-
+		
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addAlreadyExistingIndex"),
 				     IconBox.minIndexReadOnly);
 		indexFolderMenu.add(item);
@@ -212,6 +212,11 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		indexFolderMenu.add(item);
 		indexFolderActions.add(new IndexManagementHelper.IndexRenamer(indexBrowser, item));
 
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addToBlackList"),
+							IconBox.minStop);
+		indexFolderMenu.add(item);
+		indexAndFileActions.add(new IndexManagementHelper.IndexBlackLister(indexBrowser, item));
+		
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.delete"), IconBox.minDelete);
 		indexFolderMenu.add(item);
 		indexFolderActions.add(new IndexManagementHelper.IndexDeleter(indexBrowser, item));

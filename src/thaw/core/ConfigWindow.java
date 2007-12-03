@@ -243,7 +243,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 				dialog.getContentPane().add(new JLabel(I18n.getMessage("thaw.common.pleaseWait"),
 								       JLabel.CENTER));
 
-				dialog.setUndecorated(true);
+				//dialog.setUndecorated(true);
 				dialog.setResizable(false);
 
 				dialog.setSize(150, 30);

@@ -1100,14 +1100,36 @@ public class IndexManagementHelper {
 		}
 
 		public void setTarget(final IndexTreeNode node) {
-			if (node != null && node instanceof Index)
+			if (node != null)
 				super.setTarget(node);
 			else
 				super.setTarget(null);
 		}
+		
+		private void blackListRecursivly(Hsqldb db, IndexFolder target) {
+			/* A nicer way would be to ask directly to the database the index who
+			 * are children of this folder, but I'm a lazy bastard.
+			 */
+			java.util.Enumeration targetChildren = target.children();
+			
+			while (targetChildren.hasMoreElements()) {
+				Object o = targetChildren.nextElement();
+				
+				if (o instanceof Index) {
+					BlackList.addToBlackList(db, ((Index)o).getPublicKey());
+				} else if (o instanceof IndexFolder) {
+					blackListRecursivly(db, (IndexFolder)o);
+				}
+			}
+		}
 
 		public void apply() {
-			BlackList.addToBlackList(indexBrowser.getDb(), getTarget().getPublicKey());
+			if (getTarget() instanceof IndexFolder) {
+				blackListRecursivly(indexBrowser.getDb(), (IndexFolder)getTarget());
+			} else if (getTarget() instanceof Index) {
+				BlackList.addToBlackList(indexBrowser.getDb(), getTarget().getPublicKey());
+			}
+			
 			super.apply();
 			indexBrowser.getBlackList().updateList();
 		}
