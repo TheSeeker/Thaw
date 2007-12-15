@@ -259,18 +259,6 @@ public class FCPClientGet extends Observable
 				|| queueManager.getQueryManager().getConnection() == null)
 			return false;
 
-		if (queueManager.getQueryManager().getConnection().isLocalSocket()
-		    && !noDDA
-		    && (destinationDir != null || finalPath != null)) {
-
-			if (destinationDir == null)
-				destinationDir = new File(finalPath).getAbsoluteFile().getParent();
-
-			testDDA = new FCPTestDDA(destinationDir, false, true);
-			testDDA.addObserver(this);
-			return testDDA.start(queueManager);
-		}
-
 		return sendClientGet();
 	}
 
@@ -417,6 +405,20 @@ public class FCPClientGet extends Observable
 
 		if("ProtocolError".equals( message.getMessageName() )) {
 			Logger.debug(this, "ProtocolError !");
+			
+			if (queueManager.getQueryManager().getConnection().isLocalSocket()
+					&& !noDDA
+				    && (destinationDir != null || finalPath != null)) {
+
+					if (destinationDir == null)
+						destinationDir = new File(finalPath).getAbsoluteFile().getParent();
+
+				testDDA = new FCPTestDDA(destinationDir, false, true);
+				testDDA.addObserver(this);
+				testDDA.start(queueManager);
+				
+				return;
+			}
 
 			if ("4".equals(message.getValue("Code"))) {
 				Logger.warning(this, "The node reported an invalid key. Please check the following key\n"+
