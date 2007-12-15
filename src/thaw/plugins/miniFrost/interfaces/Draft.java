@@ -40,6 +40,7 @@ public interface Draft {
 	 * @param date the date provided is already GMT-ized
 	 */
 	public void setDate(java.util.Date date);
+	public java.util.Date getDate();
 
 	/**
 	 * @param i specify the position of the id line in the text

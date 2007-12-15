@@ -276,6 +276,10 @@ public class MiniFrostPanel implements Observer {
 
 		boardTree.updateDraftValues(waitings, postings);
 	}
+	
+	public Vector getDrafts() {
+		return drafts;
+	}
 
 	public boolean isInGmailView() {
 		return gmailView;

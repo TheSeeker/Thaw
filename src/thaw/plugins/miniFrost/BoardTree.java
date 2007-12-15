@@ -356,15 +356,15 @@ public class BoardTree extends Observable
 
 		Board b = ((Board)list.getSelectedValue());
 
-		if (b == currentlySelected)
-			return;
-
-		currentlySelected = b;
-
 		for (Iterator it = actions.iterator();
 		     it.hasNext();) {
 			((BoardManagementHelper.BoardAction)it.next()).setTarget(b);
 		}
+		
+		if (b == currentlySelected)
+			return;
+		
+		currentlySelected = b;
 
 		setChanged();
 		notifyObservers(b);

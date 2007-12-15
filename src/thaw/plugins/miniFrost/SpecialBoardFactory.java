@@ -40,6 +40,7 @@ public class SpecialBoardFactory
 		Vector v = new Vector();
 
 		v.add(new SentMessages(miniFrost));
+		v.add(new Outbox(miniFrost));
 
 		return v;
 	}

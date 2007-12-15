@@ -104,6 +104,10 @@ public class KSKDraft
 	public void setDate(Date date) {
 		this.date = date;
 	}
+	
+	public Date getDate() {
+		return date;
+	}
 
 
 	private java.io.File fileToInsert;
