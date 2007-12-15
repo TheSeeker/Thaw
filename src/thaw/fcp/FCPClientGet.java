@@ -510,7 +510,8 @@ public class FCPClientGet extends Observable
 				return;
 			}
 
-			Logger.notice(this, "GetFailed : "+message.getValue("CodeDescription"));
+			if (!"13".equals(message.getValue("Code"))) /* if != of Data Not Found */
+				Logger.notice(this, "GetFailed : "+message.getValue("CodeDescription"));
 
 
 			if(!isRunning()) { /* Must be a "GetFailed: cancelled by caller", so we simply ignore */
@@ -945,6 +946,7 @@ public class FCPClientGet extends Observable
 
 		if(!isPersistent()) {
 			Logger.notice(this, "Can't remove non persistent request.");
+
 			return false;
 		}
 
@@ -992,7 +994,7 @@ public class FCPClientGet extends Observable
 	public boolean stop(final FCPQueueManager queryManager) {
 		Logger.info(this, "Stop fetching of the key : "+getFileKey());
 
-		if(!removeRequest())
+		if(isPersistent() && !removeRequest())
 			return false;
 
 		boolean wasFinished = isFinished();

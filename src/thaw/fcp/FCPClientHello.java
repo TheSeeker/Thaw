@@ -12,7 +12,7 @@ import thaw.core.Logger;
  *       and start() returns false.
  */
 public class FCPClientHello implements FCPQuery, Observer {
-	public final static int NODEHELLO_TIMEOUT = 30; /* in seconds */
+	public final static int NODEHELLO_TIMEOUT = 60; /* in seconds */
 
 	private final static String FCP_EXPECTED_VERSION = "2.0";
 	private String id;

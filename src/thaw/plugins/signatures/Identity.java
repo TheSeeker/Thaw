@@ -513,8 +513,8 @@ public class Identity {
 			initFrostCrypt();
 			return frostCrypt.detachedVerify(text, publicKey, sig);
 		} catch(Exception e) {
-			Logger.notice(this, "signature check failed because: "+e.toString());
-			e.printStackTrace();
+			Logger.info(this, "Exception while checking signature: "+e.toString());
+			//e.printStackTrace();
 			return false;
 		}
 	}
