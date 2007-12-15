@@ -109,7 +109,7 @@ public class LinkManagementHelper {
 		private Vector t;
 
 		private boolean addToParent; /* (== add to the same parent folder) */
-		private boolean autoSorting;
+		private boolean autoSorting = true;
 
 		/**
 		 * @param addToParent Try to add the new index to the same folder than the
