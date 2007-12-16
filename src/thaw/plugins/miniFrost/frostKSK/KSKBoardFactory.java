@@ -40,7 +40,8 @@ public class KSKBoardFactory
 		"boards",
 		"public",
 		"sites",
-		"test"
+		"test",
+		"privacy"
 	};
 
 
