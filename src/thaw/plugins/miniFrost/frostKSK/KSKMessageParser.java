@@ -4,7 +4,10 @@ import java.sql.*;
 
 import org.w3c.dom.*;
 import java.text.SimpleDateFormat;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.UnsupportedEncodingException;
 
 import java.util.Vector;
 import java.util.Iterator;
@@ -65,11 +68,11 @@ public class KSKMessageParser {
 	private static FrostCrypt frostCrypt;
 
 
-	public KSKMessageParser(String inReplyTo,
+	public KSKMessageParser(String inReplyTo, /* msg id */
 				String from,
 				String subject,
 				java.util.Date dateUtil,
-				String recipient,
+				Identity encryptedFor,
 				String board,
 				String body,
 				String publicKey,
@@ -88,7 +91,8 @@ public class KSKMessageParser {
 		this.date = date[0];
 		this.time = date[1];
 
-		this.recipient = null;
+		this.encryptedFor = encryptedFor;
+		this.recipient = (encryptedFor != null ? encryptedFor.toString() : null);
 
 		this.board = board;
 		this.body = body;
@@ -429,16 +433,12 @@ public class KSKMessageParser {
 	protected boolean decrypt(Hsqldb db, Element rootNode) {
 		Vector identities = Identity.getYourIdentities(db);
 
-		/**
-		 * I prefer to not trust the recipient field ...
-		 */
-
 		byte[] content;
 		String recipient = XMLTools.getChildElementsCDATAValue(rootNode, "recipient");
 
 		try {
 			content = Base64.decode(XMLTools.getChildElementsCDATAValue(rootNode,
-										    "content").getBytes("UTF-8"));
+										    "content").getBytes("UTF-8")); /* ISO-8859-1 in Frost */
 		} catch(Exception e) {
 			Logger.notice(this, "Unable to decode encrypted message because : "+e.toString());
 			return false;
@@ -681,6 +681,59 @@ public class KSKMessageParser {
 
 		return root;
 	}
+	
+	private byte[] readByteArray(File file) {
+		try {
+            byte[] data = new byte[(int)file.length()];
+            FileInputStream fileIn = new FileInputStream(file);
+            DataInputStream din = new DataInputStream(fileIn);
+            din.readFully(data);
+            fileIn.close();
+            return data;
+        } catch(java.io.IOException e) {
+            Logger.error(this, "Exception thrown in readByteArray(File file): '"+e.toString()+"'");
+        }
+        return null;
+	}
+
+	public File crypt(Identity receiver, File msgFile) {
+		File tmpFile;
+
+		try {
+			tmpFile = File.createTempFile("thaw-", "-message.xml");
+			tmpFile.deleteOnExit();
+		} catch(java.io.IOException e) {
+			Logger.error(this, "Can't create temporary file because : "+e.toString());
+			return null;
+		}
+
+		Document doc = XMLTools.createDomDocument();
+		
+		Element el;
+		Element root = doc.createElement("EncryptedFrostMessage");
+
+		/* first tag : recipient */
+		if ((el = makeCDATA(doc, "recipient", receiver.toString())) != null)  root.appendChild(el);
+		
+		/* second tag : crypted content */
+		byte[] xmlContent = readByteArray(msgFile);
+		byte[] encContent = receiver.encode(xmlContent);
+
+        String base64enc;
+        try {
+            base64enc = new String(Base64.encode(encContent), "UTF-8"); /* ISO-8859-1 in Frost */
+        } catch (UnsupportedEncodingException ex) {
+            Logger.error(this, "UTF-8 encoding is not supported ?! : '"+ex.toString()+"'");
+            return null;
+        }
+        if ((el = makeCDATA(doc, "content", base64enc)) != null)  root.appendChild(el);
+		
+		doc.appendChild(root);
+		
+		File cryptedFile = (XMLTools.writeXmlFile(doc, tmpFile.getPath()) ? tmpFile : null);
+		
+		return cryptedFile;
+	}
 
 
 	public File generateXML() {
@@ -698,7 +751,16 @@ public class KSKMessageParser {
 
 		doc.appendChild(getXMLTree(doc));
 
-		return (XMLTools.writeXmlFile(doc, tmpFile.getPath()) ? tmpFile : null);
+		File clearMsg = (XMLTools.writeXmlFile(doc, tmpFile.getPath()) ? tmpFile : null);
+		
+		if (encryptedFor == null)
+			return clearMsg;
+		
+		File cryptedFile = crypt(encryptedFor, clearMsg);
+		
+		tmpFile.delete();
+		
+		return cryptedFile;
 	}
 
 	protected boolean mustBeDisplayedAsRead() {

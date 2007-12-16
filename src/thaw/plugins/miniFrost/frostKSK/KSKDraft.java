@@ -21,14 +21,15 @@ import thaw.core.ThawThread;
 public class KSKDraft
 	implements thaw.plugins.miniFrost.interfaces.Draft, Observer {
 
-	private KSKMessage inReplyTo;
-	private KSKBoard board;
+	private KSKMessage inReplyTo = null;
+	private KSKBoard board = null;
 
-	private String subject;
-	private String txt;
-	private String nick;
-	private Identity identity;
-	private Date date;
+	private String subject = null;
+	private String txt = null;
+	private String nick = null;
+	private Identity identity = null;
+	private Identity recipient = null;
+	private Date date = null;
 
 	private int idLinePos = 0;
 	private int idLineLen = 0;
@@ -40,6 +41,13 @@ public class KSKDraft
 		this.board = board;
 		this.inReplyTo = inReplyTo;
 		attachments = null;
+		
+		if (inReplyTo != null
+				&& inReplyTo.encryptedFor() != null
+				&& inReplyTo.getSender() != null
+				&& inReplyTo.getSender().getIdentity() != null) {
+			recipient = inReplyTo.getSender().getIdentity();
+		}
 	}
 
 	public String getSubject() {
@@ -99,6 +107,14 @@ public class KSKDraft
 
 	public String getAuthorNick() {
 		return nick;
+	}
+	
+	public void setRecipient(Identity id) {
+		this.recipient = id;
+	}
+
+	public Identity getRecipient() {
+		return recipient;
 	}
 
 	public void setDate(Date date) {
@@ -201,18 +217,14 @@ public class KSKDraft
 
 	private void startInsertion() {
 		/* we generate first the XML message */
-		KSKMessageParser generator = new KSKMessageParser( ((inReplyTo != null) ?
-									    inReplyTo.getMsgId() :
-									    null),
+		KSKMessageParser generator = new KSKMessageParser( ((inReplyTo != null) ? inReplyTo.getMsgId() : null),
 									  nick,
 									  subject,
 									  date,
-									  null, /* recipient */
+									  recipient, /* recipient */
 									  board.getName(),
 									  txt,
-									  ((identity != null) ?
-									   identity.getPublicKey() :
-									   null),
+									  ((identity != null) ? identity.getPublicKey() : null),
 									   attachments,
 									   identity,
 									   idLinePos,

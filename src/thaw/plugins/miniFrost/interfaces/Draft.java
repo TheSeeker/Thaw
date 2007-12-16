@@ -25,6 +25,12 @@ public interface Draft {
 	 * @return can return null if unknown
 	 */
 	public Identity getAuthorIdentity();
+	
+	/**
+	 * @param id null for anybody
+	 */
+	public void setRecipient(Identity id);
+	public Identity getRecipient();
 
 	public boolean allowUnsignedPost();
 

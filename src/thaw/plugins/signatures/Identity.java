@@ -61,7 +61,7 @@ public class Identity {
 
 	private Hsqldb db;
 
-	private int id;
+	private int id = -1;
 
 	private String nick;
 
@@ -634,6 +634,19 @@ public class Identity {
 
 		return null;
 	}
+	
+	public byte[] encode(byte[] input) {
+		initFrostCrypt();
+		
+		try {
+			return frostCrypt.encrypt(input, publicKey);
+		} catch(Exception e) {
+			Logger.error(this, "Can't crypt message because : '"+e.toString()+"'");
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
 
 
 	public static Identity importIdentity(Hsqldb db, File file) {
@@ -686,6 +699,16 @@ public class Identity {
 		}
 
 		return null;
+	}
+	
+	public boolean equals(Object o) {
+		if (!(o instanceof Identity))
+			return false;
+		
+		if (getId() < 0)
+			return false;
+		
+		return (getId() == ((Identity)o).getId());
 	}
 }
 

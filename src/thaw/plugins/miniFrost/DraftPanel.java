@@ -57,6 +57,8 @@ public class DraftPanel implements ActionListener, MouseListener {
 	private JComboBox authorBox;
 	private JTextField subjectField;
 	private JTextArea textArea;
+	private JComboBox recipientBox;
+	
 	private JButton cancelButton;
 	private JButton sendButton;
 
@@ -84,12 +86,22 @@ public class DraftPanel implements ActionListener, MouseListener {
 		messageDateFormat = new SimpleDateFormat("yyyy.MM.dd - HH:mm:ss");
 
 		panel = new JPanel(new BorderLayout(5, 5));
+		
+		/* author box */
 
 		authorBox = new JComboBox();
 		authorBox.setEditable(true);
-
+		
 		subjectField = new JTextField("");
 		subjectField.setEditable(true);
+		
+		/* recipient box */
+		
+		recipientBox = new JComboBox();
+		
+		/* content will be updated when setDraft() will be called 
+		 * to take into consideration people marked as GOOD recently
+		 */
 
 		textArea = new JTextArea("");
 		textArea.setEditable(true);
@@ -104,12 +116,13 @@ public class DraftPanel implements ActionListener, MouseListener {
 
 		JPanel northPanel = new JPanel(new BorderLayout(5, 5));
 
-		JPanel headersPanel = new JPanel(new GridLayout(3, 1));
+		JPanel headersPanel = new JPanel(new GridLayout(4, 1));
 		headersPanel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.board")+": "));
 		headersPanel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.author")+": "));
-		headersPanel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.subject")+": "));
+		headersPanel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.recipient")+": "));
+		headersPanel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.subject")+": "));		
 
-		JPanel valuesPanel = new JPanel(new GridLayout(3, 1));
+		JPanel valuesPanel = new JPanel(new GridLayout(4, 1));
 
 		JPanel topPanel = new JPanel(new BorderLayout(5, 5));
 		topPanel.add(boardLabel, BorderLayout.CENTER);
@@ -117,6 +130,7 @@ public class DraftPanel implements ActionListener, MouseListener {
 
 		valuesPanel.add(topPanel);
 		valuesPanel.add(authorBox);
+		valuesPanel.add(recipientBox);
 		valuesPanel.add(subjectField);
 
 		northPanel.add(headersPanel, BorderLayout.WEST);
@@ -210,16 +224,43 @@ public class DraftPanel implements ActionListener, MouseListener {
 		Vector ids = new Vector();
 		ids.add(I18n.getMessage("thaw.plugin.miniFrost.anonymous"));
 		ids.addAll(Identity.getYourIdentities(mainPanel.getDb()));
-
+		
 		authorBox.removeAllItems();
 
 		for (Iterator it = ids.iterator(); it.hasNext();)
 			authorBox.addItem(it.next());
-
+		
 		if (draft.getAuthorIdentity() != null)
 			authorBox.setSelectedItem(draft.getAuthorIdentity());
 		else if (draft.getAuthorNick() != null)
 			authorBox.setSelectedItem(draft.getAuthorNick());
+		else
+			authorBox.setSelectedIndex(0);
+		
+		/* recipient */
+		Vector nicePeople = new Vector();
+		nicePeople.add(I18n.getMessage("thaw.plugin.miniFrost.recipient.all"));
+		nicePeople.addAll(Identity.getIdentities(mainPanel.getDb(),
+												"trustLevel >= "+Integer.toString(Identity.trustLevelInt[1])));
+		
+		recipientBox.removeAllItems();
+		
+		for (Iterator it = nicePeople.iterator(); it.hasNext(); ) {
+			recipientBox.addItem(it.next());
+		}
+		
+		recipientBox.setSelectedIndex(0);
+		
+		if (draft.getRecipient() != null) {
+			recipientBox.setSelectedItem(draft.getRecipient());
+			
+			if (!recipientBox.getSelectedItem().equals(draft.getRecipient())) {
+				/* then it means that the recipient wasn't in the list */
+				recipientBox.addItem(draft.getRecipient());
+				recipientBox.setSelectedItem(draft.getRecipient());
+			}
+		}
+			
 
 		/* subject */
 		subjectField.setText(draft.getSubject());
@@ -296,6 +337,13 @@ public class DraftPanel implements ActionListener, MouseListener {
 
 			draft.setAuthor(nick, null);
 		}
+		
+		/* recipient */
+		
+		if (recipientBox.getSelectedItem() instanceof Identity)
+			draft.setRecipient((Identity)recipientBox.getSelectedItem());
+		else
+			draft.setRecipient(null);
 
 		/* subject */
 
