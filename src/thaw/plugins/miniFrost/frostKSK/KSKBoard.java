@@ -745,7 +745,7 @@ public class KSKBoard
 
 	public void refresh(int maxDaysInThePast) {
 		if (refreshing) {
-			Logger.warning(this, "Already refreshing");
+			Logger.notice(this, "Already refreshing");
 			return;
 		}
 

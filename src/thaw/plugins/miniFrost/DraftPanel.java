@@ -91,13 +91,16 @@ public class DraftPanel implements ActionListener, MouseListener {
 
 		authorBox = new JComboBox();
 		authorBox.setEditable(true);
+		authorBox.setBackground(java.awt.Color.WHITE);
 		
 		subjectField = new JTextField("");
 		subjectField.setEditable(true);
+		subjectField.setBackground(java.awt.Color.WHITE);
 		
 		/* recipient box */
 		
 		recipientBox = new JComboBox();
+		subjectField.setBackground(java.awt.Color.WHITE);
 		
 		/* content will be updated when setDraft() will be called 
 		 * to take into consideration people marked as GOOD recently

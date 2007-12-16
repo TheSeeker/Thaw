@@ -217,7 +217,8 @@ public class KSKDraft
 
 	private void startInsertion() {
 		/* we generate first the XML message */
-		KSKMessageParser generator = new KSKMessageParser( ((inReplyTo != null) ? inReplyTo.getMsgId() : null),
+		KSKMessageParser generator = new KSKMessageParser(board.getFactory().getDb(),
+									((inReplyTo != null) ? inReplyTo.getMsgId() : null),
 									  nick,
 									  subject,
 									  date,
@@ -230,7 +231,7 @@ public class KSKDraft
 									   idLinePos,
 									   idLineLen);
 
-		fileToInsert = generator.generateXML();
+		fileToInsert = generator.generateXML(board.getFactory().getDb() /* gruick */);
 		
 		
 		waiting = false;

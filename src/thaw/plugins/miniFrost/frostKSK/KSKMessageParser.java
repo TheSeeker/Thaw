@@ -44,6 +44,7 @@ public class KSKMessageParser {
 
 	private String messageId;
 	private String inReplyTo;
+	private String inReplyToFull;
 	private String from;
 	private String subject;
 	private String date;
@@ -68,7 +69,8 @@ public class KSKMessageParser {
 	private static FrostCrypt frostCrypt;
 
 
-	public KSKMessageParser(String inReplyTo, /* msg id */
+	public KSKMessageParser(Hsqldb db,
+				String inReplyTo, /* msg id */
 				String from,
 				String subject,
 				java.util.Date dateUtil,
@@ -103,6 +105,8 @@ public class KSKMessageParser {
 		this.attachments = attachments;
 
 		this.identity = identity;
+		
+		inReplyToFull = getFullInReplyTo(db, inReplyTo);
 
 		if (frostCrypt == null)
 			frostCrypt = new FrostCrypt();
@@ -210,6 +214,7 @@ public class KSKMessageParser {
 
 				/* we search the message to this one answer */
 				if (inReplyTo != null) {
+					inReplyToFull = inReplyTo;
 					String[] split = inReplyTo.split(",");
 					inReplyTo = split[split.length-1];
 
@@ -335,8 +340,8 @@ public class KSKMessageParser {
 		allContent.append(from).append(SIGNATURE_ELEMENTS_SEPARATOR);
 		if (withMsgId)
 			allContent.append(messageId).append(SIGNATURE_ELEMENTS_SEPARATOR);
-		if( inReplyTo != null && inReplyTo.length() > 0 ) {
-			allContent.append(inReplyTo).append(SIGNATURE_ELEMENTS_SEPARATOR);
+		if( inReplyToFull != null && inReplyToFull.length() > 0 ) {
+			allContent.append(inReplyToFull).append(SIGNATURE_ELEMENTS_SEPARATOR);
 		}
 		if( recipient != null && recipient.length() > 0 ) {
 			allContent.append(recipient).append(SIGNATURE_ELEMENTS_SEPARATOR);
@@ -379,9 +384,10 @@ public class KSKMessageParser {
 
 		if (!ret) {
 			Logger.notice(this, "Invalid signature !");
+			return invalidMessage("Invalid signature");
 		}
 
-		return ret;
+		return true;
 	}
 
 
@@ -389,6 +395,7 @@ public class KSKMessageParser {
 	protected boolean loadXMLElements(Element root) {
 		messageId     = XMLTools.getChildElementsCDATAValue(root, "MessageId");
 		inReplyTo     = XMLTools.getChildElementsCDATAValue(root, "InReplyTo");
+		inReplyToFull = inReplyTo;
 		from          = XMLTools.getChildElementsCDATAValue(root, "From");
 		subject       = XMLTools.getChildElementsCDATAValue(root, "Subject");
 		date          = XMLTools.getChildElementsCDATAValue(root, "Date");
@@ -501,6 +508,8 @@ public class KSKMessageParser {
 		/* (I'm still thinking that mixing up Boards & private messages is a BAD idea) */
 
 		inReplyTo = null;
+		inReplyToFull = null;
+
 		from = "["+I18n.getMessage("thaw.plugin.miniFrost.encrypted")+"]";
 		subject = "["+I18n.getMessage("thaw.plugin.miniFrost.encryptedBody").replaceAll("X", recipient)+"]";
 
@@ -538,6 +547,7 @@ public class KSKMessageParser {
 		/* the goal is to not download this message again */
 		
 		inReplyTo = null;
+		inReplyToFull = null;
 		from = "["+I18n.getMessage("thaw.plugin.miniFrost.invalidMessage")+"]";
 		subject = "["+I18n.getMessage("thaw.plugin.miniFrost.invalidMessage")+"]";
 
@@ -646,8 +656,49 @@ public class KSKMessageParser {
 		return current;
 	}
 
+	public String getFullInReplyTo(Hsqldb db, String inReplyTo) {
+		String lastId = inReplyTo;
+		
+		PreparedStatement st;
+		
+		try {
+			st = db.getConnection().prepareStatement("SELECT inReplyToId FROM frostKSKMessages "+
+													"WHERE msgId = ? LIMIT 1");
+		} catch(SQLException e) {
+			Logger.error(this, "Can't get full inReplyTo String because: "+e.toString());
+			return inReplyTo;
+		}
+		
+		while(lastId != null) {
+			/* I don't remember if inReplyTo is correctly set, so we will
+			 * use inReplyToId to be safer
+			 */
+			
+			try {
+				synchronized(db.dbLock) {
+									
+					st.setString(1, lastId);
+					
+					ResultSet set = st.executeQuery();
+					
+					if (set.next()) {
+						lastId = set.getString("inReplyToId");
+						
+						if (lastId != null)
+							inReplyTo = lastId + ","+inReplyTo;
+					} else
+						lastId = null;
+				}				
+			} catch(SQLException e) {
+				Logger.error(this, "Can't find message parent because : "+e.toString());
+				lastId = null;
+			}
+		}
+		
+		return inReplyTo;
+	}
 
-	public Element getXMLTree(Document doc) {
+	public Element getXMLTree(Hsqldb db, Document doc) {
 		Element root = doc.createElement("FrostMessage");
 
 		Element el;
@@ -655,7 +706,7 @@ public class KSKMessageParser {
 		if ((el = makeText( doc, "client",    "Thaw "+thaw.core.Main.VERSION)) != null)
 			root.appendChild(el);
 		if ((el = makeCDATA(doc, "MessageId", messageId)) != null)   root.appendChild(el);
-		if ((el = makeCDATA(doc, "InReplyTo", inReplyTo)) != null)   root.appendChild(el);
+		if ((el = makeCDATA(doc, "InReplyTo", inReplyToFull)) != null)   root.appendChild(el);
 		if ((el = makeText( doc, "IdLinePos", idLinePos)) != null)   root.appendChild(el);
 		if ((el = makeText( doc, "IdLineLen", idLineLen)) != null)   root.appendChild(el);
 		if ((el = makeCDATA(doc, "From", from)) != null)             root.appendChild(el);
@@ -736,7 +787,7 @@ public class KSKMessageParser {
 	}
 
 
-	public File generateXML() {
+	public File generateXML(Hsqldb db) {
 		File tmpFile;
 
 		try {
@@ -749,7 +800,7 @@ public class KSKMessageParser {
 
 		Document doc = XMLTools.createDomDocument();
 
-		doc.appendChild(getXMLTree(doc));
+		doc.appendChild(getXMLTree(db, doc));
 
 		File clearMsg = (XMLTools.writeXmlFile(doc, tmpFile.getPath()) ? tmpFile : null);
 		

@@ -62,8 +62,7 @@ Message format
 	IDs are comma separated (no space).
 	(Note : why not using xml tags instead of commas ?)
 
-	Atm, Thaw only provides the latest id (Frost seems to accept
-	it). In any case, Thaw will only use the latest id (to avoid a
+	Thaw only uses the latest id (to avoid a
 	flooder sending messages with 20 false inReplyTo id per
 	message & because it's easier to implement :)
  -->
