@@ -88,7 +88,7 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 		if (config.getValue("indexBrowserPanelSplitPosition") != null)
 			split.setDividerLocation(Integer.parseInt(config.getValue("indexBrowserPanelSplitPosition")));
 
-		leftSplit.setSize(150, MainWindow.DEFAULT_SIZE_Y - 150);
+		leftSplit.setSize(400, MainWindow.DEFAULT_SIZE_Y - 400);
 		leftSplit.setResizeWeight(0.5);
 
 		if (config.getValue("indexTreeUnknownListSplitLocation") == null) {

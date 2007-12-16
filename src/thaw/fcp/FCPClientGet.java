@@ -406,7 +406,8 @@ public class FCPClientGet extends Observable
 		if("ProtocolError".equals( message.getMessageName() )) {
 			Logger.debug(this, "ProtocolError !");
 			
-			if (queueManager.getQueryManager().getConnection().isLocalSocket()
+			if ("25".equals(message.getValue("Code"))
+					&& queueManager.getQueryManager().getConnection().isLocalSocket()
 					&& !noDDA
 				    && (destinationDir != null || finalPath != null)) {
 

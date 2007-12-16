@@ -62,7 +62,8 @@ public class FCPMessage {
 		}
 
 
-		if("ProtocolError".equals( getMessageName() ))
+		if("ProtocolError".equals( getMessageName() )
+			&& !"25".equals(getValue("Code")) ) /* code 25 == need to test DDA */
 			Logger.warning(this, "PROTOCOL ERROR:\n"+toString());
 		else if (Logger.getLogLevel() <= 3)
 			Logger.info(this, "Message (Node >> Thaw): "+getMessageName());

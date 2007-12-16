@@ -724,7 +724,6 @@ public class Core implements Observer {
 				    || code == 13 /* Couldn't write file */
 				    || code == 14 /* Couldn't rename file */
 				    || code == 22 /* File parse error */
-				    || code == 25 /* DDA denied */
 				    || code == 26 /* Could not read file */) {
 					askToDisableDDA();
 				}
