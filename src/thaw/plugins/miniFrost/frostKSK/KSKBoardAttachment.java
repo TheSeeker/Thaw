@@ -9,10 +9,10 @@ import thaw.plugins.Hsqldb;
 import thaw.core.Logger;
 import thaw.fcp.FCPQueueManager;
 import thaw.plugins.miniFrost.interfaces.Board;
-
+import thaw.plugins.miniFrost.interfaces.BoardAttachment;
 
 public class KSKBoardAttachment
-	extends KSKAttachment {
+	extends KSKAttachment implements BoardAttachment {
 
 	private String boardName;
 	private String publicKey;
@@ -36,11 +36,20 @@ public class KSKBoardAttachment
 			privateKey = ((SSKBoard)board).getPrivateKey();
 		}
 	}
+	
+	public KSKBoardAttachment(KSKBoardFactory factory,
+			String boardName,
+  			String publicKey,
+  			String privateKey,
+  			String description) {
+		this(boardName, publicKey, privateKey, description);
+		this.boardFactory = factory;
+	}
 
 	public KSKBoardAttachment(String boardName,
-				  String publicKey,
-				  String privateKey,
-				  String description) {
+				  			String publicKey,
+				  			String privateKey,
+				  			String description) {
 		this.boardName = boardName;
 
 		if (publicKey != null && publicKey.endsWith("/"))
@@ -188,15 +197,19 @@ public class KSKBoardAttachment
 
 	public void apply(Hsqldb db, FCPQueueManager queueManager, String action) {
 		if (action.equals(I18n.getMessage("thaw.common.add"))) {
-			if (publicKey != null) {
-				boardFactory.createBoard(boardName, publicKey, privateKey);
-				boardFactory.getPlugin().getPanel().notifyChange();
-
-				return;
-			}
-			boardFactory.createBoard(boardName);
-			boardFactory.getPlugin().getPanel().notifyChange();
+			addBoard(db, queueManager);
 		}
+	}
+	
+	public void addBoard(Hsqldb db, FCPQueueManager queueManager) {
+		if (publicKey != null) {
+			boardFactory.createBoard(boardName, publicKey, privateKey);
+			boardFactory.getPlugin().getPanel().notifyChange();
+
+			return;
+		}
+		boardFactory.createBoard(boardName);
+		boardFactory.getPlugin().getPanel().notifyChange();
 	}
 
 
@@ -333,5 +346,9 @@ public class KSKBoardAttachment
 
 	public boolean isReady() {
 		return true;
+	}
+	
+	public int compareTo(Object o) {
+		return toString().compareTo(o.toString());
 	}
 }

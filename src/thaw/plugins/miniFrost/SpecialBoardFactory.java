@@ -68,6 +68,9 @@ public class SpecialBoardFactory
 		Logger.warning(this, "NI !");
 	}
 
+	public Vector getAllKnownBoards() {
+		return new Vector();
+	}
 
 	/**
 	 * For example 'frost boards' ; Use I18n ...

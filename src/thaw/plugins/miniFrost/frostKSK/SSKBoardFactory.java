@@ -228,6 +228,11 @@ public class SSKBoardFactory extends KSKBoardFactory {
 			}
 		}
 	}
+	
+	public Vector getAllKnownBoards() {
+		/* KSKBoardFactory already answered for us */
+		return new Vector();
+	}
 
 	public String toString() {
 		return I18n.getMessage("thaw.plugin.miniFrost.FrostSSK");

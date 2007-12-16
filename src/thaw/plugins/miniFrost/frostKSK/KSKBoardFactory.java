@@ -574,6 +574,31 @@ public class KSKBoardFactory
 		}
 	}
 
+	public Vector getAllKnownBoards() {
+		Vector v = new Vector();
+
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+				
+				st = db.getConnection().prepareStatement("select distinct name, publickey, privatekey from frostKSKAttachmentBoards");
+				
+				ResultSet set = st.executeQuery();
+				
+				while(set.next()) {
+					v.add(new KSKBoardAttachment(this,
+												set.getString("name"),
+												set.getString("publicKey"),
+												set.getString("privateKey"),
+												null));
+				}
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Can't get the list of know boards because: "+e.toString());
+		}
+
+		return v;
+	}
 
 	public String toString() {
 		return I18n.getMessage("thaw.plugin.miniFrost.FrostKSK");

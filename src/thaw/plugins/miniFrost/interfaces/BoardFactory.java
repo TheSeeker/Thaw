@@ -36,6 +36,11 @@ public interface BoardFactory {
 	public Vector getSentMessages();
 
 	/**
+	 * @return a list of BoardAttachment
+	 */
+	public Vector getAllKnownBoards();
+
+	/**
 	 * display the dialog asking for a name, etc.
 	 * the tree will be reloaded after that
 	 */
