@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.JComboBox;
 
@@ -183,6 +184,7 @@ public class SigConfigTab implements ActionListener, Observer {
 						    BorderLayout.NORTH);
 
 			list = new JList();
+			list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 			updateList();
 
