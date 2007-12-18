@@ -26,6 +26,8 @@ public class KSKBoardFactory
 
 	public final static String[] DEFAULT_BOARDS = new String[] {
 		"freenet",
+		"freenet.0.7.bugs",
+		"freenet-refs",
 		"thaw",
 		"frost",
 		"fuqid",
@@ -37,6 +39,7 @@ public class KSKBoardFactory
 		"fr.boards",
 		"fr.discussion",
 		"fr.freenet",
+		"fr.freenet.freesites",
 		"boards",
 		"public",
 		"sites",

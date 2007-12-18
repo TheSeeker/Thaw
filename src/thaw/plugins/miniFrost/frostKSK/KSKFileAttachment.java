@@ -64,7 +64,7 @@ public class KSKFileAttachment
 						    null /* name */,
 						    null /* private key */,
 						    FCPClientPut.DEFAULT_PRIORITY,
-						    true /* global */,
+						    false /* global */,
 						    FCPClientPut.PERSISTENCE_UNTIL_DISCONNECT,
 						    true /* getCHKOnly */);
 		put.addObserver(this);
