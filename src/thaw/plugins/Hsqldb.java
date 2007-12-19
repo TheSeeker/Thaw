@@ -56,9 +56,12 @@ public class Hsqldb extends LibraryPlugin {
 
 		if(connection != null)
 			disconnect();
-
+		
 		connection = DriverManager.getConnection(core.getConfig().getValue("hsqldb.url"),
 							 "sa", "");
+		
+		executeQuery("SET LOGSIZE 50;");
+		executeQuery("SET CHECKPOINT DEFRAG 50;");
 	}
 
 	public void disconnect() throws java.sql.SQLException {

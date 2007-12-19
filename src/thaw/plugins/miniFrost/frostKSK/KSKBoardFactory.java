@@ -31,6 +31,7 @@ public class KSKBoardFactory
 		"thaw",
 		"frost",
 		"fuqid",
+		"jsite",
 		"successful",
 		"unsuccessful",
 		"Thaw-indexes",
