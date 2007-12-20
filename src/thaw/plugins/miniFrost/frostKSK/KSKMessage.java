@@ -122,9 +122,21 @@ public class KSKMessage
 			Logger.info(this, key+" found => parsing");
 
 			KSKMessageParser parser = new KSKMessageParser();
-
-			if (parser.loadFile(new File(get.getPath()), db)
-			    && parser.checkSignature(db)
+			
+			if (!parser.loadFile(new File(get.getPath()), db)) {
+				/* invalid slot */
+				Logger.notice(this, "Invalid message: '"+board.getName()+"'"
+							+" - "+date.toString()
+							+" - "+Integer.toString(rev));
+				
+				board.addInvalidSlot(date, rev);
+				
+				successfullyDownloaded = true;
+				downloading            = false;
+				successfullyParsed     = false;
+				read = false;
+				
+			} else if (parser.checkSignature(db)
 			    && parser.filter(board.getFactory().getPlugin().getRegexpBlacklist())
 			    && parser.insert(db, board.getId(),
 					     date, rev, board.getName())) {

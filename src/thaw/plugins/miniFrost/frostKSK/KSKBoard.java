@@ -424,14 +424,14 @@ public class KSKBoard
 
 				st = db.getConnection().prepareStatement("SELECT rev FROM frostKSKMessages "+
 									 "WHERE keyDate = ? "+
-									 "AND rev > ? AND boardId = ? ORDER by rev");
+									 "AND rev >= ? AND boardId = ? ORDER by rev");
 				st.setDate(1, date);
 				st.setInt( 2, rev);
 				st.setInt(3, id);
 
 				ResultSet set = st.executeQuery();
 
-				int lastRev = rev;
+				int lastRev = rev-1;
 
 				while(set.next()) {
 					int newRev = set.getInt("rev");
@@ -450,6 +450,18 @@ public class KSKBoard
 		}
 
 		return -1;
+	}
+	
+	protected int getNextNonDownloadedAndValidRev(Date daDate, int rev) {
+		int nextNonDownloaded;
+		int nextValid = rev+1;
+
+		do {
+			nextNonDownloaded = getNextNonDownloadedRev(daDate, nextValid);
+			nextValid = getNextValidSlot(daDate, nextNonDownloaded);
+		} while(nextValid != nextNonDownloaded);
+		
+		return nextValid;
 	}
 
 
@@ -512,7 +524,7 @@ public class KSKBoard
 			return;
 		}
 
-		int rev = getNextNonDownloadedRev(lastDate, lastRev);
+		int rev = getNextNonDownloadedAndValidRev(lastDate, lastRev);
 
 		Logger.debug(this, "Rev : "+Integer.toString(lastRev)+
 			     " ; "+Integer.toString(rev)+" ; Date : "+lastDate.toString());
@@ -873,6 +885,10 @@ public class KSKBoard
 		try {
 			synchronized(db.dbLock) {
 				PreparedStatement st;
+				
+				st = db.getConnection().prepareStatement("DELETE FROM frostKSKInvalidSlots WHERE boardId = ?");
+				st.setInt(1, id);
+				st.execute();
 
 				st = db.getConnection().prepareStatement("DELETE FROM frostKSKBoards "+
 									 "WHERE id = ?");
@@ -925,5 +941,107 @@ public class KSKBoard
 		if (!(o instanceof KSKBoard))
 			return false;
 		return ( ((KSKBoard)o).getId() == getId() );
+	}
+	
+	
+	public void addInvalidSlot(Date date, int rev) {
+		date = getMidnight(date);
+		Hsqldb db = factory.getDb();
+
+		synchronized(db.dbLock) {
+			PreparedStatement st;
+			
+			try {
+				st = db.getConnection().prepareStatement("SELECT id, minRev, maxRev "+
+							"FROM frostKSKInvalidSlots "+
+							"WHERE boardId = ? "+
+							"AND date = ? "+
+							"AND (maxRev = ? "+
+							"OR minRev = ?) LIMIT 1");
+				st.setInt(1, id);
+				st.setDate(2, new java.sql.Date(date.getTime()));
+				st.setInt(3, rev-1);
+				st.setInt(4, rev+1);
+				
+				ResultSet set = st.executeQuery();
+				
+				if (!set.next()) {
+					/* no existing interval near our rev */
+					/* => we create one */
+					
+					st = db.getConnection().prepareStatement("INSERT INTO frostKSKInvalidSlots (boardId, date, minRev, maxRev) "+
+							"VALUES (?, ?, ?, ?)");
+					st.setInt(1, id);
+					st.setDate(2, new java.sql.Date(date.getTime()));
+					st.setInt(3, rev);
+					st.setInt(4, rev);
+					st.execute();
+					
+				} else {
+					/* an interval near this one already exist */
+					/* => we adjust */
+					
+					int intervalId = set.getInt("id");
+					int intervalMinRev = set.getInt("minRev");
+					int intervalMaxRev = set.getInt("maxRev");
+					
+					if (intervalMaxRev == (rev-1)) {
+						st = db.getConnection().prepareStatement("UPDATE frostKSKInvalidSlots SET maxRev = ? "+
+								"WHERE id = ?");
+						st.setInt(1, rev);
+						st.setInt(2, intervalId);
+						st.execute();
+					} else if (intervalMinRev == (rev+1)) {
+						st = db.getConnection().prepareStatement("UPDATE frostKSKInvalidSlots SET minRev = ? "+
+							"WHERE id = ?");
+						st.setInt(1, rev);
+						st.setInt(2, intervalId);
+						st.execute();
+					} else {
+						Logger.error(this, "Unmanaged case !");
+					}
+				}
+				
+			} catch(SQLException e) {
+				Logger.error(this, "Error while adding invalid slot to the database : "+e.toString());
+			}
+		}
+	}
+	
+	public int getNextValidSlot(Date date, int rev) {
+		date = getMidnight(date);
+		Hsqldb db = factory.getDb();
+
+		synchronized(db.dbLock) {
+			PreparedStatement st;
+			
+			try {
+				st = db.getConnection().prepareStatement("SELECT id, minRev, maxRev "+
+						"FROM frostKSKInvalidSlots "+
+						"WHERE boardId = ? "+
+						"AND date = ? "+
+						"AND (maxRev >= ? "+
+						"AND minRev <= ?) LIMIT 1");
+
+				while(true) {
+					st.setInt(1, id);
+					st.setDate(2, new java.sql.Date(date.getTime()));
+					st.setInt(3, rev);
+					st.setInt(4, rev);
+				
+					ResultSet set = st.executeQuery();
+				
+					if (!set.next()) {
+						return rev;
+					}
+					rev = set.getInt("maxRev")+1;
+				}
+
+			} catch(SQLException e) {
+				Logger.error(this, "getNextValidSlot(): "+e.toString());
+			}
+		}
+		
+		return rev;
 	}
 }

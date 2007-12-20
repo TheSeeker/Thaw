@@ -129,6 +129,10 @@ public class KSKBoardFactory
 
 					msg.destroy(db);
 				}
+				
+				st = db.getConnection().prepareStatement("DELETE FROM frostKSKInvalidSlots WHERE date < ?");
+				st.setTimestamp(1, timestamp);
+				st.execute();
 
 
 				timestamp = new java.sql.Timestamp(new Date().getTime()
@@ -256,6 +260,14 @@ public class KSKBoardFactory
 			  + "privateKey VARCHAR(256) NULL, "
 			  + "kskBoardId INTEGER NOT NULL, "
 			  + "FOREIGN KEY (kskBoardId) REFERENCES frostKSKBoards (id))");
+		
+		sendQuery("CREATE CACHED TABLE frostKSKInvalidSlots ("
+				+ "id INTEGER IDENTITY NOT NULL, "
+				+ "boardId INTEGER NOT NULL, "
+				+ "date DATE NOT NULL, "
+				+ "minRev INTEGER NOT NULL, "
+				+ "maxRev INTEGER NOT NULL, "
+				+ "FOREIGN KEY (boardId) REFERENCES frostKSKBoards (id))");
 
 		sendQuery("CREATE CACHED TABLE frostKSKMessages ("
 			  + "id INTEGER IDENTITY NOT NULL, "

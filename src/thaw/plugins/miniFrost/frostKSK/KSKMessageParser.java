@@ -68,6 +68,7 @@ public class KSKMessageParser {
 
 	private static FrostCrypt frostCrypt;
 
+	private boolean loaded = false;
 
 	public KSKMessageParser(Hsqldb db,
 				String inReplyTo, /* msg id */
@@ -314,6 +315,13 @@ public class KSKMessageParser {
 
 
 	public boolean filter(RegexpBlacklist blacklist) {
+		if (!loaded) {
+			/* message was not loaded and so was replaced by an "invalid message"
+			 * so the message haven't to be filtered
+			 */
+			return true;
+		}
+		
 		if (blacklist.isBlacklisted(subject)
 		    || blacklist.isBlacklisted(from)
 		    || blacklist.isBlacklisted(body)) {
@@ -365,6 +373,13 @@ public class KSKMessageParser {
 
 
 	public boolean checkSignature(Hsqldb db) {
+		if (!loaded) {
+			/* message was not loaded and so was replaced by an "invalid message"
+			 * so the signature have not to be checked
+			 */
+			return true;
+		}
+		
 		if (publicKey == null || signature == null) {
 			from = from.replaceAll("@", "_");
 			return true;
@@ -595,35 +610,45 @@ public class KSKMessageParser {
 				doc = XMLTools.parseXmlFile(file, false);
 			} catch(Exception ex) {  // xml format error
 				Logger.notice(this, "Invalid Xml");
-				return invalidMessage("XML parser error:\n"+ex.toString());
+				loaded = false;
+				//return invalidMessage("XML parser error:\n"+ex.toString());
+				return false;
 			}
 
 			if( doc == null ) {
 				Logger.notice(this,
 					       "Error: couldn't parse XML Document - " +
 					       "File name: '" + file.getName() + "'");
-				return invalidMessage("Nothing parsed ?!");
+				loaded = false;
+				//return invalidMessage("Nothing parsed ?!");
+				return false;
 			}
 
 			Element rootNode = doc.getDocumentElement();
 
 			if(rootNode.getTagName().equals("EncryptedFrostMessage")) {
-				if (db != null) {
-					return decrypt(db, rootNode);
+				if (db != null && decrypt(db, rootNode)) {
+						loaded = true;
+						return true;
 				} else {
-					Logger.error(this, "Can't decrypt the message (no connection to the db available)");
+					loaded = false;
+					Logger.error(this, "Can't decrypt the message");
 					return false;
 				}
 			}
 
 			// load the message itself
-			return loadXMLElements(rootNode);
+			loaded = (loadXMLElements(rootNode));
+			
+			return loaded;
 
 		} catch(Exception e) {
 			/* XMLTools throws runtime exception sometimes ... */
 			Logger.notice(this, "Unable to parse XML message because : "+e.toString());
 			e.printStackTrace();
-			return invalidMessage("Unable to parse XML message because : "+e.toString());
+			loaded = false;
+			//return invalidMessage("Unable to parse XML message because : "+e.toString());
+			return false;
 		}
 	}
 
