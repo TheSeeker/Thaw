@@ -286,7 +286,7 @@ public class KSKDraft
 				initialInsertion = true;
 
 				board.deleteObserver(this);
-				revUsed = board.getNextNonDownloadedRev(date, -1);
+				revUsed = board.getNextNonDownloadedAndValidRev(date, -1);
 				
 				ThawThread th = new ThawThread(new InsertionStarter(), "Frost message insertion starter");
 				th.start();
