@@ -128,8 +128,10 @@ public class KSKMessage
 				Logger.notice(this, "Invalid message: '"+board.getName()+"'"
 							+" - "+date.toString()
 							+" - "+Integer.toString(rev));
-				
+					
 				board.addInvalidSlot(date, rev);
+				
+				new File(get.getPath()).delete();
 				
 				successfullyDownloaded = true;
 				downloading            = false;

@@ -276,9 +276,11 @@ public class KSKMessageParser {
 				st.setInt(14, boardId);
 
 				st.execute();
+				
+				String boardName = (board != null) ? board : "(null)";
 
 				Logger.notice(this, "Last inserted message in the db : "+
-					      board + " (" + Integer.toString(boardId) + ") - " +
+					      boardName + " (" + Integer.toString(boardId) + ") - " +
 					      timestampSql.toString() + " - " +
 					      Integer.toString(rev));
 
