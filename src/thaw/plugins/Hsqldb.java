@@ -62,6 +62,7 @@ public class Hsqldb extends LibraryPlugin {
 		
 		executeQuery("SET LOGSIZE 50;");
 		executeQuery("SET CHECKPOINT DEFRAG 50;");
+		executeQuery("SET PROPERTY \"hsqldb.nio_data_file\" FALSE");
 	}
 
 	public void disconnect() throws java.sql.SQLException {
