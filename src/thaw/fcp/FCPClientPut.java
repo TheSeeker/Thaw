@@ -231,8 +231,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 			startInsert();
 		}
 
-		setChanged();
-		this.notifyObservers();
+		notifyChange();
 
 		return true;
 	}
@@ -338,8 +337,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 				identifier = queueManager.getAnID();
 		}
 
-		setChanged();
-		this.notifyObservers();
+		notifyChange();
 
 		final FCPMessage msg = new FCPMessage();
 
@@ -490,8 +488,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 
 			if( System.currentTimeMillis() >= (startTime+3000) ) {
 				toTheNodeProgress = (int) (((origSize - remaining) * 100) / origSize);
-				setChanged();
-				this.notifyObservers();
+				notifyChange();
 				startTime = System.currentTimeMillis();
 			}
 
@@ -595,8 +592,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 
 				status = "Inserting";
 
-				setChanged();
-				this.notifyObservers();
+				notifyChange();
 				return;
 			}
 
@@ -610,8 +606,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 				if (publicKey == null) {
 					status = "[Warning]";
 					Logger.warning(this, "PutSuccessful message without URI field ?!");
-					setChanged();
-					this.notifyObservers();
+					notifyChange();
 					return;
 				}
 
@@ -629,8 +624,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 
 				status = "Finished";
 
-				setChanged();
-				this.notifyObservers();
+				notifyChange();
 				return;
 			}
 

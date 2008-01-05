@@ -186,7 +186,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 			if (!query.isFinished())
 				return GUIHelper.getPrintableTime(remaining);
 			else
-				return I18n.getMessage("thaw.plugin.queueWatcher.totalTime") + " "+GUIHelper.getPrintableSize(remaining);
+				return I18n.getMessage("thaw.plugin.queueWatcher.totalTime") + " "+GUIHelper.getPrintableTime(remaining);
 		}
 
 		return null;

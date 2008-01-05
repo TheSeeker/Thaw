@@ -95,6 +95,8 @@ public abstract class FCPTransferQuery extends Observable implements FCPQuery {
 				averageSpeed = (blocks * BLOCK_SIZE) / diffTime;			
 				ETA = diffTime; /* ok, it's a little bit icky, but it does the trick :) */
 				
+				notifyChange();
+				
 				return;
 			}
 			
@@ -108,14 +110,14 @@ public abstract class FCPTransferQuery extends Observable implements FCPQuery {
 				long diffBlocks = transferedBlocks - transferedBlocksPast[currentReadCursor];
 				long remainingBlocks = (insertion ? (totalBlocks - transferedBlocks) : (requiredBlocks - transferedBlocks));
 				
-				if (diffTimeSec <= 0 /* we never know */ || diffBlocks <= 0 || remainingBlocks == 0) {
+				if (diffTimeSec <= 0 || diffBlocks <= 0 || remainingBlocks == 0) {
 					averageSpeed = 0;
 					ETA = 0;
 				} else {
 					double averageSpeedInBlocksPerSecond = diffBlocks / diffTimeSec;
 					
 					averageSpeed = (long)(averageSpeedInBlocksPerSecond * (double)BLOCK_SIZE);
-					ETA = (long)(((double)remainingBlocks) / averageSpeedInBlocksPerSecond);
+					ETA = (long)(remainingBlocks / averageSpeedInBlocksPerSecond);
 				}
 				
 				if (currentWriteCursor == currentReadCursor-1
