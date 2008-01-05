@@ -101,6 +101,9 @@ public abstract class FCPTransferQuery extends Observable implements FCPQuery {
 			
 			if (!running || finished)
 				return;
+			
+			if (transferedBlocks < 0)
+				return;
 
 			if (reliable && (currentReadCursor != currentWriteCursor)) {
 				if (transferedBlocksPast[currentReadCursor] < 0)
@@ -115,21 +118,33 @@ public abstract class FCPTransferQuery extends Observable implements FCPQuery {
 				
 				
 				if (diffTimeSec <= 0 || diffBlocks <= 0 || remainingBlocks == 0) {
+					if (diffBlocks < 0)
+						Logger.warning(this, "DiffBlocks < 0, shouldn't happen !");
+					if (diffTimeSec < 0)
+						Logger.warning(this, "DiffTimeSec < 0, shouldn't happen !");
+					
 					averageSpeed = 0;
 					ETA = 0;
 				} else {
-					double averageSpeedInBlocksPerSecond = diffBlocks / diffTimeSec;
+					//averageSpeed = (diffBlocks*BLOCK_SIZE) / diffTimeSec;
+
+					double averageSpeedInBlocksPerSecond = ((double)diffBlocks) / diffTimeSec;
+					averageSpeed = (long)(((double)averageSpeedInBlocksPerSecond) * ((double)BLOCK_SIZE));
 					
-					averageSpeed = (long)(averageSpeedInBlocksPerSecond * ((double)BLOCK_SIZE));
-					
-					if (averageSpeedInBlocksPerSecond >= 0.000001) {
+					if (averageSpeed >= 0.00000001) {
 						ETA = (long)((double)remainingBlocks / averageSpeedInBlocksPerSecond);
-						/*Logger.notice(this, "R: "+Long.toString(remainingBlocks)
-						 *					+ " ; AS: "+Double.toString(averageSpeedInBlocksPerSecond)
-						 *					+ " ; ETA: "+Long.toString(ETA));
+						/* Logger.notice(this, "R: "+Long.toString(remainingBlocks)
+						 *		+ " ; AS: "+Double.toString(averageSpeedInBlocksPerSecond)
+						 *		+ " ; ETA: "+Long.toString(ETA));
 						 */
-					} else
+						 
+					} else {
+						/*Logger.notice(this, "R: "+Long.toString(remainingBlocks)
+						 *		 					+ " ; AS: "+Double.toString(averageSpeedInBlocksPerSecond)
+						 *		 					+ " ; ETA == 0");
+						 */
 						ETA = 0;
+					}
 				}
 				
 				if (currentWriteCursor == currentReadCursor-1
