@@ -451,7 +451,7 @@ public class FCPQueueManager extends java.util.Observable implements ThawRunnabl
 	
 	
 	private void updateStats()
-	{
+	{	
 		synchronized(runningQueries) {
 			for (Iterator it = runningQueries.iterator(); it.hasNext(); ) {
 				FCPTransferQuery query = (FCPTransferQuery)it.next();

@@ -3,6 +3,8 @@ package thaw.fcp;
 import java.util.HashMap;
 import java.util.Observable;
 
+import thaw.core.Logger;
+
 /**
  * Transfer query == fetch / insert query. These queries must be able to
  * give more informations than the other.
@@ -31,8 +33,6 @@ public abstract class FCPTransferQuery extends Observable implements FCPQuery {
 	
 	/* reminder to do the maths */
 	public final static int NMB_REMINDERS = 60; /* one per seconde, so 1 minute here */
-	private long[] requiredBlocksPast = new long[NMB_REMINDERS];
-	private long[] totalBlocksPast = new long[NMB_REMINDERS];
 	private long[] transferedBlocksPast = new long[NMB_REMINDERS];
 	private int currentReadCursor = 0; /* read Cursor in the *past arrays */
 	private int currentWriteCursor = 0; /* write Cursor in the *past arrays */
@@ -54,8 +54,6 @@ public abstract class FCPTransferQuery extends Observable implements FCPQuery {
 		reliable = insertion;
 		
 		for (int i = 0 ; i < NMB_REMINDERS ; i++) {
-			requiredBlocksPast[i]   = -1;
-			totalBlocksPast[i]      = -1;
 			transferedBlocksPast[i] = -1;
 		}
 	}
@@ -104,11 +102,17 @@ public abstract class FCPTransferQuery extends Observable implements FCPQuery {
 			if (!running || finished)
 				return;
 
-			if (currentReadCursor != currentWriteCursor) {
+			if (reliable && (currentReadCursor != currentWriteCursor)) {
+				if (transferedBlocksPast[currentReadCursor] < 0)
+					Logger.warning(this, "TransferedBlocksNumber < 0, shouldn't happen !");
+				
 				/* reminder : we have one second between each slot of the *Past arrays */
 				long diffTimeSec = ((currentWriteCursor < currentReadCursor) ? currentWriteCursor+NMB_REMINDERS : currentWriteCursor) - currentReadCursor;
 				long diffBlocks = transferedBlocks - transferedBlocksPast[currentReadCursor];
 				long remainingBlocks = (insertion ? (totalBlocks - transferedBlocks) : (requiredBlocks - transferedBlocks));
+				
+				//Logger.notice(this, "T: "+Long.toString(diffTimeSec)+ " ; B: "+ Long.toString(diffBlocks)+" ; R: "+Long.toString(remainingBlocks));
+				
 				
 				if (diffTimeSec <= 0 || diffBlocks <= 0 || remainingBlocks == 0) {
 					averageSpeed = 0;
@@ -116,8 +120,16 @@ public abstract class FCPTransferQuery extends Observable implements FCPQuery {
 				} else {
 					double averageSpeedInBlocksPerSecond = diffBlocks / diffTimeSec;
 					
-					averageSpeed = (long)(averageSpeedInBlocksPerSecond * (double)BLOCK_SIZE);
-					ETA = (long)(remainingBlocks / averageSpeedInBlocksPerSecond);
+					averageSpeed = (long)(averageSpeedInBlocksPerSecond * ((double)BLOCK_SIZE));
+					
+					if (averageSpeedInBlocksPerSecond >= 0.000001) {
+						ETA = (long)((double)remainingBlocks / averageSpeedInBlocksPerSecond);
+						/*Logger.notice(this, "R: "+Long.toString(remainingBlocks)
+						 *					+ " ; AS: "+Double.toString(averageSpeedInBlocksPerSecond)
+						 *					+ " ; ETA: "+Long.toString(ETA));
+						 */
+					} else
+						ETA = 0;
 				}
 				
 				if (currentWriteCursor == currentReadCursor-1
@@ -133,8 +145,6 @@ public abstract class FCPTransferQuery extends Observable implements FCPQuery {
 
 			/* updating known values */
 			
-			requiredBlocksPast[currentWriteCursor] = requiredBlocks;
-			totalBlocksPast[currentWriteCursor] = totalBlocks;
 			transferedBlocksPast[currentWriteCursor] = transferedBlocks;
 
 			currentWriteCursor++;
