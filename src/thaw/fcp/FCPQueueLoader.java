@@ -74,7 +74,7 @@ public class FCPQueueLoader implements FCPQuery, Observer {
 			final FCPClientGet clientGet = new FCPClientGet(msg.getValue("Identifier"),
 									msg.getValue("URI"), // key
 									priority, persistence, global,
-									destinationDir, "Fetching", 0,
+									destinationDir, "Fetching",
 									-1, queueManager);
 
 			if(queueManager.addQueryToTheRunningQueue(clientGet, false))

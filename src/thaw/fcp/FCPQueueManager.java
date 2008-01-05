@@ -385,7 +385,7 @@ public class FCPQueueManager extends java.util.Observable implements ThawRunnabl
 	}
 
 
-	public void schedule() {
+	private void schedule() {
 			/* We count the running query to see if there is an empty slot */
 
 			int runningInsertions = 0;
@@ -448,6 +448,17 @@ public class FCPQueueManager extends java.util.Observable implements ThawRunnabl
 			}
 
 	}
+	
+	
+	private void updateStats()
+	{
+		synchronized(runningQueries) {
+			for (Iterator it = runningQueries.iterator(); it.hasNext(); ) {
+				FCPTransferQuery query = (FCPTransferQuery)it.next();
+				query.updateStats();
+			}
+		}
+	}
 
 
 	public void run() {
@@ -459,7 +470,7 @@ public class FCPQueueManager extends java.util.Observable implements ThawRunnabl
 
 		while(!stopThread) {
 			try {
-				Thread.sleep(500);
+				Thread.sleep(1000);
 			} catch(final java.lang.InterruptedException e) {
 				/* We don't care */
 			}
@@ -472,6 +483,11 @@ public class FCPQueueManager extends java.util.Observable implements ThawRunnabl
 					   && !queryManager.getConnection().isWriting()
 					   && queueCompleted)
 						schedule();
+					
+					if(queryManager.getConnection().isConnected()
+					   && !queryManager.getConnection().isWriting())
+						updateStats();
+
 
 				} catch(final Exception e) {
 					Logger.error(this, "EXCEPTION FROM FCP SCHEDULER : "+e.toString()+ " ; "+e.getMessage());

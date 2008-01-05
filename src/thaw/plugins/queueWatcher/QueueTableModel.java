@@ -175,7 +175,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		} else if( ((isForInsertions && (column == 6))
 			     || (!isForInsertions && (column == 7)) ) ) {
 
-			if (query.isFinished() || !query.isProgressionReliable())
+			if (!query.isProgressionReliable())
 				return "";
 
 			long remaining = query.getETA();
@@ -183,7 +183,10 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 			if (remaining <= 0)
 				return "";
 			
-			return GUIHelper.getPrintableTime(remaining);
+			if (!query.isFinished())
+				return GUIHelper.getPrintableTime(remaining);
+			else
+				return I18n.getMessage("thaw.plugin.queueWatcher.totalTime") + " "+GUIHelper.getPrintableSize(remaining);
 		}
 
 		return null;

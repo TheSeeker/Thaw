@@ -86,7 +86,7 @@ public class FCPQueryManager extends Observable implements ThawRunnable {
 
 		result.loadFromRawMessage(whatsUp);
 
-		if(withData) {
+		if(withData && result.getValue("DataLength") != null) {
 			final long dataWaiting = (new Long(result.getValue("DataLength"))).longValue();
 			connection.setRawDataWaiting(dataWaiting);
 			Logger.info(this, "Achtung data: "+(new Long(dataWaiting)).toString());

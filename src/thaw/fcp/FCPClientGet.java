@@ -12,19 +12,10 @@ import thaw.core.ThawThread;
 import thaw.core.ThawRunnable;
 
 
-public class FCPClientGet extends Observable
-	implements Observer, FCPTransferQuery {
-
-	public final static int DEFAULT_PRIORITY = 4;
-	public final static int DEFAULT_MAX_RETRIES = -1;
-	public final static int PERSISTENCE_FOREVER           = 0;
-	public final static int PERSISTENCE_UNTIL_NODE_REBOOT = 1;
-	public final static int PERSISTENCE_UNTIL_DISCONNECT  = 2;
-
+public class FCPClientGet extends FCPTransferQuery implements Observer {
 
 	private int maxRetries = -1;
 	private final static int PACKET_SIZE = 65536;
-	public final static int BLOCK_SIZE = 16384;
 
 	private FCPQueueManager queueManager;
 	private FCPQueryManager duplicatedQueryManager;
@@ -33,8 +24,6 @@ public class FCPClientGet extends Observable
 	private String filename = null; /* Extract from the key */
 	private int priority = DEFAULT_PRIORITY;
 	private int persistence = PERSISTENCE_FOREVER;
-	private long startupTime = -1;
-	private long completionTime = -1;
 	private boolean globalQueue = true;
 	private String destinationDir = null;
 	private String finalPath = null;
@@ -44,24 +33,14 @@ public class FCPClientGet extends Observable
 
 	private String identifier;
 
-	private int progress = 0; /* in pourcent */
-	private long transferedBlocks = 0;
 	private int fromTheNodeProgress = 0;
-	private boolean progressReliable = false;
 	private long fileSize;
 	private long maxSize = 0;
 
-	private boolean running = false;
-	private boolean successful = true;
 	private boolean writingSuccessful = true;
 	private boolean fatal = true;
 	private boolean isLockOwner = false;
 
-	private long initialStart = -1; /* set at first SimpleProgress message */
-	private long initialBlockNumber = -1;
-	private long averageSpeed = 0; /* computed at each SimpleProgress message */
-	private long eta = 0;
-	
 	private boolean alreadySaved = false;
 
 	private boolean noDDA = false;
@@ -80,10 +59,11 @@ public class FCPClientGet extends Observable
 	 * See setParameters().
 	 */
 	public FCPClientGet(final FCPQueueManager queueManager, final HashMap parameters) {
+		super(false);
+		
 		this.queueManager = queueManager;
 		setParameters(parameters);
 
-		progressReliable = false;
 		fromTheNodeProgress = 0;
 
 		/* If isPersistent(), then start() won't be called, so must relisten the
@@ -103,20 +83,16 @@ public class FCPClientGet extends Observable
 	 *                       (path determined only when the file is availabed ;
 	 *                       this file will be deleted on jvm exit)
 	 */
-	public FCPClientGet(final String id, final String key, final int priority,
+	protected FCPClientGet(final String id, final String key, final int priority,
 			    final int persistence, final boolean globalQueue,
-			    final String destinationDir, String status, final int progress,
+			    final String destinationDir, String status,
 			    final int maxRetries,
 			    final FCPQueueManager queueManager) {
 
 		this(key, priority, persistence, globalQueue, maxRetries, destinationDir);
 
-		progressReliable = false;
-
 		this.queueManager = queueManager;
 
-		this.progress = progress;
-		this.transferedBlocks = 0;
 		this.status = status;
 
 		if(status == null) {
@@ -140,17 +116,7 @@ public class FCPClientGet extends Observable
 		}
 		/* /FIX */
 
-
-		successful = true;
-		running = true;
-
-		if(progress < 100) {
-			fromTheNodeProgress = 0;
-		} else {
-			fromTheNodeProgress = 100;
-			progressReliable = true;
-		}
-
+		setStatus(true, false, false);
 	}
 
 
@@ -177,12 +143,11 @@ public class FCPClientGet extends Observable
 			    final int persistence, boolean globalQueue,
 			    final int maxRetries,
 			    String destinationDir) {
-
+		super(false);
 
 		if (globalQueue && (persistence >= PERSISTENCE_UNTIL_DISCONNECT))
 			globalQueue = false; /* else protocol error */
 
-		progressReliable = false;
 		fromTheNodeProgress = 0;
 
 		this.maxRetries = maxRetries;
@@ -192,8 +157,6 @@ public class FCPClientGet extends Observable
 		this.globalQueue = globalQueue;
 		this.destinationDir = destinationDir;
 
-		progress = 0;
-		transferedBlocks = 0;
 		fileSize = 0;
 		attempt  = 0;
 
@@ -247,9 +210,8 @@ public class FCPClientGet extends Observable
 
 	public boolean start(final FCPQueueManager queueManager) {
 		attempt++;
-		running = true;
-		progress = 0;
-		transferedBlocks = 0;
+		
+		setStatus(true, false, false);
 
 		this.queueManager = queueManager;
 		
@@ -364,16 +326,13 @@ public class FCPClientGet extends Observable
 							    && !(queueManager.getQueryManager().getConnection().isLocalSocket() && !noDDA)
 							    && queueManager.getQueryManager().getConnection().getAutoDownload()) {
 								status = "Requesting file from the node";
-								progress = 99;
-								running = true;
-								successful = true;
+								
 								writingSuccessful = false;
 								saveFileTo(destinationDir, false);
+
 							} else {
 								status = "Available";
-								progress = 100;
-								running = false;
-								successful = true;
+								setStatus(false, true, true);
 								writingSuccessful = true;
 								Logger.info(this, "File already existing. Not rewrited");
 							}
@@ -384,8 +343,7 @@ public class FCPClientGet extends Observable
 					}
 				}
 
-				setChanged();
-				notifyObservers();
+				notifyChange();
 			}
 
 			return;
@@ -397,8 +355,7 @@ public class FCPClientGet extends Observable
 			identifier = null;
 			start(queueManager);
 
-			setChanged();
-			this.notifyObservers();
+			notifyChange();
 
 			return;
 		}
@@ -436,9 +393,9 @@ public class FCPClientGet extends Observable
 			protocolErrorCode = Integer.parseInt(message.getValue("Code"));
 
 			status = "Protocol Error ("+message.getValue("CodeDescription")+")";
-			progress = 100;
-			running = false;
-			successful = false;
+
+			setStatus(false, true, false);
+
 			fatal = true;
 
 			if((message.getValue("Fatal") != null) &&
@@ -453,8 +410,7 @@ public class FCPClientGet extends Observable
 				isLockOwner= false;
 			}
 
-			setChanged();
-			notifyObservers();
+			notifyChange();
 
 			queueManager.getQueryManager().deleteObserver(this);
 
@@ -476,9 +432,7 @@ public class FCPClientGet extends Observable
 			status = "Removed";
 
 			if (!isFinished()) {
-				progress = 100;
-				running = false;
-				successful = false;
+				setStatus(false, true, false);
 				fatal = true;
 			}
 
@@ -486,8 +440,7 @@ public class FCPClientGet extends Observable
 			queueManager.getQueryManager().deleteObserver(this);
 			queueManager.remove(this);
 
-			setChanged();
-			notifyObservers();
+			notifyChange();
 			return;
 		}
 
@@ -527,9 +480,7 @@ public class FCPClientGet extends Observable
 			getFailedCode = Integer.parseInt(message.getValue("Code"));
 
 			status = "Failed ("+message.getValue("CodeDescription")+")";
-			progress = 100;
-			running = false;
-			successful = false;
+			setStatus(false, true, false);
 
 			fatal = true;
 
@@ -539,8 +490,7 @@ public class FCPClientGet extends Observable
 				status = status + " (non-fatal)";
 			}
 
-			setChanged();
-			this.notifyObservers();
+			notifyChange();
 
 			return;
 		}
@@ -548,59 +498,32 @@ public class FCPClientGet extends Observable
 		if ("SimpleProgress".equals(message.getMessageName())) {
 			Logger.debug(this, "SimpleProgress !");
 
-			progress = 0;
-
 			if (message.getValue("Total") != null
 					&& message.getValue("Required") != null
 					&& message.getValue("Succeeded") != null) {
+
 				fileSize = Long.parseLong(message.getValue("Total"))*FCPClientGet.BLOCK_SIZE;
+
 				final long total = Long.parseLong(message.getValue("Total"));
 				final long required = Long.parseLong(message.getValue("Required"));
 				final long succeeded = Long.parseLong(message.getValue("Succeeded"));
 
-				progress = (int) ((long)((succeeded * 98) / total));
-				transferedBlocks = succeeded;
-
-				status = "Fetching";
-
+				boolean progressReliable = false;
+				
 				if((message.getValue("FinalizedTotal") != null) &&
-				   message.getValue("FinalizedTotal").equals("true")) {
+						   message.getValue("FinalizedTotal").equals("true")) {
 					progressReliable = true;
 				}
 
-				successful = true;
-				running = true;
-				
-				/* computing average speed & ETA */
-				long timeElapsed = 0;
-				long blocks = 0;
-				
-				if (initialStart < 0) {
-					/* first simple progress message */ 
-					initialStart = (new java.util.Date()).getTime();
-					initialBlockNumber = transferedBlocks;
-				}
-				
-				if (initialStart > 0) {
-					timeElapsed = (new java.util.Date()).getTime() - initialStart;
-					blocks = transferedBlocks - initialBlockNumber;
-				}
-				
-				if (blocks != 0 && timeElapsed != 0) {
-					averageSpeed = (blocks * FCPClientGet.BLOCK_SIZE * 1000) / timeElapsed;
-				} else {
-					averageSpeed = 0; /* == unknown */
-				}
-				
-				if (succeeded >= required || averageSpeed <= 0)
-					eta = 0; /* unknown */
-				else {
-					eta = ((required - succeeded) * BLOCK_SIZE) / averageSpeed;
-				}
+				status = "Fetching";
+				setBlockNumbers(required, total, succeeded, progressReliable);
+				setStatus(true, false, false);
+
+			} else {
+				setBlockNumbers(-1, -1, -1, false);
 			}
 
-			setChanged();
-			this.notifyObservers();
+			notifyChange();
 
 			return;
 		}
@@ -610,41 +533,32 @@ public class FCPClientGet extends Observable
 
 			fileSize = message.getAmountOfDataWaiting();
 
-			running = true;
-			successful = true;
-			progress = 99;
-			startupTime = Long.valueOf(message.getValue("StartupTime")).longValue();
-			completionTime = Long.valueOf(message.getValue("CompletionTime")).longValue();
+			setStatus(true, false, false);
+			setStartupTime(Long.valueOf(message.getValue("StartupTime")).longValue());
+			setCompletionTime(Long.valueOf(message.getValue("CompletionTime")).longValue());
+
 			status = "Writing to disk";
 			Logger.info(this, "Receiving file ...");
 
-			setChanged();
-			this.notifyObservers();
-
-			successful = true;
+			notifyChange();
 
 			if(fetchDirectly(queryManager.getConnection(), fileSize, true)) {
+				Logger.info(this, "File received");
+
 				writingSuccessful = true;
-				successful = true;
 				status = "Available";
 			} else {
 				Logger.warning(this, "Unable to fetch correctly the file. This may create problems on socket");
-				if (writingSuccessful) { /* if we forgot to set the correct values */
-					writingSuccessful = false;
-					successful = false;
-					status = "Error while receveing the file";
-				}
+				writingSuccessful = false;
+				status = "Error while receveing the file";
 			}
-
-			Logger.info(this, "File received");
 
 			if (duplicatedQueryManager != null)
 				duplicatedQueryManager.getConnection().removeFromWriterQueue();
 
 			isLockOwner= false;
-
-			running = false;
-			progress = 100;
+			
+			setStatus(false, true, writingSuccessful);
 
 			queryManager.deleteObserver(this);
 
@@ -654,17 +568,8 @@ public class FCPClientGet extends Observable
 				duplicatedQueryManager = null;
 			}
 
-			setChanged();
-			notifyObservers();
+			notifyChange();
 
-
-			return;
-		}
-
-		if ("PersistentGet".equals(message.getMessageName())) {
-			Logger.debug(this, "PersistentGet !");
-			setChanged();
-			notifyObservers();
 			return;
 		}
 
@@ -768,12 +673,12 @@ public class FCPClientGet extends Observable
 
 		Logger.info(this, "Waiting for socket  ...");
 		status = "Waiting for socket availability ...";
-		progress = 99;
-		running = true;
+		fromTheNodeProgress = 1; /* display issue */
+		
+		setStatus(true, false, false);
 
-		setChanged();
-		this.notifyObservers();
-
+		notifyChange();
+		
 		UnlockWaiter uw = new UnlockWaiter(this, duplicatedQueryManager.getConnection(), dir);
 
 		final Thread fork = new ThawThread(uw,
@@ -793,11 +698,11 @@ public class FCPClientGet extends Observable
 		destinationDir = dir;
 
 		status = "Requesting file";
-		progress = 99;
-		running = true;
-		setChanged();
-		this.notifyObservers();
+		fromTheNodeProgress = 1; /* display issue */
+		setStatus(true, false, false);
 
+		notifyChange();
+		
 		if(destinationDir == null) {
 			Logger.warning(this, "saveFileTo() : Wtf ?");
 		}
@@ -880,7 +785,7 @@ public class FCPClientGet extends Observable
 				Logger.error(this, "Socket closed, damn !");
 				status = "Unable to read data from the node";
 				writingSuccessful = false;
-				successful = false;
+				setStatus(false, true, false);
 				try {
 					outputStream.close();
 				} catch(java.io.IOException ex) {
@@ -898,7 +803,7 @@ public class FCPClientGet extends Observable
 					Logger.error(this, "Unable to write file on disk ... out of space ? : "+e.toString());
 					status = "Unable to fetch / disk probably full !";
 					writingSuccessful = false;
-					successful = false;
+					setStatus(false, true, false);
 					try {
 						outputStream.close();
 					} catch(java.io.IOException ex) {
@@ -915,8 +820,12 @@ public class FCPClientGet extends Observable
 			if( System.currentTimeMillis() >= (startTime+3000)) {
 				status = "Writing to disk";
 				fromTheNodeProgress = (int) (((origSize-size) * 100) / origSize);
-				setChanged();
-				this.notifyObservers();
+				
+				if (fromTheNodeProgress <= 0) /* display issue */
+					fromTheNodeProgress = 1;
+
+				notifyChange();
+
 				startTime = System.currentTimeMillis();
 			}
 
@@ -969,7 +878,7 @@ public class FCPClientGet extends Observable
 
 		queueManager.getQueryManager().writeMessage(stopMessage);
 
-		running = false;
+		setStatus(false, isFinished(), isSuccessful());
 
 		return true;
 	}
@@ -981,14 +890,12 @@ public class FCPClientGet extends Observable
 		Logger.info(this, "Pausing fetching of the key : "+getFileKey());
 
 		removeRequest();
+		
+		setStatus(false, false, false);
 
-		progress = 0;
-		running = false;
-		successful = false;
 		status = "Delayed";
 
-		setChanged();
-		this.notifyObservers();
+		notifyChange();
 
 		return true;
 
@@ -1001,18 +908,14 @@ public class FCPClientGet extends Observable
 			return false;
 
 		boolean wasFinished = isFinished();
+		
+		setStatus(false, true, isSuccessful());
 
-		if (progress < 100)
-			successful = false;
-
-		progress = 100;
-		running = false;
 		fatal = true;
 		status = "Stopped";
 
 		if (!restartIfFailed && !wasFinished) {
-			setChanged();
-			this.notifyObservers();
+			notifyChange();
 		}
 
 		return true;
@@ -1051,8 +954,7 @@ public class FCPClientGet extends Observable
 
 		priority = prio;
 
-		setChanged();
-		this.notifyObservers();
+		notifyChange();
 	}
 
 	public int getQueryType() {
@@ -1061,26 +963,6 @@ public class FCPClientGet extends Observable
 
 	public String getStatus() {
 		return status;
-	}
-
-	public int getProgression() {
-		return progress;
-	}
-	
-	
-	public long getAverageSpeed() {
-		return averageSpeed;
-	}
-	
-	public long getETA() {
-		return eta;
-	}
-
-	public boolean isProgressionReliable() {
-		if((progress == 0) || (progress >= 99))
-			return true;
-
-		return progressReliable;
 	}
 
 	public String getFileKey() {
@@ -1094,13 +976,6 @@ public class FCPClientGet extends Observable
 		}
 
 		return key;
-	}
-
-	public boolean isFinished() {
-		if(progress >= 100)
-			return true;
-
-		return false;
 	}
 
 	public long getFileSize() {
@@ -1136,7 +1011,7 @@ public class FCPClientGet extends Observable
 
 		if(x == 0) {
 			/* We suppose it's a restart */
-			progress = 0;
+			setBlockNumbers(-1, -1, -1, false);
 		}
 	}
 
@@ -1144,20 +1019,12 @@ public class FCPClientGet extends Observable
 		return maxRetries;
 	}
 
-	public boolean isSuccessful() {
-		return successful;
-	}
-
 	public boolean isWritingSuccessful() {
 		return writingSuccessful;
 	}
 
 	public boolean isFatallyFailed() {
-		return ((!successful) && fatal);
-	}
-
-	public boolean isRunning() {
-		return running;
+		return ((!isSuccessful()) && fatal);
 	}
 
 	public HashMap getParameters() {
@@ -1174,10 +1041,9 @@ public class FCPClientGet extends Observable
 		result.put("status", status);
 
        		result.put("Identifier", identifier);
-		result.put("Progress", Integer.toString(progress));
 		result.put("FileSize", Long.toString(fileSize));
-		result.put("Running", Boolean.toString(running));
-		result.put("Successful", Boolean.toString(successful));
+		result.put("Running", Boolean.toString(isRunning()));
+		result.put("Successful", Boolean.toString(isSuccessful()));
 		result.put("MaxRetries", Integer.toString(maxRetries));
 
 		return result;
@@ -1199,16 +1065,16 @@ public class FCPClientGet extends Observable
 		identifier     = (String)parameters.get("Identifier");
 
 		Logger.info(this, "Resuming id : "+identifier);
-
-		progress       = Integer.parseInt((String)parameters.get("Progress"));
 		fileSize       = Long.parseLong((String)parameters.get("FileSize"));
-		running        = Boolean.valueOf((String)parameters.get("Running")).booleanValue();
-		successful     = Boolean.valueOf((String)parameters.get("Successful")).booleanValue();
+		boolean running        = Boolean.valueOf((String)parameters.get("Running")).booleanValue();
+		boolean successful     = Boolean.valueOf((String)parameters.get("Successful")).booleanValue();
 		maxRetries     = Integer.parseInt((String)parameters.get("MaxRetries"));
+		
+		setStatus(running, !running, successful);
 
 		if((persistence == PERSISTENCE_UNTIL_DISCONNECT) && !isFinished()) {
-			progress = 0;
-			running = false;
+			setStatus(false, false, false);
+			setBlockNumbers(-1, -1, -1, false);
 			status = "Waiting";
 		}
 
@@ -1236,11 +1102,6 @@ public class FCPClientGet extends Observable
 		return fromTheNodeProgress;
 	}
 
-	public void notifyChange() {
-		setChanged();
-		notifyObservers();
-	}
-
 	public int getGetFailedCode() {
 		return getFailedCode;
 	}
@@ -1249,13 +1110,4 @@ public class FCPClientGet extends Observable
 		return protocolErrorCode;
 	}
 
-
-	public long getCompletionTime() {
-		return completionTime;
-	}
-
-
-	public long getStartupTime() {
-		return startupTime;
-	}
 }
