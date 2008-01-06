@@ -345,7 +345,8 @@ public class KSKDraft
 				put.stop(queueManager);
 				queueManager.remove(put);
 
-				revUsed = board.getNextNonDownloadedRev(date, revUsed);
+				//revUsed = board.getNextNonDownloadedRev(date, revUsed);
+				revUsed = board.getNextNonDownloadedAndValidRev(date, revUsed);
 				startInsertion();
 			}
 		}
