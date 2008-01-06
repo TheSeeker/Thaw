@@ -95,8 +95,16 @@ public class KSKMessage
 		if (!get.isSuccessful()) {
 
 			int code = get.getGetFailedCode();
+			
+			if (get.getProtocolErrorCode() == 21 /* Too big */
+				|| get.getProtocolErrorCode() == 28 /* All data not found */) {
 
-			if (get.getProtocolErrorCode() == 4
+				Logger.warning(this, "MiniFrost: Invalid key: "+key);
+				successfullyDownloaded = true;
+				
+				board.addInvalidSlot(date, rev);
+				
+			} else if (get.getProtocolErrorCode() == 4
 			    || code == 20) {
 				Logger.warning(this, "MiniFrost: Invalid key: "+key);
 				successfullyDownloaded = true;
