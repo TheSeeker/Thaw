@@ -185,8 +185,8 @@ public class Main {
 			e.printStackTrace();
 		}
 
-		//Logger.warning(this, "Will try to continue anyway");
-		System.exit(1);
+		Logger.warning(this, "Will try to continue anyway");
+		//System.exit(1);
 	}
 
 

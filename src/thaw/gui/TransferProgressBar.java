@@ -9,20 +9,21 @@ import thaw.fcp.FCPClientGet;
 import thaw.core.I18n;
 
 public class TransferProgressBar extends JProgressBar {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -4726613087699822787L;
 	private FCPTransferQuery query;
 	private boolean statusInProgressBar;
 	private boolean withBorder;
+	
+	private final static String failedStr = I18n.getMessage("thaw.common.failed");
+	private final static String finishedStr = I18n.getMessage("thaw.common.finished");
+	
 
 	public TransferProgressBar(FCPTransferQuery q) {
 		this(q, true);
 	}
 
 	public TransferProgressBar(FCPTransferQuery query, boolean statusInProgressBar,
-				   boolean withBorder) {
+				   				boolean withBorder) {
 		super(0, 100);
 		this.query = query;
 		this.statusInProgressBar = statusInProgressBar;
@@ -58,9 +59,9 @@ public class TransferProgressBar extends JProgressBar {
 		setValue(progress);
 
 		if(query.isFinished() && !query.isSuccessful())
-			setString(I18n.getMessage("thaw.common.failed"));
+			setString(failedStr);
 		else if(query.isFinished() && query.isSuccessful())
-			setString(I18n.getMessage("thaw.common.finished"));
+			setString(finishedStr);
 		else if(!query.isFinished()) {
 			String txt= "";
 

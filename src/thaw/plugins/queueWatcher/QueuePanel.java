@@ -77,7 +77,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	private JRadioButtonMenuItem[] priorityRadioButton;
 	private JRadioButtonMenuItem unknowPriority;
 	private ButtonGroup priorityGroup;
-	private final int MIN_PRIORITY = 6;
+	public final static int MIN_PRIORITY = 6;
 
 	private int[] selectedRows;
 

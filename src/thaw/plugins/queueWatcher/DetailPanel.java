@@ -36,9 +36,18 @@ public class DetailPanel implements Observer {
 	private final JTextField globalQueue           = new JTextField();
 
 	private FCPTransferQuery query = null;
-
-
+	
 	private final static Dimension dim = new Dimension(thaw.plugins.QueueWatcher.DIVIDER_LOCATION-10, 400);
+
+	private final static String unknownStr = I18n.getMessage("thaw.common.unknown");
+	private final static String failedStr = I18n.getMessage("thaw.common.failed");
+	private final static String estimationStr = I18n.getMessage("thaw.common.estimation");
+	
+	private final static String[] prioritiesStr = new String[QueuePanel.MIN_PRIORITY+1];
+	static {
+		for (int i = 0 ; i < prioritiesStr.length ; i++)
+			prioritiesStr[i] = I18n.getMessage("thaw.plugin.priority.p"+Integer.toString(i));
+	};
 
 
 	public DetailPanel() {
@@ -133,19 +142,19 @@ public class DetailPanel implements Observer {
 				String progression = Integer.toString(query.getProgression()) + "%";
 
 				if(!query.isProgressionReliable())
-					progression = progression + " ("+I18n.getMessage("thaw.common.estimation")+")";
+					progression = progression + " ("+estimationStr+")";
 
 				progress.setString(progression);
 			} else
-				progress.setString(I18n.getMessage("thaw.common.failed"));
+				progress.setString(failedStr);
 
 			if(query.getFileKey() != null)
 				key.setText(query.getFileKey());
 			else
-				key.setText(I18n.getMessage("thaw.common.unknown"));
+				key.setText(unknownStr);
 
 			if(query.getFileSize() == 0)
-				size.setText(I18n.getMessage("thaw.common.unknown"));
+				size.setText(unknownStr);
 			else
 				size.setText((new Long(query.getFileSize())).toString()+" B");
 
@@ -156,9 +165,9 @@ public class DetailPanel implements Observer {
 				identifier.setText("N/A");
 
 			if(query.getThawPriority() != -1)
-				priority.setText(I18n.getMessage("thaw.plugin.priority.p"+Integer.toString(query.getThawPriority())));
+				priority.setText(prioritiesStr[query.getThawPriority()]);
 			else
-				priority.setText(I18n.getMessage("thaw.common.unknown"));
+				priority.setText(unknownStr);
 
 		} else {
 			withTheNodeProgress.setValue(0);

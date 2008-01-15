@@ -30,7 +30,6 @@ public class KSKBoardFactory
 		"freenet-refs",
 		"thaw",
 		"frost",
-		"fuqid",
 		"jsite",
 		"successful",
 		"unsuccessful",

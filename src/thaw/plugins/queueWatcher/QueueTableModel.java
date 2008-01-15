@@ -27,11 +27,17 @@ import thaw.plugins.TrayIcon;
 
 
 public class QueueTableModel extends javax.swing.table.AbstractTableModel implements Observer {
-	private static final long serialVersionUID = 20060708;
+	private static final long serialVersionUID = 20060709;
+	private final static String totalTimeStr = I18n.getMessage("thaw.plugin.queueWatcher.totalTime");
+	private final static String downloadSuccessfulStr = I18n.getMessage("thaw.plugin.queueWatcher.downloadSuccessful");
+	private final static String downloadFailedStr = I18n.getMessage("thaw.plugin.queueWatcher.downloadFailed");
+	private final static String insertionSuccessfulStr = I18n.getMessage("thaw.plugin.queueWatcher.insertionSuccessful");
+	private final static String insertionFailedStr = I18n.getMessage("thaw.plugin.queueWatcher.insertionFailed");
+	private final static String unspecifiedStr = I18n.getMessage("thaw.common.unspecified");
 
 	private final Vector columnNames;
 
-        private Vector queries = null;
+    private Vector queries = null;
 
 	private boolean isForInsertions = false;
 
@@ -147,7 +153,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 			if(query.getPath() != null)
 				return query.getPath();
 			else
-				return I18n.getMessage("thaw.common.unspecified");
+				return unspecifiedStr;
 
 		} else if( (isForInsertions && (column == 3))
 		    || (!isForInsertions && (column == 4)) ) {
@@ -186,7 +192,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 			if (!query.isFinished())
 				return GUIHelper.getPrintableTime(remaining);
 			else
-				return I18n.getMessage("thaw.plugin.queueWatcher.totalTime") + " "+GUIHelper.getPrintableTime(remaining);
+				return totalTimeStr + " "+GUIHelper.getPrintableTime(remaining);
 		}
 
 		return null;
@@ -368,12 +374,12 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 			if (o instanceof FCPClientGet) {
 				str = (success ?
-				       I18n.getMessage("thaw.plugin.queueWatcher.downloadSuccessful") :
-				       I18n.getMessage("thaw.plugin.queueWatcher.downloadFailed"));
+				       downloadSuccessfulStr :
+				       downloadFailedStr);
 			} else if (o instanceof FCPClientPut) {
 				str = (success ?
-				       I18n.getMessage("thaw.plugin.queueWatcher.insertionSuccessful") :
-				       I18n.getMessage("thaw.plugin.queueWatcher.insertionFailed"));
+				       insertionSuccessfulStr :
+				       insertionFailedStr);
 			}
 
 			if (str != null) {

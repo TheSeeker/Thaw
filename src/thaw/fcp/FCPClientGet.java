@@ -334,12 +334,17 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 								status = "Available";
 								setStatus(false, true, true);
 								writingSuccessful = true;
-								Logger.info(this, "File already existing. Not rewrited");
+								Logger.notice(this, "Download finished => File already existing. Not rewrited");
 							}
 
 						} else {
-							Logger.info(this, "Don't know where to put file, so file not asked to the node");
+							setStatus(false, true, true);
+							status = "Available but not downloaded";
+							writingSuccessful = true;
+							Logger.notice(this, "Download finished => Don't know where to put file, so file not asked to the node");
 						}
+					} else {
+						/* we do nothing : the request is not persistent, so we should get a AllData */
 					}
 				}
 
@@ -454,7 +459,7 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 				status = "Redirected ...";
 				if (queueManager.isOur(message.getValue("Identifier"))) {
 					restartIfFailed = true;
-					stop(queueManager);
+					stop(queueManager, false);
 				} else {
 					Logger.debug(this, "Not our transfer ; we don't touch");
 				}
@@ -900,8 +905,12 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 		return true;
 
 	}
+	
+	public boolean stop(final FCPQueueManager queueManager) {
+		return stop(queueManager, true);
+	}
 
-	public boolean stop(final FCPQueueManager queryManager) {
+	public boolean stop(final FCPQueueManager queryManager, boolean notify) {
 		Logger.info(this, "Stop fetching of the key : "+getFileKey());
 
 		if(isPersistent() && !removeRequest())
@@ -909,12 +918,12 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 
 		boolean wasFinished = isFinished();
 		
-		setStatus(false, true, isSuccessful());
+		setStatus(false, true, wasFinished && isSuccessful());
 
 		fatal = true;
 		status = "Stopped";
 
-		if (!restartIfFailed && !wasFinished) {
+		if (!restartIfFailed && !wasFinished && notify) {
 			notifyChange();
 		}
 

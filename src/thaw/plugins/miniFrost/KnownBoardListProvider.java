@@ -47,6 +47,11 @@ public class KnownBoardListProvider implements BoardFactory {
 		
 		Object[] boardListAr = boardList.toArray();
 		
+		if (boardListAr.length <= 0) {
+			new thaw.gui.WarningWindow(mainWindow, I18n.getMessage("thaw.plugin.miniFrost.knownBoard.none"));
+			return;
+		}
+		
 		BoardAttachment selection = (BoardAttachment)JOptionPane.showInputDialog(mainWindow.getMainFrame(),
 			      I18n.getMessage("thaw.plugin.miniFrost.knownBoard.select"),
 			      I18n.getMessage("thaw.plugin.miniFrost.knownBoard.select"),
