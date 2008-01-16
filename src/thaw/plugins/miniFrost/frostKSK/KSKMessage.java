@@ -61,11 +61,14 @@ public class KSKMessage
 	private boolean downloading = false; /* put back to false only after parsing */
 	private boolean successfullyDownloaded = false;
 	private boolean successfullyParsed = false;
+	private FCPQueueManager queueManager = null;
 
 	private String key = null;
 
 	public void download(FCPQueueManager queueManager, Hsqldb db) {
 		this.db = db;
+		this.queueManager = queueManager;
+		
 		downloading = true;
 
 		key = board.getDownloadKey(date, rev);
@@ -91,7 +94,7 @@ public class KSKMessage
 
 		if (!get.isFinished())
 			return;
-
+		
 		if (!get.isSuccessful()) {
 
 			int code = get.getGetFailedCode();
@@ -170,6 +173,9 @@ public class KSKMessage
 				read = true;
 			}
 		}
+		
+		get.stop(queueManager);
+		queueManager.remove(get);
 
 		setChanged();
 		notifyObservers();

@@ -31,6 +31,15 @@ public class StatusBar implements ThawRunnable, Plugin, LogListener {
 	private boolean dropNextRefresh = false;
 
 	public final static Color ORANGE = new Color(240, 160, 0);
+	
+	private final static String connectingStr = I18n.getMessage("thaw.statusBar.connecting");
+	private final static String disconnectedStr = I18n.getMessage("thaw.statusBar.disconnected");
+	private final static String globalProgressionStr= I18n.getMessage("thaw.plugin.statistics.globalProgression");
+	private final static String finishedStr = I18n.getMessage("thaw.plugin.statistics.finished");
+	private final static String failedStr = I18n.getMessage("thaw.plugin.statistics.failed");
+	private final static String runningStr = I18n.getMessage("thaw.plugin.statistics.running");
+	private final static String pendingStr = I18n.getMessage("thaw.plugin.statistics.pending");
+	
 
 	public boolean run(final Core core) {
 		this.core = core;
@@ -86,13 +95,13 @@ public class StatusBar implements ThawRunnable, Plugin, LogListener {
 
 		if (core.isReconnecting()) {
 			core.getMainWindow().setStatus(IconBox.blueBunny,
-						       I18n.getMessage("thaw.statusBar.connecting"), java.awt.Color.RED);
+						       connectingStr, java.awt.Color.RED);
 			return;
 		}
 
 		if (!core.getConnectionManager().isConnected()) {
 			core.getMainWindow().setStatus(IconBox.minDisconnectAction,
-						       I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
+						       disconnectedStr, java.awt.Color.RED);
 			return;
 		}
 
@@ -148,19 +157,19 @@ public class StatusBar implements ThawRunnable, Plugin, LogListener {
 
 		if(advancedMode) {
 			status = status
-				+ StatusBar.SEPARATOR + I18n.getMessage("thaw.plugin.statistics.globalProgression") + " "
+				+ StatusBar.SEPARATOR + globalProgressionStr + " "
 				+ Integer.toString(progressDone) + "/" + Integer.toString(progressTotal);
 		}
 
 
 		status = status
-			+ StatusBar.SEPARATOR + I18n.getMessage("thaw.plugin.statistics.finished")+ " "
+			+ StatusBar.SEPARATOR + finishedStr+ " "
 			+ Integer.toString(finished) + "/" + Integer.toString(total)
-			+ StatusBar.SEPARATOR + I18n.getMessage("thaw.plugin.statistics.failed") + " "
+			+ StatusBar.SEPARATOR + failedStr + " "
 			+ Integer.toString(failed) + "/" + Integer.toString(total)
-			+ StatusBar.SEPARATOR + I18n.getMessage("thaw.plugin.statistics.running") + " "
+			+ StatusBar.SEPARATOR + runningStr + " "
 			+ Integer.toString(running) + "/" + Integer.toString(total)
-			+ StatusBar.SEPARATOR + I18n.getMessage("thaw.plugin.statistics.pending") + " "
+			+ StatusBar.SEPARATOR + pendingStr + " "
 			+ Integer.toString(pending) + "/" + Integer.toString(total);
 
 		core.getMainWindow().setStatus(IconBox.minConnectAction, status);
