@@ -20,9 +20,11 @@ public class SentMessages
 	public SentMessages(MiniFrost miniFrost) {
 		this.miniFrost = miniFrost;
 	}
+	
+	private final static String sentBoxStr = I18n.getMessage("thaw.plugin.miniFrost.sentBox");
 
 	public String getName() {
-		return I18n.getMessage("thaw.plugin.miniFrost.sentBox");
+		return sentBoxStr;
 	}
 
 	/**

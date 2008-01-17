@@ -910,8 +910,10 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 		return stop(queueManager, true);
 	}
 
-	public boolean stop(final FCPQueueManager queryManager, boolean notify) {
+	public boolean stop(final FCPQueueManager queueManager, boolean notify) {
 		Logger.info(this, "Stop fetching of the key : "+getFileKey());
+		
+		queueManager.getQueryManager().deleteObserver(this);
 
 		if(isPersistent() && !removeRequest())
 			return false;

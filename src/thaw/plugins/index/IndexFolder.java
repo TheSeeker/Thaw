@@ -1078,10 +1078,12 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 		return toString();
 	}
 
+	
+	private final static String yourIndexesStr = thaw.core.I18n.getMessage("thaw.plugin.index.yourIndexes");
 
 	public String toString() {
 		if (id < 0)
-			return thaw.core.I18n.getMessage("thaw.plugin.index.yourIndexes");
+			return yourIndexesStr;
 
 		if (name != null)
 			return name;

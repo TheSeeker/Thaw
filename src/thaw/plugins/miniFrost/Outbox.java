@@ -181,9 +181,11 @@ public class Outbox implements Board {
 		
 		return msgs;
 	}
+	
+	private final static String outboxStr = I18n.getMessage("thaw.plugin.miniFrost.outbox");
 
 	public String getName() {
-		return I18n.getMessage("thaw.plugin.miniFrost.outbox");
+		return outboxStr;
 	}
 
 	public int getNewMessageNumber(boolean unsigned, boolean archived, int minTrustLevel) {

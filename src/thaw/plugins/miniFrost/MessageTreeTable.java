@@ -140,6 +140,8 @@ public class MessageTreeTable implements Observer,
 
 	/** for the thread tree **/
 	private MessageNodeTree messageNodeTree;
+	
+	private final static String trustLevelNoneStr = I18n.getMessage("thaw.plugin.signature.trustLevel.none");
 
 
 	public MessageTreeTable(MiniFrostPanel mainPanel) {
@@ -606,7 +608,7 @@ public class MessageTreeTable implements Observer,
 				if (author != null && author.getIdentity() != null)
 					value = author.getIdentity().getTrustLevelStr();
 				else
-					value = I18n.getMessage("thaw.plugin.signature.trustLevel.none");
+					value = trustLevelNoneStr;
 			}
 
 			if (value instanceof java.util.Date) {

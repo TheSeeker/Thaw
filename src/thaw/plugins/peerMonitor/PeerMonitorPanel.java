@@ -97,7 +97,12 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 	private ToolbarModifier toolbarModifier;
 
 	private JButton foldButton;
-
+	
+	private final static String nodeMemoryStr = I18n.getMessage("thaw.plugin.peerMonitor.infos.nodeMemory");
+	private final static String thawMemoryStr = I18n.getMessage("thaw.plugin.peerMonitor.infos.thawMemory");
+	private final static String nodeThreadsStr = I18n.getMessage("thaw.plugin.peerMonitor.infos.nodeThreads");
+	private final static String thawThreadsStr = I18n.getMessage("thaw.plugin.peerMonitor.infos.thawThreads");
+	private final static String nodeStatsStr = I18n.getMessage("thaw.plugin.peerMonitor.nodeStats");
 
 	public PeerMonitorPanel(PeerMonitor peerMonitor,
 				FCPQueueManager queueManager,
@@ -256,7 +261,7 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 		pourcent = (int)((used * 100) / max);
 
-		nodeMemBar.setString(I18n.getMessage("thaw.plugin.peerMonitor.infos.nodeMemory")+ ": "
+		nodeMemBar.setString(nodeMemoryStr+ ": "
 				     + GUIHelper.getPrintableSize(used)
 				     + " / "
 				     + GUIHelper.getPrintableSize(max));
@@ -276,7 +281,7 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 		pourcent = (int)((used * 100) / max);
 
-		thawMemBar.setString(I18n.getMessage("thaw.plugin.peerMonitor.infos.thawMemory")+ ": "
+		thawMemBar.setString(thawMemoryStr+ ": "
 				     + GUIHelper.getPrintableSize(used)
 				     + " / "
 				     + GUIHelper.getPrintableSize(max));
@@ -286,9 +291,9 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 
 
 	public void setNmbThreads(int nmbNodeThreads) {
-		nodeThreads.setText(I18n.getMessage("thaw.plugin.peerMonitor.infos.nodeThreads")
+		nodeThreads.setText(nodeThreadsStr
 				    + " : "+ Integer.toString(nmbNodeThreads));
-		thawThreads.setText(I18n.getMessage("thaw.plugin.peerMonitor.infos.thawThreads")
+		thawThreads.setText(thawThreadsStr
 				    + " : "+ Integer.toString(Thread.activeCount()));
 	}
 
@@ -355,7 +360,7 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 	{
 		peers = new Vector();
 
-		peers.add(I18n.getMessage("thaw.plugin.peerMonitor.nodeStats"));
+		peers.add(nodeStatsStr);
 
 		/* TODO : dirty : should use comparator, etc */
 		for (int i = 0 ; i < STR_STATUS.length ; i++) {
@@ -397,8 +402,6 @@ public class PeerMonitorPanel extends Observable implements ActionListener, Mous
 			peerMonitor.hideTab();
 		}
 	}
-
-
 
 	/**
 	 * @return null if it must not be displayed ; else an array with two elements (key translated + value translated)
