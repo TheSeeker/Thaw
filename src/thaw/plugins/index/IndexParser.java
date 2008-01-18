@@ -280,6 +280,7 @@ public class IndexParser {
 			FileInputStream stream = new FileInputStream(filePath);
 			loadXML(stream, clean);
 			stream.close();
+			stream = null;
 		} catch(final java.io.FileNotFoundException e) {
 			Logger.error(this, "Unable to load XML: FileNotFoundException ('"+filePath+"') ! : "+e.toString());
 		} catch(java.io.IOException e) {
