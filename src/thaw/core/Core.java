@@ -143,7 +143,7 @@ public class Core implements Observer {
 				     "Thaw "+Main.VERSION+" : "+I18n.getMessage("thaw.statusBar.ready"));
 
 		splashScreen.hide();
-
+		splashScreen = null;
 		mainWindow.setVisible(true);
 
 		setTheme(lookAndFeel);

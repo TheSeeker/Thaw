@@ -1038,6 +1038,8 @@ public class Index extends Observable implements MutableTreeNode,
 			} else {
 				nmbFailedCommentFetching++;
 			}
+			
+			c.deleteObserver(this);
 
 			if (nmbFailedCommentFetching > COMMENT_FETCHING_RUNNING_AT_THE_SAME_TIME +1) {
 				if (indexTree != null) {

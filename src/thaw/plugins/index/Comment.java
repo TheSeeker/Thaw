@@ -796,8 +796,11 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 	public void update(Observable o, Object param) {
 		if (o instanceof FCPTransferQuery) {
-			if (((FCPTransferQuery)o).isFinished())
-				((Observable)o).deleteObserver(this);
+			if (((FCPTransferQuery)o).isFinished()) {
+				o.deleteObserver(this);
+				((FCPTransferQuery)o).stop(queueManager);
+				queueManager.remove((FCPTransferQuery)o);
+			}
 
 			if (o instanceof FCPClientPut) {
 				FCPClientPut put = (FCPClientPut)o;
