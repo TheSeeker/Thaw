@@ -35,16 +35,20 @@ import java.util.ResourceBundle;
  */
 public class I18n {
 	public final static Locale[] supportedLocales = {
-		new Locale("en"),
-		new Locale("fr")
+		Locale.ENGLISH,
+		Locale.FRENCH
 	};
 
 	private static Locale currentLocale;
 	private static ResourceBundle currentResourceBundle;
 
 	static {
-		currentResourceBundle = ResourceBundle.getBundle("thaw.i18n.thaw", I18n.getLocale());
-		currentLocale = Locale.getDefault();
+		currentLocale = Locale.ENGLISH;
+		currentResourceBundle = ResourceBundle.getBundle("thaw.i18n.thaw", currentLocale);
+	}
+	
+	public I18n() {
+		I18n.setLocale(Locale.getDefault());
 	}
 
 	public static Locale getLocale() {
