@@ -796,10 +796,12 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 	public void update(Observable o, Object param) {
 		if (o instanceof FCPTransferQuery) {
-			if (((FCPTransferQuery)o).isFinished()) {
-				o.deleteObserver(this);
-				((FCPTransferQuery)o).stop(queueManager);
-				queueManager.remove((FCPTransferQuery)o);
+			FCPTransferQuery query = (FCPTransferQuery)o;
+			
+			if (query.isFinished()) {
+				query.deleteObserver(this);
+				query.stop(queueManager);
+				queueManager.remove(query);
 			}
 
 			if (o instanceof FCPClientPut) {
@@ -851,13 +853,6 @@ public class Comment extends Observable implements Observer, ActionListener {
 				notifyObservers();
 			}
 
-		}
-
-		if (o instanceof FCPTransferQuery) {
-			FCPTransferQuery q = (FCPTransferQuery)o;
-
-			if (q.isFinished() && q.isSuccessful() && q instanceof Observable)
-				((Observable)q).deleteObserver(this);
 		}
 	}
 
