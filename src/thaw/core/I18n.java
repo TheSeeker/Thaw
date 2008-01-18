@@ -40,33 +40,26 @@ public class I18n {
 	};
 
 	private static Locale currentLocale;
+	private static ResourceBundle currentResourceBundle;
 
-	public I18n() {
-
+	static {
+		currentResourceBundle = ResourceBundle.getBundle("thaw.i18n.thaw", I18n.getLocale());
+		currentLocale = Locale.getDefault();
 	}
 
 	public static Locale getLocale() {
-		if (I18n.currentLocale == null)
-			I18n.currentLocale = Locale.getDefault();
-		return I18n.currentLocale;
+		return currentLocale;
 	}
 
 	public static void setLocale(final Locale locale) {
-		I18n.currentLocale = locale;
+		currentLocale = locale;
 		Locale.setDefault(locale);
-	}
-
-	public static ResourceBundle getResourceBundle() {
-		return I18n.getResourceBundle(I18n.getLocale());
-	}
-
-	public static ResourceBundle getResourceBundle(final Locale locale) {
-		return ResourceBundle.getBundle("thaw.i18n.thaw", I18n.getLocale());
+		currentResourceBundle = ResourceBundle.getBundle("thaw.i18n.thaw", locale);
 	}
 
 	public static String getMessage(final String key) {
 		try {
-			return I18n.getResourceBundle().getString(key);
+			return currentResourceBundle.getString(key);
 		} catch(final Exception e) {
 			Logger.warning(new I18n(),
 				       "Unable to find translation for '"+key+"'");
