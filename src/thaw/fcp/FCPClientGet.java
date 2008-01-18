@@ -317,7 +317,8 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 				if(!alreadySaved) {
 					alreadySaved = true;
 
-					fileSize = (new Long(message.getValue("DataLength"))).longValue();
+					fileSize = Long.parseLong(message.getValue("DataLength"));
+					
 
 					if(isPersistent()
 					   || (queueManager.getQueryManager().getConnection().isLocalSocket() && !noDDA)) {
