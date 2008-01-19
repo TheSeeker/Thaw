@@ -365,6 +365,11 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 
 			return;
 		}
+		
+		if ("PersistentGet".equals(message.getMessageName())) {
+			/* not our problem */
+			return;
+		}
 
 		if("ProtocolError".equals( message.getMessageName() )) {
 			Logger.debug(this, "ProtocolError !");
@@ -914,10 +919,10 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 	public boolean stop(final FCPQueueManager queueManager, boolean notify) {
 		Logger.info(this, "Stop fetching of the key : "+getFileKey());
 		
-		queueManager.getQueryManager().deleteObserver(this);
-
 		if(isPersistent() && !removeRequest())
 			return false;
+		
+		queueManager.getQueryManager().deleteObserver(this);
 
 		boolean wasFinished = isFinished();
 		

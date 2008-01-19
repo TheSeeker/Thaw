@@ -97,13 +97,16 @@ public class PluginManager {
 			final Iterator pluginIt = pluginNames.iterator();
 
 			final int progressJump = (100-40) / pluginNames.size();
-			core.getSplashScreen().setProgression(40);
+			
+			if (core.getSplashScreen() != null)
+				core.getSplashScreen().setProgression(40);
 
 			while(pluginIt.hasNext()) {
 				final String pluginName = (String)pluginIt.next();
 
-				core.getSplashScreen().setProgressionAndStatus(core.getSplashScreen().getProgression()+progressJump,
-																"Loading plugin '"+pluginName.replaceFirst("thaw.plugins.", "")+"' ...");
+				if (core.getSplashScreen() != null)
+					core.getSplashScreen().setProgressionAndStatus(core.getSplashScreen().getProgression()+progressJump,
+																	"Loading plugin '"+pluginName.replaceFirst("thaw.plugins.", "")+"' ...");
 
 				if (loadPlugin(pluginName) == null) {
 					Logger.notice(this, "Plugin alread loaded");
@@ -198,10 +201,12 @@ public class PluginManager {
 	
 				javax.swing.ImageIcon icon;
 	
-				if ((icon = plugin.getIcon()) != null)
-					core.getSplashScreen().addIcon(icon);
-				else
-					core.getSplashScreen().addIcon(thaw.gui.IconBox.add);
+				if (core.getSplashScreen() != null) {
+					if ((icon = plugin.getIcon()) != null)
+						core.getSplashScreen().addIcon(icon);
+					else
+						core.getSplashScreen().addIcon(thaw.gui.IconBox.add);
+				}
 	
 				plugin.run(core);
 	

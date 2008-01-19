@@ -15,6 +15,7 @@ import thaw.core.Logger;
 import thaw.core.I18n;
 
 public class GUIHelper {
+	private final static String unknownStr = I18n.getMessage("thaw.common.unknown");
 
 	public GUIHelper() {
 
@@ -73,7 +74,7 @@ public class GUIHelper {
 
 	public static String getPrintableTime(final long seconds) {
 		if (seconds == 0)
-			return I18n.getMessage("thaw.common.unknown");
+			return unknownStr;
 
 		if (seconds < 60)
 			return (new Long(seconds)).toString() + " s";
@@ -96,7 +97,7 @@ public class GUIHelper {
 
 	public static String getPrintableSize(final long size) {
 		if(size == 0)
-			return I18n.getMessage("thaw.common.unknown");
+			return unknownStr;
 
 		if(size < 1024) /* < 1KB */
 			return ((new Long(size)).toString() + " B");

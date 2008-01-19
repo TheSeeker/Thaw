@@ -136,7 +136,7 @@ public class KSKMessage
 			
 			if (!parser.loadFile(new File(get.getPath()), db)) {
 				/* invalid slot */
-				Logger.notice(this, "Invalid message: '"+board.getName()+"'"
+				Logger.notice(this, " message: '"+board.getName()+"'"
 							+" - "+date.toString()
 							+" - "+Integer.toString(rev));
 					

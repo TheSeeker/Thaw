@@ -600,6 +600,8 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 
 			if("PutSuccessful".equals(msg.getMessageName())) {
 				setStatus(false, true, true);
+				
+				queueManager.getQueryManager().deleteObserver(this);
 
 				setStartupTime(Long.valueOf(msg.getValue("StartupTime")).longValue());
 				setCompletionTime(Long.valueOf(msg.getValue("CompletionTime")).longValue());
