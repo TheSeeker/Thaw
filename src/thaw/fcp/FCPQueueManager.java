@@ -480,12 +480,10 @@ public class FCPQueueManager extends java.util.Observable implements ThawRunnabl
 				try {
 
 					if(queryManager.getConnection().isConnected()
-					   && !queryManager.getConnection().isWriting()
 					   && queueCompleted)
 						schedule();
 					
-					if(queryManager.getConnection().isConnected()
-					   && !queryManager.getConnection().isWriting())
+					if(queryManager.getConnection().isConnected())
 						updateStats();
 
 

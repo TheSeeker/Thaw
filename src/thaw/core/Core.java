@@ -615,7 +615,7 @@ public class Core implements Observer {
 						// brouzouf
 					}
 					
-					initialWait = false;
+					initialWait = true;
 	
 					Logger.notice(this, "Trying to reconnect ...");
 					if(initConnection())

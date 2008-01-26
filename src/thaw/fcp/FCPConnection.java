@@ -45,8 +45,6 @@ public class FCPConnection extends Observable {
 	private int writersWaiting;
 	private Object monitor;
 
-	private long lastWrite = 0; /* real writes ; System.currentTimeMillis() */
-
 	private boolean duplicationAllowed = true;
 	private boolean localSocket = false;
 	private boolean autoDownload = true;
@@ -201,7 +199,6 @@ public class FCPConnection extends Observable {
 
 		rawBytesWaiting = 0;
 		writersWaiting = 0;
-		lastWrite = 0;
 
 		Logger.info(this, "Connected");
 
@@ -243,8 +240,6 @@ public class FCPConnection extends Observable {
 	protected synchronized boolean realRawWrite(final byte[] data) {
 		if((out != null) && (socket != null) && socket.isConnected()) {
 			try {
-				lastWrite = System.currentTimeMillis();
-
 				out.write(data);
 				out.flush();
 			} catch(final java.io.IOException e) {
@@ -293,12 +288,13 @@ public class FCPConnection extends Observable {
 			monitor.notify();
 		}
 	}
-
+	
 	public boolean isWriting() {
-		if( !isConnected() )
+		if( !isConnected() ) {
 			return false;
+		}
 
-		return ( (writersWaiting > 0) || ((System.currentTimeMillis() - lastWrite) < 300) );
+		return (writersWaiting > 0);
 	}
 
 	public boolean write(final String toWrite) {
@@ -435,7 +431,7 @@ public class FCPConnection extends Observable {
 
 					if(c == -1) {
 						if(isConnected())
-							Logger.error(this, "Unable to read but still connected");
+							Logger.warning(this, "Unable to read but still connected");
 						else
 							Logger.notice(this, "Disconnected");
 

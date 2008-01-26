@@ -33,7 +33,10 @@ public class PluginConfigPanel implements Observer, ActionListener {
 		//refreshList();
 
 		mainPanel = new JPanel(new GridLayout(1, 1));
-		mainPanel.add(new JScrollPane(pluginConfigPanel));
+		
+		JScrollPane scroll = new JScrollPane(pluginConfigPanel);
+		scroll.getVerticalScrollBar().setUnitIncrement(10);
+		mainPanel.add(scroll);
 	}
 
 

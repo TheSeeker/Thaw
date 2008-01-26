@@ -178,7 +178,7 @@ public class StatusBar implements ThawRunnable, Plugin, LogListener {
 
 	public void stop() {
 		running = false;
-
+		Logger.removeLogListener(this);
 		core.getMainWindow().setStatus(IconBox.blueBunny, "Thaw "+Main.VERSION);
 	}
 
