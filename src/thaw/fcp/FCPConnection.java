@@ -182,7 +182,7 @@ public class FCPConnection extends Observable {
 		}
 
 		if(!socket.isConnected()) {
-			Logger.warning(this, "Unable to connect, but no exception ?! WTF ?");
+			Logger.warning(this, "Unable to connect, but no exception ?!");
 			Logger.warning(this, "Will try to continue ...");
 		}
 
@@ -388,7 +388,7 @@ public class FCPConnection extends Observable {
 
 		/* SECURITY */
 		if(rawBytesWaiting > 0) {
-			Logger.warning(this, "RAW BYTES STILL WAITING ON SOCKET. THIS IS ABNORMAL. : Will drop them.");
+			Logger.warning(this, "RAW BYTES STILL WAITING ON SOCKET. THIS IS ABNORMAL. -> Will drop them.");
 
 			while(rawBytesWaiting > 0) {
 				int to_read = 1024;
@@ -455,7 +455,7 @@ public class FCPConnection extends Observable {
 
 			} catch (final java.io.IOException e) {
 				if(isConnected())
-					Logger.error(this, "IOException while reading but still connected, wtf? : "
+					Logger.notice(this, "IOException while reading but still connected ?! : "
 						     +e.toString()+ " ; "+e.getMessage() );
 				else
 					Logger.notice(this, "IOException. Disconnected. : "+e.toString() + " ; "

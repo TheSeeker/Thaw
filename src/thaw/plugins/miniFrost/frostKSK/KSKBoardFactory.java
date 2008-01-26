@@ -44,7 +44,8 @@ public class KSKBoardFactory
 		"public",
 		"sites",
 		"test",
-		"privacy"
+		"privacy",
+		"software"
 	};
 
 

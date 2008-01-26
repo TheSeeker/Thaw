@@ -152,7 +152,7 @@ public class TrayIcon implements thaw.core.Plugin,
 
 
 	public void newLogLine(int level, Object src, String line) {
-		if (level > 1 || src == this || src == icon)
+		if (level > Logger.LOG_LEVEL_ERROR || src == this || src == icon)
 			return;
 
 		int msgType = ((level == 0) ? SysTrayIcon.MSG_ERROR : SysTrayIcon.MSG_WARNING);

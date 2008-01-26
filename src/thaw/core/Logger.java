@@ -9,6 +9,13 @@ import java.util.Vector;
  */
 public class Logger {
 
+	public final static int LOG_LEVEL_ERROR   = 0;
+	public final static int LOG_LEVEL_WARNING = 1;
+	public final static int LOG_LEVEL_NOTICE  = 2;
+	public final static int LOG_LEVEL_INFO    = 3;
+	public final static int LOG_LEVEL_DEBUG   = 4;
+	public final static int LOG_LEVEL_VERBOSE = 5;
+
 	private static int LOG_LEVEL = 2;
 
 
@@ -59,7 +66,7 @@ public class Logger {
 	}
 
 	private static void log(final int level, final Object o, final String msg,
-				final boolean manda) {
+							final boolean manda) {
 		if (Logger.LOG_LEVEL < level && !manda)
 			return;
 
