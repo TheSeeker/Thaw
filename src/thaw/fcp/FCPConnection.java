@@ -238,9 +238,9 @@ public class FCPConnection extends Observable {
 	}
 
 	/**
-	 * Should be call by FCPBufferedStream. Not you.
+	 * Should be call by FCPBufferedStream.
 	 */
-	public synchronized boolean realRawWrite(final byte[] data) {
+	protected synchronized boolean realRawWrite(final byte[] data) {
 		if((out != null) && (socket != null) && socket.isConnected()) {
 			try {
 				lastWrite = System.currentTimeMillis();
@@ -255,6 +255,12 @@ public class FCPConnection extends Observable {
 			}
 		} else {
 			Logger.notice(this, "Cannot write if disconnected !");
+			if (out == null)
+				Logger.notice(this, "^ no output stream         ^");
+			if (socket == null)
+				Logger.notice(this, "^ no socket                ^");
+			else if (!socket.isConnected())
+				Logger.notice(this, "^ socket but not connected ^");
 			return false;
 		}
 
@@ -320,6 +326,12 @@ public class FCPConnection extends Observable {
 			}
 		} else {
 			Logger.notice(this, "Cannot write if disconnected !");
+			if (out == null)
+				Logger.notice(this, "^ no output stream         ^");
+			if (socket == null)
+				Logger.notice(this, "^ no socket                ^");
+			else if (!socket.isConnected())
+				Logger.notice(this, "^ socket but not connected ^");
 			if (checkLock)
 				removeFromWriterQueue();
 			return false;

@@ -96,11 +96,13 @@ public class FCPClientHello implements FCPQuery, Observer {
 
 		if(nodeName != null) {
 			Logger.info(this, "Hello "+nodeName+", I'm Thaw :)");
+		} else if (count >= (NODEHELLO_TIMEOUT*2)) {
+			Logger.warning(this, "Unable to connect, timeout ...");
+			return false;
 		} else {
-			Logger.warning(this, "Unable to connect, ID is probably already taken or there was a timeout");
+			Logger.warning(this, "ID already used !");
 			return false;
 		}
-
 
 		return true;
 	}

@@ -440,7 +440,7 @@ public class MainWindow implements java.awt.event.ActionListener,
 	 */
 	public void actionPerformed(final ActionEvent e) {
 		if(e.getSource() == connectButton) {
-			core.reconnect();
+			core.reconnect(false);
 		}
 
 		if(e.getSource() == disconnectButton) {
@@ -470,7 +470,7 @@ public class MainWindow implements java.awt.event.ActionListener,
 					return;
 			}
 
-			core.reconnect();
+			core.reconnect(false);
 		}
 
 		if(e.getSource() == optionsFileMenuItem) {

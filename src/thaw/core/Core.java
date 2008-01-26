@@ -43,7 +43,7 @@ public class Core implements Observer {
 	private String lookAndFeel = null;
 
 	public final static int MAX_CONNECT_TRIES = 3;
-	public final static int TIME_BETWEEN_EACH_TRY = 5000;
+	public final static int TIME_BETWEEN_EACH_TRY = 20000;
 
 	private ReconnectionManager reconnectionManager = null;
 
@@ -286,48 +286,32 @@ public class Core implements Observer {
 			if((connection != null) && connection.isConnected()) {
 				subDisconnect();
 			}
-
-			if(connection == null) {
-				connection = new FCPConnection(config.getValue("nodeAddress"),
-							       Integer.parseInt(config.getValue("nodePort")),
-							       Integer.parseInt(config.getValue("maxUploadSpeed")),
-							       Boolean.valueOf(config.getValue("multipleSockets")).booleanValue(),
-							       Boolean.valueOf(config.getValue("sameComputer")).booleanValue(),
-							       Boolean.valueOf(config.getValue("downloadLocally")).booleanValue());
-			} else { /* connection is not recreate to avoid troubles with possible observers etc */
+			
+			if (connection != null)
 				connection.deleteObserver(this);
-				connection.setNodeAddress(config.getValue("nodeAddress"));
-				connection.setNodePort(Integer.parseInt(config.getValue("nodePort")));
-				connection.setMaxUploadSpeed(Integer.parseInt(config.getValue("maxUploadSpeed")));
-				connection.setDuplicationAllowed(Boolean.valueOf(config.getValue("multipleSockets")).booleanValue());
-				connection.setLocalSocket(Boolean.valueOf(config.getValue("sameComputer")).booleanValue());
-				connection.setAutoDownload(Boolean.valueOf(config.getValue("downloadLocally")).booleanValue());
-			}
+
+			connection = new FCPConnection(config.getValue("nodeAddress"),
+											Integer.parseInt(config.getValue("nodePort")),
+											Integer.parseInt(config.getValue("maxUploadSpeed")),
+											Boolean.valueOf(config.getValue("multipleSockets")).booleanValue(),
+											Boolean.valueOf(config.getValue("sameComputer")).booleanValue(),
+											Boolean.valueOf(config.getValue("downloadLocally")).booleanValue());
 
 			if(!connection.connect()) {
 				Logger.warning(this, "Unable to connect !");
 				ret = false;
 			}
+			
+			if (queryManager != null)
+				queryManager.deleteObserver(this);
 
-			if(queryManager == null) {
-				queryManager = new FCPQueryManager(connection);
-				queryManager.addObserver(this);
-			}
+			queryManager = new FCPQueryManager(connection);
+			queryManager.addObserver(this);
 
-			if(queueManager == null)
-				queueManager = new FCPQueueManager(queryManager,
-								   config.getValue("thawId"),
-								   Integer.parseInt(config.getValue("maxSimultaneousDownloads")),
-								   Integer.parseInt(config.getValue("maxSimultaneousInsertions")));
-			else {
-				queueManager.setThawId(config.getValue("thawId"));
-				queueManager.setMaxDownloads(Integer.parseInt(config.getValue("maxSimultaneousDownloads")));
-				queueManager.setMaxInsertions(Integer.parseInt(config.getValue("maxSimultaneousInsertions")));
-
-			}
-
-
-
+			queueManager = new FCPQueueManager(queryManager,
+												config.getValue("thawId"),
+												Integer.parseInt(config.getValue("maxSimultaneousDownloads")),
+												Integer.parseInt(config.getValue("maxSimultaneousInsertions")));
 
 			if(ret && connection.isConnected()) {
 				queryManager.startListening();
@@ -604,9 +588,11 @@ public class Core implements Observer {
 
 	protected class ReconnectionManager implements ThawRunnable {
 		private boolean running = true;
+		private boolean initialWait = true;
 
-		public ReconnectionManager() {
+		public ReconnectionManager(boolean initialWait) {
 			running = true;
+			this.initialWait = initialWait;
 		}
 
 		public void run() {
@@ -623,10 +609,13 @@ public class Core implements Observer {
 	
 				while(running) {
 					try {
-						Thread.sleep(Core.TIME_BETWEEN_EACH_TRY);
+						if (initialWait)
+							Thread.sleep(Core.TIME_BETWEEN_EACH_TRY);
 					} catch(final java.lang.InterruptedException e) {
 						// brouzouf
 					}
+					
+					initialWait = false;
 	
 					Logger.notice(this, "Trying to reconnect ...");
 					if(initConnection())
@@ -644,9 +633,9 @@ public class Core implements Observer {
 				if (running) {
 					getPluginManager().loadAndRunPlugins();
 				}
-	
+
 				reconnectionManager = null;
-	
+
 				getMainWindow().connectionHasChanged();
 			}
 		}
@@ -660,10 +649,10 @@ public class Core implements Observer {
 	/**
 	 * use Thread => will also do all the work related to the plugins
 	 */
-	public void reconnect() {
+	public void reconnect(boolean withInitialWait) {
 		synchronized(this) {
 			if (reconnectionManager == null) {
-				reconnectionManager = new ReconnectionManager();
+				reconnectionManager = new ReconnectionManager(withInitialWait);
 				final Thread th = new ThawThread(reconnectionManager,
 								 "Reconnection manager", this);
 				th.start();
@@ -708,7 +697,7 @@ public class Core implements Observer {
 		Logger.debug(this, "Move on the connection (?)");
 
 		if ((o == connection) && !connection.isConnected()) {
-			reconnect();
+			reconnect(true);
 		}
 
 		if ((o == queryManager) && target instanceof FCPMessage) {
