@@ -197,13 +197,17 @@ public class MainWindow implements java.awt.event.ActionListener,
 		core.getConnectionManager().addObserver(this);
 
 		if (core.getConfig().getValue("mainWindowSizeX") != null
-		    && core.getConfig().getValue("mainWindowSizeY") != null) {
+		    && core.getConfig().getValue("mainWindowSizeY") != null) {		    
 			try {
 				mainWindow.setSize(Integer.parseInt(core.getConfig().getValue("mainWindowSizeX")),
 						   Integer.parseInt(core.getConfig().getValue("mainWindowSizeY")));
 			} catch(NumberFormatException e) {
 				Logger.warning(this, "Exception while setting the main window size");
 			}
+		}
+		
+		if (core.getConfig().getValue("mainWindowState") != null) {
+			mainWindow.setExtendedState(Integer.parseInt(core.getConfig().getValue("mainWindowState")));
 		}
 
 	}
@@ -228,8 +232,9 @@ public class MainWindow implements java.awt.event.ActionListener,
 	 * Make the window visible or not.
 	 */
 	public void setVisible(final boolean v) {
-		if (!v || !core.isStopping())
+		if (!v || !core.isStopping()) {
 			mainWindow.setVisible(v);
+		}
 	}
 
 
@@ -522,6 +527,8 @@ public class MainWindow implements java.awt.event.ActionListener,
 						  Integer.toString((new Double(size.getWidth())).intValue()));
 			core.getConfig().setValue("mainWindowSizeY",
 						  Integer.toString((new Double(size.getHeight())).intValue()));
+			core.getConfig().setValue("mainWindowState",
+						  Integer.toString(mainWindow.getExtendedState()));
 		}
 
 		if(core == null) {
