@@ -142,7 +142,7 @@ public class TrayIcon implements thaw.core.Plugin,
 		String cfg;
 
 		if ( (cfg = config.getValue("disableTrayIconPopups")) != null )
-			if (Boolean.TRUE.equals(cfg))
+			if (Boolean.TRUE.equals(Boolean.valueOf(cfg)))
 				return false;
 
 		icon.popMessage(title, message, msgType);
@@ -227,7 +227,7 @@ public class TrayIcon implements thaw.core.Plugin,
 
 
 	private JPanel getTransferPanel(FCPTransferQuery q) {
-		JPanel p = new JPanel(new GridLayout(2, 1));
+		JPanel p = new JPanel(new GridLayout(2, 1, 5, 5));
 
 		String txt = q.getFilename();
 
