@@ -367,7 +367,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 		if (o instanceof FCPTransferQuery
 		    && queries.indexOf(o) >= 0
 		    && ((FCPTransferQuery)o).isFinished()
-		    && !(arg instanceof Long /* update of the total time/ETA */)) {
+		    && (arg == null || !(arg instanceof Long /* update of the total time/ETA */)) ) {
 
 			String str = null;
 
