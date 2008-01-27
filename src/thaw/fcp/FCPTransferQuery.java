@@ -90,10 +90,14 @@ public abstract class FCPTransferQuery extends Observable implements FCPQuery {
 				if (blocks <= 0 || diffTime <= 0)
 					return;
 				
+				long prevAverageSpeed = averageSpeed;
+				long prevETA = ETA;
+			
 				averageSpeed = (blocks * BLOCK_SIZE) / diffTime;			
 				ETA = diffTime; /* ok, it's a little bit icky, but it does the trick :) */
 				
-				notifyChange();
+				if (prevAverageSpeed != averageSpeed || prevETA != ETA)
+					notifyChange(new Long(ETA));
 				
 				return;
 			}
@@ -268,6 +272,11 @@ public abstract class FCPTransferQuery extends Observable implements FCPQuery {
 	public void notifyChange() {
 		setChanged();
 		notifyObservers();
+	}
+	
+	public void notifyChange(Object o) {
+		setChanged();
+		notifyObservers(o);
 	}
 	
 	
