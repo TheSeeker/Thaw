@@ -20,7 +20,7 @@ import java.io.FileOutputStream;
 /**
  * Main class. Only used to display some informations and init the core.
  *
- * @author <a href="mailto:jflesch@nerim.net">Jerome Flesch</a>
+ * @author <a href="mailto:jflesch@gmail.com">Jerome Flesch</a>
  */
 public class Main {
 
