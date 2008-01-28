@@ -2,7 +2,6 @@ package thaw.plugins.miniFrost;
 
 import javax.swing.JPanel;
 import java.util.Observable;
-import java.awt.GridLayout;
 import java.awt.BorderLayout;
 
 import javax.swing.JList;
@@ -30,6 +29,7 @@ import java.awt.Font;
 import thaw.gui.IconBox;
 import thaw.core.I18n;
 
+import thaw.plugins.ToolbarModifier;
 import thaw.plugins.miniFrost.interfaces.BoardFactory;
 import thaw.plugins.miniFrost.interfaces.Board;
 
@@ -50,6 +50,7 @@ public class BoardTree extends Observable
 	private JList list;
 
 	private JPopupMenu rightClickMenu;
+	private ToolbarModifier toolbarModifier;
 	private Vector actions;
 
 	private MiniFrostPanel mainPanel;
@@ -126,49 +127,51 @@ public class BoardTree extends Observable
 		rightClickMenu.add(item);
 		actions.add(new BoardManagementHelper.NewMessage(mainPanel, item));
 
-		/* buttons */
+		/* toolbar buttons */
 
-		JPanel southPanel = new JPanel(new BorderLayout());
-
-		JPanel buttonPanel = new JPanel(new GridLayout(2, 3));
-
+		
 		JButton button;
+		toolbarModifier = new ToolbarModifier(mainPanel.getPluginCore().getCore().getMainWindow());
 
-		button = new JButton(IconBox.minAdd);
+		button = new JButton(IconBox.add);
 		button.setToolTipText(I18n.getMessage("thaw.common.add"));
 		actions.add(new BoardManagementHelper.BoardAdder(mainPanel, button));
-		buttonPanel.add(button);
+		toolbarModifier.addButtonToTheToolbar(button);
 
-		button = new JButton(IconBox.minDelete);
+		button = new JButton(IconBox.delete);
 		button.setToolTipText(I18n.getMessage("thaw.common.remove"));
 		actions.add(new BoardManagementHelper.BoardRemover(mainPanel, button));
-		buttonPanel.add(button);
+		toolbarModifier.addButtonToTheToolbar(button);
 
-		button = new JButton(IconBox.minRefreshAction);
+		button = new JButton(IconBox.refreshAction);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.miniFrost.loadNewMessages"));
 		actions.add(new BoardManagementHelper.BoardRefresher(mainPanel, button));
-		buttonPanel.add(button);
+		toolbarModifier.addButtonToTheToolbar(button);
 
-		button = new JButton(IconBox.minMarkAsRead);
+		button = new JButton(IconBox.markAsRead);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.miniFrost.markAsRead"));
 		actions.add(new BoardManagementHelper.MarkAllAsRead(mainPanel, button));
-		buttonPanel.add(button);
+		toolbarModifier.addButtonToTheToolbar(button);
 
-		button = new JButton(IconBox.minMsgNew);
+		button = new JButton(IconBox.msgNew);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.miniFrost.newMessage"));
 		actions.add(new BoardManagementHelper.NewMessage(mainPanel, button));
-		buttonPanel.add(button);
+		toolbarModifier.addButtonToTheToolbar(button);
 
 		/* drafts state */
 
 		draftsState = new JLabel("");
 		updateDraftValues(0, 0);
 
-		southPanel.add(new JLabel(""), BorderLayout.CENTER);
-		southPanel.add(buttonPanel, BorderLayout.WEST);
-		southPanel.add(draftsState, BorderLayout.SOUTH);
+		//southPanel.add(new JLabel(""), BorderLayout.CENTER);
+		//southPanel.add(buttonPanel, BorderLayout.WEST);
+		//southPanel.add(draftsState, BorderLayout.SOUTH);
 
-		panel.add(southPanel, BorderLayout.SOUTH);
+		panel.add(draftsState, BorderLayout.SOUTH);
+	}
+	
+	public ToolbarModifier getToolbarModifier() {
+		return toolbarModifier;
 	}
 
 

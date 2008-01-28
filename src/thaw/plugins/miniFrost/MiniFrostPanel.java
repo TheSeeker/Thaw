@@ -284,4 +284,12 @@ public class MiniFrostPanel implements Observer {
 	public boolean isInGmailView() {
 		return gmailView;
 	}
+	
+	public void setVisible(boolean v) {
+		if (v) {
+			boardTree.getToolbarModifier().displayButtonsInTheToolbar();
+		} else {
+			boardTree.getToolbarModifier().hideButtonsInTheToolbar();
+		}
+	}
 }

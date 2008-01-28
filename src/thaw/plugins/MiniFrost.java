@@ -1,5 +1,8 @@
 package thaw.plugins;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import thaw.core.I18n;
 import thaw.core.Core;
 import thaw.core.Logger;
@@ -13,7 +16,7 @@ import thaw.plugins.miniFrost.MiniFrostConfigTab;
 import thaw.plugins.miniFrost.RegexpBlacklist;
 
 
-public class MiniFrost implements thaw.core.Plugin {
+public class MiniFrost implements thaw.core.Plugin, ChangeListener {
 	public final static int DEFAULT_ARCHIVE_AFTER = 7; /* days */
 	public final static int DEFAULT_DELETE_AFTER  = 60; /* days */
 
@@ -57,6 +60,10 @@ public class MiniFrost implements thaw.core.Plugin {
 						   core.getConfigWindow(),
 						   regexpBlacklist);
 		configTab.display();
+		
+		miniFrostPanel.setVisible(true);
+		
+		core.getMainWindow().getTabbedPane().addChangeListener(this);
 
 		return true;
 	}
@@ -143,6 +150,8 @@ public class MiniFrost implements thaw.core.Plugin {
 	}
 
 	public void stop() {
+		core.getMainWindow().getTabbedPane().removeChangeListener(this);
+		
 		if (autoRefresh != null)
 			autoRefresh.stop();
 
@@ -156,6 +165,8 @@ public class MiniFrost implements thaw.core.Plugin {
 
 		if (hsqldb != null)
 			hsqldb.unregisterChild(this);
+		
+		miniFrostPanel.setVisible(false);
 	}
 
 	public BoardFactory[] getFactories() {
@@ -174,5 +185,19 @@ public class MiniFrost implements thaw.core.Plugin {
 
 	public javax.swing.ImageIcon getIcon() {
 		return thaw.gui.IconBox.readComments;
+	}
+
+
+	public void stateChanged(ChangeEvent arg0) {
+		int tabId;
+
+		tabId = core.getMainWindow().getTabbedPane().indexOfTab(I18n.getMessage("thaw.plugin.miniFrost"));
+
+		if (tabId < 0) {
+			Logger.warning(this, "Unable to find the tab !");
+			return;
+		}
+
+		miniFrostPanel.setVisible(core.getMainWindow().getTabbedPane().getSelectedIndex() == tabId);		
 	}
 }

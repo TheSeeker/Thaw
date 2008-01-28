@@ -225,7 +225,7 @@ public class IndexBrowserPanel implements javax.swing.event.TreeSelectionListene
 	/**
 	 * Called by IndexBrowser when the panel become visible
 	 */
-	public void isVisible(boolean visibility) {
+	public void setVisible(boolean visibility) {
 		if (visibility) {
 			indexTree.getToolbarModifier().displayButtonsInTheToolbar();
 		} else {

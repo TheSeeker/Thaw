@@ -187,7 +187,7 @@ public class IndexBrowser extends ToolbarModifier implements Plugin, ChangeListe
 			return;
 		}
 
-		browserPanel.isVisible(core.getMainWindow().getTabbedPane().getSelectedIndex() == tabId);
+		browserPanel.setVisible(core.getMainWindow().getTabbedPane().getSelectedIndex() == tabId);
 	}
 
 	public javax.swing.ImageIcon getIcon() {
