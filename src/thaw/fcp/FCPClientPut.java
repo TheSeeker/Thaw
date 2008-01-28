@@ -512,10 +512,10 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 	}
 
 	public boolean stop(final FCPQueueManager queueManager) {
+		boolean wasFinished = isFinished();
+		
 		if(removeRequest()) {
 			queueManager.getQueryManager().deleteObserver(this);
-			
-			boolean wasFinished = isFinished();
 
 			status = "Stopped";
 
