@@ -709,7 +709,6 @@ public class Core implements Observer {
 				if (connection.isLocalSocket()
 						&& (code == 8     /* Invalid field (?!) */
 							|| code == 9  /* File not found */
-							|| code == 10 /* Disk target exists */
 							|| code == 12 /* Couldn't create file */
 							|| code == 13 /* Couldn't write file */
 							|| code == 14 /* Couldn't rename file */
