@@ -206,6 +206,9 @@ public class KSKBoard
 					KSKBoard daBoard = ((board != null) ?
 							    board :
 							    factory.getBoard(set.getInt("boardId")));
+					
+					if (daBoard == null)
+						Logger.warning(new KSKBoard(), "Can't find the board n°"+Integer.toString(set.getInt("boardId"))+"");
 
 					int sigId = set.getInt("sigId");
 					String nick = set.getString("nickname");

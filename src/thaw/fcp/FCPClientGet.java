@@ -513,7 +513,7 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 					&& message.getValue("Required") != null
 					&& message.getValue("Succeeded") != null) {
 
-				fileSize = Long.parseLong(message.getValue("Total"))*FCPClientGet.BLOCK_SIZE;
+				fileSize = Long.parseLong(message.getValue("Required"))*FCPClientGet.BLOCK_SIZE;
 
 				final long total = Long.parseLong(message.getValue("Total"));
 				final long required = Long.parseLong(message.getValue("Required"));

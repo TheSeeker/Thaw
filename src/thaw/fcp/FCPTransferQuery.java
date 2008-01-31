@@ -12,7 +12,7 @@ import thaw.core.Logger;
  * Some methods are only useful for downloads, and some for insertions, so check getQueryType() before calling them.
  */
 public abstract class FCPTransferQuery extends Observable implements FCPQuery {
-	public final static int BLOCK_SIZE = 16384;
+	public final static int BLOCK_SIZE = 32768;
 	public final static int KEY_TYPE_CHK = 0;
 	public final static int KEY_TYPE_KSK = 1;
 	public final static int KEY_TYPE_SSK = 2; /* also USK */

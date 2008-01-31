@@ -447,6 +447,11 @@ public class KSKMessage
 		String content;
 
 		try {
+			if (board == null)
+				Logger.error(this, "No ref to the corresponding board ?!");
+			else if (board.getFactory() == null)
+				Logger.error(this, "Can't access the board factory ?!");
+			
 			Hsqldb db = board.getFactory().getDb();
 
 			synchronized(db.dbLock) {

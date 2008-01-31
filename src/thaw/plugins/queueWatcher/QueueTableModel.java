@@ -85,9 +85,9 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 
 	public int getRowCount() {
-		if(queries != null)
+		if(queries != null) {
 			return queries.size();
-		else
+		} else
 			return 0;
 	}
 
