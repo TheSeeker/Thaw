@@ -237,5 +237,10 @@ public class SSKBoardFactory extends KSKBoardFactory {
 	public String toString() {
 		return I18n.getMessage("thaw.plugin.miniFrost.FrostSSK");
 	}
+	
+	protected void recompactInvalidSlots(Hsqldb db, Core core) {
+		/* done by KSKBoardFactory */
+		/* \_o< */
+	}
 }
 

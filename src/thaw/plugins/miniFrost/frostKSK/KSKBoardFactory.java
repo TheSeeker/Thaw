@@ -8,6 +8,7 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Date;
+import java.util.Stack;
 
 import thaw.core.Core;
 import thaw.core.Logger;
@@ -82,6 +83,14 @@ public class KSKBoardFactory
 			if (core.getConfig().getValue(configOption) == null)
 				core.getConfig().setValue(configOption, "true");
 		}
+		
+		if (core.getSplashScreen() != null)
+			core.getSplashScreen().setStatus("MiniFrost : Compacting frost invalid slots list ...");
+		
+		recompactInvalidSlots(db, core);
+		
+		if (core.getSplashScreen() != null)
+			core.getSplashScreen().setStatus("MiniFrost : Loading ...");
 
 		boardsHashMap = new HashMap();
 
@@ -618,5 +627,122 @@ public class KSKBoardFactory
 
 	public String toString() {
 		return I18n.getMessage("thaw.plugin.miniFrost.FrostKSK");
+	}
+
+	
+	private void recompactInvalidSlots(Hsqldb db, int boardId, java.sql.Date date)
+		throws SQLException {
+
+		/*** Preparing statements ***/
+		PreparedStatement select, update, delete;
+
+		/* we select them 2 by 2 */
+		select = db.getConnection().prepareStatement("SELECT id, minRev, maxRev FROM frostKSKinvalidSlots WHERE date = ? AND boardId = ? ORDER BY minRev LIMIT 2 OFFSET ?");
+		select.setDate(1, date);
+		select.setInt(2, boardId);
+
+		update = db.getConnection().prepareStatement("UPDATE frostKSKinvalidSlots SET minRev = ?, maxRev = ? WHERE id = ?");
+		delete = db.getConnection().prepareStatement("DELETE FROM frostKSKinvalidSlots WHERE id = ?");
+
+		/*** Compacting ***/
+		
+		int pos = 0;
+		boolean stop = false;
+		
+		int[] id = new int[2];
+		int[] min = new int[2];
+		int[] max = new int[2];
+		
+		while(!stop) {
+			
+			/* selecting 2 elements */
+			select.setInt(3, pos);
+			
+			ResultSet set = select.executeQuery();
+			
+			for (int i = 0 ; i < 2 ; i++) {
+				if (!set.next()) {
+					stop = true;
+					break;
+				}
+				
+				id[i] = set.getInt("id");
+				min[i] = set.getInt("minRev");
+				max[i] = set.getInt("maxRev");
+			}
+			
+			if (stop) {
+				/* can't select the two elements => we stop */
+				break;
+			}
+			
+			/* checking if we can put them together */
+			
+			if (max[0] + 1 <= min[1]) {
+				/* if yes => we put them together */
+				update.setInt(1, min[0]);
+				update.setInt(2, max[1]);
+				update.setInt(3, id[0]);
+				update.execute();
+				
+				delete.setInt(1, id[1]);
+				delete.execute();
+			} else {
+				/* if no => we continue our progression */
+				pos++;
+			}
+		}		
+	}
+	
+	
+	private void recompactInvalidSlots(Hsqldb db, int boardId)
+		throws SQLException {
+		
+		Stack dates = new Stack();
+		
+		PreparedStatement st = db.getConnection().prepareStatement("SELECT DISTINCT date FROM frostKSKinvalidSlots");
+		
+		ResultSet set = st.executeQuery();
+		
+		while(set.next()) {
+			dates.push(set.getDate("date"));
+		}
+		
+		while(!dates.empty()) {
+			recompactInvalidSlots(db, boardId, (java.sql.Date)dates.pop());
+		}
+	}
+	
+	protected void recompactInvalidSlots(Hsqldb db, Core core) {
+		synchronized(db.dbLock) {
+			try {
+				PreparedStatement st;
+				Stack boardIds = new Stack();
+				Stack boardNames = new Stack();
+				
+				st = db.getConnection().prepareStatement("SELECT id, name FROM frostKSKBoards");
+				
+				ResultSet set = st.executeQuery();
+				
+				while(set.next()) {
+					boardIds.push(new Integer(set.getInt("id")));
+					boardNames.push(set.getString("name"));
+				}
+				
+				while(!boardIds.empty() && !boardNames.empty()) {
+
+					String name = (String)boardNames.pop();
+					Logger.info(this, "Compacting invalid slots for board '"+name+"'");
+					if (core.getSplashScreen() != null)
+						core.getSplashScreen().setStatus("MiniFrost : Compacting frost invalid slots list for the board '"+name+"' ...");
+					
+					recompactInvalidSlots(db, ((Integer)boardIds.pop()).intValue());
+				}
+				
+			} catch(SQLException e) {
+				Logger.error(this, "SQLException while compacting the invalid slots: "+e.toString());
+				e.printStackTrace();
+			}
+		}
 	}
 }
