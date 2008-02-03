@@ -176,6 +176,20 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		indexFolderActions.add(new IndexManagementHelper.NodeNameDisplayer(item));
 
 		indexFolderMenu.addSeparator();
+		
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addAlreadyExistingIndex"),
+			     IconBox.minIndexReadOnly);
+		indexFolderMenu.add(item);
+		indexFolderActions.add(new IndexManagementHelper.IndexReuser(queueManager, indexBrowser, item));
+
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addCategory"),
+				IconBox.minFolderNew);
+		indexFolderMenu.add(item);
+		indexFolderActions.add(new IndexManagementHelper.IndexFolderAdder(indexBrowser, item));
+
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.createIndex"), IconBox.minIndexNew);
+		indexFolderMenu.add(item);
+		indexFolderActions.add(new IndexManagementHelper.IndexCreator(queueManager, indexBrowser, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.downloadIndexes"),
 				     IconBox.minRefreshAction);
@@ -193,20 +207,6 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.sortAlphabetically"));
 		indexFolderMenu.add(item);
 		indexFolderActions.add(new IndexManagementHelper.IndexFolderReorderer(indexBrowser, item));
-		
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addAlreadyExistingIndex"),
-				     IconBox.minIndexReadOnly);
-		indexFolderMenu.add(item);
-		indexFolderActions.add(new IndexManagementHelper.IndexReuser(queueManager, indexBrowser, item));
-
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addCategory"),
-				     IconBox.minFolderNew);
-		indexFolderMenu.add(item);
-		indexFolderActions.add(new IndexManagementHelper.IndexFolderAdder(indexBrowser, item));
-
-		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.createIndex"), IconBox.minIndexNew);
-		indexFolderMenu.add(item);
-		indexFolderActions.add(new IndexManagementHelper.IndexCreator(queueManager, indexBrowser, item));
 
 		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.rename"));
 		indexFolderMenu.add(item);

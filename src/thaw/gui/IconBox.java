@@ -175,6 +175,9 @@ public class IconBox {
 
 	public static ImageIcon miniFrostGmailView;
 	public static ImageIcon miniFrostOutlookView;
+	
+	public static ImageIcon trust;
+	public static ImageIcon minTrust;
 
 
 	/**
@@ -321,6 +324,8 @@ public class IconBox {
 		IconBox.web                 = IconBox.loadIcon("images/web.png");
 		IconBox.miniFrostGmailView  = IconBox.loadIcon("images/miniFrost-view-gmail.png");
 		IconBox.miniFrostOutlookView = IconBox.loadIcon("images/miniFrost-view-outlook.png");
+		IconBox.trust               = IconBox.loadIcon("images/trust.png");
+		IconBox.minTrust            = IconBox.loadIcon("images/min-trust.png");
 	}
 
 }
