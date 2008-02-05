@@ -31,6 +31,7 @@ public class PluginManager {
 		"thaw.plugins.ThemeSelector",
 		"thaw.plugins.Hsqldb",
 		"thaw.plugins.Signatures",
+		"thaw.plugins.WebOfTrust",
 		"thaw.plugins.IndexBrowser",
 		"thaw.plugins.IndexExporter",
 		"thaw.plugins.IndexTreeRebuilder",

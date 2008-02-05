@@ -16,7 +16,7 @@ public class Logger {
 	public final static int LOG_LEVEL_DEBUG   = 4;
 	public final static int LOG_LEVEL_VERBOSE = 5;
 
-	private static int LOG_LEVEL = 2;
+	private static int LOG_LEVEL = 3;
 
 
 	public final static String[] PREFIXES = new String[] {

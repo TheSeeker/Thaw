@@ -102,7 +102,7 @@ public class DatabaseManager {
 	}
 
 
-	/* dropTables is not implements because signatures may be VERY important */
+	/* dropTables is not implemented because signatures may be VERY important */
 	/* (anyway, because of the foreign key, it would probably fail */
 
 	protected static boolean convertDatabase_1_to_2(Hsqldb db) {

@@ -116,16 +116,20 @@ public class Signatures extends LibraryPlugin {
 
 		used--;
 
-		if (used == 0)
+		if (used == 0) {
 			db.unregisterChild(this);
+			db = null;
+		}
 	}
 
 
 	public void realStop() {
 		used--;
 
-		if (used == 0)
+		if (used == 0) {
 			db.unregisterChild(this);
+			db = null;
+		}
 	}
 
 	public String getNameForUser() {

@@ -421,8 +421,13 @@ public class Core implements Observer {
 
 		lookAndFeel = theme;
 
+		/* the recommandation is to set the lnf before displaying the first window */
+		/* but I had more bugs with the GTK lnf when I followed the recommandation than
+		 * when I didn't. So now I only change it when the main window is already displayed :p */
 
-		if (mainWindow.getMainFrame().isVisible())
+		if (mainWindow != null
+			&& mainWindow.getMainFrame() != null
+			&& mainWindow.getMainFrame().isVisible())
 			reallySetTheme(lookAndFeel);
 	}
 
@@ -444,8 +449,9 @@ public class Core implements Observer {
 			if (splashScreen != null)
 				splashScreen.rebuild();
 		} catch (final Exception e) {
-			Logger.warning(this, "Exception while setting the L&F : " + e.getMessage());
-			Logger.warning(this, "Using the default lookAndFeel");
+			Logger.warning(this, "Exception while setting the L&F : " + e.toString() + " ; " + e.getMessage());
+			e.printStackTrace();
+			Logger.warning(this, "Will use the default lookAndFeel");
 		}
 
 		return true;

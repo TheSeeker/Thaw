@@ -78,7 +78,8 @@ public class Config {
 		String currentValue = getValue(key);
 
 		if ( (currentValue != null && !currentValue.equals(value))
-		     || (currentValue == null && value != null ) ) {
+		     || (currentValue == null && value != null)
+		     || (currentValue != null && value == null) ) {
 
 			/* we get the plugin list to reload */
 			Vector pluginList = (Vector)listeners.get(key);
@@ -100,7 +101,10 @@ public class Config {
 			}
 
 			/* and to finish, we set the value */
-			parameters.put(key, value);
+			if (value != null)
+				parameters.put(key, value);
+			else
+				parameters.remove(key);
 		}
 	}
 
