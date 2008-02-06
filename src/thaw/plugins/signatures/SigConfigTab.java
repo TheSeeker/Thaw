@@ -558,33 +558,32 @@ public class SigConfigTab implements ActionListener, Observer {
 				return;
 			}
 
-			int row = table.getSelectedRow();
+			int[] rows = table.getSelectedRows();
 
-			if (row < 0)
-				return;
+			for (int i = 0 ; i < rows.length ; i++) {
+				int row = rows[i];
 
-			Identity target = model.getIdentity(row);
+				if (row < 0)
+					continue;
 
-			if (target == null)
-				return;
+				Identity target = model.getIdentity(row);
 
-
-			if (e.getSource() == setOriginal) {
-				target.setOriginal();
-
-				updateList();
-
-				return;
-			}
+				if (target == null)
+					continue;
 
 
-			if (e.getSource() instanceof JButton) {
-				JButton bt = (JButton)e.getSource();
+				if (e.getSource() == setOriginal) {
+					target.setOriginal();
 
-				target.setTrustLevel(bt.getText());
+					updateList();
 
-				updateList();
-				return;
+				} else if (e.getSource() instanceof JButton) {
+					JButton bt = (JButton)e.getSource();
+
+					target.setTrustLevel(bt.getText());
+
+					updateList();
+				}
 			}
 		}
 	}
