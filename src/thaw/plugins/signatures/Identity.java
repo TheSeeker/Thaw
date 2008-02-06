@@ -24,39 +24,47 @@ public class Identity {
 	public final static int[] trustLevelInt = {
 		100,
 		10,
+		5,
 		1,
 		0,
 		-1,
+		-5,
 		-10
 	};
 
 	public final static String[] trustLevelStr = {
 		I18n.getMessage("thaw.plugin.signature.trustLevel.dev"),
+		I18n.getMessage("thaw.plugin.signature.trustLevel.trustworthy"),
 		I18n.getMessage("thaw.plugin.signature.trustLevel.good"),
 		I18n.getMessage("thaw.plugin.signature.trustLevel.observe"),
 		I18n.getMessage("thaw.plugin.signature.trustLevel.check"),
 		I18n.getMessage("thaw.plugin.signature.trustLevel.bad"),
-		I18n.getMessage("thaw.plugin.signature.trustLevel.evil")
+		I18n.getMessage("thaw.plugin.signature.trustLevel.evil"),
+		I18n.getMessage("thaw.plugin.signature.trustLevel.asshole")
 	};
 
 	public final static String[] trustLevelUserStr= {
+		I18n.getMessage("thaw.plugin.signature.trustLevel.trustworthy"),
 		I18n.getMessage("thaw.plugin.signature.trustLevel.good"),
 		I18n.getMessage("thaw.plugin.signature.trustLevel.observe"),
 		I18n.getMessage("thaw.plugin.signature.trustLevel.check"),
 		I18n.getMessage("thaw.plugin.signature.trustLevel.bad"),
-		I18n.getMessage("thaw.plugin.signature.trustLevel.evil")
+		I18n.getMessage("thaw.plugin.signature.trustLevel.evil"),
+		I18n.getMessage("thaw.plugin.signature.trustLevel.asshole")
 	};
 
 	public final static Color[] trustLevelColor = {
 		Color.BLUE,
-		new java.awt.Color(0, 128, 0), /* light green */
-		new java.awt.Color(0, 175, 0), /* green */
+		new Color(0, 200, 0), /* light green */
+		new Color(0, 150, 0), 
+		new Color(0, 80, 0), /* green */
 		Color.BLACK,
-		new java.awt.Color(175, 0, 0), /* moderatly red */
-		Color.RED
+		new Color(125, 0, 0), /* moderatly red */
+		new Color(200, 0, 0),
+		new Color(255, 0, 0)
 	};
 
-	public final static Color trustLevelColorMe = new Color(0, 128, 0);
+	public final static Color trustLevelColorMe = new Color(127, 127, 255) /* weird color */;
 
 
 	private Hsqldb db;
