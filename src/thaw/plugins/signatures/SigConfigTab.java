@@ -400,6 +400,10 @@ public class SigConfigTab implements ActionListener, Observer {
 			final TableModelEvent event = new TableModelEvent(this);
 			fireTableChanged(event);
 		}
+		
+		public Vector getIdentities() {
+			return identities;
+		}
 
 		public int getRowCount() {
 			if (identities == null)
@@ -470,7 +474,7 @@ public class SigConfigTab implements ActionListener, Observer {
 	}
 
 
-	protected class OtherIdentitiesPanel implements ActionListener {
+	protected class OtherIdentitiesPanel implements ActionListener, TrustListParser.TrustListContainer {
 		private JDialog dialog;
 		private IdentityModel model;
 
@@ -566,8 +570,36 @@ public class SigConfigTab implements ActionListener, Observer {
 		public void actionPerformed(ActionEvent e) {
 
 			if (e.getSource() == close) {
+
 				dialog.setVisible(false);
 				dialog.dispose();
+				return;
+
+			} else if (e.getSource() == exportButton) {
+				
+				FileChooser chooser = new FileChooser(I18n.getMessage("thaw.plugin.signature.trustList.export.long"));
+				chooser.setDirectoryOnly(false);
+				chooser.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
+				
+				File file = chooser.askOneFile();
+
+				TrustListParser.exportTrustList(model.getIdentities(), file);
+
+				return;
+
+			} else if (e.getSource() == importButton) {
+
+				FileChooser chooser = new FileChooser(I18n.getMessage("thaw.plugin.signature.trustList.import.long"));
+				chooser.setDirectoryOnly(false);
+				chooser.setDialogType(javax.swing.JFileChooser.OPEN_DIALOG);
+				
+				File file = chooser.askOneFile();
+
+				synchronized(db.dbLock) {
+					TrustListParser.importTrustList(this, file);
+					updateList();
+				}
+
 				return;
 			}
 
@@ -590,10 +622,6 @@ public class SigConfigTab implements ActionListener, Observer {
 
 					updateList();
 
-				} else if (e.getSource() == exportButton) {
-					
-				} else if (e.getSource() == importButton) {
-					
 				} else if (e.getSource() instanceof JButton) {
 					JButton bt = (JButton)e.getSource();
 
@@ -602,6 +630,14 @@ public class SigConfigTab implements ActionListener, Observer {
 					updateList();
 				}
 			}
+		}
+
+		/**
+		 * called back by the trust list parser when importing
+		 */
+		public void updateIdentity(Identity importedId) {
+			Identity id = Identity.getIdentity(db, importedId.getNick(), importedId.getPublicKey(), true /* create if doesn't exist */);
+			id.setTrustLevel(importedId.getTrustLevel());
 		}
 	}
 

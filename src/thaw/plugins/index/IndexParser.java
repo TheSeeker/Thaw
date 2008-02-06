@@ -127,7 +127,7 @@ public class IndexParser {
 	}
 
 
-	public Element getXMLHeader(final Document xmlDoc) {
+	private Element getXMLHeader(final Document xmlDoc) {
 		final Element header = xmlDoc.createElement("header");
 
 		final Element title = xmlDoc.createElement("title");
@@ -182,7 +182,7 @@ public class IndexParser {
 	}
 
 
-	public Element getXMLLinks(final Document xmlDoc) {
+	private Element getXMLLinks(final Document xmlDoc) {
 		final Element linksEl = xmlDoc.createElement("indexes");
 
 		LinkContainer[] links = index.getLinkList();
@@ -203,7 +203,7 @@ public class IndexParser {
 	}
 
 
-	public Element getXMLFileList(final Document xmlDoc) {
+	private Element getXMLFileList(final Document xmlDoc) {
 		final Element filesEl = xmlDoc.createElement("files");
 
 		FileContainer[] files = index.getFileList();
@@ -242,7 +242,7 @@ public class IndexParser {
 	}
 
 
-	public Element getXMLCommentInfos(final Document xmlDoc) {
+	private Element getXMLCommentInfos(final Document xmlDoc) {
 		final Element infos = xmlDoc.createElement("comments");
 
 		infos.setAttribute("publicKey", index.getCommentPublicKey());
@@ -264,7 +264,7 @@ public class IndexParser {
 	}
 
 
-	/*********** INDEX LOADING **************/
+	/**************************** INDEX LOADING *******************************/
 
 
 	public void loadXML(final String filePath) {
@@ -273,7 +273,7 @@ public class IndexParser {
 
 
 	/**
-	 * @param clean if set to false, will do a merge
+	 * @param clean if set to false, will do a merge (won't call purgeIndex())
 	 */
 	public void loadXML(final String filePath, boolean clean) {
 		try {
@@ -289,7 +289,7 @@ public class IndexParser {
 	}
 
 
-	public class IndexHandler extends DefaultHandler {
+	protected class IndexHandler extends DefaultHandler {
 		private boolean clean = true;
 
 		public IndexHandler() {
@@ -301,12 +301,6 @@ public class IndexParser {
 		}
 
 		/**
-		 * @see org.xml.sax.ContentHandler#setDocumentLocator(org.xml.sax.Locator)
-		 */
-		public void setDocumentLocator(Locator value) {
-		}
-
-		/**
 		 * Called when parsing is started
 		 * @see org.xml.sax.ContentHandler#startDocument()
 		 */
@@ -314,26 +308,6 @@ public class IndexParser {
 			if (clean)
 				index.purgeIndex();
 		}
-
-		/**
-		 * Called when starting to parse in a specific name space
-		 * @param prefix name space prefix
-		 * @param URI name space URI
-		 * @see org.xml.sax.ContentHandler#startPrefixMapping(java.lang.String, java.lang.String)
-		 */
-		public void startPrefixMapping(String prefix, String URI) throws SAXException {
-			/* \_o< */
-		}
-
-		/**
-		 * @param prefix name space prefix
-		 * @see org.xml.sax.ContentHandler#endPrefixMapping(java.lang.String)
-		 */
-		public void endPrefixMapping(String prefix) throws SAXException {
-			/* \_o< */
-		}
-
-
 
 		private boolean ownerTag = false;
 		private boolean privateKeyTag = false;
@@ -537,22 +511,6 @@ public class IndexParser {
 			/* ignore unkwown stuffs */
 
 		}
-
-		public void ignorableWhitespace(char[] ch, int start, int end) throws SAXException {
-
-		}
-
-		public void processingInstruction(String target, String data) throws SAXException {
-
-		}
-
-		/**
-		 * @see org.xml.sax.ContentHandler#skippedEntity(java.lang.String)
-		 */
-		public void skippedEntity(String arg0) throws SAXException {
-
-		}
-
 
 		/**
 		 * Called when parsing is finished

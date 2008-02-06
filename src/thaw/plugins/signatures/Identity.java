@@ -124,7 +124,14 @@ public class Identity {
 
 		hash = frostCrypt.digest(publicKey);
 	}
+	
+	protected void setDb(Hsqldb db) {
+		this.db = db;
+	}
 
+	protected void setId(int id) {
+		this.id = id;
+	}
 
 	private static void initFrostCrypt() {
 		if (frostCrypt == null)
@@ -611,7 +618,11 @@ public class Identity {
 		return current;
 	}
 
-
+	/**
+	 * Frost format
+	 * @param file
+	 * @return
+	 */
 	public boolean exportIdentity(File file) {
 
 		Document doc = XMLTools.createDomDocument();
@@ -621,7 +632,9 @@ public class Identity {
 
 		identityEl.appendChild(makeCDATA(doc, "name", toString()));
 		identityEl.appendChild(makeCDATA(doc, "key", publicKey));
-		identityEl.appendChild(makeCDATA(doc, "privKey", privateKey));
+		
+		if (privateKey != null)
+			identityEl.appendChild(makeCDATA(doc, "privKey", privateKey));
 
 		root.appendChild(identityEl);
 		doc.appendChild(root);
@@ -656,19 +669,26 @@ public class Identity {
 		return null;
 	}
 
-
-	public static Identity importIdentity(Hsqldb db, File file) {
+	/**
+	 * Frost format
+	 * @param db
+	 * @param file
+	 * @return Vector<Identity>
+	 */
+	public static Vector importIdentity(Hsqldb db, File file) {
+		Vector ids = new Vector();
+		
 		try {
 			Document doc = null;
 			try {
 				doc = XMLTools.parseXmlFile(file, false);
 			} catch(Exception ex) {  // xml format error
-				Logger.warning(ex, "Invalid Xml");
+				Logger.error(ex, "Invalid Xml");
 				return null;
 			}
 
 			if( doc == null ) {
-				Logger.warning(null,
+				Logger.error(null,
 					       "Error: couldn't parse XML Document - " +
 					       "File name: '" + file.getName() + "'");
 				return null;
@@ -680,7 +700,7 @@ public class Identity {
 
 			if (l == null) {
 				Logger.error(null, "No identity to import");
-				return null;
+				return ids;
 			}
 
 			for (Iterator it = l.iterator();
@@ -697,6 +717,8 @@ public class Identity {
 								 publicKey, privateKey, false,
 								 10);
 				identity.insert();
+				
+				ids.add(identity);
 			}
 
 		} catch(Exception e) {
@@ -706,7 +728,7 @@ public class Identity {
 			return null;
 		}
 
-		return null;
+		return ids;
 	}
 	
 	public boolean equals(Object o) {
