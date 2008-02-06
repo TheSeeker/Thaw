@@ -99,16 +99,17 @@ public class KSKMessage
 
 			int code = get.getGetFailedCode();
 			
-			if (get.getProtocolErrorCode() == 21 /* Too big */
-				|| get.getProtocolErrorCode() == 28 /* All data not found */) {
+			if (code == 21 /* Too big */
+				|| code == 28 /* All data not found */) {
 
 				Logger.warning(this, "MiniFrost: Invalid key: "+key);
 				successfullyDownloaded = true;
 				
 				board.addInvalidSlot(date, rev);
 				
-			} else if (get.getProtocolErrorCode() == 4
-			    || code == 20) {
+			} else if (get.getProtocolErrorCode() == 4 /* URI parse error */
+				|| get.getProtocolErrorCode() == 20 /* URL parse error */
+			    || code == 20 /* Invalid URI */) {
 				Logger.warning(this, "MiniFrost: Invalid key: "+key);
 				successfullyDownloaded = true;
 			} else if (get.getProtocolErrorCode() >= 0) {
