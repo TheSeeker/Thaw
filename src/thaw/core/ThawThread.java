@@ -42,12 +42,7 @@ public class ThawThread extends Thread {
 		Logger.info(this, "Thread '"+name+"' finished");
 
 		if (threads.size() == 0) {
-			Logger.notice(this, "All threads are stopped");
-
-			if (allowFullStop) {
-				Logger.notice(this, "Halting Thaw");
-				System.exit(0);
-			}
+			Logger.notice(this, "All Thaw threads are stopped");
 		}
 	}
 
@@ -66,8 +61,7 @@ public class ThawThread extends Thread {
 		synchronized(threads) {
 			if (allowFullStop) {
 				if (threads.size() == 0) {
-					Logger.notice(null, "All threads are stopped => Halting Thaw");
-					System.exit(0);
+					Logger.notice(null, "All Thaw threads are stopped.");
 				}
 			}
 		}

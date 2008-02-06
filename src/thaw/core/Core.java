@@ -553,6 +553,7 @@ public class Core implements Observer {
 
 		Logger.info(this, "Hidding main window ...");
 		mainWindow.setVisible(false);
+		configWindow.setVisible(false);
 
 		Logger.info(this, "Stopping plugins ...");
 		pluginManager.stopPlugins();

@@ -154,6 +154,9 @@ public class SigConfigTab implements ActionListener, Observer {
 		else if (param == configWindow.getCancelButton())
 			reset();
 	}
+	
+	
+	/************************ YOUR IDENTITIES ********************************/
 
 
 	protected class YourIdentitiesPanel implements ActionListener {
@@ -223,7 +226,7 @@ public class SigConfigTab implements ActionListener, Observer {
 
 			dialog.getContentPane().add(southPanel, BorderLayout.SOUTH);
 
-
+			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setSize(500, 300);
 			dialog.setVisible(true);
 		}
@@ -365,17 +368,18 @@ public class SigConfigTab implements ActionListener, Observer {
 
 			if (e.getSource() == closeWindow) {
 				dialog.setVisible(false);
+				dialog.dispose();
 			}
 		}
 
 
 	}
+	
+	
+	/********************* OTHER IDENTITIES **********************************/
 
 
 	protected class IdentityModel extends javax.swing.table.AbstractTableModel {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = -7614528570324908651L;
 
 		public String[] columnNames = {
@@ -436,10 +440,6 @@ public class SigConfigTab implements ActionListener, Observer {
 
 
 	protected class OtherIdentitiesRenderer extends thaw.gui.Table.DefaultRenderer {
-
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 5405210731032136559L;
 		private IdentityModel model;
 
@@ -479,7 +479,7 @@ public class SigConfigTab implements ActionListener, Observer {
 		private JButton close;
 
 		private JButton setOriginal;
-		private Vector buttons;
+		private JButton exportButton, importButton;
 
 
 		public  OtherIdentitiesPanel() {
@@ -505,24 +505,33 @@ public class SigConfigTab implements ActionListener, Observer {
 
 			JPanel eastPanel = new JPanel(new BorderLayout());
 
-			JPanel buttonsPanel = new JPanel(new GridLayout(Identity.trustLevelInt.length +1, 1));
-
-			buttons = new Vector();
+			JPanel buttonsPanel = new JPanel(new GridLayout(Identity.trustLevelInt.length +4, 1));
 
 			for (int i = 0 ; i < Identity.trustLevelInt.length ; i++) {
 				if (Identity.trustLevelInt[i] < 100) {
 					JButton button = new JButton(Identity.trustLevelStr[i]);
 					buttonsPanel.add(button);
-					buttons.add(button);
 					button.addActionListener(this);
 				}
 			}
 
-			setOriginal = new JButton(I18n.getMessage("thaw.plugin.signature.setOriginal"));
 			buttonsPanel.add(new JLabel(""));
+			setOriginal = new JButton(I18n.getMessage("thaw.plugin.signature.setOriginal"));
 			buttonsPanel.add(setOriginal);
-			buttons.add(setOriginal);
 			setOriginal.addActionListener(this);
+			
+			buttonsPanel.add(new JLabel(""));
+			exportButton = new JButton(I18n.getMessage("thaw.plugin.signature.trustList.export.short"),
+										IconBox.minExportAction);
+			exportButton.setToolTipText(I18n.getMessage("thaw.plugin.signature.trustList.export.long"));
+			exportButton.addActionListener(this);
+			buttonsPanel.add(exportButton);
+			
+			importButton = new JButton(I18n.getMessage("thaw.plugin.signature.trustList.import.short"),
+										IconBox.minImportAction);
+			importButton.setToolTipText(I18n.getMessage("thaw.plugin.signature.trustList.import.long"));
+			importButton.addActionListener(this);
+			buttonsPanel.add(importButton);
 
 
 			JPanel eastTopPanel = new JPanel();
@@ -532,7 +541,9 @@ public class SigConfigTab implements ActionListener, Observer {
 
 			JPanel eastBottomPanel = new JPanel();
 
-			close = new JButton(IconBox.minClose);
+			close = new JButton(I18n.getMessage("thaw.common.close"),
+								IconBox.minClose);
+			close.setToolTipText(I18n.getMessage("thaw.common.closeWin"));
 			close.addActionListener(this);
 
 			eastBottomPanel.add(close);
@@ -542,7 +553,8 @@ public class SigConfigTab implements ActionListener, Observer {
 			dialog.getContentPane().add(eastPanel, BorderLayout.EAST);
 
 			updateList();
-
+			
+			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setSize(640, 500);
 			dialog.setVisible(true);
 		}
@@ -555,6 +567,7 @@ public class SigConfigTab implements ActionListener, Observer {
 
 			if (e.getSource() == close) {
 				dialog.setVisible(false);
+				dialog.dispose();
 				return;
 			}
 
@@ -577,6 +590,10 @@ public class SigConfigTab implements ActionListener, Observer {
 
 					updateList();
 
+				} else if (e.getSource() == exportButton) {
+					
+				} else if (e.getSource() == importButton) {
+					
 				} else if (e.getSource() instanceof JButton) {
 					JButton bt = (JButton)e.getSource();
 
@@ -593,9 +610,7 @@ public class SigConfigTab implements ActionListener, Observer {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == yourIdentitiesButton) {
 			new YourIdentitiesPanel();
-		}
-
-		if (e.getSource() == otherIdentitiesButton) {
+		} else if (e.getSource() == otherIdentitiesButton) {
 			new OtherIdentitiesPanel();
 		}
 	}

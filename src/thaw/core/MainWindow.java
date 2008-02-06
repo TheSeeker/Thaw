@@ -210,6 +210,7 @@ public class MainWindow implements java.awt.event.ActionListener,
 			mainWindow.setExtendedState(Integer.parseInt(core.getConfig().getValue("mainWindowState")));
 		}
 
+		mainWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	}
 
 
@@ -235,6 +236,9 @@ public class MainWindow implements java.awt.event.ActionListener,
 		if (!v || !core.isStopping()) {
 			mainWindow.setVisible(v);
 		}
+		
+		if (!v && core.isStopping())
+			mainWindow.dispose();
 	}
 
 
@@ -531,12 +535,7 @@ public class MainWindow implements java.awt.event.ActionListener,
 						  Integer.toString(mainWindow.getExtendedState()));
 		}
 
-		if(core == null) {
-			Logger.error(this, "Warning, no ref to core, exiting brutaly");
-			System.exit(0);
-		} else {
-			core.exit();
-		}
+		core.exit();
 	}
 
 

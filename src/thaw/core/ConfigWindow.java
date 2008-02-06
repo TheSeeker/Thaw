@@ -116,6 +116,8 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 
 		if (v)
 			configWin.repaint();
+		else if (core.isStopping())
+			configWin.dispose();
 	}
 
 	public boolean addTab(final String name, final java.awt.Component panel) {
