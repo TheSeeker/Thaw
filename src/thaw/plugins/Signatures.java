@@ -1,5 +1,7 @@
 package thaw.plugins;
 
+import java.util.Iterator;
+import java.util.HashSet;
 
 import thaw.core.I18n;
 import thaw.core.Core;
@@ -138,5 +140,23 @@ public class Signatures extends LibraryPlugin {
 
 	public javax.swing.ImageIcon getIcon() {
 		return IconBox.identity;
+	}
+	
+	
+	public static interface SignaturesObserver {
+		public void publicIdentityAdded(Identity i);
+		public void privateIdentityAdded(Identity i);
+		public void trustLevelUpdated(Identity i);
+		/* we never remove identities ? ... hmmmm */
+	}
+	
+	private static HashSet observers = new HashSet();
+
+	public void addObserver(SignaturesObserver o) {
+		
+	}
+	
+	public void removeObserver(SignaturesObserver o) {
+		
 	}
 }

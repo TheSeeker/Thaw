@@ -179,9 +179,9 @@ public class Main {
 
 			return;
 		} catch(java.io.IOException e) {
-			Logger.error(this, "Can't extract '"+src+"' because : "+e.toString());
+			Logger.warning(this, "Can't extract '"+src+"' because : "+e.toString());
 			if (e.getCause() != null)
-				Logger.error(this, "Cause : "+e.getCause().toString());
+				Logger.warning(this, "Cause : "+e.getCause().toString());
 			e.printStackTrace();
 		}
 
