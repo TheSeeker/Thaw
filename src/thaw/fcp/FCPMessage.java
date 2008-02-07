@@ -50,15 +50,13 @@ public class FCPMessage {
 			/* Line not containing '=' (like "Data" or "EndMessage") are ignored */
 			if("".equals( lines[i] ) || !(lines[i].indexOf("=") >= 0))
 				continue;
+			
+			int equalPos = lines[i].indexOf('=');
+			
+			String name = lines[i].substring(0, equalPos);
+			String value = lines[i].substring(equalPos+1);
 
-			final String[] affectation = lines[i].split("=");
-
-			if(affectation.length < 2) {
-				Logger.warning(this, "Malformed message");
-				continue;
-			}
-
-			setValue(affectation[0], affectation[1]);
+			setValue(name, value);
 		}
 
 

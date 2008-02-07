@@ -178,6 +178,8 @@ public class IconBox {
 	
 	public static ImageIcon trust;
 	public static ImageIcon minTrust;
+	
+	public static ImageIcon minPlugins;
 
 
 	/**
@@ -326,6 +328,7 @@ public class IconBox {
 		IconBox.miniFrostOutlookView = IconBox.loadIcon("images/miniFrost-view-outlook.png");
 		IconBox.trust               = IconBox.loadIcon("images/trust.png");
 		IconBox.minTrust            = IconBox.loadIcon("images/min-trust.png");
+		IconBox.minPlugins          = IconBox.loadIcon("images/min-plugins.png");
 	}
 
 }

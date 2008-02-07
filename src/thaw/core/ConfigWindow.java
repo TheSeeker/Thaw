@@ -78,7 +78,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		//tabs.setSize(600, 360);
 		//okButton.setSize(100, 40);
 
-		configWin.setSize(600, 470);
+		configWin.setSize(700, 470);
 		//configWin.setResizable(false);
 
 		okButton.addActionListener(this);
@@ -98,8 +98,8 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		removeTab( pluginConfigPanel.getPanel() );
 
 		addTab("Thaw", IconBox.blueBunny, thawConfigPanel.getPanel());
-		addTab(I18n.getMessage("thaw.common.node"), IconBox.minConnectAction, nodeConfigPanel.getPanel());
-		addTab(I18n.getMessage("thaw.common.plugins"), IconBox.minSettings, pluginConfigPanel.getPanel());
+		addTab(I18n.getMessage("thaw.config.nodeConnection"), IconBox.minConnectAction, nodeConfigPanel.getPanel());
+		addTab(I18n.getMessage("thaw.common.plugins"), IconBox.minPlugins, pluginConfigPanel.getPanel());
 	}
 
 
