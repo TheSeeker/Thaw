@@ -96,7 +96,7 @@ public class NodeConfiguratorTab implements Observer, ActionListener, ListSelect
 		settingChoice = new JList();
 		settingChoice.addListSelectionListener(this);
 		settingsPanel.add(sc = new JScrollPane(settingChoice), BorderLayout.CENTER);
-		sc.setPreferredSize(new java.awt.Dimension(COLUMNS_WIDTH*2, COLUMNS_WIDTH*2));
+		sc.setPreferredSize(new java.awt.Dimension((int)(COLUMNS_WIDTH*1.5), (int)(COLUMNS_WIDTH*1.5)));
 		
 		subPanel.add(settingsPanel, BorderLayout.WEST);
 		
