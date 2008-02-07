@@ -27,5 +27,4 @@ To start Thaw-light, you will have to specify where each dependency is located:
 
 % java \
   -cp [pathToJmdns]/jmdns.jar:[pathToHsqldb]/hsqldb.jar:[pathToBouncyCastle]/BouncyCastle.jar \
-  -jar Thaw.jar
-
+  -jar Thaw-light.jar
