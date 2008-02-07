@@ -148,10 +148,10 @@ public class FCPGetConfig extends Observable implements FCPQuery, Observer {
 			
 			setting.setElement(element, value);
 		}
+		
+		stop(queueManager);
 
 		setChanged();
 		notifyObservers(configSettings);
-		
-		stop(queueManager);
 	}
 }

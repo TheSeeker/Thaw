@@ -22,11 +22,10 @@ import java.util.Observable;
 import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.Vector;
-import java.util.Iterator;
 
-import thaw.core.Config;
 import thaw.core.I18n;
 import thaw.fcp.FCPGetConfig;
+import thaw.fcp.FCPModifyConfig;
 import thaw.fcp.FCPQueueManager;
 
 public class NodeConfiguratorTab implements Observer, ActionListener, ListSelectionListener {
@@ -165,6 +164,16 @@ public class NodeConfiguratorTab implements Observer, ActionListener, ListSelect
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == applyButton || e.getSource() == valueField) {
+			
+			FCPGetConfig.ConfigSetting setting = (FCPGetConfig.ConfigSetting)settingChoice.getSelectedValue();
+			
+			String name = setting.getName();
+			String value = valueField.getText();
+			
+			FCPModifyConfig modifConf = new FCPModifyConfig(name, value);
+			modifConf.start(queueManager);
+			
+			refresh();
 			
 		} else if (e.getSource() == reload) {
 			refresh();
