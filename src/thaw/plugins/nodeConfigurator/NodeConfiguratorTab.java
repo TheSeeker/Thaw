@@ -2,6 +2,7 @@ package thaw.plugins.nodeConfigurator;
 
 import javax.swing.JPanel;
 import javax.swing.JList;
+import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
@@ -39,8 +40,14 @@ public class NodeConfiguratorTab implements Observer, ActionListener, ListSelect
 	private JList categoryChoice;
 	private JList settingChoice;
 	private JTextArea descriptionArea;
+
 	private JTextField valueField;
+	private JComboBox valueSelecter;
+	private boolean selecter = false;
+
 	private JTextField defaultField;
+	
+	private JPanel valuePanel;
 	
 	private JButton applyButton;
 	
@@ -49,6 +56,9 @@ public class NodeConfiguratorTab implements Observer, ActionListener, ListSelect
 	
 	private Hashtable categories = null;
 	private Vector categoryNames = null;
+	
+	private final static String trueStr = I18n.getMessage("thaw.common.true");
+	private final static String falseStr = I18n.getMessage("thaw.common.false");
 
 	public NodeConfiguratorTab(boolean advanced, FCPQueueManager queueManager) {
 		this.advanced = advanced;
@@ -107,7 +117,7 @@ public class NodeConfiguratorTab implements Observer, ActionListener, ListSelect
 		JPanel valueAndButtonsPanel = new JPanel(new BorderLayout(0, 0));
 		
 		/* value */	
-		JPanel valuePanel = new JPanel(new GridLayout(4, 0));
+		valuePanel = new JPanel(new GridLayout(4, 0));
 		valuePanel.add(new JLabel(I18n.getMessage("thaw.plugin.nodeConfig.default")));
 		defaultField = new JTextField();
 		defaultField.setEditable(false);
@@ -115,8 +125,14 @@ public class NodeConfiguratorTab implements Observer, ActionListener, ListSelect
 		valuePanel.add(defaultField);
 		valuePanel.add(new JLabel(I18n.getMessage("thaw.plugin.nodeConfig.value")));
 		valueField = new JTextField();
-		valueField.addActionListener(this);
 		valuePanel.add(valueField);
+		
+		selecter = false;
+		
+		valueSelecter = new JComboBox(new String[] {
+			trueStr,
+			falseStr
+		});
 		
 		valueAndButtonsPanel.add(valuePanel, BorderLayout.NORTH);
 		
@@ -156,19 +172,50 @@ public class NodeConfiguratorTab implements Observer, ActionListener, ListSelect
 		settingChoice.removeListSelectionListener(this);
 		settingChoice.setListData(new Vector());
 		settingChoice.addListSelectionListener(this);
+		
+		displayField();
 
 		descriptionArea.setText("");
 		valueField.setText("");
 		defaultField.setText("");
 	}
+	
+	private void displaySelecter() {
+		if (!selecter) {
+			valuePanel.remove(valueField);
+			valuePanel.add(valueSelecter);
+			selecter = true;
+			panel.revalidate();
+		}
+	}
+	
+	private void displayField() {
+		if (selecter) {
+			valuePanel.remove(valueSelecter);
+			valuePanel.add(valueField);
+			selecter = false;
+			panel.revalidate();
+		}
+	}
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == applyButton || e.getSource() == valueField) {
+		if (e.getSource() == applyButton) {
 			
 			FCPGetConfig.ConfigSetting setting = (FCPGetConfig.ConfigSetting)settingChoice.getSelectedValue();
 			
 			String name = setting.getName();
-			String value = valueField.getText();
+			
+			String value;
+			
+			if (!selecter)
+				value = valueField.getText();
+			else {
+				String selected = (String)valueSelecter.getSelectedItem();
+				if (trueStr == selected)
+					value = "true";
+				else
+					value = "false";
+			}
 			
 			FCPModifyConfig modifConf = new FCPModifyConfig(name, value);
 			modifConf.start(queueManager);
@@ -190,6 +237,8 @@ public class NodeConfiguratorTab implements Observer, ActionListener, ListSelect
 				settingChoice.removeListSelectionListener(this);
 				settingChoice.setListData((Vector)categories.get(catName));
 				settingChoice.addListSelectionListener(this);
+				
+				displayField();
 
 				descriptionArea.setText("");
 				valueField.setText("");
@@ -200,8 +249,24 @@ public class NodeConfiguratorTab implements Observer, ActionListener, ListSelect
 		} else if (e.getSource() == settingChoice) {
 			
 			FCPGetConfig.ConfigSetting setting = (FCPGetConfig.ConfigSetting)settingChoice.getSelectedValue();
-			descriptionArea.setText(setting.getLongDesc());
-			valueField.setText(setting.getCurrent());
+			descriptionArea.setText(setting.getLongDesc());			
+
+			if ("false".equals(setting.getDefault())
+					|| "true".equals(setting.getDefault())) {
+
+				displaySelecter();
+
+				if ("true".equals(setting.getCurrent()))
+					valueSelecter.setSelectedItem(trueStr);
+				else
+					valueSelecter.setSelectedItem(falseStr);
+
+			} else {
+				
+				displayField();
+				valueField.setText(setting.getCurrent());
+			}
+
 			defaultField.setText(setting.getDefault());
 		}
 	}
