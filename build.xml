@@ -18,19 +18,19 @@
 	<property name="jmdns.location" value="${lib.dir}/jmdns.jar" />
 	<available file="${jmdns.location}" property="jmdns_available" />
 	<fail unless="jmdns_available" status="1"
-	message="You need to download jmdns.jar from http://sourceforge.net/projects/jmdns/ and to put it in lib/" />
+	message="You need to download jmdns.jar from http://sourceforge.net/projects/jmdns/ and to put it in lib/ or set the ant property 'jmdns.location' to the correct path (filename included) " />
 
 	<!-- HSQLDB -->
 	<property name="hsqldb.location" value="${lib.dir}/hsqldb.jar" />
 	<available file="${hsqldb.location}" property="hsqldb_available" />
 	<fail unless="hsqldb_available" status="1"
-	message="You need to download hsqldb.jar from http://sourceforge.net/projects/hsqldb/ and to put it in lib/" />
+	message="You need to download hsqldb.jar from http://sourceforge.net/projects/hsqldb/ and to put it in lib/ or set the ant property 'hsqldb.location' to the correct path (filename included)" />
 
 	<!-- BOUNCYCASTLE -->
 	<property name="bouncycastle.location" value="${lib.dir}/BouncyCastle.jar" />
 	<available file="${bouncycastle.location}" property="bouncycastle_available" />
 	<fail unless="bouncycastle_available" status="1"
-	message="You need to download the bouncycastle provider for the JDK 1.4 from http://bouncycastle.org/latest_releases.html and put it in lib/ with the name BouncyCastle.jar." />
+	message="You need to download the bouncycastle provider for the JDK 1.4 from http://bouncycastle.org/latest_releases.html and put it in lib/ with the name BouncyCastle.jar. or set the ant property 'bouncycastle.location' to the correct path (filename included)" />
 
 
 	<target name="compile">
@@ -84,6 +84,27 @@
 
 			<fileset dir=".">
 			    <include name="${lib.dir}/**/*.jar" />
+			    <include name="${licenses.dir}/**/*.txt" />
+			    <include name="${images.dir}/**/*.png" />
+			</fileset>
+		</jar>
+	</target>
+
+
+	<target name="jar-nodeps" depends="compile" description="Make a Jar without including the .jar dependancies" >
+		<mkdir dir="${final.dir}" />
+
+		<jar jarfile="${final.dir}/Thaw-light.jar" basedir="${bin.dir}">
+		        <manifest>
+			        <attribute name="Main-Class" value="thaw.core.Main" />
+				<attribute name="Class-Path" value="." />
+			</manifest>
+
+			<fileset dir="build">
+			   <include name="**/*.class" />
+			</fileset>
+
+			<fileset dir=".">
 			    <include name="${licenses.dir}/**/*.txt" />
 			    <include name="${images.dir}/**/*.png" />
 			</fileset>
