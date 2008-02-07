@@ -22,3 +22,10 @@ So in the end, you can use the following line to compile Thaw:
    jar-nodeps
 
 If you use the target "jar-nodeps", the final .jar will be bin/Thaw-light.jar
+
+To start Thaw-light, you will have to specify where each dependency is located:
+
+% java \
+  -cp [pathToJmdns]/jmdns.jar:[pathToHsqldb]/hsqldb.jar:[pathToBouncyCastle]/BouncyCastle.jar \
+  -jar Thaw.jar
+
