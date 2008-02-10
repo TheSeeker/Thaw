@@ -68,7 +68,7 @@ public class UnknownIndexList implements MouseListener, ActionListener {
 					   I18n.getMessage("thaw.plugin.index.autoSorting"),
 					   true);
 		autoSorting.addActionListener(this);
-		panel.add(new JScrollPane(autoSorting), BorderLayout.SOUTH);
+		panel.add(new JScrollPane(autoSorting, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS), BorderLayout.SOUTH);
 
 		JButton button;
 
