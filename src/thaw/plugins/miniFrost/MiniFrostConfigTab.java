@@ -1,5 +1,6 @@
 package thaw.plugins.miniFrost;
 
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JComboBox;
@@ -50,10 +51,11 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 	private JRadioButton gmailView;
 	private JRadioButton outlookView;
 
+	private JCheckBox treeCheckBox;
 
 	public MiniFrostConfigTab(Config config,
-				  ConfigWindow configWindow,
-				  RegexpBlacklist regexpBlacklist) {
+			ConfigWindow configWindow,
+			RegexpBlacklist regexpBlacklist) {
 		this.config = config;
 		this.configWindow = configWindow;
 		this.regexpBlacklist = regexpBlacklist;
@@ -74,6 +76,8 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 			archiveAfter.addItem(Integer.toString(i)+ " "+I18n.getMessage("thaw.plugin.miniFrost.days"));
 			deleteAfter.addItem( Integer.toString(i)+ " "+I18n.getMessage("thaw.plugin.miniFrost.days"));
 		}
+		
+		treeCheckBox = new JCheckBox(I18n.getMessage("thaw.plugin.miniFrost.seeTree"));
 
 		panel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.maxBoardsRefreshed")));
 		panel.add(maxBoards);
@@ -83,6 +87,10 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 
 		panel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.deleteAfter")));
 		panel.add(deleteAfter);
+		
+		panel.add(new JLabel(""));
+		panel.add(treeCheckBox);
+		panel.add(new JLabel(""));
 
 		JPanel regexpPanel = new JPanel(new BorderLayout());
 		regexpPanel.add(new JLabel(""), BorderLayout.CENTER);
@@ -99,7 +107,7 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 		JPanel southPanel = new JPanel(new BorderLayout());
 
 		southPanel.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.views")),
-			       BorderLayout.NORTH);
+				BorderLayout.NORTH);
 
 		ButtonGroup buttonGroup = new ButtonGroup();
 
@@ -113,13 +121,13 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 
 		gmailPanel.add(gmailView, BorderLayout.NORTH);
 		gmailPanel.add(new JLabel(IconBox.miniFrostGmailView,
-					  JLabel.LEFT),
-			       BorderLayout.CENTER);
+				JLabel.LEFT),
+				BorderLayout.CENTER);
 
 		outlookPanel.add(outlookView, BorderLayout.NORTH);
 		outlookPanel.add(new JLabel(IconBox.miniFrostOutlookView,
-					    JLabel.LEFT),
-				 BorderLayout.CENTER);
+				JLabel.LEFT),
+				BorderLayout.CENTER);
 
 
 		buttonGroup.add(gmailView);
@@ -140,8 +148,8 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 	public void display() {
 		configWindow.addObserver(this);
 		configWindow.addTab(I18n.getMessage("thaw.plugin.miniFrost"),
-				    thaw.gui.IconBox.minReadComments,
-				    globalPanel);
+				thaw.gui.IconBox.minReadComments,
+				globalPanel);
 	}
 
 
@@ -198,6 +206,14 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 			gmailView.setSelected(false);
 			outlookView.setSelected(true);
 		}
+		
+		boolean s = MiniFrost.DISPLAY_AS_TREE;
+		
+		if (config.getValue("checkbox_miniFrost_seeTree") != null) {
+			s = Boolean.valueOf(config.getValue("checkbox_miniFrost_seeTree")).booleanValue();
+		}
+		
+		treeCheckBox.setSelected(s);
 	}
 
 
@@ -221,6 +237,9 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 
 			config.setValue("miniFrostView",
 					(gmailView.isSelected() ? "0" : "1"));
+			
+			config.setValue("checkbox_miniFrost_seeTree",
+					Boolean.toString(treeCheckBox.isSelected()));
 
 		} else if (param == configWindow.getCancelButton()) {
 

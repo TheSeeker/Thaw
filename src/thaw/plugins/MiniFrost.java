@@ -19,6 +19,7 @@ import thaw.plugins.miniFrost.RegexpBlacklist;
 public class MiniFrost implements thaw.core.Plugin, ChangeListener {
 	public final static int DEFAULT_ARCHIVE_AFTER = 7; /* days */
 	public final static int DEFAULT_DELETE_AFTER  = 60; /* days */
+	public final static boolean DISPLAY_AS_TREE = true;
 
 	private Core core;
 	private Hsqldb hsqldb;
@@ -46,6 +47,7 @@ public class MiniFrost implements thaw.core.Plugin, ChangeListener {
 		core.getConfig().addListener("miniFrostArchiveAfter",         this);
 		core.getConfig().addListener("miniFrostDeleteAfter",          this);
 		core.getConfig().addListener("miniFrostView",                 this);
+		core.getConfig().addListener("checkbox_miniFrost_seeTree",    this);
 
 		if (!loadDeps()
 		    || !initFactories()

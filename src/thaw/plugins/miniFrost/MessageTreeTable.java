@@ -48,6 +48,7 @@ import thaw.gui.CheckBox;
 import thaw.gui.IconBox;
 import thaw.core.I18n;
 import thaw.core.Logger;
+import thaw.plugins.MiniFrost;
 import thaw.plugins.signatures.Identity;
 
 import thaw.plugins.miniFrost.interfaces.Author;
@@ -130,7 +131,7 @@ public class MessageTreeTable implements Observer,
 	private int orderBy;
 	private boolean desc;
 
-	private CheckBox seeTree;
+	private boolean tree;
 	private CheckBox seeUnsigned;
 	private JComboBox minTrustLevel;
 	private int minTrustLevelInt;
@@ -263,33 +264,25 @@ public class MessageTreeTable implements Observer,
 					   true);
 		seeUnsigned.addActionListener(this);
 
-		seeTree = new CheckBox(mainPanel.getConfig(),
-				       "miniFrost_seeTree",
-				       I18n.getMessage("thaw.plugin.miniFrost.seeTree"),
-				       true);
-		seeTree.addActionListener(this);
-
-		JPanel southWestPanel = new JPanel(new GridLayout(2, 1));
-		southWestPanel.add(new JLabel(""));
-		southWestPanel.add(seeTree);
+		tree = MiniFrost.DISPLAY_AS_TREE;
+		
+		if (mainPanel.getConfig().getValue("checkbox_miniFrost_seeTree") != null) {
+			tree = Boolean.valueOf(mainPanel.getConfig().getValue("checkbox_miniFrost_seeTree")).booleanValue();
+		}
 
 
-		JPanel southEastPanel = new JPanel(new GridLayout(2, 1));
-
-		JPanel southEastPanelTop = new JPanel(new GridLayout(1, 3, 5, 5));
+		JPanel southWestPanel = new JPanel(new GridLayout(1, 3, 5, 5));
 		//southEastPanelTop.add(new JLabel(I18n.getMessage("thaw.plugin.miniFrost.seeMessages")));
-		southEastPanelTop.add(seeUnsigned);
-		southEastPanelTop.add(seeArchived);
-		southEastPanelTop.add(seeRead);
+		southWestPanel.add(seeUnsigned);
+		southWestPanel.add(seeArchived);
+		southWestPanel.add(seeRead);
 
-		southEastPanel.add(southEastPanelTop);
-		southEastPanel.add(minTrustLevelPanel);
 
 		JPanel southPanel = new JPanel(new BorderLayout(5, 5));
 
 		southPanel.add(southWestPanel, BorderLayout.WEST);
 		southPanel.add(new JLabel(""), BorderLayout.CENTER);
-		southPanel.add(southEastPanel, BorderLayout.EAST);
+		southPanel.add(minTrustLevelPanel, BorderLayout.EAST);
 
 		panel.add(southPanel, BorderLayout.SOUTH);
 
@@ -590,7 +583,7 @@ public class MessageTreeTable implements Observer,
 				return checkBoxRenderer;
 			}
 
-			if (value instanceof MessageNode && seeTree.isSelected()) {
+			if (value instanceof MessageNode && tree) {
 				return messageNodeTree.getTableCellRendererComponent(table,
 										     value,
 										     isSelected,
@@ -948,7 +941,7 @@ public class MessageTreeTable implements Observer,
 
 		Vector rootNodes;
 
-		if (seeTree.isSelected()) {
+		if (tree) {
 
 			/** Filling in messageNodeHashtable **/
 			Hashtable messageNodeHashtable = new Hashtable(msgs.size());
@@ -1186,7 +1179,6 @@ public class MessageTreeTable implements Observer,
 		if (e.getSource() == seeUnsigned
 		    || e.getSource() == minTrustLevel
 		    || e.getSource() == seeArchived
-		    || e.getSource() == seeTree
 		    || e.getSource() == seeRead) {
 
 			minTrustLevelInt = Identity.getTrustLevel((String)(minTrustLevel.getSelectedItem()));
