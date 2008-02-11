@@ -62,7 +62,7 @@ public class MiniFrostConfigTab implements Observer, ActionListener {
 
 		globalPanel = new JPanel(new BorderLayout(10, 10));
 
-		JPanel panel = new JPanel(new GridLayout(10, 1));
+		JPanel panel = new JPanel(new GridLayout(11, 1));
 
 		maxBoards = new JComboBox();
 
