@@ -1,7 +1,7 @@
 package thaw.plugins;
 
 import java.util.Iterator;
-import java.util.HashSet;
+import java.util.Vector;
 
 import thaw.core.I18n;
 import thaw.core.Core;
@@ -77,6 +77,9 @@ public class Signatures extends LibraryPlugin {
 		core.getConfig().addListener("minTrustLevel", this);
 
 		used++;
+		
+		if (observers.size() > 0)
+			observers = new Vector();
 
 		if(core.getPluginManager().getPlugin("thaw.plugins.Hsqldb") == null) {
 			Logger.info(this, "Loading Hsqldb plugin");
@@ -119,6 +122,7 @@ public class Signatures extends LibraryPlugin {
 		used--;
 
 		if (used == 0) {
+			observers = new Vector();
 			db.unregisterChild(this);
 			db = null;
 		}
@@ -129,6 +133,7 @@ public class Signatures extends LibraryPlugin {
 		used--;
 
 		if (used == 0) {
+			observers = new Vector();
 			db.unregisterChild(this);
 			db = null;
 		}
@@ -144,19 +149,51 @@ public class Signatures extends LibraryPlugin {
 	
 	
 	public static interface SignaturesObserver {
+		/**
+		 * Id in the db may not be defined => you may have to query the db to know it
+		 * @param i
+		 */
 		public void publicIdentityAdded(Identity i);
+		
+		/**
+		 * Id in the db may not be defined => you may have to query the db to know it
+		 * @param i
+		 */
 		public void privateIdentityAdded(Identity i);
-		public void trustLevelUpdated(Identity i);
+
+		public void identityUpdated(Identity i);
 		/* we never remove identities ? ... hmmmm */
 	}
 	
-	private static HashSet observers = new HashSet();
+	private static Vector observers = new Vector();
 
-	public void addObserver(SignaturesObserver o) {
-		
+	public static void addObserver(SignaturesObserver o) {
+		if (!observers.contains(o))
+			observers.add(o);
 	}
 	
-	public void removeObserver(SignaturesObserver o) {
-		
+	public static void deleteObserver(SignaturesObserver o) {
+		while (observers.remove(o));
+	}
+	
+	public static void notifyPublicIdentityAdded(Identity i) {
+		for (Iterator it = observers.iterator();
+			 it.hasNext();) {
+			((SignaturesObserver)it.next()).publicIdentityAdded(i);
+		}
+	}
+	
+	public static void notifyPrivateIdentityAdded(Identity i) {
+		for (Iterator it = observers.iterator();
+			 it.hasNext();) {
+			((SignaturesObserver)it.next()).privateIdentityAdded(i);
+		}
+	}
+	
+	public static void notifyIdentityUpdated(Identity i) {
+		for (Iterator it = observers.iterator();
+			 it.hasNext();) {
+			((SignaturesObserver)it.next()).identityUpdated(i);
+		}
 	}
 }

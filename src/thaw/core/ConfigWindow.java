@@ -304,8 +304,10 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 					core.getConfig().applyChanges();
 			}
 
-			if (resetConnection)
+			if (resetConnection) {
 				dialog.setVisible(false);
+				dialog.dispose();
+			}
 		}
 		
 		public void run() {

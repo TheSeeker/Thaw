@@ -414,11 +414,13 @@ public class IndexConfigDialog implements ActionListener, MouseListener,
 
 			index.setCategory(categoryField.getText());
 			categoryDialog.setVisible(false);
+			categoryDialog.dispose();
 			updateCategoryLabel();
 
 		} else if (e.getSource() == categoryCancelButton) {
 
 			categoryDialog.setVisible(false);
+			categoryDialog.dispose();
 
 		}
 	}

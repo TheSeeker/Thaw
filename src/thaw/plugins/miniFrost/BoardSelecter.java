@@ -123,6 +123,7 @@ public class BoardSelecter implements ActionListener {
 		}
 
 		dialog.setVisible(false);
+		dialog.dispose();
 
 		Vector selected = null;
 

@@ -204,6 +204,7 @@ public class SSKBoardFactory extends KSKBoardFactory {
 				this.notifyAll();
 			}
 			dialog.setVisible(false);
+			dialog.dispose();
 		}
 
 		public void update(Observable o, Object param) {

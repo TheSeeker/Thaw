@@ -15,6 +15,7 @@ import java.io.File;
 import thaw.core.Logger;
 import thaw.core.I18n;
 import thaw.plugins.Hsqldb;
+import thaw.plugins.Signatures;
 import thaw.core.Config;
 
 
@@ -242,6 +243,8 @@ public class Identity {
 			}
 
 			trustLevel = i;
+			
+			Signatures.notifyIdentityUpdated(this);
 
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to change trust level because: "+e.toString());
@@ -365,6 +368,9 @@ public class Identity {
 
 				Identity i = new Identity(db, id, nick, publicKey, null, isDup, 0);
 				Logger.info(i, "New identity found");
+				
+				Signatures.notifyPublicIdentityAdded(i);
+				
 				return i;
 
 			}
@@ -466,6 +472,8 @@ public class Identity {
 					st.setInt(3, id);
 
 					st.execute();
+					
+					Signatures.notifyIdentityUpdated(this);
 				} else {
 
 					st = db.getConnection().prepareStatement("INSERT INTO signatures "+
@@ -479,12 +487,37 @@ public class Identity {
 					st.setInt(5, trustLevel);
 
 					st.execute();
+					
+					if (privateKey == null)
+						Signatures.notifyPublicIdentityAdded(this);
+					else
+						Signatures.notifyPrivateIdentityAdded(this);
 				}
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Exception while adding the identity to the bdd: "+e.toString());
 			e.printStackTrace();
 		}
+	}
+	
+	
+	public static boolean hasAtLeastATrustDefined(Hsqldb db) {
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st = db.getConnection().prepareStatement("SELECT id FROM signatures WHERE trustLevel != ? and trustLevel < ?");
+				st.setInt(1, 0);
+				st.setInt(2, trustLevelInt[0]);
+				
+				ResultSet set = st.executeQuery();
+
+				return set.next();				
+			}			
+		} catch(SQLException e) {
+			Logger.error(new Identity(), "Exception while accessing the signature table : "+e.toString());
+			e.printStackTrace();
+		}
+		
+		return false;
 	}
 
 

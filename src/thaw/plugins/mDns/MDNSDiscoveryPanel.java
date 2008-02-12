@@ -205,6 +205,7 @@ public class MDNSDiscoveryPanel extends JDialog
 
 		this.setVisible(false);
 		owner.setEnabled(true);
+		this.dispose();
 
 		if (!cancelledByUser) {
 			Logger.debug(this, "We got something that looks valid from the UI : let's propagate changes to  the config");

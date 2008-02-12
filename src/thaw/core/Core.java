@@ -614,7 +614,7 @@ public class Core implements Observer {
 	
 				subDisconnect();
 	
-				while(running) {
+				while(running && !isStopping()) {
 					try {
 						if (initialWait)
 							Thread.sleep(Core.TIME_BETWEEN_EACH_TRY);
@@ -629,7 +629,7 @@ public class Core implements Observer {
 						break;
 				}
 	
-				if (running) {
+				if (running && !isStopping()) {
 					getMainWindow().setStatus(IconBox.minConnectAction,
 								  I18n.getMessage("thaw.statusBar.ready"));
 				} else {
@@ -637,7 +637,7 @@ public class Core implements Observer {
 								  I18n.getMessage("thaw.statusBar.disconnected"), java.awt.Color.RED);
 				}
 	
-				if (running) {
+				if (running && !isStopping()) {
 					getPluginManager().loadAndRunPlugins();
 				}
 

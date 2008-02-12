@@ -51,10 +51,10 @@ public class FCPGenerateSSK extends Observable implements FCPQuery, Observer {
 			privateKey = privateKey.replaceFirst("freenet:", "");
 			publicKey = publicKey.replaceFirst("freenet:", "");
 
+			stop(queueManager);
+			
 			setChanged();
 			this.notifyObservers();
-
-			stop(queueManager);
 
 			return;
 		}

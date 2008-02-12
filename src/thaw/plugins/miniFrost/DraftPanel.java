@@ -530,8 +530,11 @@ public class DraftPanel implements ActionListener, MouseListener {
 
 		if (dialog == null)
 			mainPanel.displayMessageTable();
-		else
+		else {
 			dialog.setVisible(false);
+			dialog.dispose();
+			dialog = null;
+		}
 	}
 
 

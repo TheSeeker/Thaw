@@ -53,7 +53,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 	private int putFailedCode = -1;
 
 	/**
-	 * To resume query from file. (see core.QueueKeeper)
+	 * To resume query from file. (see thaw.core.QueueKeeper)
 	 */
 	public FCPClientPut(final FCPQueueManager queueManager, final HashMap parameters) {
 		super(true);

@@ -14,6 +14,7 @@ import javax.swing.JComboBox;
 
 import thaw.core.Config;
 import thaw.core.I18n;
+import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
 import thaw.plugins.signatures.Identity;
 
@@ -68,7 +69,7 @@ public class WebOfTrustConfigTab implements Observer, ActionListener {
 		
 		for (Iterator it = identities.iterator();
 			it.hasNext();) {
-			identityUsed.addItem(it.next().toString());
+			identityUsed.addItem(it.next());
 		}
 	}
 	
@@ -79,21 +80,37 @@ public class WebOfTrustConfigTab implements Observer, ActionListener {
 		identityUsed.setSelectedItem(I18n.getMessage("thaw.plugin.wot.usedIdentity.none"));
 		
 		/* loading values */
-		if (config.getValue("wotActivated") != null)
-			activated.setSelected(Boolean.valueOf(config.getValue("wotActivated")).booleanValue());
-		if (config.getValue("wotIdentityUsed") != null)
-			identityUsed.setSelectedItem(config.getValue("wotIdentityUsed"));
-		if (config.getValue("wotNumberOfRefresh") != null)
-			numberOfRefresh.setSelectedItem(new Integer(config.getValue("wotNumberOfRefresh")));
+		try {
+			if (config.getValue("wotActivated") != null)
+				activated.setSelected(Boolean.valueOf(config.getValue("wotActivated")).booleanValue());
+			if (config.getValue("wotIdentityUsed") != null)
+				identityUsed.setSelectedItem(Identity.getIdentity(db, Integer.parseInt(config.getValue("wotIdentityUsed"))));
+			if (config.getValue("wotNumberOfRefresh") != null)
+				numberOfRefresh.setSelectedItem(new Integer(config.getValue("wotNumberOfRefresh")));
+		} catch(Exception e) {
+			Logger.warning(this, "Error while reading config: "+e.toString());
+		}
 	}
 	
 	protected void saveSettings() {
 		config.setValue("wotActivated", Boolean.valueOf(activated.isSelected()).toString());
 
-		if (identityUsed.getSelectedIndex() <= 0)
-			config.setValue("wotIdentityUsed", null);
-		else
-			config.setValue("wotIdentityUsed", identityUsed.getSelectedItem().toString());
+		String prevIdentity = config.getValue("wotIdentityUsed");
+		String newIdentity = null;
+		
+		if (identityUsed.getSelectedIndex() > 0)
+			newIdentity = Integer.toString(((Identity)identityUsed.getSelectedItem()).getId());
+		
+		config.setValue("wotIdentityUsed", newIdentity);
+		
+		if ( (prevIdentity != null && newIdentity == null)
+				|| (prevIdentity == null && newIdentity != null)
+				|| (!prevIdentity.equals(newIdentity)) ) {
+			/* to force the regeneration of the keys */
+			config.setValue("wotPrivateKey", null);
+			config.setValue("wotPublicKey", null);
+		}
+		
 
 		config.setValue("wotNumberOfRefresh", numberOfRefresh.getSelectedItem().toString());
 	}

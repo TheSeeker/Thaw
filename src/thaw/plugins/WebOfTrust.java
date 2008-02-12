@@ -5,11 +5,15 @@ import javax.swing.ImageIcon;
 import thaw.core.Core;
 import thaw.core.Logger;
 import thaw.core.I18n;
+import thaw.core.ThawThread;
+import thaw.core.ThawRunnable;
 import thaw.plugins.Hsqldb;
 import thaw.plugins.Signatures;
-import thaw.plugins.webOfTrust.WebOfTrustConfigTab;
+import thaw.plugins.webOfTrust.*;
 
 public class WebOfTrust extends thaw.core.LibraryPlugin {
+	public final static long UPLOAD_AFTER_MS = 30*60*1000; /* 30 min */ 
+	
 	private Core core;
 	private Hsqldb db;
 	private Signatures sigs;
@@ -72,11 +76,73 @@ public class WebOfTrust extends thaw.core.LibraryPlugin {
 	public String getNameForUser() {
 		return I18n.getMessage("thaw.plugin.wot");
 	}
+	
+	private class TrucMucheThread implements ThawRunnable {
+		private boolean running = false;
+
+		public TrucMucheThread() {
+			running = false;
+		}
+		
+		public void run() {
+			running = true;
+			
+			while(running) {
+				try {
+					Thread.sleep(1000);
+				} catch(InterruptedException e) {
+					/* \_o< */
+				}
+				
+				try {
+					if (running)
+						process();
+				} catch(Exception e) {
+					Logger.error(this, "Exception in the web of trust plugin : "+e.toString());
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		public void stop() {
+			running = false;
+		}
+	}
+	
+	private TrucMucheThread thread;
+	private TrustListUploader trustListUploader = null;
+	
+	private void initThread() {
+		trustListUploader = new TrustListUploader(db, core.getQueueManager(), core.getConfig());
+		trustListUploader.init();
+
+		thread = new TrucMucheThread();
+		new ThawThread(thread, "WoT refresher", this).start();
+	}
+	
+	private void process() {
+		if (trustListUploader != null)
+			trustListUploader.process();
+	}
+	
+	private void stopThread() {
+		if (thread != null) {
+			thread.stop();
+			thread = null;
+		}
+		
+		if (trustListUploader != null) {
+			trustListUploader.stop();
+			trustListUploader = null;
+		}
+	}
 
 	public boolean run(Core core) {
 		core.getConfig().addListener("wotActivated",        this);
 		core.getConfig().addListener("wotIdentityUsed",     this);
 		core.getConfig().addListener("wotNumberOfRefresh",  this);
+		core.getConfig().addListener("wotPrivateKey",       this);
+		core.getConfig().addListener("wotPublicKey",        this);
 
 		used++;
 		
@@ -91,6 +157,8 @@ public class WebOfTrust extends thaw.core.LibraryPlugin {
 		core.getConfigWindow().addTab(I18n.getMessage("thaw.plugin.wot"),
 			      thaw.gui.IconBox.minTrust,
 			      configTab.getPanel());
+		
+		initThread();
 
 		return true;
 	}
@@ -103,8 +171,11 @@ public class WebOfTrust extends thaw.core.LibraryPlugin {
 			configTab = null;
 		}
 		
-		if (used == 0)
+		if (used == 0) {
 			unloadDeps(core);
+		}
+		
+		stopThread();
 	}
 
 	public void realStart() {

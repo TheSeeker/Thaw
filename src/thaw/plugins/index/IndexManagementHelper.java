@@ -1381,6 +1381,7 @@ public class IndexManagementHelper {
 				final Vector keyVec = new Vector();
 
 				frame.setVisible(false);
+				frame.dispose();
 
 				final String category = FileCategory.promptForACategory();
 
@@ -1399,6 +1400,7 @@ public class IndexManagementHelper {
 
 			if (e.getSource() == cancelButton) {
 				frame.setVisible(false);
+				frame.dispose();
 			}
 		}
 
@@ -1701,6 +1703,7 @@ public class IndexManagementHelper {
 
 			if (closeDialog) {
 				dialog.setVisible(false);
+				dialog.dispose();
 				dialog = null;
 			}
 		}
@@ -1812,6 +1815,7 @@ public class IndexManagementHelper {
 			if (e.getSource() == closeButton) {
 				if (dialog != null) {
 					dialog.setVisible(false);
+					dialog.dispose();
 					dialog = null;
 				}
 			} else {

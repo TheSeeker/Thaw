@@ -291,7 +291,8 @@ public class MessageTreeTable implements Observer,
 
 
 	public void hided() {
-		nextUnread.setMnemonic(KeyEvent.VK_Z);
+		if (gmailView)
+			nextUnread.setMnemonic(KeyEvent.VK_Z);
 	}
 
 	/**
