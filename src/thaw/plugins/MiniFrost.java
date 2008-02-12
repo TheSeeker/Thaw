@@ -23,6 +23,7 @@ public class MiniFrost implements thaw.core.Plugin, ChangeListener {
 
 	private Core core;
 	private Hsqldb hsqldb;
+	private WebOfTrust wot;
 
 	private MiniFrostPanel miniFrostPanel;
 	private MiniFrostConfigTab configTab;
@@ -89,6 +90,19 @@ public class MiniFrost implements thaw.core.Plugin, ChangeListener {
 
 		hsqldb = (Hsqldb)core.getPluginManager().getPlugin("thaw.plugins.Hsqldb");
 		hsqldb.registerChild(this);
+		
+		if(core.getPluginManager().getPlugin("thaw.plugins.WebOfTrust") == null) {
+			Logger.info(this, "Loading WoT plugin");
+
+			if(core.getPluginManager().loadPlugin("thaw.plugins.WebOfTrust") == null
+			   || !core.getPluginManager().runPlugin("thaw.plugins.WebOfTrust")) {
+				Logger.error(this, "Unable to load thaw.plugins.WebOfTrust !");
+				return false;
+			}
+		}
+
+		wot = (WebOfTrust)core.getPluginManager().getPlugin("thaw.plugins.WebOfTrust");
+		wot.registerChild(this);
 
 		return true;
 	}
@@ -96,7 +110,7 @@ public class MiniFrost implements thaw.core.Plugin, ChangeListener {
 
 	protected boolean initFactories() {
 		for (int i = 0 ; i < factories.length ; i++) {
-			if (!factories[i].init(hsqldb, core, this))
+			if (!factories[i].init(hsqldb, core, wot, this))
 				return false;
 		}
 
@@ -167,6 +181,9 @@ public class MiniFrost implements thaw.core.Plugin, ChangeListener {
 
 		if (hsqldb != null)
 			hsqldb.unregisterChild(this);
+		
+		if (wot != null)
+			wot.unregisterChild(this);
 		
 		miniFrostPanel.setVisible(false);
 	}

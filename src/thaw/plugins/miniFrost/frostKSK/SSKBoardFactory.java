@@ -29,6 +29,7 @@ import thaw.core.Core;
 import thaw.core.I18n;
 import thaw.plugins.Hsqldb;
 import thaw.plugins.MiniFrost;
+import thaw.plugins.WebOfTrust;
 
 
 public class SSKBoardFactory extends KSKBoardFactory {
@@ -54,11 +55,11 @@ public class SSKBoardFactory extends KSKBoardFactory {
 		super();
 	}
 
-	public boolean init(Hsqldb db, Core core, MiniFrost plugin) {
+	public boolean init(Hsqldb db, Core core, WebOfTrust wot, MiniFrost plugin) {
 		this.db = db;
 		this.core = core;
 		this.boards = new HashMap();
-		return super.init(db, core, plugin, "frostSSKInitialized");
+		return super.init(db, core, wot, plugin, "frostSSKInitialized");
 	}
 
 	protected void addDefaultBoards() {

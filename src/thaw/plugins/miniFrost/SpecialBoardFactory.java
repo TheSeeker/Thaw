@@ -4,6 +4,7 @@ import java.util.Vector;
 import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
 import thaw.plugins.MiniFrost;
+import thaw.plugins.WebOfTrust;
 import thaw.plugins.miniFrost.interfaces.BoardFactory;
 
 
@@ -22,7 +23,8 @@ public class SpecialBoardFactory
 	 * Init
 	 */
 	public boolean init(Hsqldb db, thaw.core.Core core,
-			    MiniFrost miniFrost) {
+			WebOfTrust wot,
+			MiniFrost miniFrost) {
 		this.miniFrost = miniFrost;
 		return true;
 	}

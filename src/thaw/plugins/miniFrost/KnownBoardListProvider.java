@@ -10,6 +10,7 @@ import thaw.core.MainWindow;
 import thaw.core.I18n;
 import thaw.plugins.Hsqldb;
 import thaw.plugins.MiniFrost;
+import thaw.plugins.WebOfTrust;
 import thaw.plugins.miniFrost.interfaces.BoardAttachment;
 import thaw.plugins.miniFrost.interfaces.BoardFactory;
 
@@ -22,7 +23,7 @@ public class KnownBoardListProvider implements BoardFactory {
 		
 	}
 
-	public boolean init(Hsqldb db, Core core, MiniFrost miniFrost) {
+	public boolean init(Hsqldb db, Core core, WebOfTrust wot, MiniFrost miniFrost) {
 		this.db = db;
 		this.core = core;
 		this.miniFrost = miniFrost;

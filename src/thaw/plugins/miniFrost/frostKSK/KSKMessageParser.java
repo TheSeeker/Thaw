@@ -56,6 +56,8 @@ public class KSKMessageParser {
 	private String signature;
 	private String idLinePos;
 	private String idLineLen;
+	private String wotPublicKey;
+	private String wotPublicKeySignature;
 
 	private Vector attachments;
 
@@ -63,7 +65,7 @@ public class KSKMessageParser {
 
 	private boolean read = false;
 	private boolean archived = false;
-
+	
 	private Identity encryptedFor = null;
 
 	private static FrostCrypt frostCrypt;
@@ -82,7 +84,8 @@ public class KSKMessageParser {
 				Vector attachments,
 				Identity identity,
 				int idLinePos,
-				int idLineLen) {
+				int idLineLen,
+				String wotPublicKey) {
 		this();
 
 		this.messageId = ""; /* will be generated from the SHA1 of the content */
@@ -114,12 +117,26 @@ public class KSKMessageParser {
 
 		/* frost wants a SHA256 hash, but can't check from what is comes :p */
 		this.messageId = frostCrypt.computeChecksumSHA256(getSignedContent(false));
+		
+		
+		this.wotPublicKey = wotPublicKey;
 
-		if (identity == null)
+		if (identity == null) {
 			signature = null;
-		else {
+		} else {
 			signature = identity.sign(getSignedContent(true));
 		}
+
+		wotPublicKeySignature = getWotPublicKeySignature(identity, wotPublicKey);
+	}
+	
+	private String getWotPublicKeySignature(Identity identity, String wotPublicKey) {
+		if (identity == null || wotPublicKey == null)
+			return null;
+		
+		String toSign = wotPublicKey+"|"+date+"|"+time+"|"+messageId;
+		
+		return identity.sign(toSign);
 	}
 
 
@@ -732,6 +749,14 @@ public class KSKMessageParser {
 
 		if ((el = makeText( doc, "client",    "Thaw "+thaw.core.Main.VERSION)) != null)
 			root.appendChild(el);
+		
+		if (wotPublicKey != null) {
+			if ((el = makeText(doc, "trustListPublicKey", wotPublicKey)) != null)
+				root.appendChild(el);
+			if ((el = makeText(doc, "trustListPublicKeySignature", wotPublicKeySignature)) != null)
+				root.appendChild(el);
+		}	
+
 		if ((el = makeCDATA(doc, "MessageId", messageId)) != null)   root.appendChild(el);
 		if ((el = makeCDATA(doc, "InReplyTo", inReplyToFull)) != null)   root.appendChild(el);
 		if ((el = makeText( doc, "IdLinePos", idLinePos)) != null)   root.appendChild(el);

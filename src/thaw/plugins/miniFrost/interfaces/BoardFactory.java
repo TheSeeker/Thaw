@@ -1,6 +1,7 @@
 package thaw.plugins.miniFrost.interfaces;
 
 import thaw.plugins.MiniFrost;
+import thaw.plugins.WebOfTrust;
 
 import java.util.Vector;
 
@@ -13,6 +14,7 @@ public interface BoardFactory {
 	 * Init
 	 */
 	public boolean init(Hsqldb db, thaw.core.Core core,
+				WebOfTrust webOfTrust,
 			    MiniFrost miniFrost);
 
 

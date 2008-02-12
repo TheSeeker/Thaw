@@ -7,8 +7,10 @@ import thaw.core.Logger;
 import thaw.core.I18n;
 import thaw.core.ThawThread;
 import thaw.core.ThawRunnable;
+import thaw.fcp.FreenetURIHelper;
 import thaw.plugins.Hsqldb;
 import thaw.plugins.Signatures;
+import thaw.plugins.signatures.Identity;
 import thaw.plugins.webOfTrust.*;
 
 public class WebOfTrust extends thaw.core.LibraryPlugin {
@@ -161,6 +163,25 @@ public class WebOfTrust extends thaw.core.LibraryPlugin {
 		initThread();
 
 		return true;
+	}
+	
+	private Identity getUsedIdentity() {
+		return trustListUploader.getIdentityUsed();
+	}
+	
+	private String getTrustListPublicKey() {
+		String key;
+		
+		if ( (key = core.getConfig().getValue("wotPublicKey")) == null)
+			return null;
+		
+		return FreenetURIHelper.convertSSKtoUSK(key)+"/trustList/0/trustList.xml";
+	}
+	
+	public String getTrustListPublicKeyFor(Identity id) {
+		if (id.equals(getUsedIdentity()))
+			return getTrustListPublicKey();
+		return null;
 	}
 
 	public void stop() {

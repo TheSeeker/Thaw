@@ -16,6 +16,7 @@ import thaw.core.I18n;
 
 import thaw.plugins.Hsqldb;
 import thaw.plugins.MiniFrost;
+import thaw.plugins.WebOfTrust;
 import thaw.plugins.signatures.Identity;
 
 
@@ -52,6 +53,7 @@ public class KSKBoardFactory
 
 	private Hsqldb db;
 	private Core core;
+	private WebOfTrust wot;
 	private MiniFrost plugin;
 
 	private HashMap boardsHashMap;
@@ -62,14 +64,15 @@ public class KSKBoardFactory
 	}
 
 
-	public boolean init(Hsqldb db, Core core, MiniFrost plugin) {
-		return init(db, core, plugin, "frostKSKDatabaseVersion");
+	public boolean init(Hsqldb db, Core core, WebOfTrust wot, MiniFrost plugin) {
+		return init(db, core, wot, plugin, "frostKSKDatabaseVersion");
 	}
 
-	public boolean init(Hsqldb db, Core core, MiniFrost plugin, String configOption) {
+	public boolean init(Hsqldb db, Core core, WebOfTrust wot, MiniFrost plugin, String configOption) {
 		this.db = db;
 		this.core = core;
 		this.plugin = plugin;
+		this.wot = wot;
 
 		boolean firstStart = (core.getConfig().getValue(configOption) == null);
 
@@ -160,6 +163,9 @@ public class KSKBoardFactory
 		return true;
 	}
 
+	public WebOfTrust getWoT() {
+		return wot;
+	}
 
 	public MiniFrost getPlugin() {
 		return plugin;

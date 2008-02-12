@@ -69,6 +69,10 @@ public class TrustListUploader implements Signatures.SignaturesObserver, Observe
 		privateKey = null;
 	}
 	
+	public Identity getIdentityUsed() {
+		return identity;
+	}
+	
 	public void init() {
 		lastUpload = null;
 		
