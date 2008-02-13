@@ -105,7 +105,7 @@ public class WebOfTrustConfigTab implements Observer, ActionListener {
 		
 		if ( (prevIdentity != null && newIdentity == null)
 				|| (prevIdentity == null && newIdentity != null)
-				|| (!prevIdentity.equals(newIdentity)) ) {
+				|| (prevIdentity != null && !prevIdentity.equals(newIdentity)) ) {
 			/* to force the regeneration of the keys */
 			config.setValue("wotPrivateKey", null);
 			config.setValue("wotPublicKey", null);
