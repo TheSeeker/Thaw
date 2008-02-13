@@ -191,10 +191,14 @@ public class IndexParser {
 			LinkContainer link = links[i];
 
 			String key = index.findTheLatestKey(link.getPublicKey());
+			String cat = link.getCategory();
 
 			final Element xmlLink = xmlDoc.createElement("link");
 
 			xmlLink.setAttribute("key", key);
+			
+			if (cat != null)
+				xmlLink.setAttribute("category", cat);
 
 			linksEl.appendChild(xmlLink);
 		}
@@ -355,7 +359,7 @@ public class IndexParser {
 			} else if ("link".equals(rawName)
 				   || "index".equals(rawName)) { /* links */
 
-				if (!index.addLink(attrs.getValue("key"))) {
+				if (!index.addLink(attrs.getValue("key"), attrs.getValue("category"))) {
 					throw new SAXException("Index parsing interrupted because of a backend error");
 				}
 

@@ -1255,8 +1255,14 @@ public class Index extends Observable implements MutableTreeNode,
 
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT id, publicKey, blackListed "+
-									 "FROM links WHERE indexParent = ?");
+				st = db.getConnection().prepareStatement("SELECT links.id AS id, " +
+														" links.publicKey AS publicKey, "+
+														" links.blackListed AS blacklisted," +
+														" links.indexParent AS indexParent, "+
+														" categories.name AS categoryName "+
+														" FROM links LEFT OUTER JOIN categories "+
+														" ON links.category = categories.id "+
+														"WHERE links.indexParent = ?");
 
 				st.setInt(1, id);
 
@@ -1264,7 +1270,7 @@ public class Index extends Observable implements MutableTreeNode,
 
 				while(res.next()) {
 					Link l = new Link(db, res.getInt("id"), res.getString("publicKey"),
-							  res.getBoolean("blackListed"),
+							 res.getString("categoryName"), res.getBoolean("blackListed"),
 							  this);
 					links.add(l);
 				}
@@ -1296,7 +1302,7 @@ public class Index extends Observable implements MutableTreeNode,
 	}
 
 
-	public boolean addLink(String key) {
+	public boolean addLink(String key, String category) {
 		try {
 			if (key == null) /* it was the beginning of the index */
 				return true;
@@ -1310,12 +1316,17 @@ public class Index extends Observable implements MutableTreeNode,
 
 				st = db.getConnection().prepareStatement("INSERT INTO links "+
 									 "(publicKey, mark, comment, "+
-									 "indexParent, indexTarget, blackListed) "+
-									 "VALUES (?, 0, ?, ?, NULL, ?)");
+									 "indexParent, indexTarget, blackListed, category) "+
+									 "VALUES (?, 0, ?, ?, NULL, ?, ?)");
 				st.setString(1, key);
 				st.setString(2, "No comment"); /* comment not used at the moment */
 				st.setInt(3, id);
 				st.setBoolean(4, blackListed);
+				
+				if (category != null)
+					st.setInt(5, getCategoryId(category));
+				else
+					st.setNull(5, Types.INTEGER);
 
 				st.execute();
 
@@ -1897,6 +1908,38 @@ public class Index extends Observable implements MutableTreeNode,
 		return ("Thaw "+Main.VERSION);
 	}
 
+	/**
+	 * @return -1 if none
+	 */
+	public int getCategoryId() {
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+				st = db.getConnection().prepareStatement("SELECT categoryId "+
+									 "FROM indexes "+
+									 "WHERE id = ? LIMIT 1");
+				st.setInt(1, id);
+
+				ResultSet set = st.executeQuery();
+
+				if (!set.next())
+					return -1;
+
+				Object o = set.getObject("categoryId");
+
+				if (o == null)
+					return -1;
+								
+				return set.getInt("categoryId");
+			}
+		} catch(SQLException e) {
+			Logger.error(this,
+				     "Unable to get the category of the index because : "+
+				     e.toString());
+		}
+
+		return -1;
+	}
 
 	public String getCategory() {
 		try {
@@ -1924,18 +1967,12 @@ public class Index extends Observable implements MutableTreeNode,
 		return null;
 	}
 
-
-	/**
-	 * create it if it doesn't exist
-	 */
-	public void setCategory(String category) {
+	
+	public static String cleanUpCategoryName(String category) {
 		if (category == null)
-			return;
+			return null;
 
 		category = category.trim();
-
-		if ("".equals(category))
-			return;
 
 		category = category.toLowerCase();
 
@@ -1945,7 +1982,22 @@ public class Index extends Observable implements MutableTreeNode,
 			oldCat = category;
 			category = category.replaceAll("//", "/");
 		} while(!oldCat.equals(category));
+		
+		if ("".equals(category))
+			return null;
+		
+		return category;
+	}
 
+	/**
+	 * create it if it doesn't exist
+	 */
+	protected int getCategoryId(String cat) {
+		cat = cleanUpCategoryName(cat);
+		
+		if (cat == null)
+			return -1;
+		
 		try {
 			synchronized(db.dbLock) {
 				PreparedStatement st;
@@ -1955,10 +2007,11 @@ public class Index extends Observable implements MutableTreeNode,
 
 				st = db.getConnection().prepareStatement("SELECT id FROM categories "+
 									 "WHERE name = ? LIMIT 1");
-				st.setString(1, category);
+				st.setString(1, cat);
 
 				set = st.executeQuery();
 
+				/* if it doesn't exist, we create it */
 				if (!set.next()) {
 
 					st = db.getConnection().prepareStatement("SELECT id FROM categories "+
@@ -1971,15 +2024,45 @@ public class Index extends Observable implements MutableTreeNode,
 					st = db.getConnection().prepareStatement("INSERT INTO categories "+
 										 "(id, name) VALUES (?, ?)");
 					st.setInt(1, catId);
-					st.setString(2, category);
+					st.setString(2, cat);
 					st.execute();
+					
+					return catId;
 				} else {
-					catId = set.getInt("id");
+					
+					/* else we return the existing id */
+					return set.getInt("id");
 				}
+			} 
+		} catch(SQLException e) {
+			Logger.error(this, "Can't create/find the category '"+cat+"'");
+		}
+
+		return -1;
+	}
+	
+
+	/**
+	 * create it if it doesn't exist
+	 */
+	public void setCategory(String category) {
+		
+		cleanUpCategoryName(category);
+		
+		if (category == null || "".equals(category))
+			return;
+
+		try {
+			
+			synchronized(db.dbLock) {
+				int catId = getCategoryId(category);
+				
+				if (catId < 0)
+					return;
 
 				/* set the categoryId of the index */
 
-				st = db.getConnection().prepareStatement("UPDATE indexes SET categoryId = ? "+
+				PreparedStatement st = db.getConnection().prepareStatement("UPDATE indexes SET categoryId = ? "+
 									 "WHERE id = ?");
 				st.setInt(1, catId);
 				st.setInt(2, id);

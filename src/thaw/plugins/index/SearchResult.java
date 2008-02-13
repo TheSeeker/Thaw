@@ -108,9 +108,13 @@ public class SearchResult implements FileAndLinkList {
 			try {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT id, publicKey, indexParent, blackListed "+
-									 "FROM links "+
-									 "WHERE "+getWhereClause(false));
+				st = db.getConnection().prepareStatement("SELECT links.publicKey AS publicKey, "+
+														 " links.blackListed AS blacklisted," +
+														 " links.indexParent AS indexParent, "+
+														 " categories.name AS categoryName "+
+														 " FROM links OUTER JOIN categories "+
+														 " ON links.category = categories.id "+
+														 "WHERE "+getWhereClause(false));
 				fillInStatement(st);
 				ResultSet set = st.executeQuery();
 
@@ -119,6 +123,7 @@ public class SearchResult implements FileAndLinkList {
 						v.add(new Link(db,
 							       set.getInt("id"),
 							       set.getString("publicKey"),
+							       set.getString("categoryName"),
 							       false,
 							       set.getInt("indexParent") ));
 					}

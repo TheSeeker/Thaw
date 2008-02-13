@@ -648,7 +648,7 @@ public class FreenetURIHelper {
 			return null;
 
 		if (key.startsWith("KSK@")) {
-			return key;
+			return key.toLowerCase();
 		}
 
 		if (key.length() <= 70)

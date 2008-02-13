@@ -1539,9 +1539,10 @@ public class IndexManagementHelper {
 				PreparedStatement st;
 
 				int nextId = DatabaseManager.getNextId(db, "links");
+				int catId = target.getCategoryId();
 
-				st = db.getConnection().prepareStatement("INSERT INTO links (id, publicKey, mark, comment, indexParent, indexTarget, blackListed) "+
-									 "VALUES (?, ?, ?, ?, ?, ?, FALSE)");
+				st = db.getConnection().prepareStatement("INSERT INTO links (id, publicKey, mark, comment, indexParent, indexTarget, blackListed, category) "+
+									 "VALUES (?, ?, ?, ?, ?, ?, FALSE, ?)");
 
 				st.setInt(1, nextId);
 				st.setString(2, linkKey);
@@ -1549,6 +1550,11 @@ public class IndexManagementHelper {
 				st.setString(4, "" /* comment : not used at the moment */);
 				st.setInt(5, target.getId());
 				st.setNull(6, Types.INTEGER /* indexTarget : not used at the moment */);
+				
+				if (catId >= 0)
+					st.setInt(7, catId);
+				else
+					st.setNull(7, Types.INTEGER);
 
 				st.execute();
 			} catch(SQLException e) {

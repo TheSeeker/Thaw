@@ -68,7 +68,7 @@ public interface IndexContainer extends FileAndLinkList {
 	 * (because of db errors or anything else)
 	 */
 	public boolean addFile(String publicKey, long size, String mime);
-	public boolean addLink(String publicKey);
+	public boolean addLink(String publicKey, String category);
 	public void setCommentKeys(String publicKey, String privateKey);
 	public void addBlackListedRev(int rev);
 

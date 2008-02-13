@@ -267,13 +267,15 @@ public class KSKBoardFactory
 		sendQuery("CREATE CACHED TABLE frostKSKBoards ("
 			  + "id INTEGER IDENTITY NOT NULL, "
 			  + "name VARCHAR(128) NOT NULL, "
-			  + "lastUpdate DATE DEFAULT NULL NULL)");
+			  + "lastUpdate DATE DEFAULT NULL NULL, "
+			  + "PRIMARY KEY(id))");
 
 		sendQuery("CREATE CACHED TABLE frostSSKBoards ("
 			  + "id INTEGER IDENTITY NOT NULL, "
 			  + "publicKey VARCHAR(256) NOT NULL, "
 			  + "privateKey VARCHAR(256) NULL, "
 			  + "kskBoardId INTEGER NOT NULL, "
+			  + "PRIMARY KEY(id), "
 			  + "FOREIGN KEY (kskBoardId) REFERENCES frostKSKBoards (id))");
 		
 		sendQuery("CREATE CACHED TABLE frostKSKInvalidSlots ("
@@ -282,6 +284,7 @@ public class KSKBoardFactory
 				+ "date DATE NOT NULL, "
 				+ "minRev INTEGER NOT NULL, "
 				+ "maxRev INTEGER NOT NULL, "
+				+ "PRIMARY KEY(id), "
 				+ "FOREIGN KEY (boardId) REFERENCES frostKSKBoards (id))");
 
 		sendQuery("CREATE CACHED TABLE frostKSKMessages ("
@@ -300,6 +303,7 @@ public class KSKBoardFactory
 			  + "archived BOOLEAN DEFAULT FALSE NOT NULL, "
 			  + "encryptedFor INTEGER DEFAULT NULL NULL, "
 			  + "boardId INTEGER NOT NULL, "
+			  + "PRIMARY KEY(id), "
 			  + "FOREIGN KEY (boardId) REFERENCES frostKSKBoards (id), "
 			  + "FOREIGN KEY (inReplyTo) REFERENCES frostKSKMessages (id), "
 			  + "FOREIGN KEY (sigId) REFERENCES signatures (id), "
@@ -311,6 +315,7 @@ public class KSKBoardFactory
 			  + "size BIGINT NOT NULL, "
 			  + "key VARCHAR(512) NOT NULL, "
 			  + "messageId INTEGER NOT NULL, "
+			  + "PRIMARY KEY(id), "
 			  + "FOREIGN KEY (messageId) REFERENCES frostKSKMessages (id))");
 
 		sendQuery("CREATE CACHED TABLE frostKSKAttachmentBoards ("
@@ -320,6 +325,7 @@ public class KSKBoardFactory
 			  + "privateKey VARCHAR(256) NULL, "
 			  + "description VARCHAR(512) NULL, "
 			  + "messageId INTEGER NOT NULL, "
+			  + "PRIMARY KEY(id), "
 			  + "FOREIGN KEY (messageId) REFERENCES frostKSKMessages (id))");
 
 		if (core.getConfig().getValue("frostKSKDatabaseVersion") == null)

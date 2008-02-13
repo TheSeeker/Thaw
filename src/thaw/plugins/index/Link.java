@@ -16,6 +16,7 @@ public class Link extends java.util.Observable implements Comparable, LinkContai
 	private final Hsqldb db;
 
 	private String publicKey;
+	private String category;
 
 	private int parentId;
 	private Index parent = null;
@@ -31,17 +32,18 @@ public class Link extends java.util.Observable implements Comparable, LinkContai
 	}
 
 
-	public Link(final Hsqldb hsqldb, final int id, String publicKey, boolean blackListed,
+	public Link(final Hsqldb hsqldb, final int id, String publicKey, String category, boolean blackListed,
 		    int parentId) {
 		this.id = id;
 		this.db = hsqldb;
 		this.publicKey = publicKey;
 		this.blackListed = blackListed;
 		this.parentId = parentId;
+		this.category = category;
 	}
 
 
-	public Link(final Hsqldb hsqldb, final int id, String publicKey, boolean blackListed,
+	public Link(final Hsqldb hsqldb, final int id, String publicKey, String category, boolean blackListed,
 		    Index parent) {
 		this.id = id;
 		this.db = hsqldb;
@@ -49,6 +51,7 @@ public class Link extends java.util.Observable implements Comparable, LinkContai
 		this.blackListed = blackListed;
 		this.parentId = parent.getId();
 		this.parent = parent;
+		this.category = category;
 	}
 
 
@@ -58,8 +61,13 @@ public class Link extends java.util.Observable implements Comparable, LinkContai
 		try {
 			PreparedStatement st;
 
-			st = db.getConnection().prepareStatement("SELECT publicKey, blackListed, indexParent FROM links "+
-								 "WHERE id = ? LIMIT 1");
+			st = db.getConnection().prepareStatement("SELECT links.publicKey AS publicKey, "+
+													" links.blackListed AS blacklisted," +
+													" links.indexParent AS indexParent, "+
+													" categories.name AS categoryName "+
+													" FROM links LEFT OUTER JOIN categories "+
+													" ON links.category = categories.id "+
+								 					" WHERE links.id = ? LIMIT 1");
 
 			st.setInt(1, id);
 
@@ -69,6 +77,7 @@ public class Link extends java.util.Observable implements Comparable, LinkContai
 				publicKey = rs.getString("publicKey");
 				parentId = rs.getInt("indexParent");
 				blackListed = rs.getBoolean("blackListed");
+				category = rs.getString("categoryName");
 			} else {
 				Logger.error(this, "Link '"+Integer.toString(id)+"' not found.");
 			}
@@ -86,6 +95,13 @@ public class Link extends java.util.Observable implements Comparable, LinkContai
 			reloadDataFromDb(id);
 
 		return publicKey;
+	}
+	
+	public String getCategory() {
+		if (publicKey == null)
+			reloadDataFromDb(id);
+		
+		return category;
 	}
 
 	public boolean compare(final Link l) {
@@ -207,7 +223,12 @@ public class Link extends java.util.Observable implements Comparable, LinkContai
 	 * return the index name
 	 */
 	public String toString() {
-		return getIndexName();
+		String cat = getCategory();
+		
+		if (cat == null)
+			return getIndexName();
+		
+		return cat+"/"+getIndexName();
 	}
 
 	public void setPublicKey(final String key) {

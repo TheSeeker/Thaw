@@ -49,6 +49,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 	private Link firstSelectedLink = null;
 	private int firstSelectedLinkCorrespondingIndexId = -1; /* hmm .. I should make it shorter ... */
 
+	private final static String unknownStr = I18n.getMessage("thaw.common.unknown");
 
 	public LinkTable (final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser,
 			  Config config) {
@@ -268,6 +269,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 			columnNames = new Vector();
 
 			columnNames.add(I18n.getMessage("thaw.plugin.index.index"));
+			columnNames.add(I18n.getMessage("thaw.plugin.index.category"));
 			//columnNames.add(I18n.getMessage("thaw.common.key"));
 		}
 
@@ -304,7 +306,8 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 
 			switch(column) {
 			case(0): return link.getIndexName();
-				//case(1): return link.getPublicKey();
+			case(1): return (link.getCategory() != null ? link.getCategory() : unknownStr);
+				//case(2): return link.getPublicKey();
 			default: return null;
 			}
 		}

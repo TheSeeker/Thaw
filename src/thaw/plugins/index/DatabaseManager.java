@@ -41,6 +41,7 @@ import thaw.core.Config;
 import thaw.core.Logger;
 import thaw.core.SplashScreen;
 import thaw.fcp.FCPQueueManager;
+import thaw.fcp.FreenetURIHelper;
 import thaw.plugins.Hsqldb;
 
 /**
@@ -87,7 +88,7 @@ public class DatabaseManager {
 
 		if (config.getValue("indexDatabaseVersion") == null) {
 			newDb = true;
-			config.setValue("indexDatabaseVersion", "9");
+			config.setValue("indexDatabaseVersion", "10");
 		} else {
 
 			/* CONVERTIONS */
@@ -150,6 +151,13 @@ public class DatabaseManager {
 				if (convertDatabase_8_to_9(db))
 					config.setValue("indexDatabaseVersion", "9");
 			}
+			
+			if ("9".equals(config.getValue("indexDatabaseVersion"))) {
+				if (splashScreen != null)
+					splashScreen.setStatus("Converting database ...");
+				if (convertDatabase_9_to_10(db))
+					config.setValue("indexDatabaseVersion", "10");
+			}
 
 			/* ... */
 		}
@@ -157,7 +165,17 @@ public class DatabaseManager {
 
 		createTables(db);
 
+		if (splashScreen != null)
+			splashScreen.setStatus("Cleaning up categories ...");
 		cleanUpCategories(db);
+
+		if (splashScreen != null)
+			splashScreen.setStatus("Updating link categories ...");
+		updateLinkCategories(db);
+		
+		if (splashScreen != null)
+			splashScreen.setStatus("Loading index browser ...");
+
 
 		return newDb;
 	}
@@ -196,6 +214,46 @@ public class DatabaseManager {
 			Logger.error(new DatabaseManager(), "Can't cleanup the unused categories because: "+e.toString());
 		}
 	}
+	
+
+	public static void updateLinkCategories(Hsqldb db) {
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement selectLinks;
+				PreparedStatement selectIndex;
+				PreparedStatement updateLink;
+
+				selectLinks = db.getConnection().prepareStatement("SELECT id, publicKey FROM links WHERE category IS NULL");
+				selectIndex = db.getConnection().prepareStatement("SELECT categoryId FROM indexes wHERE LOWER(publicKey) LIKE ? LIMIT 1");
+				updateLink = db.getConnection().prepareStatement("UPDATE links SET category = ? WHERE id = ?");
+				
+				ResultSet linksWithoutCategory = selectLinks.executeQuery();
+				
+				while(linksWithoutCategory.next()) {
+					int linkId = linksWithoutCategory.getInt("id");
+					String linkKey = linksWithoutCategory.getString("publicKey");
+					
+					selectIndex.setString(1, FreenetURIHelper.getComparablePart(linkKey) +"%");
+					
+					ResultSet possibleCorrespondingIndex = selectIndex.executeQuery();
+					
+					if (possibleCorrespondingIndex.next()) {
+						Object o = possibleCorrespondingIndex.getObject("categoryId");
+						
+						if (o != null) {
+							int catId = possibleCorrespondingIndex.getInt("categoryId");
+
+							updateLink.setInt(1, catId);
+							updateLink.setInt(2, linkId);
+							updateLink.execute();
+						}
+					}
+				}
+			}
+		} catch(SQLException e) {
+			Logger.error(new DatabaseManager(), "Can't cleanup the unused categories because: "+e.toString());
+		}
+	}
 
 
 	/**
@@ -211,7 +269,8 @@ public class DatabaseManager {
 		sendQuery(db,
 			  "CREATE CACHED TABLE categories ("
 			  + "id INTEGER IDENTITY NOT NULL,"
-			  + "name VARCHAR(255) NOT NULL)");
+			  + "name VARCHAR(255) NOT NULL,"
+			  + "PRIMARY KEY(id))");
 
 		sendQuery(db,
 			  "CREATE CACHED TABLE indexFolders ("
@@ -240,7 +299,8 @@ public class DatabaseManager {
 			  + "newComment BOOLEAN DEFAULT FALSE NOT NULL, "
 			  + "parent INTEGER NULL, " /* direct parent */
 			  + "PRIMARY KEY (id), "
-			  + "FOREIGN KEY (parent) REFERENCES indexFolders (id))");
+			  + "FOREIGN KEY (parent) REFERENCES indexFolders (id), "
+			  + "FOREIGN KEY (categoryId) REFERENCES categories (id))");
 
 		/* direct AND indirect parents */
 		sendQuery(db, /* this table avoid some horrible recursivities */
@@ -286,9 +346,11 @@ public class DatabaseManager {
 			  + "toDelete BOOLEAN DEFAULT false NOT NULL,"
 			  + "dontDelete BOOLEAN DEFAULT false NOT NULL,"
 			  + "blackListed BOOLEAN DEFAULT false NOT NULL,"
+			  + "category INTEGER DEFAULT NULL, "
 			  + "PRIMARY KEY (id),"
 			  + "FOREIGN KEY (indexParent) REFERENCES indexes (id),"
-			  + "FOREIGN KEY (indexTarget) REFERENCES indexes (id))");
+			  + "FOREIGN KEY (indexTarget) REFERENCES indexes (id),"
+			  + "FOREIGN KEY (category) REFERENCES categories (id))");
 
 		sendQuery(db,
 			  "CREATE CACHED TABLE metadataNames ("
@@ -1074,6 +1136,18 @@ public class DatabaseManager {
 	public static boolean convertDatabase_8_to_9(Hsqldb db) {
 		if (!sendQuery(db, "ALTER TABLE indexes ADD COLUMN categoryId INTEGER DEFAULT NULL NULL")
 		    || !sendQuery(db, "ALTER TABLE indexes ADD FOREIGN KEY (categoryId) REFERENCES categories (id)")) {
+
+			Logger.error(new DatabaseManager(), "Error while converting the database (8 to 9) !");
+			return false;
+		}
+
+		return true;
+
+	}
+	
+	public static boolean convertDatabase_9_to_10(Hsqldb db) {
+		if (!sendQuery(db, "ALTER TABLE links ADD COLUMN category INTEGER DEFAULT NULL NULL")
+				|| !sendQuery(db, "ALTER TABLE links ADD FOREIGN KEY (category) REFERENCES categories (id)")) {
 
 			Logger.error(new DatabaseManager(), "Error while converting the database (8 to 9) !");
 			return false;

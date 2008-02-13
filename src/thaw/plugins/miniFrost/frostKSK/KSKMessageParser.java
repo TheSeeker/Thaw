@@ -134,11 +134,27 @@ public class KSKMessageParser {
 		if (identity == null || wotPublicKey == null)
 			return null;
 		
-		String toSign = wotPublicKey+"|"+date+"|"+time+"|"+messageId;
+		String toSign = wotPublicKey+"|"+date+"|"+time+"|"+messageId; /* no 'GMT' at the end of the time string because I'm a lazy bastard */
 		
 		return identity.sign(toSign);
 	}
+	
+	private boolean checkWotPublicKeySignature(Identity identity, String wotPublicKey, String signature) {
+		if (identity == null || wotPublicKey == null || signature == null)
+			return false;
+		
+		String toSign = wotPublicKey+"|"+date+"|"+time+"|"+messageId; /* no 'GMT' at the end of the time string because I'm a lazy bastard */
 
+		return identity.check(toSign, signature);
+	}
+	
+	public Identity getIdentity() {
+		return identity;
+	}
+
+	public String getTrustListPublicKey() {
+		return wotPublicKey;
+	}
 
 	private boolean alreadyInTheDb(Hsqldb db, String msgId) {
 
@@ -418,7 +434,16 @@ public class KSKMessageParser {
 
 		if (!ret) {
 			Logger.notice(this, "Invalid signature !");
+			wotPublicKeySignature = null;
+			wotPublicKey = null;
 			return invalidMessage("Invalid signature");
+		}
+		
+		if (wotPublicKey != null) {
+			if (!checkWotPublicKeySignature(identity, wotPublicKey, wotPublicKeySignature)) {
+				wotPublicKeySignature = null;
+				wotPublicKey = null;
+			}
 		}
 
 		return true;
@@ -444,6 +469,8 @@ public class KSKMessageParser {
 		publicKey     = XMLTools.getChildElementsCDATAValue(root, "pubKey");
 		idLinePos     = XMLTools.getChildElementsTextValue(root, "IdLinePos");
 		idLineLen     = XMLTools.getChildElementsTextValue(root, "IdLineLen");
+		wotPublicKey  = XMLTools.getChildElementsTextValue(root, "trustListPublicKey");
+		wotPublicKeySignature = XMLTools.getChildElementsTextValue(root, "trustListPublicKeySignature");
 
 		List l = XMLTools.getChildElementsByTagName(root, "AttachmentList");
 		if (l.size() == 1) {

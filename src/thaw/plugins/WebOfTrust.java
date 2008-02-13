@@ -183,6 +183,10 @@ public class WebOfTrust extends thaw.core.LibraryPlugin {
 			return getTrustListPublicKey();
 		return null;
 	}
+	
+	public void addTrustList(Identity id, String publicKey) {
+		/* TODO */
+	}
 
 	public void stop() {
 		used--;

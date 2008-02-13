@@ -154,6 +154,10 @@ public class KSKMessage
 			    && parser.filter(board.getFactory().getPlugin().getRegexpBlacklist())
 			    && parser.insert(db, board.getId(),
 					     date, rev, board.getName())) {
+				
+				if (parser.getTrustListPublicKey() != null) {
+					board.getFactory().getWoT().addTrustList(parser.getIdentity(), parser.getTrustListPublicKey());
+				}
 
 				new File(get.getPath()).delete();
 
