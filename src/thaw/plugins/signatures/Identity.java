@@ -191,6 +191,9 @@ public class Identity {
 	}
 
 	public boolean isDup() {
+		if (privateKey != null)
+			return false;
+
 		return isDup;
 	}
 

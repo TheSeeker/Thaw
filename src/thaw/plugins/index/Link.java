@@ -290,7 +290,7 @@ public class Link extends java.util.Observable implements Comparable, LinkContai
 
 	public int compareTo(Object o) {
 		if (o instanceof Link) {
-			return getIndexName().toLowerCase().compareTo(((Link)o).getIndexName().toLowerCase());
+			return toString().toLowerCase().compareTo(((Link)o).toString().toLowerCase());
 		}
 
 		return 0;
