@@ -31,8 +31,6 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 	private int attempt = -1;
 	private String status;
 
-	private String identifier;
-
 	private int fromTheNodeProgress = 0;
 	private long fileSize;
 	private long maxSize = 0;
@@ -59,7 +57,7 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 	 * See setParameters().
 	 */
 	public FCPClientGet(final FCPQueueManager queueManager, final HashMap parameters) {
-		super(false);
+		super((String)parameters.get("Identifier"), false);
 		
 		this.queueManager = queueManager;
 		setParameters(parameters);
@@ -68,7 +66,7 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 
 		/* If isPersistent(), then start() won't be called, so must relisten the
 		   queryManager by ourself */
-		if(isPersistent() && (identifier != null) && !identifier.equals("")) {
+		if(isPersistent() && (getIdentifier() != null) && !getIdentifier().equals("")) {
 			this.queueManager.getQueryManager().deleteObserver(this);
 			this.queueManager.getQueryManager().addObserver(this);
 		}
@@ -100,7 +98,8 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 			status = "(null)";
 		}
 
-		identifier = id;
+		setIdentifier(id);
+
 
 		/* FIX : This is a fix for the files inserted by Frost */
 		/* To remove when bback will do his work correctly */
@@ -143,7 +142,7 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 			    final int persistence, boolean globalQueue,
 			    final int maxRetries,
 			    String destinationDir) {
-		super(false);
+		super(null, false);
 
 		if (globalQueue && (persistence >= PERSISTENCE_UNTIL_DISCONNECT))
 			globalQueue = false; /* else protocol error */
@@ -237,8 +236,8 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 
 		status = "Requesting";
 
-		if((identifier == null) || "".equals( identifier ))
-			identifier = queueManager.getAnID() + "-"+filename;;
+		if((getIdentifier() == null) || "".equals( getIdentifier() ))
+			setIdentifier(queueManager.getAnID() + "-"+filename);
 
 		Logger.debug(this, "Requesting key : "+getFileKey());
 
@@ -246,7 +245,7 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 
 		queryMessage.setMessageName("ClientGet");
 		queryMessage.setValue("URI", key);
-		queryMessage.setValue("Identifier", identifier);
+		queryMessage.setValue("Identifier", getIdentifier());
 		queryMessage.setValue("Verbosity", "1");
 		queryMessage.setValue("MaxRetries", Integer.toString(maxRetries));
 		queryMessage.setValue("PriorityClass", Integer.toString(priority));
@@ -307,7 +306,7 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 			queryManager = queueManager.getQueryManager(); /* default one */
 
 		if((message.getValue("Identifier") == null)
-		   || !message.getValue("Identifier").equals(identifier))
+		   || !message.getValue("Identifier").equals(getIdentifier()))
 			return;
 
 		if("DataFound".equals( message.getMessageName() )) {
@@ -358,7 +357,7 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 		if("IdentifierCollision".equals( message.getMessageName() )) {
 			Logger.notice(this, "IdentifierCollision ! Resending with another id");
 
-			identifier = null;
+			setIdentifier(null);
 			start(queueManager);
 
 			notifyChange();
@@ -540,7 +539,7 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 		}
 
 		if ("AllData".equals(message.getMessageName())) {
-			Logger.debug(this, "AllData ! : " + identifier);
+			Logger.debug(this, "AllData ! : " + getIdentifier());
 
 			fileSize = message.getAmountOfDataWaiting();
 
@@ -676,7 +675,7 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 		Logger.info(this, "Duplicating socket ...");
 
 		if (globalQueue) {
-			duplicatedQueryManager = queueManager.getQueryManager().duplicate(identifier);
+			duplicatedQueryManager = queueManager.getQueryManager().duplicate(getIdentifier());
 			duplicatedQueryManager.addObserver(this);
 		} else { /* won't duplicate ; else it will use another id */
 			duplicatedQueryManager = queueManager.getQueryManager();
@@ -721,7 +720,7 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 		final FCPMessage getRequestStatus = new FCPMessage();
 
 		getRequestStatus.setMessageName("GetRequestStatus");
-		getRequestStatus.setValue("Identifier", identifier);
+		getRequestStatus.setValue("Identifier", getIdentifier());
 		if(globalQueue)
 			getRequestStatus.setValue("Global", "true");
 		else
@@ -873,7 +872,7 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 			return false;
 		}
 
-		if(identifier == null) {
+		if(getIdentifier() == null) {
 			Logger.notice(this, "Can't remove non-started queries");
 			return true;
 		}
@@ -885,7 +884,7 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 		else
 			stopMessage.setValue("Global", "false");
 
-		stopMessage.setValue("Identifier", identifier);
+		stopMessage.setValue("Identifier", getIdentifier());
 
 		queueManager.getQueryManager().writeMessage(stopMessage);
 
@@ -947,7 +946,7 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 
 		msg.setMessageName("ModifyPersistentRequest");
 		msg.setValue("Global", Boolean.toString(globalQueue));
-		msg.setValue("Identifier", identifier);
+		msg.setValue("Identifier", getIdentifier());
 		msg.setValue("PriorityClass", Integer.toString(priority));
 
 		if(clientToken && (destinationDir != null))
@@ -983,7 +982,7 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 	}
 
 	public String getFileKey() {
-		// TODO : It's fix due to Frost
+		// TODO : It's a fix due to Frost
 		//        => to remove when it will become unneeded
 
 		if (filename != null && key != null
@@ -1057,7 +1056,7 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 
 		result.put("status", status);
 
-       		result.put("Identifier", identifier);
+       	result.put("Identifier", getIdentifier());
 		result.put("FileSize", Long.toString(fileSize));
 		result.put("Running", Boolean.toString(isRunning()));
 		result.put("Successful", Boolean.toString(isSuccessful()));
@@ -1079,9 +1078,9 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 		destinationDir = (String)parameters.get("ClientToken");
 		attempt        = Integer.parseInt((String)parameters.get("Attempt"));
 		status         = (String)parameters.get("Status");
-		identifier     = (String)parameters.get("Identifier");
+		setIdentifier(   (String)parameters.get("Identifier"));
 
-		Logger.info(this, "Resuming id : "+identifier);
+		Logger.info(this, "Resuming id : "+getIdentifier());
 		fileSize       = Long.parseLong((String)parameters.get("FileSize"));
 		boolean running        = Boolean.valueOf((String)parameters.get("Running")).booleanValue();
 		boolean successful     = Boolean.valueOf((String)parameters.get("Successful")).booleanValue();
@@ -1101,14 +1100,6 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 
 	public boolean isPersistent() {
 		return (persistence < PERSISTENCE_UNTIL_DISCONNECT);
-	}
-
-
-	public String getIdentifier() {
-		if((identifier == null) || identifier.equals(""))
-			return null;
-
-		return identifier;
 	}
 
 	public boolean isGlobal() {

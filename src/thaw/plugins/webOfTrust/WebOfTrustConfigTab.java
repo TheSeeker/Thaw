@@ -64,6 +64,10 @@ public class WebOfTrustConfigTab implements Observer, ActionListener {
 	private void resetContentOfIdentitySelector() {
 		Vector identities = Identity.getYourIdentities(db);
 		
+		/* can happen if the database has been shutdowned */
+		if (identities == null)
+			return;
+		
 		identityUsed.removeAllItems();
 		identityUsed.addItem(I18n.getMessage("thaw.plugin.wot.usedIdentity.none"));
 		

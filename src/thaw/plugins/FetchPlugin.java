@@ -80,11 +80,16 @@ public class FetchPlugin implements thaw.core.Plugin, ActionListener {
 
 
 	public void stop() {
+		queueWatcher.removeButtonListener(QueueWatcher.DOWNLOAD_PANEL, this);
+		
 		Logger.info(this, "Stopping plugin \"FetchPlugin\" ...");
 
 		if (queueWatcher != null)
 			queueWatcher.removeButtonFromTheToolbar(buttonInToolBar);
 
+		fetchFrame.setVisible(false);
+		fetchFrame.dispose();
+		fetchFrame = null;
 	}
 
 	public String getNameForUser() {

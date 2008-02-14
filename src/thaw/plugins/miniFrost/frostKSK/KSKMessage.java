@@ -156,7 +156,9 @@ public class KSKMessage
 					     date, rev, board.getName())) {
 				
 				if (parser.getTrustListPublicKey() != null) {
-					board.getFactory().getWoT().addTrustList(parser.getIdentity(), parser.getTrustListPublicKey());
+					board.getFactory().getWoT().addTrustList(parser.getIdentity(),
+															parser.getTrustListPublicKey(),
+															parser.getDate());
 				}
 
 				new File(get.getPath()).delete();

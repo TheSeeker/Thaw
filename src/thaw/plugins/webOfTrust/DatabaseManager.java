@@ -21,6 +21,8 @@ public class DatabaseManager {
 			newDb = true;
 			config.setValue("wotDatabaseVersion", "0");
 		} else {
+			/* CONVERTIONS */
+			
 			/* ... */			
 		}
 
@@ -30,20 +32,10 @@ public class DatabaseManager {
 	}
 	
 	public static void createTables(Hsqldb db) {
-		/*sendQuery(db,
-				  "CREATE CACHED TABLE indexFolders ("
-				  + "id INTEGER IDENTITY NOT NULL,"
-				  + "name VARCHAR(255) NOT NULL,"
-				  + "positionInTree INTEGER NOT NULL,"
-				  + "modifiableIndexes BOOLEAN NOT NULL,"
-				  + "parent INTEGER NULL,"
-				  + "PRIMARY KEY (id),"
-				  + "FOREIGN KEY (parent) REFERENCES indexFolders (id))");
-		 */
-
-		sendQuery(db, "CREATE CACHED TABLE wot ("
+		sendQuery(db, "CREATE CACHED TABLE wotKeys ("
 				+ "id INTEGER IDENTITY NOT NULL, "
 				+ "publicKey VARCHAR(400) NOT NULL, "
+				+ "date TIMESTAMP NOT NULL, "
 				+ "score SMALLINT NOT NULL, "
 				+ "sigId INTEGER NOT NULL, "
 				+ "PRIMARY KEY(id), "

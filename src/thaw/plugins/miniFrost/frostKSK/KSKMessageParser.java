@@ -178,6 +178,24 @@ public class KSKMessageParser {
 		}
 	}
 
+	
+	public java.util.Date getDate() {
+		date = date.trim();
+		time = time.trim();
+
+		date += " "+time;
+
+		java.util.Date dateUtil = null;
+
+		try {
+			dateUtil = simpleFormat.parse(date);
+		} catch(java.text.ParseException e) {
+			Logger.notice(this, "Can't parse the date !");
+			return null;
+		}
+
+		return dateUtil;
+	}
 
 
 	public boolean insert(Hsqldb db,

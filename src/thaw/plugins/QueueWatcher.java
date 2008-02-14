@@ -131,7 +131,11 @@ public class QueueWatcher extends ToolbarModifier implements thaw.core.Plugin, P
 	 * @param panel see DOWNLOAD_PANEL and INSERTION_PANEL
 	 */
 	public void addButtonListener(final int panel, final ActionListener listener) {
-		queuePanels[panel].getButton().addActionListener(listener);
+		queuePanels[panel].addActionListenerToTheButton(listener);
+	}
+	
+	public void removeButtonListener(final int panel, final ActionListener listener) {
+		queuePanels[panel].removeActionListenerFromTheButton(listener);
 	}
 
 

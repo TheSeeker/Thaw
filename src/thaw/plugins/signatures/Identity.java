@@ -429,9 +429,6 @@ public class Identity {
 	public static Identity generate(Hsqldb db, String nick) {
 		Logger.info(null, "thaw.plugins.signatures.Identity : Generating new identity ...");
 
-		//DSAPrivateKey privateKey = new DSAPrivateKey(Global.DSAgroupBigA, Core.getRandom());
-		//DSAPublicKey publicKey = new DSAPublicKey(Global.DSAgroupBigA, privateKey);
-
 		initFrostCrypt();
 
 		String[] keys = frostCrypt.generateKeys();
@@ -768,6 +765,9 @@ public class Identity {
 	}
 	
 	public boolean equals(Object o) {
+		if (o == null)
+			return false;
+		
 		if (!(o instanceof Identity))
 			return false;
 		

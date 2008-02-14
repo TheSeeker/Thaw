@@ -250,6 +250,9 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 	}
 
 	public void addQuery(final FCPTransferQuery query) {
+		if (!query.isPersistent())
+			return;
+		
 		if(queries.contains(query)) {
 			Logger.debug(this, "addQuery() : Already known");
 			return;
@@ -345,6 +348,10 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 		if (o == queueManager) {
 			final FCPTransferQuery query = (FCPTransferQuery)arg;
+			
+			/* we only display persistent queries */
+			if (!query.isPersistent())
+				return;
 
 			if((query.getQueryType() == 1) && isForInsertions)
 				return;
@@ -361,10 +368,12 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 				removeQuery(query);
 				return;
 			}
-		}
+			
+			/* else we don't know */
+			reloadQueue();
+			return;
 
-
-		if (o instanceof FCPTransferQuery
+		} else if (o instanceof FCPTransferQuery
 		    && queries.indexOf(o) >= 0
 		    && ((FCPTransferQuery)o).isFinished()
 		    && (arg == null || !(arg instanceof Long /* update of the total time/ETA */)) ) {
@@ -388,28 +397,37 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 				TrayIcon.popMessage(pluginManager, "Thaw",
 						    str, thaw.gui.SysTrayIcon.MSG_INFO);
 			}
+
 		}
 
+		if (o instanceof FCPTransferQuery) {
+			int oldPos = -1;
+			int i = 0;
 
-		int oldPos = -1;
-		int i = 0;
+			if (queries != null) {
+				oldPos = queries.indexOf(o);
+			}
 
-		if (queries != null && (i = queries.indexOf(o)) >= 0) {
-			oldPos = i;
+			sortTable();
+
+			if (queries != null && (i = queries.indexOf(o)) >= 0) {
+				if (oldPos != i && oldPos >= 0)
+					this.notifyObservers(oldPos);
+				this.notifyObservers(i);
+				return;
+			}
+
+
+			Logger.warning(this, "update(): unknow change");
+
+			try {
+				throw new Exception("meh");
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+
+			reloadQueue();
 		}
-
-		sortTable();
-
-		if (queries != null && (i = queries.indexOf(o)) >= 0) {
-			if (oldPos != i)
-				this.notifyObservers(oldPos);
-			this.notifyObservers(i);
-			return;
-		}
-
-
-		Logger.debug(this, "update(): unknow change");
-		reloadQueue();
 	}
 
 

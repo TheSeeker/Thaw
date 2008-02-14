@@ -1,6 +1,7 @@
 package thaw.plugins;
 
 import javax.swing.ImageIcon;
+import java.sql.*;
 
 import thaw.core.Core;
 import thaw.core.Logger;
@@ -113,10 +114,14 @@ public class WebOfTrust extends thaw.core.LibraryPlugin {
 	
 	private TrucMucheThread thread;
 	private TrustListUploader trustListUploader = null;
+	private TrustListDownloader trustListDownloader = null;
 	
 	private void initThread() {
 		trustListUploader = new TrustListUploader(db, core.getQueueManager(), core.getConfig());
+		trustListDownloader = new TrustListDownloader(db, core.getQueueManager(), core.getConfig());
+
 		trustListUploader.init();
+		trustListDownloader.init();
 
 		thread = new TrucMucheThread();
 		new ThawThread(thread, "WoT refresher", this).start();
@@ -125,6 +130,8 @@ public class WebOfTrust extends thaw.core.LibraryPlugin {
 	private void process() {
 		if (trustListUploader != null)
 			trustListUploader.process();
+		if (trustListDownloader != null)
+			trustListDownloader.process();
 	}
 	
 	private void stopThread() {
@@ -136,6 +143,11 @@ public class WebOfTrust extends thaw.core.LibraryPlugin {
 		if (trustListUploader != null) {
 			trustListUploader.stop();
 			trustListUploader = null;
+		}
+		
+		if (trustListDownloader != null) {
+			trustListDownloader.stop();
+			trustListDownloader = null;
 		}
 	}
 
@@ -184,8 +196,47 @@ public class WebOfTrust extends thaw.core.LibraryPlugin {
 		return null;
 	}
 	
-	public void addTrustList(Identity id, String publicKey) {
-		/* TODO */
+
+	public void addTrustList(Identity identity, String publicKey, java.util.Date dateOfTheKey) {
+		Logger.info(this, "Adding key to the WoT ...");
+		
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st = db.getConnection().prepareStatement("SELECT id, date FROM wotKeys WHERE publicKey = ? OR sigId = ? LIMIT 1");
+				st.setString(1, publicKey);
+				st.setInt(2, identity.getId());
+				
+				ResultSet set = st.executeQuery();
+				
+				if (set.next()) {
+					Timestamp date = set.getTimestamp("date");
+					int id = set.getInt("id");
+					
+					if (date.getTime() >= dateOfTheKey.getTime()) {
+						Logger.info(this, "We already know the key => ignored");
+						return;
+					}
+					
+					PreparedStatement up = db.getConnection().prepareStatement("UPDATE wotKeys SET publicKey = ?, date = ? WHERE id = ?");
+					up.setString(1, publicKey);
+					up.setTimestamp(2, new java.sql.Timestamp(dateOfTheKey.getTime()));
+					up.setInt(3, id);
+					up.execute();
+				}
+				else
+				{
+					PreparedStatement in = db.getConnection().prepareStatement("INSERT INTO wotKeys (publicKey, date, score, sigId) VALUES (?, ?, 0, ?)");
+					in.setString(1, publicKey);
+					in.setTimestamp(2, new java.sql.Timestamp(dateOfTheKey.getTime()));
+					in.setInt(3, identity.getId());
+					in.execute();
+					
+					/* TODO : the newly added identity may have a good mark from the WoT, so it would be interresting to refresh it immediatly */
+				}
+			}
+		} catch(SQLException e) {
+			Logger.error(this, "Error while adding a key to the list of trust list");
+		}
 	}
 
 	public void stop() {

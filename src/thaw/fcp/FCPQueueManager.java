@@ -515,7 +515,7 @@ public class FCPQueueManager extends java.util.Observable implements ThawRunnabl
 	public String getAnID() {
 		lastId++;
 
-		if(lastId >= 65535) {
+		if(lastId >= 2147483647 /* 2^31 - 1 */) {
 			lastId = 0;
 		}
 

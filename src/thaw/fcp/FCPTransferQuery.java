@@ -47,8 +47,14 @@ public abstract class FCPTransferQuery extends Observable implements FCPQuery {
 	private long startupTime = -1;
 	private long completionTime = -1;
 	
+	private String id;
 	
-	public FCPTransferQuery(boolean insertion) {
+	/**
+	 * @param id can be null if currently unknown
+	 * @param insertion
+	 */
+	protected FCPTransferQuery(String id, boolean insertion) {
+		setIdentifier(id);
 		this.insertion = insertion;
 
 		reliable = insertion;
@@ -56,6 +62,17 @@ public abstract class FCPTransferQuery extends Observable implements FCPQuery {
 		for (int i = 0 ; i < NMB_REMINDERS ; i++) {
 			transferedBlocksPast[i] = -1;
 		}
+	}
+	
+	protected void setIdentifier(String id) {
+		if (id == null || "".equals(id.trim()))
+			this.id = null;
+		else
+			this.id = id.trim();
+	}
+	
+	public String getIdentifier() {
+		return id;
 	}
 	
 	protected void setBlockNumbers(long required, long total, long transfered, boolean reliable) {
@@ -279,8 +296,17 @@ public abstract class FCPTransferQuery extends Observable implements FCPQuery {
 		notifyObservers(o);
 	}
 	
+	public boolean equals(Object o) {
+		if (o == this) return true;
+		if (!(o instanceof FCPTransferQuery)) return false;
+		if (getIdentifier() == null) return false;
+		if (((FCPTransferQuery)o).getIdentifier() == null) return false;
+		if (((FCPTransferQuery)o).getIdentifier() == getIdentifier()) return true;
+		
+		return getIdentifier().equals(((FCPTransferQuery)o).getIdentifier());
+	}
 	
-	/**** To implement : ****/
+	/**** To implement to implement a FCPTransferQuery: ****/
 	
 	
 	
@@ -396,13 +422,8 @@ public abstract class FCPTransferQuery extends Observable implements FCPQuery {
 	public abstract boolean setParameters(HashMap parameters);
 
 
-	public abstract boolean isPersistent();
 	public abstract boolean isGlobal();
-
-	/**
-	 * @return can be null (if non active, or meaningless).
-	 */
-	public abstract String getIdentifier();
+	public abstract boolean isPersistent();
 
 	public abstract String getFilename();
 

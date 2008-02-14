@@ -120,6 +120,8 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 			button = new JButton(I18n.getMessage("thaw.common.downloads"));
 			button.setIcon(IconBox.downloads);
 		}
+		
+		button.setEnabled(false);
 
 		button.setVerticalAlignment(SwingConstants.CENTER);
 		button.setHorizontalAlignment(SwingConstants.LEFT);
@@ -218,10 +220,18 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 		rightClickMenu.insert(item, 0);
 	}
 
-	public JButton getButton() {
-		return button;
+	public void addActionListenerToTheButton(ActionListener a) {
+		button.setEnabled(true);
+		button.addActionListener(a);
 	}
-
+	
+	public void removeActionListenerFromTheButton(ActionListener a) {
+		button.removeActionListener(a);
+		
+		if (button.getActionListeners() == null
+				|| button.getActionListeners().length == 0)
+			button.setEnabled(false);
+	}
 
 	public void reloadSelections() {
 		selectedRows = table.getSelectedRows();

@@ -36,7 +36,6 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 	private String status;
 
 	private int attempt = 0;
-	private String identifier;
 
 	private boolean fatal = true;
 	private boolean sending = false;
@@ -56,7 +55,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 	 * To resume query from file. (see thaw.core.QueueKeeper)
 	 */
 	public FCPClientPut(final FCPQueueManager queueManager, final HashMap parameters) {
-		super(true);
+		super((String)parameters.get("identifier"), true);
 
 		this.queueManager = queueManager;
 		setParameters(parameters);
@@ -85,7 +84,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 			    final String privateKey, final int priority,
 			    final boolean global, final int persistence,
 			    final boolean getCHKOnly) {
-		super(true);
+		super(null, true);
 
 		this.getCHKOnly = getCHKOnly;
 		localFile = file;
@@ -119,7 +118,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 		setBlockNumbers(-1, -1, -1, true);
 		attempt = 0;
 
-		identifier = null;
+		setIdentifier(null);
 		fatal = true;
 
 	}
@@ -132,7 +131,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 			    final int priority, final int persistence, final boolean global,
 			    final String filePath, final String fileName, final String status, final int progress,
 			    final long fileSize, final FCPQueueManager queueManager) {
-		super(true);
+		super(identifier, true);
 
 		if(fileSize > 0)
 			this.fileSize = fileSize;
@@ -140,7 +139,6 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 		toTheNodeProgress = 100;
 
 		this.queueManager = queueManager;
-		this.identifier = identifier;
 
 		if(publicKey.startsWith("CHK"))
 			keyType = KEY_TYPE_CHK;
@@ -175,7 +173,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 	public boolean start(final FCPQueueManager queueManager) {
 		this.queueManager = queueManager;
 		putFailedCode = -1;
-		identifier = null;
+		setIdentifier(null);
 
 		if((localFile != null) && (localFile.length() <= 0)) {
 			Logger.warning(this, "Empty or unreachable file:"+localFile.getPath());
@@ -202,10 +200,10 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 		if (queueManager.getQueryManager().getConnection().isLocalSocket() && localFile != null) {
 			status = "Computing hash to get approval from the node ...";
 
-			identifier = queueManager.getAnID() + "-"+ localFile.getName();
+			setIdentifier(queueManager.getAnID() + "-"+ localFile.getName());
 
 			String salt = queueManager.getQueryManager().getConnection().getClientHello().getConnectionId()
-				+"-"+ identifier
+				+"-"+ getIdentifier()
 				+"-";
 			Logger.info(this, "Salt used for this transfer: ~" + salt+ "~");
 
@@ -330,11 +328,11 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 
 		status = "Sending to the node";
 
-		if(identifier == null) { /* see start() ; when computing hash */
+		if(getIdentifier() == null) { /* see start() ; when computing hash */
 			if (localFile != null)
-				identifier = queueManager.getAnID() + "-"+ localFile.getName();
+				setIdentifier(queueManager.getAnID() + "-"+ localFile.getName());
 			else
-				identifier = queueManager.getAnID();
+				setIdentifier(queueManager.getAnID());
 		}
 
 		notifyChange();
@@ -353,7 +351,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 			}
 		}
 
-		msg.setValue("Identifier", identifier);
+		msg.setValue("Identifier", getIdentifier());
 		msg.setValue("MaxRetries", "-1");
 		msg.setValue("PriorityClass", Integer.toString(priority));
 
@@ -565,7 +563,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 
 			if((msg == null)
 			   || (msg.getValue("Identifier") == null)
-			   || !msg.getValue("Identifier").equals(identifier))
+			   || !msg.getValue("Identifier").equals(getIdentifier()))
 				return;
 
 			if("URIGenerated".equals( msg.getMessageName() )
@@ -808,7 +806,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 		if(isRunning() || isFinished()) {
 			final FCPMessage msg = new FCPMessage();
 			msg.setMessageName("RemovePersistentRequest");
-			msg.setValue("Identifier", identifier);
+			msg.setValue("Identifier", getIdentifier());
 
 			if(global)
 				msg.setValue("Global", "true");
@@ -836,7 +834,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 
 		msg.setMessageName("ModifyPersistentRequest");
 		msg.setValue("Global", Boolean.toString(global));
-		msg.setValue("Identifier", identifier);
+		msg.setValue("Identifier", getIdentifier());
 		msg.setValue("PriorityClass", Integer.toString(priority));
 
 		if(clientToken && (getPath() != null))
@@ -966,8 +964,8 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 		result.put("status", status);
 
 		result.put("attempt", Integer.toString(attempt));
-		if(identifier != null)
-			result.put("identifier", identifier);
+		if(getIdentifier() != null)
+			result.put("identifier", getIdentifier());
 		result.put("running", Boolean.toString(isRunning()));
 		result.put("successful", Boolean.toString(isSuccessful()));
 		result.put("finished", Boolean.toString(isFinished()));
@@ -1002,9 +1000,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 		status = (String)parameters.get("status");
 		attempt = Integer.parseInt((String)parameters.get("attempt"));
 
-		identifier = (String)parameters.get("identifier");
-		if((identifier == null) || identifier.equals(""))
-			identifier = null;
+		setIdentifier((String)parameters.get("identifier"));
 
 		boolean running = Boolean.valueOf((String)parameters.get("running")).booleanValue();
 		boolean successful = Boolean.valueOf((String)parameters.get("successful")).booleanValue();
@@ -1027,10 +1023,6 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 
 	public boolean isGlobal() {
 		return global;
-	}
-
-	public String getIdentifier() {
-		return identifier;
 	}
 
 	public String getPrivateKey() {
