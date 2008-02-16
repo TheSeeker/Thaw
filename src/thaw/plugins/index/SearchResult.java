@@ -108,11 +108,12 @@ public class SearchResult implements FileAndLinkList {
 			try {
 				PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("SELECT links.publicKey AS publicKey, "+
+				st = db.getConnection().prepareStatement("SELECT links.id AS id, " +
+														 " links.publicKey AS publicKey, "+
 														 " links.blackListed AS blacklisted," +
 														 " links.indexParent AS indexParent, "+
 														 " categories.name AS categoryName "+
-														 " FROM links OUTER JOIN categories "+
+														 " FROM links LEFT OUTER JOIN categories "+
 														 " ON links.category = categories.id "+
 														 "WHERE "+getWhereClause(false));
 				fillInStatement(st);

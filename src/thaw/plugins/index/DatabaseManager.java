@@ -186,11 +186,14 @@ public class DatabaseManager {
 			synchronized(db.dbLock) {
 				PreparedStatement st;
 				PreparedStatement countSt;
+				PreparedStatement countBisSt;
 				PreparedStatement deleteSt;
 
 				st = db.getConnection().prepareStatement("SELECT id FROM categories");
-				countSt = db.getConnection().prepareStatement("SELECT count(id) FROM indexes "+
-									      "WHERE categoryId = ?");
+				countSt = db.getConnection().prepareStatement("SELECT id FROM indexes "+
+									      "WHERE categoryId = ? LIMIT 1");
+				countBisSt = db.getConnection().prepareStatement("SELECT id FROM links "+
+										  "WHERE category = ? LIMIT 1");
 				deleteSt = db.getConnection().prepareStatement("DELETE FROM categories "+
 									       "WHERE id = ?");
 
@@ -202,11 +205,15 @@ public class DatabaseManager {
 					countSt.setInt(1, id);
 
 					ResultSet aSet = countSt.executeQuery();
-					aSet.next();
-
-					if (aSet.getInt(1) == 0) {
-						deleteSt.setInt(1, id);
-						deleteSt.execute();
+					
+					if (!aSet.next()) {
+						countBisSt.setInt(1, id);
+						aSet = countBisSt.executeQuery();
+						
+						if (!aSet.next()) {
+							deleteSt.setInt(1, id);
+							deleteSt.execute();
+						}
 					}
 				}
 			}

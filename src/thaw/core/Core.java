@@ -58,7 +58,7 @@ public class Core implements Observer {
 	public Core() {
 		isStopping = false;
 		Logger.info(this, "Thaw, version "+Main.VERSION, true);
-		Logger.info(this, "2006(c) Freenet project", true);
+		Logger.info(this, "2006-2008(c) Freenet project", true);
 		Logger.info(this, "Released under GPL license version 2 or later (see http://www.fsf.org/licensing/licenses/gpl.html)", true);
 	}
 

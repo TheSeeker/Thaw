@@ -52,7 +52,7 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 	private final static String unknownStr = I18n.getMessage("thaw.common.unknown");
 
 	public LinkTable (final FCPQueueManager queueManager, IndexBrowserPanel indexBrowser,
-			  Config config) {
+			  		Config config) {
 		this.indexBrowser = indexBrowser;
 
 		linkListModel = new LinkListModel();
@@ -105,6 +105,19 @@ public class LinkTable implements MouseListener, KeyListener, ActionListener {
 		toolbarModifier.addButtonToTheToolbar(button);
 		rightClickMenu.add(item);
 		rightClickActions.add(new LinkManagementHelper.LinkRemover(indexBrowser, item));
+		
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.editBlackList"));
+		rightClickMenu.add(item);
+		rightClickActions.add(new LinkManagementHelper.BlackListDisplayer(item, indexBrowser.getBlackList()));
+
+		item = new JMenuItem(I18n.getMessage("thaw.plugin.index.addToBlackList"), IconBox.minStop);
+		button = new JButton(IconBox.stop);
+		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addToBlackList"));
+		toolbarActions.add(new LinkManagementHelper.ToBlackListAdder(button, indexBrowser));
+		toolbarModifier.addButtonToTheToolbar(button);
+		rightClickMenu.add(item);
+		rightClickActions.add(new LinkManagementHelper.ToBlackListAdder(item, indexBrowser));
+
 
 		gotoItem = new JMenuItem(I18n.getMessage("thaw.plugin.index.gotoIndex"));
 		rightClickMenu.add(gotoItem);
