@@ -43,6 +43,7 @@ import java.text.DateFormat;
 import thaw.gui.IconBox;
 
 import thaw.core.Config;
+import thaw.core.PleaseWaitDialog;
 import thaw.core.ThawThread;
 import thaw.core.ThawRunnable;
 import thaw.gui.FileChooser;
@@ -709,7 +710,7 @@ public class IndexManagementHelper {
 		IndexFolder oldParent = (IndexFolder)index.getParent();
 
 		if (oldParent == dst) {
-			Logger.notice(new IndexManagementHelper(), "Index already sorted.");
+			Logger.notice(new IndexManagementHelper(), "Index '"+index.toString()+"'already sorted.");
 			return false;
 		}
 
@@ -727,16 +728,23 @@ public class IndexManagementHelper {
 		return true;
 	}
 
+	public static boolean autoSortIndexes(IndexBrowserPanel indexBrowser,
+										IndexTreeNode node,
+										MainWindow mainWindow) {
+		return autoSortIndexes(indexBrowser, node, mainWindow, true);
+	}
+	
 
 	public static boolean autoSortIndexes(IndexBrowserPanel indexBrowser,
-					      IndexTreeNode node) {
+					      				IndexTreeNode node, MainWindow mainWindow,
+					      				boolean showDialog) {
 		if (node instanceof Index) {
 			String cat = ((Index)node).getCategory();
 
 			if (cat != null)
 				return autoSortIndex(indexBrowser, (Index)node, cat);
 			else
-				Logger.notice(indexBrowser, "No category ; can't sort");
+				Logger.notice(indexBrowser, "No category for '"+((Index)node).toString()+"'; can't sort");
 
 		} else if (node instanceof IndexFolder) {
 
@@ -745,15 +753,23 @@ public class IndexManagementHelper {
 			if (folder == null || "".equals(folder.toString())) {
 				return false;
 			}
+			
+			PleaseWaitDialog dialog = null;
+			
+			if (showDialog)
+				dialog = new PleaseWaitDialog(mainWindow);
 
 			for (java.util.Enumeration children = folder.children();
 			     children.hasMoreElements();) {
 
 				/* dirty recursivity */
 				IndexTreeNode subNode = (IndexTreeNode)children.nextElement();
-				autoSortIndexes(indexBrowser, subNode);
+				autoSortIndexes(indexBrowser, subNode, null, false);
 
 			}
+			
+			if (showDialog && dialog != null)
+				dialog.dispose();
 		}
 
 		return true;
@@ -761,10 +777,9 @@ public class IndexManagementHelper {
 
 
 	public static boolean autoSortIndex(IndexBrowserPanel indexBrowser,
-					    Index index,
-					    String cat) {
+										Index index, String cat) {
 		if (cat == null) {
-			Logger.warning(new IndexManagementHelper(), "No category ; Can't sort the index");
+			Logger.info(new IndexManagementHelper(), "No category ; Can't sort the index");
 			return false;
 		}
 
@@ -805,7 +820,8 @@ public class IndexManagementHelper {
 			}
 
 			autoSortIndexes(getIndexBrowserPanel(),
-					(IndexTreeNode)getTarget());
+							(IndexTreeNode)getTarget(),
+							getIndexBrowserPanel().getMainWindow());
 		}
 	}
 

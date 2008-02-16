@@ -11,10 +11,6 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JLabel;
-import java.awt.Dimension;
-import java.awt.Toolkit;
-
 import thaw.gui.TabbedPane;
 import thaw.gui.IconBox;
 
@@ -237,35 +233,10 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 		}
 
 		public void apply() {
-			JDialog dialog = null;
+			PleaseWaitDialog dialog = null;
 
 			if (resetConnection) {
-				dialog = new JDialog(core.getMainWindow().getMainFrame(),
-						     " "+I18n.getMessage("thaw.common.pleaseWait"));
-
-				dialog.getContentPane().setLayout(new GridLayout(1, 1));
-				dialog.getContentPane().add(new JLabel(I18n.getMessage("thaw.common.pleaseWait"),
-								       JLabel.CENTER));
-
-				//dialog.setUndecorated(true);
-				dialog.setResizable(false);
-
-				dialog.setSize(150, 30);
-
-				Dimension screenSize =
-					Toolkit.getDefaultToolkit().getScreenSize();
-
-				Dimension dialogSize = dialog.getSize();
-				dialog.setLocation(screenSize.width/2 - (dialogSize.width/2),
-						   screenSize.height/2 - (dialogSize.height/2));
-
-				dialog.setVisible(true);
-
-				dialog.setSize(150, 30);
-
-				dialogSize = dialog.getSize();
-				dialog.setLocation(screenSize.width/2 - (dialogSize.width/2),
-						   screenSize.height/2 - (dialogSize.height/2));
+				dialog = new PleaseWaitDialog(core.getMainWindow());
 			}
 
 			/* Imply a whole reset => all the plugins will be reloaded
@@ -284,7 +255,7 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 									   " "+core.getConfig().getValue("nodeAddress")+
 									   ":"+ core.getConfig().getValue("nodePort"));
 					else
-						new thaw.gui.WarningWindow(dialog,
+						new thaw.gui.WarningWindow(dialog.getDialog(),
 									   I18n.getMessage("thaw.warning.unableToConnectTo")+
 									   " "+core.getConfig().getValue("nodeAddress")+
 									   ":"+ core.getConfig().getValue("nodePort"));
@@ -305,7 +276,6 @@ public class ConfigWindow extends Observable implements ActionListener, java.awt
 			}
 
 			if (resetConnection) {
-				dialog.setVisible(false);
 				dialog.dispose();
 			}
 		}
