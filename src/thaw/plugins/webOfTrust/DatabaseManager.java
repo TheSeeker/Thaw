@@ -35,11 +35,22 @@ public class DatabaseManager {
 		sendQuery(db, "CREATE CACHED TABLE wotKeys ("
 				+ "id INTEGER IDENTITY NOT NULL, "
 				+ "publicKey VARCHAR(400) NOT NULL, "
-				+ "date TIMESTAMP NOT NULL, "
+				+ "keyDate TIMESTAMP NOT NULL, "
 				+ "score SMALLINT NOT NULL, "
 				+ "sigId INTEGER NOT NULL, "
+				+ "lastDownload TIMESTAMP DEFAULT NULL NULL, "
+				+ "lastUpdate TIMESTAMP DEFAULT NULL NULL, "
 				+ "PRIMARY KEY(id), "
 				+ "FOREIGN KEY(sigId) REFERENCES signatures (id))");
+		
+		sendQuery(db, "CREATE CACHED TABLE wotTrustLists ("
+				+ "id INTEGER IDENTITY NOT NULL, "
+				+ "source INTEGER NOT NULL, "
+				+ "destination INTEGER NOT NULL, "
+				+ "trustLevel SMALLINT NOT NULL, "
+				+ "PRIMARY KEY(id), "
+				+ "FOREIGN KEY(source) REFERENCES signatures (id), "
+				+ "FOREIGN KEY(destination) REFERENCES signatures(id))");
 	}
 	
 	/**

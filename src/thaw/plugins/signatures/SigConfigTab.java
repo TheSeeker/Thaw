@@ -639,6 +639,10 @@ public class SigConfigTab implements ActionListener, Observer {
 			Identity id = Identity.getIdentity(db, importedId.getNick(), importedId.getPublicKey(), true /* create if doesn't exist */);
 			id.setTrustLevel(importedId.getTrustLevel());
 		}
+
+		public void start() { }
+
+		public void end() { }
 	}
 
 

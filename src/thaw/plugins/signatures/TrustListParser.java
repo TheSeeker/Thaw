@@ -150,12 +150,16 @@ public class TrustListParser {
 	/*********************** IMPORT ****************************************/
 	
 	public static interface TrustListContainer {
+		public void start();
+		
 		/**
 		 * Identity is used here just as a container.
 		 * no ref to the db was provided to these identity
 		 * @param i
 		 */
 		public void updateIdentity(Identity i);
+		
+		public void end();
 	}
 
 
@@ -167,10 +171,17 @@ public class TrustListParser {
 		private TrustListContainer container;
 		
 		public TrustListHandler(TrustListContainer container) {
+			setTrustListContainer(container);
+		}
+		
+		protected void setTrustListContainer(TrustListContainer container) {
 			this.container = container;
 		}
 		
-		public void startDocument() throws SAXException {	}
+		public void startDocument() throws SAXException {
+			if (container != null)
+				container.start();
+		}
 		
 		private boolean nickTag = false;
 		private boolean publicKeyTag = false;
@@ -220,7 +231,7 @@ public class TrustListParser {
 				return;
 
 			if ("identity".equals(rawName)) {
-				if (nick != null && publicKey != null && trustLevel != null) {
+				if (nick != null && publicKey != null && trustLevel != null && container != null) {
 					Identity i = new Identity(null, -1, nick, publicKey, null, false, Integer.parseInt(trustLevel)/10);
 					container.updateIdentity(i);
 				}
@@ -246,7 +257,8 @@ public class TrustListParser {
 		}
 		
 		public void endDocument() throws SAXException {
-
+			if (container != null)
+				container.end();
 		}
 	}
 

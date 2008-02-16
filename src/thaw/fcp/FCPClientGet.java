@@ -82,10 +82,10 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 	 *                       this file will be deleted on jvm exit)
 	 */
 	protected FCPClientGet(final String id, final String key, final int priority,
-			    final int persistence, final boolean globalQueue,
-			    final String destinationDir, String status,
-			    final int maxRetries,
-			    final FCPQueueManager queueManager) {
+			    			final int persistence, final boolean globalQueue,
+			    			final String destinationDir, String status,
+			    			final int maxRetries,
+			    			final FCPQueueManager queueManager) {
 
 		this(key, priority, persistence, globalQueue, maxRetries, destinationDir);
 

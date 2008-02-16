@@ -2,7 +2,6 @@ package thaw.plugins.webOfTrust;
 
 import thaw.plugins.Hsqldb;
 import thaw.plugins.Signatures;
-import thaw.plugins.WebOfTrust;
 import thaw.plugins.signatures.Identity;
 import thaw.plugins.signatures.TrustListParser;
 
@@ -34,6 +33,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class TrustListUploader implements Signatures.SignaturesObserver, Observer {
+	public final static long UPLOAD_AFTER_MS = 10*60*1000; /* 10 min */ 
+
 	private final FCPQueueManager queueManager;
 	private final Config config;
 	private final Hsqldb db;
@@ -125,7 +126,7 @@ public class TrustListUploader implements Signatures.SignaturesObserver, Observe
 		if (lastUpload.compareTo(lastTrustChange) < 0) {
 		
 			/* last change was done more than UPLOAD_AFTER_MS ms (for example 30min) */
-			if (new Date().getTime() - lastTrustChange.getTime() >= WebOfTrust.UPLOAD_AFTER_MS)
+			if (new Date().getTime() - lastTrustChange.getTime() >= UPLOAD_AFTER_MS)
 				return true;
 			
 		}
@@ -250,7 +251,7 @@ public class TrustListUploader implements Signatures.SignaturesObserver, Observe
 		
 		if (mustUpload() && hasSomethingToUpload()) {
 			
-			Logger.notice(this, "Uploading your trust list ...");
+			Logger.notice(this, "MARK : Uploading your trust list ...");
 			
 			try {
 				File file = File.createTempFile("thaw-", "-trustList.xml");
@@ -327,6 +328,7 @@ public class TrustListUploader implements Signatures.SignaturesObserver, Observe
 		
 				upload.deleteObserver(this);
 				
+				upload.stop(queueManager);
 				queueManager.remove(upload);
 				
 				if (upload.isSuccessful()) {

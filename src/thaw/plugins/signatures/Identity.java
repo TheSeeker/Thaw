@@ -90,8 +90,7 @@ public class Identity {
 	private static FrostCrypt frostCrypt;
 
 
-	private Identity() {
-	}
+	protected Identity() { }
 
 
 	/**
@@ -128,6 +127,10 @@ public class Identity {
 	
 	protected void setDb(Hsqldb db) {
 		this.db = db;
+	}
+	
+	public Hsqldb getDb() {
+		return db;
 	}
 
 	protected void setId(int id) {
@@ -176,7 +179,7 @@ public class Identity {
 			return I18n.getMessage("thaw.plugin.signature.trustLevel.me");
 		}
 
-		return getTrustLevelStr(trustLevel);
+		return getTrustLevelStr(getTrustLevel());
 	}
 
 	public static String getTrustLevelStr(int trustLevel) {
@@ -309,6 +312,9 @@ public class Identity {
 					   String nick,
 					   String publicKey,
 					   boolean create) {
+		if (nick == null || publicKey == null)
+			return null;
+		
 		try {
 			synchronized(db.dbLock) {
 				PreparedStatement st;

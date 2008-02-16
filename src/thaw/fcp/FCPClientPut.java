@@ -558,7 +558,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 			return;
 		}
 
-		if(o == queueManager.getQueryManager()) {
+		if (param != null && param instanceof FCPMessage) {
 			final FCPMessage msg = (FCPMessage)param;
 
 			if((msg == null)

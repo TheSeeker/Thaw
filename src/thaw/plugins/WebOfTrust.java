@@ -15,8 +15,6 @@ import thaw.plugins.signatures.Identity;
 import thaw.plugins.webOfTrust.*;
 
 public class WebOfTrust extends thaw.core.LibraryPlugin {
-	public final static long UPLOAD_AFTER_MS = 30*60*1000; /* 30 min */ 
-	
 	private Core core;
 	private Hsqldb db;
 	private Signatures sigs;
@@ -165,6 +163,8 @@ public class WebOfTrust extends thaw.core.LibraryPlugin {
 		if (!loadDeps(core))
 			return false;
 		
+		DatabaseManager.init(db, core.getConfig(), core.getSplashScreen());
+		
 		configTab = new WebOfTrustConfigTab(core.getConfigWindow(),
 											core.getConfig(), db);
 
@@ -172,7 +172,9 @@ public class WebOfTrust extends thaw.core.LibraryPlugin {
 			      thaw.gui.IconBox.minTrust,
 			      configTab.getPanel());
 		
-		initThread();
+		if (core.getConfig().getValue("wotActivated") == null
+				|| Boolean.valueOf(core.getConfig().getValue("wotActivated")).booleanValue())
+				initThread();
 
 		return true;
 	}
@@ -198,18 +200,21 @@ public class WebOfTrust extends thaw.core.LibraryPlugin {
 	
 
 	public void addTrustList(Identity identity, String publicKey, java.util.Date dateOfTheKey) {
+		if (identity.getPrivateKey() != null)
+			return;
+		
 		Logger.info(this, "Adding key to the WoT ...");
 		
 		try {
 			synchronized(db.dbLock) {
-				PreparedStatement st = db.getConnection().prepareStatement("SELECT id, date FROM wotKeys WHERE publicKey = ? OR sigId = ? LIMIT 1");
+				PreparedStatement st = db.getConnection().prepareStatement("SELECT id, keyDate FROM wotKeys WHERE publicKey = ? OR sigId = ? LIMIT 1");
 				st.setString(1, publicKey);
 				st.setInt(2, identity.getId());
 				
 				ResultSet set = st.executeQuery();
 				
 				if (set.next()) {
-					Timestamp date = set.getTimestamp("date");
+					Timestamp date = set.getTimestamp("keyDate");
 					int id = set.getInt("id");
 					
 					if (date.getTime() >= dateOfTheKey.getTime()) {
@@ -217,26 +222,27 @@ public class WebOfTrust extends thaw.core.LibraryPlugin {
 						return;
 					}
 					
-					PreparedStatement up = db.getConnection().prepareStatement("UPDATE wotKeys SET publicKey = ?, date = ? WHERE id = ?");
+					PreparedStatement up = db.getConnection().prepareStatement("UPDATE wotKeys SET publicKey = ?, keyDate = ?, lastUpdate = ? WHERE id = ?");
 					up.setString(1, publicKey);
 					up.setTimestamp(2, new java.sql.Timestamp(dateOfTheKey.getTime()));
-					up.setInt(3, id);
+					up.setNull(3, Types.TIMESTAMP);
+					up.setInt(4, id);
 					up.execute();
 				}
 				else
 				{
-					PreparedStatement in = db.getConnection().prepareStatement("INSERT INTO wotKeys (publicKey, date, score, sigId) VALUES (?, ?, 0, ?)");
+					PreparedStatement in = db.getConnection().prepareStatement("INSERT INTO wotKeys (publicKey, keyDate, score, sigId) VALUES (?, ?, 0, ?)");
 					in.setString(1, publicKey);
 					in.setTimestamp(2, new java.sql.Timestamp(dateOfTheKey.getTime()));
 					in.setInt(3, identity.getId());
 					in.execute();
-					
-					/* TODO : the newly added identity may have a good mark from the WoT, so it would be interresting to refresh it immediatly */
 				}
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Error while adding a key to the list of trust list");
 		}
+		
+		trustListDownloader.startULPR(publicKey, identity);
 	}
 
 	public void stop() {
