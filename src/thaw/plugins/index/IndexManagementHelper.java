@@ -247,6 +247,7 @@ public class IndexManagementHelper {
 						st.setNull(11, Types.INTEGER);
 
 					st.execute();
+					st.close();
 
 					index = new Index(db, getIndexBrowserPanel().getConfig(),
 							  id, (TreeNode)getTarget(),
@@ -469,6 +470,7 @@ public class IndexManagementHelper {
 					st.setNull(10, Types.INTEGER);
 
 				st.execute();
+				st.close();
 
 				index = new Index(db, indexBrowser.getConfig(),
 						  id, parent,
@@ -555,6 +557,7 @@ public class IndexManagementHelper {
 					st.setNull(5, Types.INTEGER);
 
 				st.execute();
+				st.close();
 
 				folder = new IndexFolder(indexBrowser.getDb(), indexBrowser.getConfig(),
 							 nextId, target, name, false);
@@ -1277,9 +1280,12 @@ public class IndexManagementHelper {
 									 " ?, ?, ?, "+
 									 " ?, ?, TRUE)");
 				nextId = DatabaseManager.getNextId(db, "files");
-
-				if (nextId < 0)
+				
+				if (nextId < 0) {
+					selectSt.close();
+					st.close();
 					return;
+				}
 			} catch(SQLException e) {
 				Logger.error(new IndexManagementHelper(), "Exception while trying to add file: "+e.toString());
 				return;
@@ -1326,6 +1332,13 @@ public class IndexManagementHelper {
 				} catch(SQLException e) {
 					Logger.error(new IndexManagementHelper(), "Error while adding file: "+e.toString());
 				}
+			}
+			
+			try {
+				selectSt.close();
+				st.close();
+			} catch(SQLException e) {
+				/* \_o< */
 			}
 		}
 
@@ -1467,8 +1480,11 @@ public class IndexManagementHelper {
 									 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, TRUE)");
 				nextId = DatabaseManager.getNextId(db, "files");
 
-				if (nextId < 0)
+				if (nextId < 0) {
+					preSt.close();
+					st.close();
 					return;
+				}
 			} catch(SQLException e) {
 				Logger.error(new IndexManagementHelper(), "Exception while trying to add file: "+e.toString());
 				return;
@@ -1514,6 +1530,13 @@ public class IndexManagementHelper {
 				} catch(SQLException e) {
 					Logger.error(new IndexManagementHelper(), "Error while adding file: "+e.toString());
 				}
+			}
+
+			try {
+				preSt.close();
+				st.close();
+			} catch(SQLException e) {
+				/* \_o< */
 			}
 		}
 
@@ -1573,6 +1596,7 @@ public class IndexManagementHelper {
 					st.setNull(7, Types.INTEGER);
 
 				st.execute();
+				st.close();
 			} catch(SQLException e) {
 				Logger.error(new IndexManagementHelper(), "Error while adding link: "+e.toString());
 			}
@@ -1866,16 +1890,19 @@ public class IndexManagementHelper {
 							rs = st.executeQuery();
 							rs.next();
 							nmbFilesInt = rs.getInt(1);
+							st.close();
 
 							st = db.getConnection().prepareStatement("SELECT count(id) from links");
 							rs = st.executeQuery();
 							rs.next();
 							nmbLinksInt = rs.getInt(1);
+							st.close();
 
 							st = db.getConnection().prepareStatement("SELECT sum(size) from files");
 							rs = st.executeQuery();
 							rs.next();
 							totalSize = rs.getLong(1);
+							st.close();
 						} else {
 							st = db.getConnection().prepareStatement("SELECT count(id) "+
 												 "FROM files WHERE files.indexParent IN "+
@@ -1887,7 +1914,7 @@ public class IndexManagementHelper {
 							rs = st.executeQuery();
 							rs.next();
 							nmbFilesInt = rs.getInt(1);
-
+							st.close();
 
 							st = db.getConnection().prepareStatement("SELECT count(id) "+
 												 "FROM links WHERE links.indexParent IN "+
@@ -1898,7 +1925,7 @@ public class IndexManagementHelper {
 							rs = st.executeQuery();
 							rs.next();
 							nmbLinksInt = rs.getInt(1);
-
+							st.close();
 
 							st = db.getConnection().prepareStatement("SELECT sum(files.size) "+
 												 "FROM files WHERE files.indexParent IN "+
@@ -1910,13 +1937,14 @@ public class IndexManagementHelper {
 							rs = st.executeQuery();
 							rs.next();
 							totalSize = rs.getLong(1);
-
+							st.close();
 						}
 
 						insertionDate = null;
 
 
 					} else if (node instanceof Index) {
+						/* mode lazy bastard => on */
 						thaw.plugins.index.File[] files = ((Index)node).getFileList(null, true);
 
 						nmbFilesInt = files.length;

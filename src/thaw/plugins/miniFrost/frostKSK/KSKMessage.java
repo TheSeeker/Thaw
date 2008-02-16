@@ -309,6 +309,7 @@ public class KSKMessage
 				st.setInt(2, id);
 
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Can't update read status because : "+e.toString());
@@ -334,6 +335,7 @@ public class KSKMessage
 				st.setInt(2, id);
 
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Can't update archived status because : "+e.toString());
@@ -411,10 +413,14 @@ public class KSKMessage
 
 				ResultSet set = st.executeQuery();
 
-				if (!set.next())
+				if (!set.next()) {
+					st.close();
 					return null;
+				}
 
-				return set.getString("content");
+				String s = set.getString("content");
+				st.close();
+				return s;
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Error while getting the messages : "+e.toString());
@@ -473,10 +479,14 @@ public class KSKMessage
 
 				ResultSet set = st.executeQuery();
 
-				if (!set.next())
+				if (!set.next()) {
+					st.close();
 					return null;
+				}
 
 				content = set.getString("content");
+				
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Error while getting the messages : "+e.toString());
@@ -547,11 +557,13 @@ public class KSKMessage
 				st = db.getConnection().prepareStatement("UPDATE frostKSKMessages SET "+
 									 "inReplyTo = NULL");
 				st.execute();
+				st.close();
 
 				st = db.getConnection().prepareStatement("DELETE FROM frostKSKMessages "+
 									 "WHERE boardId = ?");
 				st.setInt(1, board.getId());
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(null, "Can't destroy the board messages because : "+e.toString());
@@ -577,11 +589,13 @@ public class KSKMessage
 									 "inReplyTo = NULL WHERE inReplyTo = ?");
 				st.setInt(1, id);
 				st.execute();
+				st.close();
 
 				st = db.getConnection().prepareStatement("DELETE FROM frostKSKMessages "+
 									 "WHERE id = ?");
 				st.setInt(1, id);
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(null, "Can't destroy the message "+Integer.toString(id)+" because : "+e.toString());

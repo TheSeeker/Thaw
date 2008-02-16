@@ -246,22 +246,26 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 						result = st.getResultSet();
 					else {
 						addToConsole("Ok\n");
+						st.close();
 						return;
 					}
 				} else {
 					thaw.plugins.index.DatabaseManager.dropTables(hsqldb);
 					thaw.plugins.TransferLogs.dropTables(hsqldb);
 					addToConsole("Ok\n");
+					st.close();
 					return;
 				}
 
 				if(result == null) {
 					addToConsole("(null)\n");
+					st.close();
 					return;
 				}
 
 				if(result.getFetchSize() == 0) {
 					addToConsole("(done)\n");
+					st.close();
 					return;
 				}
 
@@ -317,6 +321,8 @@ public class SqlConsole implements Plugin, java.awt.event.ActionListener {
 					}
 					addToConsole("\n");
 				}
+				
+				st.close();
 			}
 
 		} catch(final java.sql.SQLException e) {

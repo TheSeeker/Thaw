@@ -59,9 +59,12 @@ public class IndexRoot extends IndexFolder implements IndexTreeNode {
 
 					ResultSet set = select.executeQuery();
 
-					if (!set.next())
+					if (!set.next()) {
 						break;
+					}
 				}
+				
+				select.close();
 			} catch(SQLException e) {
 				Logger.error(this, "Unable to find a name for the import folder !");
 				return null;

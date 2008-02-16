@@ -181,6 +181,8 @@ public class Index extends Observable implements MutableTreeNode,
 				st.setInt(2, id);
 
 				st.execute();
+				
+				st.close();
 
 
 				if (parentId >= 0) {
@@ -191,6 +193,7 @@ public class Index extends Observable implements MutableTreeNode,
 					st.setInt(2, parentId);
 
 					st.execute();
+					st.close();
 				} /* else this parent has no parent ... :) */
 
 				st = db.getConnection().prepareStatement("INSERT INTO indexParents (indexId, folderId) "+
@@ -203,6 +206,8 @@ public class Index extends Observable implements MutableTreeNode,
 					st.setNull(2, Types.INTEGER);
 
 				st.execute();
+				
+				st.close();
 			} catch(SQLException e) {
 				Logger.error(this, "Error while changing parent : "+e.toString());
 			}
@@ -227,6 +232,7 @@ public class Index extends Observable implements MutableTreeNode,
 									 "WHERE indexId = ?");
 				st.setInt(1, id);
 				st.execute();
+				st.close();
 
 			} catch(SQLException e) {
 				Logger.error(this, "Error while removing the index: "+e.toString());
@@ -271,6 +277,8 @@ public class Index extends Observable implements MutableTreeNode,
 				st.setString(1, name);
 				st.setInt(2, id);
 				st.execute();
+				
+				st.close();
 
 			} catch(final SQLException e) {
 				Logger.error(this, "Unable to rename the index in '"+name+"', because: "+e.toString());
@@ -297,6 +305,8 @@ public class Index extends Observable implements MutableTreeNode,
 									 "WHERE indexId = ?");
 				st.setInt(1, id);
 				st.execute();
+				
+				st.close();
 
 				Logger.notice(this, "DELETING AN INDEX");
 
@@ -304,6 +314,8 @@ public class Index extends Observable implements MutableTreeNode,
 				st = db.getConnection().prepareStatement("DELETE FROM indexes WHERE id = ?");
 				st.setInt(1, id);
 				st.execute();
+				
+				st.close();
 			} catch(SQLException e) {
 				Logger.error(this, "Unable to delete the index because : "+e.toString());
 			}
@@ -333,6 +345,8 @@ public class Index extends Observable implements MutableTreeNode,
 
 				st.setInt(1, getId());
 				st.execute();
+				
+				st.close();
 			} catch(final SQLException e) {
 				Logger.error(this, "Unable to purge da list ! Exception: "+e.toString());
 			}
@@ -358,6 +372,8 @@ public class Index extends Observable implements MutableTreeNode,
 					st = c.prepareStatement("DELETE FROM files WHERE indexParent = ? AND dontDelete = FALSE");
 				st.setInt(1, getId());
 				st.execute();
+				
+				st.close();
 			} catch(final SQLException e) {
 				Logger.error(this, "Unable to purge da list ! Exception: "+e.toString());
 			}
@@ -397,9 +413,11 @@ public class Index extends Observable implements MutableTreeNode,
 					hasChanged = set.getBoolean("newRev");
 					newComment = set.getBoolean("newComment");
 					date = set.getDate("insertionDate");
+					st.close();
 					return true;
 				} else {
 					Logger.error(this, "Unable to find index "+Integer.toString(id)+" in the database ?!");
+					st.close();
 					return false;
 				}
 			} catch (final SQLException e) {
@@ -475,6 +493,7 @@ public class Index extends Observable implements MutableTreeNode,
 				st.setBoolean(1, val);
 				st.setInt(2, id);
 				st.execute();
+				st.close();
 			}
 
 			publishPrivateKey = val;
@@ -513,6 +532,7 @@ public class Index extends Observable implements MutableTreeNode,
 				st.setInt(3, id);
 
 				st.execute();
+				st.close();
 
 
 				/* we update also all the links in the index with the private key */
@@ -538,6 +558,9 @@ public class Index extends Observable implements MutableTreeNode,
 						updateLinkSt.execute();
 					}
 				}
+				
+				st.close();
+				updateLinkSt.close();
 
 			} catch(SQLException e) {
 				Logger.error(this, "Unable to set public Key because: "+e.toString());
@@ -568,6 +591,7 @@ public class Index extends Observable implements MutableTreeNode,
 				st.setInt(2, indexId);
 
 				st.execute();
+				st.close();
 			} catch(SQLException e) {
 				Logger.error(new Index(), "Unable to set private Key because: "+e.toString());
 			}
@@ -591,9 +615,11 @@ public class Index extends Observable implements MutableTreeNode,
 
 				if (set.next()) {
 					realName = set.getString("originalName");
+					st.close();
 					return realName;
 				} else {
 					Logger.error(this, "Unable to get index real name: not found");
+					st.close();
 					return null;
 				}
 			} catch(SQLException e) {
@@ -651,6 +677,8 @@ public class Index extends Observable implements MutableTreeNode,
 					ResultSet set = st.executeQuery();
 
 					if (!set.next()) {
+						st.close();
+						
 						/* no link ?! we will warn the user */
 
 						int ret =
@@ -667,7 +695,8 @@ public class Index extends Observable implements MutableTreeNode,
 						    || ret == JOptionPane.NO_OPTION) {
 							return 0;
 						}
-					}
+					} else
+						st.close();
 
 				} catch(SQLException e) {
 					Logger.error(this, "Error while checking the link number before insertion : "+e.toString());
@@ -757,17 +786,22 @@ public class Index extends Observable implements MutableTreeNode,
 
 
 			try {
-				PreparedStatement st;
+				synchronized(db.dbLock) {
+					PreparedStatement st;
 
-				String query = "UPDATE # SET dontDelete = FALSE WHERE indexParent = ?";
+					String query = "UPDATE # SET dontDelete = FALSE WHERE indexParent = ?";
 
-				st = db.getConnection().prepareStatement(query.replaceFirst("#", "files"));
-				st.setInt(1, id);
-				st.execute();
+					st = db.getConnection().prepareStatement(query.replaceFirst("#", "files"));
+					st.setInt(1, id);
+					st.execute();
+					st.close();
 
-				st = db.getConnection().prepareStatement(query.replaceFirst("#", "links"));
-				st.setInt(1, id);
-				st.execute();
+					st = db.getConnection().prepareStatement(query.replaceFirst("#", "links"));
+					st.setInt(1, id);
+					st.execute();
+
+					st.close();
+				}
 
 			} catch(SQLException e) {
 				Logger.error(this, "Error while reseting dontDelete flags: "+e.toString());
@@ -1008,6 +1042,7 @@ public class Index extends Observable implements MutableTreeNode,
 							st.setInt(2, id);
 
 							st.execute();
+							st.close();
 						}
 					} catch(SQLException e) {
 						Logger.error(this, "Error while updating the insertion date : "+e.toString());
@@ -1102,6 +1137,7 @@ public class Index extends Observable implements MutableTreeNode,
 				st.setInt(2, id);
 
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Error while updating index insertion date: "+e.toString());
@@ -1128,6 +1164,8 @@ public class Index extends Observable implements MutableTreeNode,
 				while (set.next()) {
 					v.add(new Integer(set.getInt("rev")));
 				}
+				
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to get comment black list  because: "+e.toString());
@@ -1147,7 +1185,7 @@ public class Index extends Observable implements MutableTreeNode,
 				st.setInt(2, id);
 
 				st.execute();
-
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Error while adding element to the blackList: "+e.toString());
@@ -1197,6 +1235,8 @@ public class Index extends Observable implements MutableTreeNode,
 									    localPath, mime, size, id, this);
 					files.add(file);
 				}
+				
+				st.close();
 
 				return (File[])files.toArray(new File[0]);
 
@@ -1229,6 +1269,7 @@ public class Index extends Observable implements MutableTreeNode,
 				st.setInt(5, id);
 
 				st.execute();
+				st.close();
 
 				return true;
 			}
@@ -1274,6 +1315,8 @@ public class Index extends Observable implements MutableTreeNode,
 							  this);
 					links.add(l);
 				}
+				
+				st.close();
 
 				return (Link[])links.toArray(new Link[0]);
 
@@ -1329,6 +1372,7 @@ public class Index extends Observable implements MutableTreeNode,
 					st.setNull(5, Types.INTEGER);
 
 				st.execute();
+				st.close();
 
 				return true;
 			}
@@ -1362,9 +1406,12 @@ public class Index extends Observable implements MutableTreeNode,
 						String key = FreenetURIHelper.changeUSKRevision(oKey,
 												set.getInt("revision"),
 												0);
+						st.close();
 						return key;
 					}
 				}
+				
+				st.close();
 			} catch(SQLException e) {
 				Logger.error(this, "Can't find the latest key of a link because : "+e.toString());
 			}
@@ -1415,16 +1462,23 @@ public class Index extends Observable implements MutableTreeNode,
 						String pubKey = res.getString("publicKey").replaceAll(".xml", ".frdx");
 
 						if (FreenetURIHelper.compareKeys(pubKey, key)) {
-							return res.getInt("id");
+							int r = res.getInt("id");
+							st.close();
+							return r;
 						}
 					}
 
+					st.close();
 					return -1;
 				} else {
-					if (!res.next())
+					if (!res.next()) {
+						st.close();
 						return -1;
-
-					return res.getInt("id");
+					}
+					
+					int r = res.getInt("id");
+					st.close();
+					return r;
 				}
 
 			} catch(final SQLException e) {
@@ -1487,8 +1541,12 @@ public class Index extends Observable implements MutableTreeNode,
 
 				st.setBoolean(1, flag);
 				st.setInt(2, id);
-				if (st.executeUpdate() > 0)
+				if (st.executeUpdate() > 0) {
+					st.close();
 					return true;
+				}
+				
+				st.close();
 				return false;
 			} catch(SQLException e) {
 				Logger.error(this, "Unable to change 'hasChanged' flag because: "+e.toString());
@@ -1514,8 +1572,12 @@ public class Index extends Observable implements MutableTreeNode,
 
 				st.setBoolean(1, flag);
 				st.setInt(2, id);
-				if (st.executeUpdate() > 0)
+				if (st.executeUpdate() > 0) {
+					st.close();
 					return true;
+				}
+				
+				st.close();
 				return false;
 			} catch(SQLException e) {
 				Logger.error(this, "Unable to change 'newComment' flag because: "+e.toString());
@@ -1565,10 +1627,16 @@ public class Index extends Observable implements MutableTreeNode,
 				st.setInt(1, id);
 
 				ResultSet set = st.executeQuery();
+				
+				String r = null;
 
-				if (set != null && set.next())
-					return set.getString("publicKey");
-
+				if (set != null && set.next()) {
+					r = set.getString("publicKey");
+				}
+				
+				st.close();
+				
+				return r;
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to get comment public key because : "+e.toString());
@@ -1590,10 +1658,15 @@ public class Index extends Observable implements MutableTreeNode,
 				st.setInt(1, id);
 
 				ResultSet set = st.executeQuery();
+				
+				String r = null;
 
 				if (set != null && set.next())
-					return set.getString("privateKey");
+					r = set.getString("privateKey");
+				
+				st.close();
 
+				return r;
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to get comment public key because : "+e.toString());
@@ -1614,14 +1687,17 @@ public class Index extends Observable implements MutableTreeNode,
 				st = db.getConnection().prepareStatement("DELETE FROM indexCommentBlackList WHERE indexId = ?");
 				st.setInt(1, id);
 				st.execute();
+				st.close();
 
 				st = db.getConnection().prepareStatement("DELETE FROM indexComments WHERE indexId = ?");
 				st.setInt(1, id);
 				st.execute();
+				st.close();
 
 				st = db.getConnection().prepareStatement("DELETE FROM indexCommentKeys WHERE indexId = ?");
 				st.setInt(1, id);
 				st.execute();
+				st.close();
 
 			}
 		} catch(SQLException e) {
@@ -1657,6 +1733,7 @@ public class Index extends Observable implements MutableTreeNode,
 				st.setInt(3, id);
 
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to set comment keys, because : "+e.toString());
@@ -1752,6 +1829,8 @@ public class Index extends Observable implements MutableTreeNode,
 								 set.getInt("rev"),
 								 Identity.getIdentity(db, set.getInt("authorId")),
 								 set.getString("text")));
+				
+				st.close();
 
 				if (comments.size() == 0)
 					Logger.notice(this, "No comment for this index");
@@ -1792,6 +1871,7 @@ public class Index extends Observable implements MutableTreeNode,
 				if (set.next())
 					nmb = set.getInt(1);
 
+				st.close();
 
 				return nmb;
 			}
@@ -1826,6 +1906,7 @@ public class Index extends Observable implements MutableTreeNode,
 
 				if (!res.next()) {
 					Logger.error(this, "Can't find the index "+Integer.toString(id)+"in the db! The tree is probably broken !");
+					st.close();
 					return null;
 				}
 
@@ -1839,6 +1920,8 @@ public class Index extends Observable implements MutableTreeNode,
 
 					i++;
 				} while(res.next());
+				
+				st.close();
 
 				int nmb_folders = i+1; /* i + root */
 
@@ -1922,15 +2005,21 @@ public class Index extends Observable implements MutableTreeNode,
 
 				ResultSet set = st.executeQuery();
 
-				if (!set.next())
+				if (!set.next()) {
+					st.close();
 					return -1;
+				}
 
 				Object o = set.getObject("categoryId");
-
-				if (o == null)
+				
+				if (o == null) {
+					st.close();
 					return -1;
+				}
 								
-				return set.getInt("categoryId");
+				int i = set.getInt("categoryId");
+				st.close();
+				return i;
 			}
 		} catch(SQLException e) {
 			Logger.error(this,
@@ -1953,10 +2042,14 @@ public class Index extends Observable implements MutableTreeNode,
 
 				ResultSet set = st.executeQuery();
 
-				if (!set.next())
+				if (!set.next()) {
+					st.close();
 					return null;
+				}
 
-				return set.getString("name").toLowerCase();
+				String r =  set.getString("name").toLowerCase();
+				st.close();
+				return r;
 			}
 		} catch(SQLException e) {
 			Logger.error(this,
@@ -2019,6 +2112,8 @@ public class Index extends Observable implements MutableTreeNode,
 					set = st.executeQuery();
 					if (set.next())
 						catId = set.getInt("id")+1;
+					
+					st.close();
 
 					/* insertion */
 					st = db.getConnection().prepareStatement("INSERT INTO categories "+
@@ -2026,12 +2121,14 @@ public class Index extends Observable implements MutableTreeNode,
 					st.setInt(1, catId);
 					st.setString(2, cat);
 					st.execute();
+					st.close();
 					
 					return catId;
 				} else {
-					
 					/* else we return the existing id */
-					return set.getInt("id");
+					int i = set.getInt("id");
+					st.close();
+					return i;
 				}
 			} 
 		} catch(SQLException e) {
@@ -2067,7 +2164,7 @@ public class Index extends Observable implements MutableTreeNode,
 				st.setInt(1, catId);
 				st.setInt(2, id);
 				st.execute();
-
+				st.close();
 			}
 
 		} catch(SQLException e) {

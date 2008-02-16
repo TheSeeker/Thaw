@@ -104,8 +104,10 @@ public class AutoRefresh implements ThawRunnable, java.util.Observer {
 			results = st.executeQuery();
 
 
-			if (results == null || !results.next())
+			if (results == null || !results.next()) {
+				st.close();
 				return -1;
+			}
 
 			ret = results.getInt("id");
 
@@ -131,6 +133,8 @@ public class AutoRefresh implements ThawRunnable, java.util.Observer {
 
 				browserPanel.getIndexTree().redraw();
 			}
+			
+			st.close();
 
 			return ret;
 

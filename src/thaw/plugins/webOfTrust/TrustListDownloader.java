@@ -26,7 +26,7 @@ import thaw.plugins.Signatures;
  */
 public class TrustListDownloader implements Observer, Signatures.SignaturesObserver {
 	public final static long KEY_OBSOLETE_AFTER = 2 /* week */ *7 /* days */ * 24 /* hour */ * 60 /*min */ * 60 /* sec */ * 1000 /* ms */;
-	public final static int CLIENTGET_PRIORITY = 2;
+	public final static int CLIENTGET_PRIORITY = 3;
 	public final static int MAX_SIZE = 102400; /* 100 KB */
 	public final static int MIN_TRUSTLEVEL = 0;
 
@@ -116,6 +116,8 @@ public class TrustListDownloader implements Observer, Signatures.SignaturesObser
 					
 					startULPR(key, id);
 				}
+				
+				st.close();
 				
 			} catch(SQLException e) {
 				Logger.error(this, "Error while starting ULPRs : "+e.toString());

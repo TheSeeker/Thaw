@@ -228,6 +228,8 @@ public class WebOfTrust extends thaw.core.LibraryPlugin {
 					up.setNull(3, Types.TIMESTAMP);
 					up.setInt(4, id);
 					up.execute();
+					
+					up.close();
 				}
 				else
 				{
@@ -236,7 +238,11 @@ public class WebOfTrust extends thaw.core.LibraryPlugin {
 					in.setTimestamp(2, new java.sql.Timestamp(dateOfTheKey.getTime()));
 					in.setInt(3, identity.getId());
 					in.execute();
+					
+					in.close();
 				}
+				
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Error while adding a key to the list of trust list");

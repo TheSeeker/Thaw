@@ -234,6 +234,8 @@ public class KSKBoard
 							     encryptedFor,
 							     daBoard));
 				}
+				
+				st.close();
 			}
 
 		} catch(SQLException e) {
@@ -305,7 +307,7 @@ public class KSKBoard
 
 					int sigId = set.getInt("sigId");
 
-					return new KSKMessage(set.getInt("id"),
+					KSKMessage m = new KSKMessage(set.getInt("id"),
 							      set.getString("msgId"),
 							      set.getString("inReplyToId"),
 							      set.getString("subject"),
@@ -324,7 +326,11 @@ public class KSKBoard
 							      false, false,
 							      encryptedFor,
 							      this);
+					st.close();
+					return m;
 				}
+				
+				st.close();
 			}
 
 		} catch(SQLException e) {
@@ -444,6 +450,8 @@ public class KSKBoard
 
 					lastRev = newRev;
 				}
+				
+				st.close();
 
 				/* no hole found */
 				return lastRev+1;
@@ -489,9 +497,16 @@ public class KSKBoard
 				st.setInt(2, id);
 
 				ResultSet set = st.executeQuery();
+				
+				int r = 0;
 
-				if (set.next())
-					return set.getInt("rev");
+				if (set.next()) {
+					r = set.getInt("rev");
+				}
+				
+				st.close();
+				
+				return r;
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Can't get the next non-downloaded rev in the board because : "+e.toString());
@@ -568,6 +583,7 @@ public class KSKBoard
 					st.setDate(1, new java.sql.Date(new java.util.Date().getTime()));
 					st.setInt(2, id);
 					st.execute();
+					st.close();
 				}
 			} catch(SQLException e) {
 				Logger.error(this, "Unable to update the lastUpdate date :"+e.toString());
@@ -810,8 +826,8 @@ public class KSKBoard
 	}
 
 
-        protected static int countNewMessages(Hsqldb db, int boardId, String boardName,
-					      boolean unsigned, boolean archived, int minTrustLevel) {
+	protected static int countNewMessages(Hsqldb db, int boardId, String boardName,
+			boolean unsigned, boolean archived, int minTrustLevel) {
 		int count = -1;
 
 		String archivedStr = "";
@@ -825,25 +841,28 @@ public class KSKBoard
 			unsignedStr = " AND frostKSKMessages.sigId IS NOT NULL AND signatures.trustLevel >= ?";
 
 		String query = "SELECT count(frostKSKMessages.id) "+
-		    "FROM frostKSKMessages LEFT JOIN signatures "+
-		    " ON frostKSKMessages.sigId = signatures.id "+
-		    "WHERE frostKSKMessages.boardId = ? "+
-		    "AND frostKSKMessages.read = FALSE"+
-		    archivedStr+
-		    unsignedStr;
+						"FROM frostKSKMessages LEFT JOIN signatures "+
+						" ON frostKSKMessages.sigId = signatures.id "+
+						"WHERE frostKSKMessages.boardId = ? "+
+						"AND frostKSKMessages.read = FALSE"+
+						archivedStr+
+						unsignedStr;
 
 		try {
-			PreparedStatement subSt;
+			synchronized(db.dbLock) {
+				PreparedStatement subSt;
 
-			subSt = db.getConnection().prepareStatement(query);
-			subSt.setInt(1, boardId);
-			subSt.setInt(2, minTrustLevel);
+				subSt = db.getConnection().prepareStatement(query);
+				subSt.setInt(1, boardId);
+				subSt.setInt(2, minTrustLevel);
 
-			ResultSet subRes = subSt.executeQuery();
+				ResultSet subRes = subSt.executeQuery();
 
-			if (subRes.next())
-				count = subRes.getInt(1);
-
+				if (subRes.next())
+					count = subRes.getInt(1);
+				
+				subSt.close();
+			}
 		} catch(SQLException e) {
 			Logger.error(db, "Can't count the number of new message on the board "+
 				     "'"+boardName+"'because : "+e.toString());
@@ -892,11 +911,13 @@ public class KSKBoard
 				st = db.getConnection().prepareStatement("DELETE FROM frostKSKInvalidSlots WHERE boardId = ?");
 				st.setInt(1, id);
 				st.execute();
+				st.close();
 
 				st = db.getConnection().prepareStatement("DELETE FROM frostKSKBoards "+
-									 "WHERE id = ?");
+														"WHERE id = ?");
 				st.setInt(1, id);
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Can't destroy the board because : "+e.toString());
@@ -971,6 +992,7 @@ public class KSKBoard
 				if (!set.next()) {
 					/* no existing interval near our rev */
 					/* => we create one */
+					st.close();
 					
 					st = db.getConnection().prepareStatement("INSERT INTO frostKSKInvalidSlots (boardId, date, minRev, maxRev) "+
 							"VALUES (?, ?, ?, ?)");
@@ -979,14 +1001,15 @@ public class KSKBoard
 					st.setInt(3, rev);
 					st.setInt(4, rev);
 					st.execute();
-					
+					st.close();
 				} else {
 					/* an interval near this one already exist */
 					/* => we adjust */
-					
 					int intervalId = set.getInt("id");
 					int intervalMinRev = set.getInt("minRev");
 					int intervalMaxRev = set.getInt("maxRev");
+					
+					st.close();
 					
 					if (intervalMaxRev == (rev-1)) {
 						st = db.getConnection().prepareStatement("UPDATE frostKSKInvalidSlots SET maxRev = ? "+
@@ -994,12 +1017,14 @@ public class KSKBoard
 						st.setInt(1, rev);
 						st.setInt(2, intervalId);
 						st.execute();
+						st.close();
 					} else if (intervalMinRev == (rev+1)) {
 						st = db.getConnection().prepareStatement("UPDATE frostKSKInvalidSlots SET minRev = ? "+
 							"WHERE id = ?");
 						st.setInt(1, rev);
 						st.setInt(2, intervalId);
 						st.execute();
+						st.close();
 					} else {
 						Logger.error(this, "Unmanaged case !");
 					}
@@ -1035,6 +1060,7 @@ public class KSKBoard
 					ResultSet set = st.executeQuery();
 				
 					if (!set.next()) {
+						st.close();
 						return rev;
 					}
 					rev = set.getInt("maxRev")+1;

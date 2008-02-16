@@ -168,7 +168,9 @@ public class KSKMessageParser {
 
 				ResultSet res = st.executeQuery();
 
-				return (res.next());
+				boolean b = (res.next());
+				st.close();
+				return b;
 			}
 		} catch(SQLException e) {
 			Logger.error(this,
@@ -279,6 +281,7 @@ public class KSKMessageParser {
 					if (res.next())
 						replyToId = res.getInt("id");
 
+					st.close();
 				}
 
 				/* we insert the message */
@@ -327,6 +330,7 @@ public class KSKMessageParser {
 				st.setInt(14, boardId);
 
 				st.execute();
+				st.close();
 				
 				String boardName = (board != null) ? board : "(null)";
 
@@ -339,7 +343,7 @@ public class KSKMessageParser {
 				/* we need the id of the message */
 
 				st = db.getConnection().prepareStatement("SELECT id FROM frostKSKmessages "+
-									 "WHERE msgId = ? LIMIT 1");
+									 					"WHERE msgId = ? LIMIT 1");
 				st.setString(1, messageId);
 
 				ResultSet set = st.executeQuery();
@@ -347,6 +351,8 @@ public class KSKMessageParser {
 				set.next();
 
 				int id = set.getInt("id");
+				
+				st.close();
 
 				/* we insert the attachments */
 
@@ -749,41 +755,48 @@ public class KSKMessageParser {
 		String lastId = inReplyTo;
 		
 		PreparedStatement st;
-		
-		try {
-			st = db.getConnection().prepareStatement("SELECT inReplyToId FROM frostKSKMessages "+
-													"WHERE msgId = ? LIMIT 1");
-		} catch(SQLException e) {
-			Logger.error(this, "Can't get full inReplyTo String because: "+e.toString());
-			return inReplyTo;
-		}
-		
-		while(lastId != null) {
-			/* I don't remember if inReplyTo is correctly set, so we will
-			 * use inReplyToId to be safer
-			 */
-			
+
+		synchronized(db.dbLock) {
+
 			try {
-				synchronized(db.dbLock) {
-									
+				st = db.getConnection().prepareStatement("SELECT inReplyToId FROM frostKSKMessages "+
+				"WHERE msgId = ? LIMIT 1");
+			} catch(SQLException e) {
+				Logger.error(this, "Can't get full inReplyTo String because: "+e.toString());
+				return inReplyTo;
+			}
+
+			while(lastId != null) {
+				/* I don't remember if inReplyTo is correctly set, so we will
+				 * use inReplyToId to be safer
+				 */
+
+				try {
+
+
 					st.setString(1, lastId);
-					
+
 					ResultSet set = st.executeQuery();
-					
+
 					if (set.next()) {
 						lastId = set.getString("inReplyToId");
-						
+
 						if (lastId != null)
 							inReplyTo = lastId + ","+inReplyTo;
 					} else
 						lastId = null;
-				}				
+				} catch(SQLException e) {
+					Logger.error(this, "Can't find message parent because : "+e.toString());
+					lastId = null;
+				}
+			}
+
+			try {
+				st.close();
 			} catch(SQLException e) {
-				Logger.error(this, "Can't find message parent because : "+e.toString());
-				lastId = null;
+				/* \_o< */
 			}
 		}
-		
 		return inReplyTo;
 	}
 

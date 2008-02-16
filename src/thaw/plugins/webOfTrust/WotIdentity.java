@@ -47,8 +47,15 @@ public class WotIdentity extends Identity implements TrustListParser.TrustListCo
 
 				ResultSet set = st.executeQuery();
 				
-				if (set.next())
-					return (set.getTimestamp("lastDownload") != null);
+				boolean b = false;
+				
+				if (set.next()) {
+					b = (set.getTimestamp("lastDownload") != null);
+				}
+				
+				st.close();
+				
+				return b;
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Error while checking if we already have the trust list of the identity '"+toString()+"'");
@@ -71,10 +78,14 @@ public class WotIdentity extends Identity implements TrustListParser.TrustListCo
 				
 				ResultSet set = st.executeQuery();
 
-				if (!set.next())
+				if (!set.next()) {
+					st.close();
 					return null;
+				}
 				
-				return new WotIdentity(Identity.getIdentity(db, set.getInt("sigId")));
+				WotIdentity wi = new WotIdentity(Identity.getIdentity(db, set.getInt("sigId")));
+				st.close();
+				return wi;
 			}
 		} catch(SQLException e) {
 			Logger.error(new WotIdentity(), "Error while getting the identity corresponding to a wot public key: "+e.toString());
@@ -186,8 +197,19 @@ public class WotIdentity extends Identity implements TrustListParser.TrustListCo
 		}
 		return true;
 	}
+
+	
+	
+	private PreparedStatement insertTrustLinkSt = null;
 	
 	public void start() {
+		try {
+			insertTrustLinkSt = getDb().getConnection().prepareStatement("INSERT INTO wotTrustLists (source, destination, trustLevel) VALUES (?, ?, ?)");
+		} catch(SQLException e) {
+			Logger.error(this, "Error while updating a trust list in the db (3) : "+e.toString());
+			return;
+		}
+		
 		purgeTrustList();
 	}
 
@@ -199,6 +221,7 @@ public class WotIdentity extends Identity implements TrustListParser.TrustListCo
 				st = getDb().getConnection().prepareStatement("DELETE FROM wotTrustLists WHERE source = ?");
 				st.setInt(1, getId());
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Error while updating a trust list in the db (1) : "+e.toString());
@@ -207,20 +230,16 @@ public class WotIdentity extends Identity implements TrustListParser.TrustListCo
 	}
 
 	public void end() {
-		/* \_o< */
+		try {
+			insertTrustLinkSt.close();
+			insertTrustLinkSt = null;
+		} catch(SQLException e) {
+
+		}
 	}
-	
-	private PreparedStatement insertTrustLinkSt = null;
 
 	public void updateIdentity(Identity i) {
-		try {
-			if (insertTrustLinkSt == null)
-				insertTrustLinkSt = getDb().getConnection().prepareStatement("INSERT INTO wotTrustLists (source, destination, trustLevel) VALUES (?, ?, ?)");
-		} catch(SQLException e) {
-			Logger.error(this, "Error while updating a trust list in the db (3) : "+e.toString());
-			return;
-		}
-		
+
 		if (i.getTrustLevel() == 0 
 			|| i.getTrustLevel() < Identity.trustLevelInt[Identity.trustLevelInt.length-1]
 			|| i.getTrustLevel() > Identity.trustLevelInt[1]) {
@@ -262,6 +281,7 @@ public class WotIdentity extends Identity implements TrustListParser.TrustListCo
 				st.setInt(4, getId());
 				
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Error while updating infos in the wotKeys table : "+e.toString());
@@ -280,10 +300,14 @@ public class WotIdentity extends Identity implements TrustListParser.TrustListCo
 				
 				ResultSet set = st.executeQuery();
 				
-				if (!set.next())
+				if (!set.next()) {
+					st.close();
 					return null;
+				}
 				
-				return set.getString("publicKey");
+				String r = set.getString("publicKey");
+				st.close();
+				return r;
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to check if an identity is in the WoT because : "+e.toString());

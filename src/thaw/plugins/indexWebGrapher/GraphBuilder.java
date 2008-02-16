@@ -101,6 +101,8 @@ public class GraphBuilder implements ThawRunnable {
 						 graphPanel);
 					nmb++;
 				}
+				
+				st.close();
 
 				Logger.info(this, Integer.toString(nmb)+" nodes loaded");
 			}
@@ -147,6 +149,8 @@ public class GraphBuilder implements ThawRunnable {
 						node.setLinkTo(target);
 					}
 				}
+				
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Can't load the links because : "+e.toString());

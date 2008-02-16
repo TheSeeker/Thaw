@@ -216,6 +216,11 @@ public class DatabaseManager {
 						}
 					}
 				}
+				
+				st.close();
+				countSt.close();
+				countBisSt.close();
+				deleteSt.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(new DatabaseManager(), "Can't cleanup the unused categories because: "+e.toString());
@@ -256,6 +261,10 @@ public class DatabaseManager {
 						}
 					}
 				}
+				
+				selectLinks.close();
+				selectIndex.close();
+				updateLink.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(new DatabaseManager(), "Can't cleanup the unused categories because: "+e.toString());
@@ -457,18 +466,24 @@ public class DatabaseManager {
 	 */
 	public static int getNextId(Hsqldb db, String table) {
 			try {
-				PreparedStatement st;
+				synchronized(db.dbLock) {
+					PreparedStatement st;
 
-				st = db.getConnection().prepareStatement("select id+1 from "+
-									 table +
-									 " order by id desc limit 1");
-				ResultSet res = st.executeQuery();
+					st = db.getConnection().prepareStatement("select id+1 from "+
+							table +
+					" order by id desc limit 1");
+					ResultSet res = st.executeQuery();
+					int r;
 
-				if (res.next())
-					return res.getInt(1);
-				else
-					return 1;
+					if (res.next()) {
+						r = res.getInt(1);
+					} else
+						r = 1;
 
+					st.close();
+
+					return r;
+				}
 			} catch(SQLException e) {
 				Logger.error(new DatabaseManager(), "Unable to get next id because: "+e.toString());
 			}
@@ -481,18 +496,22 @@ public class DatabaseManager {
 		int nmb;
 
 		try {
-			final Connection c = db.getConnection();
-			PreparedStatement st;
+			synchronized(db.dbLock) {
+				final Connection c = db.getConnection();
+				PreparedStatement st;
 
-			st = c.prepareStatement("SELECT count(id) FROM indexes");
-			st.execute();
+				st = c.prepareStatement("SELECT count(id) FROM indexes");
+				st.execute();
 
-			try {
-				final ResultSet answer = st.getResultSet();
-				answer.next();
-				nmb = answer.getInt(1);
-			} catch(final SQLException e) {
-				nmb = 0;
+				try {
+					final ResultSet answer = st.getResultSet();
+					answer.next();
+					nmb = answer.getInt(1);
+				} catch(final SQLException e) {
+					nmb = 0;
+				}
+
+				st.close();
 			}
 
 		} catch(final SQLException e) {
@@ -836,12 +855,12 @@ public class DatabaseManager {
 	/**
 	 * used by convertDatabase_1_to_2()
 	 */
-	public static boolean insertChildIn(Hsqldb db, int folderId) throws SQLException {
+	private static boolean insertChildIn(Hsqldb db, int folderId) throws SQLException {
 		java.util.Vector results;
 		int i = 0, j;
 
 		Logger.notice(new DatabaseManager(), "Expanding folder "+Integer.toString(folderId));
-
+		
 		PreparedStatement st;
 
 		st = db.getConnection().prepareStatement("SELECT id FROM indexFolders WHERE "+
@@ -856,6 +875,8 @@ public class DatabaseManager {
 		while(set.next()) {
 			results.add(new Integer(set.getInt("id")));
 		}
+		
+		st.close();
 
 		for (java.util.Iterator it = results.iterator();
 		     it.hasNext();) {
@@ -881,13 +902,17 @@ public class DatabaseManager {
 				j++;
 				childFolders.add(new Integer(rs.getInt("folderId")));
 			}
+			
+			st.close();
+			
+			st = db.getConnection().prepareStatement("INSERT INTO folderParents (folderId, parentId) "+
+			 "VALUES (?, ?)");
 
 			for (Iterator ite = childFolders.iterator();
 			     ite.hasNext();) {
 				Integer a = (Integer)ite.next();
 
-				st = db.getConnection().prepareStatement("INSERT INTO folderParents (folderId, parentId) "+
-									 "VALUES (?, ?)");
+				
 				st.setInt(1, a.intValue());
 				if (folderId < 0)
 					st.setNull(2, Types.INTEGER);
@@ -896,7 +921,8 @@ public class DatabaseManager {
 
 				st.execute();
 			}
-
+			
+			st.close();
 
 
 			st = db.getConnection().prepareStatement("SELECT indexId FROM indexParents WHERE folderId = ?");
@@ -910,17 +936,20 @@ public class DatabaseManager {
 				j++;
 				childIndexes.add(new Integer(rs.getInt("indexId")));
 			}
+			
+			st.close();
 
 			if (j == 0) {
 				Logger.warning(new DatabaseManager(), "empty folder (id = "+Integer.toString(nextId)+") ?");
 			}
+			
+			st = db.getConnection().prepareStatement("INSERT INTO indexParents (indexId, folderId) "+
+													"VALUES (?, ?)");
 
 			for (Iterator ite = childIndexes.iterator();
 			     ite.hasNext();) {
 				Integer a = (Integer)ite.next();
 
-				st = db.getConnection().prepareStatement("INSERT INTO indexParents (indexId, folderId) "+
-									 "VALUES (?, ?)");
 				st.setInt(1, a.intValue());
 				if (folderId < 0)
 					st.setNull(2, Types.INTEGER);
@@ -929,6 +958,8 @@ public class DatabaseManager {
 
 				st.execute();
 			}
+			
+			st.close();
 
 		}
 
@@ -1045,6 +1076,9 @@ public class DatabaseManager {
 					subSt.execute();
 				}
 			}
+			
+			st.close();
+			subSt.close();
 
 		} catch(SQLException e) {
 			Logger.error(new DatabaseManager(), "Error while converting SSK into USK : "+e.toString());

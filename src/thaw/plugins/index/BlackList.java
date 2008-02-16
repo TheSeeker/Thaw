@@ -148,6 +148,8 @@ public class BlackList implements ActionListener {
 								     res.getString("name"),
 								     res.getString("publicKey")));
 				}
+				
+				st.close();
 
 			}
 		} catch(SQLException e) {
@@ -242,10 +244,16 @@ public class BlackList implements ActionListener {
 
 				ResultSet res = st.executeQuery();
 
-				if (!res.next())
+				if (!res.next()) {
+					st.close();
 					return -1;
+				}
 
-				return res.getInt("id");
+				int i = res.getInt("id");
+				
+				st.close();
+				
+				return i;
 			}
 		} catch(SQLException e) {
 			Logger.error(new BlackList(), "Error while checking if a given key is blacklisted : "+ e.toString());
@@ -286,6 +294,7 @@ public class BlackList implements ActionListener {
 
 				st.execute();
 
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(new BlackList(), "Error while adding an entry to the blacklist : "+e.toString());
@@ -326,6 +335,8 @@ public class BlackList implements ActionListener {
 				st = db.getConnection().prepareStatement("DELETE FROM indexBlackList WHERE id = ?");
 				st.setInt(1, id);
 				st.execute();
+				
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(new BlackList(), "Error while removing an entry from the blacklist : "+e.toString());

@@ -101,6 +101,8 @@ public class Transfer implements Observer {
 						this.isDup        = set.getBoolean("isDup");
 						this.isSuccess    = set.getBoolean("isSuccess");
 					}
+					
+					st.close();
 				}
 
 
@@ -132,6 +134,8 @@ public class Transfer implements Observer {
 						this.isDup        = set.getBoolean("isDup");
 						this.isSuccess    = set.getBoolean("isSuccess");
 					}
+					
+					st.close();
 				}
 
 
@@ -224,6 +228,7 @@ public class Transfer implements Observer {
 					st.setBoolean(7, TransferLogs.isDup(db, query.getFileKey()));
 					st.setBoolean(8, query.isFinished() && query.isSuccessful());
 					st.execute();
+					st.close();
 				}
 
 
@@ -251,6 +256,7 @@ public class Transfer implements Observer {
 			st.setString(1, qKey);
 			st.setInt(2, this.id);
 			st.execute();
+			st.close();
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to update key in transfer logs because : "+e.toString());
 		}
@@ -265,6 +271,7 @@ public class Transfer implements Observer {
 			st.setLong(1, size);
 			st.setInt(2, this.id);
 			st.execute();
+			st.close();
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to update size in transfer logs because : "+e.toString());
 		}
@@ -283,6 +290,7 @@ public class Transfer implements Observer {
 			st.setBoolean(2, successful);
 			st.setInt(3, this.id);
 			st.execute();
+			st.close();
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to update dateEnd in transfer logs because : "+e.toString());
 		}
@@ -299,6 +307,7 @@ public class Transfer implements Observer {
 			st.setTimestamp(1, dateStart);
 			st.setInt(2, this.id);
 			st.execute();
+			st.close();
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to update dateEnd in transfer logs because : "+e.toString());
 		}
@@ -394,6 +403,7 @@ public class Transfer implements Observer {
 				st = db.getConnection().prepareStatement("DELETE FROM transferLogs WHERE id = ?");
 				st.setInt(1, id);
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Can't delete transfer because: "+e.toString());

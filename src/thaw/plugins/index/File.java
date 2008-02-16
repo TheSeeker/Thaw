@@ -109,27 +109,31 @@ public class File implements Observer, FileContainer {
 		this.id = id;
 
 		try {
-			PreparedStatement st;
+			synchronized(db.dbLock) {
+				PreparedStatement st;
 
-			st = db.getConnection().prepareStatement("SELECT filename, publicKey, localPath, mime, size, indexParent "+
-								 " FROM files WHERE id = ? LIMIT 1");
+				st = db.getConnection().prepareStatement("SELECT filename, publicKey, localPath, mime, size, indexParent "+
+				" FROM files WHERE id = ? LIMIT 1");
 
-			st.setInt(1, id);
+				st.setInt(1, id);
 
-			ResultSet rs = st.executeQuery();
+				ResultSet rs = st.executeQuery();
 
-			if (rs.next()) {
-				String lp;
+				if (rs.next()) {
+					String lp;
 
-				filename = rs.getString("filename");
-				publicKey = rs.getString("publicKey");
-				lp = rs.getString("localPath");
-				localPath = (lp == null ? null : new java.io.File(lp));
-				mime = rs.getString("mime");
-				size = rs.getLong("size");
-				parentId = rs.getInt("indexParent");
-			} else {
-				Logger.error(this, "File '"+Integer.toString(id)+"' not found");
+					filename = rs.getString("filename");
+					publicKey = rs.getString("publicKey");
+					lp = rs.getString("localPath");
+					localPath = (lp == null ? null : new java.io.File(lp));
+					mime = rs.getString("mime");
+					size = rs.getLong("size");
+					parentId = rs.getInt("indexParent");
+				} else {
+					Logger.error(this, "File '"+Integer.toString(id)+"' not found");
+				}
+
+				st.close();
 			}
 
 		} catch(SQLException e) {
@@ -143,13 +147,17 @@ public class File implements Observer, FileContainer {
 
 	public void setParent(int parent_id) {
 		try {
-			PreparedStatement st;
+			synchronized(db.dbLock) {
+				PreparedStatement st;
 
-			st = db.getConnection().prepareStatement("UPDATE files SET indexParent = ? "+
-								 "WHERE id = ?");
-			st.setInt(1, parent_id);
-			st.setInt(2, id);
-			st.execute();
+				st = db.getConnection().prepareStatement("UPDATE files SET indexParent = ? "+
+				"WHERE id = ?");
+				st.setInt(1, parent_id);
+				st.setInt(2, id);
+				st.execute();
+
+				st.close();
+			}
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to set parent: "+e.toString());
 		}
@@ -213,14 +221,18 @@ public class File implements Observer, FileContainer {
 		this.publicKey = FreenetURIHelper.cleanURI(publicKey);
 
 		try {
-			PreparedStatement st;
+			synchronized(db.dbLock) {
+				PreparedStatement st;
 
-			st = db.getConnection().prepareStatement("UPDATE files SET publicKey = ? "+
-								 "WHERE id = ?");
+				st = db.getConnection().prepareStatement("UPDATE files SET publicKey = ? "+
+				"WHERE id = ?");
 
-			st.setString(1, publicKey);
-			st.setInt(2, id);
-			st.execute();
+				st.setString(1, publicKey);
+				st.setInt(2, id);
+				st.execute();
+
+				st.close();
+			}
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to set publicKey: "+e.toString());
 		}
@@ -229,14 +241,18 @@ public class File implements Observer, FileContainer {
 
 	public void setSize(final long size) {
 		try {
-			PreparedStatement st;
+			synchronized(db.dbLock) {
+				PreparedStatement st;
 
-			st = db.getConnection().prepareStatement("UPDATE files SET size = ? "+
-								 "WHERE id = ?");
+				st = db.getConnection().prepareStatement("UPDATE files SET size = ? "+
+				"WHERE id = ?");
 
-			st.setLong(1, size);
-			st.setInt(2, id);
-			st.execute();
+				st.setLong(1, size);
+				st.setInt(2, id);
+				st.execute();
+
+				st.close();
+			}
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to set publicKey: "+e.toString());
 		}
@@ -343,20 +359,26 @@ public class File implements Observer, FileContainer {
 
 	public int getParentId() {
 		try {
-			PreparedStatement st;
+			synchronized(db.dbLock) {
+				PreparedStatement st;
 
-			st = db.getConnection().prepareStatement("SELECT indexParent FROM files "+
-								 "WHERE id = ? LIMIT 1");
-			st.setInt(1, id);
+				st = db.getConnection().prepareStatement("SELECT indexParent FROM files "+
+				"WHERE id = ? LIMIT 1");
+				st.setInt(1, id);
 
-			ResultSet rs = st.executeQuery();
+				ResultSet rs = st.executeQuery();
 
-			if (rs.next()) {
-				return rs.getInt("indexParent");
-			} else {
-				Logger.error(this, "File id not found: "+Integer.toString(id));
+				if (rs.next()) {
+					int i = rs.getInt("indexParent");
+					st.close();
+					return i;
+				} else {
+					Logger.error(this, "File id not found: "+Integer.toString(id));
+				}
+
+				st.close();
+				
 			}
-
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to get parent id because: "+e.toString());
 		}
@@ -373,11 +395,14 @@ public class File implements Observer, FileContainer {
 
 	public void delete() {
 		try {
-			PreparedStatement st;
+			synchronized(db.dbLock) {
+				PreparedStatement st;
 
-			st = db.getConnection().prepareStatement("DELETE FROM files WHERE id = ?");
-			st.setInt(1, id);
-			st.execute();
+				st = db.getConnection().prepareStatement("DELETE FROM files WHERE id = ?");
+				st.setInt(1, id);
+				st.execute();
+				st.close();
+			}
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to remove file because: "+e.toString());
 		}
@@ -402,48 +427,56 @@ public class File implements Observer, FileContainer {
 	 * a file in the database
 	 */
 	public static boolean resumeTransfers(FCPQueueManager queue, Hsqldb db) {
-		PreparedStatement st;
+		synchronized(db.dbLock) {
+			PreparedStatement st;
 
-		try {
-			st = db.getConnection().prepareStatement("SELECT a.id, a.filename, a.publicKey, "+
-								 "a.localPath, a.mime, a.size, a.indexParent "+
-								 "FROM files AS a JOIN indexes AS b ON (a.indexParent = b.id)"+
-								 "WHERE b.privateKey IS NOT NULL AND a.filename LIKE ?");
-		} catch(SQLException e) {
-			Logger.error("thaw.plugin.index.File", "Error while sending query to the database : "+e.toString());
-			return false;
-		}
+			try {
+				st = db.getConnection().prepareStatement("SELECT a.id, a.filename, a.publicKey, "+
+						"a.localPath, a.mime, a.size, a.indexParent "+
+						"FROM files AS a JOIN indexes AS b ON (a.indexParent = b.id)"+
+				"WHERE b.privateKey IS NOT NULL AND a.filename LIKE ?");
+			} catch(SQLException e) {
+				Logger.error("thaw.plugin.index.File", "Error while sending query to the database : "+e.toString());
+				return false;
+			}
 
-		for (Iterator it = queue.getRunningQueue().iterator();
-		     it.hasNext();) {
-			FCPTransferQuery tq = (FCPTransferQuery)it.next();
+			for (Iterator it = queue.getRunningQueue().iterator();
+			it.hasNext();) {
+				FCPTransferQuery tq = (FCPTransferQuery)it.next();
 
-			if (tq instanceof FCPClientPut) {
-				try {
-					st.setString(1, tq.getFilename());
+				if (tq instanceof FCPClientPut) {
+					try {
+						st.setString(1, tq.getFilename());
 
-					ResultSet rs = st.executeQuery();
+						ResultSet rs = st.executeQuery();
 
-					while(rs.next()) {
-						File file = new File(db,
-								     rs.getInt("id"),
-								     rs.getString("filename"),
-								     rs.getString("publicKey"),
-								     rs.getString("localPath") != null ? new java.io.File(rs.getString("localPath")) : null,
-								     rs.getString("mime"),
-								     rs.getLong("size"),
-								     rs.getInt("indexParent"));
+						while(rs.next()) {
+							File file = new File(db,
+									rs.getInt("id"),
+									rs.getString("filename"),
+									rs.getString("publicKey"),
+									rs.getString("localPath") != null ? new java.io.File(rs.getString("localPath")) : null,
+											rs.getString("mime"),
+											rs.getLong("size"),
+											rs.getInt("indexParent"));
 
-						((Observable)tq).addObserver(file);
+							((Observable)tq).addObserver(file);
 
-						if (tq.getFileKey() != null)
-							file.update(((Observable)tq), null);
+							if (tq.getFileKey() != null)
+								file.update(((Observable)tq), null);
+						}
+
+					} catch(SQLException e) {
+						Logger.warning("thaw.plugins.index.File", "Error while resuming key computations : "+e.toString());
+						return false;
 					}
-
-				} catch(SQLException e) {
-					Logger.warning("thaw.plugins.index.File", "Error while resuming key computations : "+e.toString());
-					return false;
 				}
+			}
+			
+			try {
+				st.close();
+			} catch(SQLException e) {
+				/* \_o< */
 			}
 		}
 

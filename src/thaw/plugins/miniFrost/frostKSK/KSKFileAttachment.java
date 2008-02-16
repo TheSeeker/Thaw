@@ -295,6 +295,7 @@ public class KSKFileAttachment
 				st.setInt(4, messageId);
 
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Can't insert the file attachment because : "+e.toString());
@@ -324,6 +325,8 @@ public class KSKFileAttachment
 								    msg,
 								    boardFactory.getCore().getQueueManager()));
 				}
+				
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(e, "Can't select file attachments because: "+e.toString());
@@ -351,6 +354,7 @@ public class KSKFileAttachment
 									 "WHERE messageId = ?");
 				st.setInt(1, msg.getId());
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(null, "Can't destroy the file attachments of the message because : "+e.toString());
@@ -379,6 +383,8 @@ public class KSKFileAttachment
 					st.setInt(1, id);
 					st.execute();
 				}
+				
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(null, "Can't destroy the file attachments of the board because : "+e.toString());

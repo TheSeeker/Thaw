@@ -246,6 +246,7 @@ public class Identity {
 				st.setInt(2, id);
 
 				st.execute();
+				st.close();
 			}
 
 			trustLevel = i;
@@ -273,12 +274,14 @@ public class Identity {
 				st.setString(1, nick.toLowerCase());
 
 				st.execute();
+				st.close();
 
 				st = db.getConnection().prepareStatement("UPDATE signatures SET isDup = FALSE "
 									 + "WHERE id = ?");
 				st.setInt(1, id);
 
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this,
@@ -332,8 +335,11 @@ public class Identity {
 								  set.getString("publicKey"), set.getString("privateKey"),
 								  set.getBoolean("isDup"), set.getInt("trustLevel"));
 					Logger.debug(i, "Identity found");
+					st.close();
 					return i;
 				}
+				
+				st.close();
 
 				if (!create)
 					return null;
@@ -347,6 +353,8 @@ public class Identity {
 				set = st.executeQuery();
 
 				boolean isDup = set.next();
+				
+				st.close();
 
 				/* and we add */
 
@@ -360,7 +368,7 @@ public class Identity {
 				st.setBoolean(4, isDup);
 
 				st.execute();
-
+				st.close();
 
 				/* and next we find back the id */
 
@@ -374,6 +382,8 @@ public class Identity {
 				set.next();
 
 				int id = set.getInt("id");
+				
+				st.close();
 
 				Identity i = new Identity(db, id, nick, publicKey, null, isDup, 0);
 				Logger.info(i, "New identity found");
@@ -411,12 +421,15 @@ public class Identity {
 
 				ResultSet set = st.executeQuery();
 
-				if (!set.next())
+				if (!set.next()) {
+					st.close();
 					return null;
+				}
 
 				i = new Identity(db, id, set.getString("nickName"),
 						 set.getString("publicKey"), set.getString("privateKey"),
 						 set.getBoolean("isDup"), set.getInt("trustLevel"));
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(new Identity(), "Error while getting identity (1) : "+e.toString());
@@ -464,6 +477,7 @@ public class Identity {
 									 "WHERE publicKey = ? LIMIT 1");
 				st.setString(1, publicKey);
 				st.execute();
+				st.close();
 
 				ResultSet set = st.executeQuery();
 
@@ -478,6 +492,7 @@ public class Identity {
 					st.setInt(3, id);
 
 					st.execute();
+					st.close();
 					
 					Signatures.notifyIdentityUpdated(this);
 				} else {
@@ -493,6 +508,7 @@ public class Identity {
 					st.setInt(5, trustLevel);
 
 					st.execute();
+					st.close();
 					
 					if (privateKey == null)
 						Signatures.notifyPublicIdentityAdded(this);
@@ -516,7 +532,11 @@ public class Identity {
 				
 				ResultSet set = st.executeQuery();
 
-				return set.next();				
+				boolean b=  set.next();
+				
+				st.close();
+				
+				return b;
 			}			
 		} catch(SQLException e) {
 			Logger.error(new Identity(), "Exception while accessing the signature table : "+e.toString());
@@ -537,6 +557,7 @@ public class Identity {
 				st.setInt(1, id);
 
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.warning(this, "Exception while deleting the identity from the bdd: "+e.toString());
@@ -621,6 +642,8 @@ public class Identity {
 							   set.getBoolean("isDup"),
 							   set.getInt("trustLevel")));
 				}
+				
+				st.close();
 
 				return v;
 			}

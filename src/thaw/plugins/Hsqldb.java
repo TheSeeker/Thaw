@@ -2,7 +2,6 @@ package thaw.plugins;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.Statement;
 import thaw.core.Core;
 import thaw.core.I18n;
@@ -102,14 +101,12 @@ public class Hsqldb extends LibraryPlugin {
 	}
 
 
-	public ResultSet executeQuery(final String query) throws java.sql.SQLException {
-		ResultSet results;
-
+	public void executeQuery(final String query) throws java.sql.SQLException {
 		final Statement stmt = connection.createStatement();
 
-		results = stmt.executeQuery(query);
-
-		return results;
+		stmt.execute(query);
+		
+		stmt.close();
 	}
 
 	public javax.swing.ImageIcon getIcon() {

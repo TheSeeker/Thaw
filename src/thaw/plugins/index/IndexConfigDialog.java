@@ -325,6 +325,8 @@ public class IndexConfigDialog implements ActionListener, MouseListener,
 				while(set.next()) {
 					v.add(set.getString("name"));
 				}
+				
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Can't get index categories list because : "+e.toString());

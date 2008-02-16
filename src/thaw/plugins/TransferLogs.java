@@ -185,8 +185,12 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 									 "WHERE LOWER(key) LIKE ? AND isSuccess = TRUE");
 				st.setString(1, FreenetURIHelper.getComparablePart(key)+"%");
 				ResultSet set = st.executeQuery();
-				return set.next();
+				
+				boolean b = set.next();
+				
+				st.close();
 
+				return b;
 			}
 		} catch(SQLException e) {
 			Logger.error(new TransferLogs(), "Unable to know if a key is dup in the event because : "+e.toString());
@@ -301,10 +305,10 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 
 				try {
 					st = db.getConnection().prepareStatement("INSERT INTO transferLogs "+
-										 "(dateStart, dateEnd, transferType,"+
-										 " key, filename, size, isDup, isSuccess) "+
-										 " VALUES "+
-										 "(?, ?, 0, ?, ?, NULL, ?, TRUE)");
+							"(dateStart, dateEnd, transferType,"+
+							" key, filename, size, isDup, isSuccess) "+
+							" VALUES "+
+					"(?, ?, 0, ?, ?, NULL, ?, TRUE)");
 				} catch(SQLException e) {
 					Logger.error(this, "Error while preparing to import keys : "+e.toString()); 
 				}
@@ -332,7 +336,13 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 					}
 				}
 
-			in.close();
+				try {
+					st.close();
+				} catch(SQLException e) {
+					/* \_o< */
+				}
+
+				in.close();
 
 			} catch(java.io.FileNotFoundException e) {
 				Logger.error(this, "(1) Unable to import keys because: "+e.toString());
@@ -372,6 +382,8 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 					while(set.next()) {
 						out.write((set.getString("key")+"\n").getBytes("UTF-8"));
 					}
+					
+					st.close();
 				}
 
 				out.close();

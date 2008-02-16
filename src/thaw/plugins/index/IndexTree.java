@@ -679,6 +679,8 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 					else
 						parentFolders[nmbFolders] = -1;
 				}
+				
+				st.close();
 
 				if (nmbFolders == 0) {
 					Logger.error(this, "Unable to select specified index : Not found.");
@@ -867,10 +869,14 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 			if (st.execute()) {
 				final ResultSet results = st.getResultSet();
 
-				if (results.next())
+				if (results.next()) {
+					st.close();
 					return true;
+				}
+				st.close();
 			}
-
+			else
+				st.close();
 
 		} catch(final java.sql.SQLException e) {
 			Logger.warning(this, "Exception while trying to check if '"+key+"' is already know: '"+e.toString()+"'");

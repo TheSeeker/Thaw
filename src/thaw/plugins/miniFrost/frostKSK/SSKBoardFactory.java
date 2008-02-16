@@ -105,6 +105,8 @@ public class SSKBoardFactory extends KSKBoardFactory {
 						boards.put(name+publicKey, board);
 					}
 				}
+				
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Can't get the board list because : "+e.toString());

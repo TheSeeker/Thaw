@@ -88,6 +88,7 @@ public class SSKBoard extends KSKBoard {
 									 "WHERE kskBoardId = ?");
 				st.setInt(1, getId());
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Can't destroy the board because : "+e.toString());
@@ -117,6 +118,7 @@ public class SSKBoard extends KSKBoard {
 					st.setInt(3, getId());
 
 					st.execute();
+					st.close();
 				}
 			} catch(SQLException e) {
 				Logger.error(this, "Oops ! Unable to delete the board, and I think that I've broken something :(");

@@ -241,6 +241,7 @@ public class Comment extends Observable implements Observer, ActionListener {
 				st.setInt(1, rev);
 				st.setInt(2, index.getId());
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to un-blacklist comment because: "+e.toString());
@@ -255,6 +256,7 @@ public class Comment extends Observable implements Observer, ActionListener {
 				st.setInt(1, rev);
 				st.setInt(2, index.getId());
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to blacklist comment because: "+e.toString());
@@ -277,7 +279,9 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 				ResultSet set = st.executeQuery();
 
-				return set.next();
+				boolean b= set.next();
+				st.close();
+				return b;
 			}
 		} catch(SQLException e) {
 			Logger.error(db, "thaw.plugins.index.Comment : Error while checking if the message is in the blacklist :"+e.toString());
@@ -709,6 +713,8 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 					st.execute();
 
+					st.close();
+					
 					return true;
 				}
 			} catch(SQLException e) {
@@ -755,7 +761,9 @@ public class Comment extends Observable implements Observer, ActionListener {
 
 			ResultSet set = st.executeQuery();
 
-			return (set.next());
+			boolean b = (set.next());
+			st.close();
+			return b;
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to check if the comment is already in the bdd, because: "+e.toString());
 		}

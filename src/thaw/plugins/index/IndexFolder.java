@@ -157,6 +157,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 				addToVector(v, st.executeQuery(), true);
 
+				st.close();
 
 				if (id >= 0) {
 					st = db.getConnection().prepareStatement("SELECT id, positionInTree, "+
@@ -180,6 +181,8 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				}
 
 				addToVector(v, st.executeQuery(), false);
+				
+				st.close();
 
 			} catch (SQLException e) {
 				Logger.error(this, "Unable to load child list because: "+e.toString());
@@ -265,8 +268,13 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 
 				ResultSet set = st.executeQuery();
 
-				if (set.next())
-					return set.getInt("positionInTree");
+				if (set.next()) {
+					int r = set.getInt("positionInTree");
+					st.close();
+					return r;
+				}
+				
+				st.close();
 
 				return -1;
 
@@ -327,6 +335,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 					st.setInt(1, id);
 					st.setInt(2, index);
 					st.execute();
+					st.close();
 
 					st = db.getConnection().prepareStatement("UPDATE indexFolders "+
 										 "SET positionInTree = positionInTree + 1 "+
@@ -334,6 +343,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 					st.setInt(1, id);
 					st.setInt(2, index);
 					st.execute();
+					st.close();
 
 					st = db.getConnection().prepareStatement("UPDATE "+
 										 ((child instanceof IndexFolder) ? "indexFolders" : "indexes")+
@@ -343,18 +353,21 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 					st.setInt(2, index);
 					st.setInt(3, ((IndexTreeNode)child).getId());
 					st.execute();
+					st.close();
 				} else {
 					st = db.getConnection().prepareStatement("UPDATE indexes "+
 										 "SET positionInTree = positionInTree + 1 "+
 										 "WHERE parent IS NULL AND positionInTree >= ?");
 					st.setInt(1, index);
 					st.execute();
+					st.close();
 
 					st = db.getConnection().prepareStatement("UPDATE indexFolders "+
 										 "SET positionInTree = positionInTree + 1 "+
 										 "WHERE parent IS NULL AND positionInTree >= ?");
 					st.setInt(1, index);
 					st.execute();
+					st.close();
 
 					st = db.getConnection().prepareStatement("UPDATE "+
 										 ((child instanceof IndexFolder) ? "indexFolders" : "indexes")+
@@ -364,7 +377,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 					st.setInt(2, index);
 					st.setInt(3, ((IndexTreeNode)child).getId());
 					st.execute();
-
+					st.close();
 				}
 
 
@@ -412,6 +425,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 					st.setInt(1, id);
 					st.setInt(2, pos);
 					st.execute();
+					st.close();
 
 					st = db.getConnection().prepareStatement("UPDATE indexFolders "+
 										 "SET positionInTree = positionInTree - 1 "+
@@ -419,6 +433,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 					st.setInt(1, id);
 					st.setInt(2, pos);
 					st.execute();
+					st.close();
 
 				} else {
 					st = db.getConnection().prepareStatement("UPDATE indexes "+
@@ -426,12 +441,14 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 										 "WHERE parent IS NULL AND positionInTree > ?");
 					st.setInt(1, pos);
 					st.execute();
+					st.close();
 
 					st = db.getConnection().prepareStatement("UPDATE indexFolders "+
 										 "SET positionInTree = positionInTree - 1 "+
 										 "WHERE parent IS NULL AND positionInTree > ?");
 					st.setInt(1, pos);
 					st.execute();
+					st.close();
 				}
 
 			} catch(SQLException e) {
@@ -467,8 +484,11 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 					index = n instanceof Index;
 				} else {
 					Logger.error(this, "Node not found !");
+					st.close();
 					return;
 				}
+				
+				st.close();
 
 			} catch(SQLException e) {
 				Logger.error(this, "Unable to remove node "+Integer.toString(node.getId())+" because: "+
@@ -511,6 +531,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				st.setInt(1, id);
 				st.setInt(2, id);
 				st.execute();
+				st.close();
 
 				st = db.getConnection().prepareStatement("DELETE FROM folderParents "+
 									 "WHERE ( ((folderId IN "+
@@ -525,8 +546,8 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				st.setInt(1, id);
 				st.setInt(2, id);
 				st.setInt(3, id);
-
 				st.execute();
+				st.close();
 
 			} catch(SQLException e) {
 				Logger.error(this, "Error while removing from parent: "+e.toString());
@@ -581,6 +602,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				st.setInt(2, id);
 
 				st.execute();
+				st.close();
 
 
 				/* put all its child folders into its new parents */
@@ -600,6 +622,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 					st.setInt(1, id);
 					st.setInt(2, parentId);
 					st.execute();
+					st.close();
 				} /* else no parent of the parent */
 
 
@@ -613,6 +636,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 					st.setNull(1, Types.INTEGER);
 				st.setInt(2, id);
 				st.execute();
+				st.close();
 
 				/* we put itself in the parents of its parent */
 				if (parentId >= 0) {
@@ -622,6 +646,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 					st.setInt(1, id);
 					st.setInt(2, parentId);
 					st.execute();
+					st.close();
 				}
 
 				/* and then in its parent */
@@ -633,6 +658,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				else
 					st.setNull(2, Types.INTEGER);
 				st.execute();
+				st.close();
 
 
 				st = db.getConnection().prepareStatement("INSERT INTO indexParents (indexId, folderId) "+
@@ -642,6 +668,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 									 " WHERE folderParents.folderId = ?");
 				st.setInt(1, id);
 				st.execute();
+				st.close();
 			} catch(SQLException e) {
 				Logger.error(this, "Unable to change parent because: "+e.toString());
 			}
@@ -680,6 +707,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				st.setInt(2, id);
 
 				st.execute();
+				st.close();
 			} catch(SQLException e) {
 				Logger.error(this, "Error while renaming the folder: "+e.toString());
 			}
@@ -703,6 +731,8 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 		while(set.next()) {
 			children.add(new Integer(set.getInt("id")));
 		}
+		
+		st.close();
 
 		st = db.getConnection().prepareStatement("DELETE from indexfolders where id = ?");
 
@@ -713,6 +743,8 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 			st.setInt(1, nextId.intValue());
 			st.execute();
 		}
+		
+		st.close();
 	}
 
 
@@ -745,6 +777,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 									 "  WHERE indexParents.folderId = ?)");
 				st.setInt(1, id);
 				st.execute();
+				st.close();
 
 				st = db.getConnection().prepareStatement("DELETE FROM indexComments "+
 									 "WHERE indexComments.indexId IN "+
@@ -753,6 +786,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 									 "  WHERE indexParents.folderId = ?)");
 				st.setInt(1, id);
 				st.execute();
+				st.close();
 
 				st = db.getConnection().prepareStatement("DELETE FROM indexCommentBlackList "+
 									 "WHERE indexCommentBlackList.indexId IN "+
@@ -761,6 +795,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 									 "  WHERE indexParents.folderId = ?)");
 				st.setInt(1, id);
 				st.execute();
+				st.close();
 
 
 				/* we remove all the files */
@@ -771,6 +806,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				st.setInt(1, id);
 
 				st.execute();
+				st.close();
 
 				/* we remove all the links */
 
@@ -779,17 +815,16 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 									 "(SELECT indexParents.indexId FROM indexParents WHERE indexParents.folderId = ?)");
 
 				st.setInt(1, id);
-
 				st.execute();
+				st.close();
 
 				/* we remove all the indexes */
 
 				st = db.getConnection().prepareStatement("DELETE FROM indexes WHERE indexes.id IN "+
 									 "(SELECT indexParents.indexId FROM indexParents WHERE indexParents.folderId = ?)");
-
 				st.setInt(1, id);
-
 				st.execute();
+				st.close();
 
 
 				/* we remove all the child folders */
@@ -798,10 +833,9 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				deleteChildFoldersRecursivly(id);
 
 				st = db.getConnection().prepareStatement("DELETE FROM indexFolders WHERE indexFolders.id = ?");
-
 				st.setInt(1, id);
-
 				st.execute();
+				st.close();
 
 				/* we clean the joint tables */
 
@@ -810,21 +844,22 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 									 "(SELECT indexParents.indexId FROM indexParents WHERE indexParents.folderId = ?)");
 				st.setInt(1, id);
 				st.execute();
+				st.close();
 
 
 				st = db.getConnection().prepareStatement("DELETE FROM folderParents "+
 									 "WHERE (folderId IN "+
 									 "(SELECT folderParents.folderId FROM folderParents WHERE folderParents.parentId = ?))");
 				st.setInt(1, id);
-
 				st.execute();
+				st.close();
 
 
 				st = db.getConnection().prepareStatement("DELETE FROM folderParents "+
 									 "WHERE folderId = ?");
 				st.setInt(1, id);
-
 				st.execute();
+				st.close();
 
 			} catch(SQLException e) {
 				Logger.error(this, "Error while removing the folder: "+e.toString());
@@ -857,6 +892,8 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 						   set.getInt("indexId"))).insertOnFreenet(observer, indexBrowser, queueManager);
 					i++;
 				}
+				
+				st.close();
 
 			} catch(SQLException e) {
 				Logger.error(this, "Unable to start insertions because: "+e.toString());
@@ -904,6 +941,8 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 						(new Index(db, config, indexId)).downloadFromFreenet(observer, indexTree, queueManager, rev);
 					i++;
 				}
+				
+				st.close();
 
 			} catch(SQLException e) {
 				Logger.error(this, "Unable to start insertions because: "+e.toString());
@@ -944,6 +983,8 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				while(set.next()) {
 					keys += set.getString("publicKey") + "\n";
 				}
+				
+				st.close();
 
 			} catch(SQLException e) {
 				Logger.error(this, "Unable to get public keys because: "+e.toString());
@@ -981,6 +1022,8 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				while(set.next()) {
 					keys += set.getString("privateKey") + "\n";
 				}
+				
+				st.close();
 
 			} catch(SQLException e) {
 				Logger.error(this, "Unable to get private keys because: "+e.toString());
@@ -1034,7 +1077,8 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 					position++;
 				}
 
-
+				selectSt.close();
+				updateSt.close();
 
 				/* next we sort the indexes */
 
@@ -1066,6 +1110,8 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 					position++;
 				}
 
+				selectSt.close();
+				updateSt.close();
 
 			} catch(SQLException e) {
 				Logger.error(this, "Error while reordering: "+e.toString());
@@ -1098,9 +1144,12 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				st.setInt(1, id);
 				ResultSet set = st.executeQuery();
 				if (set.next()) {
+					st.close();
 					name = set.getString("name");
 					return name;
 				}
+				
+				st.close();
 
 				Logger.error(this, "toString(): not found in the db ?!");
 				return null;
@@ -1169,12 +1218,16 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 					int res;
 
 					res = set.getInt(1);
+					
+					st.close();
 
 					if (res > 0)
 						return false;
 					else
 						return true;
 				}
+				
+				st.close();
 			} catch(SQLException e) {
 				Logger.error(this, "unable to know if the folder contains only modifiable indexes because: "+e.toString());
 			}
@@ -1202,6 +1255,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				st.setBoolean(1, flag);
 
 				st.execute();
+				st.close();
 			} catch(SQLException e) {
 				Logger.error(this, "Error while changing 'hasChanged' flag: "+e.toString());
 				return false;
@@ -1232,6 +1286,7 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				st.setBoolean(1, flag);
 
 				st.execute();
+				st.close();
 			} catch(SQLException e) {
 				Logger.error(this, "Error while changing 'newComment' flag: "+e.toString());
 				return false;
@@ -1331,6 +1386,8 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				boolean ret;
 
 				ret = set.next();
+				
+				st.close();
 
 				lastHasChangedValue = ret;
 				hasLastHasChangedValueBeenSet = true;
@@ -1381,6 +1438,8 @@ public class IndexFolder implements IndexTreeNode, MutableTreeNode {
 				boolean ret;
 
 				ret = set.next();
+				
+				st.close();
 
 				lastNewCommentValue = ret;
 				hasLastHasChangedValueBeenSet = true;

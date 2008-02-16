@@ -92,6 +92,8 @@ public class SearchResult implements FileAndLinkList {
 						       set.getLong("size"),
 						       set.getInt("indexParent")));
 				}
+				
+				st.close();
 
 			} catch(SQLException e) {
 				Logger.error(this, "Error while searching: "+e.toString());
@@ -129,6 +131,8 @@ public class SearchResult implements FileAndLinkList {
 							       set.getInt("indexParent") ));
 					}
 				}
+				
+				st.close();
 
 			} catch(SQLException e) {
 				Logger.error(this, "Error while searching: "+e.toString());

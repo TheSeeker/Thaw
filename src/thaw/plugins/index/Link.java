@@ -81,6 +81,8 @@ public class Link extends java.util.Observable implements Comparable, LinkContai
 			} else {
 				Logger.error(this, "Link '"+Integer.toString(id)+"' not found.");
 			}
+			
+			st.close();
 		} catch(SQLException e) {
 			Logger.error(this, "Error while loading data for link '"+Integer.toString(id)+"': "+e.toString());
 		}
@@ -172,6 +174,7 @@ public class Link extends java.util.Observable implements Comparable, LinkContai
 			st.setInt(1, index.getId());
 			st.setInt(2, id);
 			st.execute();
+			st.close();
 		} catch(SQLException e) {
 			Logger.error(this, "Unable to set parent because: "+e.toString());
 		}
@@ -242,6 +245,7 @@ public class Link extends java.util.Observable implements Comparable, LinkContai
 			st.setString(1, key);
 			st.setInt(2, id);
 			st.execute();
+			st.close();
 		} catch(SQLException e) {
 			Logger.error(this, "Error while changing publicKey: "+e.toString());
 		}
@@ -258,7 +262,7 @@ public class Link extends java.util.Observable implements Comparable, LinkContai
 			st.setInt(1, id);
 
 			st.execute();
-
+			st.close();
 		} catch(final SQLException e) {
 			Logger.error(this, "Unable to remove link because: "+e.toString());
 		}

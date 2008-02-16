@@ -54,7 +54,8 @@ public class IndexTreeRebuilder implements Plugin {
 
 				st.execute();
 			}
-
+			
+			st.close();
 		}
 
 
@@ -86,6 +87,7 @@ public class IndexTreeRebuilder implements Plugin {
 				rebuild(newParentsVector, set.getInt("id"));
 			}
 
+			st.close();
 
 			/* rebuild all the indexes in this folder */
 
@@ -100,6 +102,7 @@ public class IndexTreeRebuilder implements Plugin {
 				rebuildIndex(newParentsVector, set.getInt("id"));
 			}
 
+			st.close();
 
 			/* rebuild this folder */
 
@@ -124,6 +127,7 @@ public class IndexTreeRebuilder implements Plugin {
 				st.execute();
 			}
 
+			st.close();
 		}
 
 		/**
@@ -138,6 +142,8 @@ public class IndexTreeRebuilder implements Plugin {
 
 			st = db.getConnection().prepareStatement("DELETE FROM folderParents");
 			st.execute();
+			
+			st.close();
 
 			rebuild(new Vector(), -1);
 

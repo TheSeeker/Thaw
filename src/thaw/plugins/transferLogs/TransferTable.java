@@ -368,6 +368,8 @@ public class TransferTable implements MouseListener {
 									   res.getBoolean("isDup"),
 									   res.getBoolean("isSuccess")));
 					}
+
+					st.close();
 				}
 			} catch(SQLException e) {
 				Logger.error(this, "Error while reading transfer logs: "+e.toString());
@@ -435,6 +437,8 @@ public class TransferTable implements MouseListener {
 					res.next();
 
 					nmb_elements = res.getInt(1);
+					
+					st.close();
 				}
 			} catch(SQLException e) {
 				Logger.error(this, "Unable to compute the number of pages in the logs because : "+e.toString());

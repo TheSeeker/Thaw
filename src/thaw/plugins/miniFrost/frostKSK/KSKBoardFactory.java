@@ -142,9 +142,12 @@ public class KSKBoardFactory
 					msg.destroy(db);
 				}
 				
+				st.close();
+				
 				st = db.getConnection().prepareStatement("DELETE FROM frostKSKInvalidSlots WHERE date < ?");
 				st.setTimestamp(1, timestamp);
 				st.execute();
+				st.close();
 
 
 				timestamp = new java.sql.Timestamp(new Date().getTime()
@@ -155,6 +158,7 @@ public class KSKBoardFactory
 				st = db.getConnection().prepareStatement("UPDATE frostKSKMessages SET archived = TRUE WHERE date < ?");
 				st.setTimestamp(1, timestamp);
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Can't cleanup the db because : "+e.toString());
@@ -254,6 +258,8 @@ public class KSKBoardFactory
 					st.setInt(2, id);
 					st.execute();
 				}
+				
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Error while converting the board database from version 2 to 3: "+e.toString());
@@ -370,6 +376,8 @@ public class KSKBoardFactory
 						boardsHashMap.put(name, board);
 					}
 				}
+				
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Can't get the board list because : "+e.toString());
@@ -458,6 +466,8 @@ public class KSKBoardFactory
 					}
 
 				}
+				
+				st.close();
 
 			}
 		} catch(SQLException e) {
@@ -515,13 +525,17 @@ public class KSKBoardFactory
 				if (set.next()) {
 					if (warningIfExisting)
 						Logger.warning(this, "Board already added");
+					st.close();
 					return;
 				}
+				
+				st.close();
 
 				st = db.getConnection().prepareStatement("INSERT INTO frostKSKBoards (name) "+
 									 "VALUES (?)");
 				st.setString(1, name.toLowerCase());
 				st.execute();
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Can't add board because: "+e.toString());
@@ -567,8 +581,11 @@ public class KSKBoardFactory
 				if (set.next()) {
 					if (warningIfExisting)
 						Logger.warning(this, "Board already added");
+					st.close();
 					return;
 				}
+				
+				st.close();
 
 				/* we must get the id first, else we will mix up things */
 
@@ -581,6 +598,7 @@ public class KSKBoardFactory
 				if (set.next())
 					id = set.getInt("id") + 1;
 
+				st.close();
 
 				name = name.toLowerCase();
 
@@ -591,7 +609,7 @@ public class KSKBoardFactory
 				st.setString(2, name);
 
 				st.execute();
-
+				st.close();
 
 				st = db.getConnection().prepareStatement("INSERT INTO frostSSKBoards "+
 									 "(publicKey, privateKey, kskBoardId) "+
@@ -604,7 +622,7 @@ public class KSKBoardFactory
 				st.setInt(3, id);
 
 				st.execute();
-
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Can't add the board because : "+e.toString());
@@ -629,6 +647,8 @@ public class KSKBoardFactory
 												set.getString("privateKey"),
 												null));
 				}
+				
+				st.close();
 			}
 		} catch(SQLException e) {
 			Logger.error(this, "Can't get the list of know boards because: "+e.toString());
@@ -703,7 +723,11 @@ public class KSKBoardFactory
 				/* if no => we continue our progression */
 				pos++;
 			}
-		}		
+		}
+		
+		select.close();
+		update.close();
+		delete.close();
 	}
 	
 	
@@ -719,6 +743,8 @@ public class KSKBoardFactory
 		while(set.next()) {
 			dates.push(set.getDate("date"));
 		}
+		
+		st.close();
 		
 		while(!dates.empty()) {
 			recompactInvalidSlots(db, boardId, (java.sql.Date)dates.pop());
@@ -740,6 +766,8 @@ public class KSKBoardFactory
 					boardIds.push(new Integer(set.getInt("id")));
 					boardNames.push(set.getString("name"));
 				}
+				
+				st.close();
 				
 				while(!boardIds.empty() && !boardNames.empty()) {
 
