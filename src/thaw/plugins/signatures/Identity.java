@@ -476,14 +476,14 @@ public class Identity {
 				st = db.getConnection().prepareStatement("SELECT id FROM signatures "+
 									 "WHERE publicKey = ? LIMIT 1");
 				st.setString(1, publicKey);
-				st.execute();
-				st.close();
 
 				ResultSet set = st.executeQuery();
 
 				if (set.next()) {
 					int id = set.getInt("id");
 
+					st.close();
+					
 					st = db.getConnection().prepareStatement("UPDATE signatures SET "+
 										 "privateKey = ?, trustLevel = ? "+
 										 "WHERE id = ?");
@@ -497,6 +497,8 @@ public class Identity {
 					Signatures.notifyIdentityUpdated(this);
 				} else {
 
+					st.close();
+					
 					st = db.getConnection().prepareStatement("INSERT INTO signatures "+
 										 "(nickName, publicKey, privateKey, "+
 										 "isDup, trustLevel) "+
