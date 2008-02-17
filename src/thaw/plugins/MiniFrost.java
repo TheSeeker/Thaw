@@ -78,6 +78,8 @@ public class MiniFrost implements thaw.core.Plugin, ChangeListener {
 
 
 	protected boolean loadDeps() {
+		/* hsqldb */
+		
 		if(core.getPluginManager().getPlugin("thaw.plugins.Hsqldb") == null) {
 			Logger.info(this, "Loading Hsqldb plugin");
 
@@ -90,6 +92,8 @@ public class MiniFrost implements thaw.core.Plugin, ChangeListener {
 
 		hsqldb = (Hsqldb)core.getPluginManager().getPlugin("thaw.plugins.Hsqldb");
 		hsqldb.registerChild(this);
+		
+		/* wot */
 		
 		if(core.getPluginManager().getPlugin("thaw.plugins.WebOfTrust") == null) {
 			Logger.info(this, "Loading WoT plugin");
