@@ -54,6 +54,7 @@ public class SearchBar implements ActionListener {
 		userText.setSelectionStart(0);
 		userText.setSelectionEnd(userText.getText().length());
 
+		/* TOFIX : Make it possible to search in many indexes at once ! */
 		IndexTreeNode node = indexBrowser.getIndexTree().getSelectedNode();
 
 		if (node == null)

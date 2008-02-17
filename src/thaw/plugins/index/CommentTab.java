@@ -156,11 +156,14 @@ public class CommentTab implements ActionListener {
 			else
 				hideTab();
 		}
+		
+		Vector v = new Vector();
+		v.add(index);
 
 		for (Iterator it = buttonActions.iterator();
 		     it.hasNext();) {
 			IndexManagementHelper.IndexAction action = (IndexManagementHelper.IndexAction)it.next();
-			action.setTarget((Index)index);
+			action.setTargets(v);
 		}
 
 		this.index = index;

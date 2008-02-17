@@ -22,6 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
@@ -89,7 +90,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 	private boolean selectionOnly;
 
-	private IndexTreeNode selectedNode = null;
+	private Vector selectedNodes = null;
 
 	private DefaultTreeModel treeModel;
 
@@ -133,14 +134,15 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		if (!selectionOnly) {
 			tree = new JDragTree(treeModel);
-			tree.addMouseListener(this);
 		} else {
 			tree = new JTree(treeModel);
-			//tree.addMouseListener(this);
 		}
+		
+		tree.addMouseListener(this);
+		tree.addTreeSelectionListener(this);
 
 		tree.setCellRenderer(treeRenderer);
-		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
 		tree.setExpandsSelectedPaths(true);
 
 		// Menus :
@@ -329,9 +331,6 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 		panel.add(new JScrollPane(tree), BorderLayout.CENTER);
 
-		addTreeSelectionListener(this);
-
-
 		// Toolbar
 		JButton button;
 		IndexManagementHelper.IndexAction action;
@@ -343,42 +342,42 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.downloadIndexes"));
 		button.setMnemonic(KeyEvent.VK_R);
 		action = new IndexManagementHelper.IndexDownloader(queueManager, indexBrowser, button);
-		action.setTarget(getRoot());
+		action.setTargets(null);
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 
 		button = new JButton(IconBox.folderNew);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addCategory"));
 		action = new IndexManagementHelper.IndexFolderAdder(indexBrowser, button);
-		action.setTarget(getRoot());
+		action.setTargets(null);
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 
 		button = new JButton(IconBox.indexReuse);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addAlreadyExistingIndex"));
 		action = new IndexManagementHelper.IndexReuser(queueManager, indexBrowser, button);
-		action.setTarget(getRoot());
+		action.setTargets(null);
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 
 		button = new JButton(IconBox.indexNew);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.createIndex"));
 		action = new IndexManagementHelper.IndexCreator(queueManager, indexBrowser, button);
-		action.setTarget(getRoot());
+		action.setTargets(null);
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 
 		button = new JButton(IconBox.indexSettings);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.indexSettings"));
 		action = new IndexManagementHelper.IndexModifier(queueManager, indexBrowser, button);
-		action.setTarget(getRoot());
+		action.setTargets(null);
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 
 		button = new JButton(IconBox.copy);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.copyKeys"));
 		action = new IndexManagementHelper.PublicKeyCopier(button);
-		action.setTarget(null);
+		action.setTargets(null);
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 
@@ -386,14 +385,14 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addToBlackList"));
 		button.setMnemonic(KeyEvent.VK_B);
 		action = new IndexManagementHelper.IndexBlackLister(indexBrowser, button);
-		action.setTarget(getRoot());
+		action.setTargets(null);
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 
 		button = new JButton(IconBox.delete);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.delete"));
 		action = new IndexManagementHelper.IndexDeleter(indexBrowser, button);
-		action.setTarget(getRoot());
+		action.setTargets(null);
 		if (!selectionOnly)
 			tree.addKeyListener((IndexManagementHelper.IndexDeleter)action);
 		toolbarModifier.addButtonToTheToolbar(button);
@@ -405,14 +404,14 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 		button = new JButton(IconBox.addToIndexAction);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addFilesWithoutInserting"));
 		action = new IndexManagementHelper.FileAdder(config, queueManager, indexBrowser, button);
-		action.setTarget(null);
+		action.setTargets(null);
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 
 		button = new JButton(IconBox.makeALinkAction);
 		button.setToolTipText(I18n.getMessage("thaw.plugin.index.addLink"));
 		action = new IndexManagementHelper.LinkAdder(indexBrowser, button);
-		action.setTarget(getRoot());
+		action.setTargets(null);
 		toolbarModifier.addButtonToTheToolbar(button);
 		toolbarActions.add(action);
 	}
@@ -438,45 +437,72 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	public void addTreeSelectionListener(final javax.swing.event.TreeSelectionListener tsl) {
 		tree.addTreeSelectionListener(tsl);
 	}
+	
+	public void checkSelection() {
+		
+		final TreePath[] paths = tree.getSelectionPaths();
 
-	public void valueChanged(final javax.swing.event.TreeSelectionEvent e) {
-		final TreePath path = e.getPath();
-
-		if(path == null)
+		if(paths == null)
 			return;
+			
+		selectedNodes = new Vector();
+		
+		for (int i = 0 ; i < paths.length ; i++) {
+			selectedNodes.add(paths[i].getLastPathComponent());
+		}
 
-		selectedNode = (IndexTreeNode)(path.getLastPathComponent());
-
-		indexBrowser.getDetailPanel().setTarget(selectedNode);
+		indexBrowser.getDetailPanel().setTargets(selectedNodes);
 
 		// Update toolbar
 		for (final Iterator it = toolbarActions.iterator();
 		     it.hasNext(); ) {
 			final IndexManagementHelper.IndexAction action = (IndexManagementHelper.IndexAction)it.next();
-			action.setTarget(selectedNode);
+			action.setTargets(selectedNodes);
+		}
+		
+		// Update nodes
+		
+		for (int i = 0 ; i < paths.length ; i++) {
+			IndexTreeNode selectedNode = (IndexTreeNode)paths[i].getLastPathComponent();
+			
+			if ((indexBrowser != null) && (selectedNode instanceof Index)) {
+				indexBrowser.getUnknownIndexList().addLinks(((Index)selectedNode));
+
+				if (((Index)selectedNode).hasChanged()) {
+					((Index)selectedNode).setHasChangedFlag(false);
+					redraw(paths[i]);
+				}
+
+				if (((Index)selectedNode).hasNewComment()) {
+					((Index)selectedNode).setNewCommentFlag(false);
+					redraw(paths[i]);
+				}
+			}
 		}
 
+		toolbarModifier.displayButtonsInTheToolbar();
 
 		// Notify observers
 
 		setChanged();
-		notifyObservers(selectedNode); /* will make the toolbar visible */
+		notifyObservers(selectedNodes); /* will make the toolbar visible */
 	}
 
 
-	public void updateMenuState(final IndexTreeNode node) {
+	public void updateMenuState(final Vector nodes) {
 		IndexManagementHelper.IndexAction action;
+		
 
 		for(final Iterator it = indexFolderActions.iterator();
 		    it.hasNext();) {
 			action = (IndexManagementHelper.IndexAction)it.next();
-			action.setTarget(node);
+			action.setTargets(nodes);
 		}
 
 		for(final Iterator it = indexAndFileActions.iterator();
 		    it.hasNext();) {
 			action = (IndexManagementHelper.IndexAction)it.next();
-			action.setTarget(node);
+			action.setTargets(nodes);
 		}
 	}
 
@@ -490,7 +516,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 	}
 
 	public void mouseClicked(final MouseEvent e) {
-		notifySelection(e);
+		checkSelection();
 	}
 
 	public void mouseEntered(final MouseEvent e) { }
@@ -508,52 +534,17 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 	protected void showPopupMenu(final MouseEvent e) {
 		if(e.isPopupTrigger()) {
-			if(selectedNode == null)
+			if(selectedNodes == null)
 				return;
+			
+			updateMenuState(selectedNodes);
 
-			if(selectedNode instanceof IndexFolder) {
-				updateMenuState(selectedNode);
+			if(selectedNodes.size() == 1 && selectedNodes.get(0) instanceof IndexFolder) {
 				indexFolderMenu.show(e.getComponent(), e.getX(), e.getY());
-			}
-
-			if(selectedNode instanceof Index) {
-				updateMenuState(selectedNode);
+			} else if(selectedNodes.size() >= 1) {
 				indexAndFileMenu.show(e.getComponent(), e.getX(), e.getY());
 			}
 		}
-	}
-
-	public void notifySelection(final MouseEvent e) {
-		final TreePath path = tree.getPathForLocation(e.getX(), e.getY());
-
-		if(path == null)
-			return;
-
-		selectedNode = (IndexTreeNode)(path.getLastPathComponent());
-
-		if (selectedNode != null) {
-			if ((indexBrowser != null) && (selectedNode instanceof Index)) {
-				indexBrowser.getUnknownIndexList().addLinks(((Index)selectedNode));
-			}
-
-			if (selectedNode instanceof Index) {
-				if (((Index)selectedNode).hasChanged()) {
-					((Index)selectedNode).setHasChangedFlag(false);
-					redraw(path);
-				}
-
-				if (((Index)selectedNode).hasNewComment()) {
-					((Index)selectedNode).setNewCommentFlag(false);
-					redraw(path);
-				}
-			}
-
-		}
-
-		toolbarModifier.displayButtonsInTheToolbar();
-
-		setChanged();
-		notifyObservers(selectedNode);
 	}
 
 	public IndexTreeNode getSelectedNode() {
@@ -575,8 +566,7 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 
 	public void actionPerformed(final ActionEvent e) {
-		if(selectedNode == null)
-			selectedNode = root;
+
 	}
 
 
@@ -917,5 +907,10 @@ public class IndexTree extends java.util.Observable implements MouseListener, Ac
 
 	public boolean isIndexUpdating(Index index) {
 		return (updatingIndexes.indexOf(new Integer(index.getId())) >= 0);
+	}
+
+
+	public void valueChanged(TreeSelectionEvent arg0) {
+		checkSelection();		
 	}
 }

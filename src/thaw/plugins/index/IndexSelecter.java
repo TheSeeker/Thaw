@@ -3,12 +3,15 @@ package thaw.plugins.index;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.util.Iterator;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 import thaw.core.I18n;
 import thaw.core.Logger;
@@ -45,14 +48,14 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 	private IndexTree indexTree;
 
 	private JPanel fieldPanel;
-	private JTextField keyField;
+	private JTextArea keyArea;
 
 	private JPanel downPanel;
 	private JButton cancelButton;
 	private JButton okButton;
 
 	private boolean closeWin;
-	private String selectedIndexKey = null;
+	private String[] selectedIndexKeys = null;
 
 	private IndexBrowserPanel indexBrowser;
 
@@ -63,7 +66,7 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 	/**
 	 * Returned null if canceled. Is blocking !
 	 */
-	public String askForAnIndexURI(final Hsqldb db) {
+	public String[] askForIndexURIs(final Hsqldb db) {
 		frame = new JFrame(I18n.getMessage("thaw.plugin.index.selectIndex"));
 
 		frame.setVisible(false);
@@ -74,7 +77,7 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 		Logger.info(this, "plus indexes");
 
 		fieldPanel = new JPanel();
-		keyField = new JTextField("");
+		keyArea = new JTextArea("");
 
 		downPanel = new JPanel();
 		cancelButton = new JButton(I18n.getMessage("thaw.common.cancel"));
@@ -90,9 +93,15 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 
 
 		upPanel.add(indexPanel, BorderLayout.CENTER);
-
-		fieldPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.indexKey")), BorderLayout.WEST);
-		fieldPanel.add(keyField, BorderLayout.CENTER);
+		
+		JScrollPane sp = new JScrollPane(keyArea);
+		
+		keyArea.setSize(100, 100);
+		sp.setSize(100, 100);
+		sp.setPreferredSize(new java.awt.Dimension(100, 100));
+		
+		fieldPanel.add(new JLabel(I18n.getMessage("thaw.plugin.index.indexKey")), BorderLayout.NORTH);
+		fieldPanel.add(sp, BorderLayout.CENTER);
 		upPanel.add(fieldPanel, BorderLayout.SOUTH);
 
 		downPanel.add(okButton);
@@ -102,7 +111,13 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 		frame.getContentPane().add(upPanel, BorderLayout.CENTER);
 		frame.getContentPane().add(downPanel, BorderLayout.SOUTH);
 
-		frame.setSize(500, 400);
+		frame.setSize(600, 600);
+		
+		keyArea.setSize(100, 100);
+		sp.setSize(100, 100);
+		sp.setPreferredSize(new java.awt.Dimension(100, 100));
+		
+		selectedIndexKeys = null;
 
 		cancelButton.addActionListener(this);
 		okButton.addActionListener(this);
@@ -119,6 +134,7 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 		}
 
 		frame.setVisible(false);
+		frame.dispose();
 
 		frame = null;
 
@@ -126,37 +142,53 @@ public class IndexSelecter implements java.awt.event.ActionListener, java.util.O
 		indexTree = null;
 
 		fieldPanel = null;
-		keyField = null;
+		keyArea = null;
 
 		downPanel = null;
 		cancelButton = null;
 		okButton = null;
 
-		return FreenetURIHelper.cleanURI(selectedIndexKey);
+		//return FreenetURIHelper.cleanURI(selectedIndexKey);
+		return selectedIndexKeys;
 	}
 
 
 	public void update(final java.util.Observable o, final Object param) {
-		if (param instanceof Index) {
-			final Index index = (Index)param;
-			selectedIndexKey = index.getPublicKey();
+		if (param instanceof Vector) {
+			keyArea.setText("");
+			
+			for (Iterator it = ((Vector)param).iterator(); it.hasNext(); ) {
+				IndexTreeNode node = (IndexTreeNode)it.next();
+				
+				if (node instanceof Index) {
+					final Index index = (Index)node;
+					final String key = index.getPublicKey();
 
-			Logger.info(this, "Selected index key: "+selectedIndexKey);
-			keyField.setText(selectedIndexKey);
+					Logger.info(this, "Selected index key: "+key);
+					keyArea.setText(keyArea.getText()+key+"\n");
+				}
+			}			
 		}
+		
 	}
 
 	public void actionPerformed(final java.awt.event.ActionEvent e) {
 		if (e.getSource() == okButton) {
-			if ((keyField.getText() == null) || "".equals( keyField.getText() ))
-				selectedIndexKey = null;
-			else
-				selectedIndexKey = keyField.getText();
+			if ((keyArea.getText() == null) || "".equals( keyArea.getText() ))
+				selectedIndexKeys = null;
+			else {
+				selectedIndexKeys = keyArea.getText().trim().split("\n");
+				
+				for (int i = 0 ; i < selectedIndexKeys.length ; i++) {
+					selectedIndexKeys[i] = FreenetURIHelper.cleanURI(selectedIndexKeys[i]);					
+				}
+				
+			}
 			closeWin = true;
 		}
 
 		if (e.getSource() == cancelButton) {
-			selectedIndexKey = null;
+			selectedIndexKeys = null;
 			closeWin = true;
 		}
 

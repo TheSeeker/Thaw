@@ -76,7 +76,7 @@ public class IndexManagementHelper {
 		 * Can disable the abstract button if required
 		 * @param node can be null
 		 */
-		public void setTarget(IndexTreeNode node);
+		public void setTargets(Vector nodes);
 	}
 
 
@@ -85,7 +85,7 @@ public class IndexManagementHelper {
 
 		private FCPQueueManager queueManager;
 		private AbstractButton actionSource;
-		private IndexTreeNode target;
+		private Vector targets;
 
 		private IndexBrowserPanel indexBrowser;
 
@@ -94,7 +94,7 @@ public class IndexManagementHelper {
 					final AbstractButton actionSource) {
 			this.indexBrowser = indexBrowser;
 			this.actionSource = actionSource;
-			target = null;
+			targets = null;
 			this.queueManager = queueManager;
 
 			if (actionSource != null) {
@@ -107,17 +107,16 @@ public class IndexManagementHelper {
 			return actionSource;
 		}
 
-		public void setTarget(final IndexTreeNode node) {
-			target = node;
-
+		public void setTargets(final Vector nodes) {
+			targets = nodes;
 		}
 
 		public FCPQueueManager getQueueManager() {
 			return queueManager;
 		}
 
-		public IndexTreeNode getTarget() {
-			return target;
+		public Vector getTargets() {
+			return targets;
 		}
 
 		public IndexBrowserPanel getIndexBrowserPanel() {
@@ -139,31 +138,48 @@ public class IndexManagementHelper {
 
 
 		public void run() {
-			apply();
+			if (targets == null)
+				return;
+			
+			for (Iterator it = targets.iterator(); it.hasNext() ; ) {
+				IndexTreeNode node = (IndexTreeNode)it.next();
+				apply(node);
+			}
 		}
 
 		public void stop() {
 			/* \_o< */
 		}
 
-		public abstract void apply();
+		public abstract void apply(IndexTreeNode target);
 	}
 
 
 
 	public static class IndexCreator extends BasicIndexAction implements Observer {
+		private IndexTreeNode target;
+		
 		public IndexCreator(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(queueManager, indexBrowser, actionSource);
 		}
+		
+		public void setTargets(Vector nodes) {
+			super.setTargets(nodes);
+			
+			if (nodes == null || nodes.size() != 1)
+				getActionSource().setEnabled(false);
+			else
+				setTarget((IndexTreeNode)nodes.get(0));
+		}
 
 		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
-
+			this.target = node;
+			
 			if (getActionSource() != null)
 				getActionSource().setEnabled((node == null) || (node instanceof IndexFolder));
 		}
 
-		public void apply() {
+		public void apply(IndexTreeNode target) {
 			final String name = IndexManagementHelper.askAName(getIndexBrowserPanel().getMainWindow().getMainFrame(),
 									   I18n.getMessage("thaw.plugin.index.indexName"),
 									   I18n.getMessage("thaw.plugin.index.newIndex"));
@@ -172,17 +188,14 @@ public class IndexManagementHelper {
 				return;
 
 			/* will create a dedicated IndexCreator */
-			IndexManagementHelper.createIndex(getQueueManager(), getIndexBrowserPanel(), (IndexFolder)getTarget(), name);
+			IndexManagementHelper.createIndex(getQueueManager(), getIndexBrowserPanel(), (IndexFolder)target, name);
 		}
 
 
 		private String name;
 
-		/**
-		 * Don't use directly
-		 */
-		public void createIndex(String name) {
-			if (getTarget() == null)
+		private void createIndex(IndexTreeNode target, String name) {
+			if (target == null)
 				setTarget(getIndexBrowserPanel().getIndexTree().getRoot());
 
 			if ((name == null) || (name.indexOf("/") >= 0) || name.indexOf("\\") >= 0) {
@@ -241,8 +254,8 @@ public class IndexManagementHelper {
 					st.setBoolean(9, false);
 					st.setBoolean(10, false);
 
-					if (getTarget().getId() >= 0)
-						st.setInt(11, getTarget().getId());
+					if (target.getId() >= 0)
+						st.setInt(11, target.getId());
 					else
 						st.setNull(11, Types.INTEGER);
 
@@ -250,7 +263,7 @@ public class IndexManagementHelper {
 					st.close();
 
 					index = new Index(db, getIndexBrowserPanel().getConfig(),
-							  id, (TreeNode)getTarget(),
+							  id, (TreeNode)target,
 							  sskGenerator.getPublicKey(), 0,
 							  sskGenerator.getPrivateKey(), false,
 							  name, null,
@@ -263,9 +276,9 @@ public class IndexManagementHelper {
 				}
 			}
 
-			((MutableTreeNode)getTarget()).insert((index), 0);
+			((MutableTreeNode)target).insert((index), 0);
 
-			getIndexBrowserPanel().getIndexTree().refresh(getTarget());
+			getIndexBrowserPanel().getIndexTree().refresh(target);
 
 			IndexConfigDialog dialog = new IndexConfigDialog(getIndexBrowserPanel(),
 									 getQueueManager(),
@@ -281,27 +294,33 @@ public class IndexManagementHelper {
 
 		IndexCreator creator = new IndexCreator(queueManager, indexBrowser, null);
 		creator.setTarget(target);
-		creator.createIndex(name);
+		creator.createIndex(target, name);
 
 	}
 
 
 
 	public static class IndexModifier extends BasicIndexAction implements ThawRunnable {
-
 		public IndexModifier(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(queueManager, indexBrowser, actionSource);
 		}
+		
+		public void setTargets(Vector nodes) {
+			super.setTargets(nodes);
+			
+			if (nodes == null || nodes.size() != 1)
+				getActionSource().setEnabled(false);
+			else
+				setTarget((IndexTreeNode)nodes.get(0));
+		}
 
 		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
-
 			if (getActionSource() != null)
 				getActionSource().setEnabled((node != null) && (node instanceof Index));
 		}
 
-		public void apply() {
-			final Index index = ((Index)getTarget());
+		public void apply(IndexTreeNode target) {
+			final Index index = ((Index)target);
 
 			IndexConfigDialog dialog = new IndexConfigDialog(getIndexBrowserPanel(),
 									 getQueueManager(),
@@ -325,15 +344,22 @@ public class IndexManagementHelper {
 		public IndexReuser(final FCPQueueManager queueManager, final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(queueManager, indexBrowser, actionSource);
 		}
+		
+		public void setTargets(Vector nodes) {
+			super.setTargets(nodes);
+			
+			if (nodes == null || nodes.size() != 1)
+				getActionSource().setEnabled(false);
+			else
+				setTarget((IndexTreeNode)nodes.get(0));
+		}
 
 		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
-
 			if (getActionSource() != null)
 				getActionSource().setEnabled((node == null) || (node instanceof IndexFolder));
 		}
 
-		public void apply() {
+		public void apply(IndexTreeNode target) {
 			String publicKey = null;
 			String privateKey = null;
 
@@ -507,21 +533,28 @@ public class IndexManagementHelper {
 		public IndexFolderAdder(final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(null, indexBrowser, actionSource);
 		}
+		
+		public void setTargets(Vector nodes) {
+			super.setTargets(nodes);
+			
+			if (nodes == null || nodes.size() != 1)
+				getActionSource().setEnabled(false);
+			else
+				setTarget((IndexTreeNode)nodes.get(0));
+		}
 
 		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
-
 			if (getActionSource() != null)
 				getActionSource().setEnabled((node == null) || (node instanceof IndexFolder));
 		}
 
-		public void apply() {
+		public void apply(IndexTreeNode target) {
 			final String name = IndexManagementHelper.askAName(getIndexBrowserPanel().getMainWindow().getMainFrame(),
 									   I18n.getMessage("thaw.plugin.index.categoryName"),
 									   I18n.getMessage("thaw.plugin.index.newCategory"));
 
 			if (name != null)
-				IndexManagementHelper.addIndexFolder(getIndexBrowserPanel(), (IndexFolder)getTarget(), name);
+				IndexManagementHelper.addIndexFolder(getIndexBrowserPanel(), (IndexFolder)target, name);
 		}
 	}
 
@@ -580,15 +613,15 @@ public class IndexManagementHelper {
 		public IndexHasChangedFlagReseter(IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(null, indexBrowser, actionSource);
 		}
-
-		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
+		
+		public void setTargets(Vector nodes) {
+			super.setTargets(nodes);
 		}
 
-		public void apply() {
-			getTarget().setHasChangedFlag(false);
-			getTarget().setNewCommentFlag(false);
-			getIndexBrowserPanel().getIndexTree().redraw(getTarget());
+		public void apply(IndexTreeNode target) {
+			target.setHasChangedFlag(false);
+			target.setNewCommentFlag(false);
+			getIndexBrowserPanel().getIndexTree().redraw(target);
 		}
 	}
 
@@ -609,16 +642,16 @@ public class IndexManagementHelper {
 			this(queueManager, indexBrowser, actionSource);
 			this.autoSort = autoSort;
 		}
-
-		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
+		
+		public void setTargets(Vector paths) {
+			super.setTargets(paths);
 		}
 
-		public void apply() {
-			getTarget().downloadFromFreenet(this,
-							getIndexBrowserPanel().getIndexTree(),
-							getQueueManager());
-			getIndexBrowserPanel().getIndexTree().redraw(getTarget());
+		public void apply(IndexTreeNode target) {
+			target.downloadFromFreenet(this,
+						getIndexBrowserPanel().getIndexTree(),
+						getQueueManager());
+			getIndexBrowserPanel().getIndexTree().redraw(target);
 		}
 
 		public void update(Observable o, Object param) {
@@ -642,7 +675,7 @@ public class IndexManagementHelper {
 
 				if ( (cat = index.getCategory()) == null) {
 					Logger.notice(this, "No category defined ; Can't autosort "+
-						      "the index '"+index.toString(false)+"'");
+										"the index '"+index.toString(false)+"'");
 					return;
 				}
 
@@ -662,7 +695,9 @@ public class IndexManagementHelper {
 								 indexBrowser,
 								 null,
 								 autoSort);
-		downloader.setTarget(target);
+		Vector v = new Vector();
+		v.add(target);
+		downloader.setTargets(v);
 
 		Thread th = new ThawThread(downloader, "Index downloader");
 		th.start();
@@ -806,24 +841,24 @@ public class IndexManagementHelper {
 
 			super(null, indexBrowser, actionSource);
 		}
-
-		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
+		
+		public void setTargets(Vector nodes) {
+			super.setTargets(nodes);
 
 			if (getActionSource() != null)
-				getActionSource().setEnabled(node != null);
+				getActionSource().setEnabled(nodes != null && nodes.size() > 0);
 		}
 
-		public void apply() {
-			if (getTarget() instanceof Index) {
-				if (((Index)getTarget()).getCategory() == null) {
+		public void apply(IndexTreeNode target) {
+			if (target instanceof Index) {
+				if (((Index)target).getCategory() == null) {
 					Logger.warning(this, "No category => can't sort !");
 					return;
 				}
 			}
 
 			autoSortIndexes(getIndexBrowserPanel(),
-							(IndexTreeNode)getTarget(),
+							(IndexTreeNode)target,
 							getIndexBrowserPanel().getMainWindow());
 		}
 	}
@@ -836,18 +871,27 @@ public class IndexManagementHelper {
 
 			super(queueManager, indexBrowser, actionSource);
 		}
-
-		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
+		
+		public void setTargets(Vector nodes) {
+			super.setTargets(nodes);
 
 			if (getActionSource() != null)
-				getActionSource().setEnabled((node != null) && node.isModifiable());
+				getActionSource().setEnabled(nodes != null && nodes.size() > 0);
+			
+			if (getActionSource().isEnabled()) {
+				for (Iterator it = nodes.iterator() ; it.hasNext() && getActionSource().isEnabled() ; ) {
+					IndexTreeNode node = (IndexTreeNode)it.next();
+					
+					if (!node.isModifiable())
+						getActionSource().setEnabled(false);
+				}
+			}
 		}
 
-		public void apply() {
-			getTarget().insertOnFreenet(this, getIndexBrowserPanel(), getQueueManager());
+		public void apply(IndexTreeNode target) {
+			target.insertOnFreenet(this, getIndexBrowserPanel(), getQueueManager());
 
-			getIndexBrowserPanel().getIndexTree().redraw(getTarget());
+			getIndexBrowserPanel().getIndexTree().redraw(target);
 		}
 
 		public void update(Observable o, Object param) {
@@ -859,7 +903,9 @@ public class IndexManagementHelper {
 
 	public static boolean insert(FCPQueueManager queueManager, IndexBrowserPanel indexBrowser, IndexTreeNode target) {
 		IndexUploader uploader = new IndexUploader(queueManager, indexBrowser, null);
-		uploader.setTarget(target);
+		Vector v = new Vector();
+		v.add(target);
+		uploader.setTargets(v);
 
 		Thread th = new ThawThread(uploader, "Index inserter");
 		th.start();
@@ -873,15 +919,12 @@ public class IndexManagementHelper {
 			super(null, null, actionSource);
 		}
 
-		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
-
-			if (getActionSource() != null)
-				getActionSource().setEnabled(node != null);
+		public void setTargets(final Vector nodes) {
+			super.setTargets(nodes);
 		}
 
-		public void apply() {
-			IndexManagementHelper.copyPublicKeyFrom(getTarget());
+		public void apply(IndexTreeNode target) {
+			IndexManagementHelper.copyPublicKeyFrom(target);
 		}
 	}
 
@@ -905,15 +948,26 @@ public class IndexManagementHelper {
 			super(null, null, actionSource);
 		}
 
-		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
-
-			if (getActionSource() != null)
-				getActionSource().setEnabled((node != null) && (node instanceof Index) && node.isModifiable());
+		public void setTargets(final Vector nodes) {
+			super.setTargets(nodes);
+			
+			boolean e = true;
+			
+			if (nodes == null)
+				e = false;
+			else {
+				for (Iterator it = nodes.iterator(); it.hasNext() && e; ) {
+					IndexTreeNode node = (IndexTreeNode)it.next();
+					if (!(node instanceof Index) || !node.isModifiable())
+						e = false;
+				}
+			}
+			
+			getActionSource().setEnabled(e);
 		}
 
-		public void apply() {
-			IndexManagementHelper.copyPrivateKeyFrom(getTarget());
+		public void apply(IndexTreeNode target) {
+			IndexManagementHelper.copyPrivateKeyFrom(target);
 		}
 	}
 
@@ -935,31 +989,38 @@ public class IndexManagementHelper {
 		public IndexRenamer(final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(null, indexBrowser, actionSource);
 		}
+		
+		public void setTargets(Vector nodes) {
+			super.setTargets(nodes);
+			
+			if (nodes == null || nodes.size() != 1)
+				getActionSource().setEnabled(false);
+			else
+				setTarget((IndexTreeNode)nodes.get(0));
+		}
 
 		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
-
 			if (getActionSource() != null)
 				getActionSource().setEnabled(node != null);
 		}
 
-		public void apply() {
+		public void apply(IndexTreeNode target) {
 			String newName;
 
-			if (getTarget() instanceof Index) {
+			if (target instanceof Index) {
 				newName = IndexManagementHelper.askAName(getIndexBrowserPanel().getMainWindow().getMainFrame(),
 									 I18n.getMessage("thaw.plugin.index.indexName"),
-									 ((Index)getTarget()).toString(false));
+									 ((Index)target).toString(false));
 			} else {
 				newName = IndexManagementHelper.askAName(getIndexBrowserPanel().getMainWindow().getMainFrame(),
 									 I18n.getMessage("thaw.plugin.index.categoryName"),
-									 getTarget().toString());
+									 target.toString());
 			}
 
 			if (newName == null)
 				return;
 
-			IndexManagementHelper.renameNode(getIndexBrowserPanel(), getTarget(), newName);
+			IndexManagementHelper.renameNode(getIndexBrowserPanel(), target, newName);
 		}
 	}
 
@@ -979,15 +1040,22 @@ public class IndexManagementHelper {
 		public IndexExporter(final AbstractButton actionSource) {
 			super(null, null, actionSource);
 		}
+		
+		public void setTargets(Vector nodes) {
+			super.setTargets(nodes);
+			
+			if (nodes == null || nodes.size() != 1)
+				getActionSource().setEnabled(false);
+			else
+				setTarget((IndexTreeNode)nodes.get(0));
+		}
 
 		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
-
 			if (getActionSource() != null)
 				getActionSource().setEnabled((node != null) && (node instanceof Index));
 		}
 
-		public void apply() {
+		public void apply(IndexTreeNode target) {
 			java.io.File newFile;
 
 			final FileChooser fileChooser = new FileChooser();
@@ -1008,7 +1076,7 @@ public class IndexManagementHelper {
 				return;
 			}
 
-			new IndexParser(((Index)getTarget())).generateXML(out);
+			new IndexParser(((Index)target)).generateXML(out);
 			
 			try {
 				out.close();
@@ -1023,15 +1091,22 @@ public class IndexManagementHelper {
 		public IndexImporter(final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(null, indexBrowser, actionSource);
 		}
+		
+		public void setTargets(Vector nodes) {
+			super.setTargets(nodes);
+			
+			if (nodes == null || nodes.size() != 1)
+				getActionSource().setEnabled(false);
+			else
+				setTarget((IndexTreeNode)nodes.get(0));
+		}
 
 		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
-
 			if (getActionSource() != null)
 				getActionSource().setEnabled((node != null) && (node instanceof Index));
 		}
 
-		public void apply() {
+		public void apply(IndexTreeNode target) {
 			java.io.File newFile;
 
 			final FileChooser fileChooser = new FileChooser();
@@ -1043,7 +1118,7 @@ public class IndexManagementHelper {
 			if (newFile == null)
 				return;
 
-			new IndexParser(((Index)getTarget())).loadXML(newFile.getPath(), false);
+			new IndexParser(((Index)target)).loadXML(newFile.getPath(), false);
 
 			getIndexBrowserPanel().getTables().getFileTable().refresh();
 			getIndexBrowserPanel().getTables().getLinkTable().refresh();
@@ -1061,12 +1136,11 @@ public class IndexManagementHelper {
 			super(null, indexBrowser, actionSource);
 		}
 
-		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
+		public void setTargets(final Vector nodes) {
+			super.setTargets(nodes);
 
 			if (getActionSource() != null)
-				getActionSource().setEnabled(node != null
-							     && (getIndexBrowserPanel().getIndexTree() != null));
+				getActionSource().setEnabled(getIndexBrowserPanel().getIndexTree() != null);
 		}
 
 		public void  keyPressed(KeyEvent e) {
@@ -1083,8 +1157,8 @@ public class IndexManagementHelper {
 
 		}
 
-		public void apply() {
-			IndexManagementHelper.deleteNode(getIndexBrowserPanel(), getTarget());
+		public void apply(IndexTreeNode target) {
+			IndexManagementHelper.deleteNode(getIndexBrowserPanel(), target);
 		}
 	}
 
@@ -1118,11 +1192,8 @@ public class IndexManagementHelper {
 			this.indexBrowser = indexBrowser;
 		}
 
-		public void setTarget(final IndexTreeNode node) {
-			if (node != null)
-				super.setTarget(node);
-			else
-				super.setTarget(null);
+		public void setTargets(final Vector nodes) {
+			super.setTargets(nodes);
 		}
 		
 		private void blackListRecursivly(Hsqldb db, IndexFolder target) {
@@ -1142,14 +1213,14 @@ public class IndexManagementHelper {
 			}
 		}
 
-		public void apply() {
-			if (getTarget() instanceof IndexFolder) {
-				blackListRecursivly(indexBrowser.getDb(), (IndexFolder)getTarget());
-			} else if (getTarget() instanceof Index) {
-				BlackList.addToBlackList(indexBrowser.getDb(), getTarget().getPublicKey());
+		public void apply(IndexTreeNode target) {
+			if (target instanceof IndexFolder) {
+				blackListRecursivly(indexBrowser.getDb(), (IndexFolder)target);
+			} else if (target instanceof Index) {
+				BlackList.addToBlackList(indexBrowser.getDb(), target.getPublicKey());
 			}
 			
-			super.apply();
+			super.apply(target);
 			indexBrowser.getBlackList().updateList();
 		}
 	}
@@ -1164,15 +1235,23 @@ public class IndexManagementHelper {
 			super(queueManager, indexBrowser, actionSource);
 			this.config = config;
 		}
+		
+		public void setTargets(Vector nodes) {
+			super.setTargets(nodes);
+			
+			if (nodes == null || nodes.size() != 1)
+				getActionSource().setEnabled(false);
+			else
+				setTarget((IndexTreeNode)nodes.get(0));
+		}
 
 		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
 
 			if (getActionSource() != null)
 				getActionSource().setEnabled((node != null) && (node instanceof Index) && ((Index)node).isModifiable());
 		}
 
-		public void apply() {
+		public void apply(IndexTreeNode target) {
 			final FileChooser fileChooser;
 
 			String lastDir = null;
@@ -1200,7 +1279,7 @@ public class IndexManagementHelper {
 
 			final String category = FileCategory.promptForACategory();
 
-			IndexManagementHelper.addFiles(getQueueManager(), getIndexBrowserPanel(), (Index)getTarget(), files, category, true);
+			IndexManagementHelper.addFiles(getQueueManager(), getIndexBrowserPanel(), (Index)target, files, category, true);
 		}
 	}
 
@@ -1212,15 +1291,23 @@ public class IndexManagementHelper {
 			super(queueManager, indexBrowser, actionSource);
 			this.config = config;
 		}
+		
+		public void setTargets(Vector nodes) {
+			super.setTargets(nodes);
+			
+			if (nodes == null || nodes.size() != 1)
+				getActionSource().setEnabled(false);
+			else
+				setTarget((IndexTreeNode)nodes.get(0));
+		}
 
 		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
 
 			if (getActionSource() != null)
 				getActionSource().setEnabled((node != null) && (node instanceof Index) && ((Index)node).isModifiable());
 		}
 
-		public void apply() {
+		public void apply(IndexTreeNode target) {
 			final FileChooser fileChooser;
 			String lastDir = null;
 
@@ -1247,7 +1334,7 @@ public class IndexManagementHelper {
 
 			final String category = FileCategory.promptForACategory();
 
-			IndexManagementHelper.addFiles(getQueueManager(), getIndexBrowserPanel(), (Index)getTarget(), files, category, false);
+			IndexManagementHelper.addFiles(getQueueManager(), getIndexBrowserPanel(), (Index)target, files, category, false);
 		}
 	}
 
@@ -1354,19 +1441,29 @@ public class IndexManagementHelper {
 		private JDialog frame = null;
 
 		private JPopupMenu popupMenu = null;
+		
+		private IndexTreeNode target = null;
 
 		public KeyAdder(final IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(null, indexBrowser, actionSource);
 		}
+		
+		public void setTargets(Vector nodes) {
+			super.setTargets(nodes);
+			
+			if (nodes == null || nodes.size() != 1)
+				getActionSource().setEnabled(false);
+			else
+				setTarget((IndexTreeNode)nodes.get(0));
+		}
 
 		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
-
 			if (getActionSource() != null)
 				getActionSource().setEnabled((node != null) && (node instanceof Index) && ((Index)node).isModifiable());
 		}
 
-		public void apply() {
+		public void apply(IndexTreeNode target) {
+			this.target = target;
 			JLabel header = null;
 			JPanel buttonPanel = null;
 
@@ -1424,7 +1521,7 @@ public class IndexManagementHelper {
 					}
 				}
 
-				IndexManagementHelper.addKeys(getIndexBrowserPanel(), (Index)getTarget(), keyVec, category);
+				IndexManagementHelper.addKeys(getIndexBrowserPanel(), (Index)target, keyVec, category);
 			}
 
 			if (e.getSource() == cancelButton) {
@@ -1549,20 +1646,28 @@ public class IndexManagementHelper {
 		public LinkAdder(IndexBrowserPanel indexBrowser, final AbstractButton actionSource) {
 			super(null, indexBrowser, actionSource);
 		}
+		
+		public void setTargets(Vector nodes) {
+			super.setTargets(nodes);
+			
+			if (nodes == null || nodes.size() != 1)
+				getActionSource().setEnabled(false);
+			else
+				setTarget((IndexTreeNode)nodes.get(0));
+		}
 
 		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
-
 			if (getActionSource() != null)
 				getActionSource().setEnabled((node != null) && (node instanceof Index) && ((Index)node).isModifiable());
 		}
 
-		public void apply() {
+		public void apply(IndexTreeNode target) {
 			final IndexSelecter indexSelecter = new IndexSelecter(getIndexBrowserPanel());
-			final String indexKey = indexSelecter.askForAnIndexURI(getIndexBrowserPanel().getDb());
+			final String[] indexKeys = indexSelecter.askForIndexURIs(getIndexBrowserPanel().getDb());
 
-			if (indexKey != null) {
-				IndexManagementHelper.addLink(getIndexBrowserPanel(), (Index)getTarget(), indexKey);
+			if (indexKeys != null) {
+				for (int i = 0 ; i < indexKeys.length ; i++)
+					IndexManagementHelper.addLink(getIndexBrowserPanel(), (Index)target, indexKeys[i]);
 			}
 		}
 	}
@@ -1612,19 +1717,30 @@ public class IndexManagementHelper {
 			super(null, indexBrowser, actionSource);
 		}
 
-		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
-			getActionSource().setEnabled(node != null && node instanceof IndexFolder);
+		public void setTargets(final Vector nodes) {
+			super.setTargets(nodes);
+
+			boolean e = false;
+			
+			if (nodes != null) {
+				for (Iterator it = nodes.iterator() ; it.hasNext() ; ) {
+					if (it.next() instanceof IndexFolder)
+						e = true;
+				}
+			}
+			
+			e = e && nodes.size() > 0;
+			
+			getActionSource().setEnabled(e);
 		}
 
-		public void apply() {
-			if (getTarget() != null && getTarget() instanceof IndexFolder) {
-				((IndexFolder)getTarget()).reorder();
-				((IndexFolder)getTarget()).forceReload();
-				getIndexBrowserPanel().getIndexTree().refresh(getTarget());
-			}
-			else
-				Logger.notice(this, "No target ?!");
+		public void apply(IndexTreeNode target) {
+			if (!(target instanceof IndexFolder))
+				return;
+			
+			((IndexFolder)target).reorder();
+			((IndexFolder)target).forceReload();
+			getIndexBrowserPanel().getIndexTree().refresh(target);
 		}
 	}
 
@@ -1639,6 +1755,7 @@ public class IndexManagementHelper {
 		private JButton okButton;
 		private JButton cancelButton;
 
+		private IndexTreeNode target;
 
 		public IndexCommentAdder(FCPQueueManager queueManager,
 					 IndexBrowserPanel indexBrowser,
@@ -1648,11 +1765,17 @@ public class IndexManagementHelper {
 			if (actionSource != null)
 				actionSource.setEnabled(false);
 		}
-
+		
+		public void setTargets(Vector nodes) {
+			super.setTargets(nodes);
+			
+			if (nodes == null || nodes.size() != 1)
+				getActionSource().setEnabled(false);
+			else
+				setTarget((IndexTreeNode)nodes.get(0));
+		}
 
 		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
-
 			if (getActionSource() != null) {
 				getActionSource().setEnabled(node != null
 							     && node instanceof Index
@@ -1722,7 +1845,7 @@ public class IndexManagementHelper {
 			}
 
 			if (e.getSource() == okButton) {
-				if (getTarget() instanceof Index) {
+				if (target instanceof Index) {
 					Identity i = ((Identity)author.getSelectedItem());
 
 					if (i == null) {
@@ -1731,7 +1854,7 @@ public class IndexManagementHelper {
 						return;
 					}
 
-					((Index)getTarget()).postComment(getQueueManager(),
+					((Index)target).postComment(getQueueManager(),
 									 getIndexBrowserPanel().getMainWindow(),
 									 i,
 									 textArea.getText().trim());
@@ -1755,7 +1878,8 @@ public class IndexManagementHelper {
 		}
 
 
-		public void apply() {
+		public void apply(IndexTreeNode target) {
+			this.target = target;
 			showDialog();
 		}
 	}
@@ -1769,17 +1893,23 @@ public class IndexManagementHelper {
 				actionSource.setEnabled(false);
 		}
 
+		public void setTargets(Vector nodes) {
+			super.setTargets(nodes);
+			
+			if (nodes == null || nodes.size() != 1)
+				getActionSource().setEnabled(false);
+			else
+				setTarget((IndexTreeNode)nodes.get(0));
+		}
 
 		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
-
 			if (getActionSource() != null)
 				getActionSource().setEnabled(node != null
 							     && node instanceof Index
 							     && ((Index)node).canHaveComments());
 		}
 
-		public void apply() {
+		public void apply(IndexTreeNode target) {
 			getIndexBrowserPanel().getCommentTab().showTab();
 		}
 	}
@@ -1796,11 +1926,18 @@ public class IndexManagementHelper {
 			if (actionSource != null)
 				actionSource.setEnabled(false);
 		}
+		
+		public void setTargets(Vector nodes) {
+			super.setTargets(nodes);
+			
+			if (nodes == null || nodes.size() != 1)
+				getActionSource().setEnabled(false);
+			else
+				setTarget((IndexTreeNode)nodes.get(0));
+		}
 
 
 		public void setTarget(final IndexTreeNode node) {
-			super.setTarget(node);
-
 			getActionSource().setEnabled(node != null);
 		}
 
@@ -1870,8 +2007,8 @@ public class IndexManagementHelper {
 		}
 
 
-		public void apply() {
-			IndexTreeNode node = getTarget();
+		public void apply(IndexTreeNode target) {
+			IndexTreeNode node = target;
 
 			Hsqldb db = getIndexBrowserPanel().getDb();
 			PreparedStatement st;
@@ -1979,11 +2116,13 @@ public class IndexManagementHelper {
 			button.setEnabled(false);
 		}
 
-		public void setTarget(IndexTreeNode node) {
-			if (node == null) {
+		public void setTargets(Vector nodes) {
+			if (nodes == null || nodes.size() != 1) {
 				button.setText("N/A");
 				return;
 			}
+
+			IndexTreeNode node = (IndexTreeNode)nodes.get(0);
 
 			if (node instanceof Index)
 				button.setText(((Index)node).toString(false));

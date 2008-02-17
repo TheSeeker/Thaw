@@ -58,19 +58,35 @@ public class DetailPanel {
 
 
 
-	public void setTarget(IndexTreeNode l) {
+	public void setTargets(Vector targets) {
+		
+		IndexTreeNode l;
+		
+		if (targets.size() != 1)
+			l = null;
+		else
+			l = (IndexTreeNode)targets.get(0);
+		
+		setTarget(l);
+	}
 
+	public void setTarget(IndexTreeNode l) {
+		
 		if (l != null && l instanceof Index)
 			viewCommentButton.setText(I18n.getMessage("thaw.plugin.index.comment.comments").replaceAll("\\?",
 														   Integer.toString(((Index)l).getNmbComments())));
 		else
 			viewCommentButton.setText(I18n.getMessage("thaw.plugin.index.comment.comments").replaceAll("\\?",
 														   "0"));
+		
+		Vector v = new Vector();
+		if (l != null)
+			v.add(l);
 
 		for (Iterator it = buttonActions.iterator();
 		     it.hasNext();) {
 			IndexManagementHelper.IndexAction action = (IndexManagementHelper.IndexAction)it.next();
-			action.setTarget(l);
+			action.setTargets(v);
 		}
 	}
 
