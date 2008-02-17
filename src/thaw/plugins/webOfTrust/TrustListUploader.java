@@ -327,15 +327,15 @@ public class TrustListUploader implements Signatures.SignaturesObserver, Observe
 			if (upload.isFinished()) {
 		
 				upload.deleteObserver(this);
-				
-				upload.stop(queueManager);
-				queueManager.remove(upload);
-				
+			
 				if (upload.isSuccessful()) {
 					Logger.notice(this, "Trust list inserted");
 					lastUpload = new Date();
 				} else
 					Logger.warning(this, "Unable to insert trust list !");
+				
+				upload.stop(queueManager);
+				queueManager.remove(upload);
 				
 				if (upload.getPath() != null)
 					new File(upload.getPath()).delete();
