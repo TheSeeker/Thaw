@@ -7,6 +7,7 @@ import thaw.plugins.signatures.*;
 
 import java.io.File;
 import java.sql.*;
+import java.util.Vector;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -34,6 +35,10 @@ public class WotIdentity extends Identity implements TrustListParser.TrustListCo
 	
 	public int getUserTrustLevel() {
 		return super.getTrustLevel();
+	}
+	
+	public String getUserTrustLevelStr() {
+		return super.getTrustLevelStr();
 	}
 	
 	/**
@@ -314,5 +319,132 @@ public class WotIdentity extends Identity implements TrustListParser.TrustListCo
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Just a container
+	 * @author jflesch
+	 */
+	public static class TrustLink {
+		private WotIdentity src;
+		private WotIdentity dst;
+		private Identity destinationAsSeenByTheSource;
+		
+		public TrustLink(Hsqldb db, WotIdentity src, WotIdentity dst, int linkTrustLevel) {
+			this.src = src;
+			this.dst = dst;
+			destinationAsSeenByTheSource = new Identity(db, dst.getId(),
+										dst.getNick(), dst.getPublicKey(),
+										dst.getPrivateKey(), dst.isDup(), 
+										linkTrustLevel);
+		}
+		
+		public WotIdentity getSource() {
+			return src;
+		}
+		
+		public WotIdentity getDestination() {
+			return dst;
+		}
+		
+		public int getLinkTrustLevel() {
+			return destinationAsSeenByTheSource.getTrustLevel();
+		}
+		
+		public Identity getDestinationAsSeenByTheSource() {
+			return destinationAsSeenByTheSource;
+		}
+	}
+	
+	/**
+	 * @param db
+	 * @param idSrc
+	 * @return a vector of TrustLink
+	 */
+	public static Vector getTrustList(Hsqldb db, Identity idSrc) {
+		Vector v = new Vector();
+		
+		WotIdentity src = new WotIdentity(idSrc);
+		
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+				
+				st = db.getConnection().prepareStatement("SELECT signatures.id AS id, "+
+														" signatures.nickname AS nickname, "+
+														" signatures.publicKey AS publicKey, "+
+														" signatures.privateKey AS privateKey, "+
+														" signatures.isDup AS isDup, "+
+														" signatures.trustLevel AS yourTrustLevel, "+
+														" wotTrustLists.trustLevel AS linkTrustLevel "+
+										"FROM wotTrustLists INNER JOIN signatures ON wotTrustLists.destination = signatures.id "+
+										"WHERE source = ?");
+				st.setInt(1, idSrc.getId());
+				
+				ResultSet set = st.executeQuery();
+				
+				while(set.next()) {
+					WotIdentity dst = new WotIdentity(new Identity(db,
+													set.getInt("id"),
+													set.getString("nickName"),
+													set.getString("publicKey"),
+													set.getString("privateKey"),
+													set.getBoolean("isDup"),
+													set.getInt("yourTrustLevel")));
+					int linkTrustLevel = set.getInt("linkTrustLevel");
+					
+					TrustLink l = new TrustLink(db, src, dst, linkTrustLevel);
+					
+					v.add(l);
+				}
+				
+				st.close();
+			}
+		} catch(SQLException e) {
+			Logger.error(new WotIdentity(), "Error while getting trust list : "+e.toString());
+			e.printStackTrace();
+		}
+		
+		return v;
+	}
+	
+	/**
+	 * Returns only the identities with a trust > 0
+	 */
+	public static Vector getOtherIdentities(Hsqldb db) {
+		Vector v = new Vector();
+		
+		try {
+			synchronized(db.dbLock) {
+				PreparedStatement st;
+				
+				st = db.getConnection().prepareStatement("SELECT id, "+
+														" nickname, publicKey, "+
+														" privateKey, isDup, trustLevel "+
+														"FROM signatures WHERE privateKey IS NULL AND trustLevel >= 0");
+				ResultSet set = st.executeQuery();
+				
+				/* TODO : Optimize if possible */
+				
+				while(set.next()) {
+					WotIdentity wi = new WotIdentity(new Identity(db,
+							   					set.getInt("id"),
+							   					set.getString("nickName"),
+							   					set.getString("publicKey"),
+							   					set.getString("privateKey"),
+							   					set.getBoolean("isDup"),
+							   					set.getInt("trustLevel")));
+					if (wi.getTrustLevel() > 0 && wi.getTrustLevel() != Identity.trustLevelInt[0])
+						v.add(wi);
+				}
+				
+				st.close();
+			}
+		} catch(SQLException e) {
+			Logger.error(new WotIdentity(), "Error while gettings identities used in the WoT : "+e.toString());
+			e.printStackTrace();
+		}
+		
+		return v;
 	}
 }

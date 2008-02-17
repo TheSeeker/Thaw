@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Hashtable;
+import java.util.Vector;
 
 import thaw.core.Logger;
 
@@ -33,7 +34,9 @@ public class FCPMetaTransferQuery extends Observable implements Observer {
 	}
 	
 	private void add(String id, FCPTransferQuery query) {
-		idToQuery.put(id, query);
+		synchronized(idToQuery) {
+			idToQuery.put(id, query);
+		}
 	}
 
 	/***
@@ -83,7 +86,9 @@ public class FCPMetaTransferQuery extends Observable implements Observer {
 	}
 	
 	private void remove(String id) {
-		idToQuery.remove(id);
+		synchronized(idToQuery) {
+			idToQuery.remove(id);
+		}
 	}
 	
 	/**
@@ -112,11 +117,16 @@ public class FCPMetaTransferQuery extends Observable implements Observer {
 
 
 	public void stopAll() {
-		for (Iterator it = idToQuery.values().iterator(); it.hasNext() ; ) {
-			
+		Vector queries = new Vector();
+
+		synchronized(idToQuery) {
+			for (Iterator it = idToQuery.values().iterator(); it.hasNext() ; )
+				queries.add(it.next());
+		}
+
+		for (Iterator it = queries.iterator(); it.hasNext() ; ) {
 			FCPTransferQuery query = (FCPTransferQuery)it.next();
 			stop(query);
-			
 		}
 	}
 
@@ -128,7 +138,11 @@ public class FCPMetaTransferQuery extends Observable implements Observer {
 			String targetId;
 			
 			if (msg != null && (targetId = msg.getValue(idField)) != null) {
-				Observer obs = (Observer)(idToQuery.get(targetId));
+				Observer obs;
+				
+				synchronized(idToQuery) {
+					obs = (Observer)(idToQuery.get(targetId));
+				}
 				
 				if (obs != null) {
 					/* we redirect only to the target FCPTransferQuery */

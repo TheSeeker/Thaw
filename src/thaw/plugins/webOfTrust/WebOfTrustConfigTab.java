@@ -16,9 +16,10 @@ import thaw.core.Config;
 import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.plugins.Hsqldb;
+import thaw.plugins.Signatures;
 import thaw.plugins.signatures.Identity;
 
-public class WebOfTrustConfigTab implements Observer, ActionListener {
+public class WebOfTrustConfigTab implements Observer, ActionListener, Signatures.SignaturesObserver {
 	private thaw.core.ConfigWindow configWindow;
 	private Config config;
 	private Hsqldb db;
@@ -58,7 +59,16 @@ public class WebOfTrustConfigTab implements Observer, ActionListener {
 		readActivated();
 		
 		activated.addActionListener(this);
+	}
+	
+	public void addAsObserver() {
 		configWindow.addObserver(this);
+		Signatures.addObserver(this);
+	}
+	
+	public void deleteAsObserver() {
+		configWindow.deleteObserver(this);
+		Signatures.deleteObserver(this);
 	}
 	
 	private void resetContentOfIdentitySelector() {
@@ -141,5 +151,19 @@ public class WebOfTrustConfigTab implements Observer, ActionListener {
 
 	public void actionPerformed(ActionEvent e) {
 		readActivated();
+	}
+
+	public void identityUpdated(Identity i) {
+		// TODO Raccord de méthode auto-généré
+		
+	}
+
+	public void privateIdentityAdded(Identity i) {
+		reloadSettings();
+	}
+
+	public void publicIdentityAdded(Identity i) {
+		// TODO Raccord de méthode auto-généré
+		
 	}
 }

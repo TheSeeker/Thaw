@@ -86,8 +86,7 @@ public class QueuePanel implements MouseListener, ActionListener, KeyListener {
 	public QueueWatcher queueWatcher;
 
 	public QueuePanel(final Core core, final QueueWatcher queueWatcher,
-			  final DetailPanel detailPanel,
-			  boolean isForInsertionQueue) {
+					final DetailPanel detailPanel, boolean isForInsertionQueue) {
 
 		this.queueWatcher = queueWatcher;
 

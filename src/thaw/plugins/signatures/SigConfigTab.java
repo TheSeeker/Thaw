@@ -8,9 +8,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.TableModelEvent;
 import javax.swing.JComboBox;
 
 import java.awt.BorderLayout;
@@ -33,8 +31,6 @@ import thaw.core.ThawRunnable;
 
 import thaw.gui.IconBox;
 import thaw.gui.FileChooser;
-import thaw.gui.Table;
-
 import java.util.Observer;
 import java.util.Observable;
 
@@ -379,106 +375,10 @@ public class SigConfigTab implements ActionListener, Observer {
 	/********************* OTHER IDENTITIES **********************************/
 
 
-	protected class IdentityModel extends javax.swing.table.AbstractTableModel {
-		private static final long serialVersionUID = -7614528570324908651L;
-
-		public String[] columnNames = {
-			I18n.getMessage("thaw.plugin.signature.nickname"),
-			I18n.getMessage("thaw.plugin.signature.trustLevel"),
-			I18n.getMessage("thaw.plugin.signature.isDup")
-		};
-
-		private Vector identities;
-
-		public IdentityModel() {
-
-		}
-
-		public void setIdentities(Vector i) {
-			identities = i;
-
-			final TableModelEvent event = new TableModelEvent(this);
-			fireTableChanged(event);
-		}
-		
-		public Vector getIdentities() {
-			return identities;
-		}
-
-		public int getRowCount() {
-			if (identities == null)
-				return 0;
-
-			return identities.size();
-		}
-
-		public int getColumnCount() {
-			return columnNames.length;
-		}
-
-		public String getColumnName(final int column) {
-			return columnNames[column];
-		}
-
-		public Object getValueAt(int row, int column) {
-			if (identities == null)
-				return null;
-
-			if (column == 0)
-				return ((Identity)identities.get(row)).toString();
-
-			if (column == 1)
-				return ((Identity)identities.get(row)).getTrustLevelStr();
-
-			if (column == 2)
-				return ((Identity)identities.get(row)).isDup() ?
-					"X" : "";
-
-			return null;
-		}
-
-		public Identity getIdentity(int line) {
-			return (Identity)identities.get(line);
-		}
-	}
-
-
-	protected class OtherIdentitiesRenderer extends thaw.gui.Table.DefaultRenderer {
-		private static final long serialVersionUID = 5405210731032136559L;
-		private IdentityModel model;
-
-		public OtherIdentitiesRenderer(IdentityModel model) {
-			super();
-			this.model = model;
-		}
-
-		public java.awt.Component getTableCellRendererComponent(final JTable table, Object value,
-									final boolean isSelected, final boolean hasFocus,
-									final int row, final int column) {
-
-			if (value instanceof String
-			    && "X".equals(value)) {
-				value = thaw.gui.IconBox.minClose;
-			}
-
-			java.awt.Component c = super.getTableCellRendererComponent(table, value,
-										   isSelected, hasFocus,
-										   row, column);
-			Identity i = model.getIdentity(row);
-
-			c.setForeground(i.getTrustLevelColor());
-
-			return c;
-		}
-
-	}
-
-
 	protected class OtherIdentitiesPanel implements ActionListener, TrustListParser.TrustListContainer {
 		private JDialog dialog;
-		private IdentityModel model;
 
-		private Table table;
+		private IdentityTable table;
 
 		private JButton close;
 
@@ -497,15 +397,10 @@ public class SigConfigTab implements ActionListener, Observer {
 
 			dialog.getContentPane().add(label, BorderLayout.NORTH);
 
-			model = new IdentityModel();
+			table = new IdentityTable(config, "other_identities_table", true);
 
-			OtherIdentitiesRenderer renderer = new OtherIdentitiesRenderer(model);
-
-			table = new Table(config, "other_identities_table", model);
-			table.setDefaultRenderer(table.getColumnClass(0), renderer);
-
-			dialog.getContentPane().add(new JScrollPane(table),
-						    BorderLayout.CENTER);
+			dialog.getContentPane().add(new JScrollPane(table.getTable()),
+										BorderLayout.CENTER);
 
 			JPanel eastPanel = new JPanel(new BorderLayout());
 
@@ -564,7 +459,7 @@ public class SigConfigTab implements ActionListener, Observer {
 		}
 
 		public void updateList() {
-			model.setIdentities(Identity.getOtherIdentities(db));
+			table.setIdentities(Identity.getOtherIdentities(db));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -583,7 +478,7 @@ public class SigConfigTab implements ActionListener, Observer {
 				
 				File file = chooser.askOneFile();
 
-				TrustListParser.exportTrustList(model.getIdentities(), file);
+				TrustListParser.exportTrustList(table.getIdentities(), file);
 
 				return;
 
@@ -603,7 +498,7 @@ public class SigConfigTab implements ActionListener, Observer {
 				return;
 			}
 
-			int[] rows = table.getSelectedRows();
+			int[] rows = table.getTable().getSelectedRows();
 
 			for (int i = 0 ; i < rows.length ; i++) {
 				int row = rows[i];
@@ -611,7 +506,7 @@ public class SigConfigTab implements ActionListener, Observer {
 				if (row < 0)
 					continue;
 
-				Identity target = model.getIdentity(row);
+				Identity target = table.getIdentity(row);
 
 				if (target == null)
 					continue;

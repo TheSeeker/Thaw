@@ -264,7 +264,7 @@ public class TrustListUploader implements Signatures.SignaturesObserver, Observe
 											"trustList", FreenetURIHelper.convertSSKtoUSK(privateKey)+"/", /* the convertion fonction forget the '/' */
 											2, /* priority */
 										    false, /* global */
-										    FCPClientPut.PERSISTENCE_FOREVER); /* persistence */
+										    FCPClientPut.PERSISTENCE_UNTIL_DISCONNECT); /* persistence */
 				upload.addObserver(this);
 
 				queueManager.addQueryToTheRunningQueue(upload);

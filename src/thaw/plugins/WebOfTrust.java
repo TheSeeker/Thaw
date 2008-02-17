@@ -20,6 +20,7 @@ public class WebOfTrust extends thaw.core.LibraryPlugin {
 	private Signatures sigs;
 	
 	private WebOfTrustConfigTab configTab = null;
+	private WebOfTrustTab wotTab = null;
 	
 	private int used = 0;
 	
@@ -172,9 +173,22 @@ public class WebOfTrust extends thaw.core.LibraryPlugin {
 			      thaw.gui.IconBox.minTrust,
 			      configTab.getPanel());
 		
+		configTab.addAsObserver();
+		
 		if (core.getConfig().getValue("wotActivated") == null
-				|| Boolean.valueOf(core.getConfig().getValue("wotActivated")).booleanValue())
+				|| Boolean.valueOf(core.getConfig().getValue("wotActivated")).booleanValue()) {
 				initThread();
+				
+				wotTab = new WebOfTrustTab(db, core.getConfig());
+
+				core.getMainWindow().addTab(I18n.getMessage("thaw.plugin.wot"),
+							    thaw.gui.IconBox.trust,
+							    wotTab.getPanel());
+
+				core.getMainWindow().getMainFrame().validate();
+
+				wotTab.loadState();
+		}
 
 		return true;
 	}
@@ -255,12 +269,18 @@ public class WebOfTrust extends thaw.core.LibraryPlugin {
 		used--;
 		
 		if (configTab != null) {
+			configTab.deleteAsObserver();
 			core.getConfigWindow().removeTab(configTab.getPanel());
 			configTab = null;
 		}
 		
 		if (used == 0) {
 			unloadDeps(core);
+		}
+		
+		if (wotTab != null) {
+			core.getMainWindow().removeTab(wotTab.getPanel());
+			wotTab = null;
 		}
 		
 		stopThread();
