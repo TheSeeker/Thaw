@@ -1,5 +1,7 @@
 package thaw.gui;
 
+import java.awt.Graphics;
+import java.awt.geom.*;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -115,5 +117,31 @@ public class GUIHelper {
 		final long gb = size / 1073741824;
 
 		return ((new Long(gb)).toString() +" GB");
+	}
+	
+	
+	public final static int ARROW_SIZE = 15;
+	public final static double ARROW_ANGLE = Math.PI / 6; /* 30° */
+	
+	private static void paintLine(Graphics g, int headX, int headY, int lng, double angle) {
+		int endX = (int)(headX + (Math.cos(angle)*lng));
+		int endY = (int)(headY + (Math.sin(angle)*lng));
+		
+		g.drawLine(headX, headY, endX, endY);
+	}
+	
+	/* paint an arrow */
+	public static void paintArrow(Graphics g, int headX, int headY, int endX, int endY) {
+		g.drawLine(headX, headY, endX, endY);
+		
+		double dist = new Point2D.Double(headX, headY).distance(endX, endY);
+		
+		double theta = Math.acos((endX-headX) / dist);
+		
+		if ((endY-headY) < 0)
+			theta = -1 * theta;
+
+		paintLine(g, headX, headY, ARROW_SIZE, theta+ARROW_ANGLE);
+		paintLine(g, headX, headY, ARROW_SIZE, theta-ARROW_ANGLE);
 	}
 }

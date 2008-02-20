@@ -2,9 +2,12 @@ package thaw.plugins.webOfTrust;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -17,16 +20,21 @@ import thaw.plugins.Signatures;
 import thaw.plugins.signatures.Identity;
 
 
-public class WebOfTrustTab implements Signatures.SignaturesObserver, Observer {
+public class WebOfTrustTab implements Signatures.SignaturesObserver, Observer, ActionListener {
 	
 	private Config config;
 	
 	private JSplitPane mainSplit;
 	private JPanel rightPanel;
+	private JPanel subRightPanel;
 	private JPanel itsTrustListPanel;
 
 	private WotIdentityList idList;
+	
+	private JButton switchButton;
+	private boolean trustListDisplayed = true;
 	private TrustListTable trustListTable;
+	private WebOfTrustGraphPanel graphPanel;
 	
 	public WebOfTrustTab(Hsqldb db, Config config) {
 		this.config = config;
@@ -34,18 +42,32 @@ public class WebOfTrustTab implements Signatures.SignaturesObserver, Observer {
 		JPanel leftPanel;
 				
 		leftPanel = new JPanel(new BorderLayout(5,5));
-		rightPanel = new JPanel(new GridLayout(1, 1));
+		rightPanel = new JPanel(new BorderLayout(5, 5));
 		itsTrustListPanel = new JPanel(new BorderLayout(5,5));
 		
 		idList = new WotIdentityList(db, config);
 		trustListTable = new TrustListTable(db, config);
+		graphPanel = new WebOfTrustGraphPanel(db);
 		
 		leftPanel.add(new JLabel(I18n.getMessage("thaw.plugin.wot.yourTrustList")), BorderLayout.NORTH);
 		leftPanel.add(new JScrollPane(idList.getList()), BorderLayout.CENTER);
 		itsTrustListPanel.add(new JLabel(I18n.getMessage("thaw.plugin.wot.itsTrustList")), BorderLayout.NORTH);
 		itsTrustListPanel.add(new JScrollPane(trustListTable.getTable()), BorderLayout.CENTER);
 		
-		rightPanel.add(itsTrustListPanel);
+		trustListDisplayed = true;
+		switchButton = new JButton();
+		updateSwitchButton();
+		switchButton.addActionListener(this);
+		
+		JPanel northRight = new JPanel(new BorderLayout());
+		northRight.add(new JLabel(""), BorderLayout.CENTER);
+		northRight.add(switchButton, BorderLayout.EAST);
+		
+		subRightPanel = new JPanel(new GridLayout(1, 1));
+		subRightPanel.add(itsTrustListPanel);
+		
+		rightPanel.add(northRight, BorderLayout.NORTH);
+		rightPanel.add(subRightPanel, BorderLayout.CENTER);
 		
 		mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
 									leftPanel, rightPanel);
@@ -88,6 +110,40 @@ public class WebOfTrustTab implements Signatures.SignaturesObserver, Observer {
 	public void update(Observable o, Object param) {
 		if (o == idList) {
 			trustListTable.refresh((Identity)param);
+			graphPanel.refresh((Identity)param);
 		}
+	}
+	
+	private void updateSwitchButton() {
+		if (trustListDisplayed)
+			switchButton.setText(I18n.getMessage("thaw.plugin.wot.seeGraph"));
+		else
+			switchButton.setText(I18n.getMessage("thaw.plugin.wot.seeTrustList"));
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == switchButton) {
+			trustListDisplayed = !trustListDisplayed;
+			
+			if (trustListDisplayed) {
+				graphPanel.setVisible(false);
+				subRightPanel.remove(graphPanel.getPanel());
+				subRightPanel.add(itsTrustListPanel);
+				itsTrustListPanel.revalidate();
+				subRightPanel.revalidate();
+				itsTrustListPanel.repaint();
+			} else {
+				subRightPanel.remove(itsTrustListPanel);
+				subRightPanel.add(graphPanel.getPanel());
+				graphPanel.getPanel().repaint();
+				graphPanel.getPanel().revalidate();
+				subRightPanel.revalidate();
+				mainSplit.revalidate();
+				graphPanel.setVisible(true);
+				graphPanel.getPanel().repaint();
+			}
+			
+			updateSwitchButton();
+		}		
 	}
 }

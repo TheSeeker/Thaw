@@ -30,6 +30,8 @@ public class WebOfTrustViewer implements Plugin {
 
 	public boolean run(Core core) {
 		this.core = core;
+		
+		core.getConfig().addListener("wotIdentityUsed", this);
 
 		/* Hsqldb */
 		if(core.getPluginManager().getPlugin("thaw.plugins.Hsqldb") == null) {

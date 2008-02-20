@@ -7,6 +7,7 @@ import thaw.plugins.signatures.*;
 
 import java.io.File;
 import java.sql.*;
+import java.util.Iterator;
 import java.util.Vector;
 
 import org.xml.sax.Attributes;
@@ -356,6 +357,10 @@ public class WotIdentity extends Identity implements TrustListParser.TrustListCo
 		}
 	}
 	
+	public Vector getTrustList() {
+		return getTrustList(getDb(), this);
+	}
+	
 	/**
 	 * @param db
 	 * @param idSrc
@@ -365,6 +370,19 @@ public class WotIdentity extends Identity implements TrustListParser.TrustListCo
 		Vector v = new Vector();
 		
 		WotIdentity src = new WotIdentity(idSrc);
+		
+		if (idSrc.getPrivateKey() != null) {
+
+			/* mode lazy bastard => on */
+			Vector oids = getOtherWotIdentities(db);
+			
+			for (Iterator it = oids.iterator(); it.hasNext() ; ) {
+				WotIdentity id = (WotIdentity)it.next();
+				v.add(new TrustLink(db, src, id, id.getUserTrustLevel()));
+			}
+
+			return v;
+		}
 		
 		try {
 			synchronized(db.dbLock) {
@@ -378,7 +396,7 @@ public class WotIdentity extends Identity implements TrustListParser.TrustListCo
 														" signatures.trustLevel AS yourTrustLevel, "+
 														" wotTrustLists.trustLevel AS linkTrustLevel "+
 										"FROM wotTrustLists INNER JOIN signatures ON wotTrustLists.destination = signatures.id "+
-										"WHERE source = ?");
+										"WHERE wotTrustLists.source = ?");
 				st.setInt(1, idSrc.getId());
 				
 				ResultSet set = st.executeQuery();
@@ -411,17 +429,23 @@ public class WotIdentity extends Identity implements TrustListParser.TrustListCo
 	/**
 	 * Returns only the identities with a trust > 0
 	 */
-	public static Vector getOtherIdentities(Hsqldb db) {
+	public static Vector getOtherWotIdentities(Hsqldb db) {
 		Vector v = new Vector();
 		
 		try {
 			synchronized(db.dbLock) {
 				PreparedStatement st;
 				
-				st = db.getConnection().prepareStatement("SELECT id, "+
-														" nickname, publicKey, "+
-														" privateKey, isDup, trustLevel "+
-														"FROM signatures WHERE privateKey IS NULL AND trustLevel >= 0");
+				st = db.getConnection().prepareStatement("SELECT signatures.id AS id, "+
+						" signatures.nickname AS nickname, "+
+						" signatures.publicKey AS publicKey, "+
+						" signatures.privateKey AS privateKey, "+
+						" signatures.isDup AS isDup, "+
+						" signatures.trustLevel AS trustLevel "+
+						"FROM wotKeys INNER JOIN signatures ON wotKeys.sigId = signatures.id "+
+						"WHERE signatures.privateKey IS NULL "+
+						"AND signatures.trustLevel >= 0");
+				
 				ResultSet set = st.executeQuery();
 				
 				/* TODO : Optimize if possible */

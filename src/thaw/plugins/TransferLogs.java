@@ -241,6 +241,9 @@ public class TransferLogs implements Plugin, ActionListener, Observer {
 
 
 	protected void notifyAddition(FCPTransferQuery query) {
+		if (!query.isPersistent())
+			return;
+		
 		new Transfer(db, query, table);
 		table.refresh();
 	}

@@ -1,5 +1,7 @@
 package thaw.plugins.signatures;
 
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Observable;
@@ -12,7 +14,7 @@ import thaw.core.Config;
 import thaw.core.I18n;
 import thaw.gui.Table;
 
-public class IdentityTable extends Observable implements MouseListener {
+public class IdentityTable extends Observable implements MouseListener, KeyListener {
 	private static final long serialVersionUID = -6972180330110075151L;
 	
 	private thaw.gui.Table table;
@@ -26,6 +28,7 @@ public class IdentityTable extends Observable implements MouseListener {
 		table.setDefaultRenderer(table.getColumnClass(0), renderer = new IdentityRenderer(model));
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.addMouseListener(this);
+		table.addKeyListener(this);
 	}
 	
 	public void setModel(IdentityModel model) {
@@ -173,6 +176,20 @@ public class IdentityTable extends Observable implements MouseListener {
 
 
 	public void mouseReleased(MouseEvent arg0) {
+	}
+
+	public void keyPressed(KeyEvent arg0) {
+		// TODO Raccord de méthode auto-généré
+		
+	}
+
+	public void keyReleased(KeyEvent arg0) {
+		setChanged();
+		notifyObservers(model.getIdentity(table.getSelectedRow()));
+	}
+
+	public void keyTyped(KeyEvent arg0) {
+		
 	}
 
 

@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.awt.Graphics;
 import java.awt.Color;
 
+import thaw.gui.GUIHelper;
+
 
 public class Node implements Comparable {
 
@@ -336,7 +338,9 @@ public class Node implements Comparable {
 				g.setColor(Color.PINK);
 			}
 
-			g.drawLine(realX+zeroX, realY+zeroY, targetX+zeroX, targetY+zeroY);
+			//g.drawLine(realX+zeroX, realY+zeroY, targetX+zeroX, targetY+zeroY);
+			GUIHelper.paintArrow(g, targetX+zeroX, targetY+zeroY,
+								realX+zeroX, realY+zeroY);
 
 			if (target.isSelected())
 				g.setColor(Color.GRAY);

@@ -6,11 +6,11 @@ import java.awt.event.ActionEvent;
 
 import thaw.core.Config;
 
-
+/**
+ * Memorize the checkbox status (selected or not) in the configuration
+ * @author jflesch
+ */
 public class CheckBox extends JCheckBox implements ActionListener {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -7815009734483702831L;
 
 	public final static String PREFIX = "checkbox_";

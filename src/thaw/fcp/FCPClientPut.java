@@ -425,7 +425,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 			return true;
 		} else {
 			setStatus(false, true, false);
-
+			Logger.warning(this, "Unable to send the file to the node");
 			status = "Unable to send the file to the node";
 
 			notifyChange();
@@ -658,7 +658,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 			if ("PutFailed".equals( msg.getMessageName() )) {
 				setStatus(false, true, false);
 				fatal = true;
-
+				
 				putFailedCode = Integer.parseInt(msg.getValue("Code"));
 
 				status = "Failed ("+msg.getValue("CodeDescription")+")";
@@ -688,6 +688,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 					queueManager.getQueryManager().getConnection().removeFromWriterQueue();
 				}
 
+				Logger.warning(this, "Protocol error ! : "+msg.getValue("CodeDescription"));
 				status = "Protocol error ("+msg.getValue("CodeDescription")+")";
 
 				if((msg.getValue("Fatal") != null) &&
