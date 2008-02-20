@@ -1352,22 +1352,25 @@ public class IndexManagementHelper {
 		int nextId;
 
 		db = indexBrowser.getDb();
+		
+		Vector filesToManage = new Vector();
 
 		synchronized(db.dbLock) {
 			try {
 				selectSt = db.getConnection().prepareStatement("SELECT id from files "+
-									       "WHERE indexParent = ? "+
-									       " AND LOWER(filename) LIKE ? "+
-									       "LIMIT 1");
+						"WHERE indexParent = ? "+
+						" AND LOWER(filename) LIKE ? "+
+				"LIMIT 1");
 				st = db.getConnection().prepareStatement("INSERT INTO files "+
-									 "(id, filename, publicKey, "+
-									 " localPath, mime, size, "+
-									 " category, indexParent, dontDelete) "+
-									 "VALUES (?, ?, ?, "+
-									 " ?, ?, ?, "+
-									 " ?, ?, TRUE)");
+						"(id, filename, publicKey, "+
+						" localPath, mime, size, "+
+						" category, indexParent, dontDelete) "+
+						"VALUES (?, ?, ?, "+
+						" ?, ?, ?, "+
+				" ?, ?, TRUE)");
+
 				nextId = DatabaseManager.getNextId(db, "files");
-				
+
 				if (nextId < 0) {
 					selectSt.close();
 					st.close();
@@ -1380,7 +1383,7 @@ public class IndexManagementHelper {
 
 
 			for(final Iterator it = files.iterator();
-			    it.hasNext();) {
+			it.hasNext();) {
 
 				final java.io.File ioFile = (java.io.File)it.next();
 
@@ -1408,12 +1411,8 @@ public class IndexManagementHelper {
 					st.execute();
 
 					File file = new File(db, nextId);
-
-					if (insert) {
-						file.insertOnFreenet(queueManager);
-					} else {
-						file.recalculateCHK(queueManager);
-					}
+					
+					filesToManage.add(file);
 
 					nextId++;
 				} catch(SQLException e) {
@@ -1427,6 +1426,16 @@ public class IndexManagementHelper {
 			} catch(SQLException e) {
 				/* \_o< */
 			}
+		}
+		
+		for (Iterator it = filesToManage.iterator(); it.hasNext(); ){
+			File f = (File)it.next();
+			
+			if (insert) {
+				f.insertOnFreenet(queueManager);
+			} else {
+				f.recalculateCHK(queueManager);
+			}			
 		}
 
 		indexBrowser.getTables().getFileTable().refresh();
