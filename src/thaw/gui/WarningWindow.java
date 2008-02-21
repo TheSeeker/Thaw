@@ -20,7 +20,7 @@ public class WarningWindow {
 			     final String warning)
 	{
 		this(core != null ?
-		     (core.getSplashScreen().getDialog() != null ?
+		     (core.getSplashScreen() != null && core.getSplashScreen().getDialog() != null ?
 		      (Component)core.getSplashScreen().getDialog()
 		      : (Component)core.getMainWindow().getMainFrame())
 		     : (Component)null,
