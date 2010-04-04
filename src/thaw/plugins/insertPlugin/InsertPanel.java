@@ -15,6 +15,7 @@ import java.util.Observer;
 import java.util.Vector;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -29,9 +30,9 @@ import thaw.core.I18n;
 import thaw.core.Logger;
 import thaw.gui.WarningWindow;
 import thaw.fcp.FCPClientPut;
+import thaw.fcp.FCPClientHello;
 import thaw.plugins.InsertPlugin;
 import thaw.core.MainWindow;
-
 
 public class InsertPanel implements ActionListener, ItemListener, Observer {
 	private final static int MIN_PRIORITY = 6;
@@ -49,6 +50,11 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 	private JLabel selectKeyLabel;
 	private ButtonGroup keyRadioGroup;
 	private JRadioButton[] keyRadioButtons;
+
+    private JCheckBox doCompressCB;
+    private Vector<String> compressionStr;
+	private JLabel compressionLabel;
+	private JComboBox compressionSelecter;
 
 	private JLabel selectRevLabel;
 	private JTextField revField;
@@ -77,6 +83,8 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 	private InsertPlugin insertPlugin;
 	private int keyType;
+    private boolean doCompress;
+    private int compressionCodec;
 	private FCPClientPut lastInsert = null;
 
 	private Config config; /* keep a ref to the config for the "lastSourceDirectory" option */
@@ -84,6 +92,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 	public InsertPanel(final InsertPlugin insertPlugin,
 			   final Config config, final MainWindow mainWindow,
+               final FCPClientHello clientHello,
 			   final boolean advancedMode) {
 
 		this.insertPlugin = insertPlugin;
@@ -97,14 +106,16 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 		if(advancedMode) {
 			subPanel = new JPanel();
-			subPanel.setLayout(new GridLayout(3,2, 20, 20));
+			subPanel.setLayout(new GridLayout(1, 2, 20, 20));
 		}
 
+        /* LEFT SIDE */
 
 		// FILE SELECTION
 
 		JPanel subSubPanel = new JPanel();
-		subSubPanel.setLayout(new GridLayout(3, 1));
+		subSubPanel.setLayout(new GridLayout(12, 1));
+
 		browseLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.filesToInsert"));
 		subSubPanel.add(browseLabel);
 		selectedFiles = new JTextField(20);
@@ -114,16 +125,84 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		browseButton.addActionListener(this);
 		subSubPanel.add(browseButton);
 
-		if(advancedMode)
-			subPanel.add(subSubPanel);
-		else
+        // MIME TYPE
+
+		mimeLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.mime"));
+
+		final Vector mimes = (Vector)DefaultMIMETypes.getAllMIMETypes().clone();
+		mimes.add(0, "");
+
+		mimeField = new JComboBox(mimes);
+		mimeField.setEditable(true);
+		mimeField.setPreferredSize(new Dimension(75, 20));
+
+		subSubPanel.add(mimeLabel);
+		subSubPanel.add(mimeField);
+
+		if(!advancedMode)
 			mainPanel.add(subSubPanel, BorderLayout.CENTER);
 
+		// GLOBAL
 
-		// KEY TYPE SELECTION
+		globalStr = new String[] {
+			I18n.getMessage("thaw.common.true"),
+			I18n.getMessage("thaw.common.false"),
+		};
 
-		subSubPanel = new JPanel();
-		subSubPanel.setLayout(new GridLayout(4, 1));
+		globalLabel = new JLabel(I18n.getMessage("thaw.common.globalQueue"));
+		subSubPanel.add(globalLabel);
+		globalSelecter = new JComboBox(globalStr);
+		globalSelecter.setSelectedItem(I18n.getMessage("thaw.common.true"));
+		subSubPanel.add(globalSelecter);
+
+		// PRIORITY SELECTION
+
+		priorities = new String[] {
+			I18n.getMessage("thaw.plugin.priority.p0"),
+			I18n.getMessage("thaw.plugin.priority.p1"),
+			I18n.getMessage("thaw.plugin.priority.p2"),
+			I18n.getMessage("thaw.plugin.priority.p3"),
+			I18n.getMessage("thaw.plugin.priority.p4"),
+			I18n.getMessage("thaw.plugin.priority.p5"),
+			I18n.getMessage("thaw.plugin.priority.p6")
+		};
+		
+		priorityLabel = new JLabel(I18n.getMessage("thaw.common.priority"));
+		subSubPanel.add(priorityLabel);
+		prioritySelecter = new JComboBox(priorities);
+		prioritySelecter.setSelectedItem(I18n.getMessage("thaw.plugin.priority.p4"));
+		subSubPanel.add(prioritySelecter);
+   		
+        // COMPRESSION
+        doCompress=true;
+        compressionCodec=-1;
+        doCompressCB = new JCheckBox(I18n.getMessage("thaw.plugin.insert.doCompress"), true);
+        subSubPanel.add(doCompressCB);
+
+        //Allow for some more codecs to be added in the future.
+        compressionStr = new Vector<String>(4, 1);
+        compressionStr.add(I18n.getMessage("thaw.plugin.insert.best"));
+
+        for(int i=0; i < clientHello.getNmbCompressionCodecs(); i++)
+        {
+            compressionStr.add(clientHello.getCodec(i));
+        }
+
+		compressionLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.compressionType"));
+		subSubPanel.add(compressionLabel);
+		compressionSelecter = new JComboBox(compressionStr);
+		compressionSelecter.setSelectedItem(I18n.getMessage("thaw.plugin.insert.best"));
+		subSubPanel.add(compressionSelecter);
+
+        if(advancedMode)
+			subPanel.add(subSubPanel);
+
+        /* RIGHT SIDE */
+
+        // KEY TYPE SELECTION
+        subSubPanel = new JPanel();
+		subSubPanel.setLayout(new GridLayout(12, 1));
+
 		selectKeyLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.selectKey"));
 		subSubPanel.add(selectKeyLabel);
 		keyRadioButtons = new JRadioButton[3];
@@ -139,58 +218,7 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 			subSubPanel.add(keyRadioButtons[i]);
 		}
 
-		if(advancedMode)
-			subPanel.add(subSubPanel);
-
-
-		/* GLOBAL */
-
-		subSubPanel = new JPanel();
-		subSubPanel.setLayout(new GridLayout(4, 1));
-
-		globalStr = new String[] {
-			I18n.getMessage("thaw.common.true"),
-			I18n.getMessage("thaw.common.false"),
-		};
-
-		globalLabel = new JLabel(I18n.getMessage("thaw.common.globalQueue"));
-		subSubPanel.add(globalLabel);
-		globalSelecter = new JComboBox(globalStr);
-		globalSelecter.setSelectedItem(I18n.getMessage("thaw.common.true"));
-		subSubPanel.add(globalSelecter);
-
-		if(advancedMode)
-			subPanel.add(subSubPanel);
-
-
-		// PRIORITY SELECTION
-
-		priorities = new String[] {
-			I18n.getMessage("thaw.plugin.priority.p0"),
-			I18n.getMessage("thaw.plugin.priority.p1"),
-			I18n.getMessage("thaw.plugin.priority.p2"),
-			I18n.getMessage("thaw.plugin.priority.p3"),
-			I18n.getMessage("thaw.plugin.priority.p4"),
-			I18n.getMessage("thaw.plugin.priority.p5"),
-			I18n.getMessage("thaw.plugin.priority.p6")
-		};
-
-		subSubPanel.setLayout(new GridLayout(4, 1));
-		priorityLabel = new JLabel(I18n.getMessage("thaw.common.priority"));
-		subSubPanel.add(priorityLabel);
-		prioritySelecter = new JComboBox(priorities);
-		prioritySelecter.setSelectedItem(I18n.getMessage("thaw.plugin.priority.p4"));
-		subSubPanel.add(prioritySelecter);
-
-		if(advancedMode) {
-			subPanel.add(subSubPanel);
-			subPanel.add(subSubPanel);
-		}
-
 		// REVISION SELECTION
-
-		subSubPanel = new JPanel();
-		subSubPanel.setLayout(new GridLayout(4, 1));
 
 		selectRevLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.selectRev"));
 		subSubPanel.add(selectRevLabel);
@@ -205,38 +233,9 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		nameField.setEditable(true);
 		subSubPanel.add(nameField);
 
-		if(advancedMode)
-			subPanel.add(subSubPanel);
-
-
 		setRevAndNameVisible(false);
 
-
-		// MIME TYPE
-
-		subSubPanel = new JPanel();
-		subSubPanel.setLayout(new GridLayout(4, 1));
-
-		mimeLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.mime"));
-
-		final Vector mimes = (Vector)DefaultMIMETypes.getAllMIMETypes().clone();
-		mimes.add(0, "");
-
-		mimeField = new JComboBox(mimes);
-		mimeField.setEditable(true);
-		mimeField.setPreferredSize(new Dimension(75, 20));
-
-		subSubPanel.add(mimeLabel);
-		subSubPanel.add(mimeField);
-
-		if(advancedMode)
-			subPanel.add(subSubPanel);
-
-
-		// PUBLIC / PRIVATE KEY
-
-		subSubPanel = new JPanel();
-		subSubPanel.setLayout(new GridLayout(4, 1));
+        // PUBLIC / PRIVATE KEY
 
 		publicKeyLabel = new JLabel(I18n.getMessage("thaw.plugin.insert.publicKey"));
 		subSubPanel.add(publicKeyLabel);
@@ -250,13 +249,13 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 		privateKeyField.setEditable(true);
 		subSubPanel.add(privateKeyField);
 
-		if(advancedMode)
-			subPanel.add(subSubPanel);
-
 		setKeysVisible(false);
 
-		if(advancedMode)
+        if(advancedMode)
+        {
+			subPanel.add(subSubPanel);
 			mainPanel.add(subPanel, BorderLayout.CENTER);
+        }
 
 		letsGoButton = new JButton(I18n.getMessage("thaw.plugin.insert.insertAction"));
 		letsGoButton.setPreferredSize(new Dimension(200, 40));
@@ -344,12 +343,17 @@ public class InsertPanel implements ActionListener, ItemListener, Observer {
 
 			if((mimeField.getSelectedItem() != null) && !((String)mimeField.getSelectedItem()).equals(""))
 				mimeType = (String)mimeField.getSelectedItem();
+			
+			doCompress = doCompressCB.isSelected();
+			compressionCodec = compressionSelecter.getSelectedIndex() - 1;
 
 			insertPlugin.insertFile(selectedFiles.getText(),
 						keyType, rev, name, privateKey, priority,
-						global, FCPClientPut.PERSISTENCE_FOREVER, mimeType);
+						global, FCPClientPut.PERSISTENCE_FOREVER, mimeType,
+						doCompress, compressionCodec);
 
 			selectedFiles.setText("");
+			selectedFiles.invalidate();
 		}
 
 		if(e.getSource() == browseButton) {

@@ -582,8 +582,11 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 
 			return;
 		}
-
-		Logger.warning(this, "Unknow message : "+message.getMessageName() + " !");
+        if ("SendingToNetwork".equals(message.getMessageName())) {
+            //TODO: Handle this?  do we need to? -TS
+            return;
+        }
+		Logger.warning(this, "Unknown message : "+message.getMessageName() + " !");
 	}
 
 
@@ -1007,14 +1010,14 @@ public class FCPClientGet extends FCPTransferQuery implements Observer {
 			path = destinationDir + File.separator + filename;
 
 		if (path != null)
-			path = path.replaceAll("\\|", "-");
+			path = path.replaceAll("\\|", "_");
 
 		return path;
 	}
 
 	public String getFilename() {
 		if (filename != null)
-			return filename.replaceAll("\\|", "-");
+			return filename.replaceAll("[\\/:*?\"<>|]", "_");
 		return key;
 	}
 

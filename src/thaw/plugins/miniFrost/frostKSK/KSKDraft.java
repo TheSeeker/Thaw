@@ -256,7 +256,9 @@ public class KSKDraft
 							  privateKey, /* privateKey */
 							  2, /* priority */
 							  false,
-							  FCPClientPut.PERSISTENCE_FOREVER);
+							  FCPClientPut.PERSISTENCE_FOREVER,
+							  true, /* doCompress */
+							  -1); /* compression codec */
 		clientPut.addObserver(this);
 		queueManager.addQueryToTheRunningQueue(clientPut);
 	}

@@ -43,7 +43,7 @@ public class DetailPanel implements Observer {
 	private final static String failedStr = I18n.getMessage("thaw.common.failed");
 	private final static String estimationStr = I18n.getMessage("thaw.common.estimation");
 	
-	private final static String[] prioritiesStr = new String[QueuePanel.MIN_PRIORITY+1];
+	public final static String[] prioritiesStr = new String[QueuePanel.MIN_PRIORITY+1];
 	static {
 		for (int i = 0 ; i < prioritiesStr.length ; i++)
 			prioritiesStr[i] = I18n.getMessage("thaw.plugin.priority.p"+Integer.toString(i));

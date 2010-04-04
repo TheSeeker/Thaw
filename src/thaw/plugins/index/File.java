@@ -277,7 +277,9 @@ public class File implements Observer, FileContainer {
 								null /* private key */,
 								FCPClientPut.DEFAULT_PRIORITY,
 								true /* global */, FCPClientPut.PERSISTENCE_FOREVER,
-								true /* getCHKOnly */);
+								true /* getCHKOnly */,
+								true /* doCompress */,
+								-1); /* compression codec */
 
 
 		this.queueManager = queueManager; /* so the transfer will be removed when finished */
@@ -344,7 +346,9 @@ public class File implements Observer, FileContainer {
 								null, /* privateKey : EDONTCARE */
 								FCPClientPut.DEFAULT_PRIORITY,
 								true, /* global queue */
-								FCPClientPut.PERSISTENCE_FOREVER);
+								FCPClientPut.PERSISTENCE_FOREVER,
+								true, /* doCompress */
+								-1);  /* compression codec*/
 		queueManager.addQueryToThePendingQueue(clientPut);
 
 		clientPut.addObserver(this);

@@ -44,9 +44,16 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 		core.getConfig().addListener("advancedMode", this);
 
 		Logger.info(this, "Starting plugin \"InsertPlugin\" ...");
+		while(core.getClientHello() == null) {
+			try {
+				Thread.currentThread().sleep(5000);
+			}
+			catch (InterruptedException e) {}
+		}
 
 		insertPanel = new InsertPanel(this,
 					      core.getConfig(), core.getMainWindow(),
+                          core.getClientHello(),
 					      Boolean.valueOf(core.getConfig().getValue("advancedMode")).booleanValue());
 
 		scrollPane = new JScrollPane(insertPanel.getPanel());
@@ -123,12 +130,15 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 	 * @param privateKey ignored if key == CHK/KSK ; can be null if it has to be generated
 	 * @param persistence 0 = Forever ; 1 = Until node reboot ; 2 = Until the app disconnect
 	 * @param mimeType null = autodetect
+	 * @param doCompress null = true
+	 * @param compressionCodec null = -1
 	 */
 	public boolean insertFile(final String fileList, final int keyType,
 				  final int rev, final String name,
 				  final String privateKey,
 				  final int priority, final boolean global,
-				  final int persistence, final String mimeType) {
+				  final int persistence, final String mimeType,
+				  final boolean doCompress, final int compressionCodec) {
 
 		FCPClientPut clientPut = null;
 		final String[] files = fileList.split(";");
@@ -143,11 +153,13 @@ public class InsertPlugin implements thaw.core.Plugin, ActionListener {
 			if((privateKey != null) && !"".equals( privateKey )) {
 				clientPut = new FCPClientPut(new File(files[i]), keyType, rev, name,
 							     "USK@"+privateKey+"/", priority,
-							     global, persistence);
+							     global, persistence,
+								 doCompress, compressionCodec);
 			} else {
 				clientPut = new FCPClientPut(new File(files[i]), keyType, rev, name,
 							     null, priority,
-							     global, persistence);
+							     global, persistence,
+								 doCompress, compressionCodec);
 			}
 
 			if(mimeType != null) {

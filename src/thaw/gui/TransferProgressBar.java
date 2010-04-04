@@ -45,37 +45,33 @@ public class TransferProgressBar extends JProgressBar {
 
 	public void refresh() {
 
-		int progress;
+		int progress = query.getProgression();
 
 		setStringPainted(true);
 		setBorderPainted(withBorder);
 
-		if ((query instanceof FCPClientPut && (query.getTransferWithTheNodeProgression() < 100))
-		    || ((query instanceof FCPClientGet) && (query.getTransferWithTheNodeProgression() > 0)))
+		if ((query instanceof FCPClientPut && ( progress == 0))
+		    || ((query instanceof FCPClientGet) && (progress == 100)))
 			progress = query.getTransferWithTheNodeProgression();
-		else
-			progress = query.getProgression();
 
 		setValue(progress);
 
-		if(query.isFinished() && !query.isSuccessful())
-			setString(failedStr);
-		else if(query.isFinished() && query.isSuccessful())
-			setString(finishedStr);
-		else if(!query.isFinished()) {
+		if(!query.isFinished()) {
 			String txt= "";
-
-			if (statusInProgressBar)
+			if (statusInProgressBar) {
 				txt = (query.getStatus() +
 					      " [ "+Integer.toString(progress)+"% ]");
-			else
+			} else {
 				txt = (Integer.toString(progress)+"%");
-
-			if (!query.isProgressionReliable())
+			}
+			if (!query.isProgressionReliable()) {
 				txt += " [*]";
-
+			}
 			setString(txt);
+		} else if(query.isSuccessful()) {
+			setString(finishedStr);
+		} else {
+			setString(failedStr);
 		}
-
 	}
 }

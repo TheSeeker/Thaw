@@ -771,7 +771,9 @@ public class Index extends Observable implements MutableTreeNode,
 			put = new FCPClientPut(targetFile, FCPClientPut.KEY_TYPE_SSK,
 					       rev, realName, privateKey, 2 /*priority*/,
 					       true /* global queue */,
-					       FCPClientPut.PERSISTENCE_FOREVER);
+					       FCPClientPut.PERSISTENCE_FOREVER,
+						   true, /* doCompress */
+						   -1); /* compression codec */
 			put.setMetadata("ContentType", "application/x-freenet-index");
 
 			if (indexBrowser != null && indexBrowser.getIndexTree() != null)

@@ -23,6 +23,7 @@ public class FCPClientHello implements FCPQuery, Observer {
 	private String nodeName = null;
 	private boolean testnet = false; /* Hmm, in fact, we shouldn't have to bother about this one */
 	private int nmbCompressionCodecs = -1;
+	private String[] codecs;
 
 	private boolean receiveAnswer = false;
 
@@ -128,7 +129,8 @@ public class FCPClientHello implements FCPQuery, Observer {
 				nodeVersion = answer.getValue("Version");
 				nodeName = answer.getValue("Node");
 				testnet = Boolean.valueOf(answer.getValue("Testnet")).booleanValue();
-				nmbCompressionCodecs = Integer.parseInt(answer.getValue("CompressionCodecs"));
+				codecs = answer.getValue("CompressionCodecs").split(" ");
+				nmbCompressionCodecs = Integer.parseInt(codecs[0]);
 
 				queryManager.deleteObserver(this);
 
@@ -169,6 +171,14 @@ public class FCPClientHello implements FCPQuery, Observer {
 
 	public String getConnectionId() {
 		return connectionId;
+	}
+
+	public String getCodec(int i) {
+		if(i < nmbCompressionCodecs) {
+			return codecs[i+2].split("\\(")[0];
+		} else {
+			return "";
+		}
 	}
 }
 

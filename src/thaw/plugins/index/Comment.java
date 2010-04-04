@@ -454,7 +454,9 @@ public class Comment extends Observable implements Observer, ActionListener {
                                                     FreenetURIHelper.convertSSKtoUSK(privateKey)+"/", /* the convertion fonction forget the '/' */
 						    2, /* priority */
 						    false, /* global */
-						    FCPClientPut.PERSISTENCE_FOREVER ); /* persistence */
+						    FCPClientPut.PERSISTENCE_FOREVER, /* persistence */
+							true, /* doCompress */
+							-1); /* compression codec */
                 put.addObserver(this);
 
 		return queueManager.addQueryToTheRunningQueue(put);

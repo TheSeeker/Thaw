@@ -66,7 +66,10 @@ public class KSKFileAttachment
 						    FCPClientPut.DEFAULT_PRIORITY,
 						    false /* global */,
 						    FCPClientPut.PERSISTENCE_UNTIL_DISCONNECT,
-						    true /* getCHKOnly */);
+						    true /* getCHKOnly */,
+							true /* doCompress */,
+							-1); /* compression codec */
+
 		put.addObserver(this);
 		queueManager.addQueryToTheRunningQueue(put);
 	}

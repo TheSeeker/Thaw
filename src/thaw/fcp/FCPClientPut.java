@@ -31,6 +31,8 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 	private boolean global = true;
 	private int persistence = PERSISTENCE_FOREVER;
 	private boolean getCHKOnly = false;
+	private boolean doCompress = true;
+	private int compressionCodec = -1;
 
 	private int toTheNodeProgress = 0;
 	private String status;
@@ -70,20 +72,22 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 	 * @param persistence PERSISTENCE_FOREVER ; PERSISTENCE_UNTIL_NODE_REBOOT ; PERSISTENCE_UNTIL_DISCONNEC
 	 */
 	public FCPClientPut(final File file, final int keyType,
-			    final int rev, final String name,
-			    final String privateKey, final int priority,
-			    final boolean global, final int persistence) {
-		this(file, keyType, rev, name, privateKey, priority, global, persistence, false);
+				final int rev, final String name,
+				final String privateKey, final int priority,
+				final boolean global, final int persistence,
+				final boolean doCompress, final int compressionCodec) {
+		this(file, keyType, rev, name, privateKey, priority, global, persistence, false, doCompress, compressionCodec);
 	}
 
 	/**
 	 * To start a new insertion.
 	 */
 	public FCPClientPut(final File file, final int keyType,
-			    final int rev, final String name,
-			    final String privateKey, final int priority,
-			    final boolean global, final int persistence,
-			    final boolean getCHKOnly) {
+				final int rev, final String name,
+				final String privateKey, final int priority,
+				final boolean global, final int persistence,
+				final boolean getCHKOnly, final boolean doCompress,
+				final int compressionCodec) {
 		super(null, true);
 
 		this.getCHKOnly = getCHKOnly;
@@ -113,6 +117,9 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 		this.priority = priority;
 		this.global = global;
 		this.persistence = persistence;
+		this.doCompress = doCompress;
+		this.compressionCodec = compressionCodec;
+
 		status = "Waiting";
 		setStatus(false, false, false);
 		setBlockNumbers(-1, -1, -1, true);
@@ -128,9 +135,9 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 	 * @param publicKey : Complete key (with filename, etc)
 	 */
 	protected FCPClientPut(final String identifier, final String publicKey,
-			    final int priority, final int persistence, final boolean global,
-			    final String filePath, final String fileName, final String status, final int progress,
-			    final long fileSize, final FCPQueueManager queueManager) {
+				final int priority, final int persistence, final boolean global,
+				final String filePath, final String fileName, final String status, final int progress,
+				final long fileSize, final FCPQueueManager queueManager) {
 		super(identifier, true);
 
 		if(fileSize > 0)
@@ -161,10 +168,10 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 		this.global = global;
 
 		this.persistence = persistence;
-		
+
 		setBlockNumbers(-1, -1, -1, true);
 		setStatus(true, false, false);
-		
+
 		this.status = status;
 		fatal = true;
 	}
@@ -179,19 +186,19 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 			Logger.warning(this, "Empty or unreachable file:"+localFile.getPath());
 
 			status = "EMPTY OR UNREACHABLE FILE";
-			
+
 			setStatus(false, true, false);
 
 			fatal = true;
 
 			notifyChange();
-			
+
 			return false;
 		}
 
 
 		queueManager.getQueryManager().addObserver(this);
-		
+
 		setBlockNumbers(-1, -1, -1, false);
 		setStatus(true, false, false);
 
@@ -344,7 +351,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 
 		if(!metadatas.isEmpty()) {
 			for(final Iterator keyIt = metadatas.keySet().iterator();
-			    keyIt.hasNext();) {
+				keyIt.hasNext();) {
 				final String key = (String)keyIt.next();
 				final String value = (String)metadatas.get(key);
 				msg.setValue("Metadata."+key, value);
@@ -362,13 +369,14 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 		}
 		msg.setValue("Verbosity", "512");
 
-		if(global)
+		if(global) {
 			msg.setValue("Global", "true");
-		else
+		} else {
 			msg.setValue("Global", "false");
-
-		if (localFile != null)
+		}
+		if (localFile != null) {
 			msg.setValue("ClientToken", localFile.getPath());
+		}
 
 		switch(persistence) {
 		case(PERSISTENCE_FOREVER): msg.setValue("Persistence", "forever"); break;
@@ -377,10 +385,11 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 		default: Logger.error(this, "Unknow persistence !?"); break;
 		}
 
-		if (localFile != null)
+		if (localFile != null) {
 			msg.setValue("TargetFilename", localFile.getName());
-		else
+		} else {
 			msg.setValue("TargetFilename", name);
+		}
 
 		if (!connection.isLocalSocket()) {
 			msg.setValue("UploadFrom", "direct");
@@ -389,9 +398,15 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 			msg.setValue("UploadFrom", "disk");
 			msg.setValue("Filename", localFile.getPath());
 
-			if (sha != null)
+			if (sha != null) {
 				msg.setValue("FileHash", sha.getHash());
+			}
 		}
+
+		if(doCompress && compressionCodec != -1)
+			msg.setValue("Codecs", Integer.toString(compressionCodec));
+		else
+			msg.setValue("DontCompress", "true");
 
 		Logger.info(this, "Sending "+Long.toString(fileSize)+" bytes on socket ...");
 
@@ -408,9 +423,9 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 		connection.removeFromWriterQueue();
 		lockOwner = false;
 		sending = false;
-		
+
 		setBlockNumbers(-1, -1, -1, true);
-		
+
 		if(ret == true) {
 			setStatus(true, false, false);
 			fatal = true;
@@ -511,7 +526,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 
 	public boolean stop(final FCPQueueManager queueManager) {
 		boolean wasFinished = isFinished();
-		
+
 		if(removeRequest()) {
 			queueManager.getQueryManager().deleteObserver(this);
 
@@ -542,9 +557,9 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 				status = "Computing hash";
 				setBlockNumbers(100, 100, sha.getProgression(), true);
 			}
-			
+
 			notifyChange();
-			
+
 			return;
 		}
 
@@ -578,7 +593,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 
 				if(getCHKOnly) {
 					status = "CHK";
-					
+
 					setStatus(false, true, true);
 
 					toTheNodeProgress = 100;
@@ -598,7 +613,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 
 			if("PutSuccessful".equals(msg.getMessageName())) {
 				setStatus(false, true, true);
-				
+
 				queueManager.getQueryManager().deleteObserver(this);
 
 				setStartupTime(Long.valueOf(msg.getValue("StartupTime")).longValue());
@@ -658,7 +673,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 			if ("PutFailed".equals( msg.getMessageName() )) {
 				setStatus(false, true, false);
 				fatal = true;
-				
+
 				putFailedCode = Integer.parseInt(msg.getValue("Code"));
 
 				status = "Failed ("+msg.getValue("CodeDescription")+")";
@@ -717,7 +732,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 
 			if("StartedCompression".equals(msg.getMessageName())) {
 				status = "Compressing";
-				
+
 				notifyChange();
 
 				return;
@@ -743,13 +758,21 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 
 			if("SimpleProgress".equals(msg.getMessageName())) {
 
-				if((msg.getValue("Total") != null)
-				   && (msg.getValue("Succeeded") != null)) {
+				if (msg.getValue("Total") != null
+					&& msg.getValue("Required") != null
+					&& msg.getValue("Succeeded") != null) {
 
 					final long total = (new Long(msg.getValue("Total"))).longValue();
-					long required = (new Long(msg.getValue("Required"))).longValue();
+					final long required = (new Long(msg.getValue("Required"))).longValue();
 					final long succeeded = (new Long(msg.getValue("Succeeded"))).longValue();
-					
+
+					//boolean progressReliable = false;
+
+					//if((msg.getValue("FinalizedTotal") != null) &&
+					//		   msg.getValue("FinalizedTotal").equals("true")) {
+					//	progressReliable = true; //has to be true if we want to see progress at all.
+					//}
+
 					setBlockNumbers(required, total, succeeded, true);
 					setStatus(true, false, false);
 
@@ -758,8 +781,12 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 					else
 						status = "Computing";
 
-					notifyChange();
+
+				} else {
+					setBlockNumbers(-1, -1, -1, false);
 				}
+
+				notifyChange();
 
 				return;
 			}
@@ -768,7 +795,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 			if (msg.getMessageName() == null)
 				Logger.notice(this, "Unknow message (name == null)");
 			else
-				Logger.notice(this, "Unkwown message: "+msg.getMessageName());			
+				Logger.notice(this, "Unkwown message: "+msg.getMessageName());
 
 			return;
 		}
@@ -784,7 +811,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 		/*
 		 * TODO : lower priority ?
 		 */
-		
+
 		setStatus(false, false, false);
 		status = "Delayed";
 
@@ -792,7 +819,7 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 
 		removeRequest();
 		notifyChange();
-		
+
 		return false;
 	}
 
@@ -970,6 +997,8 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 		result.put("running", Boolean.toString(isRunning()));
 		result.put("successful", Boolean.toString(isSuccessful()));
 		result.put("finished", Boolean.toString(isFinished()));
+		result.put("doCompress", Boolean.toString(doCompress));
+		result.put("compressionCodec", Integer.toString(compressionCodec));
 
 		return result;
 	}
@@ -986,12 +1015,14 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 		name = (String)parameters.get("name");
 
 		privateKey = (String)parameters.get("privateKey");
-		if((privateKey == null) || privateKey.equals(""))
+		if((privateKey == null) || privateKey.equals("")) {
 			privateKey = null;
+		}
 
 		publicKey = (String)parameters.get("publicKey");
-		if((privateKey == null) || (publicKey == null) || publicKey.equals(""))
+		if((privateKey == null) || (publicKey == null) || publicKey.equals("")) {
 			publicKey = null;
+		}
 
 		priority = Integer.parseInt((String)parameters.get("priority"));
 
@@ -1001,12 +1032,15 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 		status = (String)parameters.get("status");
 		attempt = Integer.parseInt((String)parameters.get("attempt"));
 
+		doCompress = Boolean.parseBoolean("doCompress");
+		compressionCodec = Integer.parseInt("compressionCodec");
+
 		setIdentifier((String)parameters.get("identifier"));
 
 		boolean running = Boolean.valueOf((String)parameters.get("running")).booleanValue();
 		boolean successful = Boolean.valueOf((String)parameters.get("successful")).booleanValue();
 		boolean finished = Boolean.valueOf((String)parameters.get("finished")).booleanValue();
-		
+
 		setStatus(running, finished, successful);
 
 		if ((persistence == PERSISTENCE_UNTIL_DISCONNECT) && !isFinished()) {
@@ -1054,10 +1088,11 @@ public class FCPClientPut extends FCPTransferQuery implements Observer {
 	}
 
 	public void setMetadata(final String name, final String val) {
-		if(val == null)
+		if(val == null) {
 			metadatas.remove(name);
-		else
+		} else {
 			metadatas.put(name, val);
+		}
 	}
 
 	public String getMetadata(final String name) {

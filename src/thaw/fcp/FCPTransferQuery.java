@@ -126,7 +126,7 @@ public abstract class FCPTransferQuery extends Observable implements FCPQuery {
 			if (transferedBlocks < 0)
 				return;
 
-			if (reliable && (currentReadCursor != currentWriteCursor)) {
+			if ((reliable || insertion) && (currentReadCursor != currentWriteCursor)) {
 				if (transferedBlocksPast[currentReadCursor] < 0)
 					Logger.warning(this, "TransferedBlocksNumber < 0, shouldn't happen !");
 				
@@ -263,7 +263,7 @@ public abstract class FCPTransferQuery extends Observable implements FCPQuery {
 		if (getProgression() == 0)
 			return true;
 
-		return reliable;
+		return reliable || insertion;
 	}
 
 	

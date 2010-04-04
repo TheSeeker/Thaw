@@ -68,6 +68,7 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 		columnNames.add(I18n.getMessage("thaw.common.status"));
 		columnNames.add(I18n.getMessage("thaw.common.progress"));
+        columnNames.add(I18n.getMessage("thaw.common.priority"));
 		columnNames.add(I18n.getMessage("thaw.common.speed"));
 		columnNames.add(I18n.getMessage("thaw.common.eta"));
 
@@ -165,8 +166,13 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 			return query;
 
-		} else if( ((isForInsertions && (column == 5))
-			     || (!isForInsertions && (column == 6)) ) ) {
+        } else if( ((isForInsertions && (column == 5))
+                || (!isForInsertions && (column == 6)) ) ) {
+
+            return DetailPanel.prioritiesStr[query.getThawPriority()];
+
+		} else if( ((isForInsertions && (column == 6))
+			     || (!isForInsertions && (column == 7)) ) ) {
 
 			if (query.isFinished())
 				return ""; 
@@ -178,8 +184,8 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 
 			return GUIHelper.getPrintableSize(averageSpeed) + "/s";
 
-		} else if( ((isForInsertions && (column == 6))
-			     || (!isForInsertions && (column == 7)) ) ) {
+		} else if( ((isForInsertions && (column == 7))
+			     || (!isForInsertions && (column == 8)) ) ) {
 
 			if (!query.isProgressionReliable())
 				return "";
@@ -557,12 +563,18 @@ public class QueueTableModel extends javax.swing.table.AbstractTableModel implem
 					result = (new Integer(q1.getProgression())).compareTo(new Integer(q2.getProgression()));
 
 			} else if( ((column == 4) && isForInsertionTable)
-						|| ((column == 5) && !isForInsertionTable) ) { /* progress */
+						|| ((column == 5) && !isForInsertionTable) ) { /* priority */
+
+				result = -(new Integer(q1.getFCPPriority())).compareTo(new Integer(q2.getFCPPriority()));
+                /* negative result because lower priority value is higher priority */
+                
+            } else if( ((column == 5) && isForInsertionTable)
+						|| ((column == 6) && !isForInsertionTable) ) { /* progress */
 
 				result = (new Long(q1.getAverageSpeed())).compareTo(new Long(q2.getAverageSpeed()));
 
-			} else if( ((column == 5) && isForInsertionTable)
-						|| ((column == 6) && !isForInsertionTable) ) { /* progress */
+			} else if( ((column == 6) && isForInsertionTable)
+						|| ((column == 7) && !isForInsertionTable) ) { /* progress */
 				
 				if (q1.isFinished() && !q2.isFinished())
 					result = 1;
